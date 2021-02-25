@@ -52,7 +52,6 @@ def makeBuildPlan(depGraph: DependencyGraph): BuildPlan =
   val scala3set = scala3.map(_.pv).toSet
   val toBuilds = rawToBuild.map(_.resolve(scala3set))
 
-
   println(s"Will build: (${topLevelPV.size} original and ${toBuilds.size} total)")
 
   @annotation.tailrec def step(
@@ -60,10 +59,11 @@ def makeBuildPlan(depGraph: DependencyGraph): BuildPlan =
     toComplete: Seq[ToBuild]): Seq[Seq[ProjectVersion]] =
       if toComplete.isEmpty then built
       else 
-        val (completed, todo) = toComplete.partition(_.deps.isEmpty)
-        val actualCompleted = if completed.nonEmpty then completed.map(_.pv) else 
+        val (completed, rawTodo) = toComplete.partition(_.deps.isEmpty)
+        val (actualCompleted, todo) = if completed.nonEmpty then (completed.map(_.pv), rawTodo) else 
           println("Cycle in:\n" + toComplete.mkString("\n"))
-          ??? // TODO resolve cycles!
+          val mostImporant = rawTodo.maxBy(p => depScore.get(p.pv))
+          (Seq(mostImporant.pv), rawTodo.filter(_ != mostImporant))  
         
         val builtSet = (built.flatten ++ actualCompleted).toSet
         // println("Compiled: " + actualCompleted)
@@ -84,7 +84,7 @@ def makeBuildPlan(depGraph: DependencyGraph): BuildPlan =
         val targets = fullInfo(pv.p).targets
         val allOverrides = 
           targets.flatMap(_.deps).distinct.filterNot(isScala).flatMap(overrides.get)
-        val publishVersion = depScore.get(pv).map(_ => pv.v + "_communityBuild")
+        val publishVersion = depScore.get(pv).map(_ => pv.v + "-communityBuild")
         BuildStep(pv.p, pv.v, publishVersion, targets.map(_.id), allOverrides)
       
       val newSteps = pvs.sortBy(- _.p.stars).map(buildStep)

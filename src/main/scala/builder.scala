@@ -36,11 +36,13 @@ def runSbt(
   orgScalaVersion: String, 
   repoDir: Path): ProcessBuilder =
     val publishSettings = step.publishVersion.map("-Dcommunitybuild.version=" + _)
-    val versionCmd = step.publishVersion.fold("")(v => s""";set every version := "${v}" """)
+    val versionCmd = step.publishVersion.fold("")(v => 
+      s""";set every version := "${v}" ;set every credentials := Nil """)
     // TODO We assume full crossbuild for now
     val targets = step.targets.map(_.asMvnStr.stripSuffix("_" + orgScalaVersion)) 
-    val sbtCmdArg = s";++$localScalaVersion! $versionCmd ;runBuild ${targets.mkString(" ")}"
-    val args = flattenArgs("sbt", publishSettings, sbtCmdArg)
+    // we want to store original modules names before overriding scala version
+    val sbtCmdArg = s";moduleMappings ;++$localScalaVersion! $versionCmd ;runBuild ${targets.mkString(" ")}"
+    val args = flattenArgs("sbt", "-sbt-version", "1.4.7",  publishSettings, sbtCmdArg)
     println("Will run: " + args.mkString(" "))
     Process(args, repoDir.toFile)
 
@@ -87,6 +89,7 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
         _ <- run("cloning")(pb("git", "clone", repo(step), repoDir, "-b", tag, "--depth", "1"))
         _ <- run("install sbt pluggin")(setupSbt(repoDir))
         _ <- run("setup overrides")(setupOverries(step, outDir))
+        _ <- run("setup plugin")(pb("echo", """addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.3")""") #> repoDir.resolve("project/zzz_ooo.sbt").toFile)
         _ = log("building...")   
         _ <- run("running build")(runSbt(step, localScalaVersion, orgScalaVersion, repoDir))
       yield ()
@@ -104,6 +107,6 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
   val localScalaVersion = "3.0.0-RC1-bin-SNAPSHOT"
   for 
     steps <- buildPlan.steps.drop(1) // Dotty is build somewhere
-    step <- steps
+    step <- steps  // if step.p.name == "processor"
   do buildProject(localScalaVersion,orgScalaVersion, step)
   
