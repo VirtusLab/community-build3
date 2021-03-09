@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title th:text="'Index of ' + ${directory.url} + ''"></title>
+</head>
+<body>
+<h1>Index of /<span th:text="${directory.url}"></span></h1>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Last Modified</th>
+        <th>Size</th>
+    </tr>
+    <tr>
+        <th colspan="3">
+            <hr>
+        </th>
+    </tr>
+    <tr th:each="file: ${directory.files}">
+        <td><a th:href="${file.filename}" th:text="${file.filename}"></a></td>
+        <td align="right" th:text="${file.lastModified}"></td>
+        <td align="right" th:text="${file.size}"></td>
+    </tr>
+    <tr>
+        <th colspan="3">
+            <hr>
+        </th>
+    </tr>
+</table>
+</body>
+</html>
