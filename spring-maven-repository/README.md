@@ -25,3 +25,78 @@ https://youMavenRepoUrl.com/repo1/com/example/greeter/1.0.0/greeter-1.0.0.pom
 
 ## Requirements
 Gradle >=6.7 and Java >=11
+
+## Properties
+`server.port` - changing port for repo server
+`server.servlet.context-path` - url prefix (`/maven2` to imitate official maven repo)
+`maven.multiRepo` - (default false) set true if you want use server in multi repositories mode
+`maven.redirectUrl` - if set, redirection will work to another repo in case of dependency absence
+
+## Dependency Mapping Feature
+TODO
+
+## Info Feature
+By adding empty `info` flag as query param in url you will get information about dependency and its mappings.  
+Example when we have `greeter` library only in veresion `1.0.0`:  
+`http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.0/greeter_3.0.0-RC1-1.0.0.jar?info`
+```json
+{
+"organization": "com.example",
+"name": "greeter",
+"filename": "greeter_3.0.0-RC1-1.0.0.jar",
+"scalaVersion": "3.0.0-RC1",
+"version": "1.0.0",
+"jarType": "",
+"extension": "jar",
+"mappedTo": null,
+"dependencyPath": "com/example/greeter_3.0.0-RC1"
+}
+```
+`http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.2/greeter_3.0.0-RC1-1.0.2.jar?info`
+```json
+{
+"organization": "com.example",
+"name": "greeter",
+"filename": "greeter_3.0.0-RC1-1.0.2.jar",
+"scalaVersion": "3.0.0-RC1",
+"version": "1.0.2",
+"jarType": "",
+"extension": "jar",
+"mappedTo": {
+    "organization": "com.example",
+    "name": "greeter",
+    "filename": "greeter_3.0.0-RC1-1.0.0.jar",
+    "scalaVersion": "3.0.0-RC1",
+    "version": "1.0.0",
+    "jarType": "",
+    "extension": "jar",
+    "mappedTo": null,
+    "dependencyPath": "com/example/greeter_3.0.0-RC1"
+},
+"dependencyPath": "com/example/greeter_3.0.0-RC1"
+}
+```
+`http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.2/greeter_3.0.0-RC1-1.0.2-sources.jar?info`
+```json
+{
+"organization": "com.example",
+"name": "greeter",
+"filename": "greeter_3.0.0-RC1-1.0.2-sources.jar",
+"scalaVersion": "3.0.0-RC1",
+"version": "1.0.2",
+"jarType": "sources",
+"extension": "jar",
+"mappedTo": {
+    "organization": "com.example",
+    "name": "greeter",
+    "filename": "greeter_3.0.0-RC1-1.0.0-sources.jar",
+    "scalaVersion": "3.0.0-RC1",
+    "version": "1.0.0",
+    "jarType": "sources",
+    "extension": "jar",
+    "mappedTo": null,
+    "dependencyPath": "com/example/greeter_3.0.0-RC1"
+},
+"dependencyPath": "com/example/greeter_3.0.0-RC1"
+}
+```

@@ -2,6 +2,7 @@ package com.arturwegrzyn.springmavenrepository.controller
 
 import com.arturwegrzyn.springmavenrepository.model.Directory
 import com.arturwegrzyn.springmavenrepository.model.FileContext
+import com.arturwegrzyn.springmavenrepository.model.ScalaDependencyInfo
 import com.arturwegrzyn.springmavenrepository.storage.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,22 +23,21 @@ class ResourceController @Autowired constructor(private val storageService: Stor
 
     @GetMapping("/**")
     fun getDispatcher(request: HttpServletRequest, model: Model): Any {
-        val servletPath = request.servletPath
-        val lastChar = servletPath.substring(servletPath.length - 1)
         val filename = fullFileNameFromRequest(request)
-        return when (lastChar) {
-            "/" -> {
-                list(filename, model)
-            }
-            else -> {
-                fetch(filename)
-            }
+        return when {
+            isInfoPage(request) -> info(filename)
+            isDirectory(filename) -> list(filename, model)
+            else -> fetch(filename)
         }
     }
 
+    private fun isDirectory(filename: String) = storageService.isDirectory(filename)
+
+    private fun isInfoPage(request: HttpServletRequest) = request.parameterMap.contains("info")
+
     @PutMapping("/**")
     fun putFileDispatcher(request: HttpServletRequest): Any {
-            return put(request)
+        return put(request)
     }
 
     private fun list(filename: String, model: Model): String {
@@ -57,10 +57,19 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     }
 
     private fun fetch(filename: String): ResponseEntity<Resource> {
-        val file = storageService.loadAsResource(filename)
+        val resourceWithInfo = storageService.loadAsResource(filename)
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.filename + "\"")
-                .body(file)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceWithInfo.first.filename + "\"")
+                .body(resourceWithInfo.second)
+    }
+
+    private fun info(filename: String): ResponseEntity<ScalaDependencyInfo> {
+        return try {
+            val resourceWithInfo = storageService.loadAsResource(filename)
+            ResponseEntity.ok().body(resourceWithInfo.first)
+        } catch (e: StorageFileNotFoundWithFileNameException) {
+            ResponseEntity.noContent().build()
+        }
     }
 
     private fun put(request: HttpServletRequest): ResponseEntity<Any> {
