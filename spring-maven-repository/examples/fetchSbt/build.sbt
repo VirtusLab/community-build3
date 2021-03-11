@@ -7,6 +7,6 @@ lazy val root = project
     organization := "hello",
     version := "0.1.0",
     scalaVersion := scala3Version,
-    resolvers += "Private Maven Repo" at "http://localhost:8080/",
-    libraryDependencies += "com.example" %% "greeter" % "1.0.0"
+    // resolvers += "Private Maven Repo" at "http://localhost/",
+    libraryDependencies += "com.example" %% "greeter" % "1.0.1"
   )

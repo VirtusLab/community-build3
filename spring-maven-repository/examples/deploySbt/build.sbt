@@ -8,6 +8,6 @@ lazy val root = project
     version := "1.0.1",
     scalaVersion := scala3Version,
     publishTo := Some(
-      "Private Maven Repo" at s"http://localhost:8080/"
+      "Private Maven Repo" at s"http://localhost/maven2/"
     )
   )

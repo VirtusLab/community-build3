@@ -22,8 +22,7 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     private val log = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("/**")
-    fun getDispatcher(request: HttpServletRequest, model: Model): Any {
-        val filename = fullFileNameFromRequest(request)
+    fun getDispatcher(request: HttpServletRequest, model: Model): Any { val filename = fullFileNameFromRequest(request)
         return when {
             isInfoPage(request) -> info(filename)
             isDirectory(filename) -> list(filename, model)
