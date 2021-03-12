@@ -62,14 +62,16 @@ class FileSystemStorageService @Autowired constructor(val properties: StoragePro
         return rootLocation.resolve(filename)
     }
 
-    override fun loadAsResource(filename: String): Pair<ScalaDependencyInfo, Resource> {
+    override fun loadAsResource(filename: String, withBackup: Boolean): Pair<ScalaDependencyInfo, Resource> {
         val file = load(filename)
 
         val resource: Resource = UrlResource(file.toUri())
         return if (resource.exists() && resource.isReadable) {
             Pair(filenameToScalaDependencyInfo(filename, properties.location), resource)
-        } else {
+        } else if(withBackup) {
             findBackupResource(filename)
+        } else {
+            throw StorageFileNotFoundWithFileNameException(filename, "Could not read file: $filename")
         }
     }
 

@@ -5,9 +5,7 @@ import java.nio.file.Path
 import javax.servlet.http.HttpServletRequest
 
 
-class StorageHelper
-
-fun fullFileNameFromRequest(request: HttpServletRequest) = request.servletPath.substring(1)
+fun fullFileNameFromRequest(request: HttpServletRequest) = request.servletPath.substring(1).dropLastWhile { it == '/' }
 
 fun fileTypeFromFileName(fileName: String): String {
     val dotIndex = fileName.lastIndexOf('.')

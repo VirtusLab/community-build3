@@ -22,24 +22,29 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     private val log = LoggerFactory.getLogger(javaClass)
 
     @GetMapping("/**")
-    fun getDispatcher(request: HttpServletRequest, model: Model): Any { val filename = fullFileNameFromRequest(request)
+    fun getDispatcher(request: HttpServletRequest, model: Model): Any {
+        val filename = fullFileNameFromRequest(request)
+
         return when {
-            isInfoPage(request) -> info(filename)
-            isDirectory(filename) -> list(filename, model)
-            else -> fetch(filename)
+            isInfoPage(request.parameterMap) -> info(filename)
+            isDirectoryName(filename) -> list(filename, model)
+            isScalaDependency(filename) -> fetchScalaDependency(filename)
+            else -> fetchOtherDependency(filename)
         }
     }
 
-    private fun isDirectory(filename: String) = storageService.isDirectory(filename)
-
-    private fun isInfoPage(request: HttpServletRequest) = request.parameterMap.contains("info")
-
-    @PutMapping("/**")
-    fun putFileDispatcher(request: HttpServletRequest): Any {
-        return put(request)
+    private fun info(filename: String): ResponseEntity<ScalaDependencyInfo> {
+        log.info("GET info $filename")
+        return try {
+            val resourceWithInfo = storageService.loadAsResource(filename, true)
+            ResponseEntity.ok().body(resourceWithInfo.first)
+        } catch (e: StorageFileNotFoundWithFileNameException) {
+            ResponseEntity.noContent().build()
+        }
     }
 
     private fun list(filename: String, model: Model): String {
+        log.info("GET listFiles $filename")
         val directory = getDirectory(filename)
         model.addAttribute("directory", directory)
         return "listMustache"
@@ -55,24 +60,30 @@ class ResourceController @Autowired constructor(private val storageService: Stor
         return builder.build()
     }
 
-    private fun fetch(filename: String): ResponseEntity<Resource> {
-        val resourceWithInfo = storageService.loadAsResource(filename)
+    private fun fetchScalaDependency(filename: String): ResponseEntity<Resource> {
+        log.info("GET scala dependency file $filename")
+        val resourceWithInfo = storageService.loadAsResource(filename, true)
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceWithInfo.first.filename + "\"")
                 .body(resourceWithInfo.second)
     }
 
-    private fun info(filename: String): ResponseEntity<ScalaDependencyInfo> {
-        return try {
-            val resourceWithInfo = storageService.loadAsResource(filename)
-            ResponseEntity.ok().body(resourceWithInfo.first)
-        } catch (e: StorageFileNotFoundWithFileNameException) {
-            ResponseEntity.noContent().build()
-        }
+    private fun fetchOtherDependency(filename: String): ResponseEntity<Resource>  {
+        log.info("GET other dependency file $filename")
+        val resourceWithInfo = storageService.loadAsResource(filename, false)
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceWithInfo.first.filename + "\"")
+                .body(resourceWithInfo.second)
+    }
+
+    @PutMapping("/**")
+    fun putFileDispatcher(request: HttpServletRequest): Any {
+        return put(request)
     }
 
     private fun put(request: HttpServletRequest): ResponseEntity<Any> {
         val fullFileName = fullFileNameFromRequest(request)
+        log.info("PUT dependency file $fullFileName")
         storageService.store(fullFileName, request.inputStream)
         return ResponseEntity.status(HttpStatus.ACCEPTED).build()
     }

@@ -12,7 +12,7 @@ interface StorageService {
     fun store(fullFileName: String, inputStream: InputStream)
     fun loadAll(): List<Path>
     fun load(filename: String): Path
-    fun loadAsResource(filename: String): Pair<ScalaDependencyInfo, Resource>
+    fun loadAsResource(filename: String, withBackup: Boolean): Pair<ScalaDependencyInfo, Resource>
     fun loadAllFromDir(dirName: String): List<Path?>
     fun loadAllFromDirAsResource(filename: String): List<Resource?>
     fun deleteAll()
