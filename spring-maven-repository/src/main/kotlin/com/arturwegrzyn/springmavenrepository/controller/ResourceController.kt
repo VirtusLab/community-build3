@@ -34,7 +34,7 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     }
 
     private fun info(filename: String): ResponseEntity<ScalaDependencyInfo> {
-        log.info("GET info $filename")
+        log.debug("GET info $filename")
         return try {
             val resourceWithInfo = storageService.loadAsResource(filename, true)
             ResponseEntity.ok().body(resourceWithInfo.first)
@@ -44,7 +44,7 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     }
 
     private fun list(filename: String, model: Model): String {
-        log.info("GET listFiles $filename")
+        log.debug("GET listFiles $filename")
         val directory = getDirectory(filename)
         model.addAttribute("directory", directory)
         return "listMustache"
@@ -61,7 +61,7 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     }
 
     private fun fetchScalaDependency(filename: String): ResponseEntity<Resource> {
-        log.info("GET scala dependency file $filename")
+        log.debug("GET scala dependency file $filename")
         val resourceWithInfo = storageService.loadAsResource(filename, true)
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceWithInfo.first.filename + "\"")
@@ -69,7 +69,7 @@ class ResourceController @Autowired constructor(private val storageService: Stor
     }
 
     private fun fetchOtherDependency(filename: String): ResponseEntity<Resource>  {
-        log.info("GET other dependency file $filename")
+        log.debug("GET other dependency file $filename")
         val resourceWithInfo = storageService.loadAsResource(filename, false)
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceWithInfo.first.filename + "\"")
@@ -83,7 +83,7 @@ class ResourceController @Autowired constructor(private val storageService: Stor
 
     private fun put(request: HttpServletRequest): ResponseEntity<Any> {
         val fullFileName = fullFileNameFromRequest(request)
-        log.info("PUT dependency file $fullFileName")
+        log.debug("PUT dependency file $fullFileName")
         storageService.store(fullFileName, request.inputStream)
         return ResponseEntity.status(HttpStatus.ACCEPTED).build()
     }
