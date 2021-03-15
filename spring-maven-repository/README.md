@@ -33,7 +33,12 @@ Gradle >=6.7 and Java >=11
 `maven.redirectUrl` - if set, redirection will work to another repo in case of dependency absence
 
 ## Dependency Mapping Feature
-TODO
+If proxy dont have exact version that client request, is looking similar version.  
+Examples:  
+1.0.1 match to 1.0.3, 1.0.12, etc  
+1.0.1 not match to 1.1.3, 1.2.12, etc  
+In [SemVer](https://semver.org/) context it is possible to match version with different version in 'patch' part.
+
 
 ## Info Feature
 By adding empty `info` flag as query param in url you will get information about dependency and its mappings.  
