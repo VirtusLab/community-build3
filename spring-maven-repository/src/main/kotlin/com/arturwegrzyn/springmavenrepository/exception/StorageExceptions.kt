@@ -1,4 +1,4 @@
-package com.arturwegrzyn.springmavenrepository.storage
+package com.arturwegrzyn.springmavenrepository.exception
 
 open class StorageException : RuntimeException {
     constructor(message: String) : super(message) {}

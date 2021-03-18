@@ -1,6 +1,6 @@
 package com.arturwegrzyn.springmavenrepository.storage
 
-import com.arturwegrzyn.springmavenrepository.model.ScalaDependencyInfo
+import com.arturwegrzyn.springmavenrepository.dependency.resolver.model.ScalaDependencyInfo
 import org.springframework.core.io.Resource
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
@@ -12,9 +12,10 @@ interface StorageService {
     fun store(fullFileName: String, inputStream: InputStream)
     fun loadAll(): List<Path>
     fun load(filename: String): Path
-    fun loadAsResource(filename: String, withBackup: Boolean): Pair<ScalaDependencyInfo, Resource>
+    fun loadAsResource(filename: String): Resource
     fun loadAllFromDir(dirName: String): List<Path?>
     fun loadAllFromDirAsResource(filename: String): List<Resource?>
     fun deleteAll()
     fun isDirectory(filename:String): Boolean
+    fun standarizeFilename(filename: String): String
 }

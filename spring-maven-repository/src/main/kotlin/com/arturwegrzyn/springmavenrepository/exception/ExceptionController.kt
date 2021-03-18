@@ -1,7 +1,5 @@
-package com.arturwegrzyn.springmavenrepository.controller
+package com.arturwegrzyn.springmavenrepository.exception
 
-import com.arturwegrzyn.springmavenrepository.storage.StorageException
-import com.arturwegrzyn.springmavenrepository.storage.StorageFileNotFoundWithFileNameException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
