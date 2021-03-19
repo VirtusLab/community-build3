@@ -1,9 +1,7 @@
 package com.arturwegrzyn.springmavenrepository.dependency
 
 import com.arturwegrzyn.springmavenrepository.dependency.model.*
-import com.arturwegrzyn.springmavenrepository.dependency.resolver.DirectoryInfoResolver
-import com.arturwegrzyn.springmavenrepository.dependency.resolver.JavaDependencyInfoResolver
-import com.arturwegrzyn.springmavenrepository.dependency.resolver.ScalaDependencyInfoResolver
+import com.arturwegrzyn.springmavenrepository.dependency.resolver.*
 import com.arturwegrzyn.springmavenrepository.dependency.resolver.model.FileInfo
 import com.arturwegrzyn.springmavenrepository.dependency.resolver.model.ScalaDependencyInfo
 import com.arturwegrzyn.springmavenrepository.exception.StorageFileNotFoundWithFileNameException
@@ -20,7 +18,14 @@ import java.net.URI
 @Service
 class DependencyService(private val storageService: StorageService, private val env: Environment) {
     companion object {
-        val resolvers = ScalaDependencyInfoResolver(JavaDependencyInfoResolver(DirectoryInfoResolver(null)))
+        public val resolvers =
+            ScalaDependencyInfoResolver(
+                JavaDependencyInfoResolver(
+                    DirectoryInfoResolver(
+                        null
+                    )
+                )
+            )
     }
 
     fun uploadDependency(fullFileName: String, inputStream: InputStream) {
@@ -84,7 +89,7 @@ class DependencyService(private val storageService: StorageService, private val 
                 .filter {
                     it.first.extension == demandedScalaDependencyInfoWithTargetScalaVersion.extension &&
                             it.first.scalaVersion == demandedScalaDependencyInfoWithTargetScalaVersion.scalaVersion &&
-                            it.first.jarType == demandedScalaDependencyInfoWithTargetScalaVersion.jarType
+                            it.first.type == demandedScalaDependencyInfoWithTargetScalaVersion.type
                 }
                 .map { Pair(it.first, UrlResource(it.second.toPath().toUri())) }
                 .filter { it.second.exists() && it.second.isReadable }

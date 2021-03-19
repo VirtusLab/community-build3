@@ -7,5 +7,6 @@ abstract class DependencyInfo(
     open val name: String,
     open val version: String,
     open val extension: String,
+    open val type: String,
     mappedTo: DependencyInfo?
 ) : FileInfo(fullFilename, filename, mappedTo)

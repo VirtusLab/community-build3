@@ -1,56 +1,64 @@
 package com.arturwegrzyn.springmavenrepository.dependency.resolver
 
-import com.arturwegrzyn.springmavenrepository.dependency.isFileName
 import com.arturwegrzyn.springmavenrepository.dependency.resolver.model.FileInfo
 import com.arturwegrzyn.springmavenrepository.dependency.resolver.model.ScalaDependencyInfo
+import com.arturwegrzyn.springmavenrepository.exception.IllegalDependencyPathException
+import org.slf4j.LoggerFactory
 
 class ScalaDependencyInfoResolver(next: FileInfoResolver?) : FileInfoResolver(next) {
 
-    private val SCALA_FULL_FILENAME_REGEX =
-        Regex("^([a-z/]*)/(.*)_([0-9A-Za-z.-]*)/([0-9]*\\.[0-9]*\\.[0-9]*)/(.*)_([0-9A-Za-z.-]*)-([0-9]*\\.[0-9]*\\.[0-9]*)(-)?(.*)?\\.([a-z0-9]{1,4})\$")
-
-    override fun resolve(fullFilename: String, mappedTo: FileInfo?): FileInfo {
+    override fun resolve(
+        fullFilename: String,
+        mappedTo: FileInfo?,
+        exceptions: List<Pair<Class<out FileInfoResolver>, Exception>>
+    ): FileInfo {
         val filenameWithoutSlashAtTheEnd = fullFilename.dropLastWhile { it == '/' }
-        val match = SCALA_FULL_FILENAME_REGEX.find(filenameWithoutSlashAtTheEnd)
-        if (match != null) {
-            val (organization, name1, scalaVersion1, version1, name2, scalaVersion2, version2, jarType_IGNORE_IT, jarType, extension) = match.destructured
-            if (isScalaDependency(
-                    filenameWithoutSlashAtTheEnd,
-                    name1,
-                    name2,
-                    scalaVersion1,
-                    scalaVersion2,
-                    version1,
-                    version2
-                ) && mappedTo is ScalaDependencyInfo?
-            ) {
-                val splittedFullFilename = filenameWithoutSlashAtTheEnd.split("/")
-                val filename = splittedFullFilename.last()
-
-                return ScalaDependencyInfo(
-                    filenameWithoutSlashAtTheEnd,
-                    filename,
-                    organization.replace("/","."),
-                    name1,
-                    version1,
-                    extension,
-                    scalaVersion1,
-                    jarType,
-                    mappedTo
-                )
-            }
+        return try {
+            filenameToScalaDependencyInfo(filenameWithoutSlashAtTheEnd, mappedTo as ScalaDependencyInfo?)
+        } catch (exception: Exception) {
+            val newExceptions = exceptions.plusElement(Pair(javaClass, exception))
+            next(fullFilename, mappedTo, newExceptions)
         }
-        return next(fullFilename, mappedTo)
-
     }
 
-    private fun isScalaDependency(
-        filename: String,
-        name1: String,
-        name2: String,
-        scalaVersion1: String,
-        scalaVersion2: String,
-        version1: String,
-        version2: String
-    ) = isFileName(filename) && name1 == name2 && scalaVersion1 == scalaVersion2 && version1 == version2
+    private fun filenameToScalaDependencyInfo(
+        fullFilename: String,
+        mappedTo: ScalaDependencyInfo?
+    ): ScalaDependencyInfo {
+
+        val splittedFullFilename = fullFilename.split("/")
+        val nameAndScalaVersionAndVersionAndTypeAndExtension = splittedFullFilename.last()
+        val nameAndScalaVersion = splittedFullFilename[splittedFullFilename.lastIndex - 2]
+
+        val organization = splittedFullFilename.dropLast(3).joinToString(".")
+        val name = nameAndScalaVersion.split("_")[0]
+        val filename = nameAndScalaVersionAndVersionAndTypeAndExtension
+        val scalaVersion = nameAndScalaVersion.split("_")[1]
+        val version = splittedFullFilename[splittedFullFilename.lastIndex - 1]
+        val extension = nameAndScalaVersionAndVersionAndTypeAndExtension.split(".").last()
+        val type =
+            nameAndScalaVersionAndVersionAndTypeAndExtension.replace(name, "").replace(scalaVersion, "")
+                .replace(version, "").replace(extension, "").replace("-", "").replace("_", "")
+                .dropLastWhile { it == '.' }
+
+
+        if (
+            !nameAndScalaVersionAndVersionAndTypeAndExtension.contains(name) ||
+            !nameAndScalaVersionAndVersionAndTypeAndExtension.contains(version)
+        )
+            throw IllegalDependencyPathException(fullFilename)
+
+
+        return ScalaDependencyInfo(
+            fullFilename,
+            filename,
+            organization,
+            name,
+            version,
+            extension,
+            scalaVersion,
+            type,
+            mappedTo
+        )
+    }
 }

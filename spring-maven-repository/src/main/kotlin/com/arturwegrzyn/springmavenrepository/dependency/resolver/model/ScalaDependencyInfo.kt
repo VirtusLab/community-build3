@@ -8,9 +8,9 @@ data class ScalaDependencyInfo(
     override val version: String,
     override val extension: String,
     val scalaVersion: String,
-    val jarType: String,
+    override val type: String,
     override val mappedTo: ScalaDependencyInfo?
-) : DependencyInfo(fullFilename, filename, organization, name, version, extension, mappedTo) {
+) : DependencyInfo(fullFilename, filename, organization, name, version, extension, type, mappedTo) {
     private fun getOrganizationPath(): String {
         return organization.replace(".", "/")
     }
