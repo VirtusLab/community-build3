@@ -1,4 +1,5 @@
 val scala3Version = "3.0.0-RC1"
+connectInput in run := true
 
 lazy val root = project
   .in(file("."))

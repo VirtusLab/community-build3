@@ -7,10 +7,17 @@ COPY . /build/
 
 RUN apt update
 RUN apt install --only-upgrade openjdk-8-jdk-headless openjdk-8-jre-headless -y
-# only for debug
-# RUN apt install iputils-ping -y
-# RUN wget https://confluence.atlassian.com/kb/files/779355358/779355357/1/1441897666313/SSLPoke.class
-# usage `jave SSLPoke repo1.maven.org 443`
+
+# only for debug inside container ping/ifconfig/ssl test
+RUN apt install iputils-ping -y
+RUN apt install net-tools
+RUN wget https://confluence.atlassian.com/kb/files/779355358/779355357/1/1441897666313/SSLPoke.class
+# tool to debugging SSL connection - usage `java SSLPoke repo1.maven.org 443`
+
+# only for remote code debug
+ENV JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:5005,server=y,suspend=n
+EXPOSE 5005
+
 
 ADD ./keystorage/mvnProxy.crt /usr/share/ca-certificates/mvnProxy.crt
 RUN chmod 644 /usr/share/ca-certificates/mvnProxy.crt && update-ca-certificates

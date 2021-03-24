@@ -9,3 +9,7 @@ It contains few main classes:
 - `resultSummary` will just gather results (it will not run buidld plan)
 
 To run community build one need to have a version (preferably latest) relsed as `3.0.0-RC1-bin-SNAPSHOT`. To do so, clone dotty repository, update `baseVersion` in `project/Build.scala` ([this line](https://github.com/lampepfl/dotty/blob/master/project/Build.scala#L60)) to  `3.0.0-RC2` and run `sbt-dotty/scripted sbt-dotty/scaladoc-empty-test` (tests may fail).
+
+
+## MVN Proxy
+The spring-maven-repository directory is the fork of the [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository) repository. Copied for modifications needed by Dotty community builds mechanism.
