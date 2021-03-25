@@ -1,6 +1,5 @@
 import sbt._
 import sbt.Keys._
-//import sbt.librarymanagement._
 
 case class CommunityBuildCoverage(allDeps: Int, overridenScalaJars: Int, notOverridenScalaJars: Int)
 

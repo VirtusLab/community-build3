@@ -10,6 +10,6 @@ cd spring-maven-repository
 
 ./gradlew clean bootJar > ../server.logs 2>1
 
-java -jar build/libs/$(ls build/libs/ | head -1)  >> ../server.logs 2>1 &
+java -jar build/libs/$(ls build/libs/ | head -1)  >> ../server.logs &
 
 jobs -p > ../server.pid

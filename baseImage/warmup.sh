@@ -16,4 +16,4 @@ cp ../zzzz_dotty.sbt project/zzzz_dotty.sbt
 
 echo '@main def run = println("Warmed up.")' > A.scala
 
-sbt --sbt-version 1.4.8 --batch run
+sbt --sbt-version $SBT_VERSION --batch run

@@ -24,4 +24,5 @@ COPY . /build/
 
 # CMD ["sbt","compile"]
 
-CMD ["/build/build.sh"]
+# We need an entry point to pass parameters to the build
+ENTRYPOINT ["/build/build.sh"]
