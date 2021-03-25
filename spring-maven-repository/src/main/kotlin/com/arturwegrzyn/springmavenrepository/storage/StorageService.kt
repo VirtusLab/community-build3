@@ -1,5 +1,6 @@
 package com.arturwegrzyn.springmavenrepository.storage
 
+import com.arturwegrzyn.springmavenrepository.dependency.resolver.model.ScalaDependencyInfo
 import org.springframework.core.io.Resource
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
@@ -15,4 +16,6 @@ interface StorageService {
     fun loadAllFromDir(dirName: String): List<Path?>
     fun loadAllFromDirAsResource(filename: String): List<Resource?>
     fun deleteAll()
+    fun isDirectory(filename:String): Boolean
+    fun standarizeFilename(filename: String): String
 }

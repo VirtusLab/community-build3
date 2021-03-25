@@ -1,6 +1,15 @@
 server:
-  port:
-    8080
+  port: 443
+  servlet:
+    context-path: /maven2
+  ssl:
+    key-store: classpath:keystore/mvnProxy.jks
+    key-store-password: changeit
+    key-alias: mvnProxy
+    key-password: changeit
+    enabled: true
 maven:
-  multiRepo: true
+  multiRepo: false
   redirectUrl: https://repo.maven.apache.org/maven2
+  scala:
+    targetVersion: 3.0.0-RC1
