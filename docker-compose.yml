@@ -1,0 +1,9 @@
+services:
+  mvn-proxy:
+    image: mvn-proxy:latest
+    ports:
+      - 8080:8080
+  fetch-sbt:
+    image: fetch-sbt:latest
+    links:
+      - "mvn-proxy:repo1.maven.org"

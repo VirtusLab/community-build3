@@ -2,11 +2,16 @@ import sbt._
 import sbt.Keys._
 //import sbt.librarymanagement._
 
+case class CommunityBuildCoverage(allDeps: Int, overridenScalaJars: Int, notOverridenScalaJars: Int)
+
 object CommunityBuildPlugin extends AutoPlugin {
    override def trigger = allRequirements
 
   val runBuild = inputKey[Unit]("")
   val moduleMappings = inputKey[Unit]("")
+  val publishResults = taskKey[Unit]("")
+  val publishResultsConf = taskKey[PublishConfiguration]("")
+  
 
   import complete.DefaultParsers._
 
@@ -19,8 +24,21 @@ object CommunityBuildPlugin extends AutoPlugin {
   lazy val ourVersion = 
     Option(sys.props("communitybuild.version"))
   
+  val ourResolver = "proxy" at "http://localhost:8080/3.0.0-RC1" // TODO
+
   override def projectSettings = Seq(
-    dependencyOverrides := overrides
+    dependencyOverrides := overrides,
+    publishResultsConf := 
+      publishConfiguration.value
+        .withPublishMavenStyle(true)
+        .withResolverName(ourResolver.name),
+    publishResults := Classpaths.publishTask(publishResultsConf).value,
+    externalResolvers := {
+      externalResolvers.value.map {
+        case res if res.name == "public" => ourResolver
+        case other => other
+      }
+    }
   )
 
   // Create mapping from org%artifact_name to project name
