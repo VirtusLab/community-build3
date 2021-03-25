@@ -5,9 +5,4 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @ConfigurationProperties("storage")
-class StorageProperties {
-    /**
-     * Folder location for storing files
-     */
-    var location = "upload-dir"
-}
+class StorageProperties(val location:String = "upload-dir")

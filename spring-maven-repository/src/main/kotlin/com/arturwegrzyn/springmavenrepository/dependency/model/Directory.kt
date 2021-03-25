@@ -1,4 +1,4 @@
-package com.arturwegrzyn.springmavenrepository.model
+package com.arturwegrzyn.springmavenrepository.dependency.model
 
 import org.springframework.util.Assert
 import java.net.URI
