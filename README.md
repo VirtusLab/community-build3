@@ -13,3 +13,12 @@ To run community build one need to have a version (preferably latest) relsed as 
 
 ## MVN Proxy
 The spring-maven-repository directory is the fork of the [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository) repository. Copied for modifications needed by Dotty community builds mechanism.
+
+# Run demo build:
+
+Only once run:
+`./buildBase.sh`
+
+Then each time you 
+
+`./run_maven_server_bg.sh`

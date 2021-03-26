@@ -1,0 +1,17 @@
+name: scala3-community-build
+
+on:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+
+      - name: Build up base image
+        run: ./buildBase.sh      
+  
+      - name: run demo build
+        run: ./run_demo_build.sh

@@ -1,26 +1,33 @@
 import sbt._
 import sbt.Keys._
-//import sbt.librarymanagement._
+
+case class CommunityBuildCoverage(allDeps: Int, overridenScalaJars: Int, notOverridenScalaJars: Int)
 
 object CommunityBuildPlugin extends AutoPlugin {
    override def trigger = allRequirements
 
   val runBuild = inputKey[Unit]("")
   val moduleMappings = inputKey[Unit]("")
-
-  import complete.DefaultParsers._
-
-  lazy val overrides = 
-    IO.readLines(file("..") / "deps.txt").filter(_.nonEmpty).map { l =>
-      val d = l.split("%")
-      d(0) % d(1) % d(2)
-    }
-
-  lazy val ourVersion = 
-    Option(sys.props("communitybuild.version"))
+  val publishResults = taskKey[Unit]("")
+  val publishResultsConf = taskKey[PublishConfiguration]("")
   
+  import complete.DefaultParsers._
+  
+  // TODO we should simply hide maven central...
+  val ourResolver = ("proxy" at sys.env("serverLocation")).withAllowInsecureProtocol(true) 
+
   override def projectSettings = Seq(
-    dependencyOverrides := overrides
+    publishResultsConf := 
+      publishConfiguration.value
+        .withPublishMavenStyle(true)
+        .withResolverName(ourResolver.name),
+    publishResults := Classpaths.publishTask(publishResultsConf).value,
+    externalResolvers := {
+      externalResolvers.value.map {
+        case res if res.name == "public" => ourResolver
+        case other => other
+      }
+    }
   )
 
   // Create mapping from org%artifact_name to project name
@@ -37,6 +44,9 @@ object CommunityBuildPlugin extends AutoPlugin {
         current.organization +"%"+name -> r
       }
   }
+
+  lazy val ourVersion = 
+    Option(sys.props("communitybuild.version"))
 
   override def globalSettings = Seq(
     moduleMappings := { // Store settings in file to capture its original scala versions
@@ -84,8 +94,6 @@ object CommunityBuildPlugin extends AutoPlugin {
 
         val toBuild = allToBuild.map { r =>
           println(s"Starting build for $r...")
-          val coverries = dependencyOverrides.in(r).get(s.data)
-          assert(Some(overrides) == coverries, s"overrides, expected:  $overrides but has $coverries")
           
           val k = r / Compile / compile
           val t = r / Test / test
@@ -115,7 +123,7 @@ object CommunityBuildPlugin extends AutoPlugin {
                     if (cv != Some(vo)){
                       res += "publish:wrongVersion=" + cv
                     } else {
-                      val p = r / Compile / publishLocal
+                      val p = r / Compile / publishResults
                       Project.runTask(p, cState) match {
                         case Some((_, Value(_))) => 
                           res += "publish:ok"
