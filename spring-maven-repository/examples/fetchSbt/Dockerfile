@@ -24,6 +24,11 @@ RUN chmod 644 /usr/share/ca-certificates/repo1.maven.org.crt && update-ca-certif
 RUN keytool -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -noprompt -trustcacerts -importcert -alias repo1.maven.org -file /build/keystorage/repo1.maven.org.crt -storepass changeit
 
 
+ADD ./keystorage/repo.maven.apache.org.crt /usr/share/ca-certificates/repo.maven.apache.org.crt
+RUN chmod 644 /usr/share/ca-certificates/repo.maven.apache.org.crt && update-ca-certificates
+RUN keytool -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -noprompt -trustcacerts -importcert -alias repo.maven.apache.org -file /build/keystorage/repo.maven.apache.org.crt -storepass changeit
+
+
 ADD ./keystorage/repo1.maven.org.fake.crt /usr/share/ca-certificates/repo1.maven.org.fake.crt
 RUN chmod 644 /usr/share/ca-certificates/repo1.maven.org.fake.crt && update-ca-certificates
 RUN keytool -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -noprompt -trustcacerts -importcert -alias repo1.maven.org.fake -file /build/keystorage/repo1.maven.org.fake.crt -storepass changeit
