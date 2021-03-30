@@ -1,1 +1,1 @@
-rootProject.name = "spring-maven-repository"
+rootProject.name = "mvn-repo"
