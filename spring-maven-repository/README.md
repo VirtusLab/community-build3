@@ -37,7 +37,7 @@ docker run \
 --add-host repo1.maven.org.fake:$(ipconfig getifaddr en0) \
 -it --name fetch-sbt \
 -p 5005:5005 \
---network spring-maven-repository_builds-network \
+--network builds-network \
 fetch-sbt
 ```
 2.

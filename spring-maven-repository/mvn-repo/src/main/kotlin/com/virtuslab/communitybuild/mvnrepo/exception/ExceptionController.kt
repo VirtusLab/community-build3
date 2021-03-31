@@ -28,11 +28,11 @@ class ExceptionController @Autowired constructor(private val env: Environment) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.message)
     }
 
-    @ExceptionHandler(StorageFileNotFoundWithFileNameException::class)
-    fun storageFileNotFoundWithFileNameException(e: StorageFileNotFoundWithFileNameException): Any {
+    @ExceptionHandler(DependencyNotFoundException::class)
+    fun dependencyNotFoundException(e: DependencyNotFoundException): Any {
         log.debug(e.toString())
         val mavenTargetRepositoryUrl = env.getProperty("maven.redirectUrl")
-        if (Objects.nonNull(mavenTargetRepositoryUrl)) {
+        if (Objects.nonNull(mavenTargetRepositoryUrl) && e.redirectIfNotExist) {
             val isMultiRepo = env.getProperty("maven.multiRepo")?.toBoolean() ?: false
             val filePath = if (isMultiRepo)
                 e.filename.split("/").stream()

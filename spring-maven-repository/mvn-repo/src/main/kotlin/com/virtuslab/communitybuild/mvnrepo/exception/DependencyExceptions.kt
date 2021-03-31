@@ -16,7 +16,10 @@ class IllegalDependencyPathException(filename: String, cause: Throwable?) : Depe
     constructor(filename: String) : this(filename, null)
 }
 
-
 class ItIsNotDirectoryException(filename: String, cause: Throwable?) : DependencyException("This is not directory! $filename", cause) {
     constructor(filename: String) : this(filename, null)
+}
+
+class DependencyNotFoundException(val filename: String, val redirectIfNotExist:Boolean, message: String, cause: Throwable?): DependencyException(message,cause) {
+    constructor(filename: String,  redirectIfNotExist:Boolean, message: String) : this(filename, redirectIfNotExist, message, null)
 }

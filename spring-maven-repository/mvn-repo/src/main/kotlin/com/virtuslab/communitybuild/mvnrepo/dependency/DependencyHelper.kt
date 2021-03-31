@@ -10,6 +10,8 @@ fun isDirectoryName(filename: String): Boolean {
     return !isFileName(filename)
 }
 
+fun isHeadRequest(request: HttpServletRequest) = request.method == "HEAD"
+
 fun isFileName(filename: String): Boolean {
     val filenameWithoutSlashAtTheEnd = filename.dropLastWhile { it == '/' }
 

@@ -23,7 +23,7 @@ git clone $repo repo -b $rev --depth 1
 cp CommunityBuildPlugin.scala repo/project/CommunityBuildPlugin.scala
 cd repo
 
-sbt --sbt-version $SBT_VERSION -Dcommunitybuild.version="$version" \
+sbt --sbt-version $SBT_VERSION  \
   \;moduleMappings \
   \;++"$scalaVersion"! \
   \;"set every version := \"$version\"" \

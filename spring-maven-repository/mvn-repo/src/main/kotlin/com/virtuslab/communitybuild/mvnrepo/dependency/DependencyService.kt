@@ -7,6 +7,7 @@ import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.JavaDependencyIn
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.ScalaDependencyInfoResolver
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.FileInfo
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.ScalaDependencyInfo
+import com.virtuslab.communitybuild.mvnrepo.exception.DependencyNotFoundException
 import com.virtuslab.communitybuild.mvnrepo.exception.StorageFileNotFoundWithFileNameException
 import com.virtuslab.communitybuild.mvnrepo.storage.StorageService
 import org.springframework.core.env.Environment
@@ -37,7 +38,7 @@ class DependencyService(private val storageService: StorageService, private val 
 
     fun getInfoAbout(filename: String): ResponseEntity<FileInfo> {
         return try {
-            val resourceWithInfo = fetchDependency(filename)
+            val resourceWithInfo = fetchDependency(filename, true, true)
             ResponseEntity.ok().body(resourceWithInfo.first)
         } catch (e: StorageFileNotFoundWithFileNameException) {
             ResponseEntity.noContent().build()
@@ -54,25 +55,27 @@ class DependencyService(private val storageService: StorageService, private val 
         return builder.build()
     }
 
-    fun fetchDependency(filename: String): Pair<FileInfo, Resource> {
-
-        val demandedFileInfo = filenameToFileInfo(filename)
-
-        return loadDependency(demandedFileInfo)
+    fun fetchDependency(filename: String, dependencyMapping:Boolean, redirectIfNotExist: Boolean): Pair<FileInfo, Resource> {
+        try {
+            val demandedFileInfo = filenameToFileInfo(filename)
+            return loadDependency(demandedFileInfo, dependencyMapping)
+        } catch (e: StorageFileNotFoundWithFileNameException){
+            throw DependencyNotFoundException(filename, redirectIfNotExist, "Dependency not found.", e)
+        }
     }
 
     private fun filenameToFileInfo(filename: String): FileInfo {
         return resolvers.resolve(storageService.standarizeFilename(filename))
     }
 
-    private fun loadDependency(demandedFileInfo: FileInfo): Pair<FileInfo, Resource> {
+    private fun loadDependency(demandedFileInfo: FileInfo, dependencyMapping: Boolean): Pair<FileInfo, Resource> {
         return when (demandedFileInfo) {
-            is ScalaDependencyInfo -> loadScalaDependency(demandedFileInfo)
+            is ScalaDependencyInfo -> loadScalaDependency(demandedFileInfo, dependencyMapping)
             else -> Pair(demandedFileInfo, storageService.loadAsResource(demandedFileInfo.fullFilename))
         }
     }
 
-    private fun loadScalaDependency(demandedScalaDependencyInfo: ScalaDependencyInfo): Pair<FileInfo, Resource> {
+    private fun loadScalaDependency(demandedScalaDependencyInfo: ScalaDependencyInfo, dependencyMapping:Boolean): Pair<FileInfo, Resource> {
         try {
             val fullFilename = demandedScalaDependencyInfo.fullFilename
             return Pair(demandedScalaDependencyInfo, storageService.loadAsResource(fullFilename))
@@ -88,6 +91,7 @@ class DependencyService(private val storageService: StorageService, private val 
                     demandedScalaDependencyInfoWithTargetScalaVersion.version
                 )
             }
+                .filter { dependencyMapping }
                 .map { Pair(filenameToFileInfo(it.path) as ScalaDependencyInfo, it) }
                 .filter {
                     it.first.extension == demandedScalaDependencyInfoWithTargetScalaVersion.extension &&
