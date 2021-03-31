@@ -1,7 +1,8 @@
 # mvn-repo with nginx-proxy
 
 ## Docker
-`Also notice that the current configuration maps the proxy port (443) to your localhost port.`
+Note that the current configuration maps the proxy port (443) to your localhost port. In the future, it should not be visible outside the virtual docker network.
+
 ### docker-compose usage
 `docker-compose up`  - run mvn-repo and nginx-proxy
 Useful flags:  
@@ -27,11 +28,25 @@ If you run with docker-compose the network may have some prefix, check it with `
 Example: `spring-maven-repository_builds-network`.
 
 ## example build run
+Example build project `examples/fetchSbt` - look at Dockerfile there. The most important thing is to update java (to latest build of necessary version, not latest version) and copy certificates.
 1.
 ```
-docker run --add-host repo1.maven.org:$(ipconfig getifaddr en0) --add-host repo.maven.apache.org:$(ipconfig getifaddr en0) --add-host repo1.maven.org.fake:$(ipconfig getifaddr en0) -it --name fetch-sbt -p 5005:5005 --network spring-maven-repository_builds-network fetch-sbt
+docker run \
+--add-host repo1.maven.org:$(ipconfig getifaddr en0) \
+--add-host repo.maven.apache.org:$(ipconfig getifaddr en0) \
+--add-host repo1.maven.org.fake:$(ipconfig getifaddr en0) \
+-it --name fetch-sbt \
+-p 5005:5005 \
+--network spring-maven-repository_builds-network \
+fetch-sbt
 ```
 2.
 ```
-docker run --add-host repo1.maven.org:nginxProxyIp --add-host repo.maven.apache.org:nginxProxyIp --add-host repo1.maven.org.fake:nginxProxyIp -it --name fetch-sbt--network builds-network fetch-sbt
+docker run \
+--add-host repo1.maven.org:nginxProxyIp \
+--add-host repo.maven.apache.org:nginxProxyIp \
+--add-host repo1.maven.org.fake:nginxProxyIp \
+-it --name fetch-sbt--network builds-network \
+fetch-sbt
 ```
+P.S. run these commands as oneliners
