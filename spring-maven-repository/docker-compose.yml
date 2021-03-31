@@ -2,21 +2,11 @@ version: "3.9"
 services:
   mvn-repo:
     build: ./mvn-repo
-    # environment:
-    #   server.port: 8080
-    #   server.servlet.context-path: "/maven2"
-    #   maven.multiRepo: "false"
-    #   maven.redirectUrl: "https://repo1.maven.org.fake/maven2"
-    #   maven.scala.targetVersion: "3.0.0-RC1"
     networks:
       backend-network:
-#    ports:
-#      - "8080:8080"
 
   nginx-proxy:
     build: ./nginx-proxy
-#    environment:
-#      MVN_REPO_HOSTNAME: "mvn-repo"
     networks:
       backend-network:
       builds-network:
@@ -24,6 +14,7 @@ services:
       - mvn-repo
     ports:
     - "443:443"
+    - "80:80" # only for debug
 
 networks:
   backend-network:
