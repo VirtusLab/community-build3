@@ -1,7 +1,6 @@
 package com.virtuslab.communitybuild.mvnrepo.dependency
 
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.FileInfo
-import com.virtuslab.communitybuild.mvnrepo.exception.StorageException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -10,7 +9,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
-import java.io.IOException
 import javax.servlet.http.HttpServletRequest
 
 
@@ -25,8 +23,7 @@ class DependencyController @Autowired constructor(private val dependencyService:
         return when {
             isInfoPage(request.parameterMap) -> info(filename)
             isDirectoryName(filename) -> list(filename, model)
-            isHeadRequest(request) -> fetchDependency(filename, false, false)
-            else -> fetchDependency(filename, true, true)
+            else -> fetchDependency(filename)
         }
     }
 
@@ -42,9 +39,10 @@ class DependencyController @Autowired constructor(private val dependencyService:
         return "listMustache"
     }
 
-    private fun fetchDependency(filename: String, dependencyMapping:Boolean, redirectIfNotExist: Boolean): Any {
+
+    private fun fetchDependency(filename: String): Any {
         log.debug("GET dependency file $filename")
-        val resourceWithInfo = dependencyService.fetchDependency(filename, dependencyMapping, redirectIfNotExist)
+        val resourceWithInfo = dependencyService.fetchDependency(filename)
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resourceWithInfo.first.filename + "\"")
             .body(resourceWithInfo.second)
