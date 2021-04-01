@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 proxyLocation=$(host $1 | awk '/has address/ { print $4 }')
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 docker rm fetch-sbt
 docker build -t fetch-sbt .

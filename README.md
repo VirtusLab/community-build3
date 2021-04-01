@@ -14,7 +14,15 @@ To run community build one need to have a version (preferably latest) relsed as 
 ## MVN Proxy
 The spring-maven-repository directory is the fork of the [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository) repository. Copied for modifications needed by Dotty community builds mechanism.
 
-# Run demo build:
+## Run demo build:
+
+### Prerequisites
+
+The steps below assume you have docker set up on your machine.
+If working on MacOS make sure that the memory limit for docker containers is high enough
+(the default 2GB is definitely too little as the build of scala3 repository has a limit of 4GB for the JVM - successfully tested with 8GB).
+
+### Running demo
 
 Only once run:
 `./buildBase.sh`

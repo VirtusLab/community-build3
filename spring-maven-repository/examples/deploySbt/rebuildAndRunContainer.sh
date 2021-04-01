@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 docker rm deploy-sbt
 docker build -t deploy-sbt .
