@@ -4,6 +4,8 @@ set -e
 
 # ./run_maven_server_bg.sh
 docker-compose  -f spring-maven-repository/docker-compose.yml up -d
+# sleep 60 # mvn-proxy need a lot of time to start (probably thanks to gradle bootRun)
+# TODO add health endpoint (to mvn-repo) and health check here instead hardcoded sleep
 
 export CM_SCALA_VERSION=3.0.0-RC1
 export PROXY_HOSTNAME=nginx-proxy
@@ -22,7 +24,6 @@ docker build -t communitybuild3/publish_project publish_project
 
 # # build executor image
 # docker build -t communitybuild3/executor executor
-
 
 # # run publish_project
 docker run --rm --network $DOCKER_NETWORK communitybuild3/publish_project \
