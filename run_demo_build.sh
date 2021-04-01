@@ -12,37 +12,11 @@ export PROXY_HOSTNAME=nginx-proxy
 export DOCKER_NETWORK=builds-network
 # export PROXY_LOCATION='https://repo1.maven.org/maven2'
 
-
-# build publish_project image
-docker build -t communitybuild3/publish_project publish_project
-
-# build warm_up_executor image
-# docker build -t communitybuild3/warm_up_executor warm_up_executor
-
 # # build scala-release image
 # docker build -t communitybuild3/publish_scala publish_scala
 
-# # build executor image
-# docker build -t communitybuild3/executor executor
-
-# # run publish_project
-docker run --rm --network $DOCKER_NETWORK communitybuild3/publish_project \
-  $CM_SCALA_VERSION \
-  https://github.com/Stiuil06/deploySbt.git \
-  1.0.2 \
-  1.0.2-communityBuild \
-  "com.example%greeter" \
-  $PROXY_HOSTNAME
-
-
-# # run warm_up
-# docker run --rm --network builds-network communitybuild3/warm_up_executor \
-#   $CM_SCALA_VERSION \
-#   https://github.com/Stiuil06/warm_up.git \
-#   main \
-#   0.0.1-communityBuild \
-#   "default%repo" \
-#   $PROXY_LOCATION 
+# build executor image
+docker build -t communitybuild3/executor executor
 
 # release scala
 # docker run \
@@ -54,18 +28,24 @@ docker run --rm --network $DOCKER_NETWORK communitybuild3/publish_project \
 #   communitybuild3/publish_scala \
 #   $CM_SCALA_VERSION https://github.com/lampepfl/dotty.git master $PROXY_LOCATION
 
-# # run munit with new scala version
-# docker run \
-#   --rm
-#   --add-host repo1.maven.org:$(ipconfig getifaddr en0) \
-#   --add-host repo.maven.apache.org:$(ipconfig getifaddr en0) \
-#   --add-host repo1.maven.org.fake:$(ipconfig getifaddr en0) \
-#   --network builds-network \
-#   communitybuild3/executor \
-#   $CM_SCALA_VERSION https://github.com/scalameta/munit.git v0.7.22 \
-#   0.7.22-communityBuild \
-#   "org.scalameta%munit-scalacheck org.scalameta%munit" \
-#   $PROXY_LOCATION 
+
+# run build 1
+docker run --rm --network $DOCKER_NETWORK communitybuild3/executor \
+  $CM_SCALA_VERSION \
+  https://github.com/Stiuil06/deploySbt.git \
+  1.0.2 \
+  1.0.2 \
+  "com.example%greeter" \
+  $PROXY_HOSTNAME
+
+# run build 2 dependend on artifact from build 1
+docker run --rm --network $DOCKER_NETWORK communitybuild3/executor \
+  $CM_SCALA_VERSION \
+  https://github.com/Stiuil06/fetchSbt.git \
+  0.0.1 \
+  0.0.1 \
+  "com.example%helloworld" \
+  $PROXY_HOSTNAME
 
 
 docker-compose  -f spring-maven-repository/docker-compose.yml stop
