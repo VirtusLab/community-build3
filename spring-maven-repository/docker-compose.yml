@@ -2,11 +2,16 @@ version: "3.9"
 services:
   mvn-repo:
     build: ./mvn-repo
+    image: communitybuild3/mvn-repo
     networks:
       backend-network:
 
   nginx-proxy:
-    build: ./nginx-proxy
+    build:
+      context: ./nginx-proxy
+      args:
+        MAVEN_CERT_PASS: maven_cert_pass # TODO: Replace for production use
+    image: communitybuild3/nginx-proxy
     networks:
       backend-network:
       builds-network:

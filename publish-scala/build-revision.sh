@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
-
-
 set -e
 
+if [ $# -ne 4 ]; then
+  echo "Wrong number of script arguments"
+  exit 1
+fi
+
 #args parsing in order
-scalaVersion=$1 # 3.0.0-RC1-bin-SNAPSHOT
-repo=$2 #'https://github.com/scalameta/munit.git'
-rev=$3 #'v0.7.22'
+repo=$1 #'https://github.com/scalameta/munit.git'
+rev=$2 #'v0.7.22'
+scalaVersion=$3 # 3.0.0-RC1-bin-SNAPSHOT
 export PROXY_HOSTNAME=$4 #http://172.17.0.1:8443/maven2 
 export serverLocation="https://repo1.maven.org/maven2"
 
 # setup proxy location in /etc/hosts
-PROXY_LOCATION=$(/build/setup_proxy_location.sh $PROXY_HOSTNAME)
+PROXY_LOCATION=$(/build/setup-proxy-location.sh $PROXY_HOSTNAME)
 
 echo '##################################'
 echo Release Scala in version: $scalaVersion
