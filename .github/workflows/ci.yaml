@@ -10,8 +10,11 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v2
 
-      - name: Build up base image
-        run: ./buildBase.sh      
+      - name: Generate certificates
+        run: scripts/generate-secrets.sh 
+
+      - name: Build up base docker image
+        run: scripts/build-docker-base.sh      
   
       - name: run demo build
-        run: ./run_demo_build.sh
+        run: scripts/run-demo-build.sh
