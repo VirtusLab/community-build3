@@ -20,6 +20,7 @@ docker run \
   --rm \
   --network $DOCKER_NETWORK \
   communitybuild3/publish-scala \
+  /build/build-revision.sh \
   https://github.com/lampepfl/dotty.git \
   master \
   $CM_SCALA_VERSION \
@@ -30,6 +31,7 @@ docker run \
   --rm \
   --network $DOCKER_NETWORK \
   communitybuild3/executor \
+  /build/build-revision.sh \
   https://github.com/scalameta/munit.git \
   v0.7.22 \
   $CM_SCALA_VERSION \

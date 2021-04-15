@@ -13,4 +13,5 @@ echo '##################################'
 echo Clonning $repo using revision $rev
 echo '##################################'
 
+rm -rf repo
 git clone $repo repo -b $rev --depth 1

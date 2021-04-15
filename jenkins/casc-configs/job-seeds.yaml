@@ -1,0 +1,10 @@
+jobs:
+- script: |
+    job('runDaily') {
+      steps {
+        shell('cp /var/jenkins_home/seeds/runDaily.groovy .')
+        jobDsl {
+          targets 'runDaily.groovy'
+        }
+      }
+    }

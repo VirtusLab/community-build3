@@ -13,5 +13,5 @@ version=$4 #'1.0.2-communityBuild'
 targets=$5 #com.example%greeter
 proxyHostname=$6 #nginx-proxy
 
-./checkout.sh $repo $rev
-./build.sh $scalaVersion $version "$targets" $proxyHostname
+/build/checkout.sh $repo $rev
+/build/build.sh $scalaVersion $version "$targets" $proxyHostname

@@ -18,11 +18,11 @@ PROXY_LOCATION=$(/build/setup-proxy-location.sh $PROXY_HOSTNAME)
 
 echo '##################################'
 echo Scala version: $scalaVersion
-echo Disting as $version for targets: $targets
+echo Disting version $version for targets: $targets
 echo Maven proxy at: $PROXY_LOCATION
 echo '##################################'
 
-cp CommunityBuildPlugin.scala repo/project/CommunityBuildPlugin.scala
+cp /build/CommunityBuildPlugin.scala repo/project/CommunityBuildPlugin.scala
 cd repo
 
 sbt --sbt-version $SBT_VERSION -Dcommunitybuild.version="$version" \

@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+set -e
+
+if [ $# -ne 1 ]; then
+  echo "Wrong number of script arguments"
+  exit 1
+fi
 
 proxyLocation=$(host $1 | awk '/has address/ { print $4 }')
 

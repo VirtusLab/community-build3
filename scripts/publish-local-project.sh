@@ -17,8 +17,8 @@ source $scriptDir/env.sh
 containerId=$(docker create \
   --rm \
   --network $DOCKER_NETWORK \
-  --entrypoint=/build/build.sh \
   communitybuild3/executor \
+  /build/build.sh \
   $CM_SCALA_VERSION \
   $version \
   "$targets" \

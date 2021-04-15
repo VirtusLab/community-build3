@@ -45,6 +45,29 @@ scripts/publish-local-project.sh spring-maven-repository/examples/deploySbt 1.0.
 
 Remember that for this to work the local maven has to be running and the scala version used as the parameter has to be already published.
 
+## Running community build in Jenkins in Docker
+
+Assuming you have performed the preparation steps from the demo script
+
+```
+scripts/start-maven.sh
+sleep 100
+scripts/build-publish-scala.sh
+scripts/build-executor.sh
+```
+
+you can start jenkins in docker with
+
+```
+scripts/build-jenkins.sh
+scripts/start-jenkins.sh
+```
+
+Navigate to http://localhost:8080/ to access jenkins UI.
+Start the `runDaily` job to trigger the community build.
+To see the results, go to `/daily/${currentDate}`.
+Next, to see the visualization of the build plan, click `Dependency graph` in the menu on the left and select `jsplumb` format.
+
 ## General development tips
 
 ### Debug app in container
