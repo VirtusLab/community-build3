@@ -1,10 +1,10 @@
 jobs:
 - script: |
-    job('runDaily') {
-      steps {
-        shell('cp /var/jenkins_home/seeds/runDaily.groovy .')
-        jobDsl {
-          targets 'runDaily.groovy'
+    pipelineScript = new File('/var/jenkins_home/seeds/runDaily.groovy').text
+    pipelineJob('runDaily') {
+      definition {
+        cps {
+          script(pipelineScript)
         }
       }
     }

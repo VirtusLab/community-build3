@@ -43,99 +43,99 @@ In [SemVer](https://semver.org/) context it is possible to match version with di
 ### Scala Version Mapping
 If proxy dont have dependency in requested scala version, is looking for dependency in scalaVersion specified in property maven.scala.targetVersion (if specified).  
 Example:  
-`maven.scala.targetVersion` = `3.0.0-RC1`  
-Existing dependency `com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1-javadoc.jar`  
-Requested dependency `com/example/greeter_3.0.0-RC2/1.0.1/greeter_3.0.0-RC2-1.0.1-javadoc.jar`  
-Returned dependency `com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1-javadoc.jar`  
-Info for requested dependency `http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.0/greeter_3.0.0-RC1-1.0.0.jar?info`  
+`maven.scala.targetVersion` = `3.0.0-RC3`  
+Existing dependency `com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-javadoc.jar`  
+Requested dependency `com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-javadoc.jar`  
+Returned dependency `com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-javadoc.jar`  
+Info for requested dependency `http://localhost:8080/com/example/greeter_3.0.0-RC3/1.0.0/greeter_3.0.0-RC3-1.0.0.jar?info`  
 ```json
 {
-    "fullFilename": "com/example/greeter_3.0.0-RC2/1.0.1/greeter_3.0.0-RC2-1.0.1-javadoc.jar",
-    "filename": "greeter_3.0.0-RC2-1.0.1-javadoc.jar",
+    "fullFilename": "com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-javadoc.jar",
+    "filename": "greeter_3.0.0-RC3-1.0.1-javadoc.jar",
     "organization": "com.example",
     "name": "greeter",
     "version": "1.0.1",
     "extension": "jar",
-    "scalaVersion": "3.0.0-RC2",
+    "scalaVersion": "3.0.0-RC3",
     "jarType": "javadoc",
     "mappedTo": {
-        "fullFilename": "com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1-javadoc.jar",
-        "filename": "greeter_3.0.0-RC1-1.0.1-javadoc.jar",
+        "fullFilename": "com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-javadoc.jar",
+        "filename": "greeter_3.0.0-RC3-1.0.1-javadoc.jar",
         "organization": "com.example",
         "name": "greeter",
         "version": "1.0.1",
         "extension": "jar",
-        "scalaVersion": "3.0.0-RC1",
+        "scalaVersion": "3.0.0-RC3",
         "jarType": "javadoc",
         "mappedTo": null,
-        "dependencyPath": "com/example/greeter_3.0.0-RC1"
+        "dependencyPath": "com/example/greeter_3.0.0-RC3"
     },
-    "dependencyPath": "com/example/greeter_3.0.0-RC2"
+    "dependencyPath": "com/example/greeter_3.0.0-RC3"
 }
 ```
 
 ## Info Feature
 By adding empty `info` flag as query param in url you will get information about dependency and its mappings.  
 Example when we have `greeter` library only in veresion `1.0.0`:  
-`http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.0/greeter_3.0.0-RC1-1.0.0.jar?info`
+`http://localhost:8080/com/example/greeter_3.0.0-RC3/1.0.0/greeter_3.0.0-RC3-1.0.0.jar?info`
 ```json
 {
     "organization": "com.example",
     "name": "greeter",
-    "filename": "greeter_3.0.0-RC1-1.0.0.jar",
-    "scalaVersion": "3.0.0-RC1",
+    "filename": "greeter_3.0.0-RC3-1.0.0.jar",
+    "scalaVersion": "3.0.0-RC3",
     "version": "1.0.0",
     "jarType": "",
     "extension": "jar",
     "mappedTo": null,
-    "dependencyPath": "com/example/greeter_3.0.0-RC1"
+    "dependencyPath": "com/example/greeter_3.0.0-RC3"
 }
 ```
-`http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.2/greeter_3.0.0-RC1-1.0.2.jar?info`
+`http://localhost:8080/com/example/greeter_3.0.0-RC3/1.0.2/greeter_3.0.0-RC3-1.0.2.jar?info`
 ```json
 {
     "organization": "com.example",
     "name": "greeter",
-    "filename": "greeter_3.0.0-RC1-1.0.2.jar",
-    "scalaVersion": "3.0.0-RC1",
+    "filename": "greeter_3.0.0-RC3-1.0.2.jar",
+    "scalaVersion": "3.0.0-RC3",
     "version": "1.0.2",
     "jarType": "",
     "extension": "jar",
     "mappedTo": {
         "organization": "com.example",
         "name": "greeter",
-        "filename": "greeter_3.0.0-RC1-1.0.0.jar",
-        "scalaVersion": "3.0.0-RC1",
+        "filename": "greeter_3.0.0-RC3-1.0.0.jar",
+        "scalaVersion": "3.0.0-RC3",
         "version": "1.0.0",
         "jarType": "",
         "extension": "jar",
         "mappedTo": null,
-        "dependencyPath": "com/example/greeter_3.0.0-RC1"
+        "dependencyPath": "com/example/greeter_3.0.0-RC3"
     },
-    "dependencyPath": "com/example/greeter_3.0.0-RC1"
+    "dependencyPath": "com/example/greeter_3.0.0-RC3"
 }
 ```
-`http://localhost:8080/com/example/greeter_3.0.0-RC1/1.0.2/greeter_3.0.0-RC1-1.0.2-sources.jar?info`
+`http://localhost:8080/com/example/greeter_3.0.0-RC3/1.0.2/greeter_3.0.0-RC3-1.0.2-sources.jar?info`
 ```json
 {
     "organization": "com.example",
     "name": "greeter",
-    "filename": "greeter_3.0.0-RC1-1.0.2-sources.jar",
-    "scalaVersion": "3.0.0-RC1",
+    "filename": "greeter_3.0.0-RC3-1.0.2-sources.jar",
+    "scalaVersion": "3.0.0-RC3",
     "version": "1.0.2",
     "jarType": "sources",
     "extension": "jar",
     "mappedTo": {
         "organization": "com.example",
         "name": "greeter",
-        "filename": "greeter_3.0.0-RC1-1.0.0-sources.jar",
-        "scalaVersion": "3.0.0-RC1",
+        "filename": "greeter_3.0.0-RC3-1.0.0-sources.jar",
+        "scalaVersion": "3.0.0-RC3",
         "version": "1.0.0",
         "jarType": "sources",
         "extension": "jar",
         "mappedTo": null,
-        "dependencyPath": "com/example/greeter_3.0.0-RC1"
+        "dependencyPath": "com/example/greeter_3.0.0-RC3"
     },
-    "dependencyPath": "com/example/greeter_3.0.0-RC1"
+    "dependencyPath": "com/example/greeter_3.0.0-RC3"
 }
 ```

@@ -15,7 +15,7 @@ internal class FileInfoResolversKtTest {
     fun filenameToScalaDependencyInfo_jar() {
         // given
         val resolvers = getFileInfoResolverChain()
-        val fullFilename = "com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1.jar"
+        val fullFilename = "com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1.jar"
 
         // when
         val dependencyInfo = resolvers.resolve(fullFilename)
@@ -25,8 +25,8 @@ internal class FileInfoResolversKtTest {
         val scalaDependencyInfo = dependencyInfo as ScalaDependencyInfo
         assert(scalaDependencyInfo.organization == "com.example")
         assert(scalaDependencyInfo.name == "greeter")
-        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC1-1.0.1.jar")
-        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC1")
+        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC3-1.0.1.jar")
+        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC3")
         assert(scalaDependencyInfo.version == "1.0.1")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "jar")
@@ -36,7 +36,7 @@ internal class FileInfoResolversKtTest {
     fun filenameToScalaDependencyInfo_pom() {
         // given
         val resolvers = getFileInfoResolverChain()
-        val fullFilename = "com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1.pom"
+        val fullFilename = "com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1.pom"
 
         // when
         val dependencyInfo = resolvers.resolve(fullFilename)
@@ -46,8 +46,8 @@ internal class FileInfoResolversKtTest {
         val scalaDependencyInfo = dependencyInfo as ScalaDependencyInfo
         assert(scalaDependencyInfo.organization == "com.example")
         assert(scalaDependencyInfo.name == "greeter")
-        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC1-1.0.1.pom")
-        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC1")
+        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC3-1.0.1.pom")
+        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC3")
         assert(scalaDependencyInfo.version == "1.0.1")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "pom")
@@ -57,7 +57,7 @@ internal class FileInfoResolversKtTest {
     fun filenameToScalaDependencyInfo_sources_jar() {
         // given
         val resolvers = getFileInfoResolverChain()
-        val fullFilename = "com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1-sources.jar"
+        val fullFilename = "com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-sources.jar"
 
         // when
         val dependencyInfo = resolvers.resolve(fullFilename)
@@ -67,8 +67,8 @@ internal class FileInfoResolversKtTest {
         val scalaDependencyInfo = dependencyInfo as ScalaDependencyInfo
         assert(scalaDependencyInfo.organization == "com.example")
         assert(scalaDependencyInfo.name == "greeter")
-        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC1-1.0.1-sources.jar")
-        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC1")
+        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC3-1.0.1-sources.jar")
+        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC3")
         assert(scalaDependencyInfo.version == "1.0.1")
         assert(scalaDependencyInfo.type == "sources")
         assert(scalaDependencyInfo.extension == "jar")
@@ -78,22 +78,21 @@ internal class FileInfoResolversKtTest {
     fun filenameToScalaDependencyInfo_withMapping() {
         // given
         val resolvers = getFileInfoResolverChain()
-        val wantedDependencyFilename = "com/example/greeter_3.0.0-RC1/1.0.19/greeter_3.0.0-RC1-1.0.19.jar"
-        val existingDependencyInfo = resolvers.resolve("com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1.jar")
+        val wantedDependencyFilename = "com/example/greeter_3.0.0-RC3/1.0.19/greeter_3.0.0-RC3-1.0.19.jar"
+        val existingDependencyInfo = resolvers.resolve("com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1.jar")
 
         // when
         val scalaDependencyInfo = resolvers.resolve(wantedDependencyFilename, existingDependencyInfo)
 
         // then
         assert(scalaDependencyInfo.mappedTo == existingDependencyInfo)
-
     }
 
     @Test
     fun filenameToScalaDependencyInfo_md5HashFile(){
         // given
         val resolvers = getFileInfoResolverChain()
-        val wantedDependencyFilename = "com/example/greeter_3.0.0-RC1/1.0.1/greeter_3.0.0-RC1-1.0.1-sources.jar.md5"
+        val wantedDependencyFilename = "com/example/greeter_3.0.0-RC3/1.0.1/greeter_3.0.0-RC3-1.0.1-sources.jar.md5"
 
         // when
         val dependencyInfo = resolvers.resolve(wantedDependencyFilename)
@@ -103,12 +102,11 @@ internal class FileInfoResolversKtTest {
         val scalaDependencyInfo = dependencyInfo as ScalaDependencyInfo
         assert(scalaDependencyInfo.organization == "com.example")
         assert(scalaDependencyInfo.name == "greeter")
-        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC1-1.0.1-sources.jar.md5")
-        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC1")
+        assert(scalaDependencyInfo.filename == "greeter_3.0.0-RC3-1.0.1-sources.jar.md5")
+        assert(scalaDependencyInfo.scalaVersion == "3.0.0-RC3")
         assert(scalaDependencyInfo.version == "1.0.1")
         assert(scalaDependencyInfo.type == "sources.jar")
         assert(scalaDependencyInfo.extension == "md5")
-
     }
 
     @Test
@@ -130,7 +128,6 @@ internal class FileInfoResolversKtTest {
         assert(scalaDependencyInfo.version == "0.9.1")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "jar")
-
     }
 
     @Test
@@ -152,7 +149,6 @@ internal class FileInfoResolversKtTest {
         assert(scalaDependencyInfo.version == "0.9.1")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "pom")
-
     }
 
     @Test
@@ -174,7 +170,6 @@ internal class FileInfoResolversKtTest {
         assert(scalaDependencyInfo.version == "1.0.0-M4")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "pom")
-
     }
 
     @Test
@@ -195,7 +190,6 @@ internal class FileInfoResolversKtTest {
         assert(scalaDependencyInfo.version == "2.14.7-sbt-5e51b9d4f9631ebfa29753ce4accc57808e7fd6b")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "pom")
-
     }
 
     @Test
@@ -217,6 +211,5 @@ internal class FileInfoResolversKtTest {
         assert(scalaDependencyInfo.version == "1.4.8")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "jar")
-
     }
 }

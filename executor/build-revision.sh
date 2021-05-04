@@ -8,10 +8,14 @@ fi
 
 repo=$1 #'https://github.com/Stiuil06/deploySbt.git'
 rev=$2 #'1.0.2'
-scalaVersion=$3 # 3.0.0-RC1
+scalaVersion=$3 # 3.0.0-RC3
 version=$4 #'1.0.2-communityBuild'
 targets=$5 #com.example%greeter
 proxyHostname=$6 #nginx-proxy
 
 /build/checkout.sh $repo $rev
 /build/build.sh $scalaVersion $version "$targets" $proxyHostname
+echo '********************'
+# echo 'fake build'
+echo $1 $2 $3 $4 $5 $6
+echo '********************'

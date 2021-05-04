@@ -2,9 +2,6 @@ FROM lampepfl/dotty:2021-03-22
 
 ARG KEYTOOL_STORE_PASS
 
-WORKDIR /build
-COPY . /build/
-
 RUN apt update
 RUN apt install -y openjdk-11-jdk-headless
 RUN apt install dnsutils -y
@@ -12,6 +9,9 @@ RUN apt install dnsutils -y
 RUN update-java-alternatives --set java-1.11.0-openjdk-amd64
 
 ENV DEFAULT_KEYTOOL_STORE_PASS=changeit
+
+WORKDIR /build
+COPY . /build/
 
 ADD ./keystorage/repo1.maven.org.crt /usr/share/ca-certificates/repo1.maven.org.crt
 RUN chmod 644 /usr/share/ca-certificates/repo1.maven.org.crt && update-ca-certificates
@@ -25,9 +25,14 @@ ADD ./keystorage/repo1.maven.org.fake.crt /usr/share/ca-certificates/repo1.maven
 RUN chmod 644 /usr/share/ca-certificates/repo1.maven.org.fake.crt && update-ca-certificates
 RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -noprompt -trustcacerts -importcert -alias repo1.maven.org.fake -file /build/keystorage/repo1.maven.org.fake.crt -storepass $DEFAULT_KEYTOOL_STORE_PASS
 
+ADD ./keystorage/mvn-repo.crt /usr/share/ca-certificates/mvn-repo.crt
+RUN chmod 644 /usr/share/ca-certificates/mvn-repo.crt && update-ca-certificates
+RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -noprompt -trustcacerts -importcert -alias mvn-repo -file /build/keystorage/mvn-repo.crt -storepass $DEFAULT_KEYTOOL_STORE_PASS
+
+
 RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -storepasswd -storepass changeit -new $KEYTOOL_STORE_PASS
 
-ENV SBT_VERSION=1.4.9
+ENV SBT_VERSION=1.5.1
 
 # only for debug inside container ping/ifconfig/ssl test:
 

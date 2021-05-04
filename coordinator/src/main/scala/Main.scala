@@ -7,7 +7,7 @@
 // def md(org: String, name: String, version: String, scope: String = "compile"): MD = 
 //   s"$org%$name%$version%$scope"
 
-// val scalaVersion = "3.0.0-RC1"
+// val scalaVersion = "3.0.0-RC3"
 // val scalaSuffix = "_" + scalaVersion
 
 // type MD = String

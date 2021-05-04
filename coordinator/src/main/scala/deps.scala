@@ -12,8 +12,8 @@ def loadProjects(scalaRelease: String): Seq[Project] =
       val stars = e.select(".stats [title=Stars]").asScala.map(_.text)
       if texts.isEmpty || stars.isEmpty then None else Some {
         Project(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
+      }
     }
-  }
   (1 to 10000).toStream.map(load).takeWhile(_.nonEmpty).flatten 
 
 case class ModuleInVersion(version: String, modules: Seq[String])
@@ -78,4 +78,4 @@ def loadDepenenecyGraph(scalaRelease: String): DependencyGraph =
   val withMavenLoaded = rawDependencies.filter(_.mvs.nonEmpty).map(loadMavenInfo(scalaRelease))
   DependencyGraph(scalaRelease, withMavenLoaded)
 
-@main def runDeps = loadDepenenecyGraph("3.0.0-RC1")
+@main def runDeps = loadDepenenecyGraph("3.0.0-RC3")

@@ -1,4 +1,4 @@
-val scala3Version = "3.0.0-RC1"
+val scala3Version = "3.0.0-RC3"
 
 lazy val root = project
   .in(file("."))
@@ -8,6 +8,6 @@ lazy val root = project
     version := "1.0.1",
     scalaVersion := scala3Version,
     publishTo := Some(
-      "Private Maven Repo" at s"http://localhost/maven2/"
+      "Private Maven Repo" at s"http://localhost:8081/maven2"
     )
   )

@@ -3,12 +3,12 @@
 It contains few main classes:
 
 
-- `runDeps` will build a list of project (with over 20 stars for `3.0.0-RC1`) as well as its targets and dependencies (based on mvn central and scaladex). Results are cached in `data` directory
+- `runDeps` will build a list of project (with over 20 stars for `3.0.0-RC3`) as well as its targets and dependencies (based on mvn central and scaladex). Results are cached in `data` directory
 - `printBuildPlan` will run `runDeps` and will create build plan. It assumes that all deps follow semver and will not add and dependencies for non-latest version of each dependencies
-- `runBuildPlan` will create build plan (in the same way how `printBuildPlan` does it) and build all locally. Each project in given version has its dedicated directory in `ws` dir where will have `repo` with git repository, `logs.txt` with logs and `res.txt`with results. Sbt command that will be run are printed to stdout. It will run build against `3.0.0-RC1-bin-SNAPSHOT` so to test latest version of compiler one needs to downgrade `baseVersion` in `project/Build.scala` in dotty repo.
+- `runBuildPlan` will create build plan (in the same way how `printBuildPlan` does it) and build all locally. Each project in given version has its dedicated directory in `ws` dir where will have `repo` with git repository, `logs.txt` with logs and `res.txt`with results. Sbt command that will be run are printed to stdout. It will run build against `3.0.0-RC3-bin-SNAPSHOT` so to test latest version of compiler one needs to downgrade `baseVersion` in `project/Build.scala` in dotty repo.
 - `resultSummary` will just gather results (it will not run buidld plan)
 
-To run community build one need to have a version (preferably latest) relsed as `3.0.0-RC1-bin-SNAPSHOT`. To do so, clone dotty repository, update `baseVersion` in `project/Build.scala` ([this line](https://github.com/lampepfl/dotty/blob/master/project/Build.scala#L60)) to  `3.0.0-RC2` and run `sbt-dotty/scripted sbt-dotty/scaladoc-empty-test` (tests may fail).
+To run community build one need to have a version (preferably latest) relsed as `3.0.0-RC3-bin-SNAPSHOT`. To do so, clone dotty repository, update `baseVersion` in `project/Build.scala` ([this line](https://github.com/lampepfl/dotty/blob/master/project/Build.scala#L60)) to  `3.0.0-RC3` and run `sbt-dotty/scripted sbt-dotty/scaladoc-empty-test` (tests may fail).
 
 
 ## MVN Proxy
@@ -54,6 +54,7 @@ scripts/start-maven.sh
 sleep 100
 scripts/build-publish-scala.sh
 scripts/build-executor.sh
+scripts/build-coordinator.sh
 ```
 
 you can start jenkins in docker with
@@ -67,6 +68,10 @@ Navigate to http://localhost:8080/ to access jenkins UI.
 Start the `runDaily` job to trigger the community build.
 To see the results, go to `/daily/${currentDate}`.
 Next, to see the visualization of the build plan, click `Dependency graph` in the menu on the left and select `jsplumb` format.
+
+Navigate to http://localhost:8081/maven2/ to see the content of our local maven repository.
+
+When working on Mac you might need to increase the memory limit for docker even more as jenkins has 2 workers by default, which might build projects in parallel (you might need to try with 10~16 GB although this hasn't been measured exactly yet).
 
 ## General development tips
 
