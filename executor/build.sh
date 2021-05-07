@@ -27,7 +27,7 @@ echo '##################################'
 cp /build/CommunityBuildPlugin.scala repo/project/CommunityBuildPlugin.scala
 cd repo
 
-sbt --sbt-version $SBT_VERSION -Dcommunitybuild.version="$version" \
+sbt -Dcommunitybuild.version="$version" \
   \;moduleMappings \
   \;++"$scalaVersion"! \
   \;"set every version := \"$version\"" \
