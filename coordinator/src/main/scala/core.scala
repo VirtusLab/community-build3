@@ -10,6 +10,8 @@ object Project:
     val splitted = line.split("%")
     Project(splitted(0), splitted(1))(splitted(2).toInt)
 
+case class ProjectVersion(p: Project, v: String)
+
 case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[String]):
   def show = (Seq(name, version, mvn) ++ deps).mkString(",")
 
@@ -34,7 +36,10 @@ case class BuildStep(
   p: Project, 
   originalVersion: String, 
   publishVersion: Option[String], 
-  targets: Seq[TargetId], 
-  depOverrides: Seq[Dep])
+  targets: Seq[TargetId],
+  depOverrides: Seq[Dep]
+)
 
 case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
+
+case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String)

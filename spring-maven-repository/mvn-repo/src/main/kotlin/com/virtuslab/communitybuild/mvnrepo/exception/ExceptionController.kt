@@ -31,21 +31,14 @@ class ExceptionController @Autowired constructor(private val env: Environment) {
     @ExceptionHandler(StorageFileNotFoundWithFileNameException::class)
     fun storageFileNotFoundWithFileNameException(e: StorageFileNotFoundWithFileNameException): Any {
         log.debug(e.toString())
-        val mavenTargetRepositoryUrl = env.getProperty("maven.redirectUrl")
-        if (Objects.nonNull(mavenTargetRepositoryUrl)) {
-            val isMultiRepo = env.getProperty("maven.multiRepo")?.toBoolean() ?: false
-            val filePath = if (isMultiRepo)
-                e.filename.split("/").stream()
-                        .skip(1)
-                        .collect(Collectors.joining("/"))
-            else
-                e.filename
-            val targetAddress = "$mavenTargetRepositoryUrl/$filePath"
-            log.debug("Redirection request to address $targetAddress")
-            return RedirectView(targetAddress);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+    }
+
+    @ExceptionHandler(IllegalDependencyPathException::class)
+    fun illegalDependencyPathException(e: IllegalDependencyPathException): Any {
+        log.debug(e.toString())
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
     }
 
     @ExceptionHandler(NoDependencyInfoMatchedException::class)

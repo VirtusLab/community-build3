@@ -44,3 +44,11 @@ tasks.withType<KotlinCompile> {
 		jvmTarget = "11"
 	}
 }
+
+sourceSets.main {
+    java.srcDirs("src/main/kotlin", "src/main/java")
+}
+
+sourceSets.test {
+    java.srcDirs("src/test/kotlin", "src/test/java")
+}

@@ -5,6 +5,9 @@ services:
     image: communitybuild3/mvn-repo
     networks:
       backend-network:
+      builds-network:
+    ports:
+    - 8081:8081
 
   nginx-proxy:
     build:

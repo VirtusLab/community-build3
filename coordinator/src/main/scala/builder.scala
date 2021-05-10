@@ -18,7 +18,7 @@ def repo(step: BuildStep) = s"git@github.com:${step.p.org}/${step.p.name}.git"
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
-def findTag(step: BuildStep)(using l: ProcessLogger): Either[String, String] = 
+def findStepTag(step: BuildStep)(using l: ProcessLogger): Either[String, String] = 
   val cmd = Seq("git", "ls-remote", "--tags", repo(step).toString)
   util.Try {
     val lines = cmd.!!.linesIterator.filter(_.contains(step.originalVersion)).toList
@@ -52,7 +52,7 @@ def setupSbt(repoDir: Path): ProcessBuilder =
   val dest = repoDir.resolve("project").resolve(pluginFileName)
   pb("ln", "-s", orignalLoc, dest)
 
-def setupOverries(step: BuildStep, dest: Path): ProcessBuilder = 
+def setupOverrides(step: BuildStep, dest: Path): ProcessBuilder = 
   val overridesStrings = step.depOverrides.map(_.asMvnStr).mkString("\n")
   pb("echo", overridesStrings) #> dest.resolve("deps.txt").toFile
 
@@ -84,12 +84,11 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
   try 
     val res = 
       for 
-        tag <- findTag(step)
+        tag <- findStepTag(step)
         _ = log(s"cloning $tag ...")
         _ <- run("cloning")(pb("git", "clone", repo(step), repoDir, "-b", tag, "--depth", "1"))
         _ <- run("install sbt pluggin")(setupSbt(repoDir))
-        _ <- run("setup overrides")(setupOverries(step, outDir))
-        _ <- run("setup plugin")(pb("echo", """addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.3")""") #> repoDir.resolve("project/zzz_ooo.sbt").toFile)
+        _ <- run("setup overrides")(setupOverrides(step, outDir))
         _ = log("building...")   
         _ <- run("running build")(runSbt(step, localScalaVersion, orgScalaVersion, repoDir))
       yield ()
@@ -100,11 +99,11 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
   finally logger.close()
 
 @main def runBuildPlan: Unit =
-  val orgScalaVersion = "3.0.0-RC1"
+  val orgScalaVersion = "3.0.0-RC3"
   val deps = loadDepenenecyGraph(orgScalaVersion)
-  val buildPlan: BuildPlan = makeBuildPlan(deps)
+  val buildPlan: BuildPlan = makeStepsBasedBuildPlan(deps)
 
-  val localScalaVersion = "3.0.0-RC1-bin-SNAPSHOT"
+  val localScalaVersion = "3.0.0-RC3-bin-SNAPSHOT"
   for 
     steps <- buildPlan.steps.drop(1) // Dotty is build somewhere
     step <- steps  // if step.p.name == "processor"

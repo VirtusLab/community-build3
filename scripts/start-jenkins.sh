@@ -14,3 +14,5 @@ docker run \
   -v jenkins-docker-certs:/certs/client:ro \
   -v /var/run/docker.sock:/var/run/docker.sock \
 communitybuild3/jenkins
+
+docker exec -u root jenkins bash -c 'chmod g+w /var/run/docker.sock && chgrp docker /var/run/docker.sock'

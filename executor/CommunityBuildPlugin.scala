@@ -1,11 +1,25 @@
 import sbt._
 import sbt.Keys._
-//import sbt.librarymanagement._
 
 case class CommunityBuildCoverage(allDeps: Int, overridenScalaJars: Int, notOverridenScalaJars: Int)
 
+abstract class BuildStepResult(val asString: String)
+
+case class Info(msg: String) extends BuildStepResult(msg)
+object CompileOk extends BuildStepResult("compile:ok")
+object CompileFailed extends BuildStepResult("compile:failed")
+object TestOk extends BuildStepResult("test:ok")
+object TestFailed extends BuildStepResult("test:failed")
+object PublishSkipped extends BuildStepResult("publish:skipped")
+case class PublishWrongVersion(version: Option[String]) extends BuildStepResult(s"publish:wrongVersion=${version}")
+object PublishOk extends BuildStepResult("publish:ok")
+object PublishFailed extends BuildStepResult("publish:failed")
+case class BuildError(msg: String) extends BuildStepResult(s"error=${msg}")
+
+class ProjectBuildFailureException extends Exception
+
 object CommunityBuildPlugin extends AutoPlugin {
-   override def trigger = allRequirements
+  override def trigger = allRequirements
 
   val runBuild = inputKey[Unit]("")
   val moduleMappings = inputKey[Unit]("")
@@ -23,12 +37,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         .withPublishMavenStyle(true)
         .withResolverName(ourResolver.name),
     publishResults := Classpaths.publishTask(publishResultsConf).value,
-    externalResolvers := {
-      externalResolvers.value.map {
-        case res if res.name == "public" => ourResolver
-        case other => other
-      }
-    }
+    externalResolvers := ourResolver +: externalResolvers.value
   )
 
   // Create mapping from org%artifact_name to project name
@@ -37,12 +46,12 @@ object CommunityBuildPlugin extends AutoPlugin {
       val s = Project.extract(cState).structure
       val refs = s.allProjectRefs
       refs.map { r =>
-        val current: ModuleID = projectID.in(r).get(s.data).get
-        val sv = scalaVersion.in(r).get(s.data).get
-        val sbv = scalaBinaryVersion.in(r).get(s.data).get
+        val current: ModuleID = (r / projectID).get(s.data).get
+        val sv = (r / scalaVersion).get(s.data).get
+        val sbv = (r / scalaBinaryVersion).get(s.data).get
         val name = CrossVersion(current.crossVersion, sv, sbv)
           .fold(current.name)(_(current.name))
-        current.organization +"%"+name -> r
+        current.organization + "%" + name -> r
       }
   }
 
@@ -52,7 +61,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   override def globalSettings = Seq(
     moduleMappings := { // Store settings in file to capture its original scala versions
       val moduleIds = mkMappings.value
-      IO.write(file("..") / "mapping.txt", moduleIds.map(v => v._1 +" " +v._2.project).mkString("\n"))
+      IO.write(file("community-build-mappings.txt"), moduleIds.map(v => v._1 +" " +v._2.project).mkString("\n"))
     },
     runBuild := {
       try {
@@ -62,21 +71,30 @@ object CommunityBuildPlugin extends AutoPlugin {
         val s = extracted.structure
         val refs = s.allProjectRefs
         val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
-        
-        val svprefix = "_" + scalaBinaryVersion.in(extracted.currentRef).get(s.data).get
 
-        val originalModuleIds: Map[String, ProjectRef] =  IO.readLines(file("..") / "mapping.txt")
+        val scalaBinaryVersionSuffix = "_" + (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+        val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
+
+        val originalModuleIds: Map[String, ProjectRef] =  IO.readLines(file("community-build-mappings.txt"))
           .map(_.split(' ')).map(d => d(0) -> refsByName(d(1))).toMap
         val moduleIds: Map[String, ProjectRef] = mkMappings.value.toMap
 
         println("Starting build...")
-
+        
         // Find projects that matches maven
         val topLevelProjects = (
           for {
             id <- ids
-            actualId = id + svprefix
-          } yield originalModuleIds.getOrElse(actualId, moduleIds(actualId))
+            actualId = id + scalaVersionSuffix
+          } yield
+            Seq(
+              originalModuleIds.get(id + scalaVersionSuffix),
+              originalModuleIds.get(id + scalaBinaryVersionSuffix),
+              originalModuleIds.get(id),
+              moduleIds.get(id + scalaVersionSuffix),
+              moduleIds.get(id + scalaBinaryVersionSuffix),
+              moduleIds.get(id)
+            ).flatten.head
         ).toSet
 
         val projectDeps = s.allProjectPairs.map {case (rp, ref) =>
@@ -91,9 +109,9 @@ object CommunityBuildPlugin extends AutoPlugin {
               flatten(soFar ++ deps, pDeps.tail ++ deps)
           }
 
-        val allToBuild = flatten(topLevelProjects, topLevelProjects)      
+        val allToBuild = flatten(topLevelProjects, topLevelProjects)
 
-        val toBuild = allToBuild.map { r =>
+        val projectsBuildResults = allToBuild.map { r =>
           println(s"Starting build for $r...")
           
           val k = r / Compile / compile
@@ -101,55 +119,70 @@ object CommunityBuildPlugin extends AutoPlugin {
 
           // we should reuse state here
 
-          val res = List.newBuilder[String]
-          //res += id
-          res += r.project
+          val res = List.newBuilder[BuildStepResult]
+          res += Info(r.project)
 
           try {
             Project.runTask(k, cState) match {
               case Some((_, Value(_))) =>
-                res += "compile:ok"
+                res += CompileOk
                 Project.runTask(t, cState) match {
                   case Some((_, Value(_))) => 
-                    res += "test:ok"
+                    res += TestOk
                   case _ =>
-                    res += "test:failed"  
+                    res += TestFailed
                 }
 
                 ourVersion match {
                   case None =>
-                    res += "publish:skipped"
+                    res += PublishSkipped
                   case Some(vo) =>
-                    val cv = version.in(r).get(s.data)
+                    val cv = (r / version).get(s.data)
                     if (cv != Some(vo)){
-                      res += "publish:wrongVersion=" + cv
+                      res += PublishWrongVersion(cv)
                     } else {
                       val p = r / Compile / publishResults
                       Project.runTask(p, cState) match {
                         case Some((_, Value(_))) => 
-                          res += "publish:ok"
+                          res += PublishOk
                         case _ =>
-                          res += "publish:failed"  
+                          res += PublishFailed
                       }
                     }
                 }
               case _ =>
-                res += "compile:failed"
+                res += CompileFailed
             } 
           } catch {
             case a: Throwable =>
               a.printStackTrace()
-              res += "error=" + a.getMessage
+              res += BuildError(a.getMessage)
           }
-          res.result.mkString(",\t")
+          res.result
         }
-        IO.write(file("..") / "res.txt", toBuild.mkString("\n"))
+        val buildResultsText = projectsBuildResults.map(_.map(_.asString).mkString("\t")).mkString("\n")
+        println("************************")
+        println("Build summary:")
+        println(buildResultsText)
+        println("************************")
+        IO.write(file("..") / "res.txt", buildResultsText)
+
+        val failedSteps = projectsBuildResults.flatMap { results =>
+          results.collect {
+            case error @ (
+              CompileFailed | TestFailed | PublishWrongVersion(_) | PublishFailed | BuildError(_)
+            ) => error
+          }
+        }
+        if(failedSteps.nonEmpty) {
+          throw new ProjectBuildFailureException
+        }
       } catch {
         case a: Throwable =>
           a.printStackTrace()
           throw a
       }
     },
-    aggregate.in(runBuild) := false
+    (runBuild / aggregate) := false
    )
 }
