@@ -142,8 +142,6 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
 def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph) =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
 
-  /////
-
   val dottyProjectName = "lampepfl_dotty"
 
   def projectName(project: ProjectVersion) = s"${project.p.org}_${project.p.name}"
@@ -151,7 +149,7 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph) =
 
   val scalaSuffix = "_" + depGraph.scalaRelease // TODO - based this on version
 
-  /* val buildDefs =  */projectsDeps.toList.flatMap { (project, deps) =>
+  projectsDeps.toList.flatMap { (project, deps) =>
     val repoUrl = s"https://github.com/${project.p.org}/${project.p.name}.git"
     findTag(repoUrl, project.v).map { tag =>
       val name = projectName(project)

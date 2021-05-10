@@ -37,12 +37,6 @@ object CommunityBuildPlugin extends AutoPlugin {
         .withPublishMavenStyle(true)
         .withResolverName(ourResolver.name),
     publishResults := Classpaths.publishTask(publishResultsConf).value,
-    // externalResolvers := {
-    //   externalResolvers.value.map {
-    //     case res if res.name == "public" => ourResolver
-    //     case other => other
-    //   }
-    // }
     externalResolvers := ourResolver +: externalResolvers.value
   )
 
@@ -126,7 +120,6 @@ object CommunityBuildPlugin extends AutoPlugin {
           // we should reuse state here
 
           val res = List.newBuilder[BuildStepResult]
-          //res += id
           res += Info(r.project)
 
           try {

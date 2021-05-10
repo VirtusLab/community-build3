@@ -11,14 +11,9 @@ repo=$1 #'https://github.com/scalameta/munit.git'
 rev=$2 #'v0.7.22'
 scalaVersion=$3 # 3.0.0-RC3-bin-SNAPSHOT
 export PROXY_HOSTNAME=$4 #http://172.17.0.1:8443/maven2 
-# export serverLocation="https://repo1.maven.org/maven2"
 export serverLocation="http://mvn-repo:8081/maven2"
 
-# setup proxy location in /etc/hosts
-#PROXY_LOCATION=$(/build/setup-proxy-location.sh $PROXY_HOSTNAME)
-
 echo '##################################'
-# echo fake build
 echo Release Scala in version: $scalaVersion
 echo Clonning $repo using revision $rev
 echo Maven proxy at: $PROXY_LOCATION

@@ -40,7 +40,7 @@ class DependencyController @Autowired constructor(private val dependencyService:
     }
 
 
-    /*private*/ fun fetchDependency(filename: String): Any {
+    fun fetchDependency(filename: String): Any {
         log.debug("GET dependency file $filename")
         val resourceWithInfo = dependencyService.fetchDependency(filename)
         return ResponseEntity.ok()

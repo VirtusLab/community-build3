@@ -79,8 +79,6 @@ class DependencyService(private val storageService: StorageService, private val 
 
         } catch (e: StorageFileNotFoundWithFileNameException) {
 
-            
-
             val demandedScalaDependencyInfoWithTargetScalaVersion = mapToTargetScalaVersion(demandedScalaDependencyInfo)
             val dependencyPath = demandedScalaDependencyInfoWithTargetScalaVersion.getDependencyPath()
             val dependencyDir = storageService.load(dependencyPath).toFile()

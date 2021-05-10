@@ -3,7 +3,6 @@ scalaVersion = "3.0.0-RC3"
 node {
     def buildPlan
     docker.image('communitybuild3/coordinator').withRun("-it", "cat") { c ->
-        //sh "docker exec ${c.id} bash -c 'mkdir -p /build/data && echo '[]' > /build/data/buildPlan.json'"
         sh "docker exec ${c.id} /build/compute-build-plan.sh $scalaVersion"
         buildPlan = sh(
             script: "docker exec ${c.id} cat /build/data/buildPlan.json",

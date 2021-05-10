@@ -89,7 +89,6 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
         _ <- run("cloning")(pb("git", "clone", repo(step), repoDir, "-b", tag, "--depth", "1"))
         _ <- run("install sbt pluggin")(setupSbt(repoDir))
         _ <- run("setup overrides")(setupOverrides(step, outDir))
-        //_ <- run("setup plugin")(pb("echo", """addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.3")""") #> repoDir.resolve("project/zzz_ooo.sbt").toFile)
         _ = log("building...")   
         _ <- run("running build")(runSbt(step, localScalaVersion, orgScalaVersion, repoDir))
       yield ()

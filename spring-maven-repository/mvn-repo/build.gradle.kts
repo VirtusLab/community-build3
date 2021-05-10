@@ -45,20 +45,6 @@ tasks.withType<KotlinCompile> {
 	}
 }
 
-// sourceSets {
-// 	main {
-// 		kotlin {
-// 			srcDirs = listOf("src/main/kotlin", "src/main/java")
-// 		}
-// 	}
-// 	test {
-// 		kotlin {
-// 			srcDirs = listOf("src/main/kotlin", "src/main/java")
-// 		}
-// 	}
-// 	// main.kotlin.srcDirs = listOf("src/main/kotlin", "src/main/java")
-// 	// test.kotlin.srcDirs = listOf("src/test/kotlin", "src/test/java")
-// }
 sourceSets.main {
     java.srcDirs("src/main/kotlin", "src/main/java")
 }

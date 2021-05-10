@@ -16,6 +16,5 @@ proxyHostname=$6 #nginx-proxy
 /build/checkout.sh $repo $rev
 /build/build.sh $scalaVersion $version "$targets" $proxyHostname
 echo '********************'
-# echo 'fake build'
 echo $1 $2 $3 $4 $5 $6
 echo '********************'
