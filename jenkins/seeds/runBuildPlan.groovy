@@ -6,7 +6,7 @@ def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 def dateString = dateFormat.format(date)
 
 def scalaRepoUrl = "https://github.com/lampepfl/dotty.git"
-scalaVersion = "3.0.0-RC3-bin-COMMUNITY"  // TODO compute version from latest master
+scalaVersion = "3.0.0-RC3-bin-COMMUNITY-SNAPSHOT"  // TODO compute version from latest master
 proxyHostname = "nginx-proxy"
 
 dailiesRootPath = "/daily"
@@ -34,6 +34,8 @@ def buildProjectCommand(Map project) {
 // If some dependencies haven't finished running yet, we abort the job and let it be triggered again by some other upstream job.
 def buildProjectJobScript(Map project) {
     return """
+import java.time.*
+
 def wasBuilt(String projectName) {
 	def jenkins = jenkins.model.Jenkins.instance
 	def job = jenkins.getItemByFullName("${currentDateRootPath}/\${projectName}")
@@ -53,9 +55,27 @@ if(!allDependenciesWereBuilt) {
 	currentBuild.result = 'ABORTED'
     error('Not all dependencies have been built yet')
 }
-docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
-	echo 'building and publishing ${project.name}'
-	sh "${buildProjectCommand(project)}"
+node {
+  def restxt
+  docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
+    echo "building and publishing ${project.name}"
+    sh "${buildProjectCommand(project)}"
+    restxt = sh(
+      script: "docker exec ${'$'}${"{c.id}"} cat /build/res.txt",
+      returnStdout: true
+    )
+  }
+  writeFile(file: "res.txt", text: restxt)
+  archiveArtifacts(artifacts: "res.txt")
+
+  LocalDateTime t = LocalDateTime.now();
+  //TODO check it vvvv not sure if it even compiles, ubuntu keeps killing elasticsearch
+  sh ''' curl -X POST -H "Content-Type: application/json" 'elasticsearch:9200/community-build/doc' -d '
+  {
+    "res": ${'$'}${"{restxt}"},
+    "build_timestamp": ${'$'}${"{restxt as String}"},
+    "project_name": "${project.name}",
+  }' '''
 }
 """
 }

@@ -21,7 +21,7 @@ RUN usermod -G docker jenkins
 
 USER jenkins
 
-RUN jenkins-plugin-cli --plugins "blueocean:1.24.5 docker-workflow:1.26 job-dsl:1.77 depgraph-view:1.0.5 configuration-as-code:1.51"
+RUN jenkins-plugin-cli --plugins "blueocean:1.24.5 docker-workflow:1.26 job-dsl:1.77 depgraph-view:1.0.5 configuration-as-code:1.51 logstash:2.4.0"
 
 COPY --chown=jenkins casc-configs /var/jenkins_home/casc-configs
 COPY --chown=jenkins seeds /var/jenkins_home/seeds
