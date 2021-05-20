@@ -56,26 +56,31 @@ if(!allDependenciesWereBuilt) {
     error('Not all dependencies have been built yet')
 }
 node {
+  def result = "SUCCESS"
   def restxt
-  docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
-    echo "building and publishing ${project.name}"
-    sh "${buildProjectCommand(project)}"
-    restxt = sh(
-      script: "docker exec ${'$'}${"{c.id}"} cat /build/res.txt",
-      returnStdout: true
-    )
+  try {
+    docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
+      echo "building and publishing ${project.name}"
+      sh "${buildProjectCommand(project)}"
+      restxt = sh(
+        script: "docker exec ${'$'}${"{c.id}"} cat /build/res.txt",
+        returnStdout: true
+      )
+    }
+    writeFile(file: "res.txt", text: restxt)
+    archiveArtifacts(artifacts: "res.txt")
+  } catch (err) {
+    result = "FAILURE"
   }
-  writeFile(file: "res.txt", text: restxt)
-  archiveArtifacts(artifacts: "res.txt")
+
+  if (result == "FAILURE") {
+    currentBuild.result = 'FAILURE'
+  } else if (result == "SUCCESS") {
+    currentBuild.result = 'SUCCESS'
+  }
 
   LocalDateTime t = LocalDateTime.now();
-  //TODO check it vvvv not sure if it even compiles, ubuntu keeps killing elasticsearch
-  sh ''' curl -X POST -H "Content-Type: application/json" 'elasticsearch:9200/community-build/doc' -d '
-  {
-    "res": ${'$'}${"{restxt}"},
-    "build_timestamp": ${'$'}${"{restxt as String}"},
-    "project_name": "${project.name}",
-  }' '''
+  sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"${'$'}${'{result}'}\\", \\"build_timestamp\\": \\"${'$'}${'{t as String}'}\\", \\"project_name\\": \\"${project.name}\\" } \\'"
 }
 """
 }
