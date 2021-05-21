@@ -5,16 +5,16 @@ case class CommunityBuildCoverage(allDeps: Int, overridenScalaJars: Int, notOver
 
 abstract class BuildStepResult(val asString: String)
 
-case class Info(msg: String) extends BuildStepResult(msg)
-object CompileOk extends BuildStepResult("compile:ok")
-object CompileFailed extends BuildStepResult("compile:failed")
-object TestOk extends BuildStepResult("test:ok")
-object TestFailed extends BuildStepResult("test:failed")
-object PublishSkipped extends BuildStepResult("publish:skipped")
-case class PublishWrongVersion(version: Option[String]) extends BuildStepResult(s"publish:wrongVersion=${version}")
-object PublishOk extends BuildStepResult("publish:ok")
-object PublishFailed extends BuildStepResult("publish:failed")
-case class BuildError(msg: String) extends BuildStepResult(s"error=${msg}")
+case class Info(msg: String) extends BuildStepResult(s""""$msg"""")
+object CompileOk extends BuildStepResult(""""compile": "ok"""")
+object CompileFailed extends BuildStepResult(""""compile": "failed"""")
+object TestOk extends BuildStepResult(""""test": "ok"""")
+object TestFailed extends BuildStepResult(""""test": "failed"""")
+object PublishSkipped extends BuildStepResult(""""publish": "skipped"""")
+case class PublishWrongVersion(version: Option[String]) extends BuildStepResult(s""""publish": "wrongVersion=${version}"""")
+object PublishOk extends BuildStepResult(""""publish": "ok"""")
+object PublishFailed extends BuildStepResult(""""publish": "failed"""")
+case class BuildError(msg: String) extends BuildStepResult(s""""error": "${msg}"""")
 
 class ProjectBuildFailureException extends Exception
 
@@ -160,7 +160,10 @@ object CommunityBuildPlugin extends AutoPlugin {
           }
           res.result
         }
-        val buildResultsText = projectsBuildResults.map(_.map(_.asString).mkString("\t")).mkString("\n")
+        val buildResultsText = projectsBuildResults.map{
+          case subProjectName :: results => subProjectName.asString + ": " + results.map(_.asString).mkString("{", ", ", "}")
+          case List(s) => s.asString 
+        }.mkString("{", ", ", "}")
         println("************************")
         println("Build summary:")
         println(buildResultsText)

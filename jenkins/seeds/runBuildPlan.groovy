@@ -80,7 +80,7 @@ node {
   }
 
   LocalDateTime t = LocalDateTime.now();
-  sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"\${result}\\", \\"build_timestamp\\": \\"\${t as String}\\", \\"project_name\\": \\"${project.name}\\" } \\'"
+  sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"\${result}\\", \\"build_timestamp\\": \\"\${t as String}\\", \\"project_name\\": \\"${project.name}\\", \\"detailed_result\\": \${restxt} } \\'"
 }
 """
 }
