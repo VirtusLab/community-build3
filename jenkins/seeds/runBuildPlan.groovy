@@ -63,7 +63,7 @@ node {
       echo "building and publishing ${project.name}"
       sh "${buildProjectCommand(project)}"
       restxt = sh(
-        script: "docker exec ${'$'}${"{c.id}"} cat /build/res.txt",
+        script: "docker exec \${c.id} cat /build/res.txt",
         returnStdout: true
       )
     }
@@ -80,7 +80,7 @@ node {
   }
 
   LocalDateTime t = LocalDateTime.now();
-  sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"${'$'}${'{result}'}\\", \\"build_timestamp\\": \\"${'$'}${'{t as String}'}\\", \\"project_name\\": \\"${project.name}\\" } \\'"
+  sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"\${result}\\", \\"build_timestamp\\": \\"\${t as String}\\", \\"project_name\\": \\"${project.name}\\" } \\'"
 }
 """
 }
