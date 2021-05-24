@@ -3,4 +3,6 @@ set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-docker build -t communitybuild3/jenkins $scriptDir/../jenkins
+$scriptDir/start-maven.sh
+$scriptDir/start-jenkins.sh
+$scriptDir/start-elastic.sh

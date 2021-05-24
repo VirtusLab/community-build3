@@ -100,7 +100,7 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
 
 @main def runBuildPlan: Unit =
   val orgScalaVersion = "3.0.0-RC3"
-  val deps = loadDepenenecyGraph(orgScalaVersion)
+  val deps = loadDepenenecyGraph(orgScalaVersion, minStarsCount = 100, maxProjectsCount = None)
   val buildPlan: BuildPlan = makeStepsBasedBuildPlan(deps)
 
   val localScalaVersion = "3.0.0-RC3-bin-SNAPSHOT"

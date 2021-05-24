@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
-docker run \
-  --name jenkins \
-  -d \
-  --rm \
-  --env DOCKER_HOST=unix:///var/run/docker.sock \
-  --env CASC_JENKINS_CONFIG=/var/jenkins_home/casc-configs \
-  --network builds-network \
-  -p 8080:8080 \
-  -p 50000:50000 \
-  -v jenkins-data:/var/jenkins_home \
-  -v jenkins-docker-certs:/certs/client:ro \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-communitybuild3/jenkins
+scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-docker exec -u root jenkins bash -c 'chmod g+w /var/run/docker.sock && chgrp docker /var/run/docker.sock'
+shopt -s expand_aliases
+source $scriptDir/env.sh
+
+scbk apply -f $scriptDir/../k8s/jenkins-data.yaml
+
+scbk create configmap jenkins-seed-jobs --from-file=$scriptDir/../jenkins/seeds --dry-run=client -o yaml | scbk apply -f -
+scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/common-lib/vars --dry-run=client -o yaml | scbk apply -f -
+scbk create configmap jenkins-init-scripts --from-file=$scriptDir/../jenkins/init-scripts --dry-run=client -o yaml | scbk apply -f -
+scbk create configmap jenkins-casc-configs --from-file=$scriptDir/../jenkins/casc-configs --dry-run=client -o yaml | scbk apply -f -
+scbk apply -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/v0.5.0/deploy/crds/jenkins_v1alpha2_jenkins_crd.yaml
+scbk apply -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/v0.5.0/deploy/all-in-one-v1alpha2.yaml
+scbk apply -f $scriptDir/../k8s/jenkins.yaml

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-docker stop elasticsearch
-docker rm elasticsearch
-docker stop kibana
-docker rm kibana
+scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+shopt -s expand_aliases
+source $scriptDir/env.sh
+
+scbk delete -f $scriptDir/../k8s/elastic.yaml

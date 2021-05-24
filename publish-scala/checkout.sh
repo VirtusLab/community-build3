@@ -6,7 +6,7 @@ if [ $# -ne 3 ]; then
   exit 1
 fi
 
-repo="$1" # e.g. https://github.com/lampepfl/dotty.git
+repo="$1" # e.g. https://github.com/Stiuil06/deploySbt.git
 rev="$2" # e.g. 1.0.2
 repoDir="$3" # e.g. repo
 

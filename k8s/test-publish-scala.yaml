@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: publish-scala-test
+spec:
+  template:
+    spec:
+      containers:
+      - name: publish-scala-test
+        image: communitybuild3/publish-scala
+        imagePullPolicy: IfNotPresent
+        command:
+        - "bash"
+        - "-c"
+        - |
+            (/build/build-revision.sh \
+              https://github.com/lampepfl/dotty.git \
+              master \
+              3.0.1-RC1-bin-COMMUNITY-SNAPSHOT \
+              http://mvn-repo:8081/maven2/test \
+            && echo \
+            && echo "Scala published successfully") || true
+      restartPolicy: Never
+  backoffLimit: 0

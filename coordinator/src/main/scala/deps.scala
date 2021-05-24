@@ -72,10 +72,17 @@ def loadMavenInfo(scalaRelease: String)(projectModules: ProjectModules): LoadedP
   val targets = mvs.map(cached(asTarget(scalaRelease)))
   LoadedProject(projectModules.project, version, targets)
 
-def loadDepenenecyGraph(scalaRelease: String): DependencyGraph =
-  val projects = cachedSingle("projects.csv")(loadProjects(scalaRelease))
+def loadDepenenecyGraph(scalaRelease: String, minStarsCount: Int, maxProjectsCount: Option[Int] = None, requiredProjects: Seq[Project] = Seq.empty): DependencyGraph =
+  val projects = maxProjectsCount match
+    case Some(maxCount) if maxCount > requiredProjects.length =>
+      val loadedProjects = cachedSingle("projects.csv")(loadProjects(scalaRelease))
+      val topLoadedProject = loadedProjects.sortBy(-_.stars)
+      requiredProjects ++ topLoadedProject.take(maxCount - requiredProjects.length)
+    case _ =>
+      requiredProjects
+
   val rawDependencies = projects.map(cached(loadScaladexProject(scalaRelease)))
   val withMavenLoaded = rawDependencies.filter(_.mvs.nonEmpty).map(loadMavenInfo(scalaRelease))
   DependencyGraph(scalaRelease, withMavenLoaded)
 
-@main def runDeps = loadDepenenecyGraph("3.0.0-RC3")
+@main def runDeps = loadDepenenecyGraph("3.0.0-RC3", minStarsCount = 100)
