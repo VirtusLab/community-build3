@@ -58,20 +58,20 @@ if(!allDependenciesWereBuilt) {
 node {
   def result = "SUCCESS"
   def restxt
-  try {
-    docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
-      echo "building and publishing ${project.name}"
+  docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
+    echo "building and publishing ${project.name}"
+    try {
       sh "${buildProjectCommand(project)}"
-      restxt = sh(
-        script: "docker exec \${c.id} cat /build/res.txt",
-        returnStdout: true
-      )
+    } catch (err) {
+      result = "FAILURE"
     }
-    writeFile(file: "res.txt", text: restxt)
-    archiveArtifacts(artifacts: "res.txt")
-  } catch (err) {
-    result = "FAILURE"
+    restxt = sh(
+      script: "docker exec \${c.id} cat /build/res.txt",
+      returnStdout: true
+    )
   }
+  writeFile(file: "res.txt", text: restxt)
+  archiveArtifacts(artifacts: "res.txt")
 
   if (result == "FAILURE") {
     currentBuild.result = 'FAILURE'

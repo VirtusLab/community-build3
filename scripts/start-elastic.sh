@@ -11,7 +11,7 @@ docker run \
   --memory="1g" \
   docker.elastic.co/elasticsearch/elasticsearch:7.12.1
 
-sudo docker run \
+docker run \
   --name kibana \
   -d \
   --net builds-network \
