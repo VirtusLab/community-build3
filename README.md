@@ -73,7 +73,7 @@ Navigate to http://localhost:8081/maven2/ to see the content of our local maven 
 
 When working on Mac you might need to increase the memory limit for docker even more as jenkins has 2 workers by default, which might build projects in parallel (you might need to try with 10~16 GB although this hasn't been measured exactly yet).
 
-To start monitoring (root privileges needed) execute
+To start monitoring execute
 
 ```
 scripts/start-elastic.sh

@@ -6,7 +6,7 @@ def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 def dateString = dateFormat.format(date)
 
 def scalaRepoUrl = "https://github.com/lampepfl/dotty.git"
-scalaVersion = "3.0.0-RC3-bin-COMMUNITY-SNAPSHOT"  // TODO compute version from latest master
+scalaVersion = "3.0.1-RC1-bin-COMMUNITY-SNAPSHOT"  // TODO compute version from latest master
 proxyHostname = "nginx-proxy"
 
 dailiesRootPath = "/daily"
