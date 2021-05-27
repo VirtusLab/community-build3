@@ -32,11 +32,11 @@ docker run \
   --network $DOCKER_NETWORK \
   communitybuild3/executor \
   /build/build-revision.sh \
-  https://github.com/scalameta/munit.git \
-  v0.7.22 \
+  https://github.com/typelevel/shapeless-3.git \
+  v3.0.1 \
   $CM_SCALA_VERSION \
   0.7.22-communityBuild \
-  "org.scalameta%munit-scalacheck org.scalameta%munit" \
+  "org.typelevel%root" \
   $PROXY_HOSTNAME 
 
 $scriptDir/stop-maven.sh

@@ -66,7 +66,7 @@ def buildProject(localScalaVersion: String, orgScalaVersion: String, step: Build
   Seq("rm", "-rf", outDir.toString).!
   Seq("mkdir", outDir.toString).!
   
-   val logs = outDir.resolve("logs.txt")
+  val logs = outDir.resolve("logs.txt")
 
   val prefix = "[" + step.p.org + "/" + step.p.name + "@" + step.originalVersion + "]"
   def log(msg: String) = println(prefix + " " + msg)
