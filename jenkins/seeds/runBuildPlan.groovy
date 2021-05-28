@@ -6,7 +6,7 @@ def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 def dateString = dateFormat.format(date)
 
 def scalaRepoUrl = "https://github.com/lampepfl/dotty.git"
-scalaVersion = "3.0.0-RC3-bin-COMMUNITY"  // TODO compute version from latest master
+scalaVersion = "3.0.0-RC3-bin-COMMUNITY-SNAPSHOT"  // TODO compute version from latest master
 proxyHostname = "nginx-proxy"
 
 dailiesRootPath = "/daily"
@@ -34,6 +34,8 @@ def buildProjectCommand(Map project) {
 // If some dependencies haven't finished running yet, we abort the job and let it be triggered again by some other upstream job.
 def buildProjectJobScript(Map project) {
     return """
+import java.time.*
+
 def wasBuilt(String projectName) {
 	def jenkins = jenkins.model.Jenkins.instance
 	def job = jenkins.getItemByFullName("${currentDateRootPath}/\${projectName}")
@@ -53,9 +55,38 @@ if(!allDependenciesWereBuilt) {
 	currentBuild.result = 'ABORTED'
     error('Not all dependencies have been built yet')
 }
-docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
-	echo 'building and publishing ${project.name}'
-	sh "${buildProjectCommand(project)}"
+node {
+  def result = "SUCCESS"
+  def restxt
+  def logs
+  docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
+    echo "building and publishing ${project.name}"
+    try {
+      logs = sh(
+        script: "${buildProjectCommand(project)}",
+        returnStdout: true
+      )
+    } catch (err) {
+      result = "FAILURE"
+    }
+    restxt = sh(
+      script: "docker exec \${c.id} cat /build/res.txt",
+      returnStdout: true
+    )
+  }
+  writeFile(file: "res.txt", text: restxt)
+  archiveArtifacts(artifacts: "res.txt")
+
+  if (result == "FAILURE") {
+    currentBuild.result = 'FAILURE'
+  } else if (result == "SUCCESS") {
+    currentBuild.result = 'SUCCESS'
+  }
+
+  logs = logs.tokenize('\\n').collect { it.findAll { (int)it > 32 }.join('').replaceAll('"', '\\\\\\\\"') }.join(' ')
+
+  LocalDateTime t = LocalDateTime.now();
+  sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"\${result}\\", \\"build_timestamp\\": \\"\${t as String}\\", \\"project_name\\": \\"${project.name}\\", \\"detailed_result\\": \${restxt}, \\"logs\\": \\"\${logs}\\" } \\'"
 }
 """
 }

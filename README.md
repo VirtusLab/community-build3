@@ -73,6 +73,15 @@ Navigate to http://localhost:8081/maven2/ to see the content of our local maven 
 
 When working on Mac you might need to increase the memory limit for docker even more as jenkins has 2 workers by default, which might build projects in parallel (you might need to try with 10~16 GB although this hasn't been measured exactly yet).
 
+To start monitoring execute
+
+```
+scripts/start-elastic.sh
+```
+
+Navigate to http://localhost:5601/ and create an index pattern for `communnity-build`. ~(Home -> Kibana -> Add data -> Create index pattern)
+Then go to http://localhost:5601/app/discover#/ and select community-build index pattern.
+
 ## General development tips
 
 ### Debug app in container
