@@ -26,7 +26,7 @@ docker.image('communitybuild3/publish-scala').withRun("-it --network builds-netw
 """
 
 def buildProjectCommand(Map project) {
-  return """docker exec \${c.id} /build/build-revision.sh ${project.repoUrl} ${project.revision} ${scalaVersion} ${project.version} '${project.targets}' ${proxyHostname} >> /tmp/logs.txt"""
+  return """docker exec \${c.id} /build/build-revision.sh ${project.repoUrl} ${project.revision} ${scalaVersion} ${project.version} '${project.targets}' ${proxyHostname}"""
 }
 
 // Because the job will be triggered when ANY of its upstream dependencies finishes its build.
@@ -62,16 +62,15 @@ node {
   docker.image('communitybuild3/executor').withRun("-it --network builds-network", "cat") { c ->
     echo "building and publishing ${project.name}"
     try {
-      sh "${buildProjectCommand(project)}"
+      logs = sh(
+        script: "${buildProjectCommand(project)}",
+        returnStdout: true
+      )
     } catch (err) {
       result = "FAILURE"
     }
     restxt = sh(
       script: "docker exec \${c.id} cat /build/res.txt",
-      returnStdout: true
-    )
-    logs = sh(
-      script: "docker exec \${c.id} cat /tmp/logs.txt",
       returnStdout: true
     )
   }
@@ -83,6 +82,8 @@ node {
   } else if (result == "SUCCESS") {
     currentBuild.result = 'SUCCESS'
   }
+
+  logs = logs.tokenize('\\n').collect { it.findAll { (int)it > 32 }.join('').replaceAll('"', '\\\\\\\\"') }.join(' ')
 
   LocalDateTime t = LocalDateTime.now();
   sh " curl -X POST -H \\"Content-Type: application/json\\" \\"elasticsearch:9200/community-build/doc\\" -d \\' { \\"res\\": \\"\${result}\\", \\"build_timestamp\\": \\"\${t as String}\\", \\"project_name\\": \\"${project.name}\\", \\"detailed_result\\": \${restxt}, \\"logs\\": \\"\${logs}\\" } \\'"
