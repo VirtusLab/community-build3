@@ -3,4 +3,9 @@ set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-docker-compose  -f $scriptDir/../spring-maven-repository/docker-compose.yml up -d
+shopt -s expand_aliases
+source $scriptDir/env.sh
+
+scbk apply -f $scriptDir/../k8s/maven-data.yaml
+
+scbk apply -f $scriptDir/../k8s/maven.yaml

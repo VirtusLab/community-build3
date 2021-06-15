@@ -18,6 +18,17 @@ case class BuildError(msg: String) extends BuildStepResult(s""""error": "${msg}"
 
 class ProjectBuildFailureException extends Exception
 
+object WithExtractedScala3Suffix {
+  def unapply(s: String): Option[(String, String)] = {
+    val parts = s.split("_")
+    if (parts.length > 1 && parts.last.startsWith("3")) {
+      Some(parts.init.mkString("_"), parts.last)
+    } else {
+      None
+    }
+  }
+}
+
 object CommunityBuildPlugin extends AutoPlugin {
   override def trigger = allRequirements
 
@@ -29,21 +40,23 @@ object CommunityBuildPlugin extends AutoPlugin {
   import complete.DefaultParsers._
   
   // TODO we should simply hide maven central...
-  val ourResolver = ("proxy" at sys.env("serverLocation")).withAllowInsecureProtocol(true) 
+  val ourResolver = ("Community Build Repo" at sys.env("CB_MVN_REPO_URL")).withAllowInsecureProtocol(true) 
 
   override def projectSettings = Seq(
     publishResultsConf := 
-      publishConfiguration.value
+      publishM2Configuration.value
         .withPublishMavenStyle(true)
         .withResolverName(ourResolver.name),
     publishResults := Classpaths.publishTask(publishResultsConf).value,
     externalResolvers := ourResolver +: externalResolvers.value
   )
 
+  private def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s }
+
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
      val cState = state.value
-      val s = Project.extract(cState).structure
+      val s = sbt.Project.extract(cState).structure
       val refs = s.allProjectRefs
       refs.map { r =>
         val current: ModuleID = (r / projectID).get(s.data).get
@@ -51,7 +64,8 @@ object CommunityBuildPlugin extends AutoPlugin {
         val sbv = (r / scalaBinaryVersion).get(s.data).get
         val name = CrossVersion(current.crossVersion, sv, sbv)
           .fold(current.name)(_(current.name))
-        current.organization + "%" + name -> r
+        val mappingKey = s"${current.organization}%${stripScala3Suffix(name)}"
+        mappingKey -> r
       }
   }
 
@@ -67,7 +81,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       try {
         val ids = spaceDelimited("<arg>").parsed.toList
         val cState = state.value
-        val extracted = Project.extract(cState)
+        val extracted = sbt.Project.extract(cState)
         val s = extracted.structure
         val refs = s.allProjectRefs
         val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
@@ -94,7 +108,17 @@ object CommunityBuildPlugin extends AutoPlugin {
               moduleIds.get(id + scalaVersionSuffix),
               moduleIds.get(id + scalaBinaryVersionSuffix),
               moduleIds.get(id)
-            ).flatten.head
+            ).flatten.headOption.getOrElse{
+              println("Module mapping missing:")
+              println(s"id: $id")
+              println(s"actualId: $actualId")
+              println(s"scalaVersionSuffix: $scalaVersionSuffix")
+              println(s"scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix")
+              println(s"originalModuleIds: $originalModuleIds")
+              println(s"moduleIds: $moduleIds")
+              throw new Exception("Module mapping missing")
+          
+          }
         ).toSet
 
         val projectDeps = s.allProjectPairs.map {case (rp, ref) =>
@@ -111,11 +135,15 @@ object CommunityBuildPlugin extends AutoPlugin {
 
         val allToBuild = flatten(topLevelProjects, topLevelProjects)
 
+        println("Projects:")
+        println(allToBuild)
+
         val projectsBuildResults = allToBuild.map { r =>
           println(s"Starting build for $r...")
           
           val k = r / Compile / compile
-          val t = r / Test / test
+          // val t = r / Test / test
+          val t = r / Test / compile
 
           // we should reuse state here
 
@@ -123,10 +151,10 @@ object CommunityBuildPlugin extends AutoPlugin {
           res += Info(r.project)
 
           try {
-            Project.runTask(k, cState) match {
+            sbt.Project.runTask(k, cState) match {
               case Some((_, Value(_))) =>
                 res += CompileOk
-                Project.runTask(t, cState) match {
+                sbt.Project.runTask(t, cState) match {
                   case Some((_, Value(_))) => 
                     res += TestOk
                   case _ =>
@@ -142,7 +170,7 @@ object CommunityBuildPlugin extends AutoPlugin {
                       res += PublishWrongVersion(cv)
                     } else {
                       val p = r / Compile / publishResults
-                      Project.runTask(p, cState) match {
+                      sbt.Project.runTask(p, cState) match {
                         case Some((_, Value(_))) => 
                           res += PublishOk
                         case _ =>

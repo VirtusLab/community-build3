@@ -6,25 +6,12 @@ if [ $# -ne 4 ]; then
   exit 1
 fi
 
-#args parsing in order
-repo=$1 #'https://github.com/scalameta/munit.git'
-rev=$2 #'v0.7.22'
-scalaVersion=$3 # 3.0.0-RC3-bin-SNAPSHOT
-export PROXY_HOSTNAME=$4 #http://172.17.0.1:8443/maven2 
-export serverLocation="http://mvn-repo:8081/maven2"
+repoUrl="$1" # e.g. https://github.com/lampepfl/dotty.git
+rev="$2" # e.g. master
+scalaVersion="$3" # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
+mvnRepoUrl="$4" # e.g. https://mvm-repo/maven2/2021-05-23_1
 
-echo '##################################'
-echo Release Scala in version: $scalaVersion
-echo Clonning $repo using revision $rev
-echo Maven proxy at: $PROXY_LOCATION
-echo '##################################'
+scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-git clone $repo repo -b $rev --depth 1
-cd repo
-
-sed -i -r 's/val baseVersion = ".*"/val baseVersion = "'$scalaVersion'"/' project/Build.scala 
-export RELEASEBUILD=yes
-
-sbt --sbt-version $SBT_VERSION  \
-  \;'set every sonatypePublishToBundle := Some(("proxy" at sys.env("serverLocation")).withAllowInsecureProtocol(true))'  \
-  \;"scala3-bootstrapped/publish"
+$scriptDir/checkout.sh "$repoUrl" "$rev" repo
+$scriptDir/build.sh repo "$scalaVersion" "$mvnRepoUrl"

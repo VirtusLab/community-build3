@@ -1,4 +1,197 @@
-## Get stats about versions and its deps from scaladex and maven central
+## General architecture
+
+Everything in run inside k8s.
+The entire build is coordinated by jenkins, which dynamically spawns workers to do the following tasks:
+* compute the build plan
+* build scala compiler
+* build scala community projects in proper order so that all the dependencies of a project are built before the project itself
+(there is a limit of how many projects can be built within some reasonable time
+and using only the resources we have for this purpose)
+
+The artifacts of the compiler and the community projects are published to and pulled from a custom maven repository.
+If a required artifact is not found here (e.g. java dependencies, scala dependencies which did not get into the build plan) normal resolvers of a particular project are used.
+The repository is virtually divided into subrepositories for each run of the entire community build
+so artifacts from different runs are not mixed with each other.
+
+Elasticsearch with Kibana are used for aggregating and visualising build results.
+
+## Limitations
+
+Currently only sbt projects are supported.
+
+## MVN repository
+The spring-maven-repository directory is the fork of the [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository) repository. Copied for modifications needed by Dotty community builds mechanism.
+
+## Local development
+
+### Prerequisites
+
+The steps below assume you have kubectl and minikube installed on your machine.
+Running the entire build with full infrastructure
+(maven repository, jenkins master, jenkins workers, elasticsearch with kibana)
+requires quite a lot of resources, which need to be declared while starting minikube
+(tested successfully with 18GB of memory and 3 CPU cores on Mac; using hyperkit as driver as the default one caused problems).
+
+```
+minikube start --driver=hyperkit --memory=18432 --cpus=3
+```
+
+### Preparing docker images
+
+Set the environment variables to publish docker images to minikube instead of docker directly
+
+```
+eval $(minikube -p minikube docker-env)
+```
+
+Most likely you'll need to build the base image only once (this will take quite a lot of time):
+
+```
+scripts/generate-secrets.sh
+scripts/build-docker-base.sh
+```
+
+Build all the remaining images
+
+```
+scripts/build-quick.sh
+```
+
+or (re)build each image separately e.g.
+
+```
+scripts/build-maven.sh
+```
+
+### Debugging in k8s
+
+The entire build infrastructure in k8s is defined inside one namespace. Running
+
+```
+source scripts/env.sh
+```
+
+will prepare your current shell session to work with these k8s resources. 
+Among others this will set up `scbk` alias (standing for `Scala Communit Build K8S`)
+working just as `kubectl` with the proper namespace set.
+
+There are a couple of utility scripts to manage the lificycles of particular pieces of the infrastructure
+
+```
+scripts/start-XXX.sh
+scripts/stop-XXX.sh
+scripts/clean-XXX.sh
+```
+
+To be able to access the resources through your browser or send requests to them manually
+you'll need to forward their ports using `scripts/forward-XXX.sh` scripts.
+Each script needs to be run in a separate console and stopping the script will stop forwarding.
+If a pod gets restarted the corresponding forwarding script needs to be stopped and started again.
+
+Some resources might require credentials to be accessed via the UI.
+Run `scripts/show-XXX-credentials.sh` to get them.
+
+Useful k8s commands:
+
+```
+scbk get pods
+scbk describe pod $POD_NAME
+scbk logs $POD_NAME
+scbk exec -it $POD_NAME -- sh
+```
+
+### Maven repository
+
+UI URL:
+
+```
+http://localhost:8081/maven2
+```
+
+You can manage the published artifacts by logging into the repository pod with
+
+```
+scbk exec -it svc/mvn-repo -- bash
+```
+
+and modifying the content of `upload-dir` folder.
+
+### Elasticsearch and Kibana
+
+UI URL (your browser might complain about the page not being secure - proceed anyway):
+
+```
+https://localhost:5601/
+```
+
+You can load Kibana settings with `scripts/configure-kibana.sh`
+
+If you want to create an index pattern for `communnity-build` manually, navigate to `(Burger menu in the left upper corner) -> Index patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
+
+Elasticsearch and Kibana currently don't use persistent storage so every restart will clean all the data.
+
+### Jenkins
+
+UI URL: 
+
+```
+http://localhost:8080
+```
+
+Jenkins is set up by [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/).
+
+Jenkins requires the maven repo and elasticsearch to be up and running to successfully execute the entire build flow.
+
+To trigger a new run of the community build, start the `runDaily` job.
+When this job finishes navigate to `/daily/${currentDate}` to see the build progress of particular projects.
+
+For development purposes only you can uncomment the backup section in `k8s/jenkins.yaml`
+to make jenkins preserve data of jobs after a restart (remember to build the backup image first).
+This might however not be very reliable.
+You can get into the backup container for debugging with
+
+```
+scbk exec -it jenkins-build -c backup -- bash
+```
+
+If jenkins doesn't get set up properly or keeps crashing and restarting
+you can try to debug that by looking at the logs of the operator pod.
+
+A know issue is that jenkins itself might not start if it decides that you should update some of the plugins.
+You should then bump the versions in the yaml config.
+
+For easier development of shared jenkins libraries you can use `scripts/push-jenkins-lib.sh`
+to upload the locally modified files without having to restart jenkins.
+
+### Building a project locally
+
+Assuming you have the maven repo running in k8s, you can try to build a locally cloned project using the already published dependencies.
+
+```
+# Link plugin file(s) (needs to be run only once per cloned repo)
+executor/prepare-project.sh $PROJECT_PATH
+
+# Build the project using the build script or directly with sbt
+executor/build.sh $PROJECT_PATH $SCALA_VERSION $PROJECT_VERSION "$TARGETS" $MVN_REPO_URL
+# e.g.
+# executor/build.sh tmp/shapeless '3.0.1-RC1-bin-COMMUNITY-SNAPSHOT' '3.0.0-M4' 'org.typelevel%shapeless3-deriving org.typelevel%shapeless3-data org.typelevel%shapeless3-test org.typelevel%shapeless3-typeable' 'http://localhost:8081/maven2/2021-06-02_2'
+```
+
+Warning: you might run into problems if you manually rebuild only some of the artifacts using a different version of JDK that the one used for building the rest.
+
+### Running simple test demo
+
+This will only build and publish the latest scala compiler and a single community project.
+This doesn't use jenkins or elasticsearch.
+
+Assuming you have started minikube (you might set less resources than for the full build),
+built the docker images as described above and started the maven repository run
+
+```
+scripts/test-build.sh
+```
+
+## Build coordinator (outdated)
 
 It contains few main classes:
 
@@ -8,81 +201,7 @@ It contains few main classes:
 - `runBuildPlan` will create build plan (in the same way how `printBuildPlan` does it) and build all locally. Each project in given version has its dedicated directory in `ws` dir where will have `repo` with git repository, `logs.txt` with logs and `res.txt`with results. Sbt command that will be run are printed to stdout. It will run build against `3.0.0-RC3-bin-SNAPSHOT` so to test latest version of compiler one needs to downgrade `baseVersion` in `project/Build.scala` in dotty repo.
 - `resultSummary` will just gather results (it will not run buidld plan)
 
-To run community build one need to have a version (preferably latest) relsed as `3.0.0-RC3-bin-SNAPSHOT`. To do so, clone dotty repository, update `baseVersion` in `project/Build.scala` ([this line](https://github.com/lampepfl/dotty/blob/master/project/Build.scala#L60)) to  `3.0.0-RC3` and run `sbt-dotty/scripted sbt-dotty/scaladoc-empty-test` (tests may fail).
-
-
-## MVN Proxy
-The spring-maven-repository directory is the fork of the [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository) repository. Copied for modifications needed by Dotty community builds mechanism.
-
-## Run demo build:
-
-### Prerequisites
-
-The steps below assume you have docker set up on your machine.
-If working on MacOS make sure that the memory limit for docker containers is high enough
-(the default 2GB is definitely too little as the build of scala3 repository has a limit of 4GB for the JVM - successfully tested with 8GB).
-
-### Running demo
-
-Only once run:
-
-```
-scripts/generate-secrets.sh
-scripts/build-docker-base.sh
-```
-
-Then each time you 
-
-`scripts/run-demo-build.sh`
-
-You can also run particular steps from the script above manually for debugging.
-In such a case you might want to build a local repository rather than a git repo.
-For this purpose you can run `scripts/publish-local-project.sh` (currently this works for sbt projects only), e.g.
-
-```
-scripts/publish-local-project.sh spring-maven-repository/examples/deploySbt 1.0.2-communityBuild com.example%greeter
-```
-
-Remember that for this to work the local maven has to be running and the scala version used as the parameter has to be already published.
-
-## Running community build in Jenkins in Docker
-
-Assuming you have performed the preparation steps from the demo script
-
-```
-scripts/start-maven.sh
-sleep 100
-scripts/build-publish-scala.sh
-scripts/build-executor.sh
-scripts/build-coordinator.sh
-```
-
-you can start jenkins in docker with
-
-```
-scripts/build-jenkins.sh
-scripts/start-jenkins.sh
-```
-
-Navigate to http://localhost:8080/ to access jenkins UI.
-Start the `runDaily` job to trigger the community build.
-To see the results, go to `/daily/${currentDate}`.
-Next, to see the visualization of the build plan, click `Dependency graph` in the menu on the left and select `jsplumb` format.
-
-Navigate to http://localhost:8081/maven2/ to see the content of our local maven repository.
-
-When working on Mac you might need to increase the memory limit for docker even more as jenkins has 2 workers by default, which might build projects in parallel (you might need to try with 10~16 GB although this hasn't been measured exactly yet).
-
-To start monitoring execute
-
-```
-scripts/start-elastic.sh
-```
-
-Navigate to http://localhost:5601/ and create an index pattern for `communnity-build`. ~(Home -> Kibana -> Add data -> Create index pattern)
-Then go to http://localhost:5601/app/discover#/ and select community-build index pattern.
-
-## General development tips
+## Docker development tips (outdated)
 
 ### Debug app in container
 To debug an application in a container, you need to set JAVA_TOOL_OPTIONS env variable (in container) and expose pointed in it port. How you do this, depends on your work environment.

@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: executor-test
+spec:
+  template:
+    spec:
+      containers:
+      - name: executor-test
+        image: communitybuild3/executor
+        imagePullPolicy: IfNotPresent
+        command:
+        - "bash"
+        - "-c"
+        - |
+            (/build/build-revision.sh \
+              https://github.com/dotty-staging/shapeless.git \
+              shapeless-3-staging \
+              3.0.1-RC1-bin-COMMUNITY-SNAPSHOT \
+              3.0.0-M4 \
+              "org.typelevel%shapeless3-deriving org.typelevel%shapeless3-data org.typelevel%shapeless3-test org.typelevel%shapeless3-typeable" \
+              http://mvn-repo:8081/maven2/test \
+            && echo \
+            && echo "Community project published successfully") || true
+      restartPolicy: Never
+  backoffLimit: 0

@@ -1,29 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
   echo "Wrong number of script arguments"
   exit 1
 fi
 
-#args parsing in order
-scalaVersion=$1 # 3.0.0-RC3
-version=$2 #'1.0.2-communityBuild'
-targets=$3 #com.example%greeter
-export PROXY_HOSTNAME=$4 #nginx-proxy
-export serverLocation="http://mvn-repo:8081/maven2"
+repoDir="$1" # e.g. /tmp/shapeless
+scalaVersion="$2" # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
+version="$3" # e.g. 1.0.2-communityBuild
+targets="$4" # e.g. "com.example%foo com.example%bar"
+export CB_MVN_REPO_URL="$5" # e.g. https://mvm-repo/maven2/2021-05-23_1
 
 echo '##################################'
 echo Scala version: $scalaVersion
 echo Disting version $version for targets: $targets
 echo '##################################'
 
-cp /build/CommunityBuildPlugin.scala repo/project/CommunityBuildPlugin.scala
-cd repo
+cd $repoDir
 
 sbt -Dcommunitybuild.version="$version" \
-  \;moduleMappings \
   \;++"$scalaVersion"! \
   \;"set every version := \"$version\"" \
   \;"set every credentials := Nil" \
+  \;moduleMappings \
   \;"runBuild $targets"

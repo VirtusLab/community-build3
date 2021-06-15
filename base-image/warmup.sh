@@ -2,7 +2,7 @@
 
 set -e
 
-scala_version=3.0.0-RC3 # TODO
+scala_version=3.0.0 # TODO
 
 mkdir warm_up
 
@@ -13,4 +13,6 @@ echo 'scalaVersion := "'$scala_version'"' > build.sbt
 
 echo '@main def run = println("Warmed up.")' > A.scala
 
-sbt --sbt-version $SBT_VERSION --batch run
+for version in $(echo $SBT_VERSIONS); do
+  sbt --sbt-version $version --batch run
+done

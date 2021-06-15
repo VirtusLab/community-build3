@@ -3,7 +3,4 @@ set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-shopt -s expand_aliases
-source $scriptDir/env.sh
-
-scbk delete -f $scriptDir/../k8s/maven.yaml
+docker build -t communitybuild3/jenkins-backup $scriptDir/../jenkins-backup

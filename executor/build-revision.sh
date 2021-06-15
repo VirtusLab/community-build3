@@ -6,15 +6,15 @@ if [ $# -ne 6 ]; then
   exit 1
 fi
 
-repo=$1 #'https://github.com/Stiuil06/deploySbt.git'
-rev=$2 #'1.0.2'
-scalaVersion=$3 # 3.0.0-RC3
-version=$4 #'1.0.2-communityBuild'
-targets=$5 #com.example%greeter
-proxyHostname=$6 #nginx-proxy
+repoUrl="$1" #'https://github.com/Stiuil06/deploySbt.git'
+rev="$2" #'1.0.2'
+scalaVersion="$3" # 3.0.0-RC3
+version="$4" #'1.0.2-communityBuild'
+targets="$5" #com.example%greeter
+mvnRepoUrl="$6" #https://mvm-repo/maven2/2021-05-23_1
 
-/build/checkout.sh $repo $rev
-/build/build.sh $scalaVersion $version "$targets" $proxyHostname
-echo '********************'
-echo $1 $2 $3 $4 $5 $6
-echo '********************'
+scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+$scriptDir/checkout.sh "$repoUrl" "$rev" repo
+$scriptDir/prepare-project.sh repo
+$scriptDir/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl"

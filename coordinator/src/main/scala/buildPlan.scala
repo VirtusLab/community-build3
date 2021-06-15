@@ -2,6 +2,7 @@ import org.jsoup._
 import collection.JavaConverters._
 import java.nio.file._
 import scala.sys.process._
+import scala.util.CommandLineParser.FromString
 
 def findTag(repoUrl: String, version: String): Either[String, String] = 
   val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
@@ -15,6 +16,27 @@ def findTag(repoUrl: String, version: String): Either[String, String] =
     e.getMessage
   }.flatten
 
+object WithExtractedScala3Suffix {
+  def unapply(s: String): Option[(String, String)] = {
+    val parts = s.split("_")
+    if (parts.length > 1 && parts.last.startsWith("3")) {
+      Some(parts.init.mkString("_"), parts.last)
+    } else {
+      None
+    }
+  }
+}
+
+def hasScala3Suffix(s: String) = s match {
+  case WithExtractedScala3Suffix(_, _) => true
+  case _ => false
+}
+
+// Needed as long as some projects use scala version prior to 3.0.0
+def replaceScalaBinaryVersion(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix + "_3" }
+
+def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix }
+
 def buildPlanCommons(depGraph: DependencyGraph) = 
   val data = depGraph.projects
   val topLevelData = data.filter(_.p.stars > 100)
@@ -27,7 +49,7 @@ def buildPlanCommons(depGraph: DependencyGraph) =
     data.flatMap(lp => lp.targets.map(t => t.id -> ProjectVersion(lp.p, lp.v))).toMap
 
   def flattenScalaDeps(p: LoadedProject): Seq[ProjectVersion] =
-    p.targets.flatMap(_.deps.filter(_.id.name.endsWith(scalaSuffix))).distinct.flatMap(
+    p.targets.flatMap(_.deps.filter(dep => hasScala3Suffix(dep.id.name))).distinct.flatMap(
       d => depsMap.get(d.id).map(_.copy(v = d.version))
     )
 
@@ -120,7 +142,7 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   BuildPlan(depGraph.scalaRelease, computedSteps._1)
 
 @main def printBuildPlan: BuildPlan = 
-  val deps = loadDepenenecyGraph("3.0.0-RC3")
+  val deps = loadDepenenecyGraph("3.0.0-RC3", minStarsCount = 100)
   val plan = makeStepsBasedBuildPlan(deps)
   val niceSteps = plan.steps.zipWithIndex.map { case (steps, nr) =>
     val items = 
@@ -144,36 +166,62 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph) =
 
   val dottyProjectName = "lampepfl_dotty"
 
+  val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
+  val replacements = scala.io.Source.fromFile("replaced-projects.txt")
+    .getLines
+    .filter(line => line.nonEmpty && !line.startsWith("#"))
+    .map {
+      case replacementPattern(org1, name1, org2, name2, branch) =>
+        (org1, name1) -> ((org2, name2), Option(branch))
+    }
+    .toMap
+
+  def projectRepoUrl(project: Project) =
+    val originalCoords = (project.org, project.name)
+    val (org, name) = replacements.get(originalCoords).map(_._1).getOrElse(originalCoords)
+    s"https://github.com/${org}/${name}.git"
+
+  def getRevision(project: Project) =
+    val originalCoords = (project.org, project.name)
+    replacements.get(originalCoords).map(_._2).flatten
+
   def projectName(project: ProjectVersion) = s"${project.p.org}_${project.p.name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
 
   val scalaSuffix = "_" + depGraph.scalaRelease // TODO - based this on version
 
-  projectsDeps.toList.flatMap { (project, deps) =>
-    val repoUrl = s"https://github.com/${project.p.org}/${project.p.name}.git"
-    findTag(repoUrl, project.v).map { tag =>
-      val name = projectName(project)
-      val baseDependencies = deps.map(projectName)
-        .filter(depName => projectNames.contains(depName) && depName != name && depName != dottyProjectName)
-        .distinct
-      val dependencies = if baseDependencies.nonEmpty then baseDependencies else baseDependencies :+ dottyProjectName
-      ProjectBuildDef(
-        name = name,
-        dependencies = dependencies.toArray,
-        repoUrl = repoUrl,
-        revision = tag,
-        version = project.v,
-        targets = fullInfo(project.p).targets.map(t => t.id.asMvnStr.stripSuffix(scalaSuffix)).mkString(" ")
-      )
-    }.toOption // TODO catch errors on tag not found
+  projectsDeps.toList.map { (project, deps) =>
+    val repoUrl = projectRepoUrl(project.p)
+    val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption).getOrElse("")
+    val name = projectName(project)
+    val baseDependencies = deps.map(projectName)
+      .filter(depName => projectNames.contains(depName) && depName != name && depName != dottyProjectName)
+      .distinct
+    val dependencies = if baseDependencies.nonEmpty then baseDependencies else baseDependencies :+ dottyProjectName
+    ProjectBuildDef(
+      name = name,
+      dependencies = dependencies.toArray,
+      repoUrl = repoUrl,
+      revision = tag,
+      version = project.v,
+      targets = fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" ")
+    )
   }.filter(_.name != dottyProjectName).toArray
 
+private given FromString[Seq[Project]] = str =>
+  str.split(",").toSeq.filter(_.nonEmpty).map {
+    case s"${org}/${name}" => Project(org, name)(Int.MaxValue)
+    case _ => throw new IllegalArgumentException
+  }
 
-@main def storeDependenciesBasedBuildPlan(scalaVersion: String) =
-  val depGraph = loadDepenenecyGraph(scalaVersion)
-  val topProjects = depGraph.projects.sortBy(-_.p.stars).take(20)
-  val topProjectsGraph = depGraph.copy(projects = topProjects)
-  val plan = makeDependenciesBasedBuildPlan(topProjectsGraph)
+@main def storeDependenciesBasedBuildPlan(scalaVersion: String, minStarsCount: Int, maxProjectsCount: Int, requiredProjects: Seq[Project]) =
+  val depGraph = loadDepenenecyGraph(
+    scalaVersion,
+    minStarsCount = minStarsCount,
+    maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
+    requiredProjects
+  )
+  val plan = makeDependenciesBasedBuildPlan(depGraph)
 
   import com.google.gson.Gson
   val gson = new Gson
