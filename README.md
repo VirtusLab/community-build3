@@ -27,12 +27,13 @@ The spring-maven-repository directory is the fork of the [spring-maven-repositor
 ### Prerequisites
 
 The steps below assume you have kubectl and minikube installed on your machine.
+Because of a bug breaking DNS in Alpine Linux you might need to use a specific version of minikube (doesn't work with 1.22.0 or 1.21.0, works with 1.19.0).
 Running the entire build with full infrastructure
 (maven repository, jenkins master, jenkins workers, elasticsearch with kibana)
 requires quite a lot of resources, which need to be declared while starting minikube
-(tested successfully with 18GB of memory and 3 CPU cores on Mac; using hyperkit as driver as the default one caused problems).
+(tested successfully with 18GB of memory and 3 CPU cores on Mac; using hyperkit because the default driver caused problems).
 
-```
+```shell
 minikube start --driver=hyperkit --memory=18432 --cpus=3
 ```
 
@@ -40,26 +41,26 @@ minikube start --driver=hyperkit --memory=18432 --cpus=3
 
 Set the environment variables to publish docker images to minikube instead of docker directly
 
-```
+```shell
 eval $(minikube -p minikube docker-env)
 ```
 
 Most likely you'll need to build the base image only once (this will take quite a lot of time):
 
-```
+```shell
 scripts/generate-secrets.sh
 scripts/build-docker-base.sh
 ```
 
 Build all the remaining images
 
-```
+```shell
 scripts/build-quick.sh
 ```
 
 or (re)build each image separately e.g.
 
-```
+```shell
 scripts/build-maven.sh
 ```
 
@@ -67,7 +68,7 @@ scripts/build-maven.sh
 
 The entire build infrastructure in k8s is defined inside one namespace. Running
 
-```
+```shell
 source scripts/env.sh
 ```
 
@@ -77,10 +78,16 @@ working just as `kubectl` with the proper namespace set.
 
 There are a couple of utility scripts to manage the lificycles of particular pieces of the infrastructure
 
-```
+```shell
 scripts/start-XXX.sh
 scripts/stop-XXX.sh
 scripts/clean-XXX.sh
+```
+
+For convenience you can also run
+
+```shell
+scripts/start-all.sh
 ```
 
 To be able to access the resources through your browser or send requests to them manually
@@ -93,11 +100,14 @@ Run `scripts/show-XXX-credentials.sh` to get them.
 
 Useful k8s commands:
 
-```
+```shell
 scbk get pods
 scbk describe pod $POD_NAME
 scbk logs $POD_NAME
 scbk exec -it $POD_NAME -- sh
+docker image ls | grep community | awk '{print $1":"$2}' | xargs docker save -o /tmp/community-build-images.tar
+docker image load -i /tmp/community-build-images.tar
+docker image ls | grep community | awk '{print $1":"$2}' | xargs docker image rm
 ```
 
 ### Maven repository
@@ -110,7 +120,7 @@ http://localhost:8081/maven2
 
 You can manage the published artifacts by logging into the repository pod with
 
-```
+```shell
 scbk exec -it svc/mvn-repo -- bash
 ```
 
@@ -167,7 +177,7 @@ to upload the locally modified files without having to restart jenkins.
 
 Assuming you have the maven repo running in k8s, you can try to build a locally cloned project using the already published dependencies.
 
-```
+```shell
 # Link plugin file(s) (needs to be run only once per cloned repo)
 executor/prepare-project.sh $PROJECT_PATH
 
@@ -187,7 +197,7 @@ This doesn't use jenkins or elasticsearch.
 Assuming you have started minikube (you might set less resources than for the full build),
 built the docker images as described above and started the maven repository run
 
-```
+```shell
 scripts/test-build.sh
 ```
 
