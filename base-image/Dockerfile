@@ -32,7 +32,7 @@ RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -n
 
 RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -storepasswd -storepass changeit -new $KEYTOOL_STORE_PASS
 
-ENV SBT_VERSIONS="1.5.0 1.5.1 1.5.2 1.5.3"
+ENV SBT_VERSIONS="1.5.0 1.5.1 1.5.2 1.5.3 1.5.4 1.5.5"
 
 # only for debug inside container ping/ifconfig/ssl test:
 

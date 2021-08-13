@@ -6,30 +6,34 @@ spec:
   configurationAsCode:
     configurations: 
     - name: jenkins-casc-configs
+    secret:
+      name: ""
   groovyScripts:
     configurations:
     - name: jenkins-init-scripts
+    secret:
+      name: ""
+  jenkinsAPISettings:
+    authorizationStrategy: createUser
   master:
     basePlugins:
     - name: kubernetes
-      version: "1.29.6"
+      version: "1.30.1"
     - name: workflow-job
       version: "2.41"
     - name: workflow-aggregator
       version: "2.6"
     - name: git
-      version: "4.7.2"
+      version: "4.8.1"
     - name: job-dsl
       version: "1.77"
     - name: configuration-as-code
       version: "1.51"
     - name: kubernetes-credentials-provider
-      version: "0.18-1"
+      version: "0.20"
     plugins:
-    - name: git-client
-      version: "3.7.2"
     - name: blueocean
-      version: "1.24.7"
+      version: "1.24.8"
     - name: depgraph-view
       version: "1.0.5"
     - name: ansicolor
@@ -38,15 +42,15 @@ spec:
     - name: seed-jobs
       configMap:
         name: jenkins-seed-jobs
+        defaultMode: 420
     - name: common-lib-vars
       configMap:
         name: jenkins-common-lib-vars
-    - name: jenkins-data
-      persistentVolumeClaim:
-        claimName: jenkins-data
+        defaultMode: 420
+    disableCSRFProtection: false
     containers:
     - name: jenkins-master
-      image: jenkins/jenkins:2.263.3-lts-alpine
+      image: jenkins/jenkins:2.277.4-lts-alpine
       imagePullPolicy: IfNotPresent
       volumeMounts:
         - name: seed-jobs
@@ -59,17 +63,17 @@ spec:
           path: /login
           port: http
           scheme: HTTP
-        initialDelaySeconds: 80
+        initialDelaySeconds: 100
         periodSeconds: 10
         successThreshold: 1
         timeoutSeconds: 5
       readinessProbe:
-        failureThreshold: 3
+        failureThreshold: 10
         httpGet:
           path: /login
           port: http
           scheme: HTTP
-        initialDelaySeconds: 30
+        initialDelaySeconds: 80
         periodSeconds: 10
         successThreshold: 1
         timeoutSeconds: 1
