@@ -4,6 +4,8 @@ import java.nio.file._
 import scala.sys.process._
 import scala.util.CommandLineParser.FromString
 
+val TagRef = """.+refs\/tags\/(.+)""".r
+
 def findTag(repoUrl: String, version: String): Either[String, String] = 
   val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
   util.Try {
@@ -142,7 +144,7 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   BuildPlan(depGraph.scalaRelease, computedSteps._1)
 
 @main def printBuildPlan: BuildPlan = 
-  val deps = loadDepenenecyGraph("3.0.0-RC3", minStarsCount = 100)
+  val deps = loadDepenenecyGraph("3.x", minStarsCount = 100)
   val plan = makeStepsBasedBuildPlan(deps)
   val niceSteps = plan.steps.zipWithIndex.map { case (steps, nr) =>
     val items = 
@@ -194,10 +196,9 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph) =
     val repoUrl = projectRepoUrl(project.p)
     val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption).getOrElse("")
     val name = projectName(project)
-    val baseDependencies = deps.map(projectName)
+    val dependencies = deps.map(projectName)
       .filter(depName => projectNames.contains(depName) && depName != name && depName != dottyProjectName)
       .distinct
-    val dependencies = if baseDependencies.nonEmpty then baseDependencies else baseDependencies :+ dottyProjectName
     ProjectBuildDef(
       name = name,
       dependencies = dependencies.toArray,
@@ -214,9 +215,9 @@ private given FromString[Seq[Project]] = str =>
     case _ => throw new IllegalArgumentException
   }
 
-@main def storeDependenciesBasedBuildPlan(scalaVersion: String, minStarsCount: Int, maxProjectsCount: Int, requiredProjects: Seq[Project]) =
+@main def storeDependenciesBasedBuildPlan(scalaBinaryVersionSeries: String, minStarsCount: Int, maxProjectsCount: Int, requiredProjects: Seq[Project]) =
   val depGraph = loadDepenenecyGraph(
-    scalaVersion,
+    scalaBinaryVersionSeries,
     minStarsCount = minStarsCount,
     maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
     requiredProjects

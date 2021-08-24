@@ -8,4 +8,18 @@ jobs:
           sandbox()
         }
       }
+      parameters {
+        // Keep parameters in sync with runDaily.groovy
+        stringParam("scalaRepoUrl", "https://github.com/lampepfl/dotty.git")
+        stringParam("scalaRepoBranch", "master")
+        stringParam("scalaBinaryVersionSeries", "3.x")
+        stringParam("scalaVersionToPublish", "3.0.1-RC1-bin-COMMUNITY-SNAPSHOT")
+        stringParam("publishedScalaVersion")
+        stringParam("minStarsCount", "100")
+        stringParam("maxProjectsCount", "40")
+        stringParam("requiredProjects", "")
+        stringParam("precomputedBuildPlan")
+        stringParam("mvnRepoBaseUrl", "http://mvn-repo:8081/maven2")
+        stringParam("elasticSearchUrl", "https://community-build-es-http:9200")
+      }
     }

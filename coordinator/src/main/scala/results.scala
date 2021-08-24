@@ -8,10 +8,10 @@ val cloneProblems = Seq("Repo was not clonned!")
 
 def listResult(p: Path): Result =  
   val name = p.getFileName.getFileName.toString
-  if !Files.exists(p.resolve("res.txt")) then 
+  if !Files.exists(p.resolve("build-summary.txt")) then 
     Result(name, 0, 0, 0, cloneProblems)
   else  
-    val lines = Files.readAllLines(p.resolve("res.txt")).asScala
+    val lines = Files.readAllLines(p.resolve("build-summary.txt")).asScala
     val res = lines.map { l => 
       val name :: rest = l.split(", ").toList
       val compiled = if l.contains("compile:ok") then 1 else 0

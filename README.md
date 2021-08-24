@@ -1,3 +1,5 @@
+# Scala 3 community build
+
 ## General architecture
 
 Everything in run inside k8s.
@@ -108,6 +110,8 @@ scbk exec -it $POD_NAME -- sh
 docker image ls | grep community | awk '{print $1":"$2}' | xargs docker save -o /tmp/community-build-images.tar
 docker image load -i /tmp/community-build-images.tar
 docker image ls | grep community | awk '{print $1":"$2}' | xargs docker image rm
+scbk get pods --no-headers | grep daily- | awk '{print $1}' | xargs kubectl delete pod -n scala3-community-build
+scbk run -i --tty executor-test --image=communitybuild3/executor image-pull-policy=Never -- sh
 ```
 
 ### Maven repository
@@ -172,6 +176,24 @@ You should then bump the versions in the yaml config.
 
 For easier development of shared jenkins libraries you can use `scripts/push-jenkins-lib.sh`
 to upload the locally modified files without having to restart jenkins.
+
+### Accelerating development and testing in jenkins
+
+As the entire flow is quite time consuming you might find it more convenient to skip some parts of it to test some of your changes, e.g.
+
+* Compute the build plan only once locally and pass it as a parameter of the build when triggering the daily build
+
+* Use a manually prepared build plan inluding only a few repositories whose builds are very fast. You can use the ones included in this project (in `sample-repos` directory) for this purpose.
+First set up a pod hosting the repositories as shown below and then use the build plan from `sample-repos/buildPlan.json`
+```shell
+eval $(minikube -p minikube docker-env)
+scripts/build-sample-repos.sh
+scripts/start-sample-repos.sh
+```
+
+* Use a version of the compiler which is already published (e.g. `3.0.0`) - this will skip the local build
+
+If you want to run some jenkins job again (possibly with some parameters modified) go to the last build and run `Rebuild` instead of running `Build with parameters` from the projects' page to preserve the parameters from the previous run.
 
 ### Building a project locally
 

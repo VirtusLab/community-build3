@@ -188,16 +188,15 @@ object CommunityBuildPlugin extends AutoPlugin {
           }
           res.result
         }
-        val buildResultsText = projectsBuildResults.map{
+        val buildSummary = projectsBuildResults.map{
           case subProjectName :: results => subProjectName.asString + ": " + results.map(_.asString).mkString("{", ", ", "}")
           case List(s) => s.asString 
         }.mkString("{", ", ", "}")
         println("************************")
         println("Build summary:")
-        println(buildResultsText)
+        println(buildSummary)
         println("************************")
-        IO.write(file("..") / "res.txt", buildResultsText)
-
+        IO.write(file("..") / "build-summary.txt", buildSummary)
         val failedSteps = projectsBuildResults.flatMap { results =>
           results.collect {
             case error @ (
@@ -205,6 +204,8 @@ object CommunityBuildPlugin extends AutoPlugin {
             ) => error
           }
         }
+        val buildStatus = if (failedSteps.isEmpty) "success" else "failure"
+        IO.write(file("..") / "build-status.txt", buildStatus)
         if(failedSteps.nonEmpty) {
           throw new ProjectBuildFailureException
         }

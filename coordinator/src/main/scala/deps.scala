@@ -43,9 +43,9 @@ case class ModuleVersion(name: String, version: String, p: Project)
 
 val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 
-def asTarget(scalaRelease: String)(mv: ModuleVersion): Target =
+def asTarget(scalaBinaryVersionSeries: String)(mv: ModuleVersion): Target =
   import mv._
-  val url = s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaRelease"
+  val url = s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersionSeries"
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
   println(gradle)
@@ -66,23 +66,26 @@ def asTarget(scalaRelease: String)(mv: ModuleVersion): Target =
     
   Target(TargetId(o,n), deps.toSeq)
 
-def loadMavenInfo(scalaRelease: String)(projectModules: ProjectModules): LoadedProject = 
+def loadMavenInfo(scalaBinaryVersionSeries: String)(projectModules: ProjectModules): LoadedProject = 
   val ModuleInVersion(version, modules) = projectModules.mvs.head
   val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
-  val targets = mvs.map(cached(asTarget(scalaRelease)))
+  val targets = mvs.map(cached(asTarget(scalaBinaryVersionSeries)))
   LoadedProject(projectModules.project, version, targets)
 
-def loadDepenenecyGraph(scalaRelease: String, minStarsCount: Int, maxProjectsCount: Option[Int] = None, requiredProjects: Seq[Project] = Seq.empty): DependencyGraph =
+  /**
+   * @param scalaBinaryVersionSeries Scala binary version name (major.minor) or `3.x` for scala 3 - following scaladex's convention
+  */
+def loadDepenenecyGraph(scalaBinaryVersionSeries: String, minStarsCount: Int, maxProjectsCount: Option[Int] = None, requiredProjects: Seq[Project] = Seq.empty): DependencyGraph =
   val projects = maxProjectsCount match
     case Some(maxCount) if maxCount > requiredProjects.length =>
-      val loadedProjects = cachedSingle("projects.csv")(loadProjects(scalaRelease))
+      val loadedProjects = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersionSeries))
       val topLoadedProject = loadedProjects.sortBy(-_.stars)
       requiredProjects ++ topLoadedProject.take(maxCount - requiredProjects.length)
     case _ =>
       requiredProjects
 
-  val rawDependencies = projects.map(cached(loadScaladexProject(scalaRelease)))
-  val withMavenLoaded = rawDependencies.filter(_.mvs.nonEmpty).map(loadMavenInfo(scalaRelease))
-  DependencyGraph(scalaRelease, withMavenLoaded)
+  val rawDependencies = projects.map(cached(loadScaladexProject(scalaBinaryVersionSeries)))
+  val withMavenLoaded = rawDependencies.filter(_.mvs.nonEmpty).map(loadMavenInfo(scalaBinaryVersionSeries))
+  DependencyGraph(scalaBinaryVersionSeries, withMavenLoaded)
 
-@main def runDeps = loadDepenenecyGraph("3.0.0-RC3", minStarsCount = 100)
+@main def runDeps = loadDepenenecyGraph("3.x", minStarsCount = 100)
