@@ -25,7 +25,6 @@ pipelineJob(compilerJobPath) {
         }
     }
     parameters {
-        // Keep parameters in sync with buildCompiler.groovy
         stringParam("scalaRepoUrl", scalaRepoUrl)
         stringParam("scalaRepoBranch", scalaRepoBranch)
         stringParam("scalaVersionToPublish", scalaVersionToPublish)
@@ -60,7 +59,6 @@ for(project in projects) {
             }
         }
         parameters {
-            // Keep parameters in sync with buildCommunityProject.groovy
             stringParam("projectName", project.name)
             stringParam("repoUrl", project.repoUrl)
             stringParam("revision", project.revision)

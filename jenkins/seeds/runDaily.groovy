@@ -2,22 +2,10 @@ import java.text.SimpleDateFormat
 
 def buildPlan
 
+// See job-seeds.yaml for the list of the job's parameters
+
 pipeline {
     agent none
-    parameters {
-        //Keep parameters in sync with job-seeds.yaml
-        string(name: "scalaRepoUrl", defaultValue: "https://github.com/lampepfl/dotty.git")
-        string(name: "scalaRepoBranch", defaultValue: "master")
-        string(name: "scalaBinaryVersionSeries", defaultValue: "3.x")
-        string(name: "scalaVersionToPublish", defaultValue: "3.0.1-RC1-bin-COMMUNITY-SNAPSHOT")
-        string(name: "publishedScalaVersion")
-        string(name: "minStarsCount", defaultValue: "100")
-        string(name: "maxProjectsCount", defaultValue: "40")
-        string(name: "requiredProjects", defaultValue: "")
-        string(name: "precomputedBuildPlan")
-        string(name: "mvnRepoBaseUrl", defaultValue: "http://mvn-repo:8081/maven2")
-        string(name: "elasticSearchUrl", defaultValue: "https://community-build-es-http:9200")
-    }
     stages {
         stage("Compute build plan") {
             when {
