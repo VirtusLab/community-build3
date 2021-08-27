@@ -193,8 +193,6 @@ scripts/start-sample-repos.sh
 
 * Use a version of the compiler which is already published (e.g. `3.0.0`) - this will skip the local build
 
-If you want to run some jenkins job again (possibly with some parameters modified) go to the last build and run `Rebuild` instead of running `Build with parameters` from the projects' page to preserve the parameters from the previous run.
-
 ### Building a project locally
 
 Assuming you have the maven repo running in k8s, you can try to build a locally cloned project using the already published dependencies.
