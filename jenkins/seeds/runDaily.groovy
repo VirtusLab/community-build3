@@ -1,6 +1,7 @@
 import java.text.SimpleDateFormat
 
-def buildPlan
+String buildPlan
+String localScalaVersion
 
 // See job-seeds.yaml for the list of the job's parameters
 
@@ -61,37 +62,61 @@ pipeline {
                 }
             }
         }
-        stage("Persist and trigger running build plan") {
+        stage("Trigger build plan execution:") {
             agent { label 'master' }
-            steps { 
-                script {
-                    writeFile(file: "buildPlan.json", text: buildPlan)
-                    archiveArtifacts(artifacts: "buildPlan.json")
-                    def date = new Date();
-                    def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
-                    def dateString = dateFormat.format(date)
-                    def buildId = "${dateString}_${BUILD_NUMBER}"
-                    def mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildId}"
-                    def elasticUrl = params.elasticSearchUrl
-                    def elasticSecretName = "community-build-es-elastic-user"
-                    def runBuildPlanScript = sh(
-                        script: "cat /var/jenkins_home/seeds/runBuildPlan.groovy",
-                        returnStdout: true
-                    )
-                    jobDsl(
-                        scriptText: runBuildPlanScript,
-                        additionalParameters: [
-                            scalaRepoUrl: params.scalaRepoUrl,
-                            scalaRepoBranch: params.scalaRepoBranch,
-                            scalaVersionToPublish: params.scalaVersionToPublish,
-                            publishedScalaVersion: params.publishedScalaVersion,
-                            buildId: buildId,
-                            mvnRepoUrl: mvnRepoUrl,
-                            elasticUrl: elasticUrl,
-                            elasticSecretName: elasticSecretName
-                        ],
-                        sandbox: true
-                    )
+            stages {
+                stage("Persist build plan") {
+                    steps {
+                        writeFile(file: "buildPlan.json", text: buildPlan)
+                        archiveArtifacts(artifacts: "buildPlan.json")
+                    }
+                }
+                stage("Determine scala version") {
+                    steps {
+                        script {
+                            if (!params.publishedScalaVersion) {
+                                def tmpDirPath = "/tmp/compiler-repo"
+                                sh(script: "git clone --depth 1 $scalaRepoUrl '$tmpDirPath'")
+                                dir(tmpDirPath) {
+                                    def baseVersion = sh(script: '''cat project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print $4 }' ''', returnStdout: true).trim()
+                                    def commitHash = sh(script: '''git rev-parse HEAD''', returnStdout: true).trim()
+                                    deleteDir()
+                                    localScalaVersion = "${baseVersion}-bin-${commitHash}-COMMUNITY-BUILD"
+                                }
+                            }
+                        }
+                    }
+                }
+                stage("Spawn build jobs") {
+                    steps {
+                        script {
+                            def date = new Date();
+                            def dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+                            def dateString = dateFormat.format(date)
+                            def buildId = "${dateString}_${BUILD_NUMBER}"
+                            def mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildId}"
+                            def elasticUrl = params.elasticSearchUrl
+                            def elasticSecretName = "community-build-es-elastic-user"
+                            def runBuildPlanScript = sh(
+                                script: "cat /var/jenkins_home/seeds/runBuildPlan.groovy",
+                                returnStdout: true
+                            )
+                            jobDsl(
+                                scriptText: runBuildPlanScript,
+                                additionalParameters: [
+                                    scalaRepoUrl: params.scalaRepoUrl,
+                                    scalaRepoBranch: params.scalaRepoBranch,
+                                    localScalaVersion: localScalaVersion,
+                                    publishedScalaVersion: params.publishedScalaVersion,
+                                    buildId: buildId,
+                                    mvnRepoUrl: mvnRepoUrl,
+                                    elasticUrl: elasticUrl,
+                                    elasticSecretName: elasticSecretName
+                                ],
+                                sandbox: true
+                            )
+                        }
+                    }
                 }
             }
         }

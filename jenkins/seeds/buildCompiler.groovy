@@ -32,7 +32,7 @@ pipeline {
                 container('publish-scala') {
                     ansiColor('xterm') {
                         echo 'building and publishing scala'
-                        sh "/build/build-revision.sh '${params.scalaRepoUrl}' ${params.scalaRepoBranch} '${params.scalaVersionToPublish}' '${params.mvnRepoUrl}'"
+                        sh "/build/build-revision.sh '${params.scalaRepoUrl}' ${params.scalaRepoBranch} '${params.localScalaVersion}' '${params.mvnRepoUrl}'"
                     }
                 }
             }
