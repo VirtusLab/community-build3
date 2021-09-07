@@ -27,7 +27,7 @@ pipelineJob(compilerJobPath) {
     parameters {
         stringParam("scalaRepoUrl", scalaRepoUrl)
         stringParam("scalaRepoBranch", scalaRepoBranch)
-        stringParam("scalaVersionToPublish", scalaVersionToPublish)
+        stringParam("localScalaVersion", localScalaVersion)
         stringParam("publishedScalaVersion", publishedScalaVersion)
         stringParam("mvnRepoUrl", mvnRepoUrl)
     }
@@ -40,7 +40,6 @@ queue(compilerJobPath)
 def jsonSlurper = new JsonSlurper()
 def projectsFileText = readFileFromWorkspace("buildPlan.json")
 def projects = jsonSlurper.parseText(projectsFileText)
-def scalaVersion = publishedScalaVersion ?: scalaVersionToPublish
 
 for(project in projects) {
     def jobPath = projectPath(project.name)
@@ -62,7 +61,7 @@ for(project in projects) {
             stringParam("projectName", project.name)
             stringParam("repoUrl", project.repoUrl)
             stringParam("revision", project.revision)
-            stringParam("scalaVersion", scalaVersion)
+            stringParam("scalaVersion", publishedScalaVersion ?: localScalaVersion)
             stringParam("version", project.version)
             stringParam("targets", project.targets)
             stringParam("dependencies", upstreamJobPaths)

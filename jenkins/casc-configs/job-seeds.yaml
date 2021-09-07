@@ -9,15 +9,32 @@ jobs:
         }
       }
       parameters {
+        separator {
+          name("COMPILER")
+          sectionHeader("Compiler")
+          separatorStyle("")
+          sectionHeaderStyle("")
+        }
+        stringParam("publishedScalaVersion", null, "(Optional, for debugging purposes mainly): An already published version of the compiler to be used instead of building one from sources, e.g. '3.1.1-RC1-bin-20210904-a82a1a6-NIGHTLY'. When specified, the remaining parameters from this section are ignored")
         stringParam("scalaRepoUrl", "https://github.com/lampepfl/dotty.git")
         stringParam("scalaRepoBranch", "master")
-        stringParam("scalaBinaryVersionSeries", "3.x")
-        stringParam("scalaVersionToPublish", "3.0.1-RC1-bin-COMMUNITY-SNAPSHOT")
-        stringParam("publishedScalaVersion")
-        stringParam("minStarsCount", "100")
-        stringParam("maxProjectsCount", "40")
-        stringParam("requiredProjects", "")
-        stringParam("precomputedBuildPlan")
+        separator {
+          name("BUILD_PLAN")
+          sectionHeader("Build plan")
+          separatorStyle("")
+          sectionHeaderStyle("")
+        }
+        stringParam("precomputedBuildPlan", null, "(Optional, for debugging purposes mainly): The build plan (in JSON format) to be used instead of computing the plan dynamically. When specified, the remaining parameters from this section are ignored")
+        stringParam("scalaBinaryVersionSeries", "3.x", "Scala binary version following Scaladex API convention used for detecting projects to be built")
+        stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
+        stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
+        stringParam("requiredProjects", "", "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
+        separator {
+          name("GENERAL")
+          sectionHeader("General")
+          separatorStyle("")
+          sectionHeaderStyle("")
+        }
         stringParam("mvnRepoBaseUrl", "http://mvn-repo:8081/maven2")
         stringParam("elasticSearchUrl", "https://community-build-es-http:9200")
       }
