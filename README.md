@@ -140,7 +140,7 @@ https://localhost:5601/
 
 You can load Kibana settings with `scripts/configure-kibana.sh`
 
-If you want to create an index pattern for `communnity-build` manually, navigate to `(Burger menu in the left upper corner) -> Index patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
+If you want to create an index pattern for `communnity-build` manually, navigate to `(Burger menu in the left upper corner) -> Stack Management -> Index patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
 
 Elasticsearch and Kibana currently don't use persistent storage so every restart will clean all the data.
 
