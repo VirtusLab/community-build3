@@ -8,6 +8,7 @@ source $scriptDir/env.sh
 
 scbk delete -f $scriptDir/../k8s/jenkins.yaml
 scbk delete -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/v0.6.0/deploy/all-in-one-v1alpha2.yaml
+scbk delete configmap jenkins-build-configs
 scbk delete configmap jenkins-casc-configs
 scbk delete configmap jenkins-init-scripts
 scbk delete configmap jenkins-common-lib-vars

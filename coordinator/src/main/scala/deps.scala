@@ -14,7 +14,7 @@ def loadProjects(scalaRelease: String): Seq[Project] =
         Project(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
       }
     }
-  (1 to 10000).toStream.map(load).takeWhile(_.nonEmpty).flatten 
+  (1 to 10000).to(LazyList).map(load).takeWhile(_.nonEmpty).flatten 
 
 case class ModuleInVersion(version: String, modules: Seq[String])
 
@@ -79,7 +79,7 @@ def loadDepenenecyGraph(scalaBinaryVersionSeries: String, minStarsCount: Int, ma
   val projects = maxProjectsCount match
     case Some(maxCount) if maxCount > requiredProjects.length =>
       val loadedProjects = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersionSeries))
-      val topLoadedProject = loadedProjects.sortBy(-_.stars)
+      val topLoadedProject = loadedProjects.filter(_.stars >= minStarsCount).sortBy(-_.stars)
       requiredProjects ++ topLoadedProject.take(maxCount - requiredProjects.length)
     case _ =>
       requiredProjects

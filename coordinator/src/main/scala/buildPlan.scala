@@ -42,7 +42,6 @@ def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(pref
 def buildPlanCommons(depGraph: DependencyGraph) = 
   val data = depGraph.projects
   val topLevelData = data.filter(_.p.stars > 100)
-  val scalaSuffix = "_" + depGraph.scalaRelease // TODO - based this on version
 
   val fullInfo = data.map(l => l.p -> l).toMap
 
@@ -163,13 +162,13 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   Files.write(Paths.get("data", "bp.txt"), bp.getBytes)
   plan
 
-def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph) =
+def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsConfigPath: String) =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
 
   val dottyProjectName = "lampepfl_dotty"
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
-  val replacements = scala.io.Source.fromFile("replaced-projects.txt")
+  val replacements = scala.io.Source.fromFile(replacedProjectsConfigPath)
     .getLines
     .filter(line => line.nonEmpty && !line.startsWith("#"))
     .map {
@@ -187,10 +186,11 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph) =
     val originalCoords = (project.org, project.name)
     replacements.get(originalCoords).map(_._2).flatten
 
-  def projectName(project: ProjectVersion) = s"${project.p.org}_${project.p.name}"
+  def projectName(project: ProjectVersion) =
+    val originalCoords = (project.p.org, project.p.name)
+    val (org, name) = replacements.get(originalCoords).map(_._1).getOrElse(originalCoords)
+    s"${org}_${name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
-
-  val scalaSuffix = "_" + depGraph.scalaRelease // TODO - based this on version
 
   projectsDeps.toList.map { (project, deps) =>
     val repoUrl = projectRepoUrl(project.p)
@@ -215,14 +215,14 @@ private given FromString[Seq[Project]] = str =>
     case _ => throw new IllegalArgumentException
   }
 
-@main def storeDependenciesBasedBuildPlan(scalaBinaryVersionSeries: String, minStarsCount: Int, maxProjectsCount: Int, requiredProjects: Seq[Project]) =
+@main def storeDependenciesBasedBuildPlan(scalaBinaryVersionSeries: String, minStarsCount: Int, maxProjectsCount: Int, requiredProjects: Seq[Project], replacedProjectsConfigPath: String) =
   val depGraph = loadDepenenecyGraph(
     scalaBinaryVersionSeries,
     minStarsCount = minStarsCount,
     maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
     requiredProjects
   )
-  val plan = makeDependenciesBasedBuildPlan(depGraph)
+  val plan = makeDependenciesBasedBuildPlan(depGraph, replacedProjectsConfigPath)
 
   import com.google.gson.Gson
   val gson = new Gson
