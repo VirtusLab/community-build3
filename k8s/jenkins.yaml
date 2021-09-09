@@ -51,6 +51,10 @@ spec:
       configMap:
         name: jenkins-common-lib-vars
         defaultMode: 420
+    - name: build-configs
+      configMap:
+        name: jenkins-build-configs
+        defaultMode: 420
     disableCSRFProtection: false
     containers:
     - name: jenkins-master
@@ -61,6 +65,8 @@ spec:
           mountPath: /var/jenkins_home/seeds
         - name: common-lib-vars
           mountPath: /var/jenkins_home/common-lib/vars
+        - name: build-configs
+          mountPath: /var/jenkins_home/build-configs
       livenessProbe:
         failureThreshold: 12
         httpGet:
