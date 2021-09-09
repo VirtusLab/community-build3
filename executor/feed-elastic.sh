@@ -23,9 +23,15 @@ json=$(jq -n \
           --arg sum "$buildSummary" \
           --arg logs "$logs" \
           '{res: $res, build_timestamp: $ts, project_name: $pn, detailed_result: $sum, logs: $logs}')
+
+jsonFile=$(mktemp /tmp/feed-elastic-tmp.XXXXXX)
+
+echo "$json" > "$jsonFile"
           
-response=$(curl -v -i -k -w "\n%{http_code}" --user "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -H "Content-Type: application/json" "${elasticUrl}/community-build/doc" -d "${json}")
+response=$(curl -v -i -k -w "\n%{http_code}" --user "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -H "Content-Type: application/json" "${elasticUrl}/community-build/doc" -d "@${jsonFile}")
 responseStatus=$(tail -n1 <<< "$response")
+
+rm "$jsonFile"
 
 if [[ "$responseStatus" != "201" ]]; then
   echo "The request resulted in unexpected status code: $responseStatus"
