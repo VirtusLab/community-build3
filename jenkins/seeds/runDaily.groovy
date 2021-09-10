@@ -109,6 +109,7 @@ pipeline {
                                     scalaRepoBranch: params.scalaRepoBranch,
                                     localScalaVersion: localScalaVersion,
                                     publishedScalaVersion: params.publishedScalaVersion,
+                                    enforcedSbtVersion: params.enforcedSbtVersion,
                                     buildId: buildId,
                                     mvnRepoUrl: mvnRepoUrl,
                                     elasticUrl: elasticUrl,

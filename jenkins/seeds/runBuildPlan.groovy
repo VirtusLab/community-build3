@@ -65,6 +65,7 @@ for(project in projects) {
             stringParam("version", project.version)
             stringParam("targets", project.targets)
             stringParam("dependencies", upstreamJobPaths)
+            stringParam("enforcedSbtVersion", enforcedSbtVersion)
             stringParam("mvnRepoUrl", mvnRepoUrl)
             stringParam("elasticUrl", elasticUrl)
             stringParam("elasticSecretName", elasticSecretName)
