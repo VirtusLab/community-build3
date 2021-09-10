@@ -75,7 +75,7 @@ pipeline {
                                     try {
                                         ansiColor('xterm') {
                                             sh """
-                                                /build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' 2>&1 | tee build-logs.txt
+                                                /build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' '${params.enforcedSbtVersion}' 2>&1 | tee build-logs.txt
                                             """
                                         }
                                         assert getBuildStatus() == "success"

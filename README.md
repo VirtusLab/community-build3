@@ -198,8 +198,8 @@ scripts/start-sample-repos.sh
 Assuming you have the maven repo running in k8s, you can try to build a locally cloned project using the already published dependencies.
 
 ```shell
-# Link plugin file(s) (needs to be run only once per cloned repo)
-executor/prepare-project.sh $PROJECT_PATH
+# Verify support for project's build tool and inject the plugin file(s). This needs to be run only once per cloned repo. ENFORCED_SBT_VERSION may be set to an empty string 
+executor/prepare-project.sh $PROJECT_PATH $ENFORCED_SBT_VERSION
 
 # Build the project using the build script or directly with sbt
 executor/build.sh $PROJECT_PATH $SCALA_VERSION $PROJECT_VERSION "$TARGETS" $MVN_REPO_URL

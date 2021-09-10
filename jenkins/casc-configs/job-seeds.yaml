@@ -33,6 +33,13 @@ jobs:
         stringParam("requiredProjects", requiredProjects, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
         textParam("replacedProjects", replacedProjects, "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
         separator {
+          name("COMMUNITY_PROJECT")
+          sectionHeader("Community project")
+          separatorStyle("")
+          sectionHeaderStyle("")
+        }
+        stringParam("enforcedSbtVersion", null, "(Optional): When not specified original sbt versions specified in the build definition of each project will be used")
+        separator {
           name("GENERAL")
           sectionHeader("General")
           separatorStyle("")
