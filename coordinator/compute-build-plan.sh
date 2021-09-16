@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-set -e
+set -e 
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 5 ]; then 
   echo "Wrong number of script arguments"
   exit 1
 fi
