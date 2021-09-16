@@ -21,7 +21,7 @@ pipeline {
                           containers:
                           - name: publish-scala
                             image: communitybuild3/publish-scala
-                            imagePullPolicy: IfNotPresent
+                            imagePullPolicy: Always
                             command:
                             - cat
                             tty: true

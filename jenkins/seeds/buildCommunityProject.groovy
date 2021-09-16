@@ -46,7 +46,7 @@ pipeline {
                           containers:
                           - name: executor
                             image: communitybuild3/executor
-                            imagePullPolicy: IfNotPresent
+                            imagePullPolicy: Always
                             command:
                             - cat
                             tty: true

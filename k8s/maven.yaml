@@ -18,7 +18,7 @@ spec:
       containers:
       - name: mvn-repo
         image: communitybuild3/mvn-repo
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 8081
         volumeMounts:

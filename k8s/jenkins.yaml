@@ -59,7 +59,7 @@ spec:
     containers:
     - name: jenkins-master
       image: jenkins/jenkins:2.277.4-lts-alpine
-      imagePullPolicy: IfNotPresent
+      imagePullPolicy: Always
       volumeMounts:
         - name: seed-jobs
           mountPath: /var/jenkins_home/seeds
@@ -106,7 +106,7 @@ spec:
 #       - name: BACKUP_COUNT
 #         value: "3" # keep only the 2 most recent backups
 #       image: communitybuild3/jenkins-backup #virtuslab/jenkins-operator-backup-pvc:v0.1.0 # look at backup/pvc directory
-#       imagePullPolicy: IfNotPresent
+#       imagePullPolicy: Always
 #       volumeMounts:
 #       - mountPath: /jenkins-home # Jenkins home volume
 #         name: jenkins-home

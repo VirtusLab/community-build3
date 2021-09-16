@@ -26,7 +26,7 @@ pipeline {
                           containers:
                           - name: coordinator
                             image: communitybuild3/coordinator
-                            imagePullPolicy: IfNotPresent
+                            imagePullPolicy: Always
                             command:
                             - cat
                             tty: true
