@@ -102,6 +102,7 @@ object CommunityBuildPlugin extends AutoPlugin {
             actualId = id + scalaVersionSuffix
           } yield
             Seq(
+              refsByName.get(id),
               originalModuleIds.get(id + scalaVersionSuffix),
               originalModuleIds.get(id + scalaBinaryVersionSuffix),
               originalModuleIds.get(id),
@@ -114,6 +115,7 @@ object CommunityBuildPlugin extends AutoPlugin {
               println(s"actualId: $actualId")
               println(s"scalaVersionSuffix: $scalaVersionSuffix")
               println(s"scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix")
+              println(s"refsByName: $refsByName")
               println(s"originalModuleIds: $originalModuleIds")
               println(s"moduleIds: $moduleIds")
               throw new Exception("Module mapping missing")
