@@ -1,5 +1,7 @@
-def wasBuilt(String projectPath) {
-    def status = lastBuildStatus(projectPath)
+// Look at initializeSeedJobs.groovy for how this file gets parameterized
+
+def labeledProjectWasBuilt(String label) {
+    def status = getLastLabeledBuildStatus("/buildCommunityProject", label)
     return status in ['SUCCESS', 'FAILURE', 'UNSTABLE']
 }
 
@@ -10,27 +12,40 @@ def getBuildStatus() {
     ).trim()
 }
 
-def elasticCredentialsDefined = false
+def parseCommaSeparated(String string) {
+    return (string ?: "").split(",").findAll { !it.isEmpty() } as List
+}
 
-// See runBuildPlan.groovy for the list of the job's parameters
+def upstreamProjects = parseCommaSeparated(params.upstreamProjects)
+def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
+
+def elasticCredentialsDefined = false
+def wasBuildSuccessful = false
 
 pipeline {
     agent none
     stages {
-        stage("Assert dependencies have been built") {
-            // Because the job will be triggered when ANY of its upstream dependencies finishes its build.
-            // We need to manually check if ALL the upstream jobs actually finished (not necessarily without errors).
-            // If some dependencies haven't finished running yet, we abort the job and let it be triggered again by some other upstream job.
-            when {
-                expression {
-                    params.dependencies.split(",").any { !wasBuilt(it) }
-                }
-            }
-            agent none
+        stage("Initialize build") {
             steps {
                 script {
-                    currentBuild.result = 'ABORTED'
-                    error('Not all dependencies have been built yet')
+                    currentBuild.setDescription("${params.buildName} :: ${params.projectName}")
+                }
+            }
+        }
+        stage("Wait for dependencies") {
+            // Because the builds of all community projects are started at the same time
+            // we need to manually check if the builds of ALL the dependencies of this particular project actually finished (not necessarily without errors).
+            // If some dependencies haven't finished running yet, we suspend the job and let it be resumed later by some other dependency's build job.
+            steps {
+                script {
+                    def missingDependencies = upstreamProjects.collect()
+                    while (!missingDependencies.isEmpty()) {
+                        missingDependencies.removeAll { projectName ->  labeledProjectWasBuilt("${params.buildName} :: ${projectName}") }
+                        if (!missingDependencies.isEmpty()) {
+                            echo "Some dependencies haven't been built yet: ${missingDependencies.join(", ")}"
+                            suspendThisBuild()
+                        }
+                    }
                 }
             }
         }
@@ -52,11 +67,11 @@ pipeline {
                             tty: true
                             env:
                             - name: ELASTIC_USERNAME
-                              value: elastic
+                              value: ${params.elasticSearchUserName}
                             - name: ELASTIC_PASSWORD
                               valueFrom:
                                 secretKeyRef:
-                                  name: ${params.elasticSecretName}
+                                  name: ${params.elasticSearchSecretName}
                                   key: elastic
                                   optional: true
                     """.stripIndent()
@@ -65,7 +80,8 @@ pipeline {
             stages {
                 stage("Build project") {
                     steps {
-                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        // Set SUCCESS here for the entire build for now so that next stages are still executed
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                             container('executor') {
                                 script {
                                     echo "building and publishing ${params.projectName}"
@@ -78,13 +94,22 @@ pipeline {
                                                 /build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' '${params.enforcedSbtVersion}' 2>&1 | tee build-logs.txt
                                             """
                                         }
-                                        assert getBuildStatus() == "success"
+                                        wasBuildSuccessful = getBuildStatus() == "success"
+                                        assert wasBuildSuccessful // Mark the entire build as failed if the build didn't explicitly succeed
                                     } finally {
                                         archiveArtifacts(artifacts: "build-logs.txt")
                                         archiveArtifacts(artifacts: "build-summary.txt")
                                         archiveArtifacts(artifacts: "build-status.txt")
                                     }
                                 }
+                            }
+                        }
+                        script {
+                            // Set the status before the job actually finishes so that downstream builds know they can continue
+                            if (wasBuildSuccessful) {
+                                currentBuild.result = 'SUCCESS'
+                            } else {
+                                currentBuild.result = 'FAILURE'
                             }
                         }
                     }
@@ -100,9 +125,18 @@ pipeline {
                             script {
                                 def timestamp = java.time.LocalDateTime.now()
                                 def buildStatus = getBuildStatus()
-                                sh "/build/feed-elastic.sh '${params.elasticUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt"
+                                sh "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt"
                             }
                         }
+                    }
+                }
+            }
+        }
+        stage("Notify downstream projects") {
+            steps {
+                script {
+                    for (projectName in downstreamProjects) {
+                        resumeLastLabeledBuild("/buildCommunityProject", "${params.buildName} :: ${projectName}")
                     }
                 }
             }

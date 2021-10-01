@@ -1,15 +1,21 @@
-// See runBuildPlan.groovy for the list of the job's parameters
+// Look at initializeSeedJobs.groovy for how this file gets parameterized
+
+import groovy.json.JsonOutput
+
+def commitHash
+def publishedCompilerVersion
 
 pipeline {
     agent none
     stages {
-        stage("Build scala") {
-            when {
-                beforeAgent true
-                expression {
-                    params.publishedScalaVersion == null | params.publishedScalaVersion == ""
+        stage("Initialize build") {
+            steps {
+                script {
+                    currentBuild.setDescription(params.buildName)
                 }
             }
+        }
+        stage("Build compiler") {
             agent {
                 kubernetes {
                     yaml '''
@@ -32,8 +38,29 @@ pipeline {
                 container('publish-scala') {
                     ansiColor('xterm') {
                         echo 'building and publishing scala'
-                        sh "/build/build-revision.sh '${params.scalaRepoUrl}' ${params.scalaRepoBranch} '${params.localScalaVersion}' '${params.mvnRepoUrl}'"
+                        sh "/build/checkout.sh '${params.scalaRepoUrl}' '${params.scalaRepoBranch}' repo"
+                        dir('repo') {
+                            script {
+                                def baseVersion = sh(script: '''cat project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print \$4 }' ''', returnStdout: true).trim()
+                                commitHash = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                                publishedCompilerVersion = "${baseVersion}-bin-${commitHash}-COMMUNITY-BUILD"
+                            }
+                        }
+                        sh "/build/build.sh repo '${publishedCompilerVersion}' '${params.mvnRepoUrl}'"
                     }
+                }
+            }
+        }
+        stage("Persist build metadata") {
+            agent { label 'master' }
+            steps {
+                script {
+                    def metadata = [
+                        commitHash: commitHash,
+                        publishedCompilerVersion: publishedCompilerVersion
+                    ]
+                    writeFile(file: "compilerMetadata.json", text: JsonOutput.toJson(metadata))
+                    archiveArtifacts(artifacts: "compilerMetadata.json")
                 }
             }
         }

@@ -1,0 +1,160 @@
+// Look at initializeSeedJobs.groovy for how this file gets parameterized
+
+def buildPlanJobName = "/computeBuildPlan"
+def buildPlanJobRef
+
+def compilerJobName = "/buildCompiler"
+def compilerJobRef
+
+def communityProjectJobName = "/buildCommunityProject"
+
+def mvnRepoUrl
+def buildPlan
+def compilerVersion
+
+def inverseMultigraph(graph) {
+    def inversed = [:]
+    graph.each { k, vs -> inversed[k] = [] }
+    graph.each { k, vs ->
+        vs.each { v ->
+            inversed[v] = inversed[v] + k
+        }
+    }
+    return inversed
+}
+
+pipeline {
+    agent none
+    stages {
+        stage("Initialize build") {
+            steps {
+                script {
+                    currentBuild.setDescription(params.buildName)
+                    mvnRepoUrl = "${params.mvnRepoBaseUrl}/${params.buildName}"
+                }
+            }
+        }
+        stage("Compiler & build plan") {
+            parallel {
+                stage("Compute build plan") {
+                    when {
+                        expression {
+                            params.precomputedBuildPlan == null || params.precomputedBuildPlan == ""
+                        }
+                    }
+                    steps {
+                        script {
+                            buildPlanJobRef = build(
+                                job: buildPlanJobName,
+                                parameters: [
+                                    string(name: "scalaBinaryVersionSeries", value: params.scalaBinaryVersionSeries),
+                                    string(name: "minStarsCount", value: params.minStarsCount),
+                                    string(name: "maxProjectsCount", value: params.maxProjectsCount),
+                                    string(name: "requiredProjects", value: params.requiredProjects),
+                                    text(name: "replacedProjects", value: params.replacedProjects)
+                                ]
+                            )
+                        }
+                    }
+                }
+                stage("Build compiler") {
+                    when {
+                        expression {
+                            params.publishedScalaVersion == null || params.publishedScalaVersion == ""
+                        }
+                    }
+                    steps {
+                        script {
+                            compilerJobRef = build(
+                                job: compilerJobName,
+                                parameters: [
+                                    string(name: "scalaRepoUrl", value: params.scalaRepoUrl),
+                                    string(name: "scalaRepoBranch", value: params.scalaRepoBranch),
+                                    string(name: "mvnRepoUrl", value: mvnRepoUrl)
+                                ]
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        stage("Collect build metadata") {
+            agent { label 'master' }
+            steps {
+                script {
+                    dir(pwd(tmp: true)) {
+                        def buildPlanText
+                        if (params.precomputedBuildPlan) {
+                            buildPlanText = params.precomputedBuildPlan
+                            echo "Using the precomputed build plan:\n\n${buildPlanText}"
+                        } else {
+                            copyArtifacts(
+                                projectName: buildPlanJobName,
+                                filter: "buildPlan.json",
+                                selector: specific(buildNumber: "${buildPlanJobRef.getNumber()}")
+                            )
+                            buildPlanText = readFile("buildPlan.json")
+                            echo "Using the computed build plan:\n\n${buildPlanText}"
+                        }
+                        buildPlan = parseJson(buildPlanText)
+
+                        if (params.publishedScalaVersion) {
+                            compilerVersion = params.publishedScalaVersion
+                            echo "Using the previously published compiler: ${compilerVersion}"
+                        } else {
+                            copyArtifacts(
+                                projectName: compilerJobName,
+                                filter: "compilerMetadata.json",
+                                selector: specific(buildNumber: "${compilerJobRef.getNumber()}")
+                            )
+                            def compilerMetadataText = readFile("compilerMetadata.json")
+                            def compilerMetadata = parseJson(compilerMetadataText)
+                            compilerVersion = compilerMetadata.publishedCompilerVersion
+                            echo "Using the compiled compiler:\n\n${compilerMetadata}"
+                        }
+
+                        deleteDir()
+                    }
+                }
+            }
+        }
+        stage("Build community projects") {
+            steps {
+                script {
+                    def jobs = [:]
+
+                    def projectDeps = buildPlan.collectEntries { project ->
+                        [project.name, project.dependencies]
+                    }
+                    def inversedProjectDeps = inverseMultigraph(projectDeps)
+
+                    for(project in buildPlan) {
+                        def proj = project // capture value for closure
+                        jobs[proj.name] = {
+                            build(
+                                job: communityProjectJobName,
+                                parameters: [
+                                    string(name: "buildName", value: params.buildName),
+                                    string(name: "projectName", value: proj.name),
+                                    string(name: "repoUrl", value: proj.repoUrl),
+                                    string(name: "revision", value: proj.revision),
+                                    string(name: "scalaVersion", value: compilerVersion),
+                                    string(name: "version", value: proj.version),
+                                    string(name: "targets", value: proj.targets),
+                                    string(name: "enforcedSbtVersion", value: params.enforcedSbtVersion),
+                                    string(name: "mvnRepoUrl", value: mvnRepoUrl),
+                                    string(name: "elasticSearchUrl", value: params.elasticSearchUrl),
+                                    string(name: "elasticSearchUserName", value: params.elasticSearchUserName),
+                                    string(name: "elasticSearchSecretName", value: params.elasticSearchSecretName),
+                                    string(name: "upstreamProjects", value: proj.dependencies.join(",")),
+                                    string(name: "downstreamProjects", value: inversedProjectDeps[proj.name].join(",")),
+                                ]
+                            )
+                        }
+                    }
+                    parallel jobs
+                }
+            }
+        }
+    }
+}
