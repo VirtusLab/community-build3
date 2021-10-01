@@ -2,12 +2,9 @@
 set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
-shopt -s expand_aliases
 source $scriptDir/env.sh
 
 scbk apply -f $scriptDir/../k8s/jenkins-data.yaml
-
 scbk create configmap jenkins-seed-jobs --from-file=$scriptDir/../jenkins/seeds --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/common-lib/vars --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-init-scripts --from-file=$scriptDir/../jenkins/init-scripts --dry-run=client -o yaml | scbk apply -f -
