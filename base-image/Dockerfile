@@ -2,9 +2,11 @@ FROM lampepfl/dotty:2021-03-22
 
 ARG KEYTOOL_STORE_PASS
 
-RUN apt update
-RUN apt install -y openjdk-11-jdk-headless
-RUN apt install dnsutils -y
+# Workaround for https://github.com/nodesource/distributions/issues/1266
+RUN apt-get update; apt-get install ca-certificates && apt-get update
+
+RUN apt-get install -y openjdk-11-jdk-headless
+RUN apt-get install dnsutils -y
 
 RUN update-java-alternatives --set java-1.11.0-openjdk-amd64
 
@@ -32,7 +34,7 @@ RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -n
 
 RUN keytool -keystore /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts -storepasswd -storepass changeit -new $KEYTOOL_STORE_PASS
 
-ENV SBT_VERSIONS="1.5.0 1.5.1 1.5.2 1.5.3 1.5.4 1.5.5"
+ENV SBT_VERSIONS="1.5.5 1.6.0-M1"
 
 # only for debug inside container ping/ifconfig/ssl test:
 
