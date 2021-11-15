@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+if [ -z "$MVN_REPO_KEYSTORE_PASSWORD" ]; then
+  echo "MVN_REPO_KEYSTORE_PASSWORD env variable has to be set and nonempty"
+  exit 1
+fi
+
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 secretsDir=$scriptDir/../secrets
@@ -9,14 +14,7 @@ cd $secretsDir
 
 # Generate and distribute SSL certificates
 
-for hostAddr in repo.maven.apache.org repo1.maven.org repo1.maven.org.fake mvn-repo; do
+for hostAddr in mvn-repo; do
   openssl req -newkey rsa:2048 -nodes -batch -subj "/CN=$hostAddr" -keyout $hostAddr.key -x509 -days 365 -out $hostAddr.crt
+  openssl pkcs12 -export -out $hostAddr.p12 -inkey $hostAddr.key -in $hostAddr.crt -name $hostAddr -password "pass:$MVN_REPO_KEYSTORE_PASSWORD"
 done
-
-baseImageKeystoreDir=$scriptDir/../base-image/keystorage
-mkdir -p $baseImageKeystoreDir
-cp $secretsDir/*.crt $baseImageKeystoreDir
-
-nginxProxyKeystoreDir=$scriptDir/../spring-maven-repository/nginx-proxy/keystore
-mkdir -p $nginxProxyKeystoreDir
-cp $secretsDir/*.crt $secretsDir/*.key $nginxProxyKeystoreDir

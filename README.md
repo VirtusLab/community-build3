@@ -21,8 +21,47 @@ Elasticsearch with Kibana are used for aggregating and visualising build results
 
 Currently only sbt projects are supported.
 
-## MVN repository
-The spring-maven-repository directory is the fork of the [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository) repository. Copied for modifications needed by Dotty community builds mechanism.
+## System components
+
+### mvn-repo
+
+A Spring application working as a custom Maven repository based on [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository).
+
+### kibana
+
+Elasticsearch with Kibana for gathering statistics from builds.
+This component is optional and the rest of the system should properly even if kibana dosn't get started.
+
+### jenkins
+
+A jenkins instance set up with [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/).
+
+It coordinates running the builds of the compiler and community projects and provides a UI for inspecting the results of builds.
+
+### builder-base
+
+It provides a common docker image with scala and sbt with predownloaded and cached dependencies used as a base for othe images (coordinator, compiler-builder and project-builder).
+
+### coordinator
+
+A scala application responsible for computing the plan of a build using data from Maven Central and Scaladex.
+
+### compiler-builder
+
+It builds and publishes the compiler.
+
+### project-builder
+
+It builds and publishes a community project.
+
+All projects are built in a fresh container for full isolation.
+
+### sample-repos
+
+For tests only.
+
+It contains some simple scala projects whose builds can be run quickly.
+The projects are served by a git daemon and can be easily cloned from other pods.
 
 ## Local development
 
@@ -39,6 +78,14 @@ requires quite a lot of resources, which need to be declared while starting mini
 minikube start --driver=hyperkit --memory=18432 --cpus=3
 ```
 
+You'll also need to generate a private key and an SSL certificate for mvn-repo
+
+```shell
+read -s MVN_REPO_KEYSTORE_PASSWORD # type your password
+export MVN_REPO_KEYSTORE_PASSWORD
+scripts/generate-secrets.sh
+```
+
 ### Preparing docker images
 
 Set the environment variables to publish docker images to minikube instead of docker directly
@@ -47,23 +94,22 @@ Set the environment variables to publish docker images to minikube instead of do
 eval $(minikube -p minikube docker-env)
 ```
 
-Most likely you'll need to build the base image only once (this will take quite a lot of time):
+Most likely you'll need to build the base image only once (it doesn't get modified too often but building it takes quite a lot of time), e.g.:
 
 ```shell
-scripts/generate-secrets.sh
-scripts/build-docker-base.sh
+scripts/build-builder-base.sh v0.0.1
 ```
 
 Build all the remaining images
 
 ```shell
-scripts/build-quick.sh
+scripts/build-quick.sh v0.0.1
 ```
 
 or (re)build each image separately e.g.
 
 ```shell
-scripts/build-maven.sh
+scripts/build-mvn-repo.sh v0.0.1
 ```
 
 ### Debugging in k8s
@@ -107,20 +153,22 @@ scbk get pods
 scbk describe pod $POD_NAME
 scbk logs $POD_NAME
 scbk exec -it $POD_NAME -- sh
-docker image ls | grep community | awk '{print $1":"$2}' | xargs docker save -o /tmp/community-build-images.tar
+docker image ls | grep virtuslab/scala-community-build | awk '{print $1":"$2}' | xargs docker save -o /tmp/community-build-images.tar
 docker image load -i /tmp/community-build-images.tar
-docker image ls | grep community | awk '{print $1":"$2}' | xargs docker image rm
+docker image ls | grep virtuslab/scala-community-build | awk '{print $1":"$2}' | xargs docker image rm
 scbk get pods --no-headers | grep daily- | awk '{print $1}' | xargs kubectl delete pod -n scala3-community-build
-scbk run -i --tty executor-test --image=communitybuild3/executor image-pull-policy=Never -- sh
+scbk run -i --tty project-builder-test --image=virtuslab/scala-community-build-project-builder image-pull-policy=Never -- sh
 ```
 
-### Maven repository
+### mvn-repo
 
 UI URL:
 
 ```
-http://localhost:8081/maven2
+https://localhost:8081/maven2
 ```
+
+Your browser might complain because of missing certificates for https. For `curl` you can add the `-k` flag as a workaround.
 
 You can manage the published artifacts by logging into the repository pod with
 
@@ -130,9 +178,9 @@ scbk exec -it svc/mvn-repo -- bash
 
 and modifying the content of `upload-dir` folder.
 
-### Elasticsearch and Kibana
+### kibana
 
-UI URL (your browser might complain about the page not being secure - proceed anyway):
+Kibana UI URL (your browser might complain about the page not being secure - proceed anyway):
 
 ```
 https://localhost:5601/
@@ -140,11 +188,11 @@ https://localhost:5601/
 
 You can load Kibana settings with `scripts/configure-kibana.sh`
 
-If you want to create an index pattern for `communnity-build` manually, navigate to `(Burger menu in the left upper corner) -> Stack Management -> Index patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
+If you want to create an index pattern for `community-build` manually, navigate to `(Burger menu in the left upper corner) -> Stack Management -> Index patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
 
 Elasticsearch and Kibana currently don't use persistent storage so every restart will clean all the data.
 
-### Jenkins
+### jenkins
 
 UI URL: 
 
@@ -152,21 +200,9 @@ UI URL:
 http://localhost:8080
 ```
 
-Jenkins is set up by [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/).
+Jenkins requires `mvn-repo` (and optionally `kibana`) to be up and running to successfully execute the entire build flow.
 
-Jenkins requires the maven repo and elasticsearch to be up and running to successfully execute the entire build flow.
-
-To trigger a new run of the community build, start the `runDaily` job.
-When this job finishes navigate to `/daily/${currentDate}` to see the build progress of particular projects.
-
-For development purposes only you can uncomment the backup section in `k8s/jenkins.yaml`
-to make jenkins preserve data of jobs after a restart (remember to build the backup image first).
-This might however not be very reliable.
-You can get into the backup container for debugging with
-
-```
-scbk exec -it jenkins-build -c backup -- bash
-```
+To trigger a new run of the community build, start the `runBuild` job with proper parameters.
 
 If jenkins doesn't get set up properly or keeps crashing and restarting
 you can try to debug that by looking at the logs of the operator pod.
@@ -191,20 +227,21 @@ scripts/build-sample-repos.sh
 scripts/start-sample-repos.sh
 ```
 
-* Use a version of the compiler which is already published (e.g. `3.0.0`) - this will skip the local build
+* Use a version of the compiler which is already published (e.g. `3.1.0`) - this will skip the local build
 
 ### Building a project locally
 
-Assuming you have the maven repo running in k8s, you can try to build a locally cloned project using the already published dependencies.
+Assuming you have the maven repo running in k8s, you could try to build a locally cloned project using the already published dependencies.
+This would however require installing the SSL certificate for `mvn-repo` locally.
 
 ```shell
 # Verify support for project's build tool and inject the plugin file(s). This needs to be run only once per cloned repo. ENFORCED_SBT_VERSION may be set to an empty string 
-executor/prepare-project.sh $PROJECT_PATH $ENFORCED_SBT_VERSION
+project-builder/prepare-project.sh $PROJECT_PATH $ENFORCED_SBT_VERSION
 
 # Build the project using the build script or directly with sbt
-executor/build.sh $PROJECT_PATH $SCALA_VERSION $PROJECT_VERSION "$TARGETS" $MVN_REPO_URL
+project-builder/build.sh $PROJECT_PATH $SCALA_VERSION $PROJECT_VERSION "$TARGETS" $MVN_REPO_URL
 # e.g.
-# executor/build.sh tmp/shapeless '3.0.1-RC1-bin-COMMUNITY-SNAPSHOT' '3.0.0-M4' 'org.typelevel%shapeless3-deriving org.typelevel%shapeless3-data org.typelevel%shapeless3-test org.typelevel%shapeless3-typeable' 'http://localhost:8081/maven2/2021-06-02_2'
+# project-builder/build.sh tmp/shapeless '3.0.1-RC1-bin-COMMUNITY-SNAPSHOT' '3.0.0-M4' 'org.typelevel%shapeless3-deriving org.typelevel%shapeless3-data org.typelevel%shapeless3-test org.typelevel%shapeless3-typeable' 'http://localhost:8081/maven2/2021-06-02_2'
 ```
 
 Warning: you might run into problems if you manually rebuild only some of the artifacts using a different version of JDK that the one used for building the rest.

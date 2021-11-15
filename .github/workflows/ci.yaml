@@ -10,16 +10,13 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v2
 
-      - name: Generate certificates
-        run: scripts/generate-secrets.sh
-
       - name: Start minikube
         run: minikube start
 
       - name: Build up base docker images
         run: |
           eval $(minikube -p minikube docker-env)
-          scripts/build-all.sh
+          scripts/build-all.sh test
   
       - name: Test build
         run: scripts/test-build.sh

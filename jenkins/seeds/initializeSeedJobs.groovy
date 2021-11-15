@@ -43,7 +43,7 @@ pipelineJob('/runBuild') {
             separatorStyle("")
             sectionHeaderStyle("")
         }
-        stringParam("mvnRepoBaseUrl", "http://mvn-repo:8081/maven2")
+        stringParam("mvnRepoBaseUrl", "https://mvn-repo:8081/maven2")
         separator {
             name("STATISTICS")
             sectionHeader("Statistics")

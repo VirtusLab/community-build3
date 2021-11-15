@@ -56,12 +56,25 @@ pipeline {
                         apiVersion: v1
                         kind: Pod
                         metadata:
-                          name: executor
+                          name: project-builder
                         spec:
+                          volumes:
+                          - name: mvn-repo-cert
+                            configMap:
+                              name: mvn-repo-cert
                           containers:
-                          - name: executor
-                            image: communitybuild3/executor
+                          - name: project-builder
+                            image: virtuslab/scala-community-build-project-builder:v0.0.1
                             imagePullPolicy: IfNotPresent
+                            volumeMounts:
+                            - name: mvn-repo-cert
+                              mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
+                              subPath: mvn-repo.crt
+                              readOnly: true
+                            lifecycle:
+                              postStart:
+                                exec:
+                                  command: ["update-ca-certificates"]
                             command:
                             - cat
                             tty: true
@@ -82,7 +95,7 @@ pipeline {
                     steps {
                         // Set SUCCESS here for the entire build for now so that next stages are still executed
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            container('executor') {
+                            container('project-builder') {
                                 script {
                                     echo "building and publishing ${params.projectName}"
                                     sh "echo 'failure' > build-status.txt" // Assume failure unless overwritten by a successful build
@@ -121,7 +134,7 @@ pipeline {
                         }
                     }
                     steps {
-                        container('executor') {
+                        container('project-builder') {
                             script {
                                 def timestamp = java.time.LocalDateTime.now()
                                 def buildStatus = getBuildStatus()

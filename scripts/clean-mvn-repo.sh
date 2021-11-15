@@ -3,4 +3,7 @@ set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-docker build -t virtuslab/scala-community-build-sample-repos $scriptDir/../sample-repos
+shopt -s expand_aliases
+source $scriptDir/env.sh
+
+scbk delete -f $scriptDir/../k8s/mvn-repo-data.yaml

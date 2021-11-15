@@ -1,0 +1,16 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /maven2
+  ssl:
+    key-store-type: PKCS12
+    key-store: ${MVN_REPO_KEY_STORE}
+    key-store-password: ${MVN_REPO_KEY_STORE_PASSWORD}
+    key-alias: mvn-repo
+    key-password: ${MVN_REPO_KEY_PASSWORD}
+    enabled: true
+maven:
+  multiRepo: false
+  redirectUrl: https://repo1.maven.org/maven2
+  scala:
+    targetVersion: 3.0.0-RC3
