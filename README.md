@@ -268,3 +268,4 @@ This configuration is dedicated to VScode with Metals.
 ```
 hostName - `localhost` if debug port is mapped to host, else IP address of container.
 port - port on which JVM listen for debug - the same like in `JAVA_TOOL_OPTIONS` env variable
+
