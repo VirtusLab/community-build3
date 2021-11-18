@@ -22,12 +22,25 @@ pipeline {
                         apiVersion: v1
                         kind: Pod
                         metadata:
-                          name: publish-scala
+                          name: compiler-builder
                         spec:
+                          volumes:
+                          - name: mvn-repo-cert
+                            configMap:
+                              name: mvn-repo-cert
                           containers:
-                          - name: publish-scala
-                            image: communitybuild3/publish-scala
+                          - name: compiler-builder
+                            image: virtuslab/scala-community-build-compiler-builder:v0.0.1
                             imagePullPolicy: IfNotPresent
+                            volumeMounts:
+                            - name: mvn-repo-cert
+                              mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
+                              subPath: mvn-repo.crt
+                              readOnly: true
+                            lifecycle:
+                              postStart:
+                                exec:
+                                  command: ["update-ca-certificates"]
                             command:
                             - cat
                             tty: true
@@ -35,7 +48,7 @@ pipeline {
                 }
             }
             steps {
-                container('publish-scala') {
+                container('compiler-builder') {
                     ansiColor('xterm') {
                         echo 'building and publishing scala'
                         sh "/build/checkout.sh '${params.scalaRepoUrl}' '${params.scalaRepoBranch}' repo"
