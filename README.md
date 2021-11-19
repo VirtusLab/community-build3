@@ -21,7 +21,11 @@ Elasticsearch with Kibana are used for aggregating and visualising build results
 
 Currently only sbt projects are supported.
 
-## System components
+## System components and repository structure
+
+### scripts
+
+Scripts useful for local development as well as for deployment to production.
 
 ### mvn-repo
 
@@ -81,8 +85,7 @@ minikube start --driver=hyperkit --memory=18432 --cpus=3
 You'll also need to generate a private key and an SSL certificate for mvn-repo
 
 ```shell
-read -s MVN_REPO_KEYSTORE_PASSWORD # type your password
-export MVN_REPO_KEYSTORE_PASSWORD
+read -s MVN_REPO_KEYSTORE_PASSWORD && export MVN_REPO_KEYSTORE_PASSWORD # type a password of your choice
 scripts/generate-secrets.sh
 ```
 
@@ -112,16 +115,16 @@ or (re)build each image separately e.g.
 scripts/build-mvn-repo.sh v0.0.1
 ```
 
-### Debugging in k8s
+### Deploying and debugging in k8s
 
-The entire build infrastructure in k8s is defined inside one namespace. Running
+The entire build infrastructure in k8s is defined inside two namespaces - one for jenkins operator and the other for everything else. Running
 
 ```shell
 source scripts/env.sh
 ```
 
 will prepare your current shell session to work with these k8s resources. 
-Among others this will set up `scbk` alias (standing for `Scala Communit Build K8S`)
+Among others this will set up `scbk` and `scbok` commands (standing for `Scala Communit Build K8S` and `Scala Communit Build Operator K8S`)
 working just as `kubectl` with the proper namespace set.
 
 There are a couple of utility scripts to manage the lificycles of particular pieces of the infrastructure
@@ -132,11 +135,30 @@ scripts/stop-XXX.sh
 scripts/clean-XXX.sh
 ```
 
-For convenience you can also run
+To set up everything from scratch you can run
 
 ```shell
-scripts/start-all.sh
+# Should be the same password as used for running scripts/generate-secrets.sh
+echo "Enter MVN_REPO_KEYSTORE_PASSWORD:"
+read -s MVN_REPO_KEYSTORE_PASSWORD && export MVN_REPO_KEYSTORE_PASSWORD
+
+# Ask the Jenkins Operator team to get credentials for local development
+echo "Enter CB_DOCKER_USERNAME:"
+read -s CB_DOCKER_USERNAME && export CB_DOCKER_USERNAME
+echo "Enter CB_DOCKER_PASSWORD:"
+read -s CB_DOCKER_PASSWORD && export CB_DOCKER_PASSWORD
+echo "Enter CB_LICENSE_CLIENT:"
+read -s CB_LICENSE_CLIENT && export CB_LICENSE_CLIENT
+echo "Enter CB_LICENSE_KEY:"
+read -s CB_LICENSE_KEY && export CB_LICENSE_KEY
+
+# Uncomment the line below only for local development 
+# scripts/prepare-local-deployment.sh
+
+scripts/start-deployment.sh
 ```
+
+`scripts/prepare-local-deployment.sh` should only be used when running locally since in production the existing Jenkins operator should be used.
 
 To be able to access the resources through your browser or send requests to them manually
 you'll need to forward their ports using `scripts/forward-XXX.sh` scripts.
@@ -162,11 +184,7 @@ scbk run -i --tty project-builder-test --image=virtuslab/scala-community-build-p
 
 ### mvn-repo
 
-UI URL:
-
-```
-https://localhost:8081/maven2
-```
+UI URL: https://localhost:8081/maven2
 
 Your browser might complain because of missing certificates for https. For `curl` you can add the `-k` flag as a workaround.
 
@@ -180,11 +198,9 @@ and modifying the content of `upload-dir` folder.
 
 ### kibana
 
-Kibana UI URL (your browser might complain about the page not being secure - proceed anyway):
+Kibana UI URL: https://localhost:5601
 
-```
-https://localhost:5601/
-```
+(your browser might complain about the page not being secure - proceed anyway)
 
 You can load Kibana settings with `scripts/configure-kibana.sh`
 
@@ -194,11 +210,9 @@ Elasticsearch and Kibana currently don't use persistent storage so every restart
 
 ### jenkins
 
-UI URL: 
+UI URL: http://localhost:8080
 
-```
-http://localhost:8080
-```
+Before you start a new jenkins instance you need to start jenkins operator first.
 
 Jenkins requires `mvn-repo` (and optionally `kibana`) to be up and running to successfully execute the entire build flow.
 
@@ -229,7 +243,7 @@ scripts/start-sample-repos.sh
 
 * Use a version of the compiler which is already published (e.g. `3.1.0`) - this will skip the local build
 
-### Building a project locally
+### Building a community project locally
 
 Assuming you have the maven repo running in k8s, you could try to build a locally cloned project using the already published dependencies.
 This would however require installing the SSL certificate for `mvn-repo` locally.
@@ -257,6 +271,57 @@ built the docker images as described above and started the maven repository run
 ```shell
 scripts/test-build.sh
 ```
+
+## Deployment to Azure
+
+Log in to Azure and get the credentials
+
+```shell
+az login
+az account set --subscription "Azure Sponsorship"
+az aks get-credentials --resource-group osj-scala-euw-prod-rg --name osj-scala-euw-prod-aks-cluster
+```
+
+Set the context for kubectl
+
+```shell
+kubectl config use-context osj-scala-euw-prod-aks-cluster
+```
+
+**WARNING!!!**
+From now on `kubectl` will use the context provided by Azure instead of the default one used for running things locally in minikube.
+This means everyhing you do with `kubectl` (including all usages of `scbk` and `scbok`) will happen in the production cluster!
+As `kubectl` context is by default stored in a file inside an OS user's HOME directory, changing the context will preserve its effect even in a new shell session or after restarting your machine. So before you run any `kubectl` commands make sure you're working with the right context. You can check this by running
+
+```shell
+kubectl config current-context
+```
+
+To get back to minikube's local context use
+
+```shell
+kubectl config use-context minikube
+```
+
+As `kubectl` namespaces used on the production cluster are different to the ones used for local development you need to set them explicitly as environment variables
+
+```shell
+export CM_K8S_NAMESPACE=jenkins-scala3
+export CM_K8S_JENKINS_OPERATOR_NAMESPACE=op-svc-jenkins-scala3
+```
+
+Now you should be able to use `scbk`, `scbok` and all scripts from `./scripts` directory just as for local development and deployment.
+Just remember a few things:
+* Make sure the previous deployment has been properly cleared before a new one is started.
+* The credentials will be different to the ones used for local development.
+* **Do not run `prepare-local-deployment.sh`** because this might overwrite the existing Jenkins operator, which is configured to work properly on the cluster.
+* `CB_LICENSE_CLIENT` and `CB_LICENSE_KEY` don't have to be set as they're required only for setting up a new Jenkins operator
+
+After a successful deployment Jenkins UI should be available at:
+
+https://scala3.westeurope.cloudapp.azure.com/
+
+You should be able to log in via GitHub assuming your account is authorized to do that.
 
 ## Build coordinator (outdated)
 

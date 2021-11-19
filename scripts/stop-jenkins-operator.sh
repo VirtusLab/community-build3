@@ -2,11 +2,9 @@
 set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
-echo "${BASH_SOURCE[0]}"
-echo $scriptDir
-
-shopt -s expand_aliases
 source $scriptDir/env.sh
 
-scbk port-forward deploy/jenkins 8080:8080
+helm -n "$CM_K8S_JENKINS_OPERATOR_NAMESPACE" delete operator
+
+scbok delete -f secret license
+scbok delete secret license-token

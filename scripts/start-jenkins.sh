@@ -4,12 +4,24 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source $scriptDir/env.sh
 
-scbk apply -f $scriptDir/../k8s/jenkins-data.yaml
+if [ -z "$CB_DOCKER_USERNAME" ]; then
+  echo >&2 "CB_DOCKER_USERNAME env variable has to be set"
+  exit 1
+fi
+
+if [ -z "$CB_DOCKER_PASSWORD" ]; then
+  echo >&2 "CB_DOCKER_PASSWORD env variable has to be set"
+  exit 1
+fi
+
+HELM_EXPERIMENTAL_OCI=1 helm registry login operatorservice.azurecr.io -u "$CB_DOCKER_USERNAME" -p "$CB_DOCKER_PASSWORD"
+
 scbk create configmap jenkins-seed-jobs --from-file=$scriptDir/../jenkins/seeds --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/common-lib/vars --dry-run=client -o yaml | scbk apply -f -
-scbk create configmap jenkins-init-scripts --from-file=$scriptDir/../jenkins/init-scripts --dry-run=client -o yaml | scbk apply -f -
-scbk create configmap jenkins-casc-configs --from-file=$scriptDir/../jenkins/casc-configs --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-build-configs --from-file=$scriptDir/../env/prod/config --dry-run=client -o yaml | scbk apply -f -
-scbk apply -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/v0.6.0/config/crd/bases/jenkins.io_jenkins.yaml
-scbk apply -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/v0.6.0/deploy/all-in-one-v1alpha2.yaml
-scbk apply -f $scriptDir/../k8s/jenkins.yaml
+
+HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CM_K8S_NAMESPACE" \
+  install jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.1.3 -f k8s/jenkins.yaml \
+  --set jenkins.namespace="$CM_K8S_NAMESPACE" \
+  --set 'jenkinsConfigurationsAsCode[0].namespace'="$CM_K8S_NAMESPACE" \
+  --set 'jenkinsGroovyScripts[0].namespace'="$CM_K8S_NAMESPACE"
