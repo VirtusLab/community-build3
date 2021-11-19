@@ -2,7 +2,8 @@
 set -e
 
 if [ -z "$MVN_REPO_KEYSTORE_PASSWORD" ]; then
-  echo "MVN_REPO_KEYSTORE_PASSWORD env variable has to be set and nonempty"
+  echo "MVN_REPO_KEYSTORE_PASSWORD env variable has to be set and nonempty."
+  echo "(Make sure )"
   exit 1
 fi
 

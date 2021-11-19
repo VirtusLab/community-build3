@@ -14,5 +14,5 @@ rm -rf .git && \
 git init && \
 git add --all && \
 git commit -m "init" && \
-scbk cp ../common-lib -c jenkins-master jenkins-build:/tmp && \
+scbk cp ../common-lib -c jenkins-controller jenkins-build:/tmp && \
 rm -rf .git

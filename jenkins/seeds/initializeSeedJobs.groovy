@@ -66,6 +66,11 @@ pipelineJob('/computeBuildPlan') {
             sandbox()
         }
     }
+    properties {
+        copyArtifactPermission {
+            projectNames("*")
+        }
+    }
     parameters {
         stringParam("buildName")
         stringParam("scalaBinaryVersionSeries", "3.x", "Scala binary version following Scaladex API convention used for detecting projects to be built")
@@ -84,6 +89,11 @@ pipelineJob('/buildCompiler') {
         cps {
             script(buildCompilerScript)
             sandbox()
+        }
+    }
+    properties {
+        copyArtifactPermission {
+            projectNames("*")
         }
     }
     parameters {
