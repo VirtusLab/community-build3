@@ -2,7 +2,7 @@
 set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source $scriptDir/env.sh
+source $scriptDir/utils.sh
 
 if [ -z "$CB_DOCKER_USERNAME" ]; then
   echo >&2 "CB_DOCKER_USERNAME env variable has to be set"
@@ -11,6 +11,16 @@ fi
 
 if [ -z "$CB_DOCKER_PASSWORD" ]; then
   echo >&2 "CB_DOCKER_PASSWORD env variable has to be set"
+  exit 1
+fi
+
+if [ -z "$CM_K8S_JENKINS_OPERATOR_NAMESPACE" ]; then
+  echo >&2 "CM_K8S_JENKINS_OPERATOR_NAMESPACE env variable has to be set"
+  exit 1
+fi
+
+if [ -z "$CM_K8S_NAMESPACE" ]; then
+  echo >&2 "CM_K8S_NAMESPACE env variable has to be set"
   exit 1
 fi
 
