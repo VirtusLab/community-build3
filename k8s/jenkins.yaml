@@ -32,7 +32,7 @@ jenkins:
     initContainers: []
     jenkinsController:
       name: jenkins-controller
-      image: jenkins/jenkins:2.289.2-lts
+      image: jenkins/jenkins:2.303.3-lts
       imagePullPolicy: IfNotPresent
       imagePullSecrets: []
       livenessProbe: {}
@@ -134,11 +134,11 @@ jenkins:
   #   version: "3.1.1"
   plugins:
     - name: blueocean
-      version: "1.24.8"
+      version: "1.25.2"
     - name: depgraph-view
       version: "1.0.5"
     - name: ansicolor
-      version: "1.0.0"
+      version: "1.0.1"
     - name: parameter-separator
       version: "1.3"
     - name: copyartifact
@@ -147,6 +147,14 @@ jenkins:
       version: "0.34"
     - name: matrix-auth
       version: "2.6.8"
+    - name: configuration-as-code
+      version: "1.54"
+    - name: git-client
+      version: "3.10.0"
+    - name: github
+      version: "1.34.1"
+    - name: git
+      version: "4.10.0"
 
   # roles defines list of extra RBAC roles for the Jenkins Master pod service account
   roles: []

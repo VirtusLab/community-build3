@@ -21,13 +21,13 @@ if [ -z "$CB_LICENSE_KEY" ]; then
   exit 1
 fi
 
-if [ -z "$CM_K8S_JENKINS_OPERATOR_NAMESPACE" ]; then
-  echo >&2 "CM_K8S_JENKINS_OPERATOR_NAMESPACE env variable has to be set"
+if [ -z "$CB_K8S_JENKINS_OPERATOR_NAMESPACE" ]; then
+  echo >&2 "CB_K8S_JENKINS_OPERATOR_NAMESPACE env variable has to be set"
   exit 1
 fi
 
-if [ -z "$CM_K8S_NAMESPACE" ]; then
-  echo >&2 "CM_K8S_NAMESPACE env variable has to be set"
+if [ -z "$CB_K8S_NAMESPACE" ]; then
+  echo >&2 "CB_K8S_NAMESPACE env variable has to be set"
   exit 1
 fi
 
@@ -48,7 +48,7 @@ EOF
 
 HELM_EXPERIMENTAL_OCI=1 helm registry login operatorservice.azurecr.io -u "$CB_DOCKER_USERNAME" -p "$CB_DOCKER_PASSWORD"
 
-HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CM_K8S_JENKINS_OPERATOR_NAMESPACE" \
+HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
   install operator oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.1.3 -f k8s/jenkins-operator.yaml \
-  --set operator.namespace="$CM_K8S_JENKINS_OPERATOR_NAMESPACE" \
-  --set operator.jenkinsNamespace="$CM_K8S_NAMESPACE"
+  --set operator.namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
+  --set operator.jenkinsNamespace="$CB_K8S_NAMESPACE"
