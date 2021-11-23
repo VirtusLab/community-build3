@@ -120,12 +120,12 @@ scripts/build-mvn-repo.sh v0.0.1
 The entire build infrastructure in k8s is defined inside two namespaces - one for jenkins operator and the other for everything else. Running
 
 ```shell
-source scripts/env.sh
+source scripts/use-minikube.sh
 ```
 
 will prepare your current shell session to work with these k8s resources. 
-Among others this will set up `scbk` and `scbok` commands (standing for `Scala Communit Build K8S` and `Scala Communit Build Operator K8S`)
-working just as `kubectl` with the proper namespace set.
+Among others this will set up `scbk` and `scbok` commands (standing for `Scala Communit Build K8S` and `Scala Communit Build Operator K8S` respectively)
+working just as `kubectl` with the proper namespaces and context set. This setup is also necessary for most other scripts to run.
 
 There are a couple of utility scripts to manage the lificycles of particular pieces of the infrastructure
 
@@ -282,32 +282,23 @@ az account set --subscription "Azure Sponsorship"
 az aks get-credentials --resource-group osj-scala-euw-prod-rg --name osj-scala-euw-prod-aks-cluster
 ```
 
-Set the context for kubectl
+Set environment variables and the context for kubectl
 
 ```shell
-kubectl config use-context osj-scala-euw-prod-aks-cluster
+source scripts/use-azure.sh
 ```
 
 **WARNING!!!**
-From now on `kubectl` will use the context provided by Azure instead of the default one used for running things locally in minikube.
-This means everyhing you do with `kubectl` (including all usages of `scbk` and `scbok`) will happen in the production cluster!
-As `kubectl` context is by default stored in a file inside an OS user's HOME directory, changing the context will preserve its effect even in a new shell session or after restarting your machine. So before you run any `kubectl` commands make sure you're working with the right context. You can check this by running
+From now on you should be very careful about which context you're using for performing k8s operations. If you're not sure which one you're currently using just run
 
 ```shell
-kubectl config current-context
+scripts/show-env.sh
 ```
 
-To get back to minikube's local context use
+To get back to minikube's local context run
 
 ```shell
-kubectl config use-context minikube
-```
-
-As `kubectl` namespaces used on the production cluster are different to the ones used for local development you need to set them explicitly as environment variables
-
-```shell
-export CM_K8S_NAMESPACE=jenkins-scala3
-export CM_K8S_JENKINS_OPERATOR_NAMESPACE=op-svc-jenkins-scala3
+source scripts/use-minikube.sh
 ```
 
 Now you should be able to use `scbk`, `scbok` and all scripts from `./scripts` directory just as for local development and deployment.
@@ -317,7 +308,7 @@ Just remember a few things:
 * **Do not run `prepare-local-deployment.sh`** because this might overwrite the existing Jenkins operator, which is configured to work properly on the cluster.
 * `CB_LICENSE_CLIENT` and `CB_LICENSE_KEY` don't have to be set as they're required only for setting up a new Jenkins operator
 
-After a successful deployment Jenkins UI should be available at:
+After a successful deployment to Azure Jenkins UI should be available at:
 
 https://scala3.westeurope.cloudapp.azure.com/
 

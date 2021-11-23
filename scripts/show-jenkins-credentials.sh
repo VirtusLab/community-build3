@@ -2,9 +2,7 @@
 set -e
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
-shopt -s expand_aliases
-source $scriptDir/env.sh
+source $scriptDir/utils.sh
 
 username=$(scbk get secret jenkins-credentials -o 'jsonpath={.data.user}' | base64 -d)
 password=$(scbk get secret jenkins-credentials -o 'jsonpath={.data.password}' | base64 -d)

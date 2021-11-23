@@ -21,8 +21,18 @@ if [ -z "$CB_LICENSE_KEY" ]; then
   exit 1
 fi
 
+if [ -z "$CM_K8S_JENKINS_OPERATOR_NAMESPACE" ]; then
+  echo >&2 "CM_K8S_JENKINS_OPERATOR_NAMESPACE env variable has to be set"
+  exit 1
+fi
+
+if [ -z "$CM_K8S_NAMESPACE" ]; then
+  echo >&2 "CM_K8S_NAMESPACE env variable has to be set"
+  exit 1
+fi
+
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source $scriptDir/env.sh
+source $scriptDir/utils.sh
 
 scbok create secret docker-registry license-token --docker-server=operatorservice.azurecr.io --docker-username="$CB_DOCKER_USERNAME" --docker-password="$CB_DOCKER_PASSWORD" --dry-run=client -o yaml | kubectl apply -f -
 
