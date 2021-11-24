@@ -1,4 +1,5 @@
 def runBuildScript = new File("/var/jenkins_home/seeds/runBuild.groovy").text
+def buildCronTrigger = System.getenv("BUILD_CRON_TRIGGER") ?: ""
 
 pipelineJob('/runBuild') {
     definition {
@@ -8,7 +9,7 @@ pipelineJob('/runBuild') {
         }
     }
     parameters {
-        stringParam("buildName", null, "Should be unique among all builds; Should be valid both as a file name and a part of a URL")
+        stringParam("buildName", null, "(Optional) Should be unique among all builds; Should be valid both as a file name and a part of a URL; Will be synthesized from current date and build number if not specified")
         separator {
             name("COMPILER")
             sectionHeader("Compiler")
@@ -53,6 +54,9 @@ pipelineJob('/runBuild') {
         stringParam("elasticSearchUrl", "https://community-build-es-http:9200")
         stringParam("elasticSearchUserName", "elastic")
         stringParam("elasticSearchSecretName", "community-build-es-elastic-user")
+    }
+    triggers {
+        cron(buildCronTrigger)
     }
 }
 

@@ -1,5 +1,7 @@
 // Look at initializeSeedJobs.groovy for how this file gets parameterized
 
+def buildName
+
 def buildPlanJobName = "/computeBuildPlan"
 def buildPlanJobRef
 
@@ -29,8 +31,16 @@ pipeline {
         stage("Initialize build") {
             steps {
                 script {
-                    currentBuild.setDescription(params.buildName)
-                    mvnRepoUrl = "${params.mvnRepoBaseUrl}/${params.buildName}"
+                    if (params.buildName) {
+                        buildName = params.buildName
+                    } else {
+                        def now = new Date()
+                        def dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                        def formattedDate = dateFormat.format(now)
+                        buildName = "${formattedDate}_${currentBuild.number}"
+                    }
+                    currentBuild.setDescription(buildName)
+                    mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildName}"
                 }
             }
         }
@@ -134,7 +144,7 @@ pipeline {
                             build(
                                 job: communityProjectJobName,
                                 parameters: [
-                                    string(name: "buildName", value: params.buildName),
+                                    string(name: "buildName", value: buildName),
                                     string(name: "projectName", value: proj.name),
                                     string(name: "repoUrl", value: proj.repoUrl),
                                     string(name: "revision", value: proj.revision),
