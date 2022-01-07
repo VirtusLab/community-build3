@@ -19,7 +19,7 @@ if [ -z "$CB_K8S_NAMESPACE" ]; then
   exit 1
 fi
 
-if [ -z "$CB_BUILD_CRON_TRIGGER" ]; then
+if [ -z "${CB_BUILD_CRON_TRIGGER+x}" ]; then
   echo >&2 "CB_BUILD_CRON_TRIGGER env variable has to be set"
   exit 1
 fi
