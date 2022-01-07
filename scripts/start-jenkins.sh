@@ -31,7 +31,7 @@ scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/
 scbk create configmap jenkins-build-configs --from-file=$scriptDir/../env/prod/config --dry-run=client -o yaml | scbk apply -f -
 
 HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CB_K8S_NAMESPACE" \
-  install jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.1.3 -f k8s/jenkins.yaml \
+  install jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.2.0 -f k8s/jenkins.yaml \
   --set jenkins.namespace="$CB_K8S_NAMESPACE" \
   --set 'jenkins.podSpec.jenkinsController.env[0].name'=BUILD_CRON_TRIGGER \
   --set 'jenkins.podSpec.jenkinsController.env[0].value'="$CB_BUILD_CRON_TRIGGER" \

@@ -46,9 +46,11 @@ stringData:
   licenseKey: "$CB_LICENSE_KEY"
 EOF
 
-HELM_EXPERIMENTAL_OCI=1 helm registry login operatorservice.azurecr.io -u "$CB_DOCKER_USERNAME" -p "$CB_DOCKER_PASSWORD"
-
-HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
-  install operator oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.1.3 -f k8s/jenkins-operator.yaml \
+export HELM_EXPERIMENTAL_OCI=1
+helm registry login operatorservice.azurecr.io -u "$CB_DOCKER_USERNAME" -p "$CB_DOCKER_PASSWORD"
+helm pull oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.2.0
+helm pull oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.2.0
+helm --namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
+  install operator oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.2.0 -f k8s/jenkins-operator.yaml \
   --set operator.namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
   --set operator.jenkinsNamespace="$CB_K8S_NAMESPACE"
