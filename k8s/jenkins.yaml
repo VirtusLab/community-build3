@@ -32,7 +32,7 @@ jenkins:
     initContainers: []
     jenkinsController:
       name: jenkins-controller
-      image: jenkins/jenkins:2.303.3-lts
+      image: jenkins/jenkins:2.319.1
       imagePullPolicy: IfNotPresent
       imagePullSecrets: []
       livenessProbe: {}
@@ -144,17 +144,20 @@ jenkins:
     - name: copyartifact
       version: "1.46.2"
     - name: github-oauth
-      version: "0.34"
+      version: "0.37"
     - name: matrix-auth
       version: "2.6.8"
     - name: configuration-as-code
-      version: "1.54"
+      version: "1.55"
     - name: git-client
       version: "3.10.0"
     - name: github
       version: "1.34.1"
     - name: git
-      version: "4.10.0"
+      version: "4.10.1"
+    # Needed for Jenkins operator 0.8.1 (current), would not be needed after update to 0.11.1
+    - name: workflow-job
+      version: 1145.v7f2433caa07f
 
   # roles defines list of extra RBAC roles for the Jenkins Master pod service account
   roles: []
