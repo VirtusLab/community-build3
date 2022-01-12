@@ -9,7 +9,7 @@ def call(String jobName, String label) {
   
   // If is not yet complete, mark it as done when is in the last stage
   // This is done to prevent deadlocks when notifing downstream. 
-  buildResult?.isCompleteBuild() || isInNotifyStage(lastLabeledBuild) 
+  buildResult != Result.NOT_BUILT || isInNotifyStage(lastLabeledBuild) 
 }
 
 @NonCPS
