@@ -7,7 +7,7 @@ testNamespace=scala3-community-build-test
 compilerBuilderTimeout=15m
 projectBuilderTimeout=5m
 
-export MVN_REPO_KEYSTORE_PASSWORD="mvn-repo-test"
+export MVN_REPO_KEYSTORE_PASSWORD=$(openssl rand -base64 32)
 
 kubectl delete namespace $testNamespace --ignore-not-found=true
 kubectl create namespace $testNamespace
