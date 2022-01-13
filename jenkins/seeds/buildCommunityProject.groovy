@@ -104,15 +104,7 @@ pipeline {
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
                                 script {
-<<<<<<< HEAD
                                   retryOnConnectionError {
-=======
-                                    sh """
-                                      echo "building and publishing ${params.projectName}"
-                                      echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
-                                      touch build-logs.txt build-summary.txt
-                                    """
->>>>>>> Concat small bash steps to reduce comunication requests with kubernetes
                                     ansiColor('xterm') {
                                     sh """
                                       echo "building and publishing ${params.projectName}"
