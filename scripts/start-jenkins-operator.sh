@@ -48,9 +48,6 @@ EOF
 
 export HELM_EXPERIMENTAL_OCI=1
 helm registry login operatorservice.azurecr.io -u "$CB_DOCKER_USERNAME" -p "$CB_DOCKER_PASSWORD"
-helm pull oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.2.0
-helm pull oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.2.0
 helm --namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
-  install operator oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.2.0 -f k8s/jenkins-operator.yaml \
-  --set operator.namespace="$CB_K8S_JENKINS_OPERATOR_NAMESPACE" \
+  install operator oci://operatorservice.azurecr.io/charts/op-svc-jenkins --version 0.3.1 -f k8s/jenkins-operator.yaml \
   --set operator.jenkinsNamespace="$CB_K8S_NAMESPACE"
