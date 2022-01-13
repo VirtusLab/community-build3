@@ -140,12 +140,17 @@ pipeline {
                         [project.name, project.dependencies]
                     }
                     def inversedProjectDeps = inverseMultigraph(projectDeps)
-
-                    for(project in buildPlan) {
+                    def delayInSeconds = 0
+                    def sortedProjects = projectsByNumberOfDependencies(buildPlan)
+                    for(project in sortedProjects) {
                         def proj = project // capture value for closure
+                        // Do not start all builds at the same time, it might lead to crashing Jenkins instance in a hard to recover manner
+                        def delay = delayInSeconds
+                        delayInSeconds += 5
                         jobs[proj.name] = {
                             build(
                                 job: communityProjectJobName,
+                                quietPeriod: delay,
                                 parameters: [
                                     string(name: "buildName", value: buildName),
                                     string(name: "projectName", value: proj.name),
@@ -170,4 +175,9 @@ pipeline {
             }
         }
     }
+}
+
+@NonCPS
+static projectsByNumberOfDependencies(buildPlan) {
+    buildPlan.sort { it.dependencies.size() }
 }
