@@ -5,5 +5,5 @@ def call(String jobName, String label) {
   def job = jenkins.getItemByFullName(jobName)
   def builds = job.getBuilds()
  	def lastLabeledBuild = builds.find { it.getDescription() == label }
-	return lastLabeledBuild?.getResult()
+	return lastLabeledBuild?.getResult()?.toString()
 }
