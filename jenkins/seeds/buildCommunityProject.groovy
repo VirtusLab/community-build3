@@ -19,9 +19,6 @@ def parseCommaSeparated(String string) {
 def upstreamProjects = parseCommaSeparated(params.upstreamProjects)
 def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 
-def elasticCredentialsDefined = false
-def wasBuildSuccessful = false
-
 pipeline {
     agent none
     stages {

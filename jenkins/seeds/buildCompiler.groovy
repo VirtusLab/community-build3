@@ -67,7 +67,7 @@ pipeline {
             }
         }
         stage("Persist build metadata") {
-            agent { label 'master' }
+            agent any
             steps {
                 script {
                     def metadata = [
