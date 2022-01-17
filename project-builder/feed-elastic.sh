@@ -13,15 +13,12 @@ timestamp="$4"
 buildSummaryFile="$5"
 logsFile="$6"
 
-buildSummary=$(cat $buildSummaryFile)
-logs=$(cat $logsFile)
-
 json=$(jq -n \
           --arg res "$buildResult" \
           --arg ts "$timestamp" \
           --arg pn "$projectName" \
-          --arg sum "$buildSummary" \
-          --arg logs "$logs" \
+          --rawfile sum "$buildSummaryFile" \
+          --rawfile logs "$logsFile" \
           '{res: $res, build_timestamp: $ts, project_name: $pn, detailed_result: $sum, logs: $logs}')
 
 jsonFile=$(mktemp /tmp/feed-elastic-tmp.XXXXXX)
