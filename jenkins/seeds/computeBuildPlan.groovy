@@ -1,6 +1,9 @@
 // Look at initializeSeedJobs.groovy for how this file gets parameterized
 
 pipeline {
+    options {
+        timeout(time: 30, unit: "MINUTES")
+    }
     agent none
     stages {
         stage("Initialize build") {

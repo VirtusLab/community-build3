@@ -47,6 +47,9 @@ pipeline {
             }
         }
         stage("Prepare executor") {
+            options {
+                timeout(time: 1, unit: "HOURS")
+            }
             agent {
                 kubernetes {
                     yaml """

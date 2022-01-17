@@ -6,6 +6,9 @@ def commitHash
 def publishedCompilerVersion
 
 pipeline {
+    options {
+        timeout(time: 30, unit: "MINUTES")
+    }
     agent none
     stages {
         stage("Initialize build") {

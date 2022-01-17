@@ -27,6 +27,9 @@ def inverseMultigraph(graph) {
 
 pipeline {
     agent none
+    options {
+      timeout(time: 8, unit: "HOURS")
+    }
     stages {
         stage("Initialize build") {
             steps {
