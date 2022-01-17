@@ -33,9 +33,11 @@ pipeline {
                 container('coordinator') {
                     script {
                         ansiColor('xterm') {
-                            echo 'computing the build plan'
-                            sh "cat << EOF > /tmp/replaced-projects.txt \n${params.replacedProjects}\nEOF"
-                            sh "/build/compute-build-plan.sh '${params.scalaBinaryVersionSeries}' '${params.minStarsCount}' '${params.maxProjectsCount}' '${params.requiredProjects}' /tmp/replaced-projects.txt"
+                            sh """
+                              echo 'computing the build plan'
+                              cat << EOF > /tmp/replaced-projects.txt \n${params.replacedProjects}\nEOF
+                              /build/compute-build-plan.sh '${params.scalaBinaryVersionSeries}' '${params.minStarsCount}' '${params.maxProjectsCount}' '${params.requiredProjects}' /tmp/replaced-projects.txt
+                            """
                         }
                         buildPlan = sh(
                             script: "cat /build/data/buildPlan.json",
