@@ -2,7 +2,7 @@
 
 def labeledProjectWasBuilt(String label) {
     def status = getLastLabeledBuildStatus("/buildCommunityProject", label)
-    return status in ['SUCCESS', 'FAILURE', 'UNSTABLE']
+    return status in ['SUCCESS', 'FAILURE', 'UNSTABLE', 'ABORTED']
 }
 
 def getBuildStatus() {
