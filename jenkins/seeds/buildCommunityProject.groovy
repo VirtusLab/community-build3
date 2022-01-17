@@ -78,6 +78,11 @@ pipeline {
                             command:
                             - cat
                             tty: true
+                            resources:
+                              requests:
+                                memory: 4Gi
+                              limits:
+                                memory: 6Gi
                             env:
                             - name: ELASTIC_USERNAME
                               value: ${params.elasticSearchUserName}
