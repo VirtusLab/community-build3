@@ -2,13 +2,15 @@
 set -e
 
 if [ $# -ne 1 ]; then 
-  echo "Wrong number of script arguments"
+  echo "Wrong number of script arguments. Expected <revision>"
   exit 1
 fi
 
-TAG_NAME="$1"
-
+VERSION="$1"
+JDK_VERSIONS=(8 11 17)
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-$scriptDir/build-builder-base.sh "$TAG_NAME"
-$scriptDir/build-quick.sh "$TAG_NAME"
+for jdkVersion in "${JDK_VERSIONS[@]}"; do
+  $scriptDir/build-builder-base.sh "$VERSION" "$jdkVersion"
+  $scriptDir/build-quick.sh "$VERSION" "$jdkVersion"
+done

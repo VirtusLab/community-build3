@@ -15,3 +15,30 @@ function scbok() {
 
   kubectl -n "$CB_K8S_JENKINS_OPERATOR_NAMESPACE" "$@"
 }
+
+function checkJavaVersion() {
+  version="$1"
+  supportedVersions=(8 11 17)
+  
+  if [ -z "$version" ]; then
+    echo >&2 "Java version has to be set"
+    exit 1
+  fi
+  if [[ ! " ${supportedVersions[*]} " =~ " ${version} " ]]; then
+    echo >&2 "Java $version is not supported, available versions: ${supportedVersions[*]}"
+    exit 1
+  fi
+}
+
+function buildTag() {
+  if [ $# -ne 2 ]; then 
+    echo >&2 "Wrong number of script arguments, expected <revision> <jdkVersion>"
+    exit 1
+  fi
+
+  revision="$1"
+  jdkVersion="$2"
+  checkJavaVersion "${jdkVersion}"
+
+  echo "jdk${jdkVersion}-$revision"
+}
