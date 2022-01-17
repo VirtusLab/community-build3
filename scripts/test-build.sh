@@ -4,7 +4,7 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 testNamespace=scala3-community-build-test
-compilerBuilderTimeout=15m
+compilerBuilderTimeout=20m
 projectBuilderTimeout=5m
 
 export MVN_REPO_KEYSTORE_PASSWORD="mvn-repo-test"
