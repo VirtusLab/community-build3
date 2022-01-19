@@ -42,4 +42,13 @@ case class BuildStep(
 
 case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 
-case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String)
+case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectConfig])
+
+// Make it a class to allow for serialization using gson
+class ProjectConfig(javaVersion: Option[String], javaOptions: Array[String]){
+  override def toString(): String = s"ProjectConfig(javaVersion=$javaVersion)"
+}
+object ProjectConfig{
+  val empty = ProjectConfig(javaVersion = None, javaOptions = Nil)
+}
+

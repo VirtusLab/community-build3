@@ -3,6 +3,7 @@ import collection.JavaConverters._
 import java.nio.file._
 import scala.sys.process._
 import scala.util.CommandLineParser.FromString
+import scala.util.Try
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
@@ -162,7 +163,7 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   Files.write(Paths.get("data", "bp.txt"), bp.getBytes)
   plan
 
-def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsConfigPath: String) =
+def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsConfigPath: String, internalProjectConfigsPath: String) =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
 
   val dottyProjectName = "lampepfl_dotty"
@@ -192,9 +193,69 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
     s"${org}_${name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
 
+  val internalProjectConfigs = Try {
+    io.Source.fromFile(internalProjectConfigsPath).mkString
+  }.toOption
+    .fold(Map.empty) { content =>
+      import com.google.gson.reflect.TypeToken
+      try {
+        given typeToken: TypeToken[java.util.Map[String, ProjectConfig]] = new TypeToken {}
+        fromJson[java.util.Map[String, ProjectConfig]](content)
+          .asScala
+          .toMap
+      } catch {
+        case ex: Exception =>
+          System.err.println(
+            s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${ex.getMessage}: '$content'"
+          )
+          Map.empty
+      }
+    }
+
+  def projectConfig(
+      name: String,
+      repoUrl: String,
+      tagOrRevision: Option[String]
+  ): Option[ProjectConfig] = {
+    val projectConfigsDir = "/tmp/projects-configs.conf"
+    val revision = tagOrRevision.getOrElse("HEAD")
+
+    def readProjectConfig() = {
+      val baseURL = repoUrl.stripSuffix(".git")
+      Try {
+        io.Source
+          .fromURL(s"$baseURL/raw/$revision/scala3-community-build.conf")
+          .mkString
+      }.toOption.fold {
+        println(s"No community-build config defined in ${repoUrl}")
+        Option.empty[ProjectConfig]
+      } { content =>
+        try
+          Option {
+            fromJson(content, classOf[ProjectConfig])
+          }
+        catch {
+          case ex: Exception =>
+            System.err.println(
+              s"Failed to decode community-build config in ${repoUrl}, reason: ${ex.getMessage}: '${content}'"
+            )
+            None
+        }
+      }
+    }
+
+    readProjectConfig()
+      .orElse(internalProjectConfigs.get(name))
+      .filter(_ != ProjectConfig.empty)
+      .map { config =>
+        println(s"Using custom project config for $name: $config")
+        config
+      }
+  }
+
   projectsDeps.toList.map { (project, deps) =>
     val repoUrl = projectRepoUrl(project.p)
-    val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption).getOrElse("")
+    val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption)
     val name = projectName(project)
     val dependencies = deps.map(projectName)
       .filter(depName => projectNames.contains(depName) && depName != name && depName != dottyProjectName)
@@ -203,9 +264,10 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
       name = name,
       dependencies = dependencies.toArray,
       repoUrl = repoUrl,
-      revision = tag,
+      revision = tag.getOrElse(""),
       version = project.v,
-      targets = fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" ")
+      targets = fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" "),
+      config = projectConfig(name, repoUrl, tag)
     )
   }.filter(_.name != dottyProjectName).toArray
 
@@ -215,21 +277,29 @@ private given FromString[Seq[Project]] = str =>
     case _ => throw new IllegalArgumentException
   }
 
-@main def storeDependenciesBasedBuildPlan(scalaBinaryVersionSeries: String, minStarsCount: Int, maxProjectsCount: Int, requiredProjects: Seq[Project], replacedProjectsConfigPath: String) =
+@main def storeDependenciesBasedBuildPlan(
+    scalaBinaryVersionSeries: String,
+    minStarsCount: Int,
+    maxProjectsCount: Int,
+    requiredProjects: Seq[Project],
+    replacedProjectsConfigPath: String,
+    maintainedProjectsConfigPath: String
+) =
   val depGraph = loadDepenenecyGraph(
     scalaBinaryVersionSeries,
     minStarsCount = minStarsCount,
     maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
     requiredProjects
   )
-  val plan = makeDependenciesBasedBuildPlan(depGraph, replacedProjectsConfigPath)
-
-  import com.google.gson.Gson
-  val gson = new Gson
-  val json = gson.toJson(plan)
+  val plan = makeDependenciesBasedBuildPlan(
+    depGraph,
+    replacedProjectsConfigPath,
+    maintainedProjectsConfigPath
+  )
 
   import java.nio.file._
   val dataPath = Paths.get("data")
   val dest = dataPath.resolve("buildPlan.json")
+  val json = toJson(plan)
   Files.createDirectories(dest.getParent)
   Files.write(dest, json.toString.getBytes)
