@@ -12,7 +12,19 @@ def fromJson[T](s: String, cls: Class[T]) = adaptedGson.fromJson[T](s, cls)
 
 private lazy val adaptedGson = Gson().newBuilder
   .registerTypeAdapter(classOf[Option[_]], new OptionTypeAdapter())
+  .registerTypeAdapter(classOf[List[_]], new ListTypeAdapter())
   .create()
+
+private class ListTypeAdapter extends JsonSerializer[List[_]] {
+  // serialize lists as arrays, instead we would get object with {"head": ?, "tail": ?}
+  def serialize(
+        value: List[_],
+        valueType: JavaType,
+        context: JsonSerializationContext
+    ): JsonElement = {
+      context.serialize(value.toArray)
+    }
+}
 
 private class OptionTypeAdapter
     extends JsonSerializer[Option[_]]

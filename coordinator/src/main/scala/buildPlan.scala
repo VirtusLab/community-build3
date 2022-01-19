@@ -6,6 +6,7 @@ import java.net.URL
 import scala.sys.process._
 import scala.util.CommandLineParser.FromString
 import scala.util.Try
+import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.error.*
 
@@ -197,23 +198,27 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
     s"${org}_${name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
 
-  lazy val internalProjectConfigs = {
+  lazy val referenceConfig = ConfigSource.resources("buildPlan.reference.conf").cursor().flatMap(_.asConfigValue).toOption
+  def internalProjectConfigs(projectName: String) = {
+    val fallbackConfig = referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(projectName, _))
     val config = ConfigSource
-      .file(internalProjectConfigsPath)
-      .load[Map[String, ProjectConfig]]
-      
+          .file(internalProjectConfigsPath)
+          .withFallback(ConfigSource.fromConfig(fallbackConfig))
+          .at(projectName)
+          .load[ProjectConfig]
+
     config.left.foreach {
       case ConfigReaderFailures(
             CannotReadFile(file, Some(_: FileNotFoundException))
           ) =>
-        println("Internal conifg projects not configured")
+        System.err.println("Internal conifg projects not configured")
       case failure =>
         System.err.println(
           s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${failure.prettyPrint(0)}"
         )
     }
 
-    config.getOrElse(Map.empty)
+    config.toOption
   }
 
   def projectConfig(
@@ -233,8 +238,7 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
       config.left.foreach {
         case ConfigReaderFailures(
               CannotReadUrl(url, Some(_: java.io.FileNotFoundException))
-            ) =>
-          println(s"No community-build config defined in ${url}")
+            ) => ()
         case reason =>
           System.err.println(
             s"Failed to decode community-build config in ${repoUrl}, reason: ${reason.prettyPrint(0)}"
@@ -244,7 +248,7 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
     }
 
     readProjectConfig()
-      .orElse(internalProjectConfigs.get(name))
+      .orElse(internalProjectConfigs(name))
       .filter(_ != ProjectConfig.empty)
       .map { config =>
         println(s"Using custom project config for $name: $config")

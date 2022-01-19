@@ -19,8 +19,8 @@ case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[Stri
 
 object MvnMapping:
   def load(s: String) =
-    val d = s.split(",")
-    MvnMapping(d(0), d(1),d(2),d.drop(3))
+    val Array(name, version, mvn, deps*) = s.split(",")
+    MvnMapping(name, version, mvn, deps)
 
 case class TargetId(org: String, name: String):
   def asMvnStr = org + "%" + name
@@ -47,7 +47,7 @@ case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectConfig])
 
 // Community projects configs
-case class JavaConfig(version: Option[String] = None, options: Array[String] = Array.empty) derives ConfigReader
+case class JavaConfig(version: Option[String] = None, options: List[String] = Nil) derives ConfigReader 
 case class ProjectConfig(java: JavaConfig) derives ConfigReader
 object ProjectConfig{
   val empty = ProjectConfig(java = JavaConfig())
