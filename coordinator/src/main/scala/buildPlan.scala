@@ -1,15 +1,19 @@
 import org.jsoup._
 import collection.JavaConverters._
 import java.nio.file._
+import java.io.FileNotFoundException
+import java.net.URL
 import scala.sys.process._
 import scala.util.CommandLineParser.FromString
 import scala.util.Try
+import pureconfig._
+import pureconfig.error.*
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
 def findTag(repoUrl: String, version: String): Either[String, String] = 
   val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
-  util.Try {
+  Try {
     val lines = cmd.!!.linesIterator.filter(_.contains(version)).toList
     lines.collectFirst { case TagRef(tag) => tag } match
         case Some(tag) => Right(tag)
@@ -193,55 +197,50 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
     s"${org}_${name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
 
-  val internalProjectConfigs = Try {
-    io.Source.fromFile(internalProjectConfigsPath).mkString
-  }.toOption
-    .fold(Map.empty) { content =>
-      import com.google.gson.reflect.TypeToken
-      try {
-        given typeToken: TypeToken[java.util.Map[String, ProjectConfig]] = new TypeToken {}
-        fromJson[java.util.Map[String, ProjectConfig]](content)
-          .asScala
-          .toMap
-      } catch {
-        case ex: Exception =>
-          System.err.println(
-            s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${ex.getMessage}: '$content'"
-          )
-          Map.empty
-      }
+  lazy val internalProjectConfigs = {
+    val config = ConfigSource
+      .file(internalProjectConfigsPath)
+      .load[Map[String, ProjectConfig]]
+      
+    config.left.foreach {
+      case ConfigReaderFailures(
+            CannotReadFile(file, Some(_: FileNotFoundException))
+          ) =>
+        println("Internal conifg projects not configured")
+      case failure =>
+        System.err.println(
+          s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${failure.prettyPrint(0)}"
+        )
     }
+
+    config.getOrElse(Map.empty)
+  }
 
   def projectConfig(
       name: String,
       repoUrl: String,
       tagOrRevision: Option[String]
   ): Option[ProjectConfig] = {
-    val projectConfigsDir = "/tmp/projects-configs.conf"
     val revision = tagOrRevision.getOrElse("HEAD")
 
     def readProjectConfig() = {
       val baseURL = repoUrl.stripSuffix(".git")
-      Try {
-        io.Source
-          .fromURL(s"$baseURL/raw/$revision/scala3-community-build.conf")
-          .mkString
-      }.toOption.fold {
-        println(s"No community-build config defined in ${repoUrl}")
-        Option.empty[ProjectConfig]
-      } { content =>
-        try
-          Option {
-            fromJson(content, classOf[ProjectConfig])
-          }
-        catch {
-          case ex: Exception =>
-            System.err.println(
-              s"Failed to decode community-build config in ${repoUrl}, reason: ${ex.getMessage}: '${content}'"
-            )
-            None
-        }
+      val config = ConfigSource
+        .url(new URL(s"$baseURL/raw/$revision/scala3-community-build.conf"))
+        .withFallback(ConfigSource.resources("buildPlan.reference.conf"))
+        .load[ProjectConfig]
+
+      config.left.foreach {
+        case ConfigReaderFailures(
+              CannotReadUrl(url, Some(_: java.io.FileNotFoundException))
+            ) =>
+          println(s"No community-build config defined in ${url}")
+        case reason =>
+          System.err.println(
+            s"Failed to decode community-build config in ${repoUrl}, reason: ${reason.prettyPrint(0)}"
+          )
       }
+      config.toOption
     }
 
     readProjectConfig()

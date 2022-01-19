@@ -1,6 +1,8 @@
 import org.jsoup._
 import collection.JavaConverters._
 import java.nio.file._
+import pureconfig._
+import pureconfig.generic.derivation.default._
 
 case class Project(org: String, name: String)(val stars: Int): // stars may change...
   def show = s"$org%$name%$stars"
@@ -44,11 +46,10 @@ case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 
 case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectConfig])
 
-// Make it a class to allow for serialization using gson
-class ProjectConfig(javaVersion: Option[String], javaOptions: Array[String]){
-  override def toString(): String = s"ProjectConfig(javaVersion=$javaVersion)"
-}
+// Community projects configs
+case class JavaConfig(version: Option[String] = None, options: Array[String] = Array.empty) derives ConfigReader
+case class ProjectConfig(java: JavaConfig) derives ConfigReader
 object ProjectConfig{
-  val empty = ProjectConfig(javaVersion = None, javaOptions = Nil)
+  val empty = ProjectConfig(java = JavaConfig())
 }
 
