@@ -7,10 +7,15 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION="$1"
-JDK_VERSIONS=(8 11 17)
+
+javaDefault=11
+javaAccessoryVersions=(8 17)
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-for jdkVersion in "${JDK_VERSIONS[@]}"; do
-  $scriptDir/build-builder-base.sh "$VERSION" "$jdkVersion"
-  $scriptDir/build-quick.sh "$VERSION" "$jdkVersion"
+$scriptDir/build-builder-base.sh "$VERSION" "$javaDefault"
+$scriptDir/build-quick.sh "$VERSION" "$javaDefault"
+
+for javaVersion in "${javaAccessoryVersions[@]}"; do
+  $scriptDir/build-builder-base.sh "$VERSION" "$javaVersion"
+  $scriptDir/build-project-builder.sh "$VERSION" "$javaVersion"
 done

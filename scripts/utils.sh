@@ -32,7 +32,7 @@ function checkJavaVersion() {
 
 function buildTag() {
   if [ $# -ne 2 ]; then 
-    echo >&2 "Wrong number of script arguments, expected <revision> <jdkVersion>"
+    echo >&2 "Wrong number of function arguments invoked in $0, expected ${FUNCNAME} <revision> <jdkVersion>, got $#: $@"
     exit 1
   fi
 

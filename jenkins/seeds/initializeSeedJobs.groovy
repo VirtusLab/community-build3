@@ -123,6 +123,7 @@ pipelineJob('/buildCommunityProject') {
         stringParam("projectName")
         stringParam("repoUrl")
         stringParam("revision")
+        stringParam("javaVersion")
         stringParam("scalaVersion")
         stringParam("version")
         stringParam("targets")

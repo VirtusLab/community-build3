@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -ne 2 ]; then 
-  echo "Wrong number of script arguments. Expected <revision> <jdk_version>"
+  echo "Wrong number of script arguments. Expected $0 <revision> <jdk_version>"
   exit 1
 fi
 

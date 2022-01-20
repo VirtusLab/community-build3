@@ -156,6 +156,7 @@ pipeline {
                                     string(name: "projectName", value: proj.name),
                                     string(name: "repoUrl", value: proj.repoUrl),
                                     string(name: "revision", value: proj.revision),
+                                    string(name: "javaVersion", value: proj.config?.java?.version), 
                                     string(name: "scalaVersion", value: compilerVersion),
                                     string(name: "version", value: proj.version),
                                     string(name: "targets", value: proj.targets),
