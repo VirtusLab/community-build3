@@ -84,13 +84,26 @@ object CommunityBuildPlugin extends AutoPlugin {
         val s = extracted.structure
         val refs = s.allProjectRefs
         val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
-
-        val scalaBinaryVersionSuffix = "_" + (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+        val scalaBinaryVersionUsed = (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+        val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
         val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
 
+        // Ignore projects for which crossScalaVersion does not contain any binary version
+        // of currently used Scala version. This is important in case of usage projectMatrix and 
+        // Scala.js / Scala Native, which can define multiple projects for different major Scala versions
+        // but with common target, eg. foo2_13, foo3
+        def projectSupportScalaBinaryVersion(projectRef: ProjectRef): Boolean =  {
+          extracted.get(projectRef / crossScalaVersions)
+            .exists(CrossVersion.binaryScalaVersion(_) == scalaBinaryVersionUsed)
+        }
         val originalModuleIds: Map[String, ProjectRef] =  IO.readLines(file("community-build-mappings.txt"))
-          .map(_.split(' ')).map(d => d(0) -> refsByName(d(1))).toMap
-        val moduleIds: Map[String, ProjectRef] = mkMappings.value.toMap
+          .map(_.split(' '))
+          .map(d => d(0) -> refsByName(d(1)))
+          .filter{ case (_, projectRef) => projectSupportScalaBinaryVersion(projectRef)}
+          .toMap
+        val moduleIds: Map[String, ProjectRef] = mkMappings.value
+          .filter{ case (_, projectRef) => projectSupportScalaBinaryVersion(projectRef)}
+          .toMap
 
         println("Starting build...")
         
@@ -121,6 +134,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           
           }
         ).toSet
+        println(topLevelProjects)
 
         val projectDeps = s.allProjectPairs.map {case (rp, ref) =>
           ref -> rp.dependencies.map(_.project)
