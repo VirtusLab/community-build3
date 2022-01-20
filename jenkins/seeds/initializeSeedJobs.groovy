@@ -31,6 +31,7 @@ pipelineJob('/runBuild') {
         stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
         stringParam("requiredProjects", "", "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
         textParam("replacedProjects", "", "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
+        textParam("projectsConfig", "", "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file")
         separator {
             name("COMMUNITY_PROJECT")
             sectionHeader("Community project")
@@ -82,6 +83,7 @@ pipelineJob('/computeBuildPlan') {
         stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
         stringParam("requiredProjects", "", "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
         textParam("replacedProjects", "", "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
+        textParam("projectsConfig", "", "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file.")
     }
 }
 
@@ -121,6 +123,7 @@ pipelineJob('/buildCommunityProject') {
     parameters {
         stringParam("buildName")
         stringParam("projectName")
+        stringParam("projectConfig")
         stringParam("repoUrl")
         stringParam("revision")
         stringParam("javaVersion")

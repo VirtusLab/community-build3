@@ -11,8 +11,8 @@ minStarsCount="$2" # e.g. 100
 maxProjectsCount="$3" # e.g. 50, negative number for no limit
 requiredProjects="$4" # e.g "typelevel/cats,scalaz/scalaz"
 replacedProjectsConfigPath="$5" # e.g. /tmp/replaced-projects.txt 
-maintainedProjectsConfigsPath="$5" # e.g. /tmp/project-configs.json 
+projectsConfigPath="$6" # e.g. /tmp/projects-config.conf 
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-cd $scriptDir && sbt "runMain storeDependenciesBasedBuildPlan \"$scalaVersion\" \"$minStarsCount\" \"$maxProjectsCount\" \"$requiredProjects\" \"$replacedProjectsConfigPath\" \"$maintainedProjectsConfigsPath\""
+cd $scriptDir && sbt "runMain storeDependenciesBasedBuildPlan \"$scalaVersion\" \"$minStarsCount\" \"$maxProjectsCount\" \"$requiredProjects\" \"$replacedProjectsConfigPath\" \"$projectsConfigPath\""

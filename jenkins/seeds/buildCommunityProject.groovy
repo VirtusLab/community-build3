@@ -111,10 +111,20 @@ pipeline {
                                       # Assume failure unless overwritten by a successful build
                                       echo 'failure' > build-status.txt 
                                       touch build-logs.txt build-summary.txt
- 
-                                      (/build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' '${params.enforcedSbtVersion}' 2>&1 | tee build-logs.txt) \
-                                        && [ "\$(cat build-status.txt)" = success ]
-                                      """
+                                    """
+                                    ansiColor('xterm') {
+                                        sh """
+                                            (/build/build-revision.sh \
+                                                '${params.repoUrl}' \
+                                                '${params.revision}' \
+                                                '${params.scalaVersion}' \
+                                                '${params.version}' \
+                                                '${params.targets}' \
+                                                '${params.mvnRepoUrl}' \
+                                                '${params.enforcedSbtVersion}' \
+                                                '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
+                                            && [ "\$(cat build-status.txt)" = success ]
+                                        """
                                     }
                                   }
                                 }

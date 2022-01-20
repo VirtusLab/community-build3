@@ -64,7 +64,8 @@ pipeline {
                                     string(name: "minStarsCount", value: params.minStarsCount),
                                     string(name: "maxProjectsCount", value: params.maxProjectsCount),
                                     string(name: "requiredProjects", value: params.requiredProjects),
-                                    text(name: "replacedProjects", value: params.replacedProjects)
+                                    text(name: "replacedProjects", value: params.replacedProjects),
+                                    text(name: "projectsConfig", value: params.projectsConfig)
                                 ]
                             )
                         }
@@ -140,23 +141,19 @@ pipeline {
                         [project.name, project.dependencies]
                     }
                     def inversedProjectDeps = inverseMultigraph(projectDeps)
-                    def delayInSeconds = 0
-                    def sortedProjects = projectsByNumberOfDependencies(buildPlan)
-                    for(project in sortedProjects) {
+                    for(project in buildPlan) {
                         def proj = project // capture value for closure
-                        // Do not start all builds at the same time, it might lead to crashing Jenkins instance in a hard to recover manner
-                        def delay = delayInSeconds
-                        delayInSeconds += 5
+                        def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
                         jobs[proj.name] = {
                             build(
                                 job: communityProjectJobName,
-                                quietPeriod: delay,
                                 parameters: [
                                     string(name: "buildName", value: buildName),
                                     string(name: "projectName", value: proj.name),
                                     string(name: "repoUrl", value: proj.repoUrl),
                                     string(name: "revision", value: proj.revision),
-                                    string(name: "javaVersion", value: proj.config?.java?.version), 
+                                    string(name: "javaVersion", value: proj.config?.java?.version),
+                                    string(name: "projectConfig", value: projectConfigJson), 
                                     string(name: "scalaVersion", value: compilerVersion),
                                     string(name: "version", value: proj.version),
                                     string(name: "targets", value: proj.targets),
@@ -176,9 +173,4 @@ pipeline {
             }
         }
     }
-}
-
-@NonCPS
-static projectsByNumberOfDependencies(buildPlan) {
-    buildPlan.sort { it.dependencies.size() }
 }

@@ -286,7 +286,7 @@ private given FromString[Seq[Project]] = str =>
     maxProjectsCount: Int,
     requiredProjects: Seq[Project],
     replacedProjectsConfigPath: String,
-    maintainedProjectsConfigPath: String
+    projectsConfigPath: String
 ) =
   val depGraph = loadDepenenecyGraph(
     scalaBinaryVersionSeries,
@@ -297,7 +297,7 @@ private given FromString[Seq[Project]] = str =>
   val plan = makeDependenciesBasedBuildPlan(
     depGraph,
     replacedProjectsConfigPath,
-    maintainedProjectsConfigPath
+    projectsConfigPath
   )
 
   import java.nio.file._
