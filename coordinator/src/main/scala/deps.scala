@@ -14,7 +14,10 @@ def loadProjects(scalaRelease: String): Seq[Project] =
         Project(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
       }
     }
-  (1 to 10000).to(LazyList).map(load).takeWhile(_.nonEmpty).flatten 
+  LazyList.from(0)
+    .map(load)
+    .takeWhile(_.nonEmpty)
+    .flatten
 
 case class ModuleInVersion(version: String, modules: Seq[String])
 
@@ -75,17 +78,49 @@ def loadMavenInfo(scalaBinaryVersionSeries: String)(projectModules: ProjectModul
   /**
    * @param scalaBinaryVersionSeries Scala binary version name (major.minor) or `3.x` for scala 3 - following scaladex's convention
   */
-def loadDepenenecyGraph(scalaBinaryVersionSeries: String, minStarsCount: Int, maxProjectsCount: Option[Int] = None, requiredProjects: Seq[Project] = Seq.empty): DependencyGraph =
-  val projects = maxProjectsCount match
-    case Some(maxCount) if maxCount > requiredProjects.length =>
-      val loadedProjects = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersionSeries))
-      val topLoadedProject = loadedProjects.filter(_.stars >= minStarsCount).sortBy(-_.stars)
-      requiredProjects ++ topLoadedProject.take(maxCount - requiredProjects.length)
-    case _ =>
-      requiredProjects
+def loadDepenenecyGraph(
+    scalaBinaryVersionSeries: String,
+    minStarsCount: Int,
+    maxProjectsCount: Option[Int] = None,
+    requiredProjects: Seq[Project] = Nil,
+    filterPatterns: Seq[String] = Nil
+): DependencyGraph =
+  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersionSeries))(p)
 
-  val rawDependencies = projects.map(cached(loadScaladexProject(scalaBinaryVersionSeries)))
-  val withMavenLoaded = rawDependencies.filter(_.mvs.nonEmpty).map(loadMavenInfo(scalaBinaryVersionSeries))
-  DependencyGraph(scalaBinaryVersionSeries, withMavenLoaded)
+  val required = LazyList
+    .from(requiredProjects)
+    .map(loadProject)
+  val optional = maxProjectsCount.fold(LazyList.empty) { maxCount =>
+    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersionSeries))
+      .filter(_.stars >= minStarsCount)
+      .sortBy(-_.stars)
+      .to(LazyList)
+      .map(loadProject)
+      .map(projectModulesFilter(filterPatterns.map(_.r)))
+      .filter(_.mvs.nonEmpty)
+      .take(maxCount - required.length)
+  }
+  val projects = (required #::: optional)
+    .map(loadMavenInfo(scalaBinaryVersionSeries))
+  DependencyGraph(scalaBinaryVersionSeries, projects)
 
+def projectModulesFilter(
+    filterPatterns: Seq[util.matching.Regex]
+)(project: ProjectModules): ProjectModules = {
+  val p = project.project
+  project.copy(mvs =
+    project.mvs
+      .collect {
+        case mvs @ ModuleInVersion(version, modules)
+            // Each entry is represented in form of `<organization>:<project/module>:<version>`
+            // Filter out whole project for given version
+            if !filterPatterns.exists(_.matches(s"${p.org}:${p.name}:$version")) =>
+          mvs.copy(modules = modules.filter { module =>
+            // Filter out modules for given version
+            !filterPatterns.exists(_.matches(s"${p.org}:$module:$version"))
+          })
+      }
+      .filter(_.modules.nonEmpty)
+  )
+}
 @main def runDeps = loadDepenenecyGraph("3.x", minStarsCount = 100)

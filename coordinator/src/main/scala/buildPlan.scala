@@ -65,8 +65,6 @@ def buildPlanCommons(depGraph: DependencyGraph) =
 
   (topLevelData, fullInfo, projectsDeps)
 
-  
-
 def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
 
@@ -168,18 +166,22 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   Files.write(Paths.get("data", "bp.txt"), bp.getBytes)
   plan
 
-def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsConfigPath: String, internalProjectConfigsPath: String) =
+def makeDependenciesBasedBuildPlan(
+    depGraph: DependencyGraph,
+    replacedProjectsConfigPath: String,
+    internalProjectConfigsPath: String
+) =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
 
   val dottyProjectName = "lampepfl_dotty"
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
-  val replacements = scala.io.Source.fromFile(replacedProjectsConfigPath)
+  val replacements = scala.io.Source
+    .fromFile(replacedProjectsConfigPath)
     .getLines
     .filter(line => line.nonEmpty && !line.startsWith("#"))
-    .map {
-      case replacementPattern(org1, name1, org2, name2, branch) =>
-        (org1, name1) -> ((org2, name2), Option(branch))
+    .map { case replacementPattern(org1, name1, org2, name2, branch) =>
+      (org1, name1) -> ((org2, name2), Option(branch))
     }
     .toMap
 
@@ -198,14 +200,15 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph, replacedProjectsCo
     s"${org}_${name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
 
-  lazy val referenceConfig = ConfigSource.resources("buildPlan.reference.conf").cursor().flatMap(_.asConfigValue).toOption
+  lazy val referenceConfig =
+    ConfigSource.resources("buildPlan.reference.conf").cursor().flatMap(_.asConfigValue).toOption
   def internalProjectConfigs(projectName: String) = {
     val fallbackConfig = referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(projectName, _))
     val config = ConfigSource
-          .file(internalProjectConfigsPath)
-          .withFallback(ConfigSource.fromConfig(fallbackConfig))
-          .at(projectName)
-          .load[ProjectConfig]
+      .file(internalProjectConfigsPath)
+      .withFallback(ConfigSource.fromConfig(fallbackConfig))
+      .at(projectName)
+      .load[ProjectConfig]
 
     config.left.foreach {
       case ConfigReaderFailures(
@@ -286,13 +289,23 @@ private given FromString[Seq[Project]] = str =>
     maxProjectsCount: Int,
     requiredProjects: Seq[Project],
     replacedProjectsConfigPath: String,
-    projectsConfigPath: String
+    projectsConfigPath: String,
+    projectsFilterPath: String
 ) =
+  val filterPatterns = io.Source
+    .fromFile(projectsFilterPath)
+    .getLines
+    .map(_.trim())
+    .filterNot(_.startsWith("#"))
+    .filter(_.nonEmpty)
+    .toSeq
+    
   val depGraph = loadDepenenecyGraph(
     scalaBinaryVersionSeries,
     minStarsCount = minStarsCount,
     maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
-    requiredProjects
+    requiredProjects = requiredProjects,
+    filterPatterns = filterPatterns
   )
   val plan = makeDependenciesBasedBuildPlan(
     depGraph,

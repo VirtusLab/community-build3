@@ -84,6 +84,7 @@ pipelineJob('/computeBuildPlan') {
         stringParam("requiredProjects", "", "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
         textParam("replacedProjects", "", "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
         textParam("projectsConfig", "", "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file.")
+        textParam("projectsFilters", "", "List of regex patterns used for exclusion of projects from build plan. Each entry should be put in seperate lines, it would be used to match the pattern <org>:<project_or_module>:<version> e.g. foo:bar:0.0.1-RC1.")
     }
 }
 

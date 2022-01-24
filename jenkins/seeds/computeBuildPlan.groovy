@@ -40,7 +40,15 @@ pipeline {
                               echo 'computing the build plan'
                               cat << EOF > /tmp/replaced-projects.txt \n${params.replacedProjects}\nEOF
                               cat << EOF > /tmp/maintained-project-configs.conf \n${params.projectsConfig}\nEOF
-                              /build/compute-build-plan.sh '${params.scalaBinaryVersionSeries}' '${params.minStarsCount}' '${params.maxProjectsCount}' '${params.requiredProjects}' /tmp/replaced-projects.txt /tmp/maintained-project-configs.conf
+                              cat << EOF > /tmp/projects-filters.txt \n${params.projectsFilters}\nEOF
+                              /build/compute-build-plan.sh \
+                               '${params.scalaBinaryVersionSeries}' \
+                               '${params.minStarsCount}' \
+                               '${params.maxProjectsCount}' \
+                               '${params.requiredProjects}' \
+                               /tmp/replaced-projects.txt \
+                               /tmp/maintained-project-configs.conf \
+                               /tmp/projects-filters.txt
                             """
                         }
                         buildPlan = sh(
