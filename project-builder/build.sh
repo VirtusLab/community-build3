@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -ne 7 ]; then
-  echo "Wrong number of script arguments"
+  echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <sbt_version?> <project_config?>, got $#: $@"
   exit 1
 fi
 
@@ -34,9 +34,9 @@ sbtSettings=(
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands? // [] | join("; ")')
 
 sbt $sbtVersionSetting ${sbtSettings[@]} \
-  \;++"$scalaVersion"! \
-  \;"set every version := \"$version\"" \
-  \;"set every credentials := Nil" \
-  \;"$customCommands" \
-  \;"moduleMappings" \
-  \;"runBuild $targets"
+  "++$scalaVersion"! \
+  "set every version := \"$version\"" \
+  "set every credentials := Nil" \
+  "$customCommands" \
+  "moduleMappings" \
+  "runBuild $targets"

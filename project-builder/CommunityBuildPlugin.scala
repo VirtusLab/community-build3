@@ -89,52 +89,67 @@ object CommunityBuildPlugin extends AutoPlugin {
         val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
 
         // Ignore projects for which crossScalaVersion does not contain any binary version
-        // of currently used Scala version. This is important in case of usage projectMatrix and 
+        // of currently used Scala version. This is important in case of usage projectMatrix and
         // Scala.js / Scala Native, which can define multiple projects for different major Scala versions
         // but with common target, eg. foo2_13, foo3
-        def projectSupportScalaBinaryVersion(projectRef: ProjectRef): Boolean =  {
-          extracted.get(projectRef / crossScalaVersions)
-            .exists(CrossVersion.binaryScalaVersion(_) == scalaBinaryVersionUsed)
+        def projectSupportsScalaBinaryVersion(
+            projectRef: ProjectRef
+        ): Boolean = {
+          val hasCrossVersionSet = extracted
+            .get(projectRef / crossScalaVersions)
+            .exists {
+              // Do not make exact check to handle projects using 3.0.0-RC* versions
+              CrossVersion
+                .binaryScalaVersion(_)
+                .startsWith(scalaBinaryVersionUsed)
+            }
+          // Workaround for scalatest/circe which does not set crossScalaVersions correctly
+          def matchesName = {
+            Seq("Dotty").exists(projectRef.project.contains)
+          }
+          hasCrossVersionSet || matchesName
         }
         val originalModuleIds: Map[String, ProjectRef] =  IO.readLines(file("community-build-mappings.txt"))
           .map(_.split(' '))
           .map(d => d(0) -> refsByName(d(1)))
-          .filter{ case (_, projectRef) => projectSupportScalaBinaryVersion(projectRef)}
+          .filter { case (_, projectRef) =>
+            projectSupportsScalaBinaryVersion(projectRef)
+          }
           .toMap
-        val moduleIds: Map[String, ProjectRef] = mkMappings.value
-          .filter{ case (_, projectRef) => projectSupportScalaBinaryVersion(projectRef)}
-          .toMap
+        val moduleIds: Map[String, ProjectRef] = mkMappings.value.filter {
+          case (_, projectRef) => projectSupportsScalaBinaryVersion(projectRef)
+        }.toMap
 
         println("Starting build...")
-        
+
         // Find projects that matches maven
         val topLevelProjects = (
           for {
             id <- ids
             actualId = id + scalaVersionSuffix
-          } yield
-            Seq(
-              refsByName.get(id),
-              originalModuleIds.get(id + scalaVersionSuffix),
-              originalModuleIds.get(id + scalaBinaryVersionSuffix),
-              originalModuleIds.get(id),
-              moduleIds.get(id + scalaVersionSuffix),
-              moduleIds.get(id + scalaBinaryVersionSuffix),
-              moduleIds.get(id)
-            ).flatten.headOption.getOrElse{
-              println("Module mapping missing:")
-              println(s"id: $id")
-              println(s"actualId: $actualId")
-              println(s"scalaVersionSuffix: $scalaVersionSuffix")
-              println(s"scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix")
-              println(s"refsByName: $refsByName")
-              println(s"originalModuleIds: $originalModuleIds")
-              println(s"moduleIds: $moduleIds")
-              throw new Exception("Module mapping missing")
+            candidates = for {
+              suffix <-
+                Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
+                  Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3."))
+              fullId = s"$id$suffix"
+            } yield Seq(
+              refsByName.get(fullId),
+              originalModuleIds.get(fullId),
+              moduleIds.get(fullId)
+            ).flatten
+          } yield candidates.flatten.headOption.getOrElse {
+            println("Module mapping missing:")
+            println(s"id: $id")
+            println(s"actualId: $actualId")
+            println(s"scalaVersionSuffix: $scalaVersionSuffix")
+            println(s"scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix")
+            println(s"refsByName: $refsByName")
+            println(s"originalModuleIds: $originalModuleIds")
+            println(s"moduleIds: $moduleIds")
+            throw new Exception("Module mapping missing")
           
           }
         ).toSet
-        println(topLevelProjects)
 
         val projectDeps = s.allProjectPairs.map {case (rp, ref) =>
           ref -> rp.dependencies.map(_.project)
