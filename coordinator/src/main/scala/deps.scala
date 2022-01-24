@@ -2,6 +2,9 @@ import org.jsoup._
 import collection.JavaConverters._
 import java.nio.file._
 import scala.sys.process._
+import scala.concurrent.*
+import scala.concurrent.duration.*
+import scala.concurrent.ExecutionContext.Implicits.global
 
 // TODO scala3 should be more robust
 def loadProjects(scalaRelease: String): Seq[Project] = 
@@ -14,7 +17,8 @@ def loadProjects(scalaRelease: String): Seq[Project] =
         Project(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
       }
     }
-  LazyList.from(0)
+  LazyList
+    .from(0)
     .map(load)
     .takeWhile(_.nonEmpty)
     .flatten
@@ -100,8 +104,14 @@ def loadDepenenecyGraph(
       .filter(_.mvs.nonEmpty)
       .take(maxCount - required.length)
   }
-  val projects = (required #::: optional)
-    .map(loadMavenInfo(scalaBinaryVersionSeries))
+  val projects = {
+    val loadProjects = Future.traverse(required #::: optional) { project =>
+      Future {
+        loadMavenInfo(scalaBinaryVersionSeries)(project)
+      }
+    }
+    Await.result(loadProjects, 30.minutes)
+  }
   DependencyGraph(scalaBinaryVersionSeries, projects)
 
 def projectModulesFilter(
