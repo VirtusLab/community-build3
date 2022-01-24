@@ -16,4 +16,4 @@ projectFiltersPath="$7" # e.g. /tmp/projects-filter.txt
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-cd $scriptDir && sbt "runMain storeDependenciesBasedBuildPlan \"$scalaVersion\" \"$minStarsCount\" \"$maxProjectsCount\" \"$requiredProjects\" \"$replacedProjectsConfigPath\" \"$projectsConfigPath\"" \"$projectFiltersPath\""
+cd $scriptDir && sbt "runMain storeDependenciesBasedBuildPlan \"$scalaVersion\" \"$minStarsCount\" \"$maxProjectsCount\" \"$requiredProjects\" \"$replacedProjectsConfigPath\" \"$projectsConfigPath\" \"$projectFiltersPath\""
