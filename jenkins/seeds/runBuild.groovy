@@ -65,7 +65,8 @@ pipeline {
                                     string(name: "maxProjectsCount", value: params.maxProjectsCount),
                                     string(name: "requiredProjects", value: params.requiredProjects),
                                     text(name: "replacedProjects", value: params.replacedProjects),
-                                    text(name: "projectsConfig", value: params.projectsConfig)
+                                    text(name: "projectsConfig", value: params.projectsConfig),
+                                    text(name: "projectsFilters", value: params.projectsFilters) 
                                 ]
                             )
                         }
