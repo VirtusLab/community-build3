@@ -14,8 +14,11 @@ export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 enforcedSbtVersion="$6"
 projectConfig="$7"
 
-targetExcludeFilters=$(echo $projectConfig | jq -r '.sbt.exclude? // ["\".*\""] | join ("|")')
-targets=( $( for target in ${unfilteredTargets[@]} ; do echo $target ; done | grep -E -v "(${targetExcludeFilters})" ) )
+targets=${unfilteredTargets[@]}
+targetExcludeFilters=$(echo $projectConfig | jq -r '.sbt.exclude? // [] | join ("|")')
+if [ ! -z ${targetExcludeFilters} ]; then
+  targets=( $( for target in ${unfilteredTargets[@]} ; do echo $target ; done | grep -E -v "(${targetExcludeFilters})" ) )
+fi
 
 echo '##################################'
 echo Scala version: $scalaVersion
