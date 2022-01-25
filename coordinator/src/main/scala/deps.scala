@@ -118,16 +118,23 @@ def projectModulesFilter(
     filterPatterns: Seq[util.matching.Regex]
 )(project: ProjectModules): ProjectModules = {
   val p = project.project
+  def matchPatternAndLog(v: String): Boolean = {
+    filterPatterns
+      .find(_.matches(v))
+      .tapEach { pattern => println(s"Excluding entry $v, matched by pattern ${pattern.regex}") }
+      .nonEmpty
+  }
+
   project.copy(mvs =
     project.mvs
       .collect {
         case mvs @ ModuleInVersion(version, modules)
             // Each entry is represented in form of `<organization>:<project/module>:<version>`
             // Filter out whole project for given version
-            if !filterPatterns.exists(_.matches(s"${p.org}:${p.name}:$version")) =>
+            if !matchPatternAndLog(s"${p.org}:${p.name}:$version") =>
           mvs.copy(modules = modules.filter { module =>
             // Filter out modules for given version
-            !filterPatterns.exists(_.matches(s"${p.org}:$module:$version"))
+            !matchPatternAndLog(s"${p.org}:$module:$version")
           })
       }
       .filter(_.modules.nonEmpty)
