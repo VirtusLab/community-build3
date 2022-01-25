@@ -104,21 +104,31 @@ object CommunityBuildPlugin extends AutoPlugin {
                 .startsWith(scalaBinaryVersionUsed)
             }
           // Workaround for scalatest/circe which does not set crossScalaVersions correctly
-          def matchesName = {
-            Seq("Dotty").exists(projectRef.project.contains)
-          }
+          def matchesName = 
+            scalaBinaryVersionUsed.startsWith("3.") && projectRef.project.contains("Dotty")
           hasCrossVersionSet || matchesName
         }
+
+        def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
+          require(projects.nonEmpty, "selectProject with empty projects argument")
+          projects.map(_._2) match {
+            case Seq(project) => project
+            case projects => projects
+              .find(projectSupportsScalaBinaryVersion)
+              .getOrElse(sys.error(s"Failed to select a project for Scala ${scalaBinaryVersionUsed} in ${projects.map(_.project).toList}"))
+          }
+        }
+
         val originalModuleIds: Map[String, ProjectRef] =  IO.readLines(file("community-build-mappings.txt"))
           .map(_.split(' '))
           .map(d => d(0) -> refsByName(d(1)))
-          .filter { case (_, projectRef) =>
-            projectSupportsScalaBinaryVersion(projectRef)
-          }
+          .groupBy(_._1)
+          .mapValues(selectProject)
           .toMap
-        val moduleIds: Map[String, ProjectRef] = mkMappings.value.filter {
-          case (_, projectRef) => projectSupportsScalaBinaryVersion(projectRef)
-        }.toMap
+        val moduleIds: Map[String, ProjectRef] = mkMappings.value
+          .groupBy(_._1)
+          .mapValues(selectProject)
+          .toMap
 
         println("Starting build...")
 
