@@ -18,5 +18,5 @@ projectConfig="$8"
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 $scriptDir/checkout.sh "$repoUrl" "$rev" repo
-$scriptDir/prepare-project.sh repo "$enforcedSbtVersion"
-$scriptDir/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$enforcedSbtVersion" "$projectConfig"
+$scriptDir/sbt-prepare-project.sh repo "$enforcedSbtVersion"
+$scriptDir/sbt-build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$enforcedSbtVersion" "$projectConfig"
