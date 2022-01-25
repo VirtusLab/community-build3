@@ -105,17 +105,18 @@ object CommunityBuildPlugin extends AutoPlugin {
             }
           // Workaround for scalatest/circe which does not set crossScalaVersions correctly
           def matchesName = 
-            scalaBinaryVersionUsed.startsWith("3.") && projectRef.project.contains("Dotty")
+            scalaBinaryVersionUsed.startsWith("3") && projectRef.project.contains("Dotty")
           hasCrossVersionSet || matchesName
         }
 
         def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
           require(projects.nonEmpty, "selectProject with empty projects argument")
+          val target = projects.head._1
           projects.map(_._2) match {
             case Seq(project) => project
             case projects => projects
               .find(projectSupportsScalaBinaryVersion)
-              .getOrElse(sys.error(s"Failed to select a project for Scala ${scalaBinaryVersionUsed} in ${projects.map(_.project).toList}"))
+              .getOrElse(sys.error(s"Multiple targets found for ${target}, failed to select a single project that can be used with Scala ${scalaBinaryVersionUsed} in ${projects.map(_.project)}"))
           }
         }
 
@@ -140,7 +141,7 @@ object CommunityBuildPlugin extends AutoPlugin {
             candidates = for {
               suffix <-
                 Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
-                  Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3."))
+                  Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
               fullId = s"$id$suffix"
             } yield Seq(
               refsByName.get(fullId),
