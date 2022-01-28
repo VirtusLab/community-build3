@@ -18,5 +18,19 @@ projectConfig="$8"
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 $scriptDir/checkout.sh "$repoUrl" "$rev" repo
-$scriptDir/sbt-prepare-project.sh repo "$enforcedSbtVersion"
-$scriptDir/sbt-build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$enforcedSbtVersion" "$projectConfig"
+
+if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
+  echo "Mill project found: ${isMillProject}"
+  $scriptDir/mill-prepare-project.sh repo "$scalaVersion" "$version"
+  $scriptDir/mill-build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig"
+
+elif [ -f "repo/build.sbt" ]; then 
+  echo "sbt project found: ${isSbtProject}"
+  $scriptDir/sbt-prepare-project.sh repo "$enforcedSbtVersion"
+  $scriptDir/sbt-build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$enforcedSbtVersion" "$projectConfig"
+
+else
+  echo "Unknown project build tool, project layout:"
+  ls -l repo/
+  exit 1
+fi
