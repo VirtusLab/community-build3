@@ -35,13 +35,15 @@ fi
 
 sbtSettings=(
   -Dcommunitybuild.version="$version"
+  "-J-Xmx5G"
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")')
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands? // [] | join("; ")')
 
+# Use `ThisBuild/Compile/version` instead of `every version`, as it might overrte Jmh/Jcstress versions
 sbt $sbtVersionSetting ${sbtSettings[@]} \
   "++$scalaVersion"! \
-  "set every version := \"$version\"" \
+  "set ThisBuild/Compile/version := \"$version\"" \
   "set every credentials := Nil" \
   "$customCommands" \
   "moduleMappings" \

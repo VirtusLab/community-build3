@@ -69,7 +69,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   }
 
   lazy val ourVersion = 
-    Option(sys.props("communitybuild.version"))
+    Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
 
   override def globalSettings = Seq(
     moduleMappings := { // Store settings in file to capture its original scala versions
