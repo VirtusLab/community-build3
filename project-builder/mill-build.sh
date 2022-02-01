@@ -35,5 +35,8 @@ millSettings=(
 args=(runCommunityBuild --scalaVersion "$scalaVersion" "$targets")
 
 # Use shipped version when available
-./mill ${millSettings[@]} ${args[@]} \
-  || mill ${millSettings[@]} ${args[@]}
+if [ -f ./mill ]; then
+  ./mill ${millSettings[@]} ${args[@]} 
+else 
+  mill ${millSettings[@]} ${args[@]}
+fi

@@ -205,14 +205,16 @@ private def mapEval(
     module: Module,
     labels: String*
 )(
-    onFailure: => BuildStepResult
+  onFailure: => BuildStepResult
 )(onSucces: => BuildStepResult)(implicit ctx: Ctx) = {
   lazy val renderedPath =
     s"$module.${Segments(labels.map(Label(_)): _*).render}"
 
   tryEval(module, labels: _*)
     .fold {
-      sys.error(s"Failed to eval $renderedPath")
+      // Target not found, skip it and treat as successfull
+      ctx.log.error(s"Not found target '$renderedPath', skipping.")
+      onSucces
     } {
       case Result.Success(v) =>
         ctx.log.info(s"Successfully evaluated $renderedPath")
