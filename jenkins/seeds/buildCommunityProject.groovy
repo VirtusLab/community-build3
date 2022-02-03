@@ -21,6 +21,9 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 
 pipeline {
     agent none
+    options {
+      timeout(time: 8, unit: "HOURS")
+    } 
     stages {
         stage("Initialize build") {
             steps {
@@ -47,9 +50,6 @@ pipeline {
             }
         }
         stage("Prepare executor") {
-            options {
-                timeout(time: 1, unit: "HOURS")
-            }
             agent {
                 kubernetes {
                     yaml """
@@ -80,7 +80,7 @@ pipeline {
                             tty: true
                             resources:
                               requests:
-                                memory: 4Gi
+                                memory: 5Gi
                               limits:
                                 memory: 6Gi
                             env:
@@ -98,8 +98,8 @@ pipeline {
             stages {
                 stage("Build project") {
                     options {
-                        timeout(time: 1, unit: "HOURS")
-                    }
+                      timeout(time: 1, unit: "HOURS")
+                    } 
                     steps {
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
