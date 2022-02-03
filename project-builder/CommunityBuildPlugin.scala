@@ -52,6 +52,38 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   private def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s }
 
+  /**
+   * Helper command used to set correct version for publishing Defined due to a
+   * bug in sbt which does not allow for usage of `set every` with scoped keys
+   * We need to use this task instead of `set every Compile/version := ???`,
+   * becouse it would set given value also in Jmh/version or Jcstress/version
+   * scopes, leading build failures
+   */
+  val setPublishVersion = Command.args("setPublishVersion", "<args>") { case (state, args) =>
+    args.headOption
+      .orElse(sys.props.get("communitybuild.version"))
+      .fold {
+        System.err.println("No explicit version found in setPublishVersion command, skipping")
+        state
+      } { version =>
+        println(s"Setting publish version to $version")
+
+        val structure                      = sbt.Project.extract(state).structure
+        def setVersionCmd(project: String) = s"""set $project/version := "$version" """
+
+        structure.allProjectRefs.collect {
+          // Filter out root project, we need to use ThisBuild instead of root project name
+          case ref @ ProjectRef(uri, project) if structure.rootProject(uri) != project => ref
+        }.foldLeft(Command.process(setVersionCmd("ThisBuild"), state)) { case (state, ref) =>
+          // Check if project needs explicit overwrite, skip otherwise 
+          val s              = sbt.Project.extract(state).structure
+          val projectVersion = (ref / Keys.version).get(s.data).get
+          if (projectVersion == version) state
+          else Command.process(setVersionCmd(ref.project), state)
+        }
+      }
+  }
+
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
      val cState = state.value

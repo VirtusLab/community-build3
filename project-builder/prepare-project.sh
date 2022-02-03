@@ -46,4 +46,7 @@ fi
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+# Register command for setting up version, for more info check command impl comments
+echo -e "commands += CommunityBuildPlugin.setPublishVersion\n" >> $repoDir/build.sbt
+
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala

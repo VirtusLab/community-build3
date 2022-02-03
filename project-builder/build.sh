@@ -40,10 +40,10 @@ sbtSettings=(
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands? // [] | join("; ")')
 
-# Use `ThisBuild/Compile/version` instead of `every version`, as it might overrte Jmh/Jcstress versions
+# Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
 sbt $sbtVersionSetting ${sbtSettings[@]} \
   "++$scalaVersion"! \
-  "set ThisBuild/Compile/version := \"$version\"" \
+  "setPublishVersion $version" \
   "set every credentials := Nil" \
   "$customCommands" \
   "moduleMappings" \
