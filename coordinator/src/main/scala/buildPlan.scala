@@ -208,7 +208,7 @@ def makeDependenciesBasedBuildPlan(
       .file(internalProjectConfigsPath)
       .withFallback(ConfigSource.fromConfig(fallbackConfig))
       .at(projectName)
-      .load[ProjectConfig]
+      .load[ProjectBuildConfig]
 
     config.left.foreach {
       case ConfigReaderFailures(
@@ -228,7 +228,7 @@ def makeDependenciesBasedBuildPlan(
       name: String,
       repoUrl: String,
       tagOrRevision: Option[String]
-  ): Option[ProjectConfig] = {
+  ): Option[ProjectBuildConfig] = {
     val revision = tagOrRevision.getOrElse("HEAD")
 
     def readProjectConfig() = {
@@ -236,7 +236,7 @@ def makeDependenciesBasedBuildPlan(
       val config = ConfigSource
         .url(new URL(s"$baseURL/raw/$revision/scala3-community-build.conf"))
         .withFallback(ConfigSource.resources("buildPlan.reference.conf"))
-        .load[ProjectConfig]
+        .load[ProjectBuildConfig]
 
       config.left.foreach {
         case ConfigReaderFailures(
@@ -252,7 +252,7 @@ def makeDependenciesBasedBuildPlan(
 
     readProjectConfig()
       .orElse(internalProjectConfigs(name))
-      .filter(_ != ProjectConfig.empty)
+      .filter(_ != ProjectBuildConfig.empty)
       .map { config =>
         println(s"Using custom project config for $name: $config")
         config

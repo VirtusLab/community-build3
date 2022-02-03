@@ -44,12 +44,18 @@ case class BuildStep(
 
 case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 
-case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectConfig])
+case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectBuildConfig])
 
 // Community projects configs
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
-case class SbtConfig(exclude: List[String] = Nil, commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
-case class ProjectConfig(java: JavaConfig, sbt: SbtConfig) derives ConfigReader
-object ProjectConfig{
-  val empty = ProjectConfig(java = JavaConfig(), sbt = SbtConfig())
+case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
+case class ProjectsConfig(exclude: List[String] = Nil)
+case class ProjectBuildConfig(
+    projects: ProjectsConfig = ProjectsConfig(),
+    java: JavaConfig = JavaConfig(),
+    sbt: SbtConfig = SbtConfig()
+) derives ConfigReader
+
+object ProjectBuildConfig {
+  val empty = ProjectBuildConfig()
 }
