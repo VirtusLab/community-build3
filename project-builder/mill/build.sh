@@ -14,7 +14,7 @@ mavenRepoUrl="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
 
 targets=${unfilteredTargets[@]}
-targetExcludeFilters=$(echo $projectConfig | jq -r '.mill?.exclude? // [] | join ("|")')
+targetExcludeFilters=$(echo $projectConfig | jq -r '.projects?.exclude? // [] | join ("|")')
 if [ ! -z ${targetExcludeFilters} ]; then
   targets=( $( for target in ${unfilteredTargets[@]} ; do echo $target ; done | grep -E -v "(${targetExcludeFilters})" ) )
 fi
