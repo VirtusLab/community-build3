@@ -4,17 +4,19 @@ import mill.eval._
 import mill.define.{Cross => DefCross, _}
 import mill.define.Segment._
 import requests._
+import coursier.maven.MavenRepository
+import coursier.Repository
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
 trait CommunityBuildPublishModule extends PublishModule { outer =>
-  def publishCommunityBuild() = T.command {
-    val mavenRepoUrl: String = sys.props
-      .get("communitybuild.maven.url")
-      .map(_.stripSuffix("/"))
-      .getOrElse {
-        sys.error("Required property 'communitybuild.maven.url' not set")
-      }
+  private val mavenRepoUrl: String = sys.props
+    .get("communitybuild.maven.url")
+    .map(_.stripSuffix("/"))
+    .getOrElse {
+      sys.error("Required property 'communitybuild.maven.url' not set")
+    }
 
+  def publishCommunityBuild() = T.command {
     val PublishModule.PublishData(metadata, artifacts) = publishArtifacts()
     val artifactModulePath = {
       val org = metadata.group.replace(".", "/")
@@ -35,6 +37,10 @@ trait CommunityBuildPublishModule extends PublishModule { outer =>
         )
       }
     }
+  }
+
+  override def repositoriesTask: Task[Seq[Repository]] = T.task {
+    MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
   }
 }
 
