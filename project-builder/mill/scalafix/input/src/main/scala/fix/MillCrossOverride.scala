@@ -8,6 +8,9 @@ object MillCrossOverride {
     abstract class Cross[T](args: Any*)
     abstract class ModuleType
   }
+
+  sealed abstract class MillCommunityBuildCross[T](cases: Any*)(version: String)
+
   import mill._
 
   object module extends Cross[ModuleType]((Seq("2.13.8", "3.0.0") ++ Option("3.1.0")): _*)

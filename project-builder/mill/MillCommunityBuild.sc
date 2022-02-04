@@ -7,15 +7,29 @@ import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
 
-// Extension to publish module allowing to upload artifacts to custom maven repo
-trait CommunityBuildPublishModule extends PublishModule { outer =>
-  private val mavenRepoUrl: String = sys.props
+trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
+  protected val mavenRepoUrl: String = sys.props
     .get("communitybuild.maven.url")
     .map(_.stripSuffix("/"))
     .getOrElse {
       sys.error("Required property 'communitybuild.maven.url' not set")
     }
 
+  override def repositoriesTask: Task[Seq[Repository]] = T.task {
+     MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+   }
+   // Override zinc worker, we need to set custom repostitories there are well,
+   // to allow to use our custom repo
+   override def zincWorker = CommunityBuildZincWorker
+   object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
+     override def repositoriesTask() = T.task {
+       MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+     }
+   }
+}
+
+// Extension to publish module allowing to upload artifacts to custom maven repo
+trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule { 
   def publishCommunityBuild() = T.command {
     val PublishModule.PublishData(metadata, artifacts) = publishArtifacts()
     val artifactModulePath = {
@@ -36,19 +50,6 @@ trait CommunityBuildPublishModule extends PublishModule { outer =>
           s"Failed to publish artifact ${url.stripPrefix(mavenRepoUrl)}: ${res.statusMessage}"
         )
       }
-    }
-  }
-
-  override def repositoriesTask: Task[Seq[Repository]] = T.task {
-    MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
-  }
-  
-  // Override zinc worker, we need to set custom repostitories there are well,
-  // to allow to use our custom repo
-  override def zincWorker = CommunityBuildZincWorker
-  object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
-    override def repositoriesTask() = T.task {
-      MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
     }
   }
 }

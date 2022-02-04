@@ -5,40 +5,49 @@ import scala.meta._
 
 class Scala3CommunityBuildMillAdapter extends SyntacticRule("Scala3CommunityBuildMillAdapter") {
   override def fix(implicit doc: SyntacticDocument): Patch = {
-    Patch.addLeft(doc.tree, Replacment.MillCommunityBuildInject) +
-      doc.tree.collect {
-        case init @ Init(
-              Type.Apply(
-                name @ (Type.Name("Cross") | Type.Select(_, Type.Name("Cross"))),
-                List(tpeParam)
-              ),
-              _,
-              List(args)
-            ) =>
-          List(
-            Patch.replaceTree(name, Replacment.CommunityBuildCross),
-            Patch.addRight(init, s"(${Replacment.DiscoverScalaVersion})")
-          ).asPatch
+    val headerInject = {
+      if (sys.props.contains("scalafix.mill.skipHeader")) Patch.empty
+      else Patch.addLeft(doc.tree, Replacment.MillCommunityBuildInject)
+    }
+    val patch = doc.tree.collect {
+      case init @ Init(
+            Type.Apply(name @ WithTypeName("Cross"), List(tpeParam)),
+            _,
+            List(args)
+          ) =>
+        List(
+          Patch.replaceTree(name, Replacment.CommunityBuildCross),
+          Patch.addRight(init, s"(${Replacment.DiscoverScalaVersion})")
+        ).asPatch
 
-        case Init(
-              name @ (Type.Name("PublishModule") | Type.Select(_, Type.Name("PublishModule"))),
-              _,
-              _
-            ) =>
-          Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
+      case template @ Template(_, traits, _, _)
+          if anyTreeOfTypeName(
+            has = Seq("ScalaModule", "JavaModule"),
+            butNot = Seq("PublishModule", "CoursierModule")
+          )(traits) =>
+        Patch.addRight(traits.last, s" with ${Replacment.CommunityBuildCoursierModule}")
 
-        case ValOrDefDef(Term.Name("scalaVersion"), body) =>
-          Patch.replaceTree(body, Replacment.DiscoverScalaVersion)
+      case Init(name @ WithTypeName("CoursierModule"), _, _) =>
+        Patch.replaceTree(name, Replacment.CommunityBuildCoursierModule)
 
-        case ValOrDefDef(Term.Name("publishVersion"), body) =>
-          Patch.replaceTree(body, Replacment.DiscoverPublishVersion)
+      case Init(name @ WithTypeName("PublishModule"), _, _) =>
+        Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
 
-      }.asPatch
+      case ValOrDefDef(Term.Name("scalaVersion"), body) =>
+        Patch.replaceTree(body, Replacment.DiscoverScalaVersion)
+
+      case ValOrDefDef(Term.Name("publishVersion"), body) =>
+        Patch.replaceTree(body, Replacment.DiscoverPublishVersion)
+
+    }.asPatch
+
+    headerInject + patch
   }
 
   object Replacment {
     val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule = "MillCommunityBuild.CommunityBuildPublishModule"
+    val CommunityBuildCoursierModule = "MillCommunityBuild.CommunityBuildCoursierModule"
     val DiscoverScalaVersion = getPropertyOrThrow("communitybuild.scala")
     val DiscoverPublishVersion = getPropertyOrThrow("communitybuild.version")
     val MillCommunityBuildInject = """
@@ -81,4 +90,24 @@ class Scala3CommunityBuildMillAdapter extends SyntacticRule("Scala3CommunityBuil
     }
   }
 
+  def anyTreeOfTypeName(has: Seq[String], butNot: Seq[String] = Nil)(trees: List[Tree]): Boolean = {
+    val exists = trees.exists {
+      case WithTypeName(name) => has.contains(name)
+      case _                  => false
+    }
+    val existsBlocker = butNot.nonEmpty && trees.exists {
+      case WithTypeName(name) => butNot.contains(name)
+      case _                  => false
+    }
+    exists && !existsBlocker
+  }
+
+  object WithTypeName {
+    def unapply(tree: Tree): Option[String] = tree match {
+      case name: Type.Name         => Some(name.toString)
+      case Type.Select(qual, name) => Some(name.toString)
+      case Init(name, _, _)        => unapply(name)
+      case _                       => None
+    }
+  }
 }
