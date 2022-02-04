@@ -120,11 +120,28 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
   }
 
   val mappings = moduleMappings(targets.toSet)
+  val topLevelModules = mappings.collect {
+    case (target, info) if targets.contains(target) => info
+  }.toSet
+  val moduleDeps: Map[Module, Seq[ModuleInfo]] =
+    ctx.root.millInternal.modules.collect { case module: JavaModule =>
+      val mapped = module.moduleDeps.flatMap(toMappingInfo).map(_._2)
+      module -> mapped
+    }.toMap
+
+  @annotation.tailrec
+  def flatten(soFar: Set[ModuleInfo], toCheck: Set[ModuleInfo]): Set[ModuleInfo] =
+    toCheck match {
+      case e if e.isEmpty => soFar
+      case mDeps =>
+        val deps = moduleDeps(mDeps.head.module).filterNot(soFar.contains)
+        flatten(soFar ++ deps, mDeps.tail ++ deps)
+    }
+
   val projectsBuildResults = for {
-    target <- targets
-    ModuleInfo(name, module) = mappings(target)
-    _ = ctx.log.info(s"Starting build for $name")
+    ModuleInfo(name, module) <- flatten(topLevelModules, topLevelModules)
   } yield Info(name) :: {
+    ctx.log.info(s"Starting build for $name")
     try runTasks(module)
     catch {
       case ex: Throwable =>
@@ -163,6 +180,14 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
   }
 }
 
+private def toMappingInfo(module: Module)(implicit ctx: Ctx): Option[(String, ModuleInfo)] = {
+  for {
+    Result.Success(publish.Artifact(org, _, _)) <- tryEval(module, "artifactMetadata")
+    Result.Success(name: String) <- tryEval(module, "artifactName")
+    targetName = s"$org%$name"
+  } yield targetName -> ModuleInfo(name, module)
+}
+
 private def moduleMappings(
     targetStrings: Set[String]
 )(implicit ctx: Ctx): Map[String, ModuleInfo] = {
@@ -171,18 +196,14 @@ private def moduleMappings(
       Result.Success(scalaVersion) <- tryEval(module, "scalaVersion")
       if scalaVersion == ctx.scalaVersion
 
-      Result
-        .Success(platformSuffix: String) <- tryEval(module, "platformSuffix")
+      Result.Success(platformSuffix: String) <- tryEval(module, "platformSuffix")
       if platformSuffix.isEmpty // is JVM
 
-      Result.Success(publish.Artifact(org, _, _)) <- tryEval(
-        module,
-        "artifactMetadata"
-      )
+      Result.Success(publish.Artifact(org, _, _)) <- tryEval(module, "artifactMetadata")
       Result.Success(name: String) <- tryEval(module, "artifactName")
-      targetName = s"$org%$name"
+      mapping @ (targetName, ModuleInfo(_, module)) <- toMappingInfo(module)
       _ = ctx.log.info(s"Using $module for $targetName")
-    } yield targetName -> ModuleInfo(name, module)
+    } yield mapping
   }.toMap
 
   val unmatched = targetStrings.diff(mappings.keySet)
@@ -248,13 +269,12 @@ private def evalOrThrow(module: Module, segments: String*)(implicit
   val segmentsAsLabels = segments.map(Label(_))
   tryEval(module, segments: _*)
     .getOrElse {
-      val path = Segments(
-        (List(Label(module.toString), ctx.cross) ++ segmentsAsLabels): _*
-      ).render
+      val outerCtx = module.millOuterCtx
+      val segments = outerCtx.segments ++ (outerCtx.segment +: segmentsAsLabels)
+      val path = segments.render
       sys.error(s"Failed to eval $path")
     }
 }
-
 
 // Extractors
 private case class ExtractorsCtx(scalaVersion: String) {
@@ -288,7 +308,8 @@ object CompileFailed extends BuildStepFailure(""""compile": "failed"""")
 object TestOk extends BuildStepSuccess(""""test": "ok"""")
 object TestFailed extends BuildStepFailure(""""test": "failed"""")
 object PublishSkipped extends BuildStepSuccess(""""publish": "skipped"""")
-case class PublishWrongVersion(version: Option[String]) extends BuildStepFailure(s""""publish": "wrongVersion=${version}"""")
+case class PublishWrongVersion(version: Option[String])
+    extends BuildStepFailure(s""""publish": "wrongVersion=${version}"""")
 object PublishOk extends BuildStepSuccess(""""publish": "ok"""")
 object PublishFailed extends BuildStepFailure(""""publish": "failed"""")
 case class BuildError(msg: String) extends BuildStepFailure(s""""error": "${msg}"""")
