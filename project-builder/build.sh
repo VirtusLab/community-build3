@@ -47,4 +47,4 @@ sbt $sbtVersionSetting ${sbtSettings[@]} \
   "set every credentials := Nil" \
   "$customCommands" \
   "moduleMappings" \
-  "runBuild $targets"
+  "runBuild ${targets[@]}"
