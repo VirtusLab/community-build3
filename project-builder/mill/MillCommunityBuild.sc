@@ -16,20 +16,20 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
     }
 
   override def repositoriesTask: Task[Seq[Repository]] = T.task {
-     MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
-   }
-   // Override zinc worker, we need to set custom repostitories there are well,
-   // to allow to use our custom repo
-   override def zincWorker = CommunityBuildZincWorker
-   object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
-     override def repositoriesTask() = T.task {
-       MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
-     }
-   }
+    MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+  }
+  // Override zinc worker, we need to set custom repostitories there are well,
+  // to allow to use our custom repo
+  override def zincWorker = CommunityBuildZincWorker
+  object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
+    override def repositoriesTask() = T.task {
+      MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+    }
+  }
 }
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
-trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule { 
+trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {
   def publishCommunityBuild() = T.command {
     val PublishModule.PublishData(metadata, artifacts) = publishArtifacts()
     val artifactModulePath = {
@@ -54,11 +54,11 @@ trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCours
   }
 }
 
-/** Replace all Scala in crossVersion with `buildScalaVersion` if its matching
-  * `buildScalaVersion` binary version
+/** Replace all Scala in crossVersion with `buildScalaVersion` if its matching `buildScalaVersion`
+  * binary version
   * @param `crossVersions`
-  *   sequence of cross versions, in the form of either `String` or `Product` of
-  *   Strings (based on the mill api)
+  *   sequence of cross versions, in the form of either `String` or `Product` of Strings (based on
+  *   the mill api)
   */
 def mapCrossVersions(
     buildScalaVersion: String,
@@ -95,39 +95,43 @@ case class Ctx(
     evaluator: Evaluator,
     log: mill.api.Logger
 ) {
-  lazy val publishVersion = sys.props.get("communitybuild.version")
+  lazy val publishVersion = sys.props.get("communitybuild.version").filterNot(_.isEmpty)
   lazy val cross = Cross(scalaVersion :: Nil)
 }
 
 // Main entry point for Mill community build
 // Evaluate tasks until first failure and publish report
 def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
-  def buildTasks(moduleInfo: ModuleInfo): LazyList[BuildStepResult] = {
-    val ModuleInfo(name, module) = moduleInfo
-    Info(name) #::
-      mapEval(module, "compile")(CompileFailed)(CompileOk) #::
-      mapEval(module, "test", "compile")(TestFailed)(TestOk) #::
-      // mapEval(module, "test", "testCached")(TestFailed)(TestOk) #::
-      ctx.publishVersion
-        .fold[BuildStepResult](PublishSkipped) { publishVersion =>
+  def runTasks(module: Module): List[BuildStepResult] = {
+    mapEval[List[BuildStepResult]](module, "compile")(CompileFailed :: Nil) {
+      val testResult = mapEval[BuildStepResult](module, "test", "compile")(TestFailed)(TestOk)
+      val publishResult = ctx.publishVersion.fold[BuildStepResult](PublishSkipped) {
+        publishVersion =>
           evalOrThrow(module, "publishVersion") match {
             case Result.Success(`publishVersion`) =>
-              mapEval(module, "publishCommunityBuild")(PublishFailed)(PublishOk)
+              mapEval[BuildStepResult](module, "publishCommunityBuild")(PublishFailed)(PublishOk)
             case Result.Success(version: String) =>
               PublishWrongVersion(Some(version))
             case _ => PublishFailed
           }
-        } #:: LazyList.empty
+      }
+      CompileOk :: testResult :: publishResult :: Nil
+    }
   }
 
   val mappings = moduleMappings(targets.toSet)
   val projectsBuildResults = for {
     target <- targets
-    moduleInfo = mappings(target)
-    tasks = buildTasks(moduleInfo)
-  } yield {
-    ctx.log.info(s"Starting build for ${moduleInfo.name}")
-    evalAndTakeUntilFailure(tasks)
+    ModuleInfo(name, module) = mappings(target)
+    _ = ctx.log.info(s"Starting build for $name")
+  } yield Info(name) :: {
+    try runTasks(module)
+    catch {
+      case ex: Throwable =>
+        ctx.log.error("Failed to evaluate tasks")
+        ex.printStackTrace()
+        BuildError(ex.getMessage) :: Nil
+    }
   }
 
   val buildSummary = projectsBuildResults
@@ -217,12 +221,9 @@ private def tryEval(module: Module, labels: String*)(implicit ctx: Ctx) = {
     }
 }
 
-private def mapEval(
-    module: Module,
-    labels: String*
-)(
-  onFailure: => BuildStepResult
-)(onSucces: => BuildStepResult)(implicit ctx: Ctx) = {
+private def mapEval[T](module: Module, labels: String*)(
+    onFailure: => T
+)(onSucces: => T)(implicit ctx: Ctx) = {
   lazy val renderedPath =
     s"$module.${Segments(labels.map(Label(_)): _*).render}"
 
@@ -254,30 +255,6 @@ private def evalOrThrow(module: Module, segments: String*)(implicit
     }
 }
 
-private def evalAndTakeUntilFailure(
-    tasks: LazyList[BuildStepResult]
-)(implicit ctx: Ctx): List[BuildStepResult] = {
-  import scala.util._
-  @scala.annotation.tailrec
-  def loop(
-      tasks: LazyList[BuildStepResult],
-      acc: List[BuildStepResult] = Nil
-  ): List[BuildStepResult] = {
-    // Evaluate head of lazy list, in case of exception wrap it into the BuildError
-    val eval = Try(tasks.headOption).recover { ex: Throwable =>
-      ctx.log.error(
-        s"Error when evaluationg ${tasks.head}, $ex - ${ex.getMessage}"
-      )
-      Some(BuildError(ex.getMessage))
-    }.get
-    eval match {
-      case None                         => acc.reverse
-      case Some(fail: BuildStepFailure) => loop(LazyList(), fail :: acc)
-      case Some(result)                 => loop(tasks.tail, result :: acc)
-    }
-  }
-  loop(tasks)
-}
 
 // Extractors
 private case class ExtractorsCtx(scalaVersion: String) {
