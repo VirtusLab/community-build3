@@ -42,6 +42,15 @@ trait CommunityBuildPublishModule extends PublishModule { outer =>
   override def repositoriesTask: Task[Seq[Repository]] = T.task {
     MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
   }
+  
+  // Override zinc worker, we need to set custom repostitories there are well,
+  // to allow to use our custom repo
+  override def zincWorker = CommunityBuildZincWorker
+  object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
+    override def repositoriesTask() = T.task {
+      MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+    }
+  }
 }
 
 /** Replace all Scala in crossVersion with `buildScalaVersion` if its matching
