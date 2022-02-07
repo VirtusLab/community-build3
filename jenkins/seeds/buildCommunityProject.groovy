@@ -47,9 +47,6 @@ pipeline {
             }
         }
         stage("Prepare executor") {
-            options {
-                timeout(time: 1, unit: "HOURS")
-            }
             agent {
                 kubernetes {
                     yaml """
@@ -97,6 +94,9 @@ pipeline {
             }
             stages {
                 stage("Build project") {
+                    options {
+                        timeout(time: 1, unit: "HOURS")
+                    }
                     steps {
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
@@ -122,7 +122,7 @@ pipeline {
                 stage("Report build results") {
                     steps {
                       container('project-builder') {
-                        timeout(unit: 'MINUTES', time: 5) {
+                        timeout(unit: 'MINUTES', time: 10) {
                             archiveArtifacts(artifacts: "build-logs.txt")
                             archiveArtifacts(artifacts: "build-summary.txt")
                             archiveArtifacts(artifacts: "build-status.txt")
@@ -161,13 +161,13 @@ pipeline {
     }
 }
 
-def retryOnConnectionError(Closure body, int retries = 10, int delayBeforeRetry = 1){
+def retryOnConnectionError(Closure body, int retries = 50, int delayBeforeRetry = 1){
   try {
     return body()
   } catch(io.fabric8.kubernetes.client.KubernetesClientException ex) {
     if(retries > 0) {
       sleep(delayBeforeRetry) // seconds
-      return retryOnConnectionError(body, retries - 1, Math.max(15, delayBeforeRetry * 2))
+      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry * 2))
     } else throw ex
   }
 }
