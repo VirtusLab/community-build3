@@ -105,11 +105,9 @@ pipeline {
                             container('project-builder') {
                                 script {
                                   retryOnConnectionError {
-                                    ansiColor('xterm') {
                                     sh """
                                       echo "building and publishing ${params.projectName}"
-                                      # Assume failure unless overwritten by a successful build
-                                      echo 'failure' > build-status.txt 
+                                      echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
                                       touch build-logs.txt build-summary.txt
                                     """
                                     ansiColor('xterm') {
@@ -159,8 +157,8 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
+            post { 
+                always { 
                     script {
                       retryOnConnectionError {
                         for (projectName in downstreamProjects) {
