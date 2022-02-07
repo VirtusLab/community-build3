@@ -46,7 +46,7 @@ pipeline {
             }
         }
         stage("Persist build plan") {
-            agent { label 'master' }
+            agent any
             steps {
                 writeFile(file: "buildPlan.json", text: buildPlan)
                 archiveArtifacts(artifacts: "buildPlan.json")

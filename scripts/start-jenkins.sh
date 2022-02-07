@@ -19,7 +19,7 @@ if [ -z "$CB_K8S_NAMESPACE" ]; then
   exit 1
 fi
 
-if [ -z "$CB_BUILD_CRON_TRIGGER" ]; then
+if [ -z "${CB_BUILD_CRON_TRIGGER+x}" ]; then
   echo >&2 "CB_BUILD_CRON_TRIGGER env variable has to be set"
   exit 1
 fi
@@ -31,9 +31,6 @@ scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/
 scbk create configmap jenkins-build-configs --from-file=$scriptDir/../env/prod/config --dry-run=client -o yaml | scbk apply -f -
 
 HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CB_K8S_NAMESPACE" \
-  install jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.1.3 -f k8s/jenkins.yaml \
-  --set jenkins.namespace="$CB_K8S_NAMESPACE" \
+  install jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --version 0.3.1 -f k8s/jenkins.yaml \
   --set 'jenkins.podSpec.jenkinsController.env[0].name'=BUILD_CRON_TRIGGER \
   --set 'jenkins.podSpec.jenkinsController.env[0].value'="$CB_BUILD_CRON_TRIGGER" \
-  --set 'jenkinsConfigurationsAsCode[0].namespace'="$CB_K8S_NAMESPACE" \
-  --set 'jenkinsGroovyScripts[0].namespace'="$CB_K8S_NAMESPACE"
