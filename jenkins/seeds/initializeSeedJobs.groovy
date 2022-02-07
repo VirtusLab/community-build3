@@ -18,7 +18,7 @@ pipelineJob('/runBuild') {
         }
         stringParam("publishedScalaVersion", null, "(Optional, for debugging purposes mainly): An already published version of the compiler to be used instead of building one from sources, e.g. '3.1.1-RC1-bin-20210904-a82a1a6-NIGHTLY'. When specified, the remaining parameters from this section are ignored")
         stringParam("scalaRepoUrl", "https://github.com/lampepfl/dotty.git")
-        stringParam("scalaRepoBranch", "master")
+        stringParam("scalaRepoBranch", "main")
         separator {
             name("BUILD_PLAN")
             sectionHeader("Build plan")
@@ -103,7 +103,7 @@ pipelineJob('/buildCompiler') {
     parameters {
         stringParam("buildName")
         stringParam("scalaRepoUrl", "https://github.com/lampepfl/dotty.git")
-        stringParam("scalaRepoBranch", "master")
+        stringParam("scalaRepoBranch", "main")
         stringParam("mvnRepoUrl")
     }
 }
