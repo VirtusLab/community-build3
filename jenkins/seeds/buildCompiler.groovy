@@ -6,6 +6,9 @@ def commitHash
 def publishedCompilerVersion
 
 pipeline {
+    options {
+        timeout(time: 30, unit: "MINUTES")
+    }
     agent none
     stages {
         stage("Initialize build") {
@@ -50,8 +53,10 @@ pipeline {
             steps {
                 container('compiler-builder') {
                     ansiColor('xterm') {
-                        echo 'building and publishing scala'
-                        sh "/build/checkout.sh '${params.scalaRepoUrl}' '${params.scalaRepoBranch}' repo"
+                        sh """
+                          echo 'building and publishing scala'
+                          /build/checkout.sh '${params.scalaRepoUrl}' '${params.scalaRepoBranch}' repo
+                        """
                         dir('repo') {
                             script {
                                 def baseVersion = sh(script: '''cat project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print \$4 }' ''', returnStdout: true).trim()

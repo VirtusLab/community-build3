@@ -2,7 +2,7 @@
 
 def labeledProjectWasBuilt(String label) {
     def status = getLastLabeledBuildStatus("/buildCommunityProject", label)
-    return status in ['SUCCESS', 'FAILURE', 'UNSTABLE']
+    return status in ['SUCCESS', 'FAILURE', 'UNSTABLE', 'ABORTED']
 }
 
 def getBuildStatus() {
@@ -18,9 +18,6 @@ def parseCommaSeparated(String string) {
 
 def upstreamProjects = parseCommaSeparated(params.upstreamProjects)
 def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
-
-def elasticCredentialsDefined = false
-def wasBuildSuccessful = false
 
 pipeline {
     agent none
@@ -78,6 +75,11 @@ pipeline {
                             command:
                             - cat
                             tty: true
+                            resources:
+                              requests:
+                                memory: 4Gi
+                              limits:
+                                memory: 6Gi
                             env:
                             - name: ELASTIC_USERNAME
                               value: ${params.elasticSearchUserName}
@@ -92,67 +94,80 @@ pipeline {
             }
             stages {
                 stage("Build project") {
+                    options {
+                        timeout(time: 1, unit: "HOURS")
+                    }
                     steps {
-                        // Set SUCCESS here for the entire build for now so that next stages are still executed
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
                                 script {
-                                    echo "building and publishing ${params.projectName}"
-                                    sh "echo 'failure' > build-status.txt" // Assume failure unless overwritten by a successful build
-                                    sh "touch build-logs.txt build-summary.txt"
-                                    elasticCredentialsDefined = sh(script: 'echo $ELASTIC_PASSWORD', returnStdout: true).trim()
-                                    try {
-                                        ansiColor('xterm') {
-                                            sh """
-                                                /build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' '${params.enforcedSbtVersion}' 2>&1 | tee build-logs.txt
-                                            """
-                                        }
-                                        wasBuildSuccessful = getBuildStatus() == "success"
-                                        assert wasBuildSuccessful // Mark the entire build as failed if the build didn't explicitly succeed
-                                    } finally {
-                                        archiveArtifacts(artifacts: "build-logs.txt")
-                                        archiveArtifacts(artifacts: "build-summary.txt")
-                                        archiveArtifacts(artifacts: "build-status.txt")
+                                  retryOnConnectionError {
+                                    ansiColor('xterm') {
+                                    sh """
+                                      echo "building and publishing ${params.projectName}"
+                                      # Assume failure unless overwritten by a successful build
+                                      echo 'failure' > build-status.txt 
+                                      touch build-logs.txt build-summary.txt
+ 
+                                      (/build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' '${params.enforcedSbtVersion}' 2>&1 | tee build-logs.txt) \
+                                        && [ "\$(cat build-status.txt)" = success ]
+                                      """
                                     }
+                                  }
                                 }
-                            }
-                        }
-                        script {
-                            // Set the status before the job actually finishes so that downstream builds know they can continue
-                            if (wasBuildSuccessful) {
-                                currentBuild.result = 'SUCCESS'
-                            } else {
-                                currentBuild.result = 'FAILURE'
                             }
                         }
                     }
                 }
                 stage("Report build results") {
-                    when {
-                        expression {
-                            elasticCredentialsDefined
-                        }
-                    }
                     steps {
-                        container('project-builder') {
-                            script {
-                                def timestamp = java.time.LocalDateTime.now()
-                                def buildStatus = getBuildStatus()
-                                sh "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt"
+                      container('project-builder') {
+                        timeout(unit: 'MINUTES', time: 10) {
+                            archiveArtifacts(artifacts: "build-logs.txt")
+                            archiveArtifacts(artifacts: "build-summary.txt")
+                            archiveArtifacts(artifacts: "build-status.txt")
+                            waitUntil {
+                                script {
+                                  retryOnConnectionError{
+                                    def elasticCredentialsDefined = sh(script: 'echo $ELASTIC_PASSWORD', returnStdout: true).trim()
+                                    if (elasticCredentialsDefined) {
+                                        def timestamp = java.time.LocalDateTime.now()
+                                        def buildStatus = getBuildStatus()
+                                        0 == sh (
+                                          script: "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt",
+                                          returnStatus: true
+                                        )
+                                    } else true
+                                  }
+                                }
                             }
                         }
+                      }
                     }
                 }
             }
-        }
-        stage("Notify downstream projects") {
-            steps {
-                script {
-                    for (projectName in downstreamProjects) {
-                        resumeLastLabeledBuild("/buildCommunityProject", "${params.buildName} :: ${projectName}")
+            post {
+                always {
+                    script {
+                      retryOnConnectionError {
+                        for (projectName in downstreamProjects) {
+                            resumeLastLabeledBuild("/buildCommunityProject", "${params.buildName} :: ${projectName}")
+                        }
+                      }
                     }
                 }
             }
         }
     }
+}
+
+def retryOnConnectionError(Closure body, int retries = 50, int delayBeforeRetry = 1){
+  try {
+    return body()
+  } catch(io.fabric8.kubernetes.client.KubernetesClientException ex) {
+    if(retries > 0) {
+      sleep(delayBeforeRetry) // seconds
+      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry * 2))
+    } else throw ex
+  }
 }
