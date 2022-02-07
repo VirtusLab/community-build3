@@ -38,7 +38,7 @@ sbtSettings=(
   "-J-Xmx4G"
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")')
 )
-customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands? // [] | join("; ")')
+customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 
 # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
 sbt $sbtVersionSetting ${sbtSettings[@]} \
