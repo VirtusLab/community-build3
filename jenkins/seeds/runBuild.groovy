@@ -89,7 +89,7 @@ pipeline {
             }
         }
         stage("Collect build metadata") {
-            agent { label 'master' }
+            agent any
             steps {
                 script {
                     dir(pwd(tmp: true)) {
