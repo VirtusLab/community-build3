@@ -39,6 +39,7 @@ sbtSettings=(
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")')
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
+targetsString="${targets[@]}"
 
 # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
 sbt $sbtVersionSetting ${sbtSettings[@]} \
@@ -47,4 +48,4 @@ sbt $sbtVersionSetting ${sbtSettings[@]} \
   "set every credentials := Nil" \
   "$customCommands" \
   "moduleMappings" \
-  "runBuild ${targets[@]}"
+  "runBuild $targetsString"
