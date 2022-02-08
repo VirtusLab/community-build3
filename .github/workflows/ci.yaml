@@ -10,6 +10,9 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v2
 
+      - name: Test mill scalafix rules
+        run: cd project-builder/mill/scalafix && sbt test  
+
       - name: Start minikube
         run: minikube start
 
