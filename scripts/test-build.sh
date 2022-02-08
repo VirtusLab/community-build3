@@ -30,15 +30,15 @@ function compilerBuilderFailed() {
   exit -1
 }
 
-kubectl -n $testNamespace apply -f $scriptDir/../k8s/compiler-builder-test.yaml
-echo "Building scala compiler"
-kubectl -n $testNamespace wait --timeout=$compilerBuilderTimeout --for=condition=complete job/compiler-builder-test || compilerBuilderFailed
+# kubectl -n $testNamespace apply -f $scriptDir/../k8s/compiler-builder-test.yaml
+# echo "Building scala compiler"
+# kubectl -n $testNamespace wait --timeout=$compilerBuilderTimeout --for=condition=complete job/compiler-builder-test || compilerBuilderFailed
 
-compilerBuilderResult=$(kubectl -n $testNamespace logs job/compiler-builder-test --tail=1)
-test "$compilerBuilderResult" == "Compiler published successfully" || compilerBuilderFailed
+# compilerBuilderResult=$(kubectl -n $testNamespace logs job/compiler-builder-test --tail=1)
+# test "$compilerBuilderResult" == "Compiler published successfully" || compilerBuilderFailed
 
 function projectBuilderFailed() {
-  jobName = "$1"
+  jobName="$1"
   echo "Failed to publish the community project"
   echo "Logs content:"
   echo
@@ -47,7 +47,7 @@ function projectBuilderFailed() {
 }
 
 function testBuildTool() {
-  tool = "$1"
+  tool="$1"
   jobName="project-builder-${tool}-test"
   echo "Building a ${tool} community project"
   kubectl -n $testNamespace apply -f $scriptDir/../k8s/${jobName}.yaml
