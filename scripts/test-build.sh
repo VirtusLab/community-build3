@@ -49,7 +49,10 @@ kubectl -n $testNamespace apply -f $scriptDir/../k8s/project-builder-test.yaml
 echo "Building a community project"
 kubectl -n $testNamespace wait --timeout=$projectBuilderTimeout --for=condition=complete job/project-builder-test || projectBuilderFailed
 
-projectBuilderResult=$(kubectl -n $testNamespace logs job/project-builder-test --tail=1)
+projectBuilderResult=$(kubectl -n $testNamespace logs job/project-builder-sbt-test --tail=1)
+test "$projectBuilderResult" == "Community project published successfully" || projectBuilderFailed
+
+projectBuilderResult=$(kubectl -n $testNamespace logs job/project-builder-mill-test --tail=1)
 test "$projectBuilderResult" == "Community project published successfully" || projectBuilderFailed
 
 kubectl delete namespace $testNamespace
