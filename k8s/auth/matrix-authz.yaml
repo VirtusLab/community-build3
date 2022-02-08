@@ -1,0 +1,26 @@
+apiVersion: operator-service.com/v1beta1
+kind: JenkinsAuthorization
+metadata:
+  name: jenkins-auth-matrix
+  namespace: scala3-community-build
+  labels:
+    operator-service.com/jenkins: jenkins
+spec:
+  type: matrix
+  matrix:
+    users:
+      - name: "VirtuslabRnD*scala 3 devs"
+        permissions:
+          - Overall/Administer
+      
+      - name: authenticated
+        permissions:
+          - Overall/Read
+          - View/Read
+          - Job/Create
+        
+      - name: anonymous
+        permissions:
+          - Overall/Read
+          - Job/Discover
+          - Job/Read
