@@ -24,7 +24,7 @@ pipeline {
                         spec:
                           containers:
                           - name: coordinator
-                            image: virtuslab/scala-community-build-coordinator:v0.0.1
+                            image: virtuslab/scala-community-build-coordinator:v0.0.3
                             imagePullPolicy: IfNotPresent
                             command:
                             - cat
@@ -39,7 +39,16 @@ pipeline {
                             sh """
                               echo 'computing the build plan'
                               cat << EOF > /tmp/replaced-projects.txt \n${params.replacedProjects}\nEOF
-                              /build/compute-build-plan.sh '${params.scalaBinaryVersionSeries}' '${params.minStarsCount}' '${params.maxProjectsCount}' '${params.requiredProjects}' /tmp/replaced-projects.txt
+                              cat << EOF > /tmp/maintained-project-configs.conf \n${params.projectsConfig}\nEOF
+                              cat << EOF > /tmp/projects-filters.txt \n${params.projectsFilters}\nEOF
+                              /build/compute-build-plan.sh \
+                               '${params.scalaBinaryVersionSeries}' \
+                               '${params.minStarsCount}' \
+                               '${params.maxProjectsCount}' \
+                               '${params.requiredProjects}' \
+                               /tmp/replaced-projects.txt \
+                               /tmp/maintained-project-configs.conf \
+                               /tmp/projects-filters.txt
                             """
                         }
                         buildPlan = sh(

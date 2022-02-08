@@ -21,6 +21,9 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 
 pipeline {
     agent none
+    options {
+      timeout(time: 8, unit: "HOURS")
+    } 
     stages {
         stage("Initialize build") {
             steps {
@@ -61,7 +64,7 @@ pipeline {
                               name: mvn-repo-cert
                           containers:
                           - name: project-builder
-                            image: virtuslab/scala-community-build-project-builder:v0.0.1
+                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.3
                             imagePullPolicy: IfNotPresent
                             volumeMounts:
                             - name: mvn-repo-cert
@@ -77,7 +80,7 @@ pipeline {
                             tty: true
                             resources:
                               requests:
-                                memory: 4Gi
+                                memory: 5Gi
                               limits:
                                 memory: 6Gi
                             env:
@@ -95,23 +98,31 @@ pipeline {
             stages {
                 stage("Build project") {
                     options {
-                        timeout(time: 1, unit: "HOURS")
-                    }
+                      timeout(time: 1, unit: "HOURS")
+                    } 
                     steps {
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
                                 script {
                                   retryOnConnectionError {
-                                    ansiColor('xterm') {
                                     sh """
                                       echo "building and publishing ${params.projectName}"
-                                      # Assume failure unless overwritten by a successful build
-                                      echo 'failure' > build-status.txt 
+                                      echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
                                       touch build-logs.txt build-summary.txt
- 
-                                      (/build/build-revision.sh '${params.repoUrl}' '${params.revision}' '${params.scalaVersion}' '${params.version}' '${params.targets}' '${params.mvnRepoUrl}' '${params.enforcedSbtVersion}' 2>&1 | tee build-logs.txt) \
-                                        && [ "\$(cat build-status.txt)" = success ]
-                                      """
+                                    """
+                                    ansiColor('xterm') {
+                                        sh """
+                                            (/build/build-revision.sh \
+                                                '${params.repoUrl}' \
+                                                '${params.revision}' \
+                                                '${params.scalaVersion}' \
+                                                '${params.version}' \
+                                                '${params.targets}' \
+                                                '${params.mvnRepoUrl}' \
+                                                '${params.enforcedSbtVersion}' \
+                                                '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
+                                            && [ "\$(cat build-status.txt)" = success ]
+                                        """
                                     }
                                   }
                                 }
@@ -146,8 +157,8 @@ pipeline {
                     }
                 }
             }
-            post {
-                always {
+            post { 
+                always { 
                     script {
                       retryOnConnectionError {
                         for (projectName in downstreamProjects) {

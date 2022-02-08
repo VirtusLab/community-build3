@@ -52,6 +52,38 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   private def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s }
 
+  /**
+   * Helper command used to set correct version for publishing Defined due to a
+   * bug in sbt which does not allow for usage of `set every` with scoped keys
+   * We need to use this task instead of `set every Compile/version := ???`,
+   * becouse it would set given value also in Jmh/version or Jcstress/version
+   * scopes, leading build failures
+   */
+  val setPublishVersion = Command.args("setPublishVersion", "<args>") { case (state, args) =>
+    args.headOption
+      .orElse(sys.props.get("communitybuild.version"))
+      .fold {
+        System.err.println("No explicit version found in setPublishVersion command, skipping")
+        state
+      } { version =>
+        println(s"Setting publish version to $version")
+
+        val structure                      = sbt.Project.extract(state).structure
+        def setVersionCmd(project: String) = s"""set $project/version := "$version" """
+
+        structure.allProjectRefs.collect {
+          // Filter out root project, we need to use ThisBuild instead of root project name
+          case ref @ ProjectRef(uri, project) if structure.rootProject(uri) != project => ref
+        }.foldLeft(Command.process(setVersionCmd("ThisBuild"), state)) { case (state, ref) =>
+          // Check if project needs explicit overwrite, skip otherwise 
+          val s              = sbt.Project.extract(state).structure
+          val projectVersion = (ref / Keys.version).get(s.data).get
+          if (projectVersion == version) state
+          else Command.process(setVersionCmd(ref.project), state)
+        }
+      }
+  }
+
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
      val cState = state.value
@@ -69,7 +101,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   }
 
   lazy val ourVersion = 
-    Option(sys.props("communitybuild.version"))
+    Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
 
   override def globalSettings = Seq(
     moduleMappings := { // Store settings in file to capture its original scala versions
@@ -84,40 +116,80 @@ object CommunityBuildPlugin extends AutoPlugin {
         val s = extracted.structure
         val refs = s.allProjectRefs
         val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
-
-        val scalaBinaryVersionSuffix = "_" + (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+        val scalaBinaryVersionUsed = (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+        val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
         val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
 
+        // Ignore projects for which crossScalaVersion does not contain any binary version
+        // of currently used Scala version. This is important in case of usage projectMatrix and
+        // Scala.js / Scala Native, which can define multiple projects for different major Scala versions
+        // but with common target, eg. foo2_13, foo3
+        def projectSupportsScalaBinaryVersion(
+            projectRef: ProjectRef
+        ): Boolean = {
+          val hasCrossVersionSet = extracted
+            .get(projectRef / crossScalaVersions)
+            .exists {
+              // Do not make exact check to handle projects using 3.0.0-RC* versions
+              CrossVersion
+                .binaryScalaVersion(_)
+                .startsWith(scalaBinaryVersionUsed)
+            }
+          // Workaround for scalatest/circe which does not set crossScalaVersions correctly
+          def matchesName = 
+            scalaBinaryVersionUsed.startsWith("3") && projectRef.project.contains("Dotty")
+          hasCrossVersionSet || matchesName
+        }
+
+        def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
+          require(projects.nonEmpty, "selectProject with empty projects argument")
+          val target = projects.head._1
+          projects.map(_._2) match {
+            case Seq(project) => project
+            case projects => projects
+              .find(projectSupportsScalaBinaryVersion)
+              .getOrElse(sys.error(s"Multiple targets found for ${target}, failed to select a single project that can be used with Scala ${scalaBinaryVersionUsed} in ${projects.map(_.project)}"))
+          }
+        }
+
         val originalModuleIds: Map[String, ProjectRef] =  IO.readLines(file("community-build-mappings.txt"))
-          .map(_.split(' ')).map(d => d(0) -> refsByName(d(1))).toMap
-        val moduleIds: Map[String, ProjectRef] = mkMappings.value.toMap
+          .map(_.split(' '))
+          .map(d => d(0) -> refsByName(d(1)))
+          .groupBy(_._1)
+          .mapValues(selectProject)
+          .toMap
+        val moduleIds: Map[String, ProjectRef] = mkMappings.value
+          .groupBy(_._1)
+          .mapValues(selectProject)
+          .toMap
 
         println("Starting build...")
-        
+
         // Find projects that matches maven
         val topLevelProjects = (
           for {
             id <- ids
             actualId = id + scalaVersionSuffix
-          } yield
-            Seq(
-              refsByName.get(id),
-              originalModuleIds.get(id + scalaVersionSuffix),
-              originalModuleIds.get(id + scalaBinaryVersionSuffix),
-              originalModuleIds.get(id),
-              moduleIds.get(id + scalaVersionSuffix),
-              moduleIds.get(id + scalaBinaryVersionSuffix),
-              moduleIds.get(id)
-            ).flatten.headOption.getOrElse{
-              println("Module mapping missing:")
-              println(s"id: $id")
-              println(s"actualId: $actualId")
-              println(s"scalaVersionSuffix: $scalaVersionSuffix")
-              println(s"scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix")
-              println(s"refsByName: $refsByName")
-              println(s"originalModuleIds: $originalModuleIds")
-              println(s"moduleIds: $moduleIds")
-              throw new Exception("Module mapping missing")
+            candidates = for {
+              suffix <-
+                Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
+                  Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
+              fullId = s"$id$suffix"
+            } yield Seq(
+              refsByName.get(fullId),
+              originalModuleIds.get(fullId),
+              moduleIds.get(fullId)
+            ).flatten
+          } yield candidates.flatten.headOption.getOrElse {
+            println("Module mapping missing:")
+            println(s"id: $id")
+            println(s"actualId: $actualId")
+            println(s"scalaVersionSuffix: $scalaVersionSuffix")
+            println(s"scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix")
+            println(s"refsByName: $refsByName")
+            println(s"originalModuleIds: $originalModuleIds")
+            println(s"moduleIds: $moduleIds")
+            throw new Exception("Module mapping missing")
           
           }
         ).toSet

@@ -12,6 +12,7 @@ lazy val root = project
       "com.novocode" % "junit-interface" % "0.11" % "test",
       // Newer versions of jsoup up to 1.13.1 are buggy and cause missing versions of artifacts
       "org.jsoup" % "jsoup" % "1.10.3",
-      "com.google.code.gson" % "gson" % "2.8.6"
+      "com.google.code.gson" % "gson" % "2.8.6",
+      "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
     )
   )

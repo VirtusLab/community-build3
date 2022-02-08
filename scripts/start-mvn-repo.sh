@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-if [ -z "$MVN_REPO_KEYSTORE_PASSWORD" ]; then
-  echo "MVN_REPO_KEYSTORE_PASSWORD env variable has to be set and nonempty."
-  echo "(Make sure it's set to the value used when running scripts/generate-secrets.sh)"
-  exit 1
-fi
-
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source $scriptDir/utils.sh
+
+export MVN_REPO_KEYSTORE_PASSWORD=$(openssl rand -base64 32)
+
+$scriptDir/generate-secrets.sh
 
 scbk create secret generic mvn-repo-keystore --from-file=$scriptDir/../secrets/mvn-repo.p12
 scbk create secret generic mvn-repo-passwords --from-literal=keystore-password="$MVN_REPO_KEYSTORE_PASSWORD"

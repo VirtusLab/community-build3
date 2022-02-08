@@ -76,17 +76,10 @@ Because of a bug breaking DNS in Alpine Linux you might need to use a specific v
 Running the entire build with full infrastructure
 (maven repository, jenkins master, jenkins workers, elasticsearch with kibana)
 requires quite a lot of resources, which need to be declared while starting minikube
-(tested successfully with 18GB of memory and 3 CPU cores on Mac; using hyperkit because the default driver caused problems).
+(tested successfully with 18GB of memory and 4 CPU cores on Mac; using hyperkit because the default driver caused problems).
 
 ```shell
-minikube start --driver=hyperkit --memory=18432 --cpus=3
-```
-
-You'll also need to generate a private key and an SSL certificate for mvn-repo
-
-```shell
-read -s MVN_REPO_KEYSTORE_PASSWORD && export MVN_REPO_KEYSTORE_PASSWORD # type a password of your choice
-scripts/generate-secrets.sh
+minikube start --driver=hyperkit --memory=18432 --cpus=4
 ```
 
 ### Preparing docker images
@@ -100,19 +93,19 @@ eval $(minikube -p minikube docker-env)
 Most likely you'll need to build the base image only once (it doesn't get modified too often but building it takes quite a lot of time), e.g.:
 
 ```shell
-scripts/build-builder-base.sh v0.0.1
+scripts/build-builder-base.sh v0.0.3
 ```
 
 Build all the remaining images
 
 ```shell
-scripts/build-quick.sh v0.0.1
+scripts/build-quick.sh v0.0.3
 ```
 
 or (re)build each image separately e.g.
 
 ```shell
-scripts/build-mvn-repo.sh v0.0.1
+scripts/build-mvn-repo.sh v0.0.3
 ```
 
 ### Deploying and debugging in k8s
@@ -138,10 +131,6 @@ scripts/clean-XXX.sh
 To set up everything from scratch you can run
 
 ```shell
-# Should be the same password as used for running scripts/generate-secrets.sh
-echo "Enter MVN_REPO_KEYSTORE_PASSWORD:"
-read -s MVN_REPO_KEYSTORE_PASSWORD && export MVN_REPO_KEYSTORE_PASSWORD
-
 # Ask the Jenkins Operator team to get credentials for local development
 echo "Enter CB_DOCKER_USERNAME:"
 read -s CB_DOCKER_USERNAME && export CB_DOCKER_USERNAME
@@ -204,7 +193,7 @@ Kibana UI URL: https://localhost:5601
 
 You can load Kibana settings with `scripts/configure-kibana.sh`
 
-If you want to create an index pattern for `community-build` manually, navigate to `(Burger menu in the left upper corner) -> Stack Management -> Index patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
+If you want to create an index pattern for `community-build` manually, navigate to `(Burger menu in the left upper corner) -> Stack Management -> Index Patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
 
 Elasticsearch and Kibana currently don't use persistent storage so every restart will clean all the data.
 

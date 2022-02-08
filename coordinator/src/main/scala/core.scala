@@ -1,6 +1,8 @@
 import org.jsoup._
 import collection.JavaConverters._
 import java.nio.file._
+import pureconfig._
+import pureconfig.generic.derivation.default._
 
 case class Project(org: String, name: String)(val stars: Int): // stars may change...
   def show = s"$org%$name%$stars"
@@ -17,8 +19,8 @@ case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[Stri
 
 object MvnMapping:
   def load(s: String) =
-    val d = s.split(",")
-    MvnMapping(d(0), d(1),d(2),d.drop(3))
+    val Array(name, version, mvn, deps*) = s.split(",")
+    MvnMapping(name, version, mvn, deps)
 
 case class TargetId(org: String, name: String):
   def asMvnStr = org + "%" + name
@@ -42,4 +44,18 @@ case class BuildStep(
 
 case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 
-case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String)
+case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectBuildConfig])
+
+// Community projects configs
+case class JavaConfig(version: Option[String] = None) derives ConfigReader
+case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
+case class ProjectsConfig(exclude: List[String] = Nil)
+case class ProjectBuildConfig(
+    projects: ProjectsConfig = ProjectsConfig(),
+    java: JavaConfig = JavaConfig(),
+    sbt: SbtConfig = SbtConfig()
+) derives ConfigReader
+
+object ProjectBuildConfig {
+  val empty = ProjectBuildConfig()
+}

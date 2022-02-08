@@ -64,7 +64,9 @@ pipeline {
                                     string(name: "minStarsCount", value: params.minStarsCount),
                                     string(name: "maxProjectsCount", value: params.maxProjectsCount),
                                     string(name: "requiredProjects", value: params.requiredProjects),
-                                    text(name: "replacedProjects", value: params.replacedProjects)
+                                    text(name: "replacedProjects", value: params.replacedProjects),
+                                    text(name: "projectsConfig", value: params.projectsConfig),
+                                    text(name: "projectsFilters", value: params.projectsFilters) 
                                 ]
                             )
                         }
@@ -140,9 +142,9 @@ pipeline {
                         [project.name, project.dependencies]
                     }
                     def inversedProjectDeps = inverseMultigraph(projectDeps)
-
                     for(project in buildPlan) {
                         def proj = project // capture value for closure
+                        def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
                         jobs[proj.name] = {
                             build(
                                 job: communityProjectJobName,
@@ -151,6 +153,8 @@ pipeline {
                                     string(name: "projectName", value: proj.name),
                                     string(name: "repoUrl", value: proj.repoUrl),
                                     string(name: "revision", value: proj.revision),
+                                    string(name: "javaVersion", value: proj.config?.java?.version),
+                                    string(name: "projectConfig", value: projectConfigJson), 
                                     string(name: "scalaVersion", value: compilerVersion),
                                     string(name: "version", value: proj.version),
                                     string(name: "targets", value: proj.targets),
