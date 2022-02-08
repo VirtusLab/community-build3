@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: project-builder-test
+  name: project-builder-mill-test
 spec:
   template:
     spec:
@@ -10,7 +10,7 @@ spec:
         configMap:
           name: mvn-repo-cert
       containers:
-      - name: project-builder-test
+      - name: project-builder-mill-test
         image: virtuslab/scala-community-build-project-builder:jdk17-test
         imagePullPolicy: IfNotPresent
         volumeMounts:
