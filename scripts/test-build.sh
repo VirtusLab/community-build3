@@ -38,19 +38,27 @@ compilerBuilderResult=$(kubectl -n $testNamespace logs job/compiler-builder-test
 test "$compilerBuilderResult" == "Compiler published successfully" || compilerBuilderFailed
 
 function projectBuilderFailed() {
+  jobName="$1"
   echo "Failed to publish the community project"
   echo "Logs content:"
   echo
-  kubectl -n $testNamespace logs job/project-builder-test
+  kubectl -n $testNamespace logs job/${jobName}
   exit -1
 }
 
-kubectl -n $testNamespace apply -f $scriptDir/../k8s/project-builder-test.yaml
-echo "Building a community project"
-kubectl -n $testNamespace wait --timeout=$projectBuilderTimeout --for=condition=complete job/project-builder-test || projectBuilderFailed
+function testBuildTool() {
+  tool="$1"
+  jobName="project-builder-${tool}-test"
+  echo "Building a ${tool} community project"
+  kubectl -n $testNamespace apply -f $scriptDir/../k8s/${jobName}.yaml
+  kubectl -n $testNamespace wait --timeout=$projectBuilderTimeout --for=condition=complete job/${jobName} || projectBuilderFailed ${jobName}
 
-projectBuilderResult=$(kubectl -n $testNamespace logs job/project-builder-test --tail=1)
-test "$projectBuilderResult" == "Community project published successfully" || projectBuilderFailed
+  projectBuilderResult=$(kubectl -n $testNamespace logs job/${jobName} --tail=1)
+  test "$projectBuilderResult" == "Community project published successfully" || projectBuilderFailed ${jobName}
+}
+
+testBuildTool sbt
+testBuildTool mill
 
 kubectl delete namespace $testNamespace
 

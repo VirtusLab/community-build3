@@ -168,7 +168,7 @@ docker image ls | grep virtuslab/scala-community-build | awk '{print $1":"$2}' |
 docker image load -i /tmp/community-build-images.tar
 docker image ls | grep virtuslab/scala-community-build | awk '{print $1":"$2}' | xargs docker image rm
 scbk get pods --no-headers | grep daily- | awk '{print $1}' | xargs kubectl delete pod -n scala3-community-build
-scbk run -i --tty project-builder-test --image=virtuslab/scala-community-build-project-builder image-pull-policy=Never -- sh
+scbk run -i --tty project-builder-sbt-test --image=virtuslab/scala-community-build-project-builder image-pull-policy=Never -- sh
 ```
 
 ### mvn-repo
