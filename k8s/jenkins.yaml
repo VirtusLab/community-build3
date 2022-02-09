@@ -391,7 +391,7 @@ jenkinsKubernetesAgents:
 
 # JenkinsAuthenticationEnabled can enable or disable the JenkinsAuthentication instance
 # Set to true if you want to deploy the resource, set to false if have configured CR(s) already and/or you want to deploy an operator only
-jenkinsAuthenticationEnabled: false
+jenkinsAuthenticationEnabled: true
 
 # JenkinsAuthentication configuration
 # For authentication creation tutorial, check https://virtuslabrnd.github.io/operator-service-docs/operator-service-for-jenkins/latest/getting-started/integrating-authentication/
@@ -418,7 +418,7 @@ jenkinsAuthentication:
     # clientSecretRef is a secret reference which allows to safely pass into Authorization Spec. Has to contain "clientSecret" key with value of
     # the client secret you received from GitHub for your OAuth App.
     clientSecretRef:
-      name: ""
+      name: jenkins-github-oauth-secret
       namespace: ""
 
     # WebURI used if you are using GitHub Enterprise. The URL to the web UI root of your GitHub installation.
