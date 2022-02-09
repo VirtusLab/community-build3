@@ -1,6 +1,22 @@
 def runBuildScript = new File("/var/jenkins_home/seeds/runBuild.groovy").text
 def buildCronTrigger = System.getenv("BUILD_CRON_TRIGGER") ?: ""
 
+def getConfigContentOrEmpty(String filename) {
+    def configsDir = "/var/jenkins_home/build-configs/"
+    def path = configsDir + filename
+    try {
+        return new File(path).text
+    } catch(Exception ex) {
+        println("Not found config file " + path)
+        return ""
+    }
+}
+
+def projectsConfig =         getConfigContentOrEmpty("projects-config.conf")
+def filteredProjectsConfig = getConfigContentOrEmpty("filtered-projects.txt")
+def requiredProjectsConfig = getConfigContentOrEmpty("required-projects.txt")
+def replacedProjectsConfig = getConfigContentOrEmpty("replaced-projects.txt")
+
 pipelineJob('/runBuild') {
     definition {
         cps {
@@ -29,10 +45,10 @@ pipelineJob('/runBuild') {
         stringParam("scalaBinaryVersionSeries", "3.x", "Scala binary version following Scaladex API convention used for detecting projects to be built")
         stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
         stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
-        stringParam("requiredProjects", "", "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
-        textParam("replacedProjects", "", "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
-        textParam("projectsConfig", "", "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file")
-        textParam("projectsFilters", "", "List of regex patterns used for exclusion of projects from build plan. Each entry should be put in seperate lines, it would be used to match the pattern <org>:<project_or_module>:<version> e.g. foo:bar:0.0.1-RC1.")
+        stringParam("requiredProjects", requiredProjectsConfig, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
+        textParam("replacedProjects", replacedProjectsConfig, "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
+        textParam("projectsConfig", projectsConfig, "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file")
+        textParam("projectsFilters", filteredProjectsConfig, "List of regex patterns used for exclusion of projects from build plan. Each entry should be put in seperate lines, it would be used to match the pattern <org>:<project_or_module>:<version> e.g. foo:bar:0.0.1-RC1.")
         separator {
             name("COMMUNITY_PROJECT")
             sectionHeader("Community project")
@@ -82,10 +98,10 @@ pipelineJob('/computeBuildPlan') {
         stringParam("scalaBinaryVersionSeries", "3.x", "Scala binary version following Scaladex API convention used for detecting projects to be built")
         stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
         stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
-        stringParam("requiredProjects", "", "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
-        textParam("replacedProjects", "", "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
-        textParam("projectsConfig", "", "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file.")
-        textParam("projectsFilters", "", "List of regex patterns used for exclusion of projects from build plan. Each entry should be put in seperate lines, it would be used to match the pattern <org>:<project_or_module>:<version> e.g. foo:bar:0.0.1-RC1.")
+        stringParam("requiredProjects", requiredProjectsConfig, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
+        textParam("replacedProjects", replacedProjectsConfig, "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
+        textParam("projectsConfig", projectsConfig, "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file.")
+        textParam("projectsFilters", filteredProjectsConfig, "List of regex patterns used for exclusion of projects from build plan. Each entry should be put in seperate lines, it would be used to match the pattern <org>:<project_or_module>:<version> e.g. foo:bar:0.0.1-RC1.")
     }
 }
 
