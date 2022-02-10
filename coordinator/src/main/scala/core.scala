@@ -49,7 +49,7 @@ case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: S
 // Community projects configs
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
 case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
-case class MillConfig(exclude: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
+case class MillConfig(options: List[String] = Nil) derives ConfigReader
 case class ProjectsConfig(exclude: List[String] = Nil)
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
