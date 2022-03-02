@@ -163,6 +163,13 @@ object CommunityBuildPlugin extends AutoPlugin {
           .mapValues(selectProject)
           .toMap
 
+        def simplifiedModuleId(id: String) =
+          // Drop first part of mapping (organization%)
+          id.substring(id.indexOf('%') + 1)
+        val simplifiedModuleIds = moduleIds.map { case (key, value) =>
+          simplifiedModuleId(key) -> value
+        }
+
         println("Starting build...")
 
         // Find projects that matches maven
@@ -175,10 +182,11 @@ object CommunityBuildPlugin extends AutoPlugin {
                 Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
                   Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
               fullId = s"$id$suffix"
-            } yield Seq(
+            } yield Stream(
               refsByName.get(fullId),
               originalModuleIds.get(fullId),
-              moduleIds.get(fullId)
+              moduleIds.get(fullId),
+              simplifiedModuleIds.get(simplifiedModuleId(fullId))
             ).flatten
           } yield candidates.flatten.headOption.getOrElse {
             println("Module mapping missing:")

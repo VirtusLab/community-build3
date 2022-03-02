@@ -292,8 +292,12 @@ private given FromString[Seq[Project]] = str =>
     projectsConfigPath: String,
     projectsFilterPath: String
 ) =
-  val fi  println(s"using Scala binary version: $scalaBinaryVersion")
-ter(_.nonEmpty)
+  val filterPatterns = io.Source
+    .fromFile(projectsFilterPath)
+    .getLines
+    .map(_.trim())
+    .filterNot(_.startsWith("#"))
+    .filter(_.nonEmpty)
     .toSeq
     
   val depGraph = loadDepenenecyGraph(
