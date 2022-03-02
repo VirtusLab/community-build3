@@ -27,8 +27,9 @@ case class ModuleInVersion(version: String, modules: Seq[String])
 
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
-def loadScaladexProject(scalaRelease: String)(project: Project): ProjectModules = 
+def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectModules = 
   import project._
+  val binaryVersionSuffix = "_" + scalaBinaryVersion
   val url = s"https://index.scala-lang.org/artifacts/$org/$name"
   val d = Jsoup.connect(url).get()
   val mvs = 
@@ -39,8 +40,8 @@ def loadScaladexProject(scalaRelease: String)(project: Project): ProjectModules 
       val modules = 
         for 
           tr <- table.select("tr").asScala 
-            if tr.attr("class").contains(s"supported-scala-version_$scalaRelease")
-          name = tr.select(".artifact").get(0).text.trim
+            if tr.attr("class").split(" ").contains(binaryVersionSuffix)
+          name = tr.select(".artifact").get(0).text.trim    
         yield name
       ModuleInVersion(version, modules.toSeq)
 
@@ -50,9 +51,9 @@ case class ModuleVersion(name: String, version: String, p: Project)
 
 val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 
-def asTarget(scalaBinaryVersionSeries: String)(mv: ModuleVersion): Target =
+def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
-  val url = s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersionSeries"
+  val url = s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
   println(gradle)
@@ -73,29 +74,29 @@ def asTarget(scalaBinaryVersionSeries: String)(mv: ModuleVersion): Target =
     
   Target(TargetId(o,n), deps.toSeq)
 
-def loadMavenInfo(scalaBinaryVersionSeries: String)(projectModules: ProjectModules): LoadedProject = 
+def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject = 
   val ModuleInVersion(version, modules) = projectModules.mvs.head
   val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
-  val targets = mvs.map(cached(asTarget(scalaBinaryVersionSeries)))
+  val targets = mvs.map(cached(asTarget(scalaBinaryVersion)))
   LoadedProject(projectModules.project, version, targets)
 
   /**
-   * @param scalaBinaryVersionSeries Scala binary version name (major.minor) or `3.x` for scala 3 - following scaladex's convention
+   * @param scalaBinaryVersion Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
   */
 def loadDepenenecyGraph(
-    scalaBinaryVersionSeries: String,
+    scalaBinaryVersion: String,
     minStarsCount: Int,
     maxProjectsCount: Option[Int] = None,
     requiredProjects: Seq[Project] = Nil,
     filterPatterns: Seq[String] = Nil
 ): DependencyGraph =
-  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersionSeries))(p)
+  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersion))(p)
 
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
   val optional = maxProjectsCount.fold(LazyList.empty) { maxCount =>
-    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersionSeries))
+    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
       .filter(_.stars >= minStarsCount)
       .sortBy(-_.stars)
       .to(LazyList)
@@ -107,12 +108,12 @@ def loadDepenenecyGraph(
   val projects = {
     val loadProjects = Future.traverse(required #::: optional) { project =>
       Future {
-        loadMavenInfo(scalaBinaryVersionSeries)(project)
+        loadMavenInfo(scalaBinaryVersion)(project)
       }
     }
     Await.result(loadProjects, 30.minutes)
   }
-  DependencyGraph(scalaBinaryVersionSeries, projects)
+  DependencyGraph(scalaBinaryVersion, projects)
 
 def projectModulesFilter(
     filterPatterns: Seq[util.matching.Regex]
@@ -140,4 +141,4 @@ def projectModulesFilter(
       .filter(_.modules.nonEmpty)
   )
 }
-@main def runDeps = loadDepenenecyGraph("3.x", minStarsCount = 100)
+@main def runDeps = loadDepenenecyGraph(scalaBinaryVersion = "3", minStarsCount = 100, maxProjectsCount = Some(100))

@@ -42,7 +42,7 @@ pipelineJob('/runBuild') {
             sectionHeaderStyle("")
         }
         stringParam("precomputedBuildPlan", null, "(Optional, for debugging purposes mainly): The build plan (in JSON format) to be used instead of computing the plan dynamically. When specified, the remaining parameters from this section are ignored")
-        stringParam("scalaBinaryVersionSeries", "3.x", "Scala binary version following Scaladex API convention used for detecting projects to be built")
+        stringParam("scalaBinaryVersion", "3", "Scala binary version following Scaladex API convention used for detecting projects to be built")
         stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
         stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
         stringParam("requiredProjects", requiredProjectsConfig, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
@@ -95,7 +95,7 @@ pipelineJob('/computeBuildPlan') {
     }
     parameters {
         stringParam("buildName")
-        stringParam("scalaBinaryVersionSeries", "3.x", "Scala binary version following Scaladex API convention used for detecting projects to be built")
+        stringParam("scalaBinaryVersion", "3", "Scala binary version following Scaladex API convention used for detecting projects to be built")
         stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
         stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
         stringParam("requiredProjects", requiredProjectsConfig, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
