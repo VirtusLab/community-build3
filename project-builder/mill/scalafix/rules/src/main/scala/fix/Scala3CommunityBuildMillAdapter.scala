@@ -2,8 +2,30 @@ package fix
 
 import scalafix.v1._
 import scala.meta._
+import metaconfig._
 
-class Scala3CommunityBuildMillAdapter extends SyntacticRule("Scala3CommunityBuildMillAdapter") {
+case class Scala3CommunityBuildMillAdapterConfig(targetScalaVersion: Option[String] = None)
+object Scala3CommunityBuildMillAdapterConfig {
+  def default = Scala3CommunityBuildMillAdapterConfig()
+  implicit val surface =
+    metaconfig.generic.deriveSurface[Scala3CommunityBuildMillAdapterConfig]
+  implicit val decoder =
+    metaconfig.generic.deriveDecoder(default)
+}
+
+class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterConfig)
+    extends SyntacticRule("Scala3CommunityBuildMillAdapter") {
+  def this() = this(config = Scala3CommunityBuildMillAdapterConfig())
+  override def withConfiguration(config: Configuration): Configured[Rule] = {
+    config.conf
+      .getOrElse("Scala3CommunityBuildMillAdapter") {
+        sys.props.get("communitybuild.scala").foldLeft(this.config) { case (config, version) =>
+          config.copy(targetScalaVersion = Some(version))
+        }
+      }
+      .map(new Scala3CommunityBuildMillAdapter(_))
+    }
+
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
       if (sys.props.contains("scalafix.mill.skipHeader")) Patch.empty
@@ -17,7 +39,7 @@ class Scala3CommunityBuildMillAdapter extends SyntacticRule("Scala3CommunityBuil
           ) =>
         List(
           Patch.replaceTree(name, Replacment.CommunityBuildCross),
-          Patch.addRight(init, s"(${Replacment.DiscoverScalaVersion})")
+          Patch.addRight(init, s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")")})")
         ).asPatch
 
       case template @ Template(_, traits, _, _)
@@ -34,10 +56,10 @@ class Scala3CommunityBuildMillAdapter extends SyntacticRule("Scala3CommunityBuil
         Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
 
       case ValOrDefDef(Term.Name("scalaVersion"), body) =>
-        Patch.replaceTree(body, Replacment.DiscoverScalaVersion)
+        Patch.replaceTree(body, Replacment.ScalaVersion(body.toString))
 
       case ValOrDefDef(Term.Name("publishVersion"), body) =>
-        Patch.replaceTree(body, Replacment.DiscoverPublishVersion)
+        Patch.replaceTree(body, Replacment.PublishVersion(body.toString))
 
     }.asPatch
 
@@ -48,8 +70,18 @@ class Scala3CommunityBuildMillAdapter extends SyntacticRule("Scala3CommunityBuil
     val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule = "MillCommunityBuild.CommunityBuildPublishModule"
     val CommunityBuildCoursierModule = "MillCommunityBuild.CommunityBuildCoursierModule"
-    val DiscoverScalaVersion = getPropertyOrThrow("communitybuild.scala")
-    val DiscoverPublishVersion = getPropertyOrThrow("communitybuild.version")
+    def ScalaVersion(default: => String) = config.targetScalaVersion
+      .map { str =>
+        // Make sure that literal is quoted
+        val quote = "\""
+        val stripQutoes = str.stripPrefix(quote).stripSuffix(quote)
+        quote + stripQutoes + quote
+      }
+      .getOrElse(default)
+    def PublishVersion(default: => String) = asTarget(
+      getPropsOrElse("communitybuild.version")(default)
+    )
+    def asTarget(v: String): String = s"T{$v}"
     val MillCommunityBuildInject = """
     |import $file.MillCommunityBuild
     |// Main entry point for community build

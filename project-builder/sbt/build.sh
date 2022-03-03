@@ -6,10 +6,10 @@ if [ $# -ne 7 ]; then
   exit 1
 fi
 
-repoDir="$1" # e.g. /tmp/shapeless
-scalaVersion="$2" # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
-version="$3" # e.g. 1.0.2-communityBuild
-unfilteredTargets="$4" # e.g. "com.example%foo com.example%bar"
+repoDir="$1"                # e.g. /tmp/shapeless
+scalaVersion="$2"           # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
+version="$3"                # e.g. 1.0.2-communityBuild
+unfilteredTargets="$4"      # e.g. "com.example%foo com.example%bar"
 export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 enforcedSbtVersion="$6"
 projectConfig="$7"
@@ -17,7 +17,7 @@ projectConfig="$7"
 targets=(${unfilteredTargets[@]})
 targetExcludeFilters=$(echo $projectConfig | jq -r '.projects?.exclude? // [] | join ("|")')
 if [ ! -z ${targetExcludeFilters} ]; then
-  targets=( $( for target in ${unfilteredTargets[@]} ; do echo $target ; done | grep -E -v "(${targetExcludeFilters})" ) )
+  targets=($(for target in ${unfilteredTargets[@]}; do echo $target; done | grep -E -v "(${targetExcludeFilters})"))
 fi
 
 echo '##################################'
@@ -27,10 +27,9 @@ echo Project projectConfig: $projectConfig
 echo '##################################'
 
 cd $repoDir
-
-sbtVersionSetting=""
 if [ -n "$enforcedSbtVersion" ]; then
-  sbtVersionSetting="--sbt-version $enforcedSbtVersion"
+  # Overwrite properties file, sbt thin client cannot take --sbt-version param
+  echo -e "sbt.version=$enforcedSbtVersion\n" >project/build.properties
 fi
 
 sbtSettings=(
@@ -41,11 +40,17 @@ sbtSettings=(
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"
 
+sbtClient="sbt --client --batch"
+$sbtClient ${sbtSettings[@]} "show crossScalaVersions"
+# Whenever possible don't force override Scala version
+# Some core modules (dependencies) might be only cross compiled for Scala 2.13
+$sbtClient "++$scalaVersion" || $sbtClient "++$scalaVersion!"
 # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
-sbt $sbtVersionSetting ${sbtSettings[@]} \
-  "++$scalaVersion"! \
-  "setPublishVersion $version" \
-  "set every credentials := Nil" \
-  "$customCommands" \
-  "moduleMappings" \
-  "runBuild $targetsString"
+$sbtClient "setPublishVersion $version"
+$sbtClient "set every credentials := Nil"
+if [ -n "$customCommands" ]; then
+  $sbtClient "$customCommands"
+fi
+$sbtClient "moduleMappings"
+$sbtClient "runBuild $targetsString"
+$sbtClient shutdown
