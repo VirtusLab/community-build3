@@ -15,8 +15,8 @@ echo Clonning $repo into $repoDir using revision $rev
 echo '##################################'
 
 rm -rf "$repoDir"
+branch=""
 if [ -n "$rev" ]; then
-  git clone "$repo" "$repoDir" -b "$rev" --depth 1
-else
-  git clone "$repo" "$repoDir" --depth 1
+  branch="-b $rev"
 fi
+git clone "$repo" "$repoDir" $branch
