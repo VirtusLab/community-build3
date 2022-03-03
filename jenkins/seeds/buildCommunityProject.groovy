@@ -167,6 +167,12 @@ pipeline {
                       }
                     }
                 }
+                failure {
+                  script {
+                    echo "Build failed, reproduce it locally using following command:"
+                    echo "scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/reproducer/reproducer.scala -- --jobId=${env.BUILD_NUMBER}"
+                  }
+                }
             }
         }
     }
