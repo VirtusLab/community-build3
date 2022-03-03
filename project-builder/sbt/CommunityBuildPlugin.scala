@@ -80,7 +80,8 @@ object CommunityBuildPlugin extends AutoPlugin {
           publishResultsConf :=
             publishM2Configuration.value
               .withPublishMavenStyle(true)
-              .withResolverName(ourResolver.name),
+              .withResolverName(ourResolver.name)
+              .withOverwrite(true),
           publishResults := Classpaths.publishTask(publishResultsConf).value,
           externalResolvers := ourResolver +: externalResolvers.value
         )
