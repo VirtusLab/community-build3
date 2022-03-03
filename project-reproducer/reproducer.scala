@@ -365,8 +365,6 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       "-c",
       s"kubectl create namespace ${k8s.namespace} --dry-run=client -o yaml | kubectl apply -f -"
     )
-    // This is currently needed to handle broken certs if previous mvn-repo is still present
-    bash(scriptsDir / "stop-mvn-repo.sh")
     bash(scriptsDir / "start-mvn-repo.sh")
 
   private def cleanCluster()(using config: Config) =
