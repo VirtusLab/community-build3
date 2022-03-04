@@ -37,9 +37,11 @@ given ExecutionContext = ExecutionContext.Implicits.global
 class FailedProjectException(msg: String) extends RuntimeException(msg)
 
 private val CBRepoName = "VirtusLab/community-build3"
-val projectInfoerUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
+val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 val communityBuildRepo = s"https://github.com/$CBRepoName.git"
-val communityBuildRepoRevision = None
+val communityBuildDir = gitCheckout(communityBuildRepo, None)(os.temp.dir())
+lazy val scriptsDir = communityBuildDir / "scripts"
+lazy val projectBuilderDir = communityBuildDir / "project-builder"
 
 case class Config(
     jobId: String,
@@ -47,6 +49,7 @@ case class Config(
     scalaVersionOverride: Option[String] = None,
     buildFailedModulesOnly: Boolean = false,
     buildUpstream: Boolean = true,
+    ignoreFailedUpstream: Boolean = false,
     jenkinsEndpoint: String = "https://scala3.westeurope.cloudapp.azure.com",
     minikube: Config.MinikubeConfig = Config.MinikubeConfig()
 ):
@@ -79,6 +82,9 @@ object Config:
       opt[Unit]("failedTargetsOnly")
         .action((x, c) => c.copy(buildFailedModulesOnly = true))
         .text("Build only failed modules of target project"),
+      opt[Unit]("ignoreFailedUpstream")
+        .action((x, c) => c.copy(ignoreFailedUpstream = true))
+        .text("Ignore build failures of upstream projects"),
       opt[Unit]("noBuildUpstream")
         .action((x, c) => c.copy(buildUpstream = false))
         .text("Build upstream projects of the target"),
@@ -198,9 +204,14 @@ case class BuildSummary(projects: List[BuildProjectSummary]) {
 }
 object BuildSummary:
   def fetchFromJenkins(jobId: String)(using config: Config): BuildSummary =
-    val r = requests.get(s"${config.jenkinsBuildProjectJob(jobId)}/artifact/build-summary.txt")
+    val r = requests.get(
+      s"${config.jenkinsBuildProjectJob(jobId)}/artifact/build-summary.txt",
+      check = false
+    )
     val projects = if !r.is2xx then
-      System.err.println(s"Failed to get build summary for job $jobId")
+      System.err.println(
+        s"Failed to get build summary for job $jobId, assuming it failed in all submodules"
+      )
       Nil
     else
       for
@@ -251,10 +262,10 @@ def gitCheckout(repoUrl: String, revision: Option[String])(cwd: os.Path): os.Pat
   val depth = revision.fold("--depth=1" :: Nil)(_ => Nil)
   os
     .proc("git", "clone", depth, repoUrl, projectDir.toString)
-    .call()
+    .call(stderr = os.Pipe)
   revision.foreach { rev =>
     println(s"Setting project revision to $rev")
-    os.proc("git", "checkout", rev).call(cwd = projectDir)
+    os.proc("git", "checkout", rev).call(cwd = projectDir, stderr = os.Pipe)
   }
   projectDir
 
@@ -310,13 +321,14 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
   private given k8s: MinikubeConfig = config.minikube
   private given IORuntime = IORuntime.global
 
-  val communityBuildDir = gitCheckout(communityBuildRepo, None)(os.temp.dir())
-  private val scriptsDir = communityBuildDir / "scripts"
   private val targetProject = build.projectsById(jobId)
 
   private def localMavenUrl(using port: MavenForwarderPort) = {
     build.mavenRepositoryUrl
-      .replace("https://mvn-repo:8081/maven2", s"https://localhost:$port/maven2")
+      .replace(
+        "https://mvn-repo:8081/maven2",
+        s"https://localhost:$port/maven2/${build.scalaVersion}"
+      )
   }
 
   def run(): Unit =
@@ -325,23 +337,17 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       setupCluster()
       usingMavenServiceForwarder {
         usingUnsafeSSLContext {
-          given DependenciesChecker = DependenciesChecker(
-            checkLocalIvy = false,
-            extraRepositories = Seq(MavenRepository(localMavenUrl)),
-            fileCache = FileCache().noCredentials
-              .withHostnameVerifier(VerifiesAllHostNames)
-              .withSslSocketFactory(summon[SSLContext].getSocketFactory)
-          )
           for {
             logger <- Slf4jLogger.create[IO]
             given Logger[IO] = logger
             _ <- KubernetesClient(
               KubeConfig.fromFile[IO](config.minikube.k8sConfig)
             ).use { implicit k8sCLient: KubernetesClient[IO] =>
+              import DependenciesChecker.*
               for {
                 _ <- logger.info("Starting")
-                _ <- buildScalaCompilerIfMissing[IO]()
-                _ <- buildProjectDependencies[IO]
+                _ <- buildScalaCompilerIfMissing[IO](withLocalMaven(localMavenUrl))
+                _ <- buildProjectDependencies[IO](onlyLocalMaven(localMavenUrl))
                 _ <- buildMainProject[IO]
                 _ <- logger.info("Build finished")
               } yield ()
@@ -363,36 +369,46 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
     bash(scriptsDir / "stop-mvn-repo.sh")(check = false)
     bash(scriptsDir / "start-mvn-repo.sh")
 
-  private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient]()(using
+  private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient](
       checkDeps: DependenciesChecker
   ): F[Unit] =
     for
       scalaReleaseExists <- Sync[F].blocking(checkDeps.scalaReleaseAvailable(build.scalaVersion))
       _ <-
-        if !scalaReleaseExists then runJob[F](compilerBuilderJob).void
+        if !scalaReleaseExists then
+          runJob(compilerBuilderJob, label = "Scala", canFail = false).void
         else Logger[F].info(s"Scala toolchain for version ${build.scalaVersion} already exists")
     yield ()
 
-  private def buildProjectDependencies[F[_]: Async: Concurrent: Logger: KubernetesClient](using
+  private def buildProjectDependencies[F[_]: Async: Concurrent: Logger: KubernetesClient](
+      depsCheck: DependenciesChecker
+  )(using
       build: BuildInfo,
       config: Config
   ) =
+    val log = Logger[F]
     def buildDependenciesInGroup(group: Set[ProjectInfo]) =
       group.toList.parTraverse { dependency =>
+        val name = dependency.projectName
+        def skipBaseMsg = s"Skip build for dependency $name"
         if config.buildFailedModulesOnly && dependency.summary.failedTargets.isEmpty then
-          Logger[F].info(s"Skip build for dependency ${dependency.projectName} - no failed targets")
+          log.info(s"$skipBaseMsg - no failed targets")
+        // We use our own maven repo here, the base url from project.params is unique for each group of runs, has format of https://maven-repo:port/maven2/<build-data><seq_no>/
+        else if depsCheck.projectReleased(dependency) then
+          log.info(s"$skipBaseMsg - already build in previous run")
         else
-          Logger[F].info(s"Starting build dependency project ${dependency.projectName}") *>
-            runJob(projectBuilderJob(using dependency)).void
+          log.info(
+            s"Starting to build dependency project $name"
+          ) *> runJob(projectBuilderJob(using dependency), label = name, canFail = true).void
       }
 
-    if !config.buildUpstream then Logger[F].info("Skipping building upstream projects")
+    if !config.buildUpstream then log.info("Skipping building upstream projects")
     else
       for
         buildPlan <- Sync[F].blocking(targetProject.buildPlanForDependencies.zipWithIndex)
         _ <- buildPlan.traverse { (group, idx) =>
           val projectsInGroup = group.map(_.params.projectName)
-          Logger[F].info(
+          log.info(
             s"Starting projects build for group ${idx + 1}/${buildPlan.length} with projects: $projectsInGroup "
           ) *> buildDependenciesInGroup(group)
         }
@@ -403,10 +419,18 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       _ <- Logger[F].info(
         s"Starting build for target project $jobId (${targetProject.projectName})"
       )
-      _ <- runJob(projectBuilderJob(using targetProject))
+      _ <- runJob(
+        projectBuilderJob(using targetProject),
+        label = targetProject.projectName,
+        canFail = false
+      )
     } yield ()
 
-  private def runJob[F[_]: Async: Logger](jobDefninition: Job)(using
+  private def runJob[F[_]: Async: Logger](
+      jobDefninition: Job,
+      label: String,
+      canFail: Boolean = false
+  )(using
       k8sClient: KubernetesClient[F]
   ): F[Int] =
     val jobName = jobDefninition.metadata.flatMap(_.name).get
@@ -444,7 +468,10 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         }
         _ <-
           if finalState.running.isDefined then Sync[F].pure(())
-          else Sync[F].raiseError(FailedProjectException(s"Failed to start pod of job ${jobName}"))
+          else
+            Sync[F].raiseError(
+              FailedProjectException(s"Failed to start pod of job ${jobName} ($label)")
+            )
       yield ()
 
     def redirectLogsToFile = Sync[F].blocking {
@@ -465,26 +492,30 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       for
         _ <- performCleanup
         job <- jobsApi.createWithResource(jobDefninition)
-        _ <- logger.info(s"Waiting for start of job $jobName")
+        _ <- logger.info(s"Waiting for start of job $jobName ($label)")
         _ <- waitForStart
-        _ <- logger.info(s"Pod for job $jobName started")
+        _ <- logger.info(s"Pod for job $jobName ($label) started")
 
         logsFile <- redirectLogsToFile
-        _ <- logger.info(s"Logs of job ${jobName} redirected to ${logsFile.toNIO.toAbsolutePath}")
+        _ <- logger.info(
+          s"Logs of job ${jobName} ($label) redirected to ${logsFile.toNIO.toAbsolutePath}"
+        )
 
         exitCode <- getContainerState
           .iterateUntil(_.terminated.isDefined)
           .map(_.terminated.get.exitCode)
           .timeout(30.minute)
-        _ <- logger.info(s"Job $jobName terminated with exit code $exitCode")
+        _ <- logger.info(s"Job $jobName ($label) terminated with exit code $exitCode")
 
         _ <- Sync[F].whenA(exitCode != 0) {
-          Sync[F].raiseError(FailedProjectException(s"Build failed for job ${jobName}"))
+          val errMsg = s"Build failed for job ${jobName} ($label)"
+          if canFail && config.ignoreFailedUpstream then logger.error(errMsg)
+          else Sync[F].raiseError(FailedProjectException(errMsg))
         }
       yield exitCode
 
     projectRun
-      .onError(logger.error(_)(s"Failed to build project in job $jobName"))
+      .onError(logger.error(_)(s"Failed to build project in job $jobName ($label)"))
       .guarantee {
         performCleanup
           .onError(
@@ -497,8 +528,8 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       }
   end runJob
 
-  private def bash(args: os.Shellable*):os.CommandResult = bash(args:_*)()
-  private def bash(args: os.Shellable*)(check: Boolean = true):os.CommandResult =
+  private def bash(args: os.Shellable*): os.CommandResult = bash(args: _*)()
+  private def bash(args: os.Shellable*)(check: Boolean = true): os.CommandResult =
     os.proc(args)
       .call(
         check = check,
@@ -614,6 +645,7 @@ object MinikubeReproducer:
   )
 
   private def builderContainer(imageName: String, args: Seq[String]) =
+    import io.k8s.apimachinery.pkg.api.resource.Quantity
     Container(
       name = "builder",
       image = s"virtuslab/scala-community-build-$imageName$imageVersion",
@@ -630,7 +662,11 @@ object MinikubeReproducer:
         Lifecycle(postStart = Handler(ExecAction(command = Seq("update-ca-certificates")))),
       command = Seq("/build/build-revision.sh"),
       args = args,
-      tty = true
+      tty = true,
+      resources = ResourceRequirements(
+        requests = Map("memory" -> Quantity("4Gi")),
+        limits = Map("memory" -> Quantity("6Gi"))
+      )
     )
 
   import javax.net.ssl.*
@@ -681,11 +717,12 @@ object MinikubeReproducer:
     val ForwardingLocallyOnPort = raw"Forwarding from 127.0.0.1:(\d+).*".r
 
     val forwarder =
-      os.proc("kubectl", "-n", k8s.namespace, "port-forward", service, s":$servicePort").spawn()
+      os.proc("kubectl", "-n", k8s.namespace, "port-forward", service, s":$servicePort")
+        .spawn()
     try
       forwarder.stdout.buffered.readLine match {
         case ForwardingLocallyOnPort(port) =>
-          Future(forwarder.stdout.buffered.lines.forEach(println))
+          Future(forwarder.stdout.buffered.lines.forEach(_ => ()))
           println(s"Forwarding $service on port ${port}")
           val res = fn(port.toInt)
           println("done")
@@ -693,11 +730,10 @@ object MinikubeReproducer:
         case _ => sys.error(s"Failed to forward $service")
       }
     finally forwarder.destroy()
+end MinikubeReproducer
 
 class LocalReproducer(using config: Config, build: BuildInfo):
   checkRequiredApps("scala-cli", "mill", "sbt", "git", "scala")
-
-  val dependencyChecker = DependenciesChecker(checkLocalIvy = true)
 
   val effectiveScalaVersion = build.scalaVersion
   val targetProject = build.projectsById(config.jobId)
@@ -707,33 +743,54 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
   def run(): Unit =
     prepareScalaVersion()
+    buildUpstreamProjects()
+    buildProject(targetProject)
+
+  private def buildUpstreamProjects() =
     if !config.buildUpstream then println("Skipping building upstream projects")
     else
+      val depsCheck = DependenciesChecker(DependenciesChecker.onlyLocalIvy)
       for
         group <- targetProject.buildPlanForDependencies
         dep <- group
-      do buildProject(dep)
-    buildProject(targetProject)
+      do
+        if depsCheck.projectReleased(dep) then
+          println(
+            s"Skipping building project ${dep.id} (${dep.projectName}) - already built in the previous run"
+          )
+        else buildProject(dep, canFail = config.ignoreFailedUpstream)
 
-  private def buildProject(project: ProjectInfo) =
+  private def buildProject(project: ProjectInfo, canFail: Boolean = false) =
     println(s"Building project ${project.id} (${project.projectName})")
     given ProjectInfo = project
     val projectDir = gitCheckout(
-      targetProject.params.projectReposiotryUrl,
-      targetProject.params.projectRevision
+      project.params.projectReposiotryUrl,
+      project.params.projectRevision
     )(os.pwd)
+    val logsFile = os.temp(prefix = s"cb-logs-build-project-${project.id}")
     val impl =
-      if os.exists(projectDir / "build.sbt") then SbtReproducer(projectDir)
-      else if os.exists(projectDir / "build.sc") then MillReproducer(projectDir)
+      if os.exists(projectDir / "build.sbt") then SbtReproducer(projectDir, logsFile)
+      else if os.exists(projectDir / "build.sc") then MillReproducer(projectDir, logsFile)
       else sys.error("Unsupported build tool")
-    impl.prepareBuild()
-    impl.runBuild()
+    try
+      println(
+        s"Starting build for project ${project.id} (${project.projectName}), logs redirected to $logsFile"
+      )
+      impl.prepareBuild()
+      impl.runBuild()
+    catch
+      case ex: Exception if canFail =>
+        System.err.println(s"Build for project ${project.id} (${project.projectName}) failed.")
 
   private def prepareScalaVersion(): Unit =
-    val needsCompilation = !dependencyChecker.scalaReleaseAvailable(effectiveScalaVersion)
+    val needsCompilation = !DependenciesChecker().scalaReleaseAvailable(effectiveScalaVersion)
 
-    if needsCompilation then
-      println(s"Building Scala compiler for version $effectiveScalaVersion")
+    if !needsCompilation then println(s"Scala ${effectiveScalaVersion} toolchain already present")
+    else
+      val logsFile = os.temp("cb-build-compiler")
+      println(
+        s"Building Scala compiler for version $effectiveScalaVersion, logs redirected to $logsFile"
+      )
       val VersionCommitSha = raw"3\..*-bin-([0-9a-f]*)-.*".r
       val revision = effectiveScalaVersion match {
         case VersionCommitSha(revision) => Some(revision)
@@ -746,14 +803,13 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       val updatedBuild =
         os.read(buildFile).replaceAll("(val baseVersion) = .*", s"$$1 = \"$effectiveScalaVersion\"")
       os.write.over(buildFile, updatedBuild)
-      println("Building Scala...")
       os
         .proc("sbt", "scala3-bootstrapped/publishLocal")
         .call(
           cwd = projectDir,
           env = Map("RELEASEBUILD" -> "yes"),
-          stdout = os.Inherit,
-          stderr = os.Inherit
+          stdout = logsFile,
+          stderr = logsFile
         )
       println(s"Scala ${effectiveScalaVersion} was successfully published locally")
   end prepareScalaVersion
@@ -768,17 +824,16 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         case _                  => None
       }
 
-  class SbtReproducer(projectDir: os.Path)(using
-      projectCtx: ProjectInfo,
+  class SbtReproducer(projectDir: os.Path, logsFile: os.Path)(using
+      project: ProjectInfo,
       build: BuildInfo
   ) extends BuildToolReproducer:
-    val buildParams = projectCtx.params
     case class SbtConfig(options: List[String], commands: List[String])
     given Manifest[SbtConfig] = scala.reflect.Manifest.classType(classOf[SbtConfig])
     val CBPluginFile = "CommunityBuildPlugin.scala"
     val minSbtVersion = "1.5.5"
     val defaultSettings = Seq("-J-Xmx4G")
-    val sbtConfig = buildParams.projectConfig
+    val sbtConfig = project.params.projectConfig
       .map(parse(_) \ "sbt")
       .flatMap(_.extractOpt[SbtConfig])
       .getOrElse(SbtConfig(Nil, Nil))
@@ -787,17 +842,14 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
     // Assumes build.propeties contains only sbt.version
     val currentSbtVersion = os.read(sbtBuildProperties).trim.stripPrefix("sbt.version=")
-    val belowMinimalSbtVersion = currentSbtVersion.split('.').take(3).map(_.toInt) match {
-      case Array(1, minor, patch) => minor < 5 || patch < 5
-      case _                      => false
-    }
+    val belowMinimalSbtVersion =
+      currentSbtVersion.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
+        case Array(1, minor, patch) => minor < 5 || patch < 5
+        case _                      => false
+      }
 
     override def prepareBuild(): Unit =
-      val communityBuild =
-        gitCheckout(communityBuildRepo, communityBuildRepoRevision)(os.temp.dir())
-      val projectInfoer = communityBuild / "project-builder"
-
-      buildParams.enforcedSbtVersion match {
+      project.params.enforcedSbtVersion match {
         case Some(version) => os.write.over(sbtBuildProperties, s"sbt.version=$version")
         case _ =>
           if belowMinimalSbtVersion then
@@ -807,36 +859,38 @@ class LocalReproducer(using config: Config, build: BuildInfo):
             os.write.over(sbtBuildProperties, s"sbt.version=$minSbtVersion")
       }
       os.copy.into(
-        projectInfoer / "sbt" / CBPluginFile,
+        projectBuilderDir / "sbt" / CBPluginFile,
         projectDir / "project",
         replaceExisting = true
       )
 
     override def runBuild(): Unit =
       try
+        sbtClient(sbtSettings, "show crossScalaVersions")
         try sbtClient(s"++${effectiveScalaVersion}")
         catch case ex: Exception => sbtClient(s"++${effectiveScalaVersion}!")
         sbtClient("set every credentials := Nil")
         sbtClient("moduleMappings")
-        sbtClient(sbtConfig.commands)
+        if (sbtConfig.commands.nonEmpty) sbtClient(sbtConfig.commands)
         sbtClient("runBuild", effectiveTargets)
+        println(s"Finished running build for ${project.id} (${project.projectName})")
       catch {
         case ex: Exception => System.err.println("Failed to run the build, check logs for details.")
       } finally sbtClient("shutdown")
 
     private def sbtClient(commands: os.Shellable*): os.CommandResult =
-      os.proc("sbt", "--client", "--batch", sbtSettings, commands)
+      os.proc("sbt", "--client", "--batch", commands)
         .call(
           cwd = projectDir,
-          stdin = os.Inherit,
-          stdout = os.Inherit,
+          stdout = os.PathAppendRedirect(logsFile),
+          stderr = os.PathAppendRedirect(logsFile),
           env = Map("CB_MVN_REPO_URL" -> "")
         )
 
   end SbtReproducer
 
-  class MillReproducer(projectDir: os.Path)(using
-      projectCtx: ProjectInfo,
+  class MillReproducer(projectDir: os.Path, logsFile: os.Path)(using
+      project: ProjectInfo,
       build: BuildInfo
   ) extends BuildToolReproducer:
     val MillCommunityBuildSc = "MillCommunityBuild.sc"
@@ -851,10 +905,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       "--scala-version=3.1.0"
     )
     override def prepareBuild(): Unit =
-      val communityBuild =
-        gitCheckout(communityBuildRepo, communityBuildRepoRevision)(os.temp.dir())
-      val projectInfoer = communityBuild / "project-builder"
-      val millBuilder = projectInfoer / "mill"
+      val millBuilder = projectBuilderDir / "mill"
       val buildFile = projectDir / "build.sc"
       val buildFileCopy = projectDir / "build.scala"
 
@@ -885,55 +936,103 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) =
-        os.proc("mill", millScalaSetting, commands).call(cwd = projectDir, stdout = os.Inherit)
+        os.proc("mill", millScalaSetting, commands)
+          .call(
+            cwd = projectDir,
+            stdout = os.PathAppendRedirect(logsFile),
+            stderr = os.PathAppendRedirect(logsFile)
+          )
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
       mill("runCommunityBuild", scalaVersion, effectiveTargets)
   end MillReproducer
 end LocalReproducer
 
 case class Dependency(org: String, name: String, version: String)
+type RepositoriesMapping = Seq[Repository] => Seq[Repository]
+object DependenciesChecker:
+  private def isIvyRepo(repo: Repository) = repo.repr.startsWith("ivy:file:")
+  val noLocalIvy: RepositoriesMapping = _.filterNot(isIvyRepo)
+  val onlyLocalIvy: RepositoriesMapping = _.filter(isIvyRepo)
+
+  def withLocalMaven(localMavenUrl: String)(using SSLContext) = DependenciesChecker(
+    withRepositories = DependenciesChecker.noLocalIvy(_) :+ MavenRepository(localMavenUrl),
+    fileCache = DependenciesChecker.unsafeFileCache
+  )
+  def onlyLocalMaven(localMavenUrl: String)(using SSLContext) = DependenciesChecker(
+    withRepositories = _ => MavenRepository(localMavenUrl) :: Nil,
+    fileCache = DependenciesChecker.unsafeFileCache
+  )
+  private def unsafeFileCache(using sslContext: SSLContext) = FileCache().noCredentials
+    .withHostnameVerifier(MinikubeReproducer.VerifiesAllHostNames)
+    .withSslSocketFactory(sslContext.getSocketFactory)
+
 class DependenciesChecker(
-    checkLocalIvy: Boolean = true,
-    extraRepositories: Seq[Repository] = Nil,
+    withRepositories: RepositoriesMapping = identity,
     fileCache: Cache[coursier.util.Task] = Cache.default
 ):
-  def checkDependenciesExist(dependencies: Dependency*) =
+  val binarySuffix = "_3"
+  val instance = {
+    val default = coursier.Resolve()
+    default
+      .withCache(fileCache)
+      .withRepositories(withRepositories(default.repositories))
+      .mapResolutionParams(p => p)
+  }
+
+  private def checkDependenciesExist(dependencies: Seq[Dependency]) =
     import scala.util.Try
+    import coursier.error.*
     // If dependency does not exists it would throw exception
     // By default coursier checks `.ivy2/local` (publishLocal target) and Maven repo
     val coursierDeps =
       for Dependency(org, name, version) <- dependencies
       yield coursier.Dependency(Module(Organization(org), ModuleName(name)), version)
 
-    Try {
-      val defaultInstance = coursier
-        .Resolve()
-        .withCache(fileCache)
-        .addRepositories(extraRepositories: _*)
-        .addDependencies(coursierDeps: _*)
-      val instance =
-        if checkLocalIvy then defaultInstance
-        else
-          defaultInstance.withRepositories(
-            defaultInstance.repositories.filter(!_.repr.startsWith("ivy:file:"))
-          )
-      instance.run()
-    }.isSuccess
+    // Ignore missing transitive dependencies, they would be always missing in local maven repo
+    def checkResoulationError(err: ResolutionError): Boolean =
+      val expectedModules = coursierDeps.map(_.module)
+      !err.errors.exists {
+        case err: ResolutionError.CantDownloadModule => expectedModules.contains(err.module)
+        case _                                       => false
+      }
+    instance
+      .withDependencies(coursierDeps)
+      .either
+      .fold(checkResoulationError, _ => true)
+
+  def projectReleased(project: ProjectInfo): Boolean =
+    project.params.projectVersion.fold {
+      // If no version in the params (orignally was not published) we cannot determiate version
+      false
+    } { projectVersion =>
+      val targetProjects =
+        for
+          target <- project.params.buildTargets
+          Array(org, name) = target.split("%")
+        yield Dependency(org, name + binarySuffix, projectVersion)
+      val summaryProjects =
+        for project <- project.summary.projects
+        yield Dependency(project.organization, project.artifactName + binarySuffix, projectVersion)
+
+      val deps = (targetProjects ++ summaryProjects).distinct
+      // If empty then we have not enough info -> always build
+      if deps.isEmpty then false
+      else checkDependenciesExist(deps)
+    }
 
   def scalaReleaseAvailable(
       scalaVersion: String,
       extraRepositories: Seq[Repository] = Nil
-  ): Boolean =
-    val deps =
-      for name <- Seq(
-          "scala3-library",
-          "scala3-compiler",
-          "scala3-language-server",
-          "scala3-staging",
-          "scala3-tasty-inspector",
-          "scaladoc",
-          "tasty-core"
-        ).map(_ + "_3") ++ Seq("scala3-interfaces", "scala3-sbt-bridge")
-      yield Dependency("org.scala-lang", name, scalaVersion)
-    checkDependenciesExist(deps: _*)
+  ): Boolean = checkDependenciesExist(
+    for name <- Seq(
+        "scala3-library",
+        "scala3-compiler",
+        "scala3-language-server",
+        "scala3-staging",
+        "scala3-tasty-inspector",
+        "scaladoc",
+        "tasty-core"
+      ).map(_ + binarySuffix) ++ Seq("scala3-interfaces", "scala3-sbt-bridge")
+    yield Dependency("org.scala-lang", name, scalaVersion)
+  )
 end DependenciesChecker
