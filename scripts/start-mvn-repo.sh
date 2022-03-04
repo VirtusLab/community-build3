@@ -4,9 +4,7 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source $scriptDir/utils.sh
 
-if [ -z "$MVN_REPO_KEYSTORE_PASSWORD" ];then
-  export MVN_REPO_KEYSTORE_PASSWORD=$(openssl rand -base64 32)
-fi
+export MVN_REPO_KEYSTORE_PASSWORD=$(openssl rand -base64 32)
 
 $scriptDir/generate-secrets.sh
 

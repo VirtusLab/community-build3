@@ -39,6 +39,7 @@ class FailedProjectException(msg: String) extends RuntimeException(msg)
 private val CBRepoName = "VirtusLab/community-build3"
 val projectInfoerUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 val communityBuildRepo = s"https://github.com/$CBRepoName.git"
+val communityBuildRepoRevision = None
 
 case class Config(
     jobId: String,
@@ -89,11 +90,6 @@ object Config:
       opt[Unit]("keepCluster")
         .action((_, c) => c.copy(minikube = c.minikube.copy(keepCluster = true)))
         .text("Should Minikube cluster be kept after finishing the build"),
-      opt[Unit]("keepMavenRepo")
-        .action((_, c) =>
-          c.copy(minikube = c.minikube.copy(keepCluster = true, keepMavenRepository = true))
-        )
-        .text("Should Maven repository instance be kept after finishing the build"),
       opt[File]("k8sConfig")
         .action((x, c) => c.copy(minikube = c.minikube.copy(k8sConfig = x)))
         .text("Path to kubernetes config file, defaults to ~/.kube/config"),
@@ -355,9 +351,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       }
     finally
       if !config.minikube.keepCluster then bash("minikube", "stop")
-      else
-        cleanCluster()
-        println("Keeping minikube alive, run 'minikube delete' to delete minikube local cluster")
+      else println("Keeping minikube alive, run 'minikube delete' to delete minikube local cluster")
 
   private def setupCluster() =
     bash(
@@ -365,11 +359,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       "-c",
       s"kubectl create namespace ${k8s.namespace} --dry-run=client -o yaml | kubectl apply -f -"
     )
+    // Workaround for problems with certs
+    bash(scriptsDir / "stop-mvn-repo.sh")(check = false)
     bash(scriptsDir / "start-mvn-repo.sh")
-
-  private def cleanCluster()(using config: Config) =
-    if !config.minikube.keepMavenRepository
-    then bash(scriptsDir / "stop-mvn-repo.sh")
 
   private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient]()(using
       checkDeps: DependenciesChecker
@@ -505,9 +497,11 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       }
   end runJob
 
-  private def bash(args: os.Shellable*) =
+  private def bash(args: os.Shellable*):os.CommandResult = bash(args:_*)()
+  private def bash(args: os.Shellable*)(check: Boolean = true):os.CommandResult =
     os.proc(args)
       .call(
+        check = check,
         stdout = os.Inherit,
         stderr = os.Inherit,
         env = Map("CB_K8S_NAMESPACE" -> k8s.namespace)
@@ -530,6 +524,16 @@ object MinikubeReproducer:
   private val imageVersion = "v0.0.4"
 
   def usingMavenServiceForwarder[T](fn: MavenForwarderPort ?=> T)(using k8s: MinikubeConfig): T =
+    // Wait until mvn-repo is started
+    os.proc(
+      "kubectl",
+      "wait",
+      "pod",
+      "--namespace=" + k8s.namespace,
+      "--selector=app=mvn-repo",
+      "--for=condition=Ready",
+      "--timeout=1m"
+    ).call()
     usingServiceForwarder("mvn-repo", 8081)(fn(using _))
 
   def projectBuilderJob(using project: ProjectInfo, k8s: MinikubeConfig, config: Config): Job =
@@ -789,7 +793,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     }
 
     override def prepareBuild(): Unit =
-      val communityBuild = gitCheckout(communityBuildRepo, None)(os.temp.dir())
+      val communityBuild =
+        gitCheckout(communityBuildRepo, communityBuildRepoRevision)(os.temp.dir())
       val projectInfoer = communityBuild / "project-builder"
 
       buildParams.enforcedSbtVersion match {
@@ -846,7 +851,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       "--scala-version=3.1.0"
     )
     override def prepareBuild(): Unit =
-      val communityBuild = gitCheckout(communityBuildRepo, None)(os.temp.dir())
+      val communityBuild =
+        gitCheckout(communityBuildRepo, communityBuildRepoRevision)(os.temp.dir())
       val projectInfoer = communityBuild / "project-builder"
       val millBuilder = projectInfoer / "mill"
       val buildFile = projectDir / "build.sc"
