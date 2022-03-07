@@ -111,7 +111,7 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
         .fold[BuildStepResult] {
           // Target not found, skip it and treat as successfull
           ctx.log.error(s"Not found target '$renderedPath', skipping.")
-          BuildError(s"Not found target '$renderedPath'")
+          Skipped
         } {
           case Result.Success(v) =>
             ctx.log.info(s"Successfully evaluated $renderedPath")
