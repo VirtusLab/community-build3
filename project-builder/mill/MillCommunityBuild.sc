@@ -174,7 +174,7 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
     ModuleBuildResults(
       organization = org,
       artifactName = name,
-      moduleName = module.toString,
+      projectName = module.toString,
       results = results
     )
   }
@@ -320,14 +320,14 @@ case class ModuleTargetsResults(
   }
 }
 case class ModuleBuildResults(
-    moduleName: String,
+    projectName: String, // Name of the project in the build tool
     organization: String,
-    artifactName: String,
+    artifactName: String, // Name of the produced artifact
     results: ModuleTargetsResults
 ) {
   lazy val toJson = {
     val resultsJson = results.jsonValues.mkString(", ")
-    val metadata = s""""meta": {"organization": "$organization", "moduleName": "$moduleName"}"""
+    val metadata = s""""meta": {"organization": "$organization", "projectName": "$projectName"}"""
     s""""$artifactName": {$resultsJson, $metadata}"""
   }
 }

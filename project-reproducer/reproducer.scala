@@ -217,14 +217,14 @@ object BuildSummary:
       for
         JObject(projects) <- parse(r.data.toString)
         JField(artifactName, results: JObject) <- projects
-        JString(moduleName) <- results \ "meta" \ "moduleName"
+        JString(projectName) <- results \ "meta" \ "projectName"
         JString(orgName) <- results \ "meta" \ "organization"
         BuildResult(compile) <- results \ "compile"
         BuildResult(testCompile) <- results \ "test-compile"
       yield BuildProjectSummary(
         organization = orgName,
         artifactName = artifactName,
-        moduleName = moduleName,
+        projectName = projectName,
         results = ProjectTargetResults(
           compile = compile,
           testCompile = testCompile
@@ -234,8 +234,8 @@ object BuildSummary:
 
 case class BuildProjectSummary(
     organization: String,
-    artifactName: String,
-    moduleName: String,
+    artifactName: String, // Name of the created artifact
+    projectName: String,  // Name of the project within the build
     results: ProjectTargetResults
 )
 
