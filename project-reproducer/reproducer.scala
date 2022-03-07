@@ -327,7 +327,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
     build.mavenRepositoryUrl
       .replace(
         "https://mvn-repo:8081/maven2",
-        s"https://localhost:$port/maven2/${build.scalaVersion}"
+        s"https://localhost:$port/maven2/"
       )
   }
 
