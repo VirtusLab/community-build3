@@ -261,7 +261,7 @@ def gitCheckout(repoUrl: String, revision: Option[String])(cwd: os.Path): os.Pat
   os.remove.all(projectDir)
   val depth = revision.fold("--depth=1" :: Nil)(_ => Nil)
   os
-    .proc("git", "clone", depth, repoUrl, projectDir.toString)
+    .proc("git", "clone", "--quiet", depth, repoUrl, projectDir.toString)
     .call(stderr = os.Pipe)
   revision.foreach { rev =>
     println(s"Setting project revision to $rev")
