@@ -767,7 +767,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       project.params.projectReposiotryUrl,
       project.params.projectRevision
     )(os.pwd)
-    val logsFile = os.temp(prefix = s"cb-logs-build-project-${project.id}")
+    val logsFile = os.temp(prefix = s"cb-logs-build-project-${project.id}", deleteOnExit = false)
     val impl =
       if os.exists(projectDir / "build.sbt") then SbtReproducer(projectDir, logsFile)
       else if os.exists(projectDir / "build.sc") then MillReproducer(projectDir, logsFile)
@@ -787,7 +787,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
     if !needsCompilation then println(s"Scala ${effectiveScalaVersion} toolchain already present")
     else
-      val logsFile = os.temp("cb-build-compiler")
+      val logsFile = os.temp("cb-build-compiler", deleteOnExit = false)
       println(
         s"Building Scala compiler for version $effectiveScalaVersion, logs redirected to $logsFile"
       )
@@ -993,7 +993,9 @@ class DependenciesChecker(
       val expectedModules = coursierDeps.map(_.module)
       !err.errors.exists {
         case err: ResolutionError.CantDownloadModule => expectedModules.contains(err.module)
-        case _                                       => false
+        case _ =>
+          System.err.println(err)
+          false
       }
     instance
       .withDependencies(coursierDeps)
