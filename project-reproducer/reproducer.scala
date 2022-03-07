@@ -332,7 +332,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
   }
 
   def run(): Unit =
-    bash("minikube", "start", s"--namespace=${k8s.namespace}")
+    startMinikube()
     try
       setupCluster()
       usingMavenServiceForwarder {
@@ -359,15 +359,27 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       if !config.minikube.keepCluster then bash("minikube", "stop")
       else println("Keeping minikube alive, run 'minikube delete' to delete minikube local cluster")
 
+  private def startMinikube() =
+    val isRunning = os
+      .proc("minikube", "status", "--format={{.Host}}")
+      .call()
+      .out
+      .text()
+      .startsWith("Running")
+    if !isRunning then bash("minikube", "start", s"--namespace=${k8s.namespace}")
+    else println("Reusing existing minikube instance")
+
   private def setupCluster() =
     bash(
       "bash",
       "-c",
       s"kubectl create namespace ${k8s.namespace} --dry-run=client -o yaml | kubectl apply -f -"
     )
-    // Workaround for problems with certs
-    bash(scriptsDir / "stop-mvn-repo.sh")(check = false)
-    bash(scriptsDir / "start-mvn-repo.sh")
+    val mavenIsRunning =
+      os.proc("kubectl", "get", "deploy/mvn-repo", "--output=name")
+        .call(check = false)
+        .exitCode == 0
+    if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
 
   private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient](
       checkDeps: DependenciesChecker
