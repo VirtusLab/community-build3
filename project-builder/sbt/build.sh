@@ -40,7 +40,7 @@ sbtSettings=(
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"
 
-sbtClient="sbt --client --batch"
+sbtClient="sbt --client --batch --no-colors"
 $sbtClient ${sbtSettings[@]} "show crossScalaVersions"
 # Whenever possible don't force override Scala version
 # Some core modules (dependencies) might be only cross compiled for Scala 2.13

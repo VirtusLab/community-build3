@@ -891,7 +891,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       } finally sbtClient("shutdown")
 
     private def sbtClient(commands: os.Shellable*): os.CommandResult =
-      os.proc("sbt", "--client", "--batch", commands)
+      os.proc("sbt", "--client", "--batch", "--no-colors", commands)
         .call(
           cwd = projectDir,
           stdout = os.PathAppendRedirect(logsFile),
