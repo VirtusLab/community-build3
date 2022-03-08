@@ -125,6 +125,20 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
   }
 
+  // By default we should use non-forced Scala version
+  val setScalaVersion = Command.args("setScalaVersion", "<args>") { case (state, args) =>
+    args.headOption
+      .fold {
+        sys.error("No explicit version found in setScalaVersion command")
+      } { version =>
+        try Command.process(s"++$version", state)
+        catch {
+          case ex: Exception =>
+            Command.process(s"++$version!", state)
+        }
+      }
+  }
+
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
     val cState = state.value
@@ -153,94 +167,93 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     },
     runBuild := {
-      try {
-        val ids = spaceDelimited("<arg>").parsed.toList
-        val cState = state.value
-        val extracted = sbt.Project.extract(cState)
-        val s = extracted.structure
-        val refs = s.allProjectRefs
-        val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
-        val scalaBinaryVersionUsed = (extracted.currentRef / scalaBinaryVersion).get(s.data).get
-        val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
-        val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
+      val ids = spaceDelimited("<arg>").parsed.toList
+      val cState = state.value
+      val extracted = sbt.Project.extract(cState)
+      val s = extracted.structure
+      val refs = s.allProjectRefs
+      val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
+      val scalaBinaryVersionUsed = (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+      val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
+      val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
 
-        // Ignore projects for which crossScalaVersion does not contain any binary version
-        // of currently used Scala version. This is important in case of usage projectMatrix and
-        // Scala.js / Scala Native, which can define multiple projects for different major Scala versions
-        // but with common target, eg. foo2_13, foo3
-        def projectSupportsScalaBinaryVersion(
-            projectRef: ProjectRef
-        ): Boolean = {
-          val hasCrossVersionSet = extracted
-            .get(projectRef / crossScalaVersions)
-            .exists {
-              // Do not make exact check to handle projects using 3.0.0-RC* versions
-              CrossVersion
-                .binaryScalaVersion(_)
-                .startsWith(scalaBinaryVersionUsed)
-            }
-          // Workaround for scalatest/circe which does not set crossScalaVersions correctly
-          def matchesName =
-            scalaBinaryVersionUsed.startsWith("3") && projectRef.project.contains("Dotty")
-          hasCrossVersionSet || matchesName
-        }
-
-        def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
-          require(projects.nonEmpty, "selectProject with empty projects argument")
-          val target = projects.head._1
-          projects.map(_._2) match {
-            case Seq(project) => project
-            case projects =>
-              projects
-                .find(projectSupportsScalaBinaryVersion)
-                .getOrElse(
-                  sys.error(
-                    s"Multiple targets found for ${target}, failed to select a single project that can be used with Scala ${scalaBinaryVersionUsed} in ${projects
-                      .map(_.project)}"
-                  )
-                )
+      // Ignore projects for which crossScalaVersion does not contain any binary version
+      // of currently used Scala version. This is important in case of usage projectMatrix and
+      // Scala.js / Scala Native, which can define multiple projects for different major Scala versions
+      // but with common target, eg. foo2_13, foo3
+      def projectSupportsScalaBinaryVersion(
+          projectRef: ProjectRef
+      ): Boolean = {
+        val hasCrossVersionSet = extracted
+          .get(projectRef / crossScalaVersions)
+          .exists {
+            // Do not make exact check to handle projects using 3.0.0-RC* versions
+            CrossVersion
+              .binaryScalaVersion(_)
+              .startsWith(scalaBinaryVersionUsed)
           }
+        // Workaround for scalatest/circe which does not set crossScalaVersions correctly
+        def matchesName =
+          scalaBinaryVersionUsed.startsWith("3") && projectRef.project.contains("Dotty")
+        hasCrossVersionSet || matchesName
+      }
+
+      def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
+        require(projects.nonEmpty, "selectProject with empty projects argument")
+        val target = projects.head._1
+        projects.map(_._2) match {
+          case Seq(project) => project
+          case projects =>
+            projects
+              .find(projectSupportsScalaBinaryVersion)
+              .getOrElse(
+                sys.error(
+                  s"Multiple targets found for ${target}, failed to select a single project that can be used with Scala ${scalaBinaryVersionUsed} in ${projects
+                    .map(_.project)}"
+                )
+              )
         }
+      }
 
-        val originalModuleIds: Map[String, ProjectRef] = IO
-          .readLines(file("community-build-mappings.txt"))
-          .map(_.split(' '))
-          .map(d => d(0) -> refsByName(d(1)))
-          .groupBy(_._1)
-          .mapValues(selectProject)
-          .toMap
-        val moduleIds: Map[String, ProjectRef] = mkMappings.value
-          .groupBy(_._1)
-          .mapValues(selectProject)
-          .toMap
+      val originalModuleIds: Map[String, ProjectRef] = IO
+        .readLines(file("community-build-mappings.txt"))
+        .map(_.split(' '))
+        .map(d => d(0) -> refsByName(d(1)))
+        .groupBy(_._1)
+        .mapValues(selectProject)
+        .toMap
+      val moduleIds: Map[String, ProjectRef] = mkMappings.value
+        .groupBy(_._1)
+        .mapValues(selectProject)
+        .toMap
 
-        def simplifiedModuleId(id: String) =
-          // Drop first part of mapping (organization%)
-          id.substring(id.indexOf('%') + 1)
-        val simplifiedModuleIds = moduleIds.map { case (key, value) =>
-          simplifiedModuleId(key) -> value
-        }
+      def simplifiedModuleId(id: String) =
+        // Drop first part of mapping (organization%)
+        id.substring(id.indexOf('%') + 1)
+      val simplifiedModuleIds = moduleIds.map { case (key, value) =>
+        simplifiedModuleId(key) -> value
+      }
 
-        println("Starting build...")
+      println("Starting build...")
 
-        // Find projects that matches maven
-        val topLevelProjects = (
-          for {
-            id <- ids
-            actualId = id + scalaVersionSuffix
-            candidates = for {
-              suffix <-
-                Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
-                  Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
-              fullId = s"$id$suffix"
-            } yield Stream(
-              refsByName.get(fullId),
-              originalModuleIds.get(fullId),
-              moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId))
-            ).flatten
-          } yield candidates.flatten.headOption.getOrElse {
-            println(s"""Module mapping missing:
+      // Find projects that matches maven
+      val topLevelProjects = (
+        for {
+          id <- ids
+          actualId = id + scalaVersionSuffix
+          candidates = for {
+            suffix <-
+              Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
+                Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
+            fullId = s"$id$suffix"
+          } yield Stream(
+            refsByName.get(fullId),
+            originalModuleIds.get(fullId),
+            moduleIds.get(fullId),
+            simplifiedModuleIds.get(simplifiedModuleId(fullId))
+          ).flatten
+        } yield candidates.flatten.headOption.getOrElse {
+          println(s"""Module mapping missing:
             |  id: $id
             |  actualId: $actualId
             |  scalaVersionSuffix: $scalaVersionSuffix
@@ -249,106 +262,100 @@ object CommunityBuildPlugin extends AutoPlugin {
             |  originalModuleIds: $originalModuleIds
             |  moduleIds: $moduleIds
             |""")
-            throw new Exception("Module mapping missing")
+          throw new Exception("Module mapping missing")
 
-          }
-        ).toSet
+        }
+      ).toSet
 
-        val projectDeps = s.allProjectPairs.map { case (rp, ref) =>
-          ref -> rp.dependencies.map(_.project)
-        }.toMap
+      val projectDeps = s.allProjectPairs.map { case (rp, ref) =>
+        ref -> rp.dependencies.map(_.project)
+      }.toMap
 
-        @annotation.tailrec
-        def flatten(soFar: Set[ProjectRef], toCheck: Set[ProjectRef]): Set[ProjectRef] =
-          toCheck match {
-            case e if e.isEmpty => soFar
-            case pDeps =>
-              val deps = projectDeps(pDeps.head).filterNot(soFar.contains)
-              flatten(soFar ++ deps, pDeps.tail ++ deps)
-          }
-
-        val allToBuild = flatten(topLevelProjects, topLevelProjects)
-        println("Projects: " + allToBuild.map(_.project))
-
-        class TaskEvaluator(val project: ProjectRef, initialState: State) {
-          def eval(task: TaskKey[_]): BuildStepResult = {
-            try {
-              // we should reuse state here
-              sbt.Project
-                .runTask(project / task, initialState)
-                .fold[BuildStepResult](BuildError("Cannot eval command")) { case (_, result) =>
-                  result.toEither match {
-                    case Right(_) => Ok
-                    case Left(_)  => Failed
-                  }
-                }
-            } catch {
-              case ex: Exception =>
-                ex.printStackTrace()
-                BuildError(s"Evaluation error: ${ex.getMessage}")
-            }
-          }
-          def evalAsDependencyOf(
-              dependecyOf: => BuildStepResult
-          )(task: TaskKey[_]): BuildStepResult = {
-            dependecyOf match {
-              case _: FailedBuildStep => Skipped
-              case _                  => eval(task)
-            }
-          }
+      @annotation.tailrec
+      def flatten(soFar: Set[ProjectRef], toCheck: Set[ProjectRef]): Set[ProjectRef] =
+        toCheck match {
+          case e if e.isEmpty => soFar
+          case pDeps =>
+            val deps = projectDeps(pDeps.head).filterNot(soFar.contains)
+            flatten(soFar ++ deps, pDeps.tail ++ deps)
         }
 
-        val projectsBuildResults = allToBuild.map { r =>
-          println(s"Starting build for $r...")
-          val evaluator = new TaskEvaluator(r, cState)
-          val s = sbt.Project.extract(cState).structure
-          val projectName = (r / moduleName).get(s.data).get
-          val orgName = (r / organization).get(s.data).get
+      val allToBuild = flatten(topLevelProjects, topLevelProjects)
+      println("Projects: " + allToBuild.map(_.project))
 
-          import evaluator._
-          val results = {
-            val compileResult = eval(Compile / compile)
-            ModuleTargetsResults(
-              compile = compileResult,
-              testsCompile = evalAsDependencyOf(compileResult)(Test / compile),
-              publish = ourVersion.fold[BuildStepResult](Skipped) { version =>
-                val currentVersion = (r / Keys.version)
-                  .get(s.data)
-                  .getOrElse(sys.error(s"${r.project}/version not set"))
-                if (currentVersion != version)
-                  WrongVersion(expected = version, got = currentVersion)
-                else evalAsDependencyOf(compileResult)(Compile / publishResults)
+      class TaskEvaluator(val project: ProjectRef, initialState: State) {
+        def eval(task: TaskKey[_]): BuildStepResult = {
+          try {
+            // we should reuse state here
+            sbt.Project
+              .runTask(project / task, initialState)
+              .fold[BuildStepResult](BuildError("Cannot eval command")) { case (_, result) =>
+                result.toEither match {
+                  case Right(_) => Ok
+                  case Left(_)  => Failed
+                }
               }
-            )
+          } catch {
+            case ex: Exception =>
+              BuildError(s"Evaluation error: ${ex.getMessage}")
           }
-          ModuleBuildResults(
-            organization = orgName,
-            artifactName = projectName,
-            projectName = r.project,
-            results = results
+        }
+        def evalAsDependencyOf(
+            dependecyOf: => BuildStepResult
+        )(task: TaskKey[_]): BuildStepResult = {
+          dependecyOf match {
+            case _: FailedBuildStep => Skipped
+            case _                  => eval(task)
+          }
+        }
+      }
+
+      val projectsBuildResults = allToBuild.map { r =>
+        println(s"Starting build for $r...")
+        val evaluator = new TaskEvaluator(r, cState)
+        val s = sbt.Project.extract(cState).structure
+        val projectName = (r / moduleName).get(s.data).get
+        val orgName = (r / organization).get(s.data).get
+
+        import evaluator._
+        val results = {
+          val compileResult = eval(Compile / compile)
+          ModuleTargetsResults(
+            compile = compileResult,
+            testsCompile = evalAsDependencyOf(compileResult)(Test / compile),
+            publish = ourVersion.fold[BuildStepResult](Skipped) { version =>
+              val currentVersion = (r / Keys.version)
+                .get(s.data)
+                .getOrElse(sys.error(s"${r.project}/version not set"))
+              if (currentVersion != version)
+                WrongVersion(expected = version, got = currentVersion)
+              else evalAsDependencyOf(compileResult)(Compile / publishResults)
+            }
           )
         }
-        val buildSummary = projectsBuildResults
-          .map(_.toJson)
-          .mkString("{", ", ", "}")
-        println(s"""
+        ModuleBuildResults(
+          organization = orgName,
+          artifactName = projectName,
+          projectName = r.project,
+          results = results
+        )
+      }
+      val buildSummary = projectsBuildResults
+        .map(_.toJson)
+        .mkString("{", ", ", "}")
+      println(s"""
           |************************
           |Build summary:
           |${buildSummary}
           |************************""".stripMargin)
-        IO.write(file("..") / "build-summary.txt", buildSummary)
+      IO.write(file("..") / "build-summary.txt", buildSummary)
 
-        val hasFailedSteps = projectsBuildResults.exists(_.results.hasFailedStep)
-        val buildStatus =
-          if (hasFailedSteps) "failure"
-          else "success"
-        IO.write(file("..") / "build-status.txt", buildStatus)
-        if (hasFailedSteps) throw new ProjectBuildFailureException
-      } catch {
-        case a: Throwable =>
-          a.printStackTrace()
-          throw a
-      }
+      val hasFailedSteps = projectsBuildResults.exists(_.results.hasFailedStep)
+      val buildStatus =
+        if (hasFailedSteps) "failure"
+        else "success"
+      IO.write(file("..") / "build-status.txt", buildStatus)
+      if (hasFailedSteps) throw new ProjectBuildFailureException
     },
     (runBuild / aggregate) := false
   )

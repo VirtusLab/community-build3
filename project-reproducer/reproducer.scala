@@ -30,11 +30,12 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import com.goyeau.kubernetes.client.*
 import io.k8s.api.batch.v1.Job
 import Config.MinikubeConfig
+import scala.util.control.NoStackTrace
 
 given Formats = DefaultFormats
 given ExecutionContext = ExecutionContext.Implicits.global
 
-class FailedProjectException(msg: String) extends RuntimeException(msg)
+class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
@@ -235,7 +236,7 @@ object BuildSummary:
 case class BuildProjectSummary(
     organization: String,
     artifactName: String, // Name of the created artifact
-    projectName: String,  // Name of the project within the build
+    projectName: String, // Name of the project within the build
     results: ProjectTargetResults
 )
 
@@ -870,6 +871,10 @@ class LocalReproducer(using config: Config, build: BuildInfo):
             )
             os.write.over(sbtBuildProperties, s"sbt.version=$minSbtVersion")
       }
+      os.write.append(
+        target = projectDir / "build.sbt",
+        data = "\ncommands += CommunityBuildPlugin.setScalaVersion\n"
+      )
       os.copy.into(
         projectBuilderDir / "sbt" / CBPluginFile,
         projectDir / "project",
@@ -877,27 +882,34 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       )
 
     override def runBuild(): Unit =
-      try
-        sbtClient(sbtSettings, "show crossScalaVersions")
-        try sbtClient(s"++${effectiveScalaVersion}")
-        catch case ex: Exception => sbtClient(s"++${effectiveScalaVersion}!")
-        sbtClient("set every credentials := Nil")
-        sbtClient("moduleMappings")
-        if (sbtConfig.commands.nonEmpty) sbtClient(sbtConfig.commands)
-        sbtClient("runBuild", effectiveTargets)
-        println(s"Finished running build for ${project.id} (${project.projectName})")
-      catch {
-        case ex: Exception => System.err.println("Failed to run the build, check logs for details.")
-      } finally sbtClient("shutdown")
-
-    private def sbtClient(commands: os.Shellable*): os.CommandResult =
-      os.proc("sbt", "--client", "--batch", "--no-colors", commands)
+      val proc = os
+        .proc(
+          "sbt",
+          "--no-colors",
+          "show crossScalaVersions",
+          s"setScalaVersion $effectiveScalaVersion",
+          "set every credentials := Nil",
+          "moduleMappings",
+          sbtConfig.commands,
+          s"runBuild ${effectiveTargets.mkString(" ")}"
+        )
         .call(
+          check = false,
           cwd = projectDir,
           stdout = os.PathAppendRedirect(logsFile),
           stderr = os.PathAppendRedirect(logsFile),
           env = Map("CB_MVN_REPO_URL" -> "")
         )
+
+      proc.exitCode match {
+        case 0 =>
+          println(s"Sucessfully finished build for project ${project.id} (${project.projectName})")
+        case code =>
+          System.err.println(s"Failed to run the build, for details check logs in $logsFile")
+          throw FailedProjectException(
+            s"Build for project ${project.id} (${project.projectName}) failed with exit code $code"
+          )
+      }
 
   end SbtReproducer
 

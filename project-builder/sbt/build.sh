@@ -33,6 +33,8 @@ if [ -n "$enforcedSbtVersion" ]; then
 fi
 
 sbtSettings=(
+  --batch
+  --no-colors
   -Dcommunitybuild.version="$version"
   "-J-Xmx4G"
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")')
@@ -40,17 +42,13 @@ sbtSettings=(
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"
 
-sbtClient="sbt --client --batch --no-colors"
-$sbtClient ${sbtSettings[@]} "show crossScalaVersions"
-# Whenever possible don't force override Scala version
-# Some core modules (dependencies) might be only cross compiled for Scala 2.13
-$sbtClient "++$scalaVersion" || $sbtClient "++$scalaVersion!"
+# Use `setScalaVersion` instead of ++version to try not forcing Scala version when its possible
 # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
-$sbtClient "setPublishVersion $version"
-$sbtClient "set every credentials := Nil"
-if [ -n "$customCommands" ]; then
-  $sbtClient "$customCommands"
-fi
-$sbtClient "moduleMappings"
-$sbtClient "runBuild $targetsString"
-$sbtClient shutdown
+sbt ${sbtSettings[@]} \
+  "show crossScalaVersions" \
+  "setScalaVersion $scalaVersion" \
+  "setPublishVersion $version" \
+  "set every credentials := Nil" \
+  "$customCommands" \
+  "moduleMappings" \
+  "runBuild $targetsString"
