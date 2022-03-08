@@ -125,20 +125,6 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
   }
 
-  // By default we should use non-forced Scala version
-  val setScalaVersion = Command.args("setScalaVersion", "<args>") { case (state, args) =>
-    args.headOption
-      .fold {
-        sys.error("No explicit version found in setScalaVersion command")
-      } { version =>
-        try Command.process(s"++$version", state)
-        catch {
-          case ex: Exception =>
-            Command.process(s"++$version!", state)
-        }
-      }
-  }
-
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
     val cState = state.value
@@ -167,15 +153,15 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     },
     runBuild := {
-      val ids = spaceDelimited("<arg>").parsed.toList
+      val scalaVersionArg :: ids = spaceDelimited("<arg>").parsed.toList
       val cState = state.value
       val extracted = sbt.Project.extract(cState)
       val s = extracted.structure
       val refs = s.allProjectRefs
       val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
-      val scalaBinaryVersionUsed = (extracted.currentRef / scalaBinaryVersion).get(s.data).get
+      val scalaBinaryVersionUsed = CrossVersion.binaryScalaVersion(scalaVersionArg)
       val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
-      val scalaVersionSuffix = "_" + (extracted.currentRef / scalaVersion).get(s.data).get
+      val scalaVersionSuffix = "_" + scalaVersionArg
 
       // Ignore projects for which crossScalaVersion does not contain any binary version
       // of currently used Scala version. This is important in case of usage projectMatrix and
@@ -240,27 +226,25 @@ object CommunityBuildPlugin extends AutoPlugin {
       val topLevelProjects = (
         for {
           id <- ids
-          actualId = id + scalaVersionSuffix
-          candidates = for {
-            suffix <-
-              Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
-                Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
-            fullId = s"$id$suffix"
-          } yield Stream(
-            refsByName.get(fullId),
-            originalModuleIds.get(fullId),
-            moduleIds.get(fullId),
-            simplifiedModuleIds.get(simplifiedModuleId(fullId))
-          ).flatten
+          testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
+            Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
+          testedFullIds = testedSuffixes.map(id + _)
+          candidates = for (fullId <- testedFullIds)
+            yield Stream(
+              refsByName.get(fullId),
+              originalModuleIds.get(fullId),
+              moduleIds.get(fullId),
+              simplifiedModuleIds.get(simplifiedModuleId(fullId))
+            ).flatten
         } yield candidates.flatten.headOption.getOrElse {
           println(s"""Module mapping missing:
             |  id: $id
-            |  actualId: $actualId
+            |  testedIds: $testedFullIds
             |  scalaVersionSuffix: $scalaVersionSuffix
             |  scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix
-            |  refsByName: $refsByName
-            |  originalModuleIds: $originalModuleIds
-            |  moduleIds: $moduleIds
+            |  refsByName: ${refsByName.keySet}
+            |  originalModuleIds: ${originalModuleIds.keySet}
+            |  moduleIds: ${moduleIds.keySet}
             |""")
           throw new Exception("Module mapping missing")
 

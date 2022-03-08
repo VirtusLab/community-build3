@@ -150,6 +150,17 @@ case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummar
     end groupByDeps
     groupByDeps(allDependencies, Set.empty, Nil)
   end buildPlanForDependencies
+
+  def effectiveTargets(using config: Config) =
+    val baseTargets =
+      if config.buildFailedModulesOnly then summary.failedTargets
+      else params.buildTargets
+    val excluded =
+      for
+        JArray(excluded) <- params.projectConfig.map(parse(_) \ "projects" \ "exclude").toSeq
+        JString(entry) <- excluded
+      yield entry
+    baseTargets.diff(excluded)
 }
 case class BuildInfo(projects: List[ProjectInfo]):
   lazy val projectsByName = projects.map(p => p.projectName -> p).toMap
@@ -582,9 +593,6 @@ object MinikubeReproducer:
 
   def projectBuilderJob(using project: ProjectInfo, k8s: MinikubeConfig, config: Config): Job =
     val params = project.params
-    val effectiveTargets =
-      if config.buildFailedModulesOnly then project.summary.failedTargets
-      else params.buildTargets
     val effectiveScalaVersion = config.scalaVersionOverride
       .getOrElse(params.scalaVersion)
     Job(
@@ -605,7 +613,7 @@ object MinikubeReproducer:
                   params.projectRevision.getOrElse(""),
                   effectiveScalaVersion,
                   params.projectVersion.getOrElse(""),
-                  effectiveTargets.mkString(" "),
+                  project.effectiveTargets.mkString(" "),
                   params.mavenRepositoryUrl,
                   params.enforcedSbtVersion.getOrElse(""),
                   params.projectConfig.getOrElse("{}")
@@ -750,9 +758,6 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
   val effectiveScalaVersion = build.scalaVersion
   val targetProject = build.projectsById(config.jobId)
-  private def effectiveTargets(using p: ProjectInfo) =
-    if config.buildFailedModulesOnly then p.summary.failedTargets
-    else p.params.buildTargets
 
   def run(): Unit =
     prepareScalaVersion()
@@ -853,8 +858,13 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     val sbtSettings = defaultSettings ++ sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
 
-    // Assumes build.propeties contains only sbt.version
-    val currentSbtVersion = os.read(sbtBuildProperties).trim.stripPrefix("sbt.version=")
+    val currentSbtVersion = os
+      .read(sbtBuildProperties)
+      .linesIterator
+      .collectFirst {
+        case str if str.startsWith("sbt.version=") => str.stripPrefix("sbt.version=")
+      }
+      .getOrElse(sys.error("Cannot resolve current sbt version"))
     val belowMinimalSbtVersion =
       currentSbtVersion.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
         case Array(1, minor, patch) => minor < 5 || patch < 5
@@ -871,10 +881,6 @@ class LocalReproducer(using config: Config, build: BuildInfo):
             )
             os.write.over(sbtBuildProperties, s"sbt.version=$minSbtVersion")
       }
-      os.write.append(
-        target = projectDir / "build.sbt",
-        data = "\ncommands += CommunityBuildPlugin.setScalaVersion\n"
-      )
       os.copy.into(
         projectBuilderDir / "sbt" / CBPluginFile,
         projectDir / "project",
@@ -882,18 +888,18 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       )
 
     override def runBuild(): Unit =
-      val proc = os
-        .proc(
+      def runSbt(forceScalaVersion: Boolean) =
+        val versionSwitchSuffix = if forceScalaVersion then "!" else ""
+        os.proc(
           "sbt",
           "--no-colors",
           "show crossScalaVersions",
-          s"setScalaVersion $effectiveScalaVersion",
+          s"++$effectiveScalaVersion$versionSwitchSuffix",
           "set every credentials := Nil",
           "moduleMappings",
           sbtConfig.commands,
-          s"runBuild ${effectiveTargets.mkString(" ")}"
-        )
-        .call(
+          s"runBuild $effectiveScalaVersion ${project.effectiveTargets.mkString(" ")}"
+        ).call(
           check = false,
           cwd = projectDir,
           stdout = os.PathAppendRedirect(logsFile),
@@ -901,14 +907,32 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           env = Map("CB_MVN_REPO_URL" -> "")
         )
 
-      proc.exitCode match {
-        case 0 =>
-          println(s"Sucessfully finished build for project ${project.id} (${project.projectName})")
-        case code =>
-          System.err.println(s"Failed to run the build, for details check logs in $logsFile")
-          throw FailedProjectException(
-            s"Build for project ${project.id} (${project.projectName}) failed with exit code $code"
-          )
+      def shouldRetryWithForcedScalaVerion = {
+        val output = os.read(logsFile).toString
+        def failedToSwitch = output.contains("RuntimeException: Switch failed: no subproject")
+        def missingMapping = output.contains("Module mapping missing:")
+        failedToSwitch || missingMapping
+      }
+
+      def onSuccess = println(
+        s"Sucessfully finished build for project ${project.id} (${project.projectName})"
+      )
+      def onFailure(code: Int) = {
+        System.err.println(s"Failed to run the build, for details check logs in $logsFile")
+        throw FailedProjectException(
+          s"Build for project ${project.id} (${project.projectName}) failed with exit code $code"
+        )
+      }
+
+      runSbt(forceScalaVersion = false).exitCode match {
+        case 0 => onSuccess
+        case code if shouldRetryWithForcedScalaVerion =>
+          println("Build failure, retrying with forced Scala version")
+          runSbt(forceScalaVersion = true).exitCode match {
+            case 0    => onSuccess
+            case code => onFailure(code)
+          }
+        case code => onFailure(code)
       }
 
   end SbtReproducer
@@ -967,7 +991,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
             stderr = os.PathAppendRedirect(logsFile)
           )
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
-      mill("runCommunityBuild", scalaVersion, effectiveTargets)
+      mill("runCommunityBuild", scalaVersion, project.effectiveTargets)
   end MillReproducer
 end LocalReproducer
 

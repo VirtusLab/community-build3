@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -o pipefail
 
 if [ $# -ne 7 ]; then
   echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <sbt_version?> <project_config?>, got $#: $@"
@@ -41,14 +42,41 @@ sbtSettings=(
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"
+logFile=build.log
 
-# Use `setScalaVersion` instead of ++version to try not forcing Scala version when its possible
+function runSbt(){
 # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
-sbt ${sbtSettings[@]} \
-  "show crossScalaVersions" \
-  "setScalaVersion $scalaVersion" \
-  "setPublishVersion $version" \
-  "set every credentials := Nil" \
-  "$customCommands" \
-  "moduleMappings" \
-  "runBuild $targetsString"
+  forceScalaVersion=$1
+  setScalaVersionCmd="++$scalaVersion"
+  if [[ "$forceScalaVersion" == "forceScala" ]]; then
+    setScalaVersionCmd="++$scalaVersion!"
+  fi
+
+  sbt ${sbtSettings[@]} \
+    "show crossScalaVersions" \
+    "$setScalaVersionCmd" \
+    "setPublishVersion $version" \
+    "set every credentials := Nil" \
+    "$customCommands" \
+    "moduleMappings" \
+    "runBuild ${scalaVersion} $targetsString" | tee $logFile
+}
+
+runSbt "no force" || {
+  shouldRetry=0
+  # Failed to switch version
+  if grep -q 'RuntimeException: Switch failed: no subproject' "$logFile"; then
+    shouldRetry=1
+  # Incorrect mappings usng Scala 2.13
+  elif grep -q 'Module mapping missing:' "$logFile" && grep -q -e 'moduleIds: .*_2\.1[1-3]' "$logFile"; then
+    shouldRetry=1
+  fi
+
+  if [[ "$shouldRetry" -eq 1 ]]; then 
+    echo "Retrying build with forced Scala version"
+    runSbt "forceScala"
+  else 
+    echo "Build failed, not retrying with forced Scala version"
+    exit 1
+  fi
+}
