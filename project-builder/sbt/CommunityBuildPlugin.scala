@@ -207,12 +207,13 @@ object CommunityBuildPlugin extends AutoPlugin {
           case projects =>
             projects
               .find(projectSupportsScalaBinaryVersion)
-              .getOrElse(
-                sys.error(
-                  s"Multiple targets found for ${target}, failed to select a single project that can be used with Scala ${scalaBinaryVersionUsed} in ${projects
-                    .map(_.project)}"
+              .getOrElse {
+                val selected = projects.head
+                System.err.println(
+                  s"None of projects in group ${projects.map(_.project)} uses current Scala binary version, using random: ${selected.project}"
                 )
-              )
+                selected
+              }
         }
       }
 
