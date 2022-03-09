@@ -53,8 +53,7 @@ function runSbt(){
   fi
 
   sbt ${sbtSettings[@]} \
-    "show crossScalaVersions" \
-    "$setScalaVersionCmd" \
+    "$setScalaVersionCmd -v" \
     "setPublishVersion $version" \
     "set every credentials := Nil" \
     "$customCommands" \

@@ -893,8 +893,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         os.proc(
           "sbt",
           "--no-colors",
-          "show crossScalaVersions",
-          s"++$effectiveScalaVersion$versionSwitchSuffix",
+          s"++$effectiveScalaVersion$versionSwitchSuffix -v",
           "set every credentials := Nil",
           "moduleMappings",
           sbtConfig.commands,
