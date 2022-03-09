@@ -135,7 +135,13 @@ object CommunityBuildPlugin extends AutoPlugin {
             val s = sbt.Project.extract(state).structure
             val projectVersion = (ref / Keys.version).get(s.data).get
             if (projectVersion == version) state
-            else Command.process(setVersionCmd(ref.project), state)
+            else
+              try Command.process(setVersionCmd(ref.project), state)
+              catch {
+                case ex: Exception =>
+                  System.err.println(s"Failed to set publish version in ${ref.project}, skipping")
+                  state
+              }
           }
       }
   }
