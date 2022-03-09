@@ -35,15 +35,12 @@ case class ModuleTargetsResults(
   }
 }
 case class ModuleBuildResults(
-    projectName: String, // Name of the project in the sbt build
-    organization: String,
-    artifactName: String, // Name of the artifact produced by build
+    artifactName: String,
     results: ModuleTargetsResults
 ) {
   lazy val toJson = {
     val resultsJson = results.jsonValues.mkString(", ")
-    val metadata = s""""meta": {"organization": "$organization" ,"projectName": "$projectName"}"""
-    s""""$artifactName": {$resultsJson, $metadata}"""
+    s""""$artifactName": {$resultsJson}"""
   }
 }
 
@@ -321,7 +318,6 @@ object CommunityBuildPlugin extends AutoPlugin {
         val evaluator = new TaskEvaluator(r, cState)
         val s = sbt.Project.extract(cState).structure
         val projectName = (r / moduleName).get(s.data).get
-        val orgName = (r / organization).get(s.data).get
 
         import evaluator._
         val results = {
@@ -340,9 +336,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
         }
         ModuleBuildResults(
-          organization = orgName,
           artifactName = projectName,
-          projectName = r.project,
           results = results
         )
       }

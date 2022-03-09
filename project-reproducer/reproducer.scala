@@ -123,6 +123,14 @@ object Config:
 case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummary) {
   def projectName = params.projectName
 
+  // Resolve organization name based on build targets, (<org>%<artifactId>)
+  // Select the most popular entry (it is possible that targets might be polluted with 3rd party orgs)
+  lazy val organization: String = params.buildTargets
+    .flatMap(_.split('%').headOption)
+    .groupBy(identity)
+    .maxBy(_._2.length)
+    ._1
+
   def allDependencies(using build: BuildInfo): Set[ProjectInfo] =
     val deps = params.upstreamProjects.flatMap { name =>
       build.projectsByName.get(name).orElse {
@@ -153,7 +161,7 @@ case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummar
 
   def effectiveTargets(using config: Config) =
     val baseTargets =
-      if config.buildFailedModulesOnly then summary.failedTargets
+      if config.buildFailedModulesOnly then summary.failedTargets(this)
       else params.buildTargets
     val excluded =
       for
@@ -208,12 +216,14 @@ object BuildInfo:
 
 end BuildInfo
 
-case class BuildSummary(projects: List[BuildProjectSummary]) {
-  lazy val failedTargets = projects.collect {
-    case BuildProjectSummary(organization, artifactName, _, results) if results.hasFailure =>
-      s"$organization%$artifactName"
+case class BuildSummary(projects: List[BuildProjectSummary]):
+  lazy val failedArtifacts = projects.collect {
+    case BuildProjectSummary(artifactName, results) if results.hasFailure => artifactName
   }
-}
+  def failedTargets(project: ProjectInfo) =
+    for artifact <- failedArtifacts
+    yield s"${project.organization}%$artifact"
+
 object BuildSummary:
   def fetchFromJenkins(jobId: String)(using config: Config): BuildSummary =
     val r = requests.get(
@@ -229,14 +239,10 @@ object BuildSummary:
       for
         JObject(projects) <- parse(r.data.toString)
         JField(artifactName, results: JObject) <- projects
-        JString(projectName) <- results \ "meta" \ "projectName"
-        JString(orgName) <- results \ "meta" \ "organization"
         BuildResult(compile) <- results \ "compile"
         BuildResult(testCompile) <- results \ "test-compile"
       yield BuildProjectSummary(
-        organization = orgName,
         artifactName = artifactName,
-        projectName = projectName,
         results = ProjectTargetResults(
           compile = compile,
           testCompile = testCompile
@@ -245,9 +251,7 @@ object BuildSummary:
     BuildSummary(projects)
 
 case class BuildProjectSummary(
-    organization: String,
     artifactName: String, // Name of the created artifact
-    projectName: String, // Name of the project within the build
     results: ProjectTargetResults
 )
 
@@ -415,8 +419,8 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       group.toList.parTraverse { dependency =>
         val name = dependency.projectName
         def skipBaseMsg = s"Skip build for dependency $name"
-        if config.buildFailedModulesOnly && dependency.summary.failedTargets.isEmpty then
-          log.info(s"$skipBaseMsg - no failed targets")
+        if config.buildFailedModulesOnly && dependency.summary.failedTargets(dependency).isEmpty
+        then log.info(s"$skipBaseMsg - no failed targets")
         // We use our own maven repo here, the base url from project.params is unique for each group of runs, has format of https://maven-repo:port/maven2/<build-data><seq_no>/
         else if depsCheck.projectReleased(dependency) then
           log.info(s"$skipBaseMsg - already build in previous run")
@@ -1058,9 +1062,10 @@ class DependenciesChecker(
           target <- project.params.buildTargets
           Array(org, name) = target.split("%")
         yield Dependency(org, name + binarySuffix, projectVersion)
+      val organization = project.organization
       val summaryProjects =
         for project <- project.summary.projects
-        yield Dependency(project.organization, project.artifactName + binarySuffix, projectVersion)
+        yield Dependency(organization, project.artifactName + binarySuffix, projectVersion)
 
       val deps = (targetProjects ++ summaryProjects).distinct
       // If empty then we have not enough info -> always build
