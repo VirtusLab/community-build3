@@ -528,7 +528,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         exitCode <- getContainerState
           .iterateUntil(_.terminated.isDefined)
           .map(_.terminated.get.exitCode)
-          .timeout(30.minute)
+          .timeout(60.minute)
         _ <- logger.info(s"Job $jobName ($label) terminated with exit code $exitCode")
 
         _ <- Sync[F].whenA(exitCode != 0) {
