@@ -70,23 +70,38 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   import complete.DefaultParsers._
 
-  override def projectSettings =
-    sys.env
-      .get("CB_MVN_REPO_URL")
-      .filter(_.nonEmpty)
-      .map("Community Build Repo" at _)
-      .map { ourResolver =>
-        Seq(
-          publishResultsConf :=
-            publishM2Configuration.value
-              .withPublishMavenStyle(true)
-              .withResolverName(ourResolver.name)
-              .withOverwrite(true),
-          publishResults := Classpaths.publishTask(publishResultsConf).value,
-          externalResolvers := ourResolver +: externalResolvers.value
-        )
+  def mvnRepoPublishSettings = sys.env
+    .get("CB_MVN_REPO_URL")
+    .filter(_.nonEmpty)
+    .map("Community Build Repo" at _)
+    .map { ourResolver =>
+      Seq(
+        publishResultsConf :=
+          publishM2Configuration.value
+            .withPublishMavenStyle(true)
+            .withResolverName(ourResolver.name)
+            .withOverwrite(true),
+        publishResults := Classpaths.publishTask(publishResultsConf).value,
+        externalResolvers := ourResolver +: externalResolvers.value
+      )
+    }
+    .getOrElse(Nil)
+
+  override def projectSettings = Seq(
+    scalacOptions := {
+      // Flags need to be unique
+      val options = CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, 0)) => Nil
+        case _            =>
+          // Ignore deprecations, replace them with info ()
+          Seq("-Wconf:cat=deprecation:i")
       }
-      .getOrElse(Nil)
+      options.foldLeft(scalacOptions.value) { case (options, flag) =>
+        if (options.contains(flag)) options
+        else options :+ flag
+      }
+    }
+  ) ++ mvnRepoPublishSettings
 
   private def stripScala3Suffix(s: String) = s match {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s
