@@ -9,4 +9,7 @@ RUN curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux
   && sh -c "mill --version" \ 
   && sh -c "scalafix --version"
 
+# Project dependencies
+RUN apt -y install git-lfs 
+
 COPY . /build/

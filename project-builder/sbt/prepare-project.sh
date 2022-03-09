@@ -7,7 +7,7 @@ if [ $# -ne 2 ]; then
   exit 1
 fi
 
-repoDir="$1" # e.g. /tmp/shapeless
+repoDir="$1"            # e.g. /tmp/shapeless
 enforcedSbtVersion="$2" # e.g. '1.5.5' or empty ''
 
 # Check if using a sbt with a supported version
@@ -24,17 +24,17 @@ else
 fi
 
 function parseSemver() {
-  local prefixSufix=(`echo ${1/-/ }`)
+  local prefixSufix=($(echo ${1/-/ }))
   local prefix=${prefixSufix[0]}
   local suffix=${prefixSufix[1]}
-  local numberParts=(`echo ${prefix//./ }`)
+  local numberParts=($(echo ${prefix//./ }))
   local major=${numberParts[0]}
   local minor=${numberParts[1]}
   local patch=${numberParts[2]}
   echo "$major $minor $patch $suffix"
 }
 
-sbtSemVerParts=(`echo $(parseSemver "$sbtVersion")`)
+sbtSemVerParts=($(echo $(parseSemver "$sbtVersion")))
 sbtMajor=${sbtSemVerParts[0]}
 sbtMinor=${sbtSemVerParts[1]}
 sbtPatch=${sbtSemVerParts[2]}
@@ -44,9 +44,16 @@ if [ "$sbtMajor" -lt 1 ] || ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -lt 5 ]) || 
   exit 1
 fi
 
-scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 # Register command for setting up version, for more info check command impl comments
-echo -e "\ncommands += CommunityBuildPlugin.setPublishVersion\n" >> $repoDir/build.sbt
+echo -e "\ncommands += CommunityBuildPlugin.setPublishVersion\n" >>$repoDir/build.sbt
 
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
+
+# Project dependencies
+repoUrl=$(git remote get-url origin || echo "unknown")
+if [[ "$repoUrl" == *"shiftleftsecurity/codepropertygraph".git ]]; then
+  # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
+  git lfs pull
+fi
