@@ -686,7 +686,7 @@ object MinikubeReproducer:
       tty = true,
       resources = ResourceRequirements(
         requests = Map("memory" -> Quantity("4Gi")),
-        limits = Map("memory" -> Quantity("6Gi"))
+        limits = Map("memory" -> Quantity("7Gi"))
       )
     )
 

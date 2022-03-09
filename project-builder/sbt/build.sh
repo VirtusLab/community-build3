@@ -63,7 +63,7 @@ function runSbt(){
 runSbt "no force" || {
   shouldRetry=0
   # Failed to switch version
-  if grep -q 'RuntimeException: Switch failed: no subproject' "$logFile"; then
+  if grep -q 'Switch failed:' "$logFile"; then
     shouldRetry=1
   # Incorrect mappings usng Scala 2.13
   elif grep -q 'Module mapping missing:' "$logFile" && grep -q -e 'moduleIds: .*_2\.1[1-3]' "$logFile"; then

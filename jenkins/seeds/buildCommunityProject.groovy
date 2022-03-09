@@ -82,7 +82,7 @@ pipeline {
                               requests:
                                 memory: 5Gi
                               limits:
-                                memory: 6Gi
+                                memory: 7Gi
                             env:
                             - name: ELASTIC_USERNAME
                               value: ${params.elasticSearchUserName}
