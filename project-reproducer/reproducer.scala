@@ -850,12 +850,11 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     given Manifest[SbtConfig] = scala.reflect.Manifest.classType(classOf[SbtConfig])
     val CBPluginFile = "CommunityBuildPlugin.scala"
     val minSbtVersion = "1.5.5"
-    val defaultSettings = Seq("-J-Xmx4G")
     val sbtConfig = project.params.projectConfig
       .map(parse(_) \ "sbt")
       .flatMap(_.extractOpt[SbtConfig])
       .getOrElse(SbtConfig(Nil, Nil))
-    val sbtSettings = defaultSettings ++ sbtConfig.options
+    val sbtSettings = sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
 
     val currentSbtVersion = os

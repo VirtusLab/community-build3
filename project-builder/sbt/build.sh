@@ -37,7 +37,6 @@ sbtSettings=(
   --batch
   --no-colors
   -Dcommunitybuild.version="$version"
-  "-J-Xmx4G"
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")')
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
