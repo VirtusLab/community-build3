@@ -28,7 +28,7 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
 
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
-      if (sys.props.contains("scalafix.mill.skipHeader")) Patch.empty
+      if (sys.props.contains("communitybuild.noInjects")) Patch.empty
       else Patch.addLeft(doc.tree, Replacment.MillCommunityBuildInject)
     }
     val patch = doc.tree.collect {
