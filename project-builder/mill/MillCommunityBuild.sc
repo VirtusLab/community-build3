@@ -122,12 +122,15 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
         }
     }
     def evalAsDependencyOf(
-        dependecyOf: => BuildStepResult
+        dependencies: BuildStepResult*
     )(labels: String*): BuildStepResult = {
-      dependecyOf match {
-        case _: FailedBuildStep => Skipped
-        case _                  => eval(labels: _*)
+      val shouldSkip = dependencies.exists {
+        case _: FailedBuildStep => true
+        case Skipped            => true
+        case _                  => false
       }
+      if (shouldSkip) Skipped
+      else eval(labels: _*)
     }
   }
 
@@ -158,13 +161,16 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
     import evaluator._
 
     val compileResult = eval("compile")
+    val docResult = evalAsDependencyOf(compileResult)("docJar")
     val results = ModuleTargetsResults(
       compile = compileResult,
+      doc = docResult,
       testsCompile = evalAsDependencyOf(compileResult)("test", "compile"),
       publish = ctx.publishVersion.fold[BuildStepResult](Skipped) { publishVersion =>
         tryEval(module, "publishVersion")
           .fold[BuildStepResult](BuildError("No task 'publishVersion'")) {
-            case Result.Success(`publishVersion`) => eval("publishCommunityBuild")
+            case Result.Success(`publishVersion`) =>
+              evalAsDependencyOf(compileResult, docResult)("publishCommunityBuild")
             case Result.Success(version: String) =>
               WrongVersion(expected = publishVersion, got = version)
             case _ => BuildError("Failed to resolve 'publishVersion'")
@@ -305,12 +311,14 @@ case class BuildError(msg: String) extends FailedBuildStep("buildError", List("r
 
 case class ModuleTargetsResults(
     compile: BuildStepResult,
+    doc: BuildStepResult,
     testsCompile: BuildStepResult,
     publish: BuildStepResult
 ) {
   def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
   def jsonValues: List[String] = List(
     "compile" -> compile,
+    "doc" -> doc,
     "test-compile" -> testsCompile,
     "publish" -> publish
   ).map { case (key, value) =>
