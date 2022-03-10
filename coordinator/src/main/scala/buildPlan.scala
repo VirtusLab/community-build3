@@ -147,7 +147,7 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   BuildPlan(depGraph.scalaRelease, computedSteps._1)
 
 @main def printBuildPlan: BuildPlan = 
-  val deps = loadDepenenecyGraph("3.x", minStarsCount = 100)
+  val deps = loadDepenenecyGraph("3", minStarsCount = 100)
   val plan = makeStepsBasedBuildPlan(deps)
   val niceSteps = plan.steps.zipWithIndex.map { case (steps, nr) =>
     val items = 
@@ -284,7 +284,7 @@ private given FromString[Seq[Project]] = str =>
   }
 
 @main def storeDependenciesBasedBuildPlan(
-    scalaBinaryVersionSeries: String,
+    scalaBinaryVersion: String,
     minStarsCount: Int,
     maxProjectsCount: Int,
     requiredProjects: Seq[Project],
@@ -301,7 +301,7 @@ private given FromString[Seq[Project]] = str =>
     .toSeq
     
   val depGraph = loadDepenenecyGraph(
-    scalaBinaryVersionSeries,
+    scalaBinaryVersion,
     minStarsCount = minStarsCount,
     maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
     requiredProjects = requiredProjects,

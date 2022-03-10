@@ -60,7 +60,7 @@ pipeline {
                             buildPlanJobRef = build(
                                 job: buildPlanJobName,
                                 parameters: [
-                                    string(name: "scalaBinaryVersionSeries", value: params.scalaBinaryVersionSeries),
+                                    string(name: "scalaBinaryVersion", value: params.scalaBinaryVersion),
                                     string(name: "minStarsCount", value: params.minStarsCount),
                                     string(name: "maxProjectsCount", value: params.maxProjectsCount),
                                     string(name: "requiredProjects", value: params.requiredProjects),

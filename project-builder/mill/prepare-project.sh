@@ -21,6 +21,7 @@ cp repo/build.sc repo/build.scala \
     --files repo/build.scala \
     --stdout \
     --syntactic \
+    --settings.Scala3CommunityBuildMillAdapter.targetScalaVersion "$scalaVersion" \
     --scala-version 3.1.0 > repo/build.sc \
   && rm repo/build.scala 
 

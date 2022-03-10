@@ -5,6 +5,7 @@ package fix
 
 object MillPublishVersionOverride {
   final val Version = "3.1.1"
+  def T[U](v: U): U = ???
 
   object module {
     val publishVersion = "3.0.0"

@@ -8,22 +8,20 @@ import coursier.maven.MavenRepository
 import coursier.Repository
 
 trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
-  protected val mavenRepoUrl: String = sys.props
+  protected val mavenRepoUrl: Option[String] = sys.props
     .get("communitybuild.maven.url")
     .map(_.stripSuffix("/"))
-    .getOrElse {
-      sys.error("Required property 'communitybuild.maven.url' not set")
-    }
+  private val mavenRepo = mavenRepoUrl.map(MavenRepository(_))
 
   override def repositoriesTask: Task[Seq[Repository]] = T.task {
-    MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+    mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
   }
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
   override def zincWorker = CommunityBuildZincWorker
   object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
     override def repositoriesTask() = T.task {
-      MavenRepository(mavenRepoUrl) +: super.repositoriesTask()
+      mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
     }
   }
 }
@@ -38,7 +36,8 @@ trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCours
     }
     for {
       (artifactPath, artifactName) <- artifacts
-      url = s"$mavenRepoUrl/$artifactModulePath/$artifactName"
+      repoUrl <- mavenRepoUrl
+      url = s"$repoUrl/$artifactModulePath/$artifactName"
     } {
       val res = put(
         url = url,
@@ -47,7 +46,7 @@ trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCours
       )
       if (!res.is2xx) {
         throw new RuntimeException(
-          s"Failed to publish artifact ${url.stripPrefix(mavenRepoUrl)}: ${res.statusMessage}"
+          s"Failed to publish artifact ${url.stripPrefix(repoUrl)}: ${res.statusMessage}"
         )
       }
     }
@@ -88,7 +87,9 @@ def mapCrossVersions(
   }
 }
 
-private case class ModuleInfo(name: String, module: Module)
+case class ModuleInfo(org: String, name: String, module: Module) {
+  val targetName = s"$org%$name"
+}
 case class Ctx(
     root: mill.define.Module,
     scalaVersion: String,
@@ -102,24 +103,35 @@ case class Ctx(
 // Main entry point for Mill community build
 // Evaluate tasks until first failure and publish report
 def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
-  def runTasks(module: Module): List[BuildStepResult] = {
-    mapEval[List[BuildStepResult]](module, "compile")(CompileFailed :: Nil) {
-      val testResult = mapEval[BuildStepResult](module, "test", "compile")(TestFailed)(TestOk)
-      val publishResult = ctx.publishVersion.fold[BuildStepResult](PublishSkipped) {
-        publishVersion =>
-          evalOrThrow(module, "publishVersion") match {
-            case Result.Success(`publishVersion`) =>
-              mapEval[BuildStepResult](module, "publishCommunityBuild")(PublishFailed)(PublishOk)
-            case Result.Success(version: String) =>
-              PublishWrongVersion(Some(version))
-            case _ => PublishFailed
-          }
+  class TaskEvaluator(module: Module) {
+    def eval(labels: String*) = {
+      lazy val renderedPath = s"$module.${Segments(labels.map(Label(_)): _*).render}"
+
+      tryEval(module, labels: _*)
+        .fold[BuildStepResult] {
+          // Target not found, skip it and treat as successfull
+          ctx.log.error(s"Not found target '$renderedPath', skipping.")
+          Skipped
+        } {
+          case Result.Success(v) =>
+            ctx.log.info(s"Successfully evaluated $renderedPath")
+            Ok
+          case failure =>
+            ctx.log.error(s"Failed to evaluated $renderedPath: ${failure}")
+            Failed
+        }
+    }
+    def evalAsDependencyOf(
+        dependecyOf: => BuildStepResult
+    )(labels: String*): BuildStepResult = {
+      dependecyOf match {
+        case _: FailedBuildStep => Skipped
+        case _                  => eval(labels: _*)
       }
-      CompileOk :: testResult :: publishResult :: Nil
     }
   }
 
-  val mappings = moduleMappings(targets.toSet)
+  val mappings = checkedModuleMappings(targets.toSet)
   val topLevelModules = mappings.collect {
     case (target, info) if targets.contains(target) => info
   }.toSet
@@ -139,28 +151,35 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
     }
 
   val projectsBuildResults = for {
-    ModuleInfo(name, module) <- flatten(topLevelModules, topLevelModules)
-  } yield Info(name) :: {
+    ModuleInfo(org, name, module) <- flatten(topLevelModules, topLevelModules)
+  } yield {
     ctx.log.info(s"Starting build for $name")
-    try runTasks(module)
-    catch {
-      case ex: Throwable =>
-        ctx.log.error("Failed to evaluate tasks")
-        ex.printStackTrace()
-        BuildError(ex.getMessage) :: Nil
-    }
+    val evaluator = new TaskEvaluator(module)
+    import evaluator._
+
+    val compileResult = eval("compile")
+    val results = ModuleTargetsResults(
+      compile = compileResult,
+      testsCompile = evalAsDependencyOf(compileResult)("test", "compile"),
+      publish = ctx.publishVersion.fold[BuildStepResult](Skipped) { publishVersion =>
+        tryEval(module, "publishVersion")
+          .fold[BuildStepResult](BuildError("No task 'publishVersion'")) {
+            case Result.Success(`publishVersion`) => eval("publishCommunityBuild")
+            case Result.Success(version: String) =>
+              WrongVersion(expected = publishVersion, got = version)
+            case _ => BuildError("Failed to resolve 'publishVersion'")
+          }
+      }
+    )
+    ModuleBuildResults(
+      artifactName = name,
+      results = results
+    )
   }
 
   val buildSummary = projectsBuildResults
-    .map {
-      case List(result) => result.asString
-      case subProjectName :: subProjectResults =>
-        val subProject = subProjectName.asString
-        val results = subProjectResults.map(_.asString).mkString("{", ", ", "}")
-        s"$subProject: $results"
-    }
+    .map(_.toJson)
     .mkString("{", ", ", "}")
-
   ctx.log.info(s"""
     |************************
     |Build summary:
@@ -171,9 +190,10 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
   val outputDir = os.pwd / os.up
   os.write.over(outputDir / "build-summary.txt", buildSummary)
 
-  val hasFailedSteps =
-    projectsBuildResults.exists(_.exists(_.isInstanceOf[BuildStepFailure]))
-  val buildStatus = if (!hasFailedSteps) "success" else "failure"
+  val hasFailedSteps = projectsBuildResults.exists(_.results.hasFailedStep)
+  val buildStatus =
+    if (hasFailedSteps) "failure"
+    else "success"
   os.write.over(outputDir / "build-status.txt", buildStatus)
   if (hasFailedSteps) {
     throw new ProjectBuildFailureException
@@ -184,14 +204,13 @@ private def toMappingInfo(module: Module)(implicit ctx: Ctx): Option[(String, Mo
   for {
     Result.Success(publish.Artifact(org, _, _)) <- tryEval(module, "artifactMetadata")
     Result.Success(name: String) <- tryEval(module, "artifactName")
-    targetName = s"$org%$name"
-  } yield targetName -> ModuleInfo(name, module)
+    info = ModuleInfo(org, name, module)
+  } yield info.targetName -> info
 }
 
-private def moduleMappings(
-    targetStrings: Set[String]
-)(implicit ctx: Ctx): Map[String, ModuleInfo] = {
-  val mappings = ctx.root.millInternal.modules.flatMap { module =>
+type ModuleMappings = Map[String, ModuleInfo]
+def moduleMappings(implicit ctx: Ctx): ModuleMappings = {
+  ctx.root.millInternal.modules.flatMap { module =>
     for {
       Result.Success(scalaVersion) <- tryEval(module, "scalaVersion")
       if scalaVersion == ctx.scalaVersion
@@ -199,13 +218,15 @@ private def moduleMappings(
       Result.Success(platformSuffix: String) <- tryEval(module, "platformSuffix")
       if platformSuffix.isEmpty // is JVM
 
-      Result.Success(publish.Artifact(org, _, _)) <- tryEval(module, "artifactMetadata")
-      Result.Success(name: String) <- tryEval(module, "artifactName")
-      mapping @ (targetName, ModuleInfo(_, module)) <- toMappingInfo(module)
-      _ = ctx.log.info(s"Using $module for $targetName")
+      mapping @ (targetName, ModuleInfo(_, _, module)) <- toMappingInfo(module)
     } yield mapping
   }.toMap
+}
 
+private def checkedModuleMappings(
+    targetStrings: Set[String]
+)(implicit ctx: Ctx): ModuleMappings = {
+  val mappings = moduleMappings(ctx)
   val unmatched = targetStrings.diff(mappings.keySet)
   if (unmatched.nonEmpty) {
     sys.error(
@@ -242,40 +263,6 @@ private def tryEval(module: Module, labels: String*)(implicit ctx: Ctx) = {
     }
 }
 
-private def mapEval[T](module: Module, labels: String*)(
-    onFailure: => T
-)(onSucces: => T)(implicit ctx: Ctx) = {
-  lazy val renderedPath =
-    s"$module.${Segments(labels.map(Label(_)): _*).render}"
-
-  tryEval(module, labels: _*)
-    .fold {
-      // Target not found, skip it and treat as successfull
-      ctx.log.error(s"Not found target '$renderedPath', skipping.")
-      onSucces
-    } {
-      case Result.Success(v) =>
-        ctx.log.info(s"Successfully evaluated $renderedPath")
-        onSucces
-      case failure =>
-        ctx.log.error(s"Failed to evaluated $renderedPath: ${failure}")
-        onFailure
-    }
-}
-
-private def evalOrThrow(module: Module, segments: String*)(implicit
-    ctx: Ctx
-) = {
-  val segmentsAsLabels = segments.map(Label(_))
-  tryEval(module, segments: _*)
-    .getOrElse {
-      val outerCtx = module.millOuterCtx
-      val segments = outerCtx.segments ++ (outerCtx.segment +: segmentsAsLabels)
-      val path = segments.render
-      sys.error(s"Failed to eval $path")
-    }
-}
-
 // Extractors
 private case class ExtractorsCtx(scalaVersion: String) {
   val SymVer(scalaMajor, scalaMinor, _, _) = scalaVersion
@@ -297,21 +284,47 @@ private object MatchesScalaBinaryVersion {
   }
 }
 
-// Step results
-abstract class BuildStepResult(val asString: String)
-abstract class BuildStepFailure(stringValue: String) extends BuildStepResult(stringValue)
-abstract class BuildStepSuccess(stringValue: String) extends BuildStepResult(stringValue)
+sealed abstract class BuildStepResult(val stringValue: String) {
+  def jsonValue = s""""$stringValue""""
+}
+sealed abstract class FailedBuildStep(name: String, info: List[(String, String)])
+    extends BuildStepResult(name) {
+  override def jsonValue =
+    if (info.isEmpty) s""""$name""""
+    else {
+      val infoFields = info.map { case (k, v) => s""""$k": "$v"""" }.mkString(", ")
+      s""""$name": {$infoFields}"""
+    }
+}
+case object Ok extends BuildStepResult("ok")
+case object Skipped extends BuildStepResult("skipped")
+case object Failed extends FailedBuildStep("failed", Nil)
+case class WrongVersion(expected: String, got: String)
+    extends FailedBuildStep("wrongVersion", List("expected" -> expected, "got" -> got))
+case class BuildError(msg: String) extends FailedBuildStep("buildError", List("reason" -> msg))
 
-case class Info(msg: String) extends BuildStepSuccess(s""""$msg"""")
-object CompileOk extends BuildStepSuccess(""""compile": "ok"""")
-object CompileFailed extends BuildStepFailure(""""compile": "failed"""")
-object TestOk extends BuildStepSuccess(""""test": "ok"""")
-object TestFailed extends BuildStepFailure(""""test": "failed"""")
-object PublishSkipped extends BuildStepSuccess(""""publish": "skipped"""")
-case class PublishWrongVersion(version: Option[String])
-    extends BuildStepFailure(s""""publish": "wrongVersion=${version}"""")
-object PublishOk extends BuildStepSuccess(""""publish": "ok"""")
-object PublishFailed extends BuildStepFailure(""""publish": "failed"""")
-case class BuildError(msg: String) extends BuildStepFailure(s""""error": "${msg}"""")
+case class ModuleTargetsResults(
+    compile: BuildStepResult,
+    testsCompile: BuildStepResult,
+    publish: BuildStepResult
+) {
+  def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
+  def jsonValues: List[String] = List(
+    "compile" -> compile,
+    "test-compile" -> testsCompile,
+    "publish" -> publish
+  ).map { case (key, value) =>
+    s""""$key": "${value.stringValue}""""
+  }
+}
+case class ModuleBuildResults(
+    artifactName: String,
+    results: ModuleTargetsResults
+) {
+  lazy val toJson = {
+    val resultsJson = results.jsonValues.mkString(", ")
+    s""""$artifactName": {$resultsJson}"""
+  }
+}
 
 class ProjectBuildFailureException extends Exception

@@ -64,7 +64,7 @@ pipeline {
                               name: mvn-repo-cert
                           containers:
                           - name: project-builder
-                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.3
+                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.4
                             imagePullPolicy: IfNotPresent
                             volumeMounts:
                             - name: mvn-repo-cert
@@ -82,7 +82,7 @@ pipeline {
                               requests:
                                 memory: 5Gi
                               limits:
-                                memory: 6Gi
+                                memory: 7Gi
                             env:
                             - name: ELASTIC_USERNAME
                               value: ${params.elasticSearchUserName}
@@ -166,6 +166,12 @@ pipeline {
                         }
                       }
                     }
+                }
+                failure {
+                  script {
+                    echo "Build failed, reproduce it locally using following command:"
+                    echo "scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/reproducer/reproducer.scala -- --jobId=${env.BUILD_NUMBER}"
+                  }
                 }
             }
         }

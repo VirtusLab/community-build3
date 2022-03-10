@@ -24,7 +24,7 @@ pipeline {
                         spec:
                           containers:
                           - name: coordinator
-                            image: virtuslab/scala-community-build-coordinator:v0.0.3
+                            image: virtuslab/scala-community-build-coordinator:v0.0.4
                             imagePullPolicy: IfNotPresent
                             command:
                             - cat
@@ -42,7 +42,7 @@ pipeline {
                               cat << EOF > /tmp/maintained-project-configs.conf \n${params.projectsConfig}\nEOF
                               cat << EOF > /tmp/projects-filters.txt \n${params.projectsFilters}\nEOF
                               /build/compute-build-plan.sh \
-                               '${params.scalaBinaryVersionSeries}' \
+                               '${params.scalaBinaryVersion}' \
                                '${params.minStarsCount}' \
                                '${params.maxProjectsCount}' \
                                '${params.requiredProjects}' \
