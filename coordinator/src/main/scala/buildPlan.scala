@@ -176,14 +176,17 @@ def makeDependenciesBasedBuildPlan(
   val dottyProjectName = "lampepfl_dotty"
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
-  val replacements = scala.io.Source
-    .fromFile(replacedProjectsConfigPath)
-    .getLines
-    .filter(line => line.nonEmpty && !line.startsWith("#"))
-    .map { case replacementPattern(org1, name1, org2, name2, branch) =>
-      (org1, name1) -> ((org2, name2), Option(branch))
-    }
-    .toMap
+  val replacements =
+    if (!Paths.get(replacedProjectsConfigPath).toFile.exists) Map.empty
+    else
+      scala.io.Source
+        .fromFile(replacedProjectsConfigPath)
+        .getLines
+        .filter(line => line.nonEmpty && !line.startsWith("#"))
+        .map { case replacementPattern(org1, name1, org2, name2, branch) =>
+          (org1, name1) -> ((org2, name2), Option(branch))
+        }
+        .toMap
 
   def projectRepoUrl(project: Project) =
     val originalCoords = (project.org, project.name)
@@ -292,14 +295,17 @@ private given FromString[Seq[Project]] = str =>
     projectsConfigPath: String,
     projectsFilterPath: String
 ) =
-  val filterPatterns = io.Source
-    .fromFile(projectsFilterPath)
-    .getLines
-    .map(_.trim())
-    .filterNot(_.startsWith("#"))
-    .filter(_.nonEmpty)
-    .toSeq
-    
+  val filterPatterns =
+    if (!Paths.get(projectsFilterPath).toFile.exists) Nil
+    else
+      io.Source
+        .fromFile(projectsFilterPath)
+        .getLines
+        .map(_.trim())
+        .filterNot(_.startsWith("#"))
+        .filter(_.nonEmpty)
+        .toSeq
+
   val depGraph = loadDepenenecyGraph(
     scalaBinaryVersion,
     minStarsCount = minStarsCount,
