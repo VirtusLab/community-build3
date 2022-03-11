@@ -378,7 +378,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
   private def startMinikube() =
     val isRunning = os
       .proc("minikube", "status", "--format={{.Host}}")
-      .call()
+      .call(check = false)
       .out
       .text()
       .startsWith("Running")
