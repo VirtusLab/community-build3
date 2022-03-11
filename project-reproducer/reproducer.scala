@@ -583,16 +583,6 @@ object MinikubeReproducer:
   private val imageVersion = "v0.0.4"
 
   def usingMavenServiceForwarder[T](fn: MavenForwarderPort ?=> T)(using k8s: MinikubeConfig): T =
-    // Wait until mvn-repo is started
-    os.proc(
-      "kubectl",
-      "wait",
-      "pod",
-      "--namespace=" + k8s.namespace,
-      "--selector=app=mvn-repo",
-      "--for=condition=Ready",
-      "--timeout=1m"
-    ).call()
     usingServiceForwarder("mvn-repo", 8081)(fn(using _))
 
   def projectBuilderJob(using project: ProjectInfo, k8s: MinikubeConfig, config: Config): Job =
@@ -740,7 +730,15 @@ object MinikubeReproducer:
   ) =
     val service = s"service/$serviceName"
     val ForwardingLocallyOnPort = raw"Forwarding from 127.0.0.1:(\d+).*".r
-
+    // Wait until service is ready is started
+    os.proc(
+      "kubectl",
+      "logs",
+      service,
+      "--namespace=" + k8s.namespace,
+      "-f",
+      "--limit-bytes=1"
+    ).call()
     val forwarder =
       os.proc("kubectl", "-n", k8s.namespace, "port-forward", service, s":$servicePort")
         .spawn()
@@ -749,9 +747,7 @@ object MinikubeReproducer:
         case ForwardingLocallyOnPort(port) =>
           Future(forwarder.stdout.buffered.lines.forEach(_ => ()))
           println(s"Forwarding $service on port ${port}")
-          val res = fn(port.toInt)
-          println("done")
-          res
+          fn(port.toInt)
         case _ => sys.error(s"Failed to forward $service")
       }
     finally forwarder.destroy()
