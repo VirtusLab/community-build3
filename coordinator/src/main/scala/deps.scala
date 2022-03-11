@@ -95,16 +95,16 @@ def loadDepenenecyGraph(
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
-  val optional = maxProjectsCount.fold(LazyList.empty) { maxCount =>
-    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
-      .filter(_.stars >= minStarsCount)
-      .sortBy(-_.stars)
-      .to(LazyList)
-      .map(loadProject)
-      .map(projectModulesFilter(filterPatterns.map(_.r)))
-      .filter(_.mvs.nonEmpty)
-      .take(maxCount - required.length)
-  }
+  val optionalStream = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
+    .filter(_.stars >= minStarsCount)
+    .sortBy(-_.stars)
+    .to(LazyList)
+    .map(loadProject)
+    .map(projectModulesFilter(filterPatterns.map(_.r)))
+    .filter(_.mvs.nonEmpty)
+  val optional = maxProjectsCount
+    .map(_ - required.length)
+    .foldLeft(optionalStream)(_.take(_))
   val projects = {
     val loadProjects = Future.traverse(required #::: optional) { project =>
       Future {
