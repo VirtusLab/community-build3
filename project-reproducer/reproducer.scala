@@ -30,7 +30,7 @@ val communityBuildVersion = sys.props.getOrElse("communitybuild.version","v0.0.4
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 val communityBuildRepo = s"https://github.com/$CBRepoName.git"
-val communityBuildDir = gitCheckout(communityBuildRepo, None)(os.temp.dir())
+lazy val communityBuildDir = gitCheckout(communityBuildRepo, None)(os.temp.dir())
 lazy val scriptsDir = communityBuildDir / "scripts"
 lazy val projectBuilderDir = communityBuildDir / "project-builder"
 
