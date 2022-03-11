@@ -856,12 +856,12 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       .getOrElse(SbtConfig(Nil, Nil))
     val sbtSettings = sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
-
+    val SbtVersion = raw"sbt\.version\s*=\s*(\d.*)".r
     val currentSbtVersion = os
       .read(sbtBuildProperties)
       .linesIterator
-      .collectFirst {
-        case str if str.startsWith("sbt.version=") => str.stripPrefix("sbt.version=")
+      .collectFirst { case SbtVersion(version) =>
+        version
       }
       .getOrElse(sys.error("Cannot resolve current sbt version"))
     val belowMinimalSbtVersion =
