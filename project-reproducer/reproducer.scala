@@ -583,6 +583,16 @@ object MinikubeReproducer:
   private val imageVersion = "v0.0.4"
 
   def usingMavenServiceForwarder[T](fn: MavenForwarderPort ?=> T)(using k8s: MinikubeConfig): T =
+    // Wait until mvn-repo is started
+    os.proc(
+      "kubectl",
+      "wait",
+      "pod",
+      "--namespace=" + k8s.namespace,
+      "--selector=app=mvn-repo",
+      "--for=condition=Ready",
+      "--timeout=1m"
+    ).call()
     usingServiceForwarder("mvn-repo", 8081)(fn(using _))
 
   def projectBuilderJob(using project: ProjectInfo, k8s: MinikubeConfig, config: Config): Job =
@@ -730,26 +740,23 @@ object MinikubeReproducer:
   ) =
     val service = s"service/$serviceName"
     val ForwardingLocallyOnPort = raw"Forwarding from 127.0.0.1:(\d+).*".r
-    // Wait until service is ready is started
-    os.proc(
-      "kubectl",
-      "logs",
-      service,
-      "--namespace=" + k8s.namespace,
-      "-f",
-      "--limit-bytes=1"
-    ).call()
-    val forwarder =
-      os.proc("kubectl", "-n", k8s.namespace, "port-forward", service, s":$servicePort")
-        .spawn()
-    try
+    def startForwarder(): (os.SubProcess, Int) =
+      val forwarder = os
+        .proc("kubectl", "-n", k8s.namespace, "port-forward", service, s":$servicePort")
+        .spawn(stderr = os.Pipe)
       forwarder.stdout.buffered.readLine match {
-        case ForwardingLocallyOnPort(port) =>
-          Future(forwarder.stdout.buffered.lines.forEach(_ => ()))
-          println(s"Forwarding $service on port ${port}")
-          fn(port.toInt)
-        case _ => sys.error(s"Failed to forward $service")
+        case null =>
+          Thread.sleep(1000)
+          startForwarder()
+        case ForwardingLocallyOnPort(port) => (forwarder, port.toInt)
+        case out                           => sys.error(s"Failed to forward $service - $out")
       }
+
+    val (forwarder, port) = startForwarder()
+    try
+      Future(forwarder.stdout.buffered.lines.forEach(_ => ()))
+      println(s"Forwarding $service on port ${port}")
+      fn(port)
     finally forwarder.destroy()
 end MinikubeReproducer
 
