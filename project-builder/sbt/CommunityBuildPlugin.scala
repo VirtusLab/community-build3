@@ -22,12 +22,14 @@ case class BuildError(msg: String) extends FailedBuildStep("buildError", List("r
 
 case class ModuleTargetsResults(
     compile: BuildStepResult,
+    doc: BuildStepResult,
     testsCompile: BuildStepResult,
     publish: BuildStepResult
 ) {
   def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
   def jsonValues: List[String] = List(
     "compile" -> compile,
+    "doc" -> doc,
     "test-compile" -> testsCompile,
     "publish" -> publish
   ).map { case (key, value) =>
@@ -304,12 +306,15 @@ object CommunityBuildPlugin extends AutoPlugin {
           }
         }
         def evalAsDependencyOf(
-            dependecyOf: => BuildStepResult
+            dependencies: BuildStepResult*
         )(task: TaskKey[_]): BuildStepResult = {
-          dependecyOf match {
-            case _: FailedBuildStep => Skipped
-            case _                  => eval(task)
+          val shouldSkip = dependencies.exists {
+            case _: FailedBuildStep => true
+            case Skipped            => true
+            case _                  => false
           }
+          if (shouldSkip) Skipped
+          else eval(task)
         }
       }
 
@@ -322,8 +327,10 @@ object CommunityBuildPlugin extends AutoPlugin {
         import evaluator._
         val results = {
           val compileResult = eval(Compile / compile)
+          val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
           ModuleTargetsResults(
             compile = compileResult,
+            doc = docsResult,
             testsCompile = evalAsDependencyOf(compileResult)(Test / compile),
             publish = ourVersion.fold[BuildStepResult](Skipped) { version =>
               val currentVersion = (r / Keys.version)
@@ -331,7 +338,7 @@ object CommunityBuildPlugin extends AutoPlugin {
                 .getOrElse(sys.error(s"${r.project}/version not set"))
               if (currentVersion != version)
                 WrongVersion(expected = version, got = currentVersion)
-              else evalAsDependencyOf(compileResult)(Compile / publishResults)
+              else evalAsDependencyOf(compileResult, docsResult)(Compile / publishResults)
             }
           )
         }
