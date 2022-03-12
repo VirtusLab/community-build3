@@ -29,8 +29,10 @@ class FailedProjectException(msg: String) extends RuntimeException(msg) with NoS
 val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.4")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
-val communityBuildRepo = s"https://github.com/$CBRepoName.git"
-lazy val communityBuildDir = gitCheckout(communityBuildRepo, None)(os.temp.dir())
+lazy val communityBuildDir = sys.props
+  .get("communitybuild.local.dir")
+  .map(os.Path(_))
+  .getOrElse(gitCheckout(s"https://github.com/$CBRepoName.git", None)(os.temp.dir()))
 lazy val scriptsDir = communityBuildDir / "scripts"
 lazy val projectBuilderDir = communityBuildDir / "project-builder"
 
@@ -735,10 +737,10 @@ object MinikubeReproducer:
         "--timeout=1m"
       )
       .call(check = false, stderr = os.Pipe)
-    while
-    val p = waitForPod()
-    p.exitCode != 0 && p.err.text().contains("error: no matching resources")
-    do ()
+    while {
+      val p = waitForPod()
+      p.exitCode != 0 && p.err.text().contains("error: no matching resources")
+    } do ()
     usingServiceForwarder("mvn-repo", 8081)(fn(using _))
 
   def projectBuilderJob(using
