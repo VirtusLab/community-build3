@@ -26,7 +26,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version","v0.0.4")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.4")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 val communityBuildRepo = s"https://github.com/$CBRepoName.git"
@@ -86,9 +86,15 @@ object Config:
       opt[Unit]("keepCluster")
         .action { (_, c) => c.withMinikube(_.copy(keepCluster = true)) }
         .text("Should Minikube cluster be kept after finishing the build"),
+      opt[Unit]("keepMavenRepo")
+        .action { (_, c) => c.withMinikube(_.copy(keepMavenRepository = true)) }
+        .text("Should Maven repository instance should not be delete after finishing the build"),
       opt[File]("k8sConfig")
         .action { (x, c) => c.withMinikube(_.copy(k8sConfig = x)) }
         .text("Path to kubernetes config file, defaults to ~/.kube/config"),
+      opt[String]("namespace")
+        .action { (x, c) => c.withMinikube(_.copy(namespace = x)) }
+        .text("Custom minikube namespace to be used"),
       opt[Unit]("locally")
         .action { (_, c) => c.copy(mode = Mode.Local) }
         .text("Run build locally without minikube cluster"),
@@ -718,15 +724,21 @@ object MinikubeReproducer:
 
   def usingMavenServiceForwarder[T](fn: MavenForwarderPort ?=> T)(using k8s: MinikubeConfig): T =
     // Wait until mvn-repo is started
-    os.proc(
-      "kubectl",
-      "wait",
-      "pod",
-      "--namespace=" + k8s.namespace,
-      "--selector=app=mvn-repo",
-      "--for=condition=Ready",
-      "--timeout=1m"
-    ).call()
+    def waitForPod() = os
+      .proc(
+        "kubectl",
+        "wait",
+        "pod",
+        "--namespace=" + k8s.namespace,
+        "--selector=app=mvn-repo",
+        "--for=condition=Ready",
+        "--timeout=1m"
+      )
+      .call(check = false, stderr = os.Pipe)
+    while
+    val p = waitForPod()
+    p.exitCode != 0 && p.err.text().contains("error: no matching resources")
+    do ()
     usingServiceForwarder("mvn-repo", 8081)(fn(using _))
 
   def projectBuilderJob(using
