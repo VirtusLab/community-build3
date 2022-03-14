@@ -169,6 +169,7 @@ object ProjectBuildPlan:
   scopt.OParser
     .parse(Config.parser, args, Config())
     .fold(()) { implicit config: Config =>
+      println("Gathering build info...")
       given BuildInfo = config.command match {
         case Command.ReproduceJenkinsBuild => BuildInfo.fetchFromJenkins()
         case Command.RunCustomProject => BuildInfo.forCustomProject(config, config.reproducer.jobId)
@@ -294,7 +295,7 @@ object BuildInfo:
 
     def prepareBuildPlan(): JValue =
       val args = Seq(
-        /* scalaVersion = */ scalaVersion,
+        /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
