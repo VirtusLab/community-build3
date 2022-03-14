@@ -69,8 +69,10 @@ case class CustomBuildConfig(
 object Config:
   enum Command:
     case ReproduceJenkinsBuild, RunCustomProject
+
   enum Mode:
     case Minikube, Local
+  
   case class MinikubeConfig(
       keepCluster: Boolean = false,
       keepMavenRepository: Boolean = false,
