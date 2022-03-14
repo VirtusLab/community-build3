@@ -5,13 +5,13 @@ object MillPublishVersionOverride {
   def T[U](v: U): U = ???
 
   object module {
-    val publishVersion = T{_root_.scala.sys.props.get("communitybuild.version").getOrElse("3.0.0")}
+    val publishVersion = "1.2.3-RC4"
   }
   class moduleDef {
-    def publishVersion: String = T{_root_.scala.sys.props.get("communitybuild.version").getOrElse("3.0.1")}
+    def publishVersion: String = "1.2.3-RC4"
   }
   class moduleDef2 extends moduleDef {
-    override val publishVersion: String = T{_root_.scala.sys.props.get("communitybuild.version").getOrElse(MillPublishVersionOverride.Version)}
+    override val publishVersion: String = "1.2.3-RC4"
   }
 
   val snippet = s"""

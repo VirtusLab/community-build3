@@ -4,7 +4,10 @@ import scalafix.v1._
 import scala.meta._
 import metaconfig._
 
-case class Scala3CommunityBuildMillAdapterConfig(targetScalaVersion: Option[String] = None)
+case class Scala3CommunityBuildMillAdapterConfig(
+    targetScalaVersion: Option[String] = None,
+    targetPublishVersion: Option[String] = None
+)
 object Scala3CommunityBuildMillAdapterConfig {
   def default = Scala3CommunityBuildMillAdapterConfig()
   implicit val surface =
@@ -19,12 +22,22 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
   override def withConfiguration(config: Configuration): Configured[Rule] = {
     config.conf
       .getOrElse("Scala3CommunityBuildMillAdapter") {
-        sys.props.get("communitybuild.scala").foldLeft(this.config) { case (config, version) =>
-          config.copy(targetScalaVersion = Some(version))
-        }
+        def propOrDefault(
+            prop: String,
+            default: Scala3CommunityBuildMillAdapterConfig => Option[String]
+        ) = sys.props
+          .get(prop)
+          .filter(_.nonEmpty)
+          .orElse(default(this.config))
+
+        this.config
+          .copy(
+            targetScalaVersion = propOrDefault("communitybuild.scala", _.targetScalaVersion),
+            targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion)
+          )
       }
       .map(new Scala3CommunityBuildMillAdapter(_))
-    }
+  }
 
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
@@ -39,7 +52,10 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
           ) =>
         List(
           Patch.replaceTree(name, Replacment.CommunityBuildCross),
-          Patch.addRight(init, s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")")})")
+          Patch.addRight(
+            init,
+            s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")")})"
+          )
         ).asPatch
 
       case template @ Template(_, traits, _, _)
@@ -71,17 +87,18 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
     val CommunityBuildPublishModule = "MillCommunityBuild.CommunityBuildPublishModule"
     val CommunityBuildCoursierModule = "MillCommunityBuild.CommunityBuildCoursierModule"
     def ScalaVersion(default: => String) = config.targetScalaVersion
-      .map { str =>
-        // Make sure that literal is quoted
-        val quote = "\""
-        val stripQutoes = str.stripPrefix(quote).stripSuffix(quote)
-        quote + stripQutoes + quote
-      }
+      .map(quoted(_))
       .getOrElse(default)
-    def PublishVersion(default: => String) = asTarget(
-      getPropsOrElse("communitybuild.version")(default)
-    )
-    def asTarget(v: String): String = s"T{$v}"
+    def PublishVersion(default: => String) = config.targetPublishVersion
+      .map(quoted(_))
+      .getOrElse(default)
+
+    private def quoted(v: String): String = {
+      // Make sure that literal is quoted
+      val quote = "\""
+      val stripQutoes = v.stripPrefix(quote).stripSuffix(quote)
+      quote + stripQutoes + quote
+    }
     val MillCommunityBuildInject = """
     |import $file.MillCommunityBuild
     |// Main entry point for community build
@@ -100,15 +117,6 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
     |    )
     |// End of code injects
     |""".stripMargin
-
-    private def getPropsOrElse(propertyName: String)(orElse: String) = {
-      s"""_root_.scala.sys.props.get("$propertyName").getOrElse($orElse)"""
-    }
-    private def throwMisingProperty(propertyName: String) = {
-      s"""_root_.scala.sys.error("Missing required property '$propertyName'")"""
-    }
-    private def getPropertyOrThrow(propertyName: String) =
-      getPropsOrElse(propertyName)(throwMisingProperty(propertyName))
 
   }
 
