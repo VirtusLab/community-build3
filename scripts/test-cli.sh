@@ -5,9 +5,6 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 cd $scriptDir/../cli
 
 # Installation of scala-cli in the GH actions workflow was not very effective, and might have lead to missing binary on the PATH when executing this script
-curl -sSLf https://virtuslab.github.io/scala-cli-packages/scala-setup.sh | sh
-source ~/.profile
-scala-cli --version
 
 testNamespace=scala3-community-build-test
 cliRunCmd="run scb-cli.scala --java-prop communitybuild.version=test --java-prop communitybuild.local.dir=$scriptDir/.. -- "
