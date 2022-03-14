@@ -75,6 +75,7 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   Target(TargetId(o,n), deps.toSeq)
 
 def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject = 
+  require(projectModules.mvs.nonEmpty, s"Empty modules list in ${projectModules.project}")
   val ModuleInVersion(version, modules) = projectModules.mvs.head
   val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
   val targets = mvs.map(cached(asTarget(scalaBinaryVersion)))
