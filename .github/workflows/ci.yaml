@@ -12,7 +12,9 @@ jobs:
       
       - name: Install deps
         run: |
-          curl -sSLf https://virtuslab.github.io/scala-cli-packages/scala-setup.sh | sh
+          curl -sSLf https://virtuslab.github.io/scala-cli-packages/scala-setup.sh | sh 
+          source ~/.profile
+          scala-cli --version
 
       - name: Test mill scalafix rules
         run: cd project-builder/mill/scalafix && sbt test  
