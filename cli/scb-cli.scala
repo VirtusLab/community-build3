@@ -544,7 +544,10 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
         .call(check = false)
         .exitCode == 0
-    if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
+    if !mavenIsRunning then 
+      // Make sure that mvn repo was completlly deleted, otherwise we would have problems with certs
+      bash(scriptsDir / "stop-mvn-repo.sh")
+      bash(scriptsDir / "start-mvn-repo.sh")
 
   private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient](
       checkDeps: DependenciesChecker
