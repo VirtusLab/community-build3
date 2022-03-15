@@ -11,13 +11,13 @@ source $scriptDir/utils.sh
 
 VERSION="$1"
 TAG_NAME=$(buildTag $VERSION 11)
-CACHE_FROM_TAG=$(buildTag "$PREV_CB_VERSION" 11)
+CACHE_FROM_TAG="$PREV_CB_VERSION"
 
 imageName=virtuslab/scala-community-build-coordinator
 
 docker pull $imageName:$CACHE_FROM_TAG || true
 docker build \
   --build-arg BASE_IMAGE="virtuslab/scala-community-build-builder-base:$TAG_NAME" \
-  -t "$imageName:$TAG_NAME" \
+  -t "$imageName:$VERSION" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
   $scriptDir/../coordinator

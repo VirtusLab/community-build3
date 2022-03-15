@@ -12,13 +12,13 @@ source $scriptDir/utils.sh
 VERSION="$1"
 # Use base image with Java 8
 TAG_NAME=$(buildTag $VERSION 8)
-CACHE_FROM_TAG=$(buildTag "$PREV_CB_VERSION" 8)
+CACHE_FROM_TAG="$PREV_CB_VERSION"
 
 imageName=virtuslab/scala-community-build-compiler-builder
 docker pull $imageName:$CACHE_FROM_TAG || true
 
 docker build \
   --build-arg BASE_IMAGE="virtuslab/scala-community-build-builder-base:$TAG_NAME" \
-  -t "$imageName:$TAG_NAME" \
+  -t "$imageName:$VERSION" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
   $scriptDir/../compiler-builder
