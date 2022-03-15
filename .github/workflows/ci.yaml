@@ -3,7 +3,28 @@ name: scala3-community-build
 on:
   pull_request:
 jobs:
-  build:
+  test-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+
+      - name: Test mill scalafix rules
+        run: cd project-builder/mill/scalafix && sbt test
+
+      - name: Start minikube
+        run: minikube start
+
+      - name: Build up base docker images
+        run: |
+          eval $(minikube -p minikube docker-env)
+          scripts/build-all.sh test
+
+      - name: Test build
+        run: scripts/test-build.sh
+
+  test-cli:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +42,6 @@ jobs:
           sudo apt update && sudo apt install scala-cli
           scala-cli --version
 
-      - name: Test mill scalafix rules
-        run: cd project-builder/mill/scalafix && sbt test
-
       - name: Start minikube
         run: minikube start
 
@@ -31,9 +49,6 @@ jobs:
         run: |
           eval $(minikube -p minikube docker-env)
           scripts/build-all.sh test
-
-      - name: Test build
-        run: scripts/test-build.sh
 
       - name: Test CLI
         run: scripts/test-cli.sh
