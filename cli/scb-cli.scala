@@ -541,7 +541,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       s"kubectl create namespace ${k8s.namespace} --dry-run=client -o yaml | kubectl apply -f -"
     )
     val mavenIsRunning =
-      os.proc("kubectl", "get", "deploy/mvn-repo", "--output=name")
+      os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
         .call(check = false)
         .exitCode == 0
     if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
