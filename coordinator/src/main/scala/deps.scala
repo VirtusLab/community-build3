@@ -75,6 +75,7 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   Target(TargetId(o,n), deps.toSeq)
 
 def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject = 
+  require(projectModules.mvs.nonEmpty, s"Empty modules list in ${projectModules.project}")
   val ModuleInVersion(version, modules) = projectModules.mvs.head
   val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
   val targets = mvs.map(cached(asTarget(scalaBinaryVersion)))
@@ -95,16 +96,16 @@ def loadDepenenecyGraph(
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
-  val optional = maxProjectsCount.fold(LazyList.empty) { maxCount =>
-    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
-      .filter(_.stars >= minStarsCount)
-      .sortBy(-_.stars)
-      .to(LazyList)
-      .map(loadProject)
-      .map(projectModulesFilter(filterPatterns.map(_.r)))
-      .filter(_.mvs.nonEmpty)
-      .take(maxCount - required.length)
-  }
+  val optionalStream = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
+    .filter(_.stars >= minStarsCount)
+    .sortBy(-_.stars)
+    .to(LazyList)
+    .map(loadProject)
+    .map(projectModulesFilter(filterPatterns.map(_.r)))
+    .filter(_.mvs.nonEmpty)
+  val optional = maxProjectsCount
+    .map(_ - required.length)
+    .foldLeft(optionalStream)(_.take(_))
   val projects = {
     val loadProjects = Future.traverse(required #::: optional) { project =>
       Future {
