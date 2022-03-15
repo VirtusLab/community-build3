@@ -13,19 +13,18 @@ sbtProject=typelevel/shapeless-3
 millProject=com-lihaoyi/os-lib
 scalaVersion=3.1.1
 
-echo "Test sbt custom build locally"
-scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts --locally
-
-echo
 echo "Test sbt custom build in minikube"
 scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts
+echo
+echo "Test mill custom build in minikube"
+scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts
 
+echo
+echo "Test sbt custom build locally"
+scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts --locally
 echo
 echo "Test mill custom build locally"
 scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts --locally
 
-echo
-echo "Test mill custom build in minikube"
-scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts
 
 echo "Tests passed"
