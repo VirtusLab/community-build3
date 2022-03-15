@@ -11,7 +11,8 @@ cliRunCmd="run scb-cli.scala --java-prop communitybuild.version=test --java-prop
 commonOpts="--namespace=$testNamespace --keepCluster --keepMavenRepo"
 sbtProject=typelevel/shapeless-3
 millProject=com-lihaoyi/os-lib
-scalaVersion=3.1.1
+# It's should actually build 3.1.1 release
+scalaVersion=3.1.1-bin-d0e5cc45da47bedbbce6f6430052ced91c941a08-COMMUNITY-BUILD
 
 echo "Test sbt custom build locally"
 scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts --locally
