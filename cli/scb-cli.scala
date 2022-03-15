@@ -548,7 +548,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
         .call(check = false, stderr = os.Pipe)
         .exitCode == 0
-    if !mavenIsRunning then 
+    if !mavenIsRunning then
       // Make sure that mvn repo was completlly deleted, otherwise we would have problems with certs
       bash(scriptsDir / "stop-mvn-repo.sh")
       bash(scriptsDir / "start-mvn-repo.sh")
