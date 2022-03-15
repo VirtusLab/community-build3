@@ -152,7 +152,11 @@ object Config:
           opt[String]("revision")
             .text("Name of repository tag or branch that should be used")
             .action { (x, c) => c.withCustomBuild(_.copy(revisionOverride = Some(x))) }
-        )
+        ),
+      checkConfig { c =>
+        if c.command == null then failure("Missing required command name")
+        else success
+      }
     )
   }
 
@@ -544,7 +548,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
         .call(check = false)
         .exitCode == 0
-    if !mavenIsRunning then 
+    if !mavenIsRunning then
       // Make sure that mvn repo was completlly deleted, otherwise we would have problems with certs
       bash(scriptsDir / "stop-mvn-repo.sh")
       bash(scriptsDir / "start-mvn-repo.sh")
