@@ -546,12 +546,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
     )
     val mavenIsRunning =
       os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
-        .call(check = false)
+        .call(check = false, stderr = os.Pipe)
         .exitCode == 0
-    if !mavenIsRunning then
-      // Make sure that mvn repo was completlly deleted, otherwise we would have problems with certs
-      bash(scriptsDir / "stop-mvn-repo.sh")(check = false)
-      bash(scriptsDir / "start-mvn-repo.sh")
+    if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
 
   private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient](
       checkDeps: DependenciesChecker
@@ -732,7 +729,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       .call(
         check = check,
         stdout = os.Inherit,
-        stderr = os.Inherit,
+        stderr = if check then os.Inherit else os.Pipe,
         env = Map("CB_K8S_NAMESPACE" -> k8s.namespace)
       )
 

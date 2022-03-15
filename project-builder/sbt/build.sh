@@ -15,6 +15,17 @@ export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 enforcedSbtVersion="$6"
 projectConfig="$7"
 
+# Wait until mvn-repo is reachable, frequently few first requests might fail
+# especially in cli immediately after starting minikube 
+for i in {1..30}; do
+  if errMsg=$(curl $CB_MVN_REPO_URL 2>&1); then
+    break
+  else
+    echo "Waiting until mvn-repo is reachable..."
+    sleep 1
+  fi
+done
+
 targets=(${unfilteredTargets[@]})
 targetExcludeFilters=$(echo $projectConfig | jq -r '.projects?.exclude? // [] | join ("|")')
 if [ ! -z ${targetExcludeFilters} ]; then
@@ -43,8 +54,8 @@ customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; 
 targetsString="${targets[@]}"
 logFile=build.log
 
-function runSbt(){
-# Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
+function runSbt() {
+  # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
   forceScalaVersion=$1
   setScalaVersionCmd="++$scalaVersion"
   if [[ "$forceScalaVersion" == "forceScala" ]]; then
@@ -70,10 +81,10 @@ runSbt "no force" || {
     shouldRetry=1
   fi
 
-  if [[ "$shouldRetry" -eq 1 ]]; then 
+  if [[ "$shouldRetry" -eq 1 ]]; then
     echo "Retrying build with forced Scala version"
     runSbt "forceScala"
-  else 
+  else
     echo "Build failed, not retrying with forced Scala version"
     exit 1
   fi
