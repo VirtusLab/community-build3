@@ -41,7 +41,8 @@ case class Config(
     mode: Config.Mode = Config.Mode.Minikube,
     reproducer: JenkinsReproducerConfig = JenkinsReproducerConfig(),
     customRun: CustomBuildConfig = CustomBuildConfig(null, null),
-    minikube: Config.MinikubeConfig = Config.MinikubeConfig()
+    minikube: Config.MinikubeConfig = Config.MinikubeConfig(),
+    redirectLogs: Boolean = true
 ):
   def withMinikube(fn: Config.MinikubeConfig => Config.MinikubeConfig) =
     copy(minikube = fn(minikube))
@@ -72,7 +73,7 @@ object Config:
 
   enum Mode:
     case Minikube, Local
-  
+
   case class MinikubeConfig(
       keepCluster: Boolean = false,
       keepMavenRepository: Boolean = false,
@@ -102,6 +103,10 @@ object Config:
       opt[Unit]("locally")
         .action { (_, c) => c.copy(mode = Mode.Local) }
         .text("Run build locally without minikube cluster"),
+      opt[Unit]("noRedirectLogs")
+        .action { (_, c) => c.copy(redirectLogs = false) }
+        .text("Do not redirect runners logs to file")
+        .hidden(),
       // Commands
       cmd("reproduce")
         .action { (_, c) => c.copy(command = Config.Command.ReproduceJenkinsBuild) }
@@ -536,7 +541,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       s"kubectl create namespace ${k8s.namespace} --dry-run=client -o yaml | kubectl apply -f -"
     )
     val mavenIsRunning =
-      os.proc("kubectl", "get", "deploy/mvn-repo", "--output=name")
+      os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
         .call(check = false)
         .exitCode == 0
     if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
@@ -648,18 +653,27 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
             )
       yield ()
 
-    def redirectLogsToFile = Sync[F].blocking {
+    def redirectLogs = Sync[F].blocking {
       val logsFile = os.temp(
         prefix = s"cb-reproduce-log-$jobName",
         deleteOnExit = false
       )
       // workaround, using os.PathRedirect to file was not working
-      Future {
-        val logs = os
-          .proc("kubectl", "-n", k8s.namespace, "logs", s"job/$jobName", "-f", "--timestamps=true")
-          .spawn()
-        val res = os.write.over(logsFile, logs.stdout)
-      }
+      val stdout =
+        Future {
+          val logs = os
+            .proc(
+              "kubectl",
+              "-n",
+              k8s.namespace,
+              "logs",
+              s"job/$jobName",
+              "-f",
+              "--timestamps=true"
+            )
+            .spawn(stdout = if config.redirectLogs then os.Pipe else os.Inherit)
+          val res = os.write.over(logsFile, logs.stdout)
+        }
       logsFile
     }
     val projectRun =
@@ -670,10 +684,13 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         _ <- waitForStart
         _ <- logger.info(s"Pod for job $jobName ($label) started")
 
-        logsFile <- redirectLogsToFile
-        _ <- logger.info(
-          s"Logs of job ${jobName} ($label) redirected to ${logsFile.toNIO.toAbsolutePath}"
-        )
+        logsFile <- redirectLogs
+        _ <-
+          if !config.redirectLogs then Sync[F].pure(())
+          else
+            logger.info(
+              s"Logs of job ${jobName} ($label) redirected to ${logsFile.toNIO.toAbsolutePath}"
+            )
 
         exitCode <- getContainerState
           .iterateUntil(_.terminated.isDefined)
@@ -952,9 +969,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       else if os.exists(projectDir / "build.sc") then MillReproducer(projectDir, logsFile)
       else sys.error("Unsupported build tool")
     try
-      println(
-        s"Starting build for project ${project.id} (${project.projectName}), logs redirected to $logsFile"
-      )
+      val redirectMessage = if config.redirectLogs then s", logs redirected to $logsFile" else ""
+      println(s"Starting build for project ${project.id} (${project.projectName})$redirectMessage")
       impl.prepareBuild()
       impl.runBuild()
     catch
@@ -966,10 +982,15 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
     if !needsCompilation then println(s"Scala ${effectiveScalaVersion} toolchain already present")
     else
-      val logsFile = os.temp("cb-build-compiler", deleteOnExit = false)
       println(
-        s"Building Scala compiler for version $effectiveScalaVersion, logs redirected to $logsFile"
+        s"Building Scala compiler for version $effectiveScalaVersion"
       )
+      val logsOutput =
+        if !config.redirectLogs then os.Inherit
+        else
+          val logsFile = os.temp("cb-build-compiler", deleteOnExit = false)
+          println(s"Scala compiler build logs redirected to $logsFile")
+          os.PathRedirect(logsFile)
       val VersionCommitSha = raw"3\..*-bin-([0-9a-f]*)-.*".r
       val revision = effectiveScalaVersion match {
         case VersionCommitSha(revision) => Some(revision)
@@ -987,8 +1008,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         .call(
           cwd = projectDir,
           env = Map("RELEASEBUILD" -> "yes"),
-          stdout = logsFile,
-          stderr = logsFile
+          stdout = logsOutput,
+          stderr = logsOutput
         )
       println(s"Scala ${effectiveScalaVersion} was successfully published locally")
   end prepareScalaVersion
@@ -1049,6 +1070,9 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
     override def runBuild(): Unit =
       def runSbt(forceScalaVersion: Boolean) =
+        val logsOutput =
+          if !config.redirectLogs then os.Inherit
+          else os.PathAppendRedirect(logsFile)
         val versionSwitchSuffix = if forceScalaVersion then "!" else ""
         os.proc(
           "sbt",
@@ -1061,8 +1085,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         ).call(
           check = false,
           cwd = projectDir,
-          stdout = os.PathAppendRedirect(logsFile),
-          stderr = os.PathAppendRedirect(logsFile),
+          stdout = logsOutput,
+          stderr = logsOutput,
           env = Map("CB_MVN_REPO_URL" -> "")
         )
 
@@ -1110,8 +1134,10 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       "--stdout",
       "--syntactic",
       "--scala-version=3.1.0",
-      "--settings.Scala3CommunityBuildMillAdapter.targetScalaVersion", effectiveScalaVersion,
-      "--settings.Scala3CommunityBuildMillAdapter.targetPublishVersion", project.params.version.getOrElse("")
+      "--settings.Scala3CommunityBuildMillAdapter.targetScalaVersion",
+      effectiveScalaVersion,
+      "--settings.Scala3CommunityBuildMillAdapter.targetPublishVersion",
+      project.params.version.getOrElse("")
     )
     override def prepareBuild(): Unit =
       val millBuilder = projectBuilderDir / "mill"
