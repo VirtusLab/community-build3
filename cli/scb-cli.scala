@@ -1109,7 +1109,9 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     val scalafixSettings = List(
       "--stdout",
       "--syntactic",
-      "--scala-version=3.1.0"
+      "--scala-version=3.1.0",
+      "--settings.Scala3CommunityBuildMillAdapter.targetScalaVersion", effectiveScalaVersion,
+      "--settings.Scala3CommunityBuildMillAdapter.targetPublishVersion", project.params.version.getOrElse("")
     )
     override def prepareBuild(): Unit =
       val millBuilder = projectBuilderDir / "mill"
