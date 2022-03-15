@@ -8,7 +8,7 @@ cd $scriptDir/../cli
 
 testNamespace=scala3-community-build-test
 cliRunCmd="run scb-cli.scala --java-prop communitybuild.version=test --java-prop communitybuild.local.dir=$scriptDir/.. -- "
-commonOpts="--namespace=$testNamespace --keepCluster --keepMavenRepo"
+commonOpts="--namespace=$testNamespace --keepCluster --keepMavenRepo --noRedirectLogs"
 sbtProject=typelevel/shapeless-3
 millProject=com-lihaoyi/os-lib
 # It's should actually build 3.1.1 release
