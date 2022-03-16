@@ -68,7 +68,7 @@ function runSbt() {
     "set every credentials := Nil" \
     "$customCommands" \
     "moduleMappings" \
-    "runBuild ${scalaVersion} $targetsString" | tee $logFile
+    "runBuild ${scalaVersion} \"${projectConfig}\" $targetsString" | tee $logFile
 }
 
 runSbt "no force" || {
