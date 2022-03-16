@@ -10,14 +10,14 @@ fi
 repoDir="$1"                # e.g. /tmp/shapeless
 scalaVersion="$2"           # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
 version="$3"                # e.g. 1.0.2-communityBuild
-unfilteredTargets="$4"      # e.g. "com.example%foo com.example%bar"
+targets=($4)                # e.g. "com.example%foo com.example%bar"
 export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 enforcedSbtVersion="$6"
 projectConfig="$7"
 
 # Wait until mvn-repo is reachable, frequently few first requests might fail
-# especially in cli immediately after starting minikube 
-for i in {1..30}; do
+# especially in cli immediately after starting minikube
+for i in {1..10}; do
   if errMsg=$(curl $CB_MVN_REPO_URL 2>&1); then
     break
   else
@@ -25,12 +25,6 @@ for i in {1..30}; do
     sleep 1
   fi
 done
-
-targets=(${unfilteredTargets[@]})
-targetExcludeFilters=$(echo $projectConfig | jq -r '.projects?.exclude? // [] | join ("|")')
-if [ ! -z ${targetExcludeFilters} ]; then
-  targets=($(for target in ${unfilteredTargets[@]}; do echo $target; done | grep -E -v "(${targetExcludeFilters})"))
-fi
 
 echo '##################################'
 echo Scala version: $scalaVersion

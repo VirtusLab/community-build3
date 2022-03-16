@@ -251,12 +251,26 @@ object CommunityBuildPlugin extends AutoPlugin {
         simplifiedModuleId(key) -> value
       }
 
-      println("Starting build...")
+      val filteredIds = ids.filter { id =>
+        id.split('%') match {
+          case Array(org, name) =>
+            val excluded = config.projects.exclude
+            val isExcluded = excluded.contains(name) || excluded.contains(id)
+            if (isExcluded) {
+              println(s"Excluding target $id - filtered by config projects exclude list")
+            }
+            !isExcluded
+          case _ =>
+            println(s"Excluding target $id - incompatible format")
+            false
+        }
+      }
 
+      println("Starting build...")
       // Find projects that matches maven
       val topLevelProjects = (
         for {
-          id <- ids
+          id <- filteredIds
           testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
             Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
           testedFullIds = testedSuffixes.map(id + _)
@@ -278,7 +292,6 @@ object CommunityBuildPlugin extends AutoPlugin {
             |  moduleIds: ${moduleIds.keySet}
             |""")
           throw new Exception("Module mapping missing")
-
         }
       ).toSet
 
