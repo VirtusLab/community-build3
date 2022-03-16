@@ -1,51 +1,26 @@
-import com.google.gson.*
-import java.lang.reflect.{
-  ParameterizedType => JavaParameterizedType,
-  Type => JavaType
-}
-import com.google.gson.reflect.TypeToken
+import org.json4s._
+import org.json4s.native.Serialization
+import org.json4s.ext.EnumSerializer
 
-def toJson[T](obj: T): String = adaptedGson.toJson(obj)
-def fromJson[T](s: String)(using typeToken: TypeToken[T]) = adaptedGson.fromJson[T](s, typeToken.getType())
-def fromJson[T](s: String, cls: Class[T]) = adaptedGson.fromJson[T](s, cls)
+given Formats = Serialization.formats(NoTypeHints) + TestingModeEnumSerializer()
 
+class TestingModeEnumSerializer
+    extends CustomSerializer[TestingMode](format => {
+      val DisabledName = "disabled"
+      val CompileOnlyName = "compile-only"
+      val FullName = "full"
 
-private lazy val adaptedGson = Gson().newBuilder
-  .registerTypeAdapter(classOf[Option[_]], new OptionTypeAdapter())
-  .registerTypeAdapter(classOf[List[_]], new ListTypeAdapter())
-  .create()
+      def deserialize: PartialFunction[JValue, TestingMode] = {
+        case JString(DisabledName)    => TestingMode.Disabled
+        case JString(CompileOnlyName) => TestingMode.CompileOnly
+        case JString(FullName)        => TestingMode.Full
+      }
+      def serialize: PartialFunction[Any, JValue] = {
+        case TestingMode.Disabled    => JString(DisabledName)
+        case TestingMode.CompileOnly => JString(CompileOnlyName)
+        case TestingMode.Full        => JString(FullName)
+      }
+      (deserialize, serialize)
+    })
 
-private class ListTypeAdapter extends JsonSerializer[List[_]] {
-  // serialize lists as arrays, instead we would get object with {"head": ?, "tail": ?}
-  def serialize(
-        value: List[_],
-        valueType: JavaType,
-        context: JsonSerializationContext
-    ): JsonElement = {
-      context.serialize(value.toArray)
-    }
-}
-
-private class OptionTypeAdapter
-    extends JsonSerializer[Option[_]]
-    with JsonDeserializer[Option[_]] {
-  def serialize(
-      value: Option[_],
-      valueType: JavaType,
-      context: JsonSerializationContext
-  ): JsonElement = {
-    value.fold(JsonNull.INSTANCE)(context.serialize(_))
-  }
-
-  def deserialize(
-      value: JsonElement,
-      valueType: JavaType,
-      context: JsonDeserializationContext
-  ): Option[_] = {
-    if (value == null) None 
-    else 
-      val parameterizedType = valueType.asInstanceOf[JavaParameterizedType]
-      val innerType = parameterizedType.getActualTypeArguments()(0)
-      Option(context.deserialize(value, innerType))
-  }
-}
+def toJson[T](obj: T): String = Serialization.write(obj)
