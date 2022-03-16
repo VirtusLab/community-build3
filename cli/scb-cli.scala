@@ -553,12 +553,14 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
   private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient](
       checkDeps: DependenciesChecker
   ): F[Unit] =
+    val log = Logger[F]
     for
       scalaReleaseExists <- Sync[F].blocking(checkDeps.scalaReleaseAvailable(build.scalaVersion))
       _ <-
         if !scalaReleaseExists then
-          runJob(compilerBuilderJob, label = "Scala", canFail = false).void
-        else Logger[F].info(s"Scala toolchain for version ${build.scalaVersion} already exists")
+          log.info(s"Scala toolchain for version ${build.scalaVersion} is missing") *>
+            runJob(compilerBuilderJob, label = "Scala", canFail = false).void
+        else log.info(s"Scala toolchain for version ${build.scalaVersion} already exists")
     yield ()
 
   private def buildProjectDependencies[F[_]: Async: Concurrent: Logger: KubernetesClient](
@@ -682,7 +684,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
     }
     val projectRun =
       for
+        _ <- logger.info(s"Starting build for job $label")
         _ <- performCleanup
+        _ <- logger.info(s"Creating new job $label")
         job <- jobsApi.createWithResource(jobDefninition)
         _ <- logger.info(s"Waiting for start of job $jobName ($label)")
         _ <- waitForStart
