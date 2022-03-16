@@ -1215,7 +1215,6 @@ class DependenciesChecker(
     default
       .withCache(fileCache)
       .withRepositories(withRepositories(default.repositories))
-      .mapResolutionParams(p => p)
   }
 
   private def checkDependenciesExist(dependencies: Seq[Dependency]) =
