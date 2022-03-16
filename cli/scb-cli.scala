@@ -1222,6 +1222,7 @@ class DependenciesChecker(
   }
 
   private def checkDependenciesExist(dependencies: Seq[Dependency]) =
+    println(s"Checking existance of dependencies: ${dependencies.toList}")
     import scala.util.Try
     import coursier.error.*
     // If dependency does not exists it would throw exception
@@ -1239,10 +1240,12 @@ class DependenciesChecker(
           System.err.println(err)
           false
       }
-    instance
+    val resolveF = instance
       .withDependencies(coursierDeps)
-      .either
-      .fold(checkResoulationError, _ => true)
+      .future
+      .map(_ => true)
+      .recover { case err: ResolutionError => checkResoulationError(err) }
+    Await.result(resolveF, 1.minute)
 
   def projectReleased(project: ProjectInfo): Boolean =
     project.params.version.fold {
