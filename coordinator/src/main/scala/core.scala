@@ -3,6 +3,7 @@ import collection.JavaConverters._
 import java.nio.file._
 import pureconfig._
 import pureconfig.generic.derivation.default._
+import pureconfig.generic.derivation.EnumConfigReader
 
 case class Project(org: String, name: String)(val stars: Int): // stars may change...
   def show = s"$org%$name%$stars"
@@ -46,16 +47,21 @@ case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 
 case class ProjectBuildDef(name: String, dependencies: Array[String], repoUrl: String, revision: String, version: String, targets: String, config: Option[ProjectBuildConfig])
 
+enum TestingMode derives EnumConfigReader:
+  case Disabled, CompileOnly, Full
+
 // Community projects configs
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
 case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
 case class MillConfig(options: List[String] = Nil) derives ConfigReader
-case class ProjectsConfig(exclude: List[String] = Nil)
+case class ProjectOverrides(tests: Option[TestingMode] = None) derives ConfigReader
+case class ProjectsConfig(exclude: List[String] = Nil, overrides: Map[String, ProjectOverrides] = Map.empty) derives ConfigReader
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
     java: JavaConfig = JavaConfig(),
     sbt: SbtConfig = SbtConfig(),
-    mill: MillConfig = MillConfig()
+    mill: MillConfig = MillConfig(),
+    tests: TestingMode = TestingMode.Full
 ) derives ConfigReader
 
 object ProjectBuildConfig {
