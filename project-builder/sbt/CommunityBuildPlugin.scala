@@ -179,10 +179,14 @@ object CommunityBuildPlugin extends AutoPlugin {
     },
     runBuild := {
       val scalaVersionArg :: configJson :: ids = spaceDelimited("<arg>").parsed.toList
-      val config = Parser
-        .parseFromString(configJson)
-        .flatMap(Converter.fromJson[ProjectBuildConfig](_)(ProjectBuildConfigFormat))
-        .getOrElse(ProjectBuildConfig())
+      println(s"Build config: ${configJson}")
+      val config = {
+        val parsed = Parser
+          .parseFromString(configJson)
+          .flatMap(Converter.fromJson[ProjectBuildConfig](_)(ProjectBuildConfigFormat))
+        println(s"Parsed config: ${parsed}")
+        parsed.getOrElse(ProjectBuildConfig())
+      }
 
       val cState = state.value
       val extracted = sbt.Project.extract(cState)
@@ -437,8 +441,9 @@ object CommunityBuildPlugin extends AutoPlugin {
     def write[J](obj: ProjectOverrides, builder: Builder[J]): Unit = ???
     def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): ProjectOverrides =
       jsOpt.fold(deserializationError("Empty object")) { js =>
+        implicit val _unbuilder: Unbuilder[J] = unbuilder
         unbuilder.beginObject(js)
-        val testsMode = unbuilder.readField[Option[TestingMode]]("tests")
+        val testsMode = readOrDefault("tests", Option.empty[TestingMode])
         unbuilder.endObject
         ProjectOverrides(tests = testsMode)
       }
@@ -448,9 +453,10 @@ object CommunityBuildPlugin extends AutoPlugin {
     def write[J](obj: ProjectsConfig, builder: Builder[J]): Unit = ???
     def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): ProjectsConfig =
       jsOpt.fold(deserializationError("Empty object")) { js =>
+        implicit val _unbuilder: Unbuilder[J] = unbuilder
         unbuilder.beginObject(js)
-        val excluded = unbuilder.readField[Array[String]]("exclude")
-        val overrides = unbuilder.readField[Map[String, ProjectOverrides]]("overrides")
+        val excluded = readOrDefault("exclude", Array.empty[String])
+        val overrides = readOrDefault("overrides", Map.empty[String, ProjectOverrides])
         unbuilder.endObject()
         ProjectsConfig(excluded.toList, overrides)
       }
@@ -460,11 +466,19 @@ object CommunityBuildPlugin extends AutoPlugin {
     def write[J](v: ProjectBuildConfig, builder: Builder[J]): Unit = ???
     def read[J](optValue: Option[J], unbuilder: Unbuilder[J]): ProjectBuildConfig =
       optValue.fold(deserializationError("Empty object")) { v =>
+        implicit val _unbuilder: Unbuilder[J] = unbuilder
         unbuilder.beginObject(v)
-        val projects = unbuilder.readField[ProjectsConfig]("projects")
-        val testsMode = unbuilder.readField[TestingMode]("tests")
+        val projects = readOrDefault("projects", ProjectsConfig())
+        val testsMode = readOrDefault[TestingMode, J]("tests", TestingMode.Full)
         unbuilder.endObject()
         ProjectBuildConfig(projects, testsMode)
       }
   }
+  private def readOrDefault[T, J](field: String, default: T)(implicit
+      format: JsonReader[T],
+      unbuilder: Unbuilder[J]
+  ) =
+    unbuilder
+      .lookupField(field)
+      .fold(default)(v => format.read(Some(v), unbuilder))
 }
