@@ -136,18 +136,26 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
   println(s"Build config: ${configJson}")
   val config = read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
-  val filteredTargets = targets.filter { id =>
-    id.split('%') match {
-      case Array(org, name) =>
-        val excluded = config.projects.exclude
-        val isExcluded = excluded.contains(name) || excluded.contains(id)
-        if (isExcluded) {
-          println(s"Excluding target $id - filtered by config projects exclude list")
-        }
-        !isExcluded
-      case _ =>
-        println(s"Excluding target $id - incompatible format")
-        false
+  val filteredTargets = {
+    val excludedPatterns = config.projects.exclude.map(_.r)
+    targets.filter { id =>
+      id.split('%') match {
+        case Array(org, name) =>
+          val excludingPattern = excludedPatterns.find { pattern =>
+            // No Regex.matches in Scala 2.12 (!sic)
+            pattern
+              .findFirstIn(name)
+              .orElse(pattern.findFirstIn(id))
+              .isDefined
+          }
+          excludingPattern.foreach { pattern =>
+            println(s"Excluding target '$id' - matches exclusion rule: '${pattern}'")
+          }
+          excludingPattern.isEmpty
+        case _ =>
+          println(s"Excluding target '$id' - incompatible format")
+          false
+      }
     }
   }
   val mappings = checkedModuleMappings(filteredTargets.toSet)
