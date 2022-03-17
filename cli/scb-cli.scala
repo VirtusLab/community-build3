@@ -1178,13 +1178,17 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
 
     override def runBuild(): Unit =
-      def mill(commands: os.Shellable*) =
+      def mill(commands: os.Shellable*) = {
+        val output = 
+          if config.redirectLogs then os.PathAppendRedirect(logsFile)
+          else os.Inherit
         os.proc("mill", millScalaSetting, commands)
           .call(
             cwd = projectDir,
-            stdout = os.PathAppendRedirect(logsFile),
-            stderr = os.PathAppendRedirect(logsFile)
+            stdout = output,
+            stderr = output
           )
+      }
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
       mill("runCommunityBuild", scalaVersion, project.effectiveTargets)
   end MillReproducer
