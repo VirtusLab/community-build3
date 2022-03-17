@@ -134,9 +134,23 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
   }
 
   val config = read[ProjectBuildConfig](configJson)
-  val mappings = checkedModuleMappings(targets.toSet)
+  val filteredTargets = targets.filter { id =>
+    id.split('%') match {
+      case Array(org, name) =>
+        val excluded = config.projects.exclude
+        val isExcluded = excluded.contains(name) || excluded.contains(id)
+        if (isExcluded) {
+          println(s"Excluding target $id - filtered by config projects exclude list")
+        }
+        !isExcluded
+      case _ =>
+        println(s"Excluding target $id - incompatible format")
+        false
+    }
+  }
+  val mappings = checkedModuleMappings(filteredTargets.toSet)
   val topLevelModules = mappings.collect {
-    case (target, info) if targets.contains(target) => info
+    case (target, info) if filteredTargets.contains(target) => info
   }.toSet
   val moduleDeps: Map[Module, Seq[ModuleInfo]] =
     ctx.root.millInternal.modules.collect { case module: PublishModule =>
