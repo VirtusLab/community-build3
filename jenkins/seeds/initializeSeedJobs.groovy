@@ -55,7 +55,7 @@ pipelineJob('/runBuild') {
             separatorStyle("")
             sectionHeaderStyle("")
         }
-        stringParam("enforcedSbtVersion", null, "(Optional): When not specified original sbt versions specified in the build definition of each project will be used")
+        stringParam("enforcedSbtVersion", "1.6.2", "(Optional): When not specified original sbt versions specified in the build definition of each project will be used")
         separator {
             name("GENERAL")
             sectionHeader("General")
