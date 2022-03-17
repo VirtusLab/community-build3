@@ -31,6 +31,5 @@ millSettings=(
   -D communitybuild.scala="$scalaVersion"
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")')
 )
-args=(runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}")
 
-mill ${millSettings[@]} ${args[@]}
+mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
