@@ -13,6 +13,10 @@ targets=($4) # e.g. "com.example%foo com.example%bar"
 mavenRepoUrl="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
 
+if [[ -z $projectConfig ]]; then
+  projectConfig="{}"
+fi
+
 echo '##################################'
 echo Scala version: $scalaVersion
 echo Disting version $version for ${#targets[@]} targets: ${targets[@]}

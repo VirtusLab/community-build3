@@ -15,6 +15,10 @@ export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 enforcedSbtVersion="$6"
 projectConfig="$7"
 
+if [[ -z "$projectConfig" ]]; then
+  projectConfig="{}"
+fi
+
 echo '##################################'
 echo Scala version: $scalaVersion
 echo Disting version $version for ${#targets[@]} targets: ${targets[@]}
@@ -51,7 +55,7 @@ function runSbt() {
     "set every credentials := Nil" \
     "$customCommands" \
     "moduleMappings" \
-    "runBuild ${scalaVersion} \"${projectConfig}\" $targetsString" | tee $logFile
+    "runBuild ${scalaVersion} ${projectConfig} $targetsString" | tee $logFile
 }
 
 runSbt "no force" || {
