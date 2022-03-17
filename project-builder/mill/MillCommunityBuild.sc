@@ -6,7 +6,7 @@ import mill.define.Segment._
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
-import upickle.default._
+import OptionPickler.{read, ReadWriter, readwriter, macroRW}
 
 trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   protected val mavenRepoUrl: Option[String] = sys.props
@@ -411,6 +411,22 @@ object TestingMode {
     readwriter[String].bimap[TestingMode](toJson, fromJson)
   }
 }
+
+// Used to asssume coding of Option as nulls, instead of arrays (default)
+object OptionPickler extends upickle.AttributeTagged {
+  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
+    implicitly[Writer[T]].comap[Option[T]] {
+      case None    => null.asInstanceOf[T]
+      case Some(x) => x
+    }
+
+  override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
+    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
+      override def visitNull(index: Int) = None
+    }
+  }
+}
+
 case class ProjectOverrides(tests: Option[TestingMode])
 object ProjectOverrides {
   implicit val rw: ReadWriter[ProjectOverrides] = macroRW
