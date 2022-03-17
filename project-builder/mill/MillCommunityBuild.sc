@@ -133,7 +133,9 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     }
   }
 
+  println(s"Build config: ${configJson}")
   val config = read[ProjectBuildConfig](configJson)
+  println(s"Parsed config: ${config}")
   val filteredTargets = targets.filter { id =>
     id.split('%') match {
       case Array(org, name) =>

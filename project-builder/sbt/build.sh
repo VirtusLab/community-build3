@@ -48,14 +48,14 @@ function runSbt() {
   if [[ "$forceScalaVersion" == "forceScala" ]]; then
     setScalaVersionCmd="++$scalaVersion!"
   fi
-
+  tq='"""'
   sbt ${sbtSettings[@]} \
     "$setScalaVersionCmd -v" \
     "setPublishVersion $version" \
     "set every credentials := Nil" \
     "$customCommands" \
     "moduleMappings" \
-    "runBuild ${scalaVersion} ${projectConfig} $targetsString" | tee $logFile
+    "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
 }
 
 runSbt "no force" || {
