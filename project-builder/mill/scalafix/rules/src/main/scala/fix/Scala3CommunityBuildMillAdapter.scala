@@ -102,9 +102,9 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
     val MillCommunityBuildInject = """
     |import $file.MillCommunityBuild
     |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: mill.eval.Evaluator, scalaVersion: String, targets: String*) = T.command {
+    |def runCommunityBuild(_evaluator: mill.eval.Evaluator, scalaVersion: String, configJson: String, targets: String*) = T.command {
     |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, T.log)
-    |  MillCommunityBuild.runBuild(targets)
+    |  MillCommunityBuild.runBuild(configJson, targets)
     |}
     |
     |// Replaces mill.define.Cross allowing to use map used cross versions

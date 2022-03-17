@@ -6,6 +6,7 @@ import mill.define.Segment._
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
+import upickle.default._
 
 trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   protected val mavenRepoUrl: Option[String] = sys.props
@@ -102,45 +103,47 @@ case class Ctx(
 
 // Main entry point for Mill community build
 // Evaluate tasks until first failure and publish report
-def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
-  class TaskEvaluator(module: Module) {
-    def eval(labels: String*) = {
-      lazy val renderedPath = s"$module.${Segments(labels.map(Label(_)): _*).render}"
-
-      tryEval(module, labels: _*)
-        .fold[BuildStepResult] {
-          // Target not found, skip it and treat as successfull
-          ctx.log.error(s"Not found target '$renderedPath', skipping.")
-          Skipped
-        } {
-          case Result.Success(v) =>
-            ctx.log.info(s"Successfully evaluated $renderedPath")
-            Ok
-          case failure =>
-            ctx.log.error(s"Failed to evaluated $renderedPath: ${failure}")
-            Failed
-        }
+def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
+  class TaskEvaluator() {
+    def eval(task: NamedTask[_]) = {
+      tryEval(task) match {
+        case Result.Success(v) =>
+          ctx.log.info(s"Successfully evaluated $task")
+          Ok
+        case failure =>
+          ctx.log.error(s"Failed to evaluated $task: ${failure}")
+          Failed
+      }
     }
-    def evalAsDependencyOf(
+    def evalAsDependencyOf(task: NamedTask[_])(
         dependencies: BuildStepResult*
-    )(labels: String*): BuildStepResult = {
+    ): BuildStepResult = {
       val shouldSkip = dependencies.exists {
         case _: FailedBuildStep => true
         case Skipped            => true
         case _                  => false
       }
       if (shouldSkip) Skipped
-      else eval(labels: _*)
+      else eval(task)
+    }
+    def evalAsDependencyOf(optTask: Option[NamedTask[_]])(
+        dependencies: BuildStepResult*
+    ): BuildStepResult = {
+      optTask.fold[BuildStepResult](Skipped)(evalAsDependencyOf(_)(dependencies: _*))
     }
   }
 
+  val config = read[ProjectBuildConfig](configJson)
   val mappings = checkedModuleMappings(targets.toSet)
   val topLevelModules = mappings.collect {
     case (target, info) if targets.contains(target) => info
   }.toSet
   val moduleDeps: Map[Module, Seq[ModuleInfo]] =
-    ctx.root.millInternal.modules.collect { case module: JavaModule =>
-      val mapped = module.moduleDeps.flatMap(toMappingInfo).map(_._2)
+    ctx.root.millInternal.modules.collect { case module: PublishModule =>
+      val mapped = for {
+        module <- module.moduleDeps
+        Result.Success((_, mapped)) <- toMappingInfo(module).asSuccess
+      } yield mapped
       module -> mapped
     }.toMap
 
@@ -154,28 +157,58 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
     }
 
   val projectsBuildResults = for {
-    ModuleInfo(org, name, module) <- flatten(topLevelModules, topLevelModules)
+    ModuleInfo(org, name, module: ScalaModule) <- flatten(topLevelModules, topLevelModules)
   } yield {
     ctx.log.info(s"Starting build for $name")
-    val evaluator = new TaskEvaluator(module)
+    val evaluator = new TaskEvaluator()
     import evaluator._
+    val overrides = config.projects.overrides.get(name)
+    val testingMode = overrides.flatMap(_.tests).getOrElse(config.tests)
 
-    val compileResult = eval("compile")
-    val docResult = evalAsDependencyOf(compileResult)("docJar")
-    val results = ModuleTargetsResults(
-      compile = compileResult,
-      doc = docResult,
-      testsCompile = evalAsDependencyOf(compileResult)("test", "compile"),
-      publish = ctx.publishVersion.fold[BuildStepResult](Skipped) { publishVersion =>
-        tryEval(module, "publishVersion")
-          .fold[BuildStepResult](BuildError("No task 'publishVersion'")) {
+    val testModule = module.millInternal.modules.toList
+      .collect { case module: mill.scalalib.TestModule => module } match {
+      case Nil =>
+        ctx.log.info(s"No test module defined in $module")
+        None
+      case single :: Nil => Some(single)
+      case multiple @ (first :: _) =>
+        ctx.log.info(s"Multiple test modules defined in $module, using $first")
+        Some(first)
+    }
+    def test(selector: TestModule => NamedTask[_]): Option[NamedTask[_]] =
+      testModule.map(selector)
+
+    val compileResult = eval(module.compile)
+    val docResult = evalAsDependencyOf(module.docJar)(compileResult)
+    val testsCompileResult = testingMode match {
+      case TestingMode.Disabled => Skipped
+      case _                    => evalAsDependencyOf(test(_.compile))(compileResult)
+    }
+    val testsExecuteResults = testingMode match {
+      case TestingMode.Full => evalAsDependencyOf(test(_.test()))(testsCompileResult)
+      case _                => Skipped
+    }
+    val publishResult = module match {
+      case module: CommunityBuildPublishModule =>
+        ctx.publishVersion.fold[BuildStepResult](Skipped) { publishVersion =>
+          tryEval(module.publishVersion) match {
             case Result.Success(`publishVersion`) =>
-              evalAsDependencyOf(compileResult, docResult)("publishCommunityBuild")
+              evalAsDependencyOf(module.publishCommunityBuild)(compileResult, docResult)
             case Result.Success(version: String) =>
               WrongVersion(expected = publishVersion, got = version)
             case _ => BuildError("Failed to resolve 'publishVersion'")
           }
-      }
+        }
+      case _ =>
+        ctx.log.error(s"Module $module is not a publish module, skipping publishing")
+        Skipped
+    }
+    val results = ModuleTargetsResults(
+      compile = compileResult,
+      doc = docResult,
+      testsCompile = testsCompileResult,
+      testsExecute = testsExecuteResults,
+      publish = publishResult
     )
     ModuleBuildResults(
       artifactName = name,
@@ -206,26 +239,37 @@ def runBuild(targets: Seq[String])(implicit ctx: Ctx) = {
   }
 }
 
-private def toMappingInfo(module: Module)(implicit ctx: Ctx): Option[(String, ModuleInfo)] = {
+private def toMappingInfo(module: JavaModule)(implicit ctx: Ctx): Result[(String, ModuleInfo)] = {
   for {
-    Result.Success(publish.Artifact(org, _, _)) <- tryEval(module, "artifactMetadata")
-    Result.Success(name: String) <- tryEval(module, "artifactName")
+    org <- module match {
+      case m: PublishModule => tryEval(m.pomSettings).map(_.organization)
+      case _                =>
+        // it's not a published module, we don't need to care about it as it's not going to be enlisted in targets
+        Result.Success("")
+    }
+    name <- tryEval(module.artifactName)
     info = ModuleInfo(org, name, module)
   } yield info.targetName -> info
 }
 
 type ModuleMappings = Map[String, ModuleInfo]
 def moduleMappings(implicit ctx: Ctx): ModuleMappings = {
-  ctx.root.millInternal.modules.flatMap { module =>
-    for {
-      Result.Success(scalaVersion) <- tryEval(module, "scalaVersion")
-      if scalaVersion == ctx.scalaVersion
+  import mill.api.Result.{Success => S}
+  ctx.root.millInternal.modules.flatMap {
+    case module: mill.scalalib.ScalaModule =>
+      // Result does not have withFilter method, wrap it into the Option to allow for-comprehension
+      for {
+        S(scalaVersion) <- tryEval(module.scalaVersion).asSuccess
+        if scalaVersion == ctx.scalaVersion
 
-      Result.Success(platformSuffix: String) <- tryEval(module, "platformSuffix")
-      if platformSuffix.isEmpty // is JVM
+        S(platformSuffix: String) <- tryEval(module.platformSuffix).asSuccess
+        if platformSuffix.isEmpty // is JVM
 
-      mapping @ (targetName, ModuleInfo(_, _, module)) <- toMappingInfo(module)
-    } yield mapping
+        S(mapping @ (targetName, ModuleInfo(_, _, module))) <- toMappingInfo(module).asSuccess
+      } yield mapping
+    case _ =>
+      // We're only intrested in Scala modules
+      None
   }.toMap
 }
 
@@ -243,30 +287,11 @@ private def checkedModuleMappings(
 }
 
 // Evaluation of mill targets/commands
-private def tryEval(module: Module, labels: String*)(implicit ctx: Ctx) = {
-  val rootSegments =
-    module.millOuterCtx.segments.value :+
-      module.millOuterCtx.segment
-  val moduleCommands =
-    try {
-      module.millInternal
-        .traverse(_.millInternal.reflectAll[mill.define.Command[_]])
-        .map(cmd => cmd.ctx.segments -> cmd)
-        .toMap
-    } catch {
-      case ex =>
-        ctx.log.error(s"Exception when trying to resolve commands for $module")
-        Map.empty
-    }
-
-  (module.millInternal.segmentsToTargets ++ moduleCommands)
-    .get(Segments((rootSegments ++ labels.map(Label(_))): _*))
-    .map { task =>
-      val evalState = ctx.evaluator.evaluate(Agg(task))
-      val failure = evalState.failing.values.flatten.toSeq.headOption
-      def result = evalState.rawValues.head
-      failure.getOrElse(result)
-    }
+private def tryEval[T](task: NamedTask[T])(implicit ctx: Ctx): Result[T] = {
+  val evalState = ctx.evaluator.evaluate(Agg(task))
+  val failure = evalState.failing.values.flatten.toSeq.headOption
+  def result = evalState.rawValues.head
+  failure.getOrElse(result).asInstanceOf[Result[T]]
 }
 
 // Extractors
@@ -313,6 +338,7 @@ case class ModuleTargetsResults(
     compile: BuildStepResult,
     doc: BuildStepResult,
     testsCompile: BuildStepResult,
+    testsExecute: BuildStepResult,
     publish: BuildStepResult
 ) {
   def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
@@ -320,6 +346,7 @@ case class ModuleTargetsResults(
     "compile" -> compile,
     "doc" -> doc,
     "test-compile" -> testsCompile,
+    "test" -> testsExecute,
     "publish" -> publish
   ).map { case (key, value) =>
     s""""$key": "${value.stringValue}""""
@@ -336,3 +363,47 @@ case class ModuleBuildResults(
 }
 
 class ProjectBuildFailureException extends Exception
+
+sealed trait TestingMode
+object TestingMode {
+  case object Disabled extends TestingMode
+  case object CompileOnly extends TestingMode
+  case object Full extends TestingMode
+
+  implicit val rw: ReadWriter[TestingMode] = {
+    val DisabledString = "disabled"
+    val CompileOnlyString = "compile-only"
+    val FullString = "full"
+    def toJson(x: TestingMode): String = x match {
+      case Disabled    => DisabledString
+      case CompileOnly => CompileOnlyString
+      case Full        => FullString
+    }
+    def fromJson(str: String): TestingMode = str match {
+      case DisabledString    => Disabled
+      case CompileOnlyString => CompileOnly
+      case FullString        => Full
+    }
+    readwriter[String].bimap[TestingMode](toJson, fromJson)
+  }
+}
+case class ProjectOverrides(tests: Option[TestingMode])
+object ProjectOverrides {
+  implicit val rw: ReadWriter[ProjectOverrides] = macroRW
+}
+
+case class ProjectsConfig(
+    exclude: List[String] = Nil,
+    overrides: Map[String, ProjectOverrides] = Map.empty
+)
+object ProjectsConfig {
+  implicit val rw: ReadWriter[ProjectsConfig] = macroRW
+}
+
+case class ProjectBuildConfig(
+    projects: ProjectsConfig = ProjectsConfig(),
+    tests: TestingMode = TestingMode.Full
+)
+object ProjectBuildConfig {
+  implicit val rw: ReadWriter[ProjectBuildConfig] = macroRW
+}
