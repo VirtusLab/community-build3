@@ -247,7 +247,7 @@ def makeDependenciesBasedBuildPlan(
             ) => ()
         case reason =>
           System.err.println(
-            s"Failed to decode community-build config in ${repoUrl}, reason: ${reason.prettyPrint(0)}"
+            s"Failed to decode community-build config in ${repoUrl}, reason: ${reason}"
           )
       }
       config.toOption

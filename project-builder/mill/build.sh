@@ -9,14 +9,12 @@ fi
 repoDir="$1" # e.g. /tmp/shapeless
 scalaVersion="$2" # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
 version="$3" # e.g. 1.0.2-communityBuild
-unfilteredTargets="$4" # e.g. "com.example%foo com.example%bar"
+targets=($4) # e.g. "com.example%foo com.example%bar"
 mavenRepoUrl="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
 
-targets=(${unfilteredTargets[@]})
-targetExcludeFilters=$(echo $projectConfig | jq -r '.projects?.exclude? // [] | join ("|")')
-if [ ! -z ${targetExcludeFilters} ]; then
-  targets=( $( for target in ${unfilteredTargets[@]} ; do echo $target ; done | grep -E -v "(${targetExcludeFilters})" ) )
+if [[ -z $projectConfig ]]; then
+  projectConfig="{}"
 fi
 
 echo '##################################'
@@ -33,6 +31,5 @@ millSettings=(
   -D communitybuild.scala="$scalaVersion"
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")')
 )
-args=(runCommunityBuild --scalaVersion "$scalaVersion" "${targets[@]}")
 
-mill ${millSettings[@]} ${args[@]}
+mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"

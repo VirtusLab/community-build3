@@ -19,6 +19,17 @@ scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 $scriptDir/checkout.sh "$repoUrl" "$rev" repo
 
+# Wait until mvn-repo is reachable, frequently few first requests might fail
+# especially in cli immediately after starting minikube
+for i in {1..10}; do
+  if errMsg=$(curl $CB_MVN_REPO_URL 2>&1); then
+    break
+  else
+    echo "Waiting until mvn-repo is reachable..."
+    sleep 1
+  fi
+done
+
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
   $scriptDir/mill/prepare-project.sh repo "$scalaVersion" "$version"

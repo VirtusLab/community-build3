@@ -1,5 +1,8 @@
 import sbt._
 import sbt.Keys._
+import sjsonnew._, LList.:*:
+import sjsonnew.BasicJsonProtocol._
+import sjsonnew.support.scalajson.unsafe.{Converter, Parser}
 
 sealed abstract class BuildStepResult(val stringValue: String) {
   def jsonValue = s""""$stringValue""""
@@ -24,6 +27,7 @@ case class ModuleTargetsResults(
     compile: BuildStepResult,
     doc: BuildStepResult,
     testsCompile: BuildStepResult,
+    testsExecute: BuildStepResult,
     publish: BuildStepResult
 ) {
   def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
@@ -31,6 +35,7 @@ case class ModuleTargetsResults(
     "compile" -> compile,
     "doc" -> doc,
     "test-compile" -> testsCompile,
+    "test" -> testsExecute,
     "publish" -> publish
   ).map { case (key, value) =>
     s""""$key": "${value.stringValue}""""
@@ -173,7 +178,16 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     },
     runBuild := {
-      val scalaVersionArg :: ids = spaceDelimited("<arg>").parsed.toList
+      val scalaVersionArg :: configJson :: ids = spaceDelimited("<arg>").parsed.toList
+      println(s"Build config: ${configJson}")
+      val config = {
+        val parsed = Parser
+          .parseFromString(configJson)
+          .flatMap(Converter.fromJson[ProjectBuildConfig](_)(ProjectBuildConfigFormat))
+        println(s"Parsed config: ${parsed}")
+        parsed.getOrElse(ProjectBuildConfig())
+      }
+
       val cState = state.value
       val extracted = sbt.Project.extract(cState)
       val s = extracted.structure
@@ -241,12 +255,34 @@ object CommunityBuildPlugin extends AutoPlugin {
         simplifiedModuleId(key) -> value
       }
 
-      println("Starting build...")
+      val filteredIds = {
+        val excludedPatterns = config.projects.exclude.map(_.r)
+        ids.filter { id =>
+          id.split('%') match {
+            case Array(org, name) =>
+              val excludingPattern = excludedPatterns.find { pattern =>
+                // No Regex.matches in Scala 2.12 (!sic)
+                pattern
+                  .findFirstIn(name)
+                  .orElse(pattern.findFirstIn(id))
+                  .isDefined
+              }
+              excludingPattern.foreach { pattern =>
+                println(s"Excluding target '$id' - matches exclusion rule: '${pattern}'")
+              }
+              excludingPattern.isEmpty
+            case _ =>
+              println(s"Excluding target '$id' - incompatible format")
+              false
+          }
+        }
+      }
 
+      println("Starting build...")
       // Find projects that matches maven
       val topLevelProjects = (
         for {
-          id <- ids
+          id <- filteredIds
           testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
             Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
           testedFullIds = testedSuffixes.map(id + _)
@@ -268,7 +304,6 @@ object CommunityBuildPlugin extends AutoPlugin {
             |  moduleIds: ${moduleIds.keySet}
             |""")
           throw new Exception("Module mapping missing")
-
         }
       ).toSet
 
@@ -319,19 +354,32 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
 
       val projectsBuildResults = allToBuild.map { r =>
-        println(s"Starting build for $r...")
         val evaluator = new TaskEvaluator(r, cState)
         val s = sbt.Project.extract(cState).structure
         val projectName = (r / moduleName).get(s.data).get
+        println(s"Starting build for $r ($projectName)...")
+
+        val overrideSettings = config.projects.overrides
+          .getOrElse(projectName, ProjectOverrides())
+        val testingMode = overrideSettings.tests.getOrElse(config.tests)
 
         import evaluator._
         val results = {
           val compileResult = eval(Compile / compile)
           val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
+          val testsCompileResult = testingMode match {
+            case TestingMode.Disabled => Skipped
+            case _                    => evalAsDependencyOf(compileResult)(Test / compile)
+          }
+          val testsExecuteResult = testingMode match {
+            case TestingMode.Full => evalAsDependencyOf(testsCompileResult)(Test / test)
+            case _                => Skipped
+          }
           ModuleTargetsResults(
             compile = compileResult,
             doc = docsResult,
-            testsCompile = evalAsDependencyOf(compileResult)(Test / compile),
+            testsCompile = testsCompileResult,
+            testsExecute = testsExecuteResult,
             publish = ourVersion.fold[BuildStepResult](Skipped) { version =>
               val currentVersion = (r / Keys.version)
                 .get(s.data)
@@ -366,4 +414,79 @@ object CommunityBuildPlugin extends AutoPlugin {
     },
     (runBuild / aggregate) := false
   )
+
+  sealed trait TestingMode
+  object TestingMode {
+    case object Disabled extends TestingMode
+    case object CompileOnly extends TestingMode
+    case object Full extends TestingMode
+  }
+
+  // Community projects configs
+  case class ProjectOverrides(tests: Option[TestingMode] = None)
+  case class ProjectsConfig(
+      exclude: List[String] = Nil,
+      overrides: Map[String, ProjectOverrides] = Map.empty
+  )
+  case class ProjectBuildConfig(
+      projects: ProjectsConfig = ProjectsConfig(),
+      tests: TestingMode = TestingMode.Full
+  )
+  // Serialization
+  implicit object TestingModeEnumJsonFormat extends JsonFormat[TestingMode] {
+    def write[J](x: TestingMode, builder: Builder[J]): Unit = "full"
+    def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): TestingMode =
+      jsOpt.fold(deserializationError("Missing string")) { js =>
+        unbuilder.readString(js) match {
+          case "disabled"     => TestingMode.Disabled
+          case "compile-only" => TestingMode.CompileOnly
+          case "full"         => TestingMode.Full
+        }
+      }
+  }
+
+  implicit object ProjectOverridesFormat extends JsonFormat[ProjectOverrides] {
+    def write[J](obj: ProjectOverrides, builder: Builder[J]): Unit = ???
+    def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): ProjectOverrides =
+      jsOpt.fold(deserializationError("Empty object")) { js =>
+        implicit val _unbuilder: Unbuilder[J] = unbuilder
+        unbuilder.beginObject(js)
+        val testsMode = readOrDefault("tests", Option.empty[TestingMode])
+        unbuilder.endObject
+        ProjectOverrides(tests = testsMode)
+      }
+  }
+
+  implicit object ProjectsConfigFormat extends JsonFormat[ProjectsConfig] {
+    def write[J](obj: ProjectsConfig, builder: Builder[J]): Unit = ???
+    def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): ProjectsConfig =
+      jsOpt.fold(deserializationError("Empty object")) { js =>
+        implicit val _unbuilder: Unbuilder[J] = unbuilder
+        unbuilder.beginObject(js)
+        val excluded = readOrDefault("exclude", Array.empty[String])
+        val overrides = readOrDefault("overrides", Map.empty[String, ProjectOverrides])
+        unbuilder.endObject()
+        ProjectsConfig(excluded.toList, overrides)
+      }
+  }
+
+  implicit object ProjectBuildConfigFormat extends JsonFormat[ProjectBuildConfig] {
+    def write[J](v: ProjectBuildConfig, builder: Builder[J]): Unit = ???
+    def read[J](optValue: Option[J], unbuilder: Unbuilder[J]): ProjectBuildConfig =
+      optValue.fold(deserializationError("Empty object")) { v =>
+        implicit val _unbuilder: Unbuilder[J] = unbuilder
+        unbuilder.beginObject(v)
+        val projects = readOrDefault("projects", ProjectsConfig())
+        val testsMode = readOrDefault[TestingMode, J]("tests", TestingMode.Full)
+        unbuilder.endObject()
+        ProjectBuildConfig(projects, testsMode)
+      }
+  }
+  private def readOrDefault[T, J](field: String, default: T)(implicit
+      format: JsonReader[T],
+      unbuilder: Unbuilder[J]
+  ) =
+    unbuilder
+      .lookupField(field)
+      .fold(default)(v => format.read(Some(v), unbuilder))
 }

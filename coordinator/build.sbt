@@ -1,4 +1,4 @@
-val scala3Version = "3.0.0"
+val scala3Version = "3.1.1"
 
 lazy val root = project
   .in(file("."))
@@ -12,7 +12,8 @@ lazy val root = project
       "com.novocode" % "junit-interface" % "0.11" % "test",
       // Newer versions of jsoup up to 1.13.1 are buggy and cause missing versions of artifacts
       "org.jsoup" % "jsoup" % "1.10.3",
-      "com.google.code.gson" % "gson" % "2.8.6",
+      "org.json4s" %% "json4s-native" % "4.0.4",
+      "org.json4s" %% "json4s-ext" % "4.0.4",
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
     )
   )

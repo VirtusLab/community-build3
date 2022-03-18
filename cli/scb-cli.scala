@@ -1082,6 +1082,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           if !config.redirectLogs then os.Inherit
           else os.PathAppendRedirect(logsFile)
         val versionSwitchSuffix = if forceScalaVersion then "!" else ""
+        val tq = "\"" * 3
+        val effectiveConfig = project.params.config.getOrElse("{}")
         os.proc(
           "sbt",
           "--no-colors",
@@ -1089,7 +1091,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           "set every credentials := Nil",
           "moduleMappings",
           sbtConfig.commands,
-          s"runBuild $effectiveScalaVersion ${project.effectiveTargets.mkString(" ")}"
+          s"runBuild $effectiveScalaVersion $tq$effectiveConfig$tq ${project.effectiveTargets.mkString(" ")}"
         ).call(
           check = false,
           cwd = projectDir,
@@ -1178,15 +1180,19 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
 
     override def runBuild(): Unit =
-      def mill(commands: os.Shellable*) =
+      def mill(commands: os.Shellable*) = {
+        val output = 
+          if config.redirectLogs then os.PathAppendRedirect(logsFile)
+          else os.Inherit
         os.proc("mill", millScalaSetting, commands)
           .call(
             cwd = projectDir,
-            stdout = os.PathAppendRedirect(logsFile),
-            stderr = os.PathAppendRedirect(logsFile)
+            stdout = output,
+            stderr = output
           )
+      }
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
-      mill("runCommunityBuild", scalaVersion, project.effectiveTargets)
+      mill("runCommunityBuild", scalaVersion, project.params.config.getOrElse("{}"), project.effectiveTargets)
   end MillReproducer
 end LocalReproducer
 
