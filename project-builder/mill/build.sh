@@ -29,7 +29,7 @@ millSettings=(
   -D communitybuild.version="$version"
   -D communitybuild.maven.url="$mavenRepoUrl"
   -D communitybuild.scala="$scalaVersion"
-  $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")')
+  $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 
 mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
