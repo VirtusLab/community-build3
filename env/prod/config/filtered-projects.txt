@@ -1,3 +1,5 @@
+# Projects to exclude in format <org>:<project>:<version>
+# Org and project should match Github names, instead of names used for artifacts (Maven)
 # Not a Scala Project
 didi:booster.*
 
@@ -8,11 +10,12 @@ typelevel:algebra.*:2.2.*
 line:armeria:.*
 
 # Not an official release version
-sbt:sbt:2.0.0-alpha.* 
+sbt:sbt:2.0.0-alpha.*
+com-lihaoyi:ammonite:.* 
 
 # Build problems:
 # Checking Scala 3 using constant version string
-com.github.ghostdogpr:caliban.*
-com.softwaremill.macwire:.*
-com.softwaremill.quicklens:.*
-com.47deg:fetch.*
+ghostdogpr:caliban.*
+softwaremill:macwire:.*
+softwaremill:quicklens:.*
+47degrees:fetch.*
