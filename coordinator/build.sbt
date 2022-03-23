@@ -15,6 +15,7 @@ lazy val root = project
       "net.sourceforge.htmlunit" % "htmlunit" % "2.29",
       "org.json4s" %% "json4s-native" % "4.0.4",
       "org.json4s" %% "json4s-ext" % "4.0.4",
-      "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
+      "com.github.pureconfig" %% "pureconfig-core" % "0.17.1",
+      "com.lihaoyi" %% "os-lib" % "0.8.0"
     )
   )

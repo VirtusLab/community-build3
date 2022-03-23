@@ -9,6 +9,9 @@ import scala.util.Try
 import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.error.*
+import scala.concurrent.*
+import scala.concurrent.duration.*
+import scala.concurrent.ExecutionContext.Implicits.global
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
@@ -232,19 +235,28 @@ def makeDependenciesBasedBuildPlan(
       repoUrl: String,
       tagOrRevision: Option[String]
   ): Option[ProjectBuildConfig] = {
-    val revision = tagOrRevision.getOrElse("HEAD")
+    val projectDir = os.temp.dir(prefix = s"repo-$name")
+    os.proc(
+      "git",
+      "clone",
+      repoUrl,
+      projectDir,
+      "--quiet",
+      tagOrRevision.map("--branch=" + _).toList,
+      "--depth=1"
+    ).call(stderr = os.Pipe)
 
     def readProjectConfig() = {
-      val baseURL = repoUrl.stripSuffix(".git")
       val config = ConfigSource
-        .url(new URL(s"$baseURL/raw/$revision/scala3-community-build.conf"))
+        .file((projectDir / "scala3-community-build.conf").toIO)
         .withFallback(ConfigSource.resources("buildPlan.reference.conf"))
         .load[ProjectBuildConfig]
 
       config.left.foreach {
         case ConfigReaderFailures(
-              CannotReadUrl(url, Some(_: java.io.FileNotFoundException))
-            ) => ()
+              CannotReadFile(_, Some(_: java.io.FileNotFoundException))
+            ) =>
+          ()
         case reason =>
           System.err.println(
             s"Failed to decode community-build config in ${repoUrl}, reason: ${reason}"
@@ -253,8 +265,46 @@ def makeDependenciesBasedBuildPlan(
       config.toOption
     }
 
+    def discoverJavaVersion(): Option[String] =
+      val githubDir = projectDir / ".github"
+      if !os.exists(githubDir) then None
+      else
+        val OptQuote = "['\"]?"
+        val JavaVersion = "java-version:\\s"
+        val SetupJavaJavaVersion = raw"\s*$JavaVersion$OptQuote(\d+)$OptQuote".r
+        val SetupScalaJavaVersion = raw"\s*$JavaVersion$OptQuote(.*)@(.*)$OptQuote".r
+        // We can only supported this versions
+        val allowedVersions = Seq("8", "11", "17")
+        val selected = os.walk
+          .stream(githubDir)
+          .filter(os.isFile)
+          .flatMap { path =>
+            os.read
+              .lines(path)
+              .collect {
+                // java-version: '11'
+                case SetupJavaJavaVersion(version) => Option(version)
+                // java-version: distro@1.11
+                case SetupScalaJavaVersion(distro, version) if !distro.contains("graal") =>
+                  version
+                    .stripPrefix("1.")
+                    .split('.')
+                    .headOption
+              }
+              .flatten
+              .filter(allowedVersions.contains(_))
+          }
+          .toList
+          .maxByOption(_.toInt)
+        println(selected)
+        selected
+
     readProjectConfig()
       .orElse(internalProjectConfigs(name))
+      .map { c =>
+        if c.java.version.nonEmpty then c
+        else c.copy(java = c.java.copy(version = discoverJavaVersion()))
+      }
       .filter(_ != ProjectBuildConfig.empty)
       .map { config =>
         println(s"Using custom project config for $name: $config")
