@@ -15,13 +15,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
-def findTag(repoUrl: String, version: String): Either[String, String] = 
+def findTag(repoUrl: String, version: String): Either[String, String] =
   val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
   Try {
     val lines = cmd.!!.linesIterator.filter(_.contains(version)).toList
     lines.collectFirst { case TagRef(tag) => tag } match
-        case Some(tag) => Right(tag)
-        case _ => Left(s"No tag in:\n${lines.map("-" + _ +"_").mkString("\n")}")
+      case Some(tag) => Right(tag)
+      case _         => Left(s"No tag in:\n${lines.map("-" + _ + "_").mkString("\n")}")
   }.toEither.left.map { e =>
     e.printStackTrace()
     e.getMessage
@@ -40,30 +40,33 @@ object WithExtractedScala3Suffix {
 
 def hasScala3Suffix(s: String) = s match {
   case WithExtractedScala3Suffix(_, _) => true
-  case _ => false
+  case _                               => false
 }
 
 // Needed as long as some projects use scala version prior to 3.0.0
-def replaceScalaBinaryVersion(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix + "_3" }
+def replaceScalaBinaryVersion(s: String) = s match {
+  case WithExtractedScala3Suffix(prefix, _) => prefix + "_3"
+}
 
 def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(prefix, _) => prefix }
 
-def buildPlanCommons(depGraph: DependencyGraph) = 
+def buildPlanCommons(depGraph: DependencyGraph) =
   val data = depGraph.projects
   val topLevelData = data.filter(_.p.stars > 100)
 
   val fullInfo = data.map(l => l.p -> l).toMap
 
   // TODO we assume that targets does not change between version, and this may not be true...
-  val depsMap: Map[TargetId, ProjectVersion] = 
+  val depsMap: Map[TargetId, ProjectVersion] =
     data.flatMap(lp => lp.targets.map(t => t.id -> ProjectVersion(lp.p, lp.v))).toMap
 
   def flattenScalaDeps(p: LoadedProject): Seq[ProjectVersion] =
-    p.targets.flatMap(_.deps.filter(dep => hasScala3Suffix(dep.id.name))).distinct.flatMap(
-      d => depsMap.get(d.id).map(_.copy(v = d.version))
-    )
+    p.targets
+      .flatMap(_.deps.filter(dep => hasScala3Suffix(dep.id.name)))
+      .distinct
+      .flatMap(d => depsMap.get(d.id).map(_.copy(v = d.version)))
 
-  val projectsDeps: Map[ProjectVersion, Seq[ProjectVersion]] = 
+  val projectsDeps: Map[ProjectVersion, Seq[ProjectVersion]] =
     topLevelData.map(lp => ProjectVersion(lp.p, lp.v) -> flattenScalaDeps(lp)).toMap
 
   (topLevelData, fullInfo, projectsDeps)
@@ -71,30 +74,34 @@ def buildPlanCommons(depGraph: DependencyGraph) =
 def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
 
-  val depScore = projectsDeps.flatMap(_._2).groupBy(identity)
-    .map{ case (pv, c) => pv -> c.size}.toMap
+  val depScore =
+    projectsDeps.flatMap(_._2).groupBy(identity).map { case (pv, c) => pv -> c.size }.toMap
 
   val topLevelPV = topLevelData.map(lp => ProjectVersion(lp.p, lp.v))
   val allPVs = (topLevelPV ++ depScore.keys).distinct
-  
+
   def majorMinor(v: String) = v.split('.').take(2).mkString(".")
   def patch(pv: ProjectVersion) = pv.v.split('.').drop(2).mkString(".")
-  val overrides = allPVs.groupBy(pv => (pv.p, majorMinor(pv.v))).flatMap { case ((p, mm), pvs) =>
-    val oVersion =
-      if pvs.size == 1 then pvs.head.v
-      else 
-        val v = pvs.maxBy(patch).v // TODO make sure that we do built requested version!
-        println(s"Forcing version for $p to $v from: " + pvs.map(_.v))
-        v
-    pvs.map(_ -> ProjectVersion(p, oVersion))
-  }.toMap
+  val overrides = allPVs
+    .groupBy(pv => (pv.p, majorMinor(pv.v)))
+    .flatMap { case ((p, mm), pvs) =>
+      val oVersion =
+        if pvs.size == 1 then pvs.head.v
+        else
+          val v = pvs.maxBy(patch).v // TODO make sure that we do built requested version!
+          println(s"Forcing version for $p to $v from: " + pvs.map(_.v))
+          v
+      pvs.map(_ -> ProjectVersion(p, oVersion))
+    }
+    .toMap
 
   case class ToBuild(pv: ProjectVersion, deps: Seq[ProjectVersion]):
     def resolve(compiled: Set[ProjectVersion]) = copy(deps = deps.filterNot(compiled))
 
-  val allToBuild = overrides.values.toSeq.distinct.sortBy(_.p.stars).reverse.map (pv =>
-    ToBuild(pv, projectsDeps.getOrElse(pv, Nil).filter(_.p != pv.p).map(overrides))
-  )
+  val allToBuild = overrides.values.toSeq.distinct
+    .sortBy(_.p.stars)
+    .reverse
+    .map(pv => ToBuild(pv, projectsDeps.getOrElse(pv, Nil).filter(_.p != pv.p).map(overrides)))
 
   val (scala3, rawToBuild) = allToBuild.partition(_.pv.p == Project("lampepfl", "dotty")(0))
 
@@ -103,42 +110,43 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
 
   println(s"Will build: (${topLevelPV.size} original and ${toBuilds.size} total)")
 
-  @annotation.tailrec def step(
-    built: Seq[Seq[ProjectVersion]], 
-    toComplete: Seq[ToBuild]): Seq[Seq[ProjectVersion]] =
-      if toComplete.isEmpty then built
-      else 
-        val (completed, rawTodo) = toComplete.partition(_.deps.isEmpty)
-        val (actualCompleted, todo) = if completed.nonEmpty then (completed.map(_.pv), rawTodo) else 
+  @annotation.tailrec
+  def step(built: Seq[Seq[ProjectVersion]], toComplete: Seq[ToBuild]): Seq[Seq[ProjectVersion]] =
+    if toComplete.isEmpty then built
+    else
+      val (completed, rawTodo) = toComplete.partition(_.deps.isEmpty)
+      val (actualCompleted, todo) =
+        if completed.nonEmpty then (completed.map(_.pv), rawTodo)
+        else
           println("Cycle in:\n" + toComplete.mkString("\n"))
           val mostImporant = rawTodo.maxBy(p => depScore.get(p.pv))
-          (Seq(mostImporant.pv), rawTodo.filter(_ != mostImporant))  
-        
-        val builtSet = (built.flatten ++ actualCompleted).toSet
-        // println("Compiled: " + actualCompleted)
-        step(actualCompleted +: built, todo.map(_.resolve(builtSet)))
-  
+          (Seq(mostImporant.pv), rawTodo.filter(_ != mostImporant))
+
+      val builtSet = (built.flatten ++ actualCompleted).toSet
+      // println("Compiled: " + actualCompleted)
+      step(actualCompleted +: built, todo.map(_.resolve(builtSet)))
+
   val builtSteps = step(scala3.map(_.pv) :: Nil, toBuilds)
-  
+
   type Steps = Seq[Seq[BuildStep]]
   type Overrides = Map[Dep, Dep]
   val init: (Steps, Overrides) = (Nil, Map.empty)
 
   def isScala(dep: Dep) = dep.id.org == "org.scala-lang" // TODO should be smarter!
 
-  val computedSteps = 
-    builtSteps.reverse.foldLeft(init){ case ((steps, overrides), pvs) =>
-      def buildStep(pv: ProjectVersion): BuildStep = 
+  val computedSteps =
+    builtSteps.reverse.foldLeft(init) { case ((steps, overrides), pvs) =>
+      def buildStep(pv: ProjectVersion): BuildStep =
         // This assumes that we've got the same targets across different versions
         val targets = fullInfo(pv.p).targets
-        val allOverrides = 
+        val allOverrides =
           targets.flatMap(_.deps).distinct.filterNot(isScala).flatMap(overrides.get)
         val publishVersion = depScore.get(pv).map(_ => pv.v + "-communityBuild")
         BuildStep(pv.p, pv.v, publishVersion, targets.map(_.id), allOverrides)
-      
-      val newSteps = pvs.sortBy(- _.p.stars).map(buildStep)
-      val newOverrides = 
-        for 
+
+      val newSteps = pvs.sortBy(-_.p.stars).map(buildStep)
+      val newOverrides =
+        for
           step <- newSteps
           newVersion <- step.publishVersion.toSeq
           tid <- step.targets
@@ -149,19 +157,21 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
 
   BuildPlan(depGraph.scalaRelease, computedSteps._1)
 
-@main def printBuildPlan: BuildPlan = 
+@main def printBuildPlan: BuildPlan =
   val deps = loadDepenenecyGraph("3", minStarsCount = 100)
   val plan = makeStepsBasedBuildPlan(deps)
   val niceSteps = plan.steps.zipWithIndex.map { case (steps, nr) =>
-    val items = 
-      def versionMap(step: BuildStep) = 
+    val items =
+      def versionMap(step: BuildStep) =
         step.originalVersion + step.publishVersion.fold("")(" -> " + _)
       def overrides(step: BuildStep) = step.depOverrides match
-        case Nil => ""
+        case Nil  => ""
         case deps => "\n    with " + deps.map(_.asMvnStr).mkString(", ")
 
-      steps.map(step => "  " + step.p.org + "/" + step.p.name + " @ " + versionMap(step) + overrides(step))
-    items.mkString(s"Step ${nr + 1}:\n", "\n", "\n") 
+      steps.map(step =>
+        "  " + step.p.org + "/" + step.p.name + " @ " + versionMap(step) + overrides(step)
+      )
+    items.mkString(s"Step ${nr + 1}:\n", "\n", "\n")
   }
 
   val bp = "Buildplan:\n" + niceSteps.mkString("\n")
@@ -312,28 +322,39 @@ def makeDependenciesBasedBuildPlan(
       }
   }
 
-  projectsDeps.toList.map { (project, deps) =>
-    val repoUrl = projectRepoUrl(project.p)
-    val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption)
-    val name = projectName(project)
-    val dependencies = deps.map(projectName)
-      .filter(depName => projectNames.contains(depName) && depName != name && depName != dottyProjectName)
-      .distinct
-    ProjectBuildDef(
-      name = name,
-      dependencies = dependencies.toArray,
-      repoUrl = repoUrl,
-      revision = tag.getOrElse(""),
-      version = project.v,
-      targets = fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" "),
-      config = projectConfig(name, repoUrl, tag)
-    )
-  }.filter(_.name != dottyProjectName).toArray
+  val resolveProjects = Future
+    .traverse(projectsDeps.toList) { (project, deps) =>
+      Future {
+        val repoUrl = projectRepoUrl(project.p)
+        val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption)
+        val name = projectName(project)
+        val dependencies = deps
+          .map(projectName)
+          .filter(depName =>
+            projectNames.contains(depName) && depName != name && depName != dottyProjectName
+          )
+          .distinct
+        ProjectBuildDef(
+          name = name,
+          dependencies = dependencies.toArray,
+          repoUrl = repoUrl,
+          revision = tag.getOrElse(""),
+          version = project.v,
+          targets =
+            fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" "),
+          config = projectConfig(name, repoUrl, tag)
+        )
+      }
+    }
+  Await
+    .result(resolveProjects, 1.hour)
+    .filter(_.name != dottyProjectName)
+    .toArray
 
 private given FromString[Seq[Project]] = str =>
   str.split(",").toSeq.filter(_.nonEmpty).map {
     case s"${org}/${name}" => Project(org, name)(Int.MaxValue)
-    case _ => throw new IllegalArgumentException
+    case _                 => throw new IllegalArgumentException
   }
 
 @main def storeDependenciesBasedBuildPlan(
