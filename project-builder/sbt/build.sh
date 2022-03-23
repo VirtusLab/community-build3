@@ -35,7 +35,7 @@ sbtSettings=(
   --batch
   --no-colors
   -Dcommunitybuild.version="$version"
-  $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")')
+  $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"

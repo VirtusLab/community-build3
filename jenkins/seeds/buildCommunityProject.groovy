@@ -98,7 +98,7 @@ pipeline {
             stages {
                 stage("Build project") {
                     options {
-                      timeout(time: 1, unit: "HOURS")
+                      timeout(time: 2, unit: "HOURS")
                     } 
                     steps {
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
@@ -170,7 +170,7 @@ pipeline {
                 failure {
                   script {
                     echo "Build failed, reproduce it locally using following command:"
-                    echo "scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/cli/scb-cli.scala -- reproduce --jobId=${env.BUILD_NUMBER}"
+                    echo "scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/cli/scb-cli.scala -- reproduce ${env.BUILD_NUMBER}"
                   }
                 }
             }

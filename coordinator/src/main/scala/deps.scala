@@ -75,8 +75,12 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   Target(TargetId(o,n), deps.toSeq)
 
 def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject = 
+  import projectModules.project.{name, org}
+  val repoName = s"https://github.com/$org/$name.git" 
   require(projectModules.mvs.nonEmpty, s"Empty modules list in ${projectModules.project}")
-  val ModuleInVersion(version, modules) = projectModules.mvs.head
+  val ModuleInVersion(version, modules) =  projectModules.mvs
+    .find(v => findTag(repoName, v.version).isRight)
+    .getOrElse(projectModules.mvs.head)
   val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
   val targets = mvs.map(cached(asTarget(scalaBinaryVersion)))
   LoadedProject(projectModules.project, version, targets)
