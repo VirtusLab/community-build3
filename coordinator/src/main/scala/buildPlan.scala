@@ -285,7 +285,7 @@ def makeDependenciesBasedBuildPlan(
         val SetupScalaJavaVersion = raw"\s*$JavaVersion$OptQuote(.*)@(.*)$OptQuote".r
         // We can only supported this versions
         val allowedVersions = Seq("8", "11", "17")
-        val selected = os.walk
+        os.walk
           .stream(githubDir)
           .filter(os.isFile)
           .flatMap { path =>
@@ -306,8 +306,6 @@ def makeDependenciesBasedBuildPlan(
           }
           .toList
           .maxByOption(_.toInt)
-        println(selected)
-        selected
 
     readProjectConfig()
       .orElse(internalProjectConfigs(name))
