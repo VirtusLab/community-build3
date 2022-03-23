@@ -27,12 +27,41 @@ case class ModuleInVersion(version: String, modules: Seq[String])
 
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
-def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectModules = 
-  import project._
-  val binaryVersionSuffix = "_" + scalaBinaryVersion
+private def loadScaladexVersionsMatrix(project: Project) =
+  // Scaladex loads data dynamically using JS handlers
+  // We use htmlunit to execute handlers and get all the results
+  import com.gargoylesoftware.htmlunit
+  import htmlunit.*
+  import htmlunit.html.HtmlPage
+  import htmlunit.javascript.JavaScriptErrorListener
+  import project.{org, name}
+
+  object NoopJsErrorListener extends JavaScriptErrorListener {
+    override def loadScriptError(page: HtmlPage, url: java.net.URL, ex: Exception): Unit = ()
+    override def malformedScriptURL(page: HtmlPage, script: String, reason: java.net.MalformedURLException): Unit = ()
+    override def scriptException(page: HtmlPage, reason: ScriptException): Unit = ()
+    override def timeoutError(page: HtmlPage, x: Long, y: Long): Unit = ()
+  }
+  
   val url = s"https://index.scala-lang.org/artifacts/$org/$name"
-  val d = Jsoup.connect(url).get()
-  val mvs = 
+  val client = WebClient(BrowserVersion.CHROME)
+  def setOption(fn: WebClientOptions => Unit) = fn(client.getOptions())
+  setOption(_.setJavaScriptEnabled(true))
+  setOption(_.setCssEnabled(false))
+  setOption(_.setThrowExceptionOnScriptError(false))
+  setOption(_.setThrowExceptionOnFailingStatusCode(true))
+  setOption(_.setTimeout(15 * 1000))
+  // We set window size to trigger loading of all entries
+  client.getCurrentWindow.setInnerHeight(Int.MaxValue)
+  client.setJavaScriptErrorListener(NoopJsErrorListener)
+
+  val page = client.getPage[HtmlPage](url)
+  Jsoup.parse(page.asXml)
+
+def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectModules =
+  val binaryVersionSuffix = "_" + scalaBinaryVersion
+  val d = loadScaladexVersionsMatrix(project)
+  val mvs =
     for
       table <- d.select("tbody").asScala.toSeq
       version <- table.select(".version").asScala.map(_.text())
