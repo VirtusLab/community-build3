@@ -33,15 +33,8 @@ private def loadScaladexVersionsMatrix(project: Project) =
   import com.gargoylesoftware.htmlunit
   import htmlunit.*
   import htmlunit.html.HtmlPage
-  import htmlunit.javascript.JavaScriptErrorListener
   import project.{org, name}
-
-  object NoopJsErrorListener extends JavaScriptErrorListener {
-    override def loadScriptError(page: HtmlPage, url: java.net.URL, ex: Exception): Unit = ()
-    override def malformedScriptURL(page: HtmlPage, script: String, reason: java.net.MalformedURLException): Unit = ()
-    override def scriptException(page: HtmlPage, reason: ScriptException): Unit = ()
-    override def timeoutError(page: HtmlPage, x: Long, y: Long): Unit = ()
-  }
+  import java.util.logging.*
   
   val url = s"https://index.scala-lang.org/artifacts/$org/$name"
   val client = WebClient(BrowserVersion.CHROME)
@@ -53,7 +46,7 @@ private def loadScaladexVersionsMatrix(project: Project) =
   setOption(_.setTimeout(15 * 1000))
   // We set window size to trigger loading of all entries
   client.getCurrentWindow.setInnerHeight(Int.MaxValue)
-  client.setJavaScriptErrorListener(NoopJsErrorListener)
+  Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF); 
 
   val page = client.getPage[HtmlPage](url)
   Jsoup.parse(page.asXml)
