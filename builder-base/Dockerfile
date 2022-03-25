@@ -11,6 +11,6 @@ RUN update-java-alternatives --set java-1.${JDK_VERSION}.0-openjdk-amd64
 WORKDIR /build
 COPY . /build/
 
-ENV SBT_VERSIONS="1.5.8 1.6.1"
+ENV SBT_VERSIONS="1.6.2"
 
 RUN ./warmup.sh
