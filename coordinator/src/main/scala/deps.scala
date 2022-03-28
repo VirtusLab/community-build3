@@ -70,9 +70,12 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
   // Make sure that versions are ordered, some libraries don't have correct order in scaladex matrix
   // Eg. scalanlp/breeze lists versions: 2.0, 2.0-RC1, 2.0.1-RC2, 2.0.1-RC1
   // We want to have latests versions in front of collection
+  case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
   val modules = mvs
     .filter(_.modules.nonEmpty)
-    .sortBy(_.version)(using Ordering[String].reverse) 
+    .map(mvs => VersionedModules(mvs, mvs.version))
+    .sortBy(_.semVersion)
+    .map(_.modules)
   ProjectModules(project, modules)
 
 case class ModuleVersion(name: String, version: String, p: Project)
