@@ -44,7 +44,7 @@ logFile=build.log
 
 function runSbt() {
   # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
-  forceScalaVersion=$1projectConfig
+  forceScalaVersion=$1
   setScalaVersionCmd="++$scalaVersion"
   if [[ "$forceScalaVersion" == "forceScala" ]]; then
     setScalaVersionCmd="++$scalaVersion!"
