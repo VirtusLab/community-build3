@@ -303,13 +303,14 @@ object BuildInfo:
       scala.reflect.ManifestFactory.classType(classOf[String])
 
     def prepareBuildPlan(): JValue =
+      val configsDir = communityBuildDir / "env" / "prod" / "config"
       val args = Seq(
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
         /* replacedProjectsPath = */ "",
-        /* projectsConfigPath = */ "",
+        /* projectsConfigPath = */ configsDir / "projects-config.conf",
         /* projectsFiterPath = */ ""
       ).map("\"" + _.toString + "\"").mkString(" ")
       val coordinatorDir = communityBuildDir / "coordinator"
@@ -318,10 +319,16 @@ object BuildInfo:
       val buildPlanJson = os.read(coordinatorDir / "data" / "buildPlan.json")
       parse(buildPlanJson)
 
+    val JArray(projectPlans) = prepareBuildPlan()
     val projects = for
-      JArray(projectPlans) <- prepareBuildPlan()
       project <- projectPlans.take(1) // There should be only 1 project
-      plan = project.extract[ProjectBuildPlan]
+      // Config is an object, though be default would be decoded to None when we expect Option[String]
+      // We don't care about its content so we treat it as opaque string value
+      configString = project \ "config" match {
+        case JNothing | JNull => None
+        case value => Option(compact(render(value)))
+      }
+      plan = project.extract[ProjectBuildPlan].copy(config = configString)
       jdkVersion = plan.config.map(parse(_) \ "java" \ "version").flatMap(_.extractOpt[String])
     yield ProjectInfo(
       id = jobId,

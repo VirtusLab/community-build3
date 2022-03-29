@@ -34,6 +34,7 @@ fi
 sbtSettings=(
   --batch
   --no-colors
+  --verbose
   -Dcommunitybuild.version="$version"
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )

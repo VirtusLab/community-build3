@@ -210,6 +210,8 @@ def makeDependenciesBasedBuildPlan(
     val originalCoords = (project.org, project.name)
     replacements.get(originalCoords).map(_._2).flatten
 
+  def originalProjectName(project: ProjectVersion) = 
+    s"${project.p.org}_${project.p.name}"
   def projectName(project: ProjectVersion) =
     val originalCoords = (project.p.org, project.p.name)
     val (org, name) = replacements.get(originalCoords).map(_._1).getOrElse(originalCoords)
@@ -241,10 +243,11 @@ def makeDependenciesBasedBuildPlan(
   }
 
   def projectConfig(
-      name: String,
+      project: ProjectVersion,
       repoUrl: String,
       tagOrRevision: Option[String]
   ): Option[ProjectBuildConfig] = {
+    val name = projectName(project)
     val projectDir = os.temp.dir(prefix = s"repo-$name")
     os.proc(
       "git",
@@ -308,7 +311,7 @@ def makeDependenciesBasedBuildPlan(
           .maxByOption(_.toInt)
 
     readProjectConfig()
-      .orElse(internalProjectConfigs(name))
+      .orElse(internalProjectConfigs(originalProjectName(project)))
       .map { c =>
         if c.java.version.nonEmpty then c
         else c.copy(java = c.java.copy(version = discoverJavaVersion()))
@@ -340,7 +343,7 @@ def makeDependenciesBasedBuildPlan(
           version = project.v,
           targets =
             fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" "),
-          config = projectConfig(name, repoUrl, tag)
+          config = projectConfig(project, repoUrl, tag)
         )
       }
     }
