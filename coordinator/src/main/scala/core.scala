@@ -82,11 +82,17 @@ object ProjectBuildConfig {
 case class SemVersion(major: Int, minor: Int, patch: Int, milestone: Option[String])
 given Conversion[String, SemVersion] = _ match {
   // format: off
-  case s"$major.$minor.$patch-$milestone" => SemVersion(major.toInt, minor.toInt, patch.toInt, Some(milestone))
-  case s"$major.$minor.$patch"            => SemVersion(major.toInt, minor.toInt, patch.toInt, None)
-  case s"$major.$minor"                   => SemVersion(major.toInt, minor.toInt, 0, None)
-  case s"$major"                          => SemVersion(major.toInt, 0, 0, None)
-  // format: on
+    case s"$major.$minor.$patch-$milestone" => SemVersion(major.toInt, minor.toInt, patch.toInt, Some(milestone))
+    case s"$major.$minor.$patch"            => SemVersion(major.toInt, minor.toInt, patch.toInt, None)
+    case s"$major.$minor-$milestone"        => SemVersion(major.toInt, minor.toInt, 0, Some(milestone))
+    case s"$major.$minor"                   => SemVersion(major.toInt, minor.toInt, 0, None)
+    case s"$major-$milestone"               => SemVersion(major.toInt, 0, 0, Some(milestone))
+    // format: on
+  case version =>
+    version.toIntOption match {
+      case Some(v) => SemVersion(v, 0, 0, None)
+      case _       => SemVersion(0, 0, 0, Some(version))
+    }
 }
 
 given Ordering[SemVersion] = (x: SemVersion, y: SemVersion) => {
