@@ -303,13 +303,14 @@ object BuildInfo:
       scala.reflect.ManifestFactory.classType(classOf[String])
 
     def prepareBuildPlan(): JValue =
+      val configsDir = communityBuildDir / "env" / "prod" / "config"
       val args = Seq(
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
         /* replacedProjectsPath = */ "",
-        /* projectsConfigPath = */ "",
+        /* projectsConfigPath = */ configsDir / "projects-config.conf",
         /* projectsFiterPath = */ ""
       ).map("\"" + _.toString + "\"").mkString(" ")
       val coordinatorDir = communityBuildDir / "coordinator"
