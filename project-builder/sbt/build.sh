@@ -34,6 +34,7 @@ fi
 sbtSettings=(
   --batch
   --no-colors
+  --verbose
   -Dcommunitybuild.version="$version"
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
@@ -43,7 +44,7 @@ logFile=build.log
 
 function runSbt() {
   # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
-  forceScalaVersion=$1
+  forceScalaVersion=$1projectConfig
   setScalaVersionCmd="++$scalaVersion"
   if [[ "$forceScalaVersion" == "forceScala" ]]; then
     setScalaVersionCmd="++$scalaVersion!"
