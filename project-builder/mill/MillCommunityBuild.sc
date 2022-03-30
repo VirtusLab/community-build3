@@ -242,7 +242,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
 
   val buildSummary = projectsBuildResults
     .map(_.toJson)
-    .mkString("{", ", ", "}")
+    .mkString("[", ",", "]")
   ctx.log.info(s"""
     |************************
     |Build summary:
@@ -382,7 +382,10 @@ case class ModuleBuildResults(
 ) {
   lazy val toJson = {
     val resultsJson = results.jsonValues.mkString(", ")
-    s""""$artifactName": {$resultsJson}"""
+    s"""{
+       | "module": "$artifactName",
+       | $resultsJson 
+       |}""".stripMargin
   }
 }
 
