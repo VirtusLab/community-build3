@@ -47,7 +47,10 @@ case class ModuleBuildResults(
 ) {
   lazy val toJson = {
     val resultsJson = results.jsonValues.mkString(", ")
-    s""""$artifactName": {$resultsJson}"""
+    s"""{
+       | "module": "$artifactName",
+       | $resultsJson 
+       |}""".stripMargin
   }
 }
 
@@ -397,7 +400,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
       val buildSummary = projectsBuildResults
         .map(_.toJson)
-        .mkString("{", ", ", "}")
+        .mkString("[", ",", "]")
       println(s"""
           |************************
           |Build summary:
