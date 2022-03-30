@@ -80,20 +80,19 @@ object ProjectBuildConfig {
 }
 
 case class SemVersion(major: Int, minor: Int, patch: Int, milestone: Option[String])
-given Conversion[String, SemVersion] = _ match {
-  // format: off
-    case s"$major.$minor.$patch-$milestone" => SemVersion(major.toInt, minor.toInt, patch.toInt, Some(milestone))
-    case s"$major.$minor.$patch"            => SemVersion(major.toInt, minor.toInt, patch.toInt, None)
-    case s"$major.$minor-$milestone"        => SemVersion(major.toInt, minor.toInt, 0, Some(milestone))
-    case s"$major.$minor"                   => SemVersion(major.toInt, minor.toInt, 0, None)
-    case s"$major-$milestone"               => SemVersion(major.toInt, 0, 0, Some(milestone))
-    // format: on
-  case version =>
-    version.toIntOption match {
-      case Some(v) => SemVersion(v, 0, 0, None)
-      case _       => SemVersion(0, 0, 0, Some(version))
-    }
-}
+given Conversion[String, SemVersion] = version =>
+  // There are multiple projects that don't follow standarnd naming convention, especially in snpashots
+  // becouse of that it needs to be more flexible, e.g to handle: x.y-z-<hash>, x.y, x.y-milestone
+  val parts = version.split('.').flatMap(_.split('-')).filter(_.nonEmpty)
+  val versionNums = parts.take(3).takeWhile(_.forall(_.isDigit))
+  def versionPart(idx: Int) = versionNums.lift(idx).flatMap(_.toIntOption).getOrElse(0)
+  val milestoneParts = parts.drop(versionNums.size)
+  SemVersion(
+    major = versionPart(0),
+    minor = versionPart(1),
+    patch = versionPart(2),
+    milestone = Option.when(milestoneParts.nonEmpty)(milestoneParts.mkString("-"))
+  )
 
 given Ordering[SemVersion] = (x: SemVersion, y: SemVersion) => {
   def compareMilestones = (x.milestone, y.milestone) match {
