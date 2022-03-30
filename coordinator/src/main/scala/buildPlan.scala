@@ -210,12 +210,7 @@ def makeDependenciesBasedBuildPlan(
     val originalCoords = (project.org, project.name)
     replacements.get(originalCoords).map(_._2).flatten
 
-  def originalProjectName(project: ProjectVersion) = 
-    s"${project.p.org}_${project.p.name}"
-  def projectName(project: ProjectVersion) =
-    val originalCoords = (project.p.org, project.p.name)
-    val (org, name) = replacements.get(originalCoords).map(_._1).getOrElse(originalCoords)
-    s"${org}_${name}"
+  def projectName(project: ProjectVersion) = s"${project.p.org}_${project.p.name}"
   val projectNames = projectsDeps.keys.map(projectName).toList
 
   lazy val referenceConfig =
@@ -311,7 +306,7 @@ def makeDependenciesBasedBuildPlan(
           .maxByOption(_.toInt)
 
     readProjectConfig()
-      .orElse(internalProjectConfigs(originalProjectName(project)))
+      .orElse(internalProjectConfigs(projectName(project)))
       .map { c =>
         if c.java.version.nonEmpty then c
         else c.copy(java = c.java.copy(version = discoverJavaVersion()))
