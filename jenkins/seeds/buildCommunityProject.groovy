@@ -145,7 +145,7 @@ pipeline {
                                         def timestamp = java.time.LocalDateTime.now()
                                         def buildStatus = getBuildStatus()
                                         0 == sh (
-                                          script: "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt",
+                                          script: "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt '${params.version}' '${params.scalaVersion}' '${params.buildName}'",
                                           returnStatus: true
                                         )
                                     } else true
