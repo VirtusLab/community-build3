@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 cd $scriptDir/../cli
