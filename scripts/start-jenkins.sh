@@ -30,6 +30,7 @@ scbk apply -f $scriptDir/../k8s/auth/authz-matrix.yaml
 scbk create configmap jenkins-seed-jobs --from-file=$scriptDir/../jenkins/seeds --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/common-lib/vars --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-build-configs --from-file=$scriptDir/../env/prod/config --dry-run=client -o yaml | scbk apply -f -
+scbk create configmap jenkins-build-scripts --from-file=$scriptDir/../jenkins/scripts --dry-run=client -o yaml | scbk apply -f -
 
 jenkinsClientId=$(scbk get secret/jenkins-github-oauth-secret -o 'jsonpath={.data.clientID}' | base64 -d)
 

@@ -174,4 +174,52 @@ pipeline {
             }
         }
     }
+    post {
+      always {
+        podTemplate(
+          containers: [
+            // Any container having a curl or pre-installed scala-cli would work 
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-coordinator:v0.0.6', command: 'sleep', args: '15m'),
+          ],
+          envVars: [
+            envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
+            secretEnvVar(key: 'ELASTIC_PASSWORD', secretName: params.elasticSearchSecretName, secretKey: 'elastic'),
+          ],
+          volumes: [
+            configMapVolume(mountPath: '/build-scripts', configMapName: 'jenkins-build-scripts')
+          ]
+        ){
+          node(POD_LABEL){
+            container('reporter'){
+              script {
+                retryOnConnectionError {
+                  def reportFile = 'build-report.txt'
+                  sh """
+                    touch build-report.txt
+                    curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
+                      | bash -s \
+                      -- run /build-scripts/buildReport.scala --quiet \
+                      -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
+                    """
+                  def report = readFile(reportFile)
+                  echo "Build report: \n\n${report}"
+                  archiveArtifacts(artifacts: reportFile)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+}
+
+def retryOnConnectionError(Closure body, int retries = 50, int delayBeforeRetry = 1){
+  try {
+    return body()
+  } catch(io.fabric8.kubernetes.client.KubernetesClientException ex) {
+    if(retries > 0) {
+      sleep(delayBeforeRetry) // seconds
+      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry * 2))
+    } else throw ex
+  }
 }

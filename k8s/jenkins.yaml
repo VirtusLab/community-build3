@@ -51,6 +51,8 @@ jenkins:
         mountPath: /var/jenkins_home/common-lib/vars
       - name: build-configs
         mountPath: /var/jenkins_home/build-configs
+      - name: build-scripts
+        mountPath: /var/jenkins_home/build-scripts
     volumes:
     - name: seed-jobs
       configMap:
@@ -63,6 +65,10 @@ jenkins:
     - name: build-configs
       configMap:
         name: jenkins-build-configs
+        defaultMode: 420
+    - name: build-scripts
+      configMap:
+        name: jenkins-build-scripts
         defaultMode: 420
     restartPolicy: ""
     imagePullSecrets: []
