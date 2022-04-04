@@ -7,20 +7,12 @@ testNamespace=scala3-community-build-test
 compilerBuilderTimeout=60m
 projectBuilderTimeout=5m
 
-export MVN_REPO_KEYSTORE_PASSWORD=$(openssl rand -base64 32)
-
 kubectl delete namespace $testNamespace --ignore-not-found=true
 kubectl create namespace $testNamespace
 
-$scriptDir/generate-secrets.sh
-
-kubectl -n $testNamespace create secret generic mvn-repo-keystore --from-file=$scriptDir/../secrets/mvn-repo.p12
-kubectl -n $testNamespace create secret generic mvn-repo-passwords --from-literal=keystore-password="$MVN_REPO_KEYSTORE_PASSWORD"
-kubectl -n $testNamespace create cm mvn-repo-cert --from-file=$scriptDir/../secrets/mvn-repo.crt
-kubectl -n $testNamespace apply -f $scriptDir/../k8s/mvn-repo-data.yaml
-cat $scriptDir/../k8s/mvn-repo.yaml \
-  | sed -E 's/(image: virtuslab\/scala-community-build-mvn-repo):.*/\1:test/' \
-  | kubectl -n $testNamespace apply -f -
+CB_VERSION="test" \
+CB_K8S_NAMESPACE="${testNamespace}" \
+$scriptDir/start-mvn-repo.sh
 
 function compilerBuilderFailed() {
   echo "Failed to publish scala"

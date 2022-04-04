@@ -1,0 +1,63 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "projectName": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "buildId": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date"
+      },
+      "version": {
+        "type": "version"
+      },
+      "scalaVersion": {
+        "type": "version"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "summary": {
+        "type": "nested", 
+        "properties": {
+          "module": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "compile": {
+            "type": "keyword"
+          },
+          "doc": {
+            "type": "keyword"
+          },
+          "publish": {
+            "type": "keyword"
+          },
+          "test": {
+            "type": "keyword"
+          },
+          "test-compile": {
+            "type": "keyword"
+          }
+        }
+      },
+      "logs": {
+        "type": "text"
+      }
+    }
+  }
+}

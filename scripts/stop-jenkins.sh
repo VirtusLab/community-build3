@@ -12,5 +12,6 @@ fi
 helm -n $CB_K8S_NAMESPACE delete jenkins
 
 scbk delete configmap jenkins-build-configs
+scbk delete configmap jenkins-build-scripts
 scbk delete configmap jenkins-common-lib-vars
 scbk delete configmap jenkins-seed-jobs

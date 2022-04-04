@@ -26,7 +26,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.5")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.6")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
@@ -741,7 +741,10 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         check = check,
         stdout = os.Inherit,
         stderr = if check then os.Inherit else os.Pipe,
-        env = Map("CB_K8S_NAMESPACE" -> k8s.namespace)
+        env = Map(
+          "CB_K8S_NAMESPACE" -> k8s.namespace,
+          "CB_VERSION" -> communityBuildVersion
+        )
       )
 
 object MinikubeReproducer:
@@ -772,6 +775,7 @@ object MinikubeReproducer:
         "--timeout=1m"
       )
       .call(check = false, stderr = os.Pipe)
+    println("Waiting for Maven repository to start...")
     while {
       val p = waitForPod()
       p.exitCode != 0 && p.err.text().contains("error: no matching resources")
