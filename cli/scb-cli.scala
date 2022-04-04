@@ -741,7 +741,10 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         check = check,
         stdout = os.Inherit,
         stderr = if check then os.Inherit else os.Pipe,
-        env = Map("CB_K8S_NAMESPACE" -> k8s.namespace)
+        env = Map(
+          "CB_K8S_NAMESPACE" -> k8s.namespace,
+          "CB_VERSION" -> communityBuildVersion
+        )
       )
 
 object MinikubeReproducer:
@@ -772,6 +775,7 @@ object MinikubeReproducer:
         "--timeout=1m"
       )
       .call(check = false, stderr = os.Pipe)
+    println("Waiting for Maven repository to start...")
     while {
       val p = waitForPod()
       p.exitCode != 0 && p.err.text().contains("error: no matching resources")
