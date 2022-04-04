@@ -18,7 +18,7 @@ def loadProjects(scalaRelease: String): Seq[Project] =
       }
     }
   LazyList
-    .from(0)
+    .from(1) // page 0 and page 1 have the same content
     .map(load)
     .takeWhile(_.nonEmpty)
     .flatten
