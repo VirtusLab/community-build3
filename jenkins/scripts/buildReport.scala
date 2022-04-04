@@ -109,19 +109,23 @@ def showBuildReport(report: BuildReport): String =
 
   def showFailedProject(project: ProjectSummary) =
     val ProjectSummary(name, version, _, _, modules) = project
+    def showModules(label: String, results: Seq[ModuleSummary])(
+        show: ModuleSummary => String
+    ) = 
+      s"${Ident2}$label modules: ${results.size}" + {
+        if results.isEmpty then ""
+        else results.map(show).mkString("\n", "\n", "")
+      }
     s"""$Ident- $name
        |${Ident2}Version: $version
-       |${Ident2}Successfull modules: ${project.successfullModules.size}
-       |${project.successfullModules
-      .map(m => s"$Ident2+ ${m.name}")
-      .mkString("\n")}
-       |${Ident2}Failed modules: ${project.failedModules.size}
-       |${project.failedModules.map(showFailedModule(_)).mkString("\n")}
+       |${showModules("Successfull", project.successfullModules)(m =>
+      s"$Ident2+ ${m.name}"
+    )}
+       |${showModules("Failed", project.failedModules)(showFailedModule(_))}
        |""".stripMargin
 
   def showFailedModule(module: ModuleSummary) =
-    def showResults(res: List[String]) =
-      if res.isEmpty then "None" else res.mkString("[", ", ", "]")
+    def showResults(res: List[String]) = res.mkString("[", ", ", "]")
 
     s"""${Ident2}- ${module.name}
     |${Ident3}Passed:  ${showResults(module.passed)}
@@ -139,7 +143,7 @@ def showBuildReport(report: BuildReport): String =
     |Failed projects: ${report.failedProjects.size} 
     |${report.failedProjects
       .map(showFailedProject(_))
-      .mkString("\n\n")}
+      .mkString("\n")}
     |Successfull projects: ${report.sucsessfullProjects.size}
     |${report.sucsessfullProjects.map(showSuccessfullProject(_)).mkString("\n")}
     |""".stripMargin
