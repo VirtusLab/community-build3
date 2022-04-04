@@ -33,7 +33,7 @@ jsonFile=$(mktemp /tmp/feed-elastic-tmp.XXXXXX)
 
 echo "$json" > "$jsonFile"
           
-response=$(curl -v -i -k -w "\n%{http_code}" --user "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -H "Content-Type: application/json" "${elasticUrl}/community-build/doc" -d "@${jsonFile}")
+response=$(curl -v -i -k -w "\n%{http_code}" --user "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -H "Content-Type: application/json" "${elasticUrl}/project-build-summary/_doc" -d "@${jsonFile}")
 responseStatus=$(tail -n1 <<< "$response")
 
 rm "$jsonFile"
