@@ -104,23 +104,22 @@ def showBuildReport(report: BuildReport): String =
   val Ident3 = Ident * 3
 
   def showSuccessfullProject(project: ProjectSummary) =
-    val ProjectSummary(name, version, _, _, modules) = project
+    val ProjectSummary(name, version, _, _, _, modules) = project
     s"""$Ident+ $name: Version: $version""".stripMargin
 
   def showFailedProject(project: ProjectSummary) =
-    val ProjectSummary(name, version, _, _, modules) = project
+    val ProjectSummary(name, version, _, _, buildUrl, modules) = project
     def showModules(label: String, results: Seq[ModuleSummary])(
         show: ModuleSummary => String
-    ) = 
+    ) =
       s"${Ident2}$label modules: ${results.size}" + {
         if results.isEmpty then ""
         else results.map(show).mkString("\n", "\n", "")
       }
     s"""$Ident- $name
        |${Ident2}Version: $version
-       |${showModules("Successfull", project.successfullModules)(m =>
-      s"$Ident2+ ${m.name}"
-    )}
+       |${Ident2}Build URL: $buildUrl
+       |${showModules("Successfull", project.successfullModules)(m => s"$Ident2+ ${m.name}")}
        |${showModules("Failed", project.failedModules)(showFailedModule(_))}
        |""".stripMargin
 
@@ -190,6 +189,7 @@ case class ProjectSummary(
     version: String,
     scalaVersion: String,
     status: BuildStatus,
+    buildUrl: String,
     projectsSummary: List[ModuleSummary]
 ) {
   lazy val (failedModules, successfullModules) =
@@ -226,6 +226,7 @@ given HitReader[ProjectSummary] = (hit: Hit) => {
       version = source("version").toString,
       scalaVersion = source("scalaVersion").toString,
       status = status,
+      buildUrl = source("buildURL").toString,
       projectsSummary = modulesSummary
     )
   }
