@@ -1,12 +1,38 @@
+import $file.CommunityBuildCore,
+CommunityBuildCore.{TestingMode => _, ProjectBuildConfig => _, ProjectOverrides => _, _}
+// Make sure that following classes are in sync with the ones defined in CommunityBuildcore,
+//  upickle has problems with classess imported from other file when creating readers
+case class ProjectBuildConfig(
+    projects: ProjectsConfig = ProjectsConfig(),
+    tests: TestingMode = TestingMode.Full
+)
+
+case class ProjectOverrides(tests: Option[TestingMode] = None)
+case class ProjectsConfig(
+    exclude: List[String] = Nil,
+    overrides: Map[String, ProjectOverrides] = Map.empty
+)
+
+sealed trait TestingMode
+object TestingMode {
+  case object Disabled extends TestingMode
+  case object CompileOnly extends TestingMode
+  case object Full extends TestingMode
+}
+// End of overrides
+
+import TaskEvaluator.EvalResult
+import serialization.OptionPickler.read
+
 import scala.reflect.ClassTag
 import scalalib._
+import scalalib.api.CompilationResult
 import mill.eval._
 import mill.define.{Cross => DefCross, _}
 import mill.define.Segment._
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
-import OptionPickler.{read, ReadWriter, readwriter, macroRW}
 
 trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   protected val mavenRepoUrl: Option[String] = sys.props
@@ -101,63 +127,44 @@ case class Ctx(
   lazy val cross = Cross(scalaVersion :: Nil)
 }
 
+class MillTaskEvaluator()(implicit ctx: Ctx) extends TaskEvaluator[NamedTask] {
+  import TaskEvaluator._
+  def eval[T](task: NamedTask[T]): EvalResult[T] = {
+    val evalStart = System.currentTimeMillis()
+    val result = tryEval(task)
+    val tookMillis = (System.currentTimeMillis() - evalStart).toInt
+    result match {
+      case Result.Success(v) =>
+        ctx.log.info(s"Successfully evaluated $task")
+        EvalResult.Value(v, evalTime = tookMillis)
+      case failure: Result.Failing[_] =>
+        ctx.log.error(s"Failed to evaluated $task: ${failure}")
+        val reason = failure match {
+          case Result.Exception(throwable, _) => throwable
+          case Result.Failure(msg, value) =>
+            EvaluationFailure(msg + value.fold("")(" - with value: " + _))
+        }
+        EvalResult.Failure(reason :: Nil, evalTime = tookMillis)
+      case other =>
+        EvalResult.Failure(List(EvaluationFailure(other.toString())), evalTime = tookMillis)
+    }
+  }
+
+  def evalAsDependencyOf[T](optTask: Option[NamedTask[T]])(
+      dependencies: EvalResult[_]*
+  ): EvalResult[T] = {
+    optTask.fold[EvalResult[T]](EvalResult.Skipped)(evalAsDependencyOf(dependencies: _*)(_))
+  }
+}
+
 // Main entry point for Mill community build
 // Evaluate tasks until first failure and publish report
 def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
-  class TaskEvaluator() {
-    def eval(task: NamedTask[_]) = {
-      tryEval(task) match {
-        case Result.Success(v) =>
-          ctx.log.info(s"Successfully evaluated $task")
-          Ok
-        case failure =>
-          ctx.log.error(s"Failed to evaluated $task: ${failure}")
-          Failed
-      }
-    }
-    def evalAsDependencyOf(task: NamedTask[_])(
-        dependencies: BuildStepResult*
-    ): BuildStepResult = {
-      val shouldSkip = dependencies.exists {
-        case _: FailedBuildStep => true
-        case Skipped            => true
-        case _                  => false
-      }
-      if (shouldSkip) Skipped
-      else eval(task)
-    }
-    def evalAsDependencyOf(optTask: Option[NamedTask[_]])(
-        dependencies: BuildStepResult*
-    ): BuildStepResult = {
-      optTask.fold[BuildStepResult](Skipped)(evalAsDependencyOf(_)(dependencies: _*))
-    }
-  }
 
   println(s"Build config: ${configJson}")
   val config = read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
-  val filteredTargets = {
-    val excludedPatterns = config.projects.exclude.map(_.r)
-    targets.filter { id =>
-      id.split('%') match {
-        case Array(org, name) =>
-          val excludingPattern = excludedPatterns.find { pattern =>
-            // No Regex.matches in Scala 2.12 (!sic)
-            pattern
-              .findFirstIn(name)
-              .orElse(pattern.findFirstIn(id))
-              .isDefined
-          }
-          excludingPattern.foreach { pattern =>
-            println(s"Excluding target '$id' - matches exclusion rule: '${pattern}'")
-          }
-          excludingPattern.isEmpty
-        case _ =>
-          println(s"Excluding target '$id' - incompatible format")
-          false
-      }
-    }
-  }
+  val filteredTargets = Utils.filterTargets(targets, config.projects.exclude.map(_.r))
   val mappings = checkedModuleMappings(filteredTargets.toSet)
   val topLevelModules = mappings.collect {
     case (target, info) if filteredTargets.contains(target) => info
@@ -181,10 +188,10 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     }
 
   val projectsBuildResults = for {
-    ModuleInfo(org, name, module: ScalaModule) <- flatten(topLevelModules, topLevelModules)
+    ModuleInfo(org, name, module: ScalaModule) <- flatten(topLevelModules, topLevelModules).toList
   } yield {
     ctx.log.info(s"Starting build for $name")
-    val evaluator = new TaskEvaluator()
+    val evaluator = new MillTaskEvaluator()
     import evaluator._
     val overrides = config.projects.overrides.get(name)
     val testingMode = overrides.flatMap(_.tests).getOrElse(config.tests)
@@ -199,67 +206,118 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
         ctx.log.info(s"Multiple test modules defined in $module, using $first")
         Some(first)
     }
-    def test(selector: TestModule => NamedTask[_]): Option[NamedTask[_]] =
+    def test[T](selector: TestModule => NamedTask[T]): Option[NamedTask[T]] =
       testModule.map(selector)
 
     val compileResult = eval(module.compile)
-    val docResult = evalAsDependencyOf(module.docJar)(compileResult)
-    val testsCompileResult = testingMode match {
-      case TestingMode.Disabled => Skipped
-      case _                    => evalAsDependencyOf(test(_.compile))(compileResult)
-    }
-    val testsExecuteResults = testingMode match {
-      case TestingMode.Full => evalAsDependencyOf(test(_.test()))(testsCompileResult)
-      case _                => Skipped
-    }
+    val docResult = evalAsDependencyOf(compileResult)(module.docJar)
+    val testsCompileResult =
+      test(_.compile).fold[EvalResult[CompilationResult]](EvalResult.skipped) {
+        evalWhen(testingMode != TestingMode.Disabled, compileResult)(_)
+      }
+    val testsExecuteResults =
+      test(_.test()).fold[EvalResult[Seq[TestRunner.Result]]](EvalResult.skipped) {
+        evalWhen(testingMode == TestingMode.Full, testsCompileResult)(_).map(_._2)
+      }
     val publishResult = module match {
       case module: CommunityBuildPublishModule =>
-        ctx.publishVersion.fold[BuildStepResult](Skipped) { publishVersion =>
+        ctx.publishVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { publishVersion =>
           tryEval(module.publishVersion) match {
             case Result.Success(`publishVersion`) =>
-              evalAsDependencyOf(module.publishCommunityBuild)(compileResult, docResult)
+              PublishResult(
+                evalAsDependencyOf(compileResult, docResult)(module.publishCommunityBuild)
+              )
             case Result.Success(version: String) =>
-              WrongVersion(expected = publishVersion, got = version)
-            case _ => BuildError("Failed to resolve 'publishVersion'")
+              PublishResult(
+                Status.Failed,
+                failureContext =
+                  Some(FailureContext.WrongVersion(expected = publishVersion, actual = version)),
+                tookMs = 0
+              )
+            case _ =>
+              PublishResult(
+                Status.Failed,
+                failureContext =
+                  Some(FailureContext.BuildError(List("Failed to resolve 'publishVersion'"))),
+                tookMs = 0
+              )
           }
         }
       case _ =>
         ctx.log.error(s"Module $module is not a publish module, skipping publishing")
-        Skipped
+        PublishResult(Status.Skipped, tookMs = 0)
     }
-    val results = ModuleTargetsResults(
-      compile = compileResult,
-      doc = docResult,
-      testsCompile = testsCompileResult,
-      testsExecute = testsExecuteResults,
-      publish = publishResult
-    )
+
     ModuleBuildResults(
       artifactName = name,
-      results = results
+      compile = collectCompileResults(compileResult),
+      doc = DocsResult(docResult.map(_.path.toIO)),
+      testsCompile = collectCompileResults(testsCompileResult),
+      testsExecute = collectTestResults(testsExecuteResults),
+      publish = publishResult
     )
   }
 
-  val buildSummary = projectsBuildResults
-    .map(_.toJson)
-    .mkString("[", ",", "]")
+  val buildSummary = BuildSummary(projectsBuildResults)
+
   ctx.log.info(s"""
     |************************
     |Build summary:
-    |$buildSummary
+    |${buildSummary.toJson}
     |************************"
     |""".stripMargin)
 
   val outputDir = os.pwd / os.up
-  os.write.over(outputDir / "build-summary.txt", buildSummary)
+  os.write.over(outputDir / "build-summary.txt", buildSummary.toJson)
 
-  val hasFailedSteps = projectsBuildResults.exists(_.results.hasFailedStep)
+  val hasFailedSteps = projectsBuildResults.exists(_.hasFailedStep)
   val buildStatus =
     if (hasFailedSteps) "failure"
     else "success"
   os.write.over(outputDir / "build-status.txt", buildStatus)
   if (hasFailedSteps) {
     throw new ProjectBuildFailureException
+  }
+}
+
+private def collectCompileResults(evalResult: EvalResult[CompilationResult]): CompileResult = {
+  // TODO: No direct access to CompileAnalysis, CompileResult contains path to serialized analysis
+  // However using it would require external dependencies
+  CompileResult(
+    evalResult.toStatus,
+    failureContext = evalResult.toBuildError,
+    warnings = 0,
+    errors = 0,
+    tookMs = evalResult.evalTime
+  )
+}
+
+private def collectTestResults(evalResult: EvalResult[Seq[TestRunner.Result]]): TestsResult = {
+  import sbt.testing.Status
+  val empty = TestsResult(
+    status = evalResult.toStatus,
+    passed = 0,
+    failed = 0,
+    ignored = 0,
+    skipped = 0,
+    tookMs = evalResult.evalTime
+  )
+  evalResult match {
+    case EvalResult.Value(results, tookMs) =>
+      // status is a string defined as sbt.testing.Status.toString
+      val resultsStatus = results
+        .groupBy(_.status)
+        .map { case (key, values) => sbt.testing.Status.valueOf(key) -> values.size }
+
+      def countOf(selected: Status*) = selected.foldLeft(0)(_ + resultsStatus.getOrElse(_, 0))
+
+      empty.copy(
+        passed = countOf(Status.Success),
+        failed = countOf(Status.Error, Status.Failure, Status.Canceled),
+        ignored = countOf(Status.Ignored),
+        skipped = countOf(Status.Skipped)
+      )
+    case _ => empty.copy(failureContext = evalResult.toBuildError)
   }
 }
 
@@ -339,67 +397,28 @@ private object MatchesScalaBinaryVersion {
   }
 }
 
-sealed abstract class BuildStepResult(val stringValue: String) {
-  def jsonValue = s""""$stringValue""""
-}
-sealed abstract class FailedBuildStep(name: String, info: List[(String, String)])
-    extends BuildStepResult(name) {
-  override def jsonValue =
-    if (info.isEmpty) s""""$name""""
-    else {
-      val infoFields = info.map { case (k, v) => s""""$k": "$v"""" }.mkString(", ")
-      s""""$name": {$infoFields}"""
+object serialization {
+  object OptionPickler extends upickle.AttributeTagged {
+    override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
+      implicitly[Writer[T]].comap[Option[T]] {
+        case None    => null.asInstanceOf[T]
+        case Some(x) => x
+      }
+
+    override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
+      new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
+        override def visitNull(index: Int) = None
+      }
     }
-}
-case object Ok extends BuildStepResult("ok")
-case object Skipped extends BuildStepResult("skipped")
-case object Failed extends FailedBuildStep("failed", Nil)
-case class WrongVersion(expected: String, got: String)
-    extends FailedBuildStep("wrongVersion", List("expected" -> expected, "got" -> got))
-case class BuildError(msg: String) extends FailedBuildStep("buildError", List("reason" -> msg))
-
-case class ModuleTargetsResults(
-    compile: BuildStepResult,
-    doc: BuildStepResult,
-    testsCompile: BuildStepResult,
-    testsExecute: BuildStepResult,
-    publish: BuildStepResult
-) {
-  def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
-  def jsonValues: List[String] = List(
-    "compile" -> compile,
-    "doc" -> doc,
-    "test-compile" -> testsCompile,
-    "test" -> testsExecute,
-    "publish" -> publish
-  ).map { case (key, value) =>
-    s""""$key": "${value.stringValue}""""
   }
-}
-case class ModuleBuildResults(
-    artifactName: String,
-    results: ModuleTargetsResults
-) {
-  lazy val toJson = {
-    val resultsJson = results.jsonValues.mkString(", ")
-    s"""{
-       | "module": "$artifactName",
-       | $resultsJson 
-       |}""".stripMargin
-  }
-}
 
-class ProjectBuildFailureException extends Exception
+  // Used to asssume coding of Option as nulls, instead of arrays (default)
+  import OptionPickler._
 
-sealed trait TestingMode
-object TestingMode {
-  case object Disabled extends TestingMode
-  case object CompileOnly extends TestingMode
-  case object Full extends TestingMode
-
-  implicit val rw: ReadWriter[TestingMode] = {
+  implicit lazy val TestingModeRW: ReadWriter[TestingMode] = {
+    import TestingMode._
     val DisabledString = "disabled"
-    val CompileOnlyString = "compile-only"
+    val CompileOnlyString = "compile-only "
     val FullString = "full"
     def toJson(x: TestingMode): String = x match {
       case Disabled    => DisabledString
@@ -413,40 +432,8 @@ object TestingMode {
     }
     readwriter[String].bimap[TestingMode](toJson, fromJson)
   }
-}
 
-// Used to asssume coding of Option as nulls, instead of arrays (default)
-object OptionPickler extends upickle.AttributeTagged {
-  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
-    implicitly[Writer[T]].comap[Option[T]] {
-      case None    => null.asInstanceOf[T]
-      case Some(x) => x
-    }
-
-  override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
-    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
-      override def visitNull(index: Int) = None
-    }
-  }
-}
-
-case class ProjectOverrides(tests: Option[TestingMode])
-object ProjectOverrides {
-  implicit val rw: ReadWriter[ProjectOverrides] = macroRW
-}
-
-case class ProjectsConfig(
-    exclude: List[String] = Nil,
-    overrides: Map[String, ProjectOverrides] = Map.empty
-)
-object ProjectsConfig {
-  implicit val rw: ReadWriter[ProjectsConfig] = macroRW
-}
-
-case class ProjectBuildConfig(
-    projects: ProjectsConfig = ProjectsConfig(),
-    tests: TestingMode = TestingMode.Full
-)
-object ProjectBuildConfig {
-  implicit val rw: ReadWriter[ProjectBuildConfig] = macroRW
+  implicit lazy val ProjectOverridesR: Reader[ProjectOverrides] = macroR
+  implicit lazy val ProjectsConfigR: Reader[ProjectsConfig] = macroR
+  implicit lazy val ProjectBuildConfigR: Reader[ProjectBuildConfig] = macroR
 }

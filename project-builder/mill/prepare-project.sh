@@ -26,4 +26,5 @@ cp repo/build.sc repo/build.scala \
     --scala-version 3.1.0 > repo/build.sc \
   && rm repo/build.scala 
 
+ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/CommunityBuildCore.sc
 ln -fs $scriptDir/MillCommunityBuild.sc $repoDir/MillCommunityBuild.sc
