@@ -1,6 +1,5 @@
 {
   "mappings": {
-    "dynamic": false,
     "properties": {
       "projectName": {
         "type": "text",
@@ -11,21 +10,11 @@
           }
         }
       },
-      "buildId": {
-        "type": "keyword"
-      },
-      "timestamp": {
-        "type": "date"
-      },
-      "version": {
-        "type": "version"
-      },
-      "scalaVersion": {
-        "type": "version"
-      },
-      "status": {
-        "type": "keyword"
-      },
+      "buildId": {"type": "keyword"},
+      "timestamp": {"type": "date"},
+      "version": {"type": "version"},
+      "scalaVersion": {"type": "version"},
+      "status": {"type": "keyword"},
       "summary": {
         "type": "nested", 
         "properties": {
@@ -39,25 +28,53 @@
             }
           },
           "compile": {
-            "type": "keyword"
+            "properties": {
+              "status": {"type": "keyword"},
+              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
+              "tookMs": {"type": "integer"},
+              "warnings": {"type": "short"},
+              "errors": {"type": "short"}
+            }
           },
           "doc": {
-            "type": "keyword"
-          },
-          "publish": {
-            "type": "keyword"
-          },
-          "test": {
-            "type": "keyword"
+            "properties": {
+              "status": {"type": "keyword"},
+              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
+              "tookMs": {"type": "integer"},
+              "files": {"type": "short"},
+              "totalSizeKb": {"type": "integer"}
+            }
           },
           "test-compile": {
-            "type": "keyword"
+            "properties": {
+              "status": {"type": "keyword"},
+              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
+              "tookMs": {"type": "integer"},
+              "warnings": {"type": "short"},
+              "errors": {"type": "short"}
+            }
+          },
+          "test": {
+            "properties": {
+              "status": {"type": "keyword"},
+              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
+              "tookMs": {"type": "integer"},
+              "passed": {"type": "integer"},
+              "failed": {"type": "short"},
+              "ignored": {"type": "short"},
+              "skipped": {"type": "short"}
+            }
+          },
+          "publish": {
+            "properties": {
+              "status": {"type": "keyword"},
+              "failureContext": {"type": "text"},
+              "tookMs": {"type": "integer"}
+            }
           }
         }
       },
-      "logs": {
-        "type": "text"
-      }
+      "logs": { "type": "text" }
     }
   }
 }
