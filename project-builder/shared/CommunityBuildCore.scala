@@ -187,7 +187,13 @@ object TaskEvaluator {
 
     def toBuildError: Option[FailureContext.BuildError] = this match {
       case EvalResult.Failure(reasons, _) =>
-        Some(FailureContext.BuildError(reasons.map(v => "\"" + v.toString + "\"").distinct))
+        Some(
+          FailureContext.BuildError(
+            reasons
+              .map(v => "\"" + v.toString.replace("\n", " \\n") + "\"")
+              .distinct
+          )
+        )
       case _ => None
     }
   }
