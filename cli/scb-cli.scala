@@ -1198,7 +1198,10 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           // We need to rename .scala files into .sc to allow for their usage in Mill
           val relPath = path.relativeTo(sharedSourcesDir).toNIO
           val fileSc = relPath.getFileName().toString.stripSuffix(".scala") + ".sc"
-          val outputPath = projectDir / os.RelPath(relPath.getParent) / fileSc
+          val outputPath =
+            Option(relPath.getParent)
+              .map(os.RelPath(_))
+              .foldLeft(projectDir)(_ / _) / fileSc
           os.copy(path, outputPath, replaceExisting = true)
         }
 
