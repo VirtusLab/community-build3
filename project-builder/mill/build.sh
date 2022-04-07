@@ -32,4 +32,5 @@ millSettings=(
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 
-mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+# Make sure to use Mill 0.9.12, 0.10.x series contains breaking changes
+MILL_VERSION=0.9.12 mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"

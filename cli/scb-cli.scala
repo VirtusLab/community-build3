@@ -1214,7 +1214,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           .call(
             cwd = projectDir,
             stdout = output,
-            stderr = output
+            stderr = output,
+            env = Map("MILL_VERSION" -> "0.9.12")
           )
       }
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)

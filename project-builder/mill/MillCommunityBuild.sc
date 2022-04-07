@@ -30,6 +30,8 @@ import scalalib.api.CompilationResult
 import mill.eval._
 import mill.define.{Cross => DefCross, _}
 import mill.define.Segment._
+// In mill 0.10.x moved from mill.scalalib
+// import mill.testrunner.TestRunner
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
