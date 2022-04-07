@@ -1191,8 +1191,15 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       ).call(cwd = projectDir, stdout = os.PathRedirect(buildFile))
       os.remove(buildFileCopy)
       os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
-      os.list(projectBuilderDir / "shared")
-        .foreach(os.copy.into(_, projectDir, replaceExisting = true))
+      val sharedSourcesDir = projectBuilderDir / "shared"
+      os.list(sharedSourcesDir)
+        .foreach { path =>
+          // We need to rename .scala files into .sc to allow for their usage in Mill
+          val segments = path.relativeTo(sharedSourcesDir).segments
+          val newName = segments.last.stripSuffix(".scala") + ".sc"
+          val outputPath = projectDir / os.RelPath(segments.init, newName)
+          os.copy(path, outputPath, replaceExisting = true)
+        }
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) = {
