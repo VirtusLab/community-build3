@@ -326,7 +326,7 @@ object BuildInfo:
       // We don't care about its content so we treat it as opaque string value
       configString = project \ "config" match {
         case JNothing | JNull => None
-        case value => Option(compact(render(value)))
+        case value            => Option(compact(render(value)))
       }
       plan = project.extract[ProjectBuildPlan].copy(config = configString)
       jdkVersion = plan.config.map(parse(_) \ "java" \ "version").flatMap(_.extractOpt[String])
@@ -1086,6 +1086,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         projectDir / "project",
         replaceExisting = true
       )
+      os.list(projectBuilderDir / "shared")
+        .foreach(os.copy.into(_, projectDir / "project", replaceExisting = true))
 
     override def runBuild(): Unit =
       def runSbt(forceScalaVersion: Boolean) =
@@ -1189,10 +1191,12 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       ).call(cwd = projectDir, stdout = os.PathRedirect(buildFile))
       os.remove(buildFileCopy)
       os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
+      os.list(projectBuilderDir / "shared")
+        .foreach(os.copy.into(_, projectDir / "project", replaceExisting = true))
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) = {
-        val output = 
+        val output =
           if config.redirectLogs then os.PathAppendRedirect(logsFile)
           else os.Inherit
         os.proc("mill", millScalaSetting, commands)
@@ -1203,7 +1207,12 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           )
       }
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
-      mill("runCommunityBuild", scalaVersion, project.params.config.getOrElse("{}"), project.effectiveTargets)
+      mill(
+        "runCommunityBuild",
+        scalaVersion,
+        project.params.config.getOrElse("{}"),
+        project.effectiveTargets
+      )
   end MillReproducer
 end LocalReproducer
 
