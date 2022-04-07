@@ -15,7 +15,7 @@ logsFile="$6"
 version="$7"
 scalaVersion="$8"
 buildId="$9"
-buildUrl="$10"
+buildUrl="${10}"
 
 buildSummary="$(cat ${buildSummaryFile})"
 
