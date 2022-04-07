@@ -1192,7 +1192,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       os.remove(buildFileCopy)
       os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
       os.list(projectBuilderDir / "shared")
-        .foreach(os.copy.into(_, projectDir / "project", replaceExisting = true))
+        .foreach(os.copy.into(_, projectDir, replaceExisting = true))
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) = {
