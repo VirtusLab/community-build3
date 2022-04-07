@@ -1204,6 +1204,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
               .foldLeft(projectDir)(_ / _) / fileSc
           os.copy(path, outputPath, replaceExisting = true)
         }
+      // Mill 0.10.x series is breaking
+      os.write.over(projectDir / ".mill-version", "0.9.12")
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) = {
@@ -1215,7 +1217,6 @@ class LocalReproducer(using config: Config, build: BuildInfo):
             cwd = projectDir,
             stdout = output,
             stderr = output,
-            env = Map("MILL_VERSION" -> "0.9.12")
           )
       }
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
