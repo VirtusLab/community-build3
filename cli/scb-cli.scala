@@ -21,6 +21,7 @@ import coursier.cache.*
 import scala.util.control.NoStackTrace
 
 import Config.*
+import os.PathConvertible
 given Formats = DefaultFormats
 given ExecutionContext = ExecutionContext.Implicits.global
 
@@ -326,7 +327,7 @@ object BuildInfo:
       // We don't care about its content so we treat it as opaque string value
       configString = project \ "config" match {
         case JNothing | JNull => None
-        case value => Option(compact(render(value)))
+        case value            => Option(compact(render(value)))
       }
       plan = project.extract[ProjectBuildPlan].copy(config = configString)
       jdkVersion = plan.config.map(parse(_) \ "java" \ "version").flatMap(_.extractOpt[String])
@@ -1086,6 +1087,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         projectDir / "project",
         replaceExisting = true
       )
+      os.list(projectBuilderDir / "shared")
+        .foreach(os.copy.into(_, projectDir / "project", replaceExisting = true))
 
     override def runBuild(): Unit =
       def runSbt(forceScalaVersion: Boolean) =
@@ -1189,21 +1192,40 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       ).call(cwd = projectDir, stdout = os.PathRedirect(buildFile))
       os.remove(buildFileCopy)
       os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
+      val sharedSourcesDir = projectBuilderDir / "shared"
+      os.list(sharedSourcesDir)
+        .foreach { path =>
+          // We need to rename .scala files into .sc to allow for their usage in Mill
+          val relPath = path.relativeTo(sharedSourcesDir).toNIO
+          val fileSc = relPath.getFileName().toString.stripSuffix(".scala") + ".sc"
+          val outputPath =
+            Option(relPath.getParent)
+              .map(os.RelPath(_))
+              .foldLeft(projectDir)(_ / _) / fileSc
+          os.copy(path, outputPath, replaceExisting = true)
+        }
+      // Force mill version due to breaking changes between 0.9.x and 0.10.x
+      os.write.over(projectDir / ".mill-version", "0.10.2")
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) = {
-        val output = 
+        val output =
           if config.redirectLogs then os.PathAppendRedirect(logsFile)
           else os.Inherit
         os.proc("mill", millScalaSetting, commands)
           .call(
             cwd = projectDir,
             stdout = output,
-            stderr = output
+            stderr = output,
           )
       }
       val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
-      mill("runCommunityBuild", scalaVersion, project.params.config.getOrElse("{}"), project.effectiveTargets)
+      mill(
+        "runCommunityBuild",
+        scalaVersion,
+        project.params.config.getOrElse("{}"),
+        project.effectiveTargets
+      )
   end MillReproducer
 end LocalReproducer
 

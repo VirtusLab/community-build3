@@ -16,8 +16,10 @@ import org.apache.http.auth.*
 import scala.language.implicitConversions
 import scala.concurrent.*
 import scala.concurrent.duration.*
+import scala.reflect.ClassTag
 
 given ExecutionContext = ExecutionContext.global
+import FromMap.given
 
 @main def reportBuildSummary(
     elasticsearchUrl: String,
@@ -104,23 +106,22 @@ def showBuildReport(report: BuildReport): String =
   val Ident3 = Ident * 3
 
   def showSuccessfullProject(project: ProjectSummary) =
-    val ProjectSummary(name, version, _, _, modules) = project
+    val ProjectSummary(name, version, _, _, _, modules) = project
     s"""$Ident+ $name: Version: $version""".stripMargin
 
   def showFailedProject(project: ProjectSummary) =
-    val ProjectSummary(name, version, _, _, modules) = project
+    val ProjectSummary(name, version, _, _, buildUrl, modules) = project
     def showModules(label: String, results: Seq[ModuleSummary])(
         show: ModuleSummary => String
-    ) = 
+    ) =
       s"${Ident2}$label modules: ${results.size}" + {
         if results.isEmpty then ""
         else results.map(show).mkString("\n", "\n", "")
       }
     s"""$Ident- $name
        |${Ident2}Version: $version
-       |${showModules("Successfull", project.successfullModules)(m =>
-      s"$Ident2+ ${m.name}"
-    )}
+       |${Ident2}Build URL: $buildUrl
+       |${showModules("Successfull", project.successfullModules)(m => s"$Ident2+ ${m.name}")}
        |${showModules("Failed", project.failedModules)(showFailedModule(_))}
        |""".stripMargin
 
@@ -160,46 +161,57 @@ case class BuildReport(
 
 enum BuildStatus:
   case Failure, Success
-enum ModuleBuildResult:
+enum StepStatus:
   case Ok, Failed, Skipped
+
+sealed trait StepResult {
+  def status: StepStatus
+}
+
+// Currently we don't use any of the other result fields
+case class CompileResult(status: StepStatus) extends StepResult
+case class DocsResult(status: StepStatus) extends StepResult
+case class TestsResult(status: StepStatus) extends StepResult
+case class PublishResult(status: StepStatus) extends StepResult
 
 case class ModuleSummary(
     name: String,
-    compile: ModuleBuildResult,
-    doc: ModuleBuildResult,
-    testsCompile: ModuleBuildResult,
-    tests: ModuleBuildResult,
-    publish: ModuleBuildResult
+    compile: CompileResult,
+    doc: DocsResult,
+    testsCompile: CompileResult,
+    tests: TestsResult,
+    publish: PublishResult
 ) {
-  def hasFailure = productIterator.contains(ModuleBuildResult.Failed)
-  private lazy val results = productElementNames
+  def hasFailure = results.exists(_._2 == StepStatus.Failed)
+  private lazy val results: List[(String, StepStatus)] = productElementNames
     .zip(productIterator)
-    .collect { case (fieldName, result: ModuleBuildResult) =>
-      (fieldName, result)
+    .collect { case (fieldName, result: StepResult) =>
+      (fieldName, result.status)
     }
     .toList
-  private def collectResults(expected: ModuleBuildResult) =
+  private def collectResults(expected: StepStatus) =
     results.collect { case (name, `expected`) => name }.toList
 
-  lazy val passed = collectResults(ModuleBuildResult.Ok)
-  lazy val failed = collectResults(ModuleBuildResult.Failed)
-  lazy val skipped = collectResults(ModuleBuildResult.Skipped)
+  lazy val passed = collectResults(StepStatus.Ok)
+  lazy val failed = collectResults(StepStatus.Failed)
+  lazy val skipped = collectResults(StepStatus.Skipped)
 }
 case class ProjectSummary(
     projectName: String,
     version: String,
     scalaVersion: String,
     status: BuildStatus,
+    buildUrl: String,
     projectsSummary: List[ModuleSummary]
 ) {
   lazy val (failedModules, successfullModules) =
     projectsSummary.partition(_.hasFailure)
 }
 
-given Conversion[String, ModuleBuildResult] = _ match {
-  case "ok"      => ModuleBuildResult.Ok
-  case "failed"  => ModuleBuildResult.Failed
-  case "skipped" => ModuleBuildResult.Skipped
+given Conversion[String, StepStatus] = _ match {
+  case "ok"      => StepStatus.Ok
+  case "failed"  => StepStatus.Failed
+  case "skipped" => StepStatus.Skipped
 }
 
 given HitReader[ProjectSummary] = (hit: Hit) => {
@@ -209,26 +221,86 @@ given HitReader[ProjectSummary] = (hit: Hit) => {
       case "failure" => BuildStatus.Failure
       case "success" => BuildStatus.Success
     }
+
     val modulesSummary =
-      for
-        modueleSource <- source("summary")
-          .asInstanceOf[List[Map[String, String]]]
-      yield ModuleSummary(
-        name = modueleSource("module"),
-        compile = modueleSource("compile"),
-        doc = modueleSource("doc"),
-        testsCompile = modueleSource("test-compile"),
-        tests = modueleSource("test"),
-        publish = modueleSource("publish")
-      )
+      for moduleSource <- source("summary").asInstanceOf[List[Map[String, AnyRef]]]
+      yield
+        def fromMap[T](field: String)(using conv: FromMap[T]) =
+          moduleSource.get(field) match {
+            case Some(m: Map[_, _]) =>
+              conv.fromMap(m.asInstanceOf[Map[String, AnyRef]]) match {
+                case Right(value) => value
+                case Left(reason) => sys.error(s"Cannot decode '$field', reason: ${reason}")
+              }
+            case Some(m) => sys.error(s"Field '$field' is not a map: ${m}")
+            case None    => sys.error(s"No field with name '$field'")
+          }
+
+        ModuleSummary(
+          name = moduleSource("module").toString,
+          compile = fromMap[CompileResult]("compile"),
+          doc = fromMap[DocsResult]("doc"),
+          testsCompile = fromMap[CompileResult]("test-compile"),
+          tests = fromMap[TestsResult]("test"),
+          publish = fromMap[PublishResult]("publish")
+        )
     ProjectSummary(
       projectName = source("projectName").toString.replaceFirst("_", "/"),
       version = source("version").toString,
       scalaVersion = source("scalaVersion").toString,
       status = status,
+      buildUrl = source("buildURL").toString,
       projectsSummary = modulesSummary
     )
   }
+}
+
+sealed trait FromMap[T]:
+  import FromMap.*
+  def fromMap(source: SourceMap): Result[T]
+
+object FromMap {
+  type SourceMap = Map[String, AnyRef]
+  type Result[T] = Either[FromMap.ConversionFailure, T]
+  sealed trait ConversionFailure
+  case class FieldMissing(field: String) extends ConversionFailure
+  case class IncorrectMapping(expected: Class[_], got: Class[_]) extends ConversionFailure
+
+  extension (source: SourceMap) {
+    def field(name: String): Result[AnyRef] =
+      source.get(name).toRight(left = FieldMissing(name))
+    def mapTo[T: FromMap]: Result[T] = summon[FromMap[T]].fromMap(source)
+  }
+
+  extension (value: Result[AnyRef]) {
+    inline def as[T: ClassTag]: Result[T] = value.flatMap {
+      case instance: T => Right(instance.asInstanceOf[T])
+      case other =>
+        Left(IncorrectMapping(expected = summon[ClassTag[T]].runtimeClass, got = other.getClass))
+    }
+  }
+
+  given FromMap[CompileResult] with
+    def fromMap(source: SourceMap): Result[CompileResult] =
+      for status <- source.field("status").as[String]
+      yield CompileResult(status = status: StepStatus)
+
+  given FromMap[DocsResult] with
+    def fromMap(source: SourceMap): Result[DocsResult] =
+      for status <- source.field("status").as[String]
+      yield DocsResult(status = status: StepStatus)
+
+  given FromMap[TestsResult] with
+    def fromMap(source: SourceMap): Result[TestsResult] =
+      for status <- source.field("status").as[String]
+      yield TestsResult(
+        status = status: StepStatus
+      )
+
+  given FromMap[PublishResult] with
+    def fromMap(source: SourceMap): Result[PublishResult] =
+      for status <- source.field("status").as[String]
+      yield PublishResult(status: StepStatus)
 
 }
 

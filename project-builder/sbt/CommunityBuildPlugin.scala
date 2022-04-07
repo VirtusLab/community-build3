@@ -3,58 +3,51 @@ import sbt.Keys._
 import sjsonnew._, LList.:*:
 import sjsonnew.BasicJsonProtocol._
 import sjsonnew.support.scalajson.unsafe.{Converter, Parser}
+import sbt.protocol.testing.TestResult
+import xsbti.compile.{FileAnalysisStore, CompileAnalysis}
+import xsbti.{Severity, CompileFailed, Problem}
+import scala.collection.JavaConverters._
 
-sealed abstract class BuildStepResult(val stringValue: String) {
-  def jsonValue = s""""$stringValue""""
-}
-sealed abstract class FailedBuildStep(name: String, info: List[(String, String)])
-    extends BuildStepResult(name) {
-  override def jsonValue =
-    if (info.isEmpty) s""""$name""""
-    else {
-      val infoFields = info.map { case (k, v) => s""""$k": "$v"""" }.mkString(", ")
-      s""""$name": {$infoFields}"""
+import TaskEvaluator.EvalResult
+
+class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
+    extends TaskEvaluator[TaskKey] {
+
+  override def eval[T](task: TaskKey[T]): EvalResult[T] = {
+    val evalStart = System.currentTimeMillis()
+    val scopedTask = project / task
+    sbt.Project
+      .runTask(scopedTask, state)
+      .fold[EvalResult[T]] {
+        val reason = TaskEvaluator.UnkownTaskException(scopedTask.toString())
+        EvalResult.Failure(reason :: Nil, 0)
+      } { case (newState, result) =>
+        val tookMs = (System.currentTimeMillis() - evalStart).toInt
+        this.state = newState
+        result.toEither match {
+          case Right(value) => EvalResult.Value(value, tookMs)
+          case Left(incomplete) =>
+            val causes = getAllDirectCauses(incomplete)
+            EvalResult.Failure(causes, tookMs)
+        }
+      }
+  }
+
+  private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
+    @scala.annotation.tailrec
+    def loop(incomplete: List[Incomplete], acc: List[Throwable] = Nil): List[Throwable] = {
+      incomplete match {
+        case Nil => acc
+        case head :: tail =>
+          loop(
+            incomplete = tail ::: head.causes.toList,
+            acc = acc ::: head.directCause.toList
+          )
+      }
     }
-}
-case object Ok extends BuildStepResult("ok")
-case object Skipped extends BuildStepResult("skipped")
-case object Failed extends FailedBuildStep("failed", Nil)
-case class WrongVersion(expected: String, got: String)
-    extends FailedBuildStep("wrongVersion", List("expected" -> expected, "got" -> got))
-case class BuildError(msg: String) extends FailedBuildStep("buildError", List("reason" -> msg))
-
-case class ModuleTargetsResults(
-    compile: BuildStepResult,
-    doc: BuildStepResult,
-    testsCompile: BuildStepResult,
-    testsExecute: BuildStepResult,
-    publish: BuildStepResult
-) {
-  def hasFailedStep: Boolean = this.productIterator.exists(_.isInstanceOf[FailedBuildStep])
-  def jsonValues: List[String] = List(
-    "compile" -> compile,
-    "doc" -> doc,
-    "test-compile" -> testsCompile,
-    "test" -> testsExecute,
-    "publish" -> publish
-  ).map { case (key, value) =>
-    s""""$key": "${value.stringValue}""""
+    loop(incomplete :: Nil, Nil)
   }
 }
-case class ModuleBuildResults(
-    artifactName: String,
-    results: ModuleTargetsResults
-) {
-  lazy val toJson = {
-    val resultsJson = results.jsonValues.mkString(", ")
-    s"""{
-       | "module": "$artifactName",
-       | $resultsJson 
-       |}""".stripMargin
-  }
-}
-
-class ProjectBuildFailureException extends Exception
 
 object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
@@ -258,28 +251,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         simplifiedModuleId(key) -> value
       }
 
-      val filteredIds = {
-        val excludedPatterns = config.projects.exclude.map(_.r)
-        ids.filter { id =>
-          id.split('%') match {
-            case Array(org, name) =>
-              val excludingPattern = excludedPatterns.find { pattern =>
-                // No Regex.matches in Scala 2.12 (!sic)
-                pattern
-                  .findFirstIn(name)
-                  .orElse(pattern.findFirstIn(id))
-                  .isDefined
-              }
-              excludingPattern.foreach { pattern =>
-                println(s"Excluding target '$id' - matches exclusion rule: '${pattern}'")
-              }
-              excludingPattern.isEmpty
-            case _ =>
-              println(s"Excluding target '$id' - incompatible format")
-              false
-          }
-        }
-      }
+      val filteredIds = Utils.filterTargets(ids, config.projects.exclude.map(_.r))
 
       println("Starting build...")
       // Find projects that matches maven
@@ -326,38 +298,8 @@ object CommunityBuildPlugin extends AutoPlugin {
       val allToBuild = flatten(topLevelProjects, topLevelProjects)
       println("Projects: " + allToBuild.map(_.project))
 
-      class TaskEvaluator(val project: ProjectRef, initialState: State) {
-        def eval(task: TaskKey[_]): BuildStepResult = {
-          try {
-            // we should reuse state here
-            sbt.Project
-              .runTask(project / task, initialState)
-              .fold[BuildStepResult](BuildError("Cannot eval command")) { case (_, result) =>
-                result.toEither match {
-                  case Right(_) => Ok
-                  case Left(_)  => Failed
-                }
-              }
-          } catch {
-            case ex: Exception =>
-              BuildError(s"Evaluation error: ${ex.getMessage}")
-          }
-        }
-        def evalAsDependencyOf(
-            dependencies: BuildStepResult*
-        )(task: TaskKey[_]): BuildStepResult = {
-          val shouldSkip = dependencies.exists {
-            case _: FailedBuildStep => true
-            case Skipped            => true
-            case _                  => false
-          }
-          if (shouldSkip) Skipped
-          else eval(task)
-        }
-      }
-
-      val projectsBuildResults = allToBuild.map { r =>
-        val evaluator = new TaskEvaluator(r, cState)
+      val projectsBuildResults = allToBuild.toList.map { r =>
+        val evaluator = new SbtTaskEvaluator(r, cState)
         val s = sbt.Project.extract(cState).structure
         val projectName = (r / moduleName).get(s.data).get
         println(s"Starting build for $r ($projectName)...")
@@ -367,48 +309,54 @@ object CommunityBuildPlugin extends AutoPlugin {
         val testingMode = overrideSettings.tests.getOrElse(config.tests)
 
         import evaluator._
-        val results = {
-          val compileResult = eval(Compile / compile)
-          val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
-          val testsCompileResult = testingMode match {
-            case TestingMode.Disabled => Skipped
-            case _                    => evalAsDependencyOf(compileResult)(Test / compile)
-          }
-          val testsExecuteResult = testingMode match {
-            case TestingMode.Full => evalAsDependencyOf(testsCompileResult)(Test / test)
-            case _                => Skipped
-          }
-          ModuleTargetsResults(
-            compile = compileResult,
-            doc = docsResult,
-            testsCompile = testsCompileResult,
-            testsExecute = testsExecuteResult,
-            publish = ourVersion.fold[BuildStepResult](Skipped) { version =>
-              val currentVersion = (r / Keys.version)
-                .get(s.data)
-                .getOrElse(sys.error(s"${r.project}/version not set"))
-              if (currentVersion != version)
-                WrongVersion(expected = version, got = currentVersion)
-              else evalAsDependencyOf(compileResult, docsResult)(Compile / publishResults)
-            }
-          )
+        val compileResult = eval(Compile / compile)
+        val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
+        val testsCompileResult = evalWhen(testingMode != TestingMode.Disabled, compileResult)(
+          Test / compile
+        )
+        val testsExecuteResult = evalWhen(testingMode == TestingMode.Full, testsCompileResult)(
+          Test / executeTests
+        )
+
+        val publishResult = ourVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { version =>
+          val currentVersion = (r / Keys.version)
+            .get(s.data)
+            .getOrElse(sys.error(s"${r.project}/version not set"))
+          if (currentVersion != version)
+            PublishResult(
+              Status.Failed,
+              failureContext = Some(
+                FailureContext.WrongVersion(expected = version, actual = currentVersion)
+              ),
+              tookMs = 0
+            )
+          else
+            PublishResult(
+              evalAsDependencyOf(compileResult, docsResult)(
+                Compile / publishResults
+              )
+            )
         }
+
         ModuleBuildResults(
           artifactName = projectName,
-          results = results
+          compile = collectCompileResult(compileResult),
+          doc = DocsResult(docsResult),
+          testsCompile = collectCompileResult(testsCompileResult),
+          testsExecute = collectTestResults(testsExecuteResult),
+          publish = publishResult
         )
       }
-      val buildSummary = projectsBuildResults
-        .map(_.toJson)
-        .mkString("[", ",", "]")
+
+      val buildSummary = BuildSummary(projectsBuildResults)
       println(s"""
           |************************
           |Build summary:
-          |${buildSummary}
+          |${buildSummary.toJson}
           |************************""".stripMargin)
-      IO.write(file("..") / "build-summary.txt", buildSummary)
+      IO.write(file("..") / "build-summary.txt", buildSummary.toJson)
 
-      val hasFailedSteps = projectsBuildResults.exists(_.results.hasFailedStep)
+      val hasFailedSteps = projectsBuildResults.exists(_.hasFailedStep)
       val buildStatus =
         if (hasFailedSteps) "failure"
         else "success"
@@ -418,23 +366,85 @@ object CommunityBuildPlugin extends AutoPlugin {
     (runBuild / aggregate) := false
   )
 
-  sealed trait TestingMode
-  object TestingMode {
-    case object Disabled extends TestingMode
-    case object CompileOnly extends TestingMode
-    case object Full extends TestingMode
+  private def collectCompileResult(evalResult: EvalResult[CompileAnalysis]): CompileResult = {
+    def countProblems(severity: Severity, problems: Iterable[Problem]) =
+      problems.count(_.severity == severity)
+    evalResult match {
+      case EvalResult.Failure(reasons, tookTime) =>
+        reasons
+          .collectFirst { case ctx: CompileFailed => ctx }
+          .foldLeft(
+            CompileResult(
+              Status.Failed,
+              failureContext = evalResult.toBuildError,
+              warnings = 0,
+              errors = 0,
+              tookMs = tookTime
+            )
+          ) { case (result, ctx) =>
+            result.copy(
+              warnings = countProblems(Severity.Warn, ctx.problems()),
+              errors = countProblems(Severity.Error, ctx.problems())
+            )
+          }
+
+      case EvalResult.Value(compileAnalysis, tookTime) =>
+        case class CompileStats(warnings: Int, errors: Int)
+        val stats = compileAnalysis
+          .readSourceInfos()
+          .getAllSourceInfos()
+          .asScala
+          .values
+          .foldLeft(CompileStats(0, 0)) { case (CompileStats(accWarnings, accErrors), sourceInfo) =>
+            def countAll(severity: Severity) =
+              countProblems(severity, sourceInfo.getReportedProblems()) +
+                countProblems(severity, sourceInfo.getUnreportedProblems())
+
+            CompileStats(
+              warnings = accWarnings + countAll(Severity.Warn),
+              errors = accErrors + countAll(Severity.Error)
+            )
+          }
+        CompileResult(
+          Status.Ok,
+          warnings = stats.warnings,
+          errors = stats.errors,
+          tookMs = tookTime
+        )
+
+      case EvalResult.Skipped => CompileResult(Status.Skipped, warnings = 0, errors = 0, tookMs = 0)
+    }
   }
 
-  // Community projects configs
-  case class ProjectOverrides(tests: Option[TestingMode] = None)
-  case class ProjectsConfig(
-      exclude: List[String] = Nil,
-      overrides: Map[String, ProjectOverrides] = Map.empty
-  )
-  case class ProjectBuildConfig(
-      projects: ProjectsConfig = ProjectsConfig(),
-      tests: TestingMode = TestingMode.Full
-  )
+  def collectTestResults(evalResult: EvalResult[Tests.Output]): TestsResult = {
+    val empty = TestsResult(
+      evalResult.toStatus,
+      failureContext = evalResult.toBuildError,
+      passed = 0,
+      failed = 0,
+      ignored = 0,
+      skipped = 0,
+      tookMs = evalResult.evalTime
+    )
+    evalResult match {
+      case EvalResult.Value(value, _) =>
+        val initialState = empty.copy(status = value.overall match {
+          case TestResult.Passed => Status.Ok
+          case _                 => Status.Failed
+        })
+        value.events.values.foldLeft(initialState) { case (state, result) =>
+          state.copy(
+            passed = state.passed + result.passedCount,
+            failed = state.failed + result.failureCount + result.errorCount + result.canceledCount,
+            ignored = state.ignored + result.ignoredCount,
+            skipped = state.skipped + result.skippedCount
+          )
+        }
+
+      case _ => empty
+    }
+  }
+
   // Serialization
   implicit object TestingModeEnumJsonFormat extends JsonFormat[TestingMode] {
     def write[J](x: TestingMode, builder: Builder[J]): Unit = "full"

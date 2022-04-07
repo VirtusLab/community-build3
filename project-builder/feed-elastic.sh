@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ $# -ne 9 ]; then
+if [ $# -ne 10 ]; then
   echo "Wrong number of script arguments, got $#, expected 7"
   exit 1
 fi
@@ -15,6 +15,7 @@ logsFile="$6"
 version="$7"
 scalaVersion="$8"
 buildId="$9"
+buildUrl="${10}"
 
 buildSummary="$(cat ${buildSummaryFile})"
 
@@ -25,9 +26,10 @@ json=$(jq -n \
           --arg ver "$version" \
           --arg scVer "$scalaVersion" \
           --arg buildId "$buildId" \
+          --arg buildURL "$buildUrl" \
           --argjson sum "$buildSummary" \
           --rawfile logs "$logsFile" \
-          '{projectName: $pn, version: $ver, scalaVersion: $scVer, status: $res, timestamp: $ts, buildId: $buildId, summary: $sum, logs: $logs}')
+          '{projectName: $pn, version: $ver, scalaVersion: $scVer, status: $res, timestamp: $ts, buildId: $buildId, buildURL: $buildURL, summary: $sum, logs: $logs}')
 
 jsonFile=$(mktemp /tmp/feed-elastic-tmp.XXXXXX)
 
