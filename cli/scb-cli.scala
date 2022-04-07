@@ -1204,8 +1204,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
               .foldLeft(projectDir)(_ / _) / fileSc
           os.copy(path, outputPath, replaceExisting = true)
         }
-      // Mill 0.10.x series is breaking
-      os.write.over(projectDir / ".mill-version", "0.9.12")
+      // Force mill version due to breaking changes between 0.9.x and 0.10.x
+      os.write.over(projectDir / ".mill-version", "0.10.2")
 
     override def runBuild(): Unit =
       def mill(commands: os.Shellable*) = {
