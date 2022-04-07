@@ -90,7 +90,7 @@ case class DocsResult(
 object DocsResult {
   def apply(evalResult: EvalResult[File]): DocsResult = {
     evalResult match {
-      case EvalResult.Value(targetDir, tookTime) =>
+      case EvalResult.Value(targetDir, tookTime) if targetDir.exists() =>
         case class Stats(files: Int, totalSize: Long)
         val stats = Files
           .walk(targetDir.toPath())
