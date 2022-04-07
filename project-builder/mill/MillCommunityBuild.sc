@@ -418,7 +418,7 @@ object serialization {
   implicit lazy val TestingModeRW: ReadWriter[TestingMode] = {
     import TestingMode._
     val DisabledString = "disabled"
-    val CompileOnlyString = "compile-only "
+    val CompileOnlyString = "compile-only"
     val FullString = "full"
     def toJson(x: TestingMode): String = x match {
       case Disabled    => DisabledString
