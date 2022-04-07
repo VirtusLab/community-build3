@@ -21,6 +21,7 @@ import coursier.cache.*
 import scala.util.control.NoStackTrace
 
 import Config.*
+import os.PathConvertible
 given Formats = DefaultFormats
 given ExecutionContext = ExecutionContext.Implicits.global
 
@@ -1195,9 +1196,9 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       os.list(sharedSourcesDir)
         .foreach { path =>
           // We need to rename .scala files into .sc to allow for their usage in Mill
-          val segments = path.relativeTo(sharedSourcesDir).segments
-          val newName = segments.last.stripSuffix(".scala") + ".sc"
-          val outputPath = projectDir / os.RelPath(segments.init, newName)
+          val relPath = path.relativeTo(sharedSourcesDir).toNIO
+          val fileSc = relPath.getFileName().toString.stripSuffix(".scala") + ".sc"
+          val outputPath = projectDir / os.RelPath(relPath.getParent) / fileSc
           os.copy(path, outputPath, replaceExisting = true)
         }
 
