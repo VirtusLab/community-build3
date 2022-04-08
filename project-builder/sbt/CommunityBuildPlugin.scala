@@ -416,7 +416,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
   }
 
-  def collectTestResults(evalResult: EvalResult[Tests.Output]): TestsResult = {
+  def collectTestResults(evalResult: EvalResult[sbt.Tests.Output]): TestsResult = {
     val empty = TestsResult(
       evalResult.toStatus,
       failureContext = evalResult.toBuildError,
