@@ -30,10 +30,32 @@ import scalalib.api.CompilationResult
 import mill.eval._
 import mill.define.{Cross => DefCross, _}
 import mill.define.Segment._
-import mill.testrunner.TestRunner
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
+
+private object compat {
+  // In Mill 0.10.x series mill.scalalib.TestRunner was moved to mill.testrunner
+  // We cannot enforce 0.10.x series, becouse multiple builds use EOL ammonite-ops, which are absent in 0.10.x
+  val MillTestRunner = {
+    import CompatDef._ // introduces alternative testrunner from ComaptDef
+    {
+      import mill._ // in 0.10.x replaces CompatDef.testrunner with mill.testrunnner
+      import testrunner._ // Adds TestRunner to the scope from either scope
+      {
+        import mill.scalalib._ // In 0.9.x replaces CompatDef.testruner.TestRunner with mill.scalalib.TestRunner
+        TestRunner
+      }
+    }
+  }
+
+  object CompatDef {
+    object testrunner {
+      object TestRunner
+    }
+  }
+}
+import compat.{MillTestRunner => TestRunner}
 
 trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   protected val mavenRepoUrl: Option[String] = sys.props

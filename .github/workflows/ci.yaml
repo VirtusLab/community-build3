@@ -33,7 +33,7 @@ jobs:
 
       - uses: coursier/setup-action@v1
         with:
-          apps: scala sbt mill:0.10.2
+          apps: scala sbt mill:0.9.12
 
       - name: Install scala-cli
         run: |
@@ -53,3 +53,4 @@ jobs:
 
       - name: Test CLI
         run: scripts/test-cli.sh
+
