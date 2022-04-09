@@ -21,8 +21,8 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 pipeline {
     agent none
     options {
-      timeout(time: 8, unit: "HOURS")
-    } 
+      timeout(time: 16, unit: "HOURS")
+    }
     stages {
         stage("Initialize build") {
             steps {
