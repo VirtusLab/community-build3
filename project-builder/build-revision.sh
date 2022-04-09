@@ -22,9 +22,10 @@ $scriptDir/checkout.sh "$repoUrl" "$rev" repo
 # Wait until mvn-repo is reachable, frequently few first requests might fail
 # especially in cli immediately after starting minikube
 for i in {1..10}; do
-  if errMsg=$(curl $CB_MVN_REPO_URL 2>&1); then
+  if errMsg=$(curl $mvnRepoUrl 2>&1); then
     break
   else
+    echo "${errMsg}"
     echo "Waiting until mvn-repo is reachable..."
     sleep 1
   fi
