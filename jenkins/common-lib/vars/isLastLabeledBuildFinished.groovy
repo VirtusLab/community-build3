@@ -4,6 +4,6 @@ def call(String jobName, String label) {
   def jenkins = jenkins.model.Jenkins.instance
   def job = jenkins.getItemByFullName(jobName)
   def builds = job.getBuilds()
- 	def lastLabeledBuild = builds.find { it.getDescription() == label }
-	return lastLabeledBuild?.getResult()?.toString()
+ 	def build = builds.findAll { it.getDescription() == label }.last()
+	return build && ( build.getResult() || build.getArtifacts().find { it.getFileName() == "build-status.txt" } )
 }

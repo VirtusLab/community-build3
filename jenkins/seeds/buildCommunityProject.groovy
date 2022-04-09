@@ -1,8 +1,7 @@
 // Look at initializeSeedJobs.groovy for how this file gets parameterized
 
 def labeledProjectWasBuilt(String label) {
-    def status = getLastLabeledBuildStatus("/buildCommunityProject", label)
-    return status in ['SUCCESS', 'FAILURE', 'UNSTABLE', 'ABORTED']
+    return isLastLabeledBuildFinished("/buildCommunityProject", label)
 }
 
 def getBuildStatus() {
