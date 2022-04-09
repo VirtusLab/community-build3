@@ -192,18 +192,21 @@ pipeline {
           node(POD_LABEL){
             container('reporter'){
               script {
-                retryOnConnectionError {
-                  def reportFile = 'build-report.txt'
-                  sh """
-                    touch build-report.txt
-                    curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
-                      | bash -s \
-                      -- run /build-scripts/buildReport.scala --quiet \
-                      -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
-                    """
-                  def report = readFile(reportFile)
-                  echo "Build report: \n\n${report}"
-                  archiveArtifacts(artifacts: reportFile)
+                // Retry in case if failed to get the scala-cli
+                retry(5){
+                  retryOnConnectionError {
+                    def reportFile = 'build-report.txt'
+                    sh """
+                      touch build-report.txt
+                      curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
+                        | bash -s \
+                        -- run /build-scripts/buildReport.scala --quiet \
+                        -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
+                      """
+                    def report = readFile(reportFile)
+                    echo "Build report: \n\n${report}"
+                    archiveArtifacts(artifacts: reportFile)
+                  }
                 }
               }
             }
