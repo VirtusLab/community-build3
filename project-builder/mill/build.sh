@@ -26,10 +26,12 @@ echo '##################################'
 cd $repoDir
 
 millSettings=(
+  "--no-server"
   -D communitybuild.version="$version"
   -D communitybuild.maven.url="$mavenRepoUrl"
   -D communitybuild.scala="$scalaVersion"
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
-
-MILL_VERSION=0.9.12 mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+args=(runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}")
+mill ${millSettings[@]} ${args[@]} || \
+  (echo "Retrying with local mill distro" && ./mill ${millSettings[@]} ${args[@]})
