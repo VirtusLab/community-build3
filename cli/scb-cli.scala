@@ -1052,12 +1052,18 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       build: BuildInfo
   ) extends BuildToolReproducer:
     case class SbtConfig(options: List[String], commands: List[String])
-    given Manifest[SbtConfig] = scala.reflect.Manifest.classType(classOf[SbtConfig])
     val CBPluginFile = "CommunityBuildPlugin.scala"
     val minSbtVersion = "1.5.5"
     val sbtConfig = project.params.config
       .map(parse(_) \ "sbt")
-      .flatMap(_.extractOpt[SbtConfig])
+      .map { json =>
+        // Parse manually, json4s seems to have some problems
+        def stringList(field: String) = (json \ field) match {
+          case JArray(fields) => fields.collect { case JString(value) => value }
+          case _              => Nil
+        }
+        SbtConfig(stringList("options"), stringList("commands"))
+      }
       .getOrElse(SbtConfig(Nil, Nil))
     val sbtSettings = sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
@@ -1104,6 +1110,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         os.proc(
           "sbt",
           "--no-colors",
+          "--verbose",
           s"++$effectiveScalaVersion$versionSwitchSuffix -v",
           "set every credentials := Nil",
           "moduleMappings",
@@ -1233,7 +1240,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       )
       if mill(useLocal = false, check = false, millCmd: _*).exitCode != 0 then
         mill(useLocal = true, check = true, millCmd: _*)
-      
+
   end MillReproducer
 end LocalReproducer
 
