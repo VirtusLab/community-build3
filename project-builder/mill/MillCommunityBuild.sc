@@ -225,8 +225,8 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
             // No Regex.matches in Scala 2.12
             // Exclude cases when excluded name is a prefix of other project
             case (key, value)
-                if key.r.findFirstIn(projectName).isDefined &&
-                  !projectName.startsWith(key) =>
+                if key.r.findFirstIn(name).isDefined &&
+                  !name.startsWith(key) =>
               value
           }
         }
