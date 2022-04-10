@@ -304,9 +304,18 @@ object CommunityBuildPlugin extends AutoPlugin {
         val projectName = (r / moduleName).get(s.data).get
         println(s"Starting build for $r ($projectName)...")
 
-        val overrideSettings = config.projects.overrides
-          .getOrElse(projectName, ProjectOverrides())
-        val testingMode = overrideSettings.tests.getOrElse(config.tests)
+        val overrideSettings = {
+          val overrides = config.projects.overrides
+          overrides
+            .get(projectName)
+            .orElse {
+              overrides.collectFirst {
+                // No Regex.matches in Scala 2.12
+                case (key, value) if key.r.findFirstIn(projectName).isDefined => value
+              }
+            }
+        }
+        val testingMode = overrideSettings.flatMap(_.tests).getOrElse(config.tests)
 
         import evaluator._
         val compileResult = eval(Compile / compile)
