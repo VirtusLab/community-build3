@@ -810,7 +810,10 @@ object MinikubeReproducer:
                   params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
                   params.mavenRepositoryUrl,
-                  params.enforcedSbtVersion.getOrElse(""),
+                  params.enforcedSbtVersion.getOrElse(config.command match {
+                    case Command.RunCustomProject => "1.6.2"
+                    case _                        => ""
+                  }),
                   params.config.getOrElse("{}")
                 )
               )
