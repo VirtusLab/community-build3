@@ -283,7 +283,7 @@ def makeDependenciesBasedBuildPlan(
         val JavaVersionDistroVer = raw"$OptQuote(\w+)@(.*)$OptQuote".r
         val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
         // We can only supported this versions
-        val allowedVersions = Seq("8", "11", "17")
+        val allowedVersions = Seq(8, 11, 17)
         os.walk
           .stream(githubDir)
           .filter(os.isFile)
@@ -295,7 +295,7 @@ def makeDependenciesBasedBuildPlan(
                 case MatrixEntry(key, valuesList) if key.toLowerCase.contains("java") =>
                   valuesList.split(",").map(_.trim)
                 case JavaVersion(value) => Option(value)
-                case _ => Nil
+                case _                  => Nil
               }
               .flatMap {
                 case JavaVersionNumber(version) => Option(version)
@@ -306,10 +306,13 @@ def makeDependenciesBasedBuildPlan(
                     .headOption
                 case other => None
               }
-              .filter(allowedVersions.contains(_))
+              .flatMap(_.toIntOption)
           }
           .toList
-          .minByOption(_.toInt)
+          .distinct
+          .flatMap(version => allowedVersions.find(_ >= version))
+          .minOption
+          .map(_.toString)
 
     readProjectConfig()
       .orElse(internalProjectConfigs(projectName(project)))
