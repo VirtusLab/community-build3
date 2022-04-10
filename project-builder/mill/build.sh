@@ -6,10 +6,10 @@ if [ $# -ne 6 ]; then
   exit 1
 fi
 
-repoDir="$1" # e.g. /tmp/shapeless
+repoDir="$1"      # e.g. /tmp/shapeless
 scalaVersion="$2" # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
-version="$3" # e.g. 1.0.2-communityBuild
-targets=($4) # e.g. "com.example%foo com.example%bar"
+version="$3"      # e.g. 1.0.2-communityBuild
+targets=($4)      # e.g. "com.example%foo com.example%bar"
 mavenRepoUrl="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
 
@@ -32,6 +32,9 @@ millSettings=(
   -D communitybuild.scala="$scalaVersion"
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
-args=(runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}")
-mill ${millSettings[@]} ${args[@]} || \
-  (echo "Retrying with local mill distro" && ./mill ${millSettings[@]} ${args[@]})
+
+mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}" ||
+  (
+    echo "Retrying with local mill distro" &&
+      ./mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+  )
