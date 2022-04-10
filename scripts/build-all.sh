@@ -7,7 +7,7 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION="$1"
-export PREV_CB_VERSION="v0.0.6"
+export PREV_CB_VERSION="v0.0.7"
 
 javaDefault=11
 javaAccessoryVersions=(8 17)

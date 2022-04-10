@@ -63,7 +63,7 @@ pipeline {
                               name: mvn-repo-cert
                           containers:
                           - name: project-builder
-                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.6
+                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.7
                             imagePullPolicy: IfNotPresent
                             volumeMounts:
                             - name: mvn-repo-cert
