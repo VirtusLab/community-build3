@@ -301,6 +301,9 @@ jenkinsConfigurationsAsCode:
       jenkins:
         systemMessage: |
           Scala 3 Community Build
+        crumbIssuer:
+          standard:
+            excludeClientIPFromCrumb: true
         numExecutors: 0 #
       jobs:
       - file: /var/jenkins_home/seeds/initializeSeedJobs.groovy
