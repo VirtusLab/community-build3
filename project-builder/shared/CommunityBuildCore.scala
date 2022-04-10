@@ -4,6 +4,7 @@ import java.io.File
 
 import TaskEvaluator.EvalResult
 import scala.util.matching.Regex
+import scala.language.higherKinds
 
 // Community projects configs
 case class ProjectBuildConfig(

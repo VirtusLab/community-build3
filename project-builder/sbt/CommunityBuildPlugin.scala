@@ -311,7 +311,11 @@ object CommunityBuildPlugin extends AutoPlugin {
             .orElse {
               overrides.collectFirst {
                 // No Regex.matches in Scala 2.12
-                case (key, value) if key.r.findFirstIn(projectName).isDefined => value
+                // Exclude cases when excluded name is a prefix of other projects
+                case (key, value)
+                    if key.r.findFirstIn(projectName).isDefined &&
+                      !projectName.startsWith(key) =>
+                  value
               }
             }
         }
