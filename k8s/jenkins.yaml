@@ -301,6 +301,12 @@ jenkinsConfigurationsAsCode:
       jenkins:
         systemMessage: |
           Scala 3 Community Build
+        clouds:
+        - kubernetes:
+            connectTimeout: 15
+            maxRequestsPerHost: 64
+            maxRequestsPerHostStr: "64"
+            waitForPodSec: 1800
         crumbIssuer:
           standard:
             excludeClientIPFromCrumb: true
