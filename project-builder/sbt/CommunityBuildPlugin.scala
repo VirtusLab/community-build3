@@ -53,7 +53,7 @@ object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
     val parts = s.split("_")
     if (parts.length > 1 && parts.last.startsWith("3")) {
-      Some(parts.init.mkString("_"), parts.last)
+      Some((parts.init.mkString("_"), parts.last))
     } else {
       None
     }
