@@ -266,7 +266,9 @@ object CommunityBuildPlugin extends AutoPlugin {
               refsByName.get(fullId),
               originalModuleIds.get(fullId),
               moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId))
+              simplifiedModuleIds.get(simplifiedModuleId(fullId)),
+              // Single top level project with the name of the build directory
+              moduleIds.headOption.map(_._2).filter(_ => moduleIds.size == 1)
             ).flatten
         } yield candidates.flatten.headOption.getOrElse {
           println(s"""Module mapping missing:
