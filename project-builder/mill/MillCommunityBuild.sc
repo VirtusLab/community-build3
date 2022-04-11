@@ -216,7 +216,21 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     ctx.log.info(s"Starting build for $name")
     val evaluator = new MillTaskEvaluator()
     import evaluator._
-    val overrides = config.projects.overrides.get(name)
+    val overrides = {
+      val overrides = config.projects.overrides
+      overrides
+        .get(name)
+        .orElse {
+          overrides.collectFirst {
+            // No Regex.matches in Scala 2.12
+            // Exclude cases when excluded name is a prefix of other project
+            case (key, value)
+                if key.r.findFirstIn(name).isDefined &&
+                  !name.startsWith(key) =>
+              value
+          }
+        }
+    }
     val testingMode = overrides.flatMap(_.tests).getOrElse(config.tests)
 
     val testModule = module.millInternal.modules.toList

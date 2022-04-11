@@ -27,7 +27,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.6")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.7")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
@@ -810,7 +810,10 @@ object MinikubeReproducer:
                   params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
                   params.mavenRepositoryUrl,
-                  params.enforcedSbtVersion.getOrElse(""),
+                  params.enforcedSbtVersion.getOrElse(config.command match {
+                    case Command.RunCustomProject => "1.6.2"
+                    case _                        => ""
+                  }),
                   params.config.getOrElse("{}")
                 )
               )
@@ -1049,12 +1052,18 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       build: BuildInfo
   ) extends BuildToolReproducer:
     case class SbtConfig(options: List[String], commands: List[String])
-    given Manifest[SbtConfig] = scala.reflect.Manifest.classType(classOf[SbtConfig])
     val CBPluginFile = "CommunityBuildPlugin.scala"
     val minSbtVersion = "1.5.5"
     val sbtConfig = project.params.config
       .map(parse(_) \ "sbt")
-      .flatMap(_.extractOpt[SbtConfig])
+      .map { json =>
+        // Parse manually, json4s seems to have some problems
+        def stringList(field: String) = (json \ field) match {
+          case JArray(fields) => fields.collect { case JString(value) => value }
+          case _              => Nil
+        }
+        SbtConfig(stringList("options"), stringList("commands"))
+      }
       .getOrElse(SbtConfig(Nil, Nil))
     val sbtSettings = sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
@@ -1101,6 +1110,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         os.proc(
           "sbt",
           "--no-colors",
+          "--verbose",
           s"++$effectiveScalaVersion$versionSwitchSuffix -v",
           "set every credentials := Nil",
           "moduleMappings",
@@ -1204,28 +1214,33 @@ class LocalReproducer(using config: Config, build: BuildInfo):
               .foldLeft(projectDir)(_ / _) / fileSc
           os.copy(path, outputPath, replaceExisting = true)
         }
-      // Force mill version due to breaking changes between 0.9.x and 0.10.x
-      os.write.over(projectDir / ".mill-version", "0.9.12")
 
     override def runBuild(): Unit =
-      def mill(commands: os.Shellable*) = {
+      def mill(useLocal: Boolean, check: Boolean, commands: os.Shellable*) = {
         val output =
           if config.redirectLogs then os.PathAppendRedirect(logsFile)
           else os.Inherit
-        os.proc("mill", millScalaSetting, commands)
-          .call(
-            cwd = projectDir,
-            stdout = output,
-            stderr = output,
-          )
+        os.proc(
+          if useLocal then projectDir / "mill" else "mill",
+          "--no-server",
+          millScalaSetting,
+          commands
+        ).call(
+          cwd = projectDir,
+          stdout = output,
+          stderr = output,
+          check = check
+        )
       }
-      val scalaVersion = Seq("--scalaVersion", effectiveScalaVersion)
-      mill(
+      val millCmd: Seq[os.Shellable] = Seq(
         "runCommunityBuild",
-        scalaVersion,
+        Seq("--scalaVersion", effectiveScalaVersion),
         project.params.config.getOrElse("{}"),
         project.effectiveTargets
       )
+      if mill(useLocal = false, check = false, millCmd: _*).exitCode != 0 then
+        mill(useLocal = true, check = true, millCmd: _*)
+
   end MillReproducer
 end LocalReproducer
 

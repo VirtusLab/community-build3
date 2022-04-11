@@ -53,7 +53,7 @@ object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
     val parts = s.split("_")
     if (parts.length > 1 && parts.last.startsWith("3")) {
-      Some(parts.init.mkString("_"), parts.last)
+      Some((parts.init.mkString("_"), parts.last))
     } else {
       None
     }
@@ -266,7 +266,9 @@ object CommunityBuildPlugin extends AutoPlugin {
               refsByName.get(fullId),
               originalModuleIds.get(fullId),
               moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId))
+              simplifiedModuleIds.get(simplifiedModuleId(fullId)),
+              // Single top level project with the name of the build directory
+              moduleIds.headOption.map(_._2).filter(_ => moduleIds.size == 1)
             ).flatten
         } yield candidates.flatten.headOption.getOrElse {
           println(s"""Module mapping missing:
@@ -304,9 +306,22 @@ object CommunityBuildPlugin extends AutoPlugin {
         val projectName = (r / moduleName).get(s.data).get
         println(s"Starting build for $r ($projectName)...")
 
-        val overrideSettings = config.projects.overrides
-          .getOrElse(projectName, ProjectOverrides())
-        val testingMode = overrideSettings.tests.getOrElse(config.tests)
+        val overrideSettings = {
+          val overrides = config.projects.overrides
+          overrides
+            .get(projectName)
+            .orElse {
+              overrides.collectFirst {
+                // No Regex.matches in Scala 2.12
+                // Exclude cases when excluded name is a prefix of other projects
+                case (key, value)
+                    if key.r.findFirstIn(projectName).isDefined &&
+                      !projectName.startsWith(key) =>
+                  value
+              }
+            }
+        }
+        val testingMode = overrideSettings.flatMap(_.tests).getOrElse(config.tests)
 
         import evaluator._
         val compileResult = eval(Compile / compile)
@@ -416,7 +431,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
   }
 
-  def collectTestResults(evalResult: EvalResult[Tests.Output]): TestsResult = {
+  def collectTestResults(evalResult: EvalResult[sbt.Tests.Output]): TestsResult = {
     val empty = TestsResult(
       evalResult.toStatus,
       failureContext = evalResult.toBuildError,

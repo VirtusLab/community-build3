@@ -33,7 +33,7 @@ pipeline {
                               name: mvn-repo-cert
                           containers:
                           - name: compiler-builder
-                            image: virtuslab/scala-community-build-compiler-builder:v0.0.6
+                            image: virtuslab/scala-community-build-compiler-builder:v0.0.7
                             imagePullPolicy: IfNotPresent
                             volumeMounts:
                             - name: mvn-repo-cert

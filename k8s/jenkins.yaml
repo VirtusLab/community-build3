@@ -173,6 +173,14 @@ jenkinsGroovyScripts:
       oldLibPath = "/var/jenkins_home/common-lib"
       newLibPath = "/var/lib/jenkins/common-lib"
 
+      // Set Kubernetes cloud config, cannot use casc, since it would override operator config
+      def instance = Jenkins.getInstanceOrNull()
+      def k8s = instance?.getCloud("kubernetes")
+      k8s?.setMaxRequestsPerHost(128) // default 32
+      k8s?.setConnectTimeout(30)      // default 5
+      k8s?.setWaitForPodSec(60 * 30)  // default 600
+      instance?.save()
+
       // The directory has to be copied because of lack of write permissions in it
       new ProcessBuilder(['bash', '-c', """
         rm -rf $newLibPath && \
@@ -301,6 +309,9 @@ jenkinsConfigurationsAsCode:
       jenkins:
         systemMessage: |
           Scala 3 Community Build
+        crumbIssuer:
+          standard:
+            excludeClientIPFromCrumb: true
         numExecutors: 0 #
       jobs:
       - file: /var/jenkins_home/seeds/initializeSeedJobs.groovy

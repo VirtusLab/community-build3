@@ -10,9 +10,11 @@ typelevel:algebra.*:2.2.*
 line:armeria:.*
 
 # Not an official release version
-sbt:sbt:2.0.0-alpha.*
-sbt:zinc:2.0.0-alpha.*
+sbt:.*:2.0.0-alpha.*
 com-lihaoyi:ammonite:.* 
+
+# Incorrect Scaladex info, no Scala 3 builds
+jvican:dijon:.*
 
 # Build problems:
 # Checking Scala 3 using constant version string
@@ -20,5 +22,17 @@ ghostdogpr:caliban:.*
 softwaremill:macwire:.*
 softwaremill:quicklens:.*
 47degrees:fetch:.*
-zio:zio-prelude:.*
+zio:zio-config:.*
 zio:zio-json:.*
+zio:zio-logging:.*
+zio:zio-nio:.*
+zio:zio-prelude:.*
+zio:zio-query:.*
+# Too complex mill build
+virtuslab:scala-cli:.*
+
+# Missing defintions of DelayedReadChannel
+rssh:scala-gopher:.*
+
+# Depends on not published compiler plugin version
+kubukoz:sup:.* 

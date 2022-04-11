@@ -28,7 +28,7 @@ def inverseMultigraph(graph) {
 pipeline {
     agent none
     options {
-      timeout(time: 8, unit: "HOURS")
+      timeout(time: 16, unit: "HOURS")
     }
     stages {
         stage("Initialize build") {
@@ -179,7 +179,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-coordinator:v0.0.6', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-coordinator:v0.0.7', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
@@ -192,18 +192,21 @@ pipeline {
           node(POD_LABEL){
             container('reporter'){
               script {
-                retryOnConnectionError {
-                  def reportFile = 'build-report.txt'
-                  sh """
-                    touch build-report.txt
-                    curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
-                      | bash -s \
-                      -- run /build-scripts/buildReport.scala --quiet \
-                      -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
-                    """
-                  def report = readFile(reportFile)
-                  echo "Build report: \n\n${report}"
-                  archiveArtifacts(artifacts: reportFile)
+                // Retry in case if failed to get the scala-cli
+                retry(5){
+                  retryOnConnectionError {
+                    def reportFile = 'build-report.txt'
+                    sh """
+                      touch build-report.txt
+                      curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
+                        | bash -s \
+                        -- run /build-scripts/buildReport.scala --quiet \
+                        -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
+                      """
+                    def report = readFile(reportFile)
+                    echo "Build report: \n\n${report}"
+                    archiveArtifacts(artifacts: reportFile)
+                  }
                 }
               }
             }

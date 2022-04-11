@@ -277,33 +277,42 @@ def makeDependenciesBasedBuildPlan(
       val githubDir = projectDir / ".github"
       if !os.exists(githubDir) then None
       else
-        val OptQuote = "['\"]?"
-        val JavaVersion = "java-version:\\s"
-        val SetupJavaJavaVersion = raw"\s*$JavaVersion$OptQuote(\d+)$OptQuote".r
-        val SetupScalaJavaVersion = raw"\s*$JavaVersion$OptQuote(.*)@(.*)$OptQuote".r
+        val OptQuote = "['\"]?".r
+        val JavaVersion = raw"java-version:\s*(.*)".r
+        val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
+        val JavaVersionDistroVer = raw"$OptQuote(\w+)@(.*)$OptQuote".r
+        val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
         // We can only supported this versions
-        val allowedVersions = Seq("8", "11", "17")
+        val allowedVersions = Seq(8, 11, 17)
         os.walk
           .stream(githubDir)
           .filter(os.isFile)
           .flatMap { path =>
             os.read
               .lines(path)
-              .collect {
-                // java-version: '11'
-                case SetupJavaJavaVersion(version) => Option(version)
-                // java-version: distro@1.11
-                case SetupScalaJavaVersion(distro, version) if !distro.contains("graal") =>
+              .map(_.trim)
+              .flatMap {
+                case MatrixEntry(key, valuesList) if key.toLowerCase.contains("java") =>
+                  valuesList.split(",").map(_.trim)
+                case JavaVersion(value) => Option(value)
+                case _                  => Nil
+              }
+              .flatMap {
+                case JavaVersionNumber(version) => Option(version)
+                case JavaVersionDistroVer(distro, version) if !distro.contains("graal") =>
                   version
                     .stripPrefix("1.")
                     .split('.')
                     .headOption
+                case other => None
               }
-              .flatten
-              .filter(allowedVersions.contains(_))
+              .flatMap(_.toIntOption)
           }
           .toList
-          .maxByOption(_.toInt)
+          .distinct
+          .flatMap(version => allowedVersions.find(_ >= version))
+          .minOption
+          .map(_.toString)
 
     readProjectConfig()
       .orElse(internalProjectConfigs(projectName(project)))

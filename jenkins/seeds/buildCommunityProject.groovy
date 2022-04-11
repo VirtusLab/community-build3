@@ -1,8 +1,7 @@
 // Look at initializeSeedJobs.groovy for how this file gets parameterized
 
 def labeledProjectWasBuilt(String label) {
-    def status = getLastLabeledBuildStatus("/buildCommunityProject", label)
-    return status in ['SUCCESS', 'FAILURE', 'UNSTABLE', 'ABORTED']
+    return isLastLabeledBuildFinished("/buildCommunityProject", label)
 }
 
 def getBuildStatus() {
@@ -22,8 +21,8 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 pipeline {
     agent none
     options {
-      timeout(time: 8, unit: "HOURS")
-    } 
+      timeout(time: 16, unit: "HOURS")
+    }
     stages {
         stage("Initialize build") {
             steps {
@@ -64,7 +63,7 @@ pipeline {
                               name: mvn-repo-cert
                           containers:
                           - name: project-builder
-                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.6
+                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.7
                             imagePullPolicy: IfNotPresent
                             volumeMounts:
                             - name: mvn-repo-cert
