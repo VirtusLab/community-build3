@@ -44,6 +44,7 @@ logFile=build.log
 
 function runSbt() {
   # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
+  # set every ... might lead to restoring original version changed in setPublishVersion
   forceScalaVersion=$1
   setScalaVersionCmd="++$scalaVersion"
   if [[ "$forceScalaVersion" == "forceScala" ]]; then
@@ -52,9 +53,9 @@ function runSbt() {
   tq='"""'
   sbt ${sbtSettings[@]} \
     "$setScalaVersionCmd -v" \
-    "setPublishVersion $version" \
     "set every credentials := Nil" \
     "$customCommands" \
+    "setPublishVersion $version" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
 }
