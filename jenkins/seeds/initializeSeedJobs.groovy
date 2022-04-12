@@ -1,4 +1,5 @@
 def runBuildScript = new File("/var/jenkins_home/seeds/runBuild.groovy").text
+def runBuildToken = System.getenv("BUILD_TOKEN")
 def buildCronTrigger = System.getenv("BUILD_CRON_TRIGGER") ?: ""
 
 def getConfigContentOrEmpty(String filename) {
@@ -18,6 +19,7 @@ def requiredProjectsConfig = getConfigContentOrEmpty("required-projects.txt")
 def replacedProjectsConfig = getConfigContentOrEmpty("replaced-projects.txt")
 
 pipelineJob('/runBuild') {
+    authenticationToken(runBuildToken)
     definition {
         cps {
             script(runBuildScript)
