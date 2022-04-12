@@ -69,7 +69,7 @@
           "publish": {
             "properties": {
               "status": {"type": "keyword"},
-              "failureContext": {"type": "text"},
+              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
               "tookMs": {"type": "integer"}
             }
           }
