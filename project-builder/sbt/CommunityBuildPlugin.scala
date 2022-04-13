@@ -112,39 +112,38 @@ object CommunityBuildPlugin extends AutoPlugin {
     * `set every Compile/version := ???`, becouse it would set given value also in Jmh/version or
     * Jcstress/version scopes, leading build failures
     */
-  val setPublishVersion = Command.args("setPublishVersion", "<args>") { case (state, args) =>
-    args.headOption
-      .orElse(sys.props.get("communitybuild.version"))
-      .filter(_.nonEmpty)
-      .fold {
-        System.err.println("No explicit version found in setPublishVersion command, skipping")
-        state
-      } { version =>
-        println(s"Setting publish version to $version")
-
-        val structure = sbt.Project.extract(state).structure
-        def setVersionCmd(project: String) = s"""set $project/version := "$version" """
-
-        structure.allProjectRefs
-          .collect {
-            // Filter out root project, we need to use ThisBuild instead of root project name
-            case ref @ ProjectRef(uri, project) if structure.rootProject(uri) != project => ref
-          }
-          .foldLeft(Command.process(setVersionCmd("ThisBuild"), state)) { case (state, ref) =>
-            // Check if project needs explicit overwrite, skip otherwise
-            val s = sbt.Project.extract(state).structure
-            val projectVersion = (ref / Keys.version).get(s.data).get
-            if (projectVersion == version) state
-            else
-              try Command.process(setVersionCmd(ref.project), state)
-              catch {
-                case ex: Exception =>
-                  System.err.println(s"Failed to set publish version in ${ref.project}, skipping")
-                  state
-              }
-          }
-      }
-  }
+  val setPublishVersion =
+    Command.args("setPublishVersion", "<args>") { case (state, args) =>
+      args.headOption
+        .orElse(sys.props.get("communitybuild.version"))
+        .filter(_.nonEmpty)
+        .fold {
+          System.err.println("No explicit version found in setPublishVersion command, skipping")
+          state
+        } { targetVersion =>
+          println(s"Setting publish version to $targetVersion")
+          val extracted = sbt.Project.extract(state)
+          val updatedVersions = extracted.structure.allProjectRefs
+            .map { ref =>
+              (ref / Keys.version).transform(
+                currentVersion => {
+                  dualVersioning
+                    .filter(_.matches(targetVersion, currentVersion))
+                    .flatMap(_.apply(targetVersion))
+                    .map { version =>
+                      println(
+                        s"Setting version ${version.render} for ${ref.project} based on dual versioning ${dualVersioning}"
+                      )
+                      version.render
+                    }
+                    .getOrElse(targetVersion)
+                },
+                sbt.internal.util.NoPosition
+              )
+            }
+          extracted.appendWithSession(updatedVersions, state)
+        }
+    }
 
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
@@ -164,6 +163,10 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   lazy val ourVersion =
     Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
+  lazy val dualVersioning = Utils.DualVersioningType.resolve
+  lazy val publishVersions = ourVersion.toList.map { version =>
+    version :: dualVersioning.flatMap(_.apply(version)).map(_.render).toList
+  }
 
   override def globalSettings = Seq(
     moduleMappings := { // Store settings in file to capture its original scala versions
@@ -337,7 +340,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           val currentVersion = (r / Keys.version)
             .get(s.data)
             .getOrElse(sys.error(s"${r.project}/version not set"))
-          if (currentVersion != version)
+          if (publishVersions.contains(currentVersion))
             PublishResult(
               Status.Failed,
               failureContext = Some(

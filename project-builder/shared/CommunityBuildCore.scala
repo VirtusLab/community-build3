@@ -242,6 +242,51 @@ class ProjectBuildFailureException
 }
 
 object Utils {
+  case class SemVersion(major: Int, minor: Int, patch: Int, preRelease: Option[String]) {
+    def render = s"$major.$minor.$patch${preRelease.fold("")("-" + _)}"
+  }
+  object SemVersionExt {
+    val SemVerPattern = raw"(\d+)\.(\d+)\.(\d+)(?:-(\w\d+))?.*".r
+    def unapply(v: String) = v match {
+      case SemVerPattern(major, minor, patch, preRelease) =>
+        Some(SemVersion(major.toInt, minor.toInt, patch.toInt, Option(preRelease)))
+      case _ => None
+    }
+  }
+
+  // Some projects might define dual versionings for some of their projects,
+  // eg. disneystreaming/weaver-test defines major.minor+1.patch for CE3 builds
+  sealed trait DualVersioningType {
+    import DualVersioningType._
+    def matches(globalVersion: Version, currentVersion: Version): Boolean
+    def apply(version: Version): Option[SemVersion]
+  }
+  object DualVersioningType {
+    type Version = String
+    def resolve = {
+      val MinorPrefix = "minor:"
+      sys.props.get("communitybuild.dualVersion") match {
+        case Some(tpe) if tpe.startsWith(MinorPrefix) =>
+          scala.util.Try(tpe.stripPrefix(MinorPrefix).toInt).map(DualMinor(_)).toOption
+        case v => None
+      }
+    }
+    case class DualMinor(diff: Int) extends DualVersioningType {
+      override def matches(globalVersion: String, currentVersion: String): Boolean = {
+        (globalVersion, currentVersion) match {
+          case (SemVersionExt(source), SemVersionExt(target)) => apply(globalVersion).get == target
+          case _                                              => false
+        }
+      }
+      override def apply(version: Version): Option[SemVersion] = {
+        version match {
+          case SemVersionExt(ver) => Some(ver.copy(minor = ver.minor + diff))
+          case _                  => None
+        }
+      }
+    }
+  }
+
   def filterTargets(targets: Seq[String], excludedPatterns: Seq[Regex]) = {
     targets.filter { target =>
       target.split('%') match {
