@@ -20,10 +20,18 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 def projectConfig = parseJson(params.projectConfig ?: "{}")
 def podMemoryRequestMb = Math.min(projectConfig?.memoryRequestMb ?: 2048, 8192).toString() + "M"
 
+def maxRetryOnRestart = 10
+def maxRetryOnFailure = 1
+def retryOnRestartCount = 0
+def retryOnFailureCount = 0
+def retryOnRestartMessage() { return "**Retry build on restart #${retryOnRestartCount}**" }
+def retryOnFailureMessage() { return "**Retry build on failure #${retryOnFailureCount}**" }
+
 pipeline {
     agent none
     options {
       timeout(time: 16, unit: "HOURS")
+      retry(count: retryOnRestartCount + maxRetryOnFailure + 1) // count: 1 means no retry
     }
     stages {
         stage("Initialize build") {
@@ -111,34 +119,47 @@ pipeline {
                       timeout(time: 2, unit: "HOURS")
                     } 
                     steps {
-                        catchError(stageResult: 'FAILURE', catchInterruptions: false) {
-                            container('project-builder') {
-                                script {
-                                  retryOnConnectionError {
-                                    sh """
-                                      echo "building and publishing ${params.projectName}"
-                                      echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
-                                      touch build-logs.txt build-summary.txt
-                                    """
-                                    ansiColor('xterm') {
-                                        sh """
-                                            (/build/build-revision.sh \
-                                                '${params.repoUrl}' \
-                                                '${params.revision}' \
-                                                '${params.scalaVersion}' \
-                                                '${params.version}' \
-                                                '${params.targets}' \
-                                                '${params.mvnRepoUrl}' \
-                                                '${params.enforcedSbtVersion}' \
-                                                '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
-                                            && [ "\$(cat build-status.txt)" = success ]
-                                        """
-                                    }
-                                  }
-                                }
+                      container('project-builder') {
+                        script {
+                          try {
+                            retryOnConnectionError {
+                              sh """
+                                echo "building and publishing ${params.projectName}"
+                                echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
+                                touch build-logs.txt build-summary.txt
+                              """
+                              ansiColor('xterm') {
+                                sh """
+                                    (/build/build-revision.sh \
+                                        '${params.repoUrl}' \
+                                        '${params.revision}' \
+                                        '${params.scalaVersion}' \
+                                        '${params.version}' \
+                                        '${params.targets}' \
+                                        '${params.mvnRepoUrl}' \
+                                        '${params.enforcedSbtVersion}' \
+                                        '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
+                                    && [ "\$(cat build-status.txt)" = success ]
+                                """
+                              }
                             }
-                        }
+                          } catch (err) {
+                            echo "Catched exception: ${err}"
+                            if (hasFailedAfterJenkinsRestart() && retryOnRestartCount < maxRetryOnRestart){
+                              retryOnRestartCount += 1
+                              echo retryOnRestartMessage()
+                              throw err // Trigger retry for whole pipeline
+                            } else if (retryOnFailureCount < maxRetryOnFailure){
+                              retryOnFailureCount += 1
+                              echo retryOnFailureMessage()
+                              throw err // Trigger retry for whole pipeline
+                            } else {
+                              currentStage.result = 'FAILURE'
+                            }
+                          }
+                      }
                     }
+                  }
                 }
                 stage("Report build results") {
                     steps {
@@ -188,13 +209,28 @@ pipeline {
     }
 }
 
-def retryOnConnectionError(Closure body, int retries = 50, int delayBeforeRetry = 1){
+def retryOnConnectionError(Closure body, int retries = 30, int delayBeforeRetry = 1){
   try {
     return body()
   } catch(io.fabric8.kubernetes.client.KubernetesClientException ex) {
     if(retries > 0) {
       sleep(delayBeforeRetry) // seconds
-      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry * 2))
+      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry + 1))
     } else throw ex
   }
+}
+
+@NonCPS
+def hasFailedAfterJenkinsRestart(){
+  def log = currentBuild.getLog()
+  def sinceLastRetryIndex = log.indexOf(retryOnRestartMessage())
+  if (log && sinceLastRetryIndex > 0) {
+    log = log.subString(sinceLastRetryIndex)
+  }
+
+  def sinceLastFailureIndex = log.indexOf(retryOnFailureMessage())
+  if (log && sinceLastFailureIndex > 0) {
+    log = log.subString(sinceLastFailureIndex)
+  }
+  log && log.contains("after Jenkins restart") // Jenkins instance was restarted, might lead to build failure
 }
