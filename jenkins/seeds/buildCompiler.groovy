@@ -50,6 +50,7 @@ pipeline {
                             resources:
                               requests:
                                 memory: 8G
+                        priorityClassName: "jenkins-agent-priority"
                     '''.stripIndent()
                 }
             }

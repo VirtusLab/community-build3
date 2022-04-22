@@ -32,6 +32,7 @@ pipeline {
                             resources:
                               requests:
                                 memory: 4G
+                        priorityClassName: "jenkins-agent-priority"
                     '''
                 }
             }

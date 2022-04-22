@@ -75,7 +75,7 @@ jenkins:
     hostAliases: []
     podSecurityContext: {}
     affinity: {}
-    priorityClassName: ""
+    priorityClassName: "jenkins-priority"
     tolerations: []
 
   # homePVC allows to set PersistentVolumeClaim properties for Jenkins home
@@ -359,6 +359,7 @@ jenkinsKubernetesAgents:
         - name: jnlp
           image: jenkins/inbound-agent:4.10-3-alpine
           imagePullPolicy: IfNotPresent
+      priorityClassName: "jenkins-agent-priority"
 
     properties:
       # Description of Jenkins Agent
