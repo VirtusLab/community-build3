@@ -78,9 +78,10 @@ pipeline {
                                 exec:
                                   command: ["update-ca-certificates"]
                             livenessProbe:
-                              # Check if the jnlp sidecar is still alive
                               exec:
-                                command: ["timeout 1 bash -c \"</dev/tcp/\${JENKINS_AGENT_SERVICE_HOST}/\${JENKINS_AGENT_SERVICE_PORT}\""]
+                                command: 
+                                # Check if the jnlp sidecar is still alive
+                                - timeout 1 bash -c "</dev/tcp/\${JENKINS_AGENT_SERVICE_HOST}/\${JENKINS_AGENT_SERVICE_PORT}"
                               initialDelaySeconds: 5
                               periodSeconds: 5
                             command:
@@ -91,6 +92,7 @@ pipeline {
                                 memory: ${podMemoryRequestMb}
                               limits:
                                 memory: 10G
+                            priorityClassName: "jenkins-agent-priority"
                             env:
                             - name: ELASTIC_USERNAME
                               value: ${params.elasticSearchUserName}
