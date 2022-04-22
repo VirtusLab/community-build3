@@ -3,4 +3,4 @@
 
 # Minute   Hour   Day of Month       Month          Day of Week        User      Command
 # (0-59)  (0-23)     (1-31)    (1-12 or Jan-Dec)  (0-6 or Sun-Sat)
-0 0 * * * root find /mvn-repo/upload-dir/ -maxdepth 1 -type d -ctime +0 -exec rm -rf {} \;
+0 * * * * root find /mvn-repo/upload-dir/ -maxdepth 1 -type d -ctime +0 -exec rm -rf {} \;
