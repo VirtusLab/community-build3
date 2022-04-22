@@ -9,7 +9,7 @@ pipeline {
     options {
         timeout(time: 30, unit: "MINUTES")
     }
-    agent none
+    agent { label "default" }
     stages {
         stage("Initialize build") {
             steps {
@@ -74,7 +74,6 @@ pipeline {
             }
         }
         stage("Persist build metadata") {
-            agent any
             steps {
                 script {
                     def metadata = [

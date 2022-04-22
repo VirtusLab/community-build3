@@ -31,7 +31,7 @@ def orderBuildPlan(buildPlan, inversedProjectDeps) {
 }
 
 pipeline {
-    agent none
+    agent { label "default" }
     options {
       timeout(time: 16, unit: "HOURS")
     }
@@ -99,7 +99,6 @@ pipeline {
             }
         }
         stage("Collect build metadata") {
-            agent any
             steps {
                 script {
                     dir(pwd(tmp: true)) {

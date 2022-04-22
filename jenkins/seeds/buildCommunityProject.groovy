@@ -27,6 +27,7 @@ pipeline {
     }
     stages {
         stage("Initialize build") {
+            agent { label "default" }
             steps {
                 script {
                     currentBuild.setDescription("${params.buildName} :: ${params.projectName}")

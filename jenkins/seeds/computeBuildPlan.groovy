@@ -4,7 +4,7 @@ pipeline {
     options {
         timeout(time: 60, unit: "MINUTES")
     }
-    agent none
+    agent { label "default" }
     stages {
         stage("Initialize build") {
             steps {
@@ -64,7 +64,6 @@ pipeline {
             }
         }
         stage("Persist build plan") {
-            agent any
             steps {
                 writeFile(file: "buildPlan.json", text: buildPlan)
                 archiveArtifacts(artifacts: "buildPlan.json")
