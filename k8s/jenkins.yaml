@@ -42,7 +42,19 @@ jenkins:
         requests:
           cpu: 1
           memory: 3Gi
-      env: []
+      env: 
+      # Enable JMX to allow connecting with profiler locally via port-forwarding
+      - name: JENKINS_JAVA_OPTS
+        value: >
+         -Dcom.sun.management.jmxremote 
+         -Dcom.sun.management.jmxremote.authenticate=false 
+         -Dcom.sun.management.jmxremote.ssl=false 
+         -Dcom.sun.management.jmxremote.local.only=false 
+         -Dcom.sun.management.jmxremote.port=1099 
+         -Dcom.sun.management.jmxremote.rmi.port=1099 
+         -Djava.rmi.server.hostname=127.0.0.1
+         -XX:+HeapDumpOnOutOfMemoryError
+         -XX:HeapDumpPath=/var/lib/jenkins/dumps
       envFrom: []
       volumeMounts:
       - name: seed-jobs
