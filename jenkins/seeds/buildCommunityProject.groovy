@@ -77,8 +77,9 @@ pipeline {
                                 exec:
                                   command: ["update-ca-certificates"]
                             livenessProbe:
+                              # Check if the jnlp sidecar is still alive
                               exec:
-                                command: ["timeout 1 bash -c "</dev/tcp/\${JENKINS_AGENT_SERVICE_HOST=}/\${JENKINS_AGENT_SERVICE_PORT}""]
+                                command: ["timeout 1 bash -c \"</dev/tcp/\${JENKINS_AGENT_SERVICE_HOST}/\${JENKINS_AGENT_SERVICE_PORT}\""]
                               initialDelaySeconds: 5
                               periodSeconds: 5
                             command:
