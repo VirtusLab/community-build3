@@ -88,9 +88,11 @@ pipeline {
                             livenessProbe:
                               exec:
                                 command: 
-                                # Check if the jnlp sidecar is still alive
-                                - timeout 1 bash -c "</dev/tcp/\${JENKINS_AGENT_SERVICE_HOST}/\${JENKINS_AGENT_SERVICE_PORT}"
-                              initialDelaySeconds: 5
+                                # Check if there is any active task executed by Jenkins 
+                                - /bin/bash
+                                - -c
+                                - ps -ef | grep /buildCommunityProject@tmp/durable | grep -v grep
+                              initialDelaySeconds: 30
                               periodSeconds: 5
                             command:
                             - cat
