@@ -99,9 +99,11 @@ pipeline {
                             tty: true
                             resources:
                               requests:
+                                cpu: 250m
                                 memory: ${podMemoryRequestMb}
                               limits:
-                                memory: 10G
+                                cpu: 2
+                                memory: 10Gi
                             priorityClassName: "jenkins-agent-priority"
                             env:
                             - name: ELASTIC_USERNAME
