@@ -149,7 +149,8 @@ pipeline {
                             }
                           } catch (err) {
                             echo "Catched exception: ${err}"
-                            if (hasFailedAfterJenkinsRestart() && retryOnRestartCount < maxRetryOnRestart){
+                            def hasFailedAfterRestart = hasFailedAfterJenkinsRestart("/buildCommunityProject", currentBuild.getDescription(), retryOnRestartMessage(), retryOnFailureMessage()))
+                            if (hasFailedAfterRestart && retryOnRestartCount < maxRetryOnRestart){
                               retryOnRestartCount += 1
                               echo retryOnRestartMessage()
                               throw err // Trigger retry for whole pipeline
@@ -222,19 +223,4 @@ def retryOnConnectionError(Closure body, int retries = 30, int delayBeforeRetry 
       return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry + 1))
     } else throw ex
   }
-}
-
-@NonCPS
-def hasFailedAfterJenkinsRestart(){
-  def log = currentBuild.getLog()
-  def sinceLastRetryIndex = log.indexOf(retryOnRestartMessage())
-  if (log && sinceLastRetryIndex > 0) {
-    log = log.subString(sinceLastRetryIndex)
-  }
-
-  def sinceLastFailureIndex = log.indexOf(retryOnFailureMessage())
-  if (log && sinceLastFailureIndex > 0) {
-    log = log.subString(sinceLastFailureIndex)
-  }
-  log && log.contains("after Jenkins restart") // Jenkins instance was restarted, might lead to build failure
 }
