@@ -12,16 +12,13 @@ enforcedSbtVersion="$2" # e.g. '1.5.5' or empty ''
 
 # Check if using a sbt with a supported version
 
-if [ ! -f $repoDir/project/build.properties ]; then
+buildPropsFile="${repoDir}/project/build.properties"
+if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
   exit 1
 fi
 
-if [ -n "$enforcedSbtVersion" ]; then
-  sbtVersion="$enforcedSbtVersion"
-else
-  sbtVersion=$(cat $repoDir/project/build.properties | grep sbt.version= | awk -F= '{ print $2 }')
-fi
+sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version= | awk -F= '{ print $2 }')
 
 function parseSemver() {
   local prefixSufix=($(echo ${1/-/ }))
@@ -39,9 +36,16 @@ sbtMajor=${sbtSemVerParts[0]}
 sbtMinor=${sbtSemVerParts[1]}
 sbtPatch=${sbtSemVerParts[2]}
 
-if [ "$sbtMajor" -lt 1 ] || ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -lt 5 ]) || ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -eq 5 ] && [ "$sbtPatch" -lt 5 ]); then
-  echo "Sbt version $sbtVersion is not supported. Use sbt 1.5.5. or newer"
-  exit 1
+if [ "$sbtMajor" -lt 1 ] ||
+  ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -lt 5 ]) ||
+  ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -eq 5 ] && [ "$sbtPatch" -lt 5 ]); then
+  echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.5.5"
+  if [ -n "$enforcedSbtVersion" ]; then
+    echo "Enforcing usage of sbt in version ${enforcedSbtVersion}"
+    sed -i -E "s/(sbt.version=).*/\1${enforcedSbtVersion}/" "${buildPropsFile}"
+  else
+    exit 1
+  fi
 fi
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"

@@ -57,7 +57,7 @@ pipelineJob('/runBuild') {
             separatorStyle("")
             sectionHeaderStyle("")
         }
-        stringParam("enforcedSbtVersion", "1.6.2", "(Optional): When not specified original sbt versions specified in the build definition of each project will be used")
+        stringParam("enforcedSbtVersion", "1.6.2", "(Optional): Version of sbt to be used when project is using unsupported version of the sbt (older then 1.5.5). If left empty projects using incompatible version would fail. Has no effect on projects using version newer then minimal supported")
         separator {
             name("GENERAL")
             sectionHeader("General")
