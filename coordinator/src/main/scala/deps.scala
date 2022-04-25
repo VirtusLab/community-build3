@@ -139,13 +139,25 @@ def loadDepenenecyGraph(
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
+  val ChunkSize = 32
   val optionalStream = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
-    .filter(_.stars >= minStarsCount)
-    .sortBy(-_.stars)
+    .takeWhile(_.stars >= minStarsCount)
+    .sliding(ChunkSize, ChunkSize)
     .to(LazyList)
-    .map(loadProject)
-    .map(projectModulesFilter(filterPatterns.map(_.r)))
-    .filter(_.mvs.nonEmpty)
+    .zipWithIndex
+    .flatMap { (chunk, idx) =>
+      println(s"Load projects - chunk #${idx}, projects indexes from ${idx * ChunkSize}")
+      val calcChunk = Future
+        .traverse(chunk) { project =>
+          Future {
+            loadProject
+              .andThen(projectModulesFilter(filterPatterns.map(_.r)))
+              .apply(project)
+          }
+        }
+        .map(_.filter(_.mvs.nonEmpty))
+      Await.result(calcChunk, 5.minute)
+    }
   val optional = maxProjectsCount
     .map(_ - required.length)
     .foldLeft(optionalStream)(_.take(_))
