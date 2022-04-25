@@ -12,11 +12,15 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
     case "3" => "3.x"
     case v   => v
   }
+  val commonSearchParams = Map(
+    "languages" -> release,
+    "platforms" -> "jvm",
+    "sort" -> "stars",
+    "q" -> "*"
+  ).map(_ + "=" + _).mkString("&")
   def load(page: Int) =
     val d = Jsoup
-      .connect(
-        s"https://index.scala-lang.org/search?languages=${release}&sort=stars&q=&page=$page"
-      )
+      .connect(s"https://index.scala-lang.org/search?${commonSearchParams}&page=$page")
       .get()
     d.select(".list-result .row").asScala.flatMap { e =>
       val texts = e.select("h4").get(0).text().split("/")
@@ -32,54 +36,48 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
     .flatten
 
 case class ModuleInVersion(version: String, modules: Seq[String])
-
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
-private def loadScaladexVersionsMatrix(project: Project) =
-  // Scaladex loads data dynamically using JS handlers
-  // We use htmlunit to execute handlers and get all the results
-  import com.gargoylesoftware.htmlunit
-  import htmlunit.*
-  import htmlunit.html.HtmlPage
-  import project.{org, name}
-  import java.util.logging.*
-
-  val url = s"https://index.scala-lang.org/artifacts/$org/$name"
-  val client = WebClient(BrowserVersion.CHROME)
-  def setOption(fn: WebClientOptions => Unit) = fn(client.getOptions())
-  setOption(_.setJavaScriptEnabled(true))
-  setOption(_.setCssEnabled(false))
-  setOption(_.setThrowExceptionOnScriptError(false))
-  setOption(_.setThrowExceptionOnFailingStatusCode(true))
-  setOption(_.setTimeout(15 * 1000))
-  // We set window size to trigger loading of all entries
-  client.getCurrentWindow.setInnerHeight(Int.MaxValue)
-  Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF)
-
-  val page = client.getPage[HtmlPage](url)
-  Jsoup.parse(page.asXml)
-
 def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectModules =
+  import scala.concurrent.ExecutionContext.Implicits.global
+  import util.*
   val binaryVersionSuffix = "_" + scalaBinaryVersion
-  val d = loadScaladexVersionsMatrix(project)
-  val mvs =
-    for
-      table <- d.select("tbody").asScala.toSeq
-      version <- table.select(".version").asScala.map(_.text())
-    yield
-      val modules =
-        for
-          tr <- table.select("tr").asScala
-          if tr.attr("class").split(" ").contains(binaryVersionSuffix)
-          name = tr.select(".artifact").get(0).text.trim
-        yield name
-      ModuleInVersion(version, modules.toSeq)
+  val moduleVersionsTask = Scaladex
+    .projectSummary(project.org, project.name, scalaBinaryVersion)
+    .flatMap {
+      case None =>
+        System.err.println(s"No project summary for ${project.org}/${project.name}")
+        Future.successful(Nil)
+      case Some(projectSummary) =>
+        for artifactsMetadata <- Future
+            .traverse(projectSummary.artifacts) { artifact =>
+              Scaladex
+                .artifactMetadata(groupId = projectSummary.groupId, artifactId = s"${artifact}_3")
+                .map { response =>
+                  if (response.pagination.pageCount != 1)
+                    System.err.println(
+                      "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
+                    )
+                  val versions = response.items.map(_.version)
+                  artifact -> versions
+                }
+            }
+            .map(_.toMap)
+        yield for version <- projectSummary.versions
+        yield ModuleInVersion(
+          version,
+          modules = artifactsMetadata.collect {
+            case (module, versions) if versions.contains(version) => module
+          }.toSeq
+        )
+    }
+  val moduleVersions = Await.result(moduleVersionsTask, 5.minute)
 
   // Make sure that versions are ordered, some libraries don't have correct order in scaladex matrix
   // Eg. scalanlp/breeze lists versions: 2.0, 2.0-RC1, 2.0.1-RC2, 2.0.1-RC1
   // We want to have latests versions in front of collection
   case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
-  val modules = mvs
+  val modules = moduleVersions
     .filter(_.modules.nonEmpty)
     .map(mvs => VersionedModules(mvs, mvs.version))
     .sortBy(_.semVersion)
