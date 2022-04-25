@@ -12,11 +12,15 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
     case "3" => "3.x"
     case v   => v
   }
+  val commonSearchParams = Map(
+    "languages" -> release,
+    "platforms" -> "jvm",
+    "sort" -> "stars",
+    "q" -> "*"
+  ).map(_ + "=" + _).mkString("&")
   def load(page: Int) =
     val d = Jsoup
-      .connect(
-        s"https://index.scala-lang.org/search?languages=${release}&sort=stars&q=&page=$page"
-      )
+      .connect(s"https://index.scala-lang.org/search?${commonSearchParams}&page=$page")
       .get()
     d.select(".list-result .row").asScala.flatMap { e =>
       val texts = e.select("h4").get(0).text().split("/")
@@ -38,29 +42,35 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
   import scala.concurrent.ExecutionContext.Implicits.global
   import util.*
   val binaryVersionSuffix = "_" + scalaBinaryVersion
-  val moduleVersionsTask = for
-    projectSummary <- Scaladex.projectSummary(project.org, project.name, scalaBinaryVersion)
-    artifactsMetadata <- Future
-      .traverse(projectSummary.artifacts) { artifact =>
-        Scaladex
-          .artifactMetadata(groupId = projectSummary.groupId, artifactId = s"${artifact}_3")
-          .map { response =>
-            if (response.pagination.pageCount != 1)
-              System.err.println(
-                "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
-              )
-            val versions = response.items.map(_.version)
-            artifact -> versions
-          }
-      }
-      .map(_.toMap)
-  yield for version <- projectSummary.versions
-  yield ModuleInVersion(
-    version,
-    modules = artifactsMetadata.collect {
-      case (module, versions) if versions.contains(version) => module
-    }.toSeq
-  )
+  val moduleVersionsTask = Scaladex
+    .projectSummary(project.org, project.name, scalaBinaryVersion)
+    .flatMap {
+      case None =>
+        System.err.println(s"No project summary for ${project.org}/${project.name}")
+        Future.successful(Nil)
+      case Some(projectSummary) =>
+        for artifactsMetadata <- Future
+            .traverse(projectSummary.artifacts) { artifact =>
+              Scaladex
+                .artifactMetadata(groupId = projectSummary.groupId, artifactId = s"${artifact}_3")
+                .map { response =>
+                  if (response.pagination.pageCount != 1)
+                    System.err.println(
+                      "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
+                    )
+                  val versions = response.items.map(_.version)
+                  artifact -> versions
+                }
+            }
+            .map(_.toMap)
+        yield for version <- projectSummary.versions
+        yield ModuleInVersion(
+          version,
+          modules = artifactsMetadata.collect {
+            case (module, versions) if versions.contains(version) => module
+          }.toSeq
+        )
+    }
   val moduleVersions = Await.result(moduleVersionsTask, 5.minute)
 
   // Make sure that versions are ordered, some libraries don't have correct order in scaladex matrix

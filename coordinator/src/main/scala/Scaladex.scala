@@ -30,7 +30,7 @@ object Scaladex {
       organization: String,
       repository: String,
       scalaBinaryVersion: String
-  ): AsyncResponse[ProjectSummary] = Future {
+  ): AsyncResponse[Option[ProjectSummary]] = Future {
     val response = requests.get(
       url = s"$ScaladexUrl/api/project",
       params = Map(
@@ -40,15 +40,11 @@ object Scaladex {
         "scalaVersion" -> scalaBinaryVersion
       )
     )
-    println(Map(
-        "organization" -> organization,
-        "repository" -> repository,
-        "target" -> "JVM",
-        "scalaVersion" -> scalaBinaryVersion
-      ))
-    println(response)
-    println(response.text())
-    fromJson[ProjectSummary](response.text())
+    // If output is empty it means that given project does not define JVM modules
+    // for given scala version
+    Option.unless(response.contentLength.contains(0)) {
+      fromJson[ProjectSummary](response.text())
+    }
   }
 
 }
