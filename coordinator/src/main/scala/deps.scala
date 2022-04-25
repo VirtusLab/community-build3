@@ -171,8 +171,9 @@ def loadDepenenecyGraph(
   val projects = {
     val loadProjects = Future.traverse((required #::: optional).zipWithIndex) { (project, idx) =>
       Future {
+        val name = s"${project.project.org}/${project.project.name}"
         println(
-          s"Load maven info: #${idx}${maxProjectsCount.map("/" + _)} - ${project.project.show}"
+          s"Load Maven info: #${idx}${maxProjectsCount.fold("")("/" + _)} - $name"
         )
         Option(loadMavenInfo(scalaBinaryVersion)(project))
       }.recover {
