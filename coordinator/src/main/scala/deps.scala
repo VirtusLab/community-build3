@@ -162,12 +162,19 @@ def loadDepenenecyGraph(
     .map(_ - required.length)
     .foldLeft(optionalStream)(_.take(_))
   val projects = {
-    val loadProjects = Future.traverse(required #::: optional) { project =>
+    val loadProjects = Future.traverse((required #::: optional).zipWithIndex) { (project, idx) =>
       Future {
-        loadMavenInfo(scalaBinaryVersion)(project)
+        println(
+          s"Load maven info: #${idx}${maxProjectsCount.map("/" + _)} - ${project.project.show}"
+        )
+        Option(loadMavenInfo(scalaBinaryVersion)(project))
+      }.recover {
+        case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
+          System.err.println(s"Missing Maven info: ${ex.getUrl()}")
+          None
       }
     }
-    Await.result(loadProjects, 30.minutes)
+    Await.result(loadProjects, 30.minutes).flatten
   }
   DependencyGraph(scalaBinaryVersion, projects)
 
