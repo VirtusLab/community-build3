@@ -7,13 +7,21 @@ import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
 
 // TODO scala3 should be more robust
-def loadProjects(scalaRelease: String): Seq[Project] = 
-  def load(page: Int) = 
-    val d = Jsoup.connect(s"https://index.scala-lang.org/search?scalaVersions=scala3&q=&page=$page").get()
+def loadProjects(scalaBinaryVersion: String): Seq[Project] =
+  val release = scalaBinaryVersion match {
+    case "3" => "3.x"
+    case v   => v
+  }
+  def load(page: Int) =
+    val d = Jsoup
+      .connect(
+        s"https://index.scala-lang.org/search?languages=${release}&sort=stars&q=&page=$page"
+      )
+      .get()
     d.select(".list-result .row").asScala.flatMap { e =>
       val texts = e.select("h4").get(0).text().split("/")
       val stars = e.select(".stats [title=Stars]").asScala.map(_.text)
-      if texts.isEmpty || stars.isEmpty then None else Some {
+      Option.unless(texts.isEmpty || stars.isEmpty) {
         Project(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
       }
     }
