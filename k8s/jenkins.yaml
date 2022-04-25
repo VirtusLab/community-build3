@@ -40,7 +40,7 @@ jenkins:
           cpu: 2
           memory: 5Gi
         requests:
-          cpu: 1
+          cpu: 500m
           memory: 3Gi
       env: 
       # Enable JMX to allow connecting with profiler locally via port-forwarding
@@ -126,8 +126,6 @@ jenkins:
   plugins:
     - name: blueocean
       version: "1.25.3"
-    - name: depgraph-view
-      version: "1.0.5"
     - name: ansicolor
       version: "1.0.1"
     - name: parameter-separator
@@ -371,7 +369,10 @@ jenkinsKubernetesAgents:
         - name: jnlp
           image: jenkins/inbound-agent:4.10-3-alpine
           imagePullPolicy: IfNotPresent
-      priorityClassName: "jenkins-agent-priority"
+          resources:
+            requests:
+              memory: 2Gi
+      priorityClassName: "jenkins-priority"
 
     properties:
       # Description of Jenkins Agent

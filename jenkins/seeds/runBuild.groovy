@@ -26,8 +26,8 @@ def inverseMultigraph(graph) {
 }
 
 @NonCPS
-def orderBuildPlan(buildPlan, inversedProjectDeps) {
-    buildPlan.sort { inversedProjectDeps[it.name].size() }
+def orderBuildPlan(buildPlan) {
+    buildPlan.sort { it.dependencies.size() }
 }
 
 pipeline {
@@ -146,7 +146,7 @@ pipeline {
                         [project.name, project.dependencies]
                     }
                     def inversedProjectDeps = inverseMultigraph(projectDeps)
-                    for(project in orderBuildPlan(buildPlan, inversedProjectDeps)) {
+                    for(project in orderBuildPlan(buildPlan)) {
                         def proj = project // capture value for closure
                         def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
                         jobs[proj.name] = {
