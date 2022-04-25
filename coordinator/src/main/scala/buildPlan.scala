@@ -52,7 +52,7 @@ def stripScala3Suffix(s: String) = s match { case WithExtractedScala3Suffix(pref
 
 def buildPlanCommons(depGraph: DependencyGraph) =
   val data = depGraph.projects
-  val topLevelData = data.filter(_.p.stars > 100)
+  val topLevelData = data
 
   val fullInfo = data.map(l => l.p -> l).toMap
 
@@ -242,7 +242,6 @@ def makeDependenciesBasedBuildPlan(
       repoUrl: String,
       tagOrRevision: Option[String]
   ): Option[ProjectBuildConfig] = {
-    println(s"Load project config ${project.p.show} @ ${project.v}")
     val name = projectName(project)
     val projectDir = os.temp.dir(prefix = s"repo-$name")
     os.proc(
@@ -400,6 +399,7 @@ private given FromString[Seq[Project]] = str =>
   import java.nio.file._
   val dataPath = Paths.get("data")
   val dest = dataPath.resolve("buildPlan.json")
-  val json = toJson(plan)
+  println("Projects in build plan: " + plan.size)
+  val json = toJson(plan.sortBy(_.dependencies.size))
   Files.createDirectories(dest.getParent)
   Files.write(dest, json.toString.getBytes)
