@@ -121,8 +121,14 @@ def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): L
   val ModuleInVersion(version, modules) = projectModules.mvs
     .find(v => findTag(repoName, v.version).isRight)
     .getOrElse(projectModules.mvs.head)
-  val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
-  val targets = mvs.map(cached(asTarget(scalaBinaryVersion)))
+  val toTargetsTask = Future.traverse(modules) { module =>
+    Future {
+      cached {
+        asTarget(scalaBinaryVersion)(_)
+      }(ModuleVersion(module, version, projectModules.project))
+    }
+  }
+  val targets = Await.result(toTargetsTask, 5.minute)
   LoadedProject(projectModules.project, version, targets)
 
   /** @param scalaBinaryVersion
