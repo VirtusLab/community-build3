@@ -20,7 +20,7 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 def projectConfig = parseJson(params.projectConfig ?: "{}")
 def podMemoryRequestMb = Math.min(projectConfig?.memoryRequestMb ?: 2048, 8192).toString() + "M"
 
-def maxRetryOnRestart = 10
+def maxRetryOnRestart = 3
 def maxRetryOnFailure = 1
 def retryOnRestartCount = 0
 def retryOnFailureCount = 0
@@ -92,8 +92,9 @@ pipeline {
                                 - /bin/bash
                                 - -c
                                 - ps -ef | grep /buildCommunityProject@tmp/durable | grep -v grep
-                              initialDelaySeconds: 30
-                              periodSeconds: 5
+                              initialDelaySeconds: 60
+                              periodSeconds: 15
+                              failureThreshold: 8
                             command:
                             - cat
                             tty: true
