@@ -242,6 +242,7 @@ def makeDependenciesBasedBuildPlan(
       repoUrl: String,
       tagOrRevision: Option[String]
   ): Option[ProjectBuildConfig] = {
+    println(s"Load project config ${project.p.show} @ ${project.v}")
     val name = projectName(project)
     val projectDir = os.temp.dir(prefix = s"repo-$name")
     os.proc(
@@ -261,9 +262,10 @@ def makeDependenciesBasedBuildPlan(
         .load[ProjectBuildConfig]
 
       config.left.foreach {
-        case ConfigReaderFailures(
-              CannotReadFile(_, Some(_: java.io.FileNotFoundException))
-            ) =>
+        case reasons: ConfigReaderFailures if reasons.toList.exists {
+              case CannotReadFile(_, Some(_: java.io.FileNotFoundException)) => true
+              case _                                                         => false
+            } =>
           ()
         case reason =>
           System.err.println(
