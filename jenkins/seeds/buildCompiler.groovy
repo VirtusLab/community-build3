@@ -7,7 +7,8 @@ def publishedCompilerVersion
 
 pipeline {
     options {
-        timeout(time: 30, unit: "MINUTES")
+        timeout(time: 90, unit: "MINUTES")
+        retry(2)
     }
     agent { label "default" }
     stages {
@@ -56,6 +57,7 @@ pipeline {
             }
             steps {
                 container('compiler-builder') {
+                  retryOnConnectionError {
                     ansiColor('xterm') {
                         sh """
                           echo 'building and publishing scala'
@@ -70,18 +72,21 @@ pipeline {
                         }
                         sh "/build/build.sh repo '${publishedCompilerVersion}' '${params.mvnRepoUrl}'"
                     }
+                  }
                 }
             }
         }
         stage("Persist build metadata") {
             steps {
                 script {
+                  retryOnConnectionError {
                     def metadata = [
                         commitHash: commitHash,
                         publishedCompilerVersion: publishedCompilerVersion
                     ]
                     writeFile(file: "compilerMetadata.json", text: JsonOutput.toJson(metadata))
                     archiveArtifacts(artifacts: "compilerMetadata.json")
+                  }
                 }
             }
         }

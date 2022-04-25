@@ -219,14 +219,3 @@ pipeline {
       }
     }
 }
-
-def retryOnConnectionError(Closure body, int retries = 50, int delayBeforeRetry = 1){
-  try {
-    return body()
-  } catch(io.fabric8.kubernetes.client.KubernetesClientException ex) {
-    if(retries > 0) {
-      sleep(delayBeforeRetry) // seconds
-      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry * 2))
-    } else throw ex
-  }
-}

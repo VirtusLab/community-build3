@@ -2,7 +2,8 @@
 
 pipeline {
     options {
-        timeout(time: 60, unit: "MINUTES")
+        timeout(time: 120, unit: "MINUTES")
+        retry(3)
     }
     agent { label "default" }
     stages {
@@ -39,6 +40,7 @@ pipeline {
             steps {
                 container('coordinator') {
                     script {
+                      retryOnConnectionError{
                         ansiColor('xterm') {
                             sh """
                               echo 'computing the build plan'
@@ -59,14 +61,17 @@ pipeline {
                             script: "cat /build/data/buildPlan.json",
                             returnStdout: true
                         )
+                      }
                     }
                 }
             }
         }
         stage("Persist build plan") {
             steps {
+              retryOnConnectionError {
                 writeFile(file: "buildPlan.json", text: buildPlan)
                 archiveArtifacts(artifacts: "buildPlan.json")
+              }
             }
         }
     }
