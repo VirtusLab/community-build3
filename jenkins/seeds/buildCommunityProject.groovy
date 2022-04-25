@@ -24,8 +24,8 @@ def maxRetryOnRestart = 10
 def maxRetryOnFailure = 1
 def retryOnRestartCount = 0
 def retryOnFailureCount = 0
-def retryOnRestartMessage() { return "**Retry build on restart #${retryOnRestartCount}**" }
-def retryOnFailureMessage() { return "**Retry build on failure #${retryOnFailureCount}**" }
+// Closures in Groovy don't handle free-variables
+def retryOnEventMessage(String event, int count) { return "**Retry build on ${event} #${count}**" }
 
 pipeline {
     agent none
@@ -149,14 +149,21 @@ pipeline {
                             }
                           } catch (err) {
                             echo "Catched exception: ${err}"
-                            def hasFailedAfterRestart = hasFailedAfterJenkinsRestart("/buildCommunityProject", currentBuild.getDescription(), retryOnRestartMessage(), retryOnFailureMessage()))
+                            def RestartEvent = "restart"
+                            def FailureEvent = "failure"
+                            def hasFailedAfterRestart = hasFailedAfterJenkinsRestart(
+                                "/buildCommunityProject",
+                                currentBuild.getDescription(),
+                                retryOnEventMessage(RestartEvent, retryOnRestartCount),
+                                retryOnEventMessage(FailureEvent, retryOnFailureCount)
+                              )
                             if (hasFailedAfterRestart && retryOnRestartCount < maxRetryOnRestart){
                               retryOnRestartCount += 1
-                              echo retryOnRestartMessage()
+                              echo retryOnEventMessage(RestartEvent, retryOnRestartCount)
                               throw err // Trigger retry for whole pipeline
                             } else if (retryOnFailureCount < maxRetryOnFailure){
                               retryOnFailureCount += 1
-                              echo retryOnFailureMessage()
+                              echo retryOnEventMessage(FailureEvent, retryOnFailureCount)
                               throw err // Trigger retry for whole pipeline
                             } else {
                               currentStage.result = 'FAILURE'
