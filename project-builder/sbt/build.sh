@@ -12,7 +12,6 @@ scalaVersion="$2"           # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
 version="$3"                # e.g. 1.0.2-communityBuild
 targets=($4)                # e.g. "com.example%foo com.example%bar"
 export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
-enforcedSbtVersion="$6"
 projectConfig="$7"
 
 if [[ -z "$projectConfig" ]]; then
@@ -26,10 +25,6 @@ echo Project projectConfig: $projectConfig
 echo '##################################'
 
 cd $repoDir
-if [ -n "$enforcedSbtVersion" ]; then
-  # Overwrite properties file, sbt thin client cannot take --sbt-version param
-  echo -e "sbt.version=$enforcedSbtVersion\n" >project/build.properties
-fi
 
 sbtSettings=(
   --batch
