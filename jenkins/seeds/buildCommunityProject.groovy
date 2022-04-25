@@ -31,7 +31,7 @@ pipeline {
     agent none
     options {
       timeout(time: 16, unit: "HOURS")
-      retry(count: retryOnRestartCount + maxRetryOnFailure + 1) // count: 1 means no retry
+      retry(count: maxRetryOnRestart + maxRetryOnFailure + 1) // count: 1 means no retry
     }
     stages {
         stage("Initialize build") {

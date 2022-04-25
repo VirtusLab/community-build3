@@ -12,12 +12,12 @@ def call(String jobName, String label, String retryOnRestartMessage, String retr
   else {
     def sinceLastRetryIndex = log.indexOf(retryOnRestartMessage)
     if (log && sinceLastRetryIndex > 0) {
-      log = log.subString(sinceLastRetryIndex)
+      log = log.substring(sinceLastRetryIndex)
     }
 
     def sinceLastFailureIndex = log.indexOf(retryOnFailureMessage)
     if (log && sinceLastFailureIndex > 0) {
-      log = log.subString(sinceLastFailureIndex)
+      log = log.substring(sinceLastFailureIndex)
     }
     log && log.contains("after Jenkins restart") // Jenkins instance was restarted, might lead to build failure
   }
