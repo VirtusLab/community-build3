@@ -43,7 +43,7 @@ private def loadScaladexVersionsMatrix(project: Project) =
   import htmlunit.html.HtmlPage
   import project.{org, name}
   import java.util.logging.*
-  
+
   val url = s"https://index.scala-lang.org/artifacts/$org/$name"
   val client = WebClient(BrowserVersion.CHROME)
   def setOption(fn: WebClientOptions => Unit) = fn(client.getOptions())
@@ -54,7 +54,7 @@ private def loadScaladexVersionsMatrix(project: Project) =
   setOption(_.setTimeout(15 * 1000))
   // We set window size to trigger loading of all entries
   client.getCurrentWindow.setInnerHeight(Int.MaxValue)
-  Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF); 
+  Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF)
 
   val page = client.getPage[HtmlPage](url)
   Jsoup.parse(page.asXml)
@@ -66,12 +66,12 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
     for
       table <- d.select("tbody").asScala.toSeq
       version <- table.select(".version").asScala.map(_.text())
-    yield 
-      val modules = 
-        for 
-          tr <- table.select("tr").asScala 
-            if tr.attr("class").split(" ").contains(binaryVersionSuffix)
-          name = tr.select(".artifact").get(0).text.trim    
+    yield
+      val modules =
+        for
+          tr <- table.select("tr").asScala
+          if tr.attr("class").split(" ").contains(binaryVersionSuffix)
+          name = tr.select(".artifact").get(0).text.trim
         yield name
       ModuleInVersion(version, modules.toSeq)
 
@@ -92,41 +92,42 @@ val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 
 def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
-  val url = s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
+  val url =
+    s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
   println(gradle)
   val GradleDep(o, n, v) = gradle
   val orgParsed = o.split('.').mkString("/")
-  val mCentralUrl = 
+  val mCentralUrl =
     s"https://repo1.maven.org/maven2/$orgParsed/$n/$v/$n-$v.pom"
   val md = Jsoup.connect(mCentralUrl).get
 
-  val deps = 
+  val deps =
     for
       dep <- md.select("dependency").asScala
       groupId <- dep.select("groupId").asScala
       artifactId <- dep.select("artifactId").asScala
       version <- dep.select("version").asScala
       scope = dep.select("scope").asScala.headOption.fold("compile")(_.text())
-    yield Dep(TargetId(groupId.text, artifactId.text), version.text) 
-    
-  Target(TargetId(o,n), deps.toSeq)
+    yield Dep(TargetId(groupId.text, artifactId.text), version.text)
 
-def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject = 
+  Target(TargetId(o, n), deps.toSeq)
+
+def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject =
   import projectModules.project.{name, org}
-  val repoName = s"https://github.com/$org/$name.git" 
+  val repoName = s"https://github.com/$org/$name.git"
   require(projectModules.mvs.nonEmpty, s"Empty modules list in ${projectModules.project}")
-  val ModuleInVersion(version, modules) =  projectModules.mvs
+  val ModuleInVersion(version, modules) = projectModules.mvs
     .find(v => findTag(repoName, v.version).isRight)
     .getOrElse(projectModules.mvs.head)
   val mvs = modules.map(m => ModuleVersion(m, version, projectModules.project))
   val targets = mvs.map(cached(asTarget(scalaBinaryVersion)))
   LoadedProject(projectModules.project, version, targets)
 
-  /**
-   * @param scalaBinaryVersion Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
-  */
+  /** @param scalaBinaryVersion
+    *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
+    */
 def loadDepenenecyGraph(
     scalaBinaryVersion: String,
     minStarsCount: Int,
@@ -204,4 +205,5 @@ def projectModulesFilter(
       .filter(_.modules.nonEmpty)
   )
 }
-@main def runDeps = loadDepenenecyGraph(scalaBinaryVersion = "3", minStarsCount = 100, maxProjectsCount = Some(100))
+@main def runDeps =
+  loadDepenenecyGraph(scalaBinaryVersion = "3", minStarsCount = 100, maxProjectsCount = Some(100))
