@@ -20,18 +20,11 @@ def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 def projectConfig = parseJson(params.projectConfig ?: "{}")
 def podMemoryRequestMb = Math.min(projectConfig?.memoryRequestMb ?: 2048, 8192).toString() + "M"
 
-def maxRetryOnRestart = 3
-def maxRetryOnFailure = 1
-def retryOnRestartCount = 0
-def retryOnFailureCount = 0
-// Closures in Groovy don't handle free-variables
-def retryOnEventMessage(String event, int count) { return "**Retry build on ${event} #${count}**" }
-
 pipeline {
     agent none
     options {
       timeout(time: 16, unit: "HOURS")
-      retry(count: maxRetryOnRestart + maxRetryOnFailure + 1) // count: 1 means no retry
+      retry(count: 2) // count: 1 means no retry
     }
     stages {
         stage("Initialize build") {
@@ -91,10 +84,10 @@ pipeline {
                                 # Check if there is any active task executed by Jenkins 
                                 - /bin/bash
                                 - -c
-                                - ps -ef | grep /buildCommunityProject@tmp/durable | grep -v grep
+                                - ps -ef | grep /buildCommunityProject | grep -v grep
                               initialDelaySeconds: 60
                               periodSeconds: 15
-                              failureThreshold: 8
+                              failureThreshold: 20
                             command:
                             - cat
                             tty: true
@@ -124,55 +117,34 @@ pipeline {
                       timeout(time: 2, unit: "HOURS")
                     } 
                     steps {
-                      container('project-builder') {
-                        script {
-                          try {
-                            retryOnConnectionError {
-                              sh """
-                                echo "building and publishing ${params.projectName}"
-                                echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
-                                touch build-logs.txt build-summary.txt
-                              """
-                              ansiColor('xterm') {
-                                sh """
-                                    (/build/build-revision.sh \
-                                        '${params.repoUrl}' \
-                                        '${params.revision}' \
-                                        '${params.scalaVersion}' \
-                                        '${params.version}' \
-                                        '${params.targets}' \
-                                        '${params.mvnRepoUrl}' \
-                                        '${params.enforcedSbtVersion}' \
-                                        '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
-                                    && [ "\$(cat build-status.txt)" = success ]
-                                """
-                              }
+                        catchError(stageResult: 'FAILURE', catchInterruptions: false) {
+                            container('project-builder') {
+                                script {
+                                  retryOnConnectionError {
+                                    sh """
+                                      echo "building and publishing ${params.projectName}"
+                                      echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
+                                      touch build-logs.txt build-summary.txt
+                                    """
+                                    ansiColor('xterm') {
+                                        sh """
+                                            (/build/build-revision.sh \
+                                                '${params.repoUrl}' \
+                                                '${params.revision}' \
+                                                '${params.scalaVersion}' \
+                                                '${params.version}' \
+                                                '${params.targets}' \
+                                                '${params.mvnRepoUrl}' \
+                                                '${params.enforcedSbtVersion}' \
+                                                '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
+                                            && [ "\$(cat build-status.txt)" = success ]
+                                        """
+                                    }
+                                  }
+                                }
                             }
-                          } catch (err) {
-                            echo "Catched exception: ${err}"
-                            def RestartEvent = "restart"
-                            def FailureEvent = "failure"
-                            def hasFailedAfterRestart = hasFailedAfterJenkinsRestart(
-                                "/buildCommunityProject",
-                                currentBuild.getDescription(),
-                                retryOnEventMessage(RestartEvent, retryOnRestartCount),
-                                retryOnEventMessage(FailureEvent, retryOnFailureCount)
-                              )
-                            if (hasFailedAfterRestart && retryOnRestartCount < maxRetryOnRestart){
-                              retryOnRestartCount += 1
-                              echo retryOnEventMessage(RestartEvent, retryOnRestartCount)
-                              throw err // Trigger retry for whole pipeline
-                            } else if (retryOnFailureCount < maxRetryOnFailure){
-                              retryOnFailureCount += 1
-                              echo retryOnEventMessage(FailureEvent, retryOnFailureCount)
-                              throw err // Trigger retry for whole pipeline
-                            } else {
-                              currentStage.result = 'FAILURE'
-                            }
-                          }
-                      }
+                        }
                     }
-                  }
                 }
                 stage("Report build results") {
                     steps {
