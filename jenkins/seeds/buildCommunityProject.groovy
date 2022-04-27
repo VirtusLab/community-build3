@@ -55,6 +55,8 @@ pipeline {
         stage("Prepare executor") {
             agent {
                 kubernetes {
+                    podRetention never()
+                    activeDeadlineSeconds 60
                     yaml """
                         apiVersion: v1
                         kind: Pod
@@ -78,16 +80,6 @@ pipeline {
                               postStart:
                                 exec:
                                   command: ["update-ca-certificates"]
-                            livenessProbe:
-                              exec:
-                                command: 
-                                # Check if there is any active task executed by Jenkins 
-                                - /bin/bash
-                                - -c
-                                - ps -ef | grep /buildCommunityProject | grep -v grep
-                              initialDelaySeconds: 60
-                              periodSeconds: 15
-                              failureThreshold: 20
                             command:
                             - cat
                             tty: true

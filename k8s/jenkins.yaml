@@ -55,6 +55,7 @@ jenkins:
          -Djava.rmi.server.hostname=127.0.0.1
          -XX:+HeapDumpOnOutOfMemoryError
          -XX:HeapDumpPath=/var/lib/jenkins/dumps
+         -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
       envFrom: []
       volumeMounts:
       - name: seed-jobs
