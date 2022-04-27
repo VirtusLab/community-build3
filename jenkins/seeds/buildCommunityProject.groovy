@@ -109,6 +109,7 @@ pipeline {
                       timeout(time: 2, unit: "HOURS")
                     } 
                     steps {
+                      timestamps{
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
                                 script {
@@ -136,6 +137,7 @@ pipeline {
                                 }
                             }
                         }
+                      }
                     }
                 }
                 stage("Report build results") {
