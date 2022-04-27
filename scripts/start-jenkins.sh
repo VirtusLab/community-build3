@@ -19,12 +19,6 @@ if [ -z "$CB_K8S_NAMESPACE" ]; then
   exit 1
 fi
 
-if [ -z "${CB_BUILD_CRON_TRIGGER+x}" ]; then
-  echo >&2 "CB_BUILD_CRON_TRIGGER env variable has to be set"
-  exit 1
-fi
-
-
 REMOTE_CREDS_SECRET=jenkins-remote-credentials
 if [[ -z "${CB_BUILD_TOKEN+x}" ]]; then
   CB_BUILD_TOKEN="$(echo $RANDOM | md5sum | head -c 32)"
@@ -46,10 +40,8 @@ jenkinsClientId=$(scbk get secret/jenkins-github-oauth-secret -o 'jsonpath={.dat
 # Make sure env ids starts from env count set in jenkins.yaml
 HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CB_K8S_NAMESPACE" \
   upgrade jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --install --version 0.3.1 -f k8s/jenkins.yaml \
-  --set 'jenkins.podSpec.jenkinsController.env[1].name'=BUILD_CRON_TRIGGER \
-  --set 'jenkins.podSpec.jenkinsController.env[1].value'="$CB_BUILD_CRON_TRIGGER" \
-  --set 'jenkins.podSpec.jenkinsController.env[2].name'=BUILD_TOKEN \
-  --set 'jenkins.podSpec.jenkinsController.env[2].valueFrom.secretKeyRef.name'="$REMOTE_CREDS_SECRET" \
-  --set 'jenkins.podSpec.jenkinsController.env[2].valueFrom.secretKeyRef.key'="runbuild-token" \
+  --set 'jenkins.podSpec.jenkinsController.env[1].name'=BUILD_TOKEN \
+  --set 'jenkins.podSpec.jenkinsController.env[1].valueFrom.secretKeyRef.name'="$REMOTE_CREDS_SECRET" \
+  --set 'jenkins.podSpec.jenkinsController.env[1].valueFrom.secretKeyRef.key'="runbuild-token" \
   --set 'jenkinsAuthentication.githubOAuth.clientID'="${jenkinsClientId}" \
   --set 'jenkinsAuthentication.githubOAuth.clientSecretRef.namespace'="$CB_K8S_NAMESPACE"
