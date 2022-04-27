@@ -25,11 +25,6 @@ def inverseMultigraph(graph) {
     return inversed
 }
 
-@NonCPS
-def orderBuildPlan(buildPlan) {
-    buildPlan.sort { it.dependencies.size() }
-}
-
 pipeline {
     agent { label "default" }
     options {
@@ -45,7 +40,8 @@ pipeline {
                         def now = new Date()
                         def dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
                         def formattedDate = dateFormat.format(now)
-                        buildName = "${formattedDate}_${currentBuild.number}"
+                        def optScalaVersion = params.publishedScalaVersion ? params.publishedScalaVersion + "_" : ""
+                        buildName = "${optScalaVersion}${formattedDate}_${currentBuild.number}"
                     }
                     currentBuild.setDescription(buildName)
                     mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildName}"
@@ -146,7 +142,7 @@ pipeline {
                         [project.name, project.dependencies]
                     }
                     def inversedProjectDeps = inverseMultigraph(projectDeps)
-                    for(project in orderBuildPlan(buildPlan)) {
+                    for(project in buildPlan) {
                         def proj = project // capture value for closure
                         def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
                         jobs[proj.name] = {
