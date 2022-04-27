@@ -46,7 +46,7 @@ pipeline {
                         missingDependencies.removeAll { projectName ->  labeledProjectWasBuilt("${params.buildName} :: ${projectName}") }
                         if (!missingDependencies.isEmpty()) {
                             echo "Some dependencies haven't been built yet: ${missingDependencies.join(", ")}"
-                            suspendThisBuild()
+                            sleep time: 2, unit: 'MINUTES'
                         }
                     }
                 }
