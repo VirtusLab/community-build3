@@ -46,7 +46,7 @@ pipeline {
                         missingDependencies.removeAll { projectName ->  labeledProjectWasBuilt("${params.buildName} :: ${projectName}") }
                         if (!missingDependencies.isEmpty()) {
                             echo "Some dependencies haven't been built yet: ${missingDependencies.join(", ")}"
-                            sleep time: 2, unit: 'MINUTES'
+                            sleep time: 2 * missingDependencies.size() , unit: 'MINUTES'
                         }
                     }
                 }
@@ -89,7 +89,7 @@ pipeline {
                                 memory: ${podMemoryRequestMb}
                               limits:
                                 cpu: 2
-                                memory: 10Gi
+                                memory: 10G
                             priorityClassName: "jenkins-agent-priority"
                             env:
                             - name: ELASTIC_USERNAME
