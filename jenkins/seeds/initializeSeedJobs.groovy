@@ -26,6 +26,9 @@ pipelineJob('/runBuild') {
             sandbox()
         }
     }
+    properties{
+        disableConcurrentBuilds()
+    }
     parameters {
         stringParam("buildName", null, "(Optional) Should be unique among all builds; Should be valid both as a file name and a part of a URL; Will be synthesized from current date and build number if not specified")
         separator {
