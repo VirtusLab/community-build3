@@ -29,6 +29,9 @@ pipeline {
                             command:
                             - cat
                             tty: true
+                            resources:
+                              requests:
+                                memory: 4G
                     '''
                 }
             }
