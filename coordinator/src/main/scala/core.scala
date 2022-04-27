@@ -74,11 +74,14 @@ case class ProjectBuildConfig(
     java: JavaConfig = JavaConfig(),
     sbt: SbtConfig = SbtConfig(),
     mill: MillConfig = MillConfig(),
-    tests: TestingMode = TestingMode.Full
+    tests: TestingMode = TestingMode.Full,
+    // We should use Option[Int] here, but json4s fails to resolve signature https://github.com/json4s/json4s/issues/1035
+    memoryRequestMb: Int = 2048
 ) derives ConfigReader
 
 object ProjectBuildConfig {
   val empty = ProjectBuildConfig()
+  final lazy val defaultMemoryRequest = empty.memoryRequestMb
 }
 
 case class SemVersion(major: Int, minor: Int, patch: Int, milestone: Option[String])
