@@ -173,7 +173,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     val fromBuild =
       val toCheck = projectDir / "build.sc" ::
         projectDir / "build.sbt" ::
-        os.walk(projectDir / "project").toList
+        List(projectDir / "project").filter(os.exists(_)).flatMap(os.walk(_)).toList
       toCheck
         .filter(f => os.exists(f) && os.isFile(f))
         .flatMap(readXmx)
@@ -188,7 +188,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
 
     def unapply(text: String): Option[MegaBytes] =
       def commentStartIdx = text.indexOf("#") max text.indexOf("//")
-      def isNotCommented = text.indexOf("-Xmx") > commentStartIdx
+      def isNotCommented = commentStartIdx < 0 || text.indexOf("-Xmx") < commentStartIdx
       text match {
         case XmxPattern(size, unit) if isNotCommented =>
           val sizeN = size.toInt
