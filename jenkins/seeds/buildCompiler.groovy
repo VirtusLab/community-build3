@@ -47,6 +47,9 @@ pipeline {
                             command:
                             - cat
                             tty: true
+                            resources:
+                              requests:
+                                memory: 8G
                     '''.stripIndent()
                 }
             }

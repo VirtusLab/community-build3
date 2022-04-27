@@ -17,6 +17,8 @@ def parseCommaSeparated(String string) {
 
 def upstreamProjects = parseCommaSeparated(params.upstreamProjects)
 def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
+def projectConfig = parseJson(params.projectConfig ?: "{}")
+def podMemoryRequestMb = Math.min(projectConfig?.memoryRequestMb ?: 2048, 8192).toString() + "M"
 
 pipeline {
     agent none
@@ -79,9 +81,9 @@ pipeline {
                             tty: true
                             resources:
                               requests:
-                                memory: 5Gi
+                                memory: ${podMemoryRequestMb}
                               limits:
-                                memory: 7Gi
+                                memory: 10G
                             env:
                             - name: ELASTIC_USERNAME
                               value: ${params.elasticSearchUserName}

@@ -23,5 +23,5 @@ class TestingModeEnumSerializer
       (deserialize, serialize)
     })
 
-def toJson[T](obj: T): String = Serialization.write(obj)
+def toJson[T <: AnyRef](obj: T): String = Serialization.write(obj)
 def fromJson[T: Manifest](json: String): T = Serialization.read(json)
