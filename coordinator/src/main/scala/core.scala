@@ -13,7 +13,9 @@ object Project:
     val splitted = line.split("%")
     Project(splitted(0), splitted(1))(splitted(2).toInt)
 
-case class ProjectVersion(p: Project, v: String)
+case class ProjectVersion(p: Project, v: String) {
+  def showName = s"${p.org}_${p.name}"
+}
 
 case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[String]):
   def show = (Seq(name, version, mvn) ++ deps).mkString(",")

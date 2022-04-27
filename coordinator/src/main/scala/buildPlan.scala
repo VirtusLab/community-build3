@@ -1,14 +1,11 @@
 import org.jsoup._
 import collection.JavaConverters._
 import java.nio.file._
-import java.io.FileNotFoundException
 import java.net.URL
 import scala.sys.process._
 import scala.util.CommandLineParser.FromString
 import scala.util.Try
-import com.typesafe.config.ConfigFactory
-import pureconfig._
-import pureconfig.error.*
+
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -185,6 +182,7 @@ def makeDependenciesBasedBuildPlan(
     internalProjectConfigsPath: String
 ) =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
+  val configDiscovery = ProjectConfigDiscovery(java.io.File(internalProjectConfigsPath))
 
   val dottyProjectName = "lampepfl_dotty"
 
@@ -210,132 +208,16 @@ def makeDependenciesBasedBuildPlan(
     val originalCoords = (project.org, project.name)
     replacements.get(originalCoords).map(_._2).flatten
 
-  def projectName(project: ProjectVersion) = s"${project.p.org}_${project.p.name}"
-  val projectNames = projectsDeps.keys.map(projectName).toList
-
-  lazy val referenceConfig =
-    ConfigSource.resources("buildPlan.reference.conf").cursor().flatMap(_.asConfigValue).toOption
-  def internalProjectConfigs(projectName: String) = {
-    val fallbackConfig = referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(projectName, _))
-    val config = ConfigSource
-      .file(internalProjectConfigsPath)
-      .withFallback(ConfigSource.fromConfig(fallbackConfig))
-      .at(projectName)
-      .load[ProjectBuildConfig]
-
-    config.left.foreach {
-      case ConfigReaderFailures(
-            CannotReadFile(file, Some(_: FileNotFoundException))
-          ) =>
-        System.err.println("Internal conifg projects not configured")
-      case failure =>
-        System.err.println(
-          s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${failure.prettyPrint(0)}"
-        )
-    }
-
-    config.toOption
-  }
-
-  def projectConfig(
-      project: ProjectVersion,
-      repoUrl: String,
-      tagOrRevision: Option[String]
-  ): Option[ProjectBuildConfig] = {
-    val name = projectName(project)
-    val projectDir = os.temp.dir(prefix = s"repo-$name")
-    os.proc(
-      "git",
-      "clone",
-      repoUrl,
-      projectDir,
-      "--quiet",
-      tagOrRevision.map("--branch=" + _).toList,
-      "--depth=1"
-    ).call(stderr = os.Pipe)
-
-    def readProjectConfig() = {
-      val config = ConfigSource
-        .file((projectDir / "scala3-community-build.conf").toIO)
-        .withFallback(ConfigSource.resources("buildPlan.reference.conf"))
-        .load[ProjectBuildConfig]
-
-      config.left.foreach {
-        case reasons: ConfigReaderFailures if reasons.toList.exists {
-              case CannotReadFile(_, Some(_: java.io.FileNotFoundException)) => true
-              case _                                                         => false
-            } =>
-          ()
-        case reason =>
-          System.err.println(
-            s"Failed to decode community-build config in ${repoUrl}, reason: ${reason}"
-          )
-      }
-      config.toOption
-    }
-
-    def discoverJavaVersion(): Option[String] =
-      val githubDir = projectDir / ".github"
-      if !os.exists(githubDir) then None
-      else
-        val OptQuote = "['\"]?".r
-        val JavaVersion = raw"java-version:\s*(.*)".r
-        val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
-        val JavaVersionDistroVer = raw"$OptQuote(\w+)@(.*)$OptQuote".r
-        val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
-        // We can only supported this versions
-        val allowedVersions = Seq(8, 11, 17)
-        os.walk
-          .stream(githubDir)
-          .filter(os.isFile)
-          .flatMap { path =>
-            os.read
-              .lines(path)
-              .map(_.trim)
-              .flatMap {
-                case MatrixEntry(key, valuesList) if key.toLowerCase.contains("java") =>
-                  valuesList.split(",").map(_.trim)
-                case JavaVersion(value) => Option(value)
-                case _                  => Nil
-              }
-              .flatMap {
-                case JavaVersionNumber(version) => Option(version)
-                case JavaVersionDistroVer(distro, version) if !distro.contains("graal") =>
-                  version
-                    .stripPrefix("1.")
-                    .split('.')
-                    .headOption
-                case other => None
-              }
-              .flatMap(_.toIntOption)
-          }
-          .toList
-          .distinct
-          .flatMap(version => allowedVersions.find(_ >= version))
-          .minOption
-          .map(_.toString)
-
-    readProjectConfig()
-      .orElse(internalProjectConfigs(projectName(project)))
-      .map { c =>
-        if c.java.version.nonEmpty then c
-        else c.copy(java = c.java.copy(version = discoverJavaVersion()))
-      }
-      .filter(_ != ProjectBuildConfig.empty)
-      .map { config =>
-        println(s"Using custom project config for $name: $config")
-        config
-      }
-  }
+  val projectNames = projectsDeps.keys.map(_.showName).toList
 
   val resolveProjects = Future
     .traverse(projectsDeps.toList) { (project, deps) =>
       Future {
         val repoUrl = projectRepoUrl(project.p)
         val tag = getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption)
-        val name = projectName(project)
+        val name = project.showName
         val dependencies = deps
-          .map(projectName)
+          .map(_.showName)
           .filter(depName =>
             projectNames.contains(depName) && depName != name && depName != dottyProjectName
           )
@@ -346,9 +228,10 @@ def makeDependenciesBasedBuildPlan(
           repoUrl = repoUrl,
           revision = tag.getOrElse(""),
           version = project.v,
-          targets =
-            fullInfo(project.p).targets.map(t => stripScala3Suffix(t.id.asMvnStr)).mkString(" "),
-          config = projectConfig(project, repoUrl, tag)
+          targets = fullInfo(project.p).targets
+            .map(t => stripScala3Suffix(t.id.asMvnStr))
+            .mkString(" "),
+          config = configDiscovery(project, repoUrl, tag)
         )
       }
     }
