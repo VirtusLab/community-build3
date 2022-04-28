@@ -179,7 +179,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-coordinator:v0.0.9', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.9', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
@@ -198,9 +198,7 @@ pipeline {
                     def reportFile = 'build-report.txt'
                     sh """
                       touch build-report.txt
-                      curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
-                        | bash -s \
-                        -- run /build-scripts/buildReport.scala --quiet \
+                      scala-cli run /build-scripts/buildReport.scala --quiet \
                         -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
                       """
                     def report = readFile(reportFile)
