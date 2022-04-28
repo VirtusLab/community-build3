@@ -38,7 +38,7 @@ if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
 
 elif [ -f "repo/build.sbt" ]; then 
   echo "sbt project found: ${isSbtProject}"
-  $scriptDir/sbt/prepare-project.sh repo "$enforcedSbtVersion"
+  $scriptDir/sbt/prepare-project.sh repo "$enforcedSbtVersion" "$scalaVersion" "$projectConfig"
   $scriptDir/sbt/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig"
 
 else
