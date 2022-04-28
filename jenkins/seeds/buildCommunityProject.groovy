@@ -1,4 +1,5 @@
 // Look at initializeSeedJobs.groovy for how this file gets parameterized
+@Library(['camunda-community', 'pipeline-logparser']) _
 
 def labeledProjectWasBuilt(String label) {
     return isLastLabeledBuildFinished("/buildCommunityProject", label)
@@ -52,64 +53,51 @@ pipeline {
                 }
             }
         }
-        stage("Prepare executor") {
-            agent {
-                kubernetes {
-                    podRetention never()
-                    activeDeadlineSeconds 60
-                    yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                          name: project-builder
-                        spec:
-                          volumes:
-                          - name: mvn-repo-cert
-                            configMap:
-                              name: mvn-repo-cert
-                          containers:
-                          - name: project-builder
-                            image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.9
-                            imagePullPolicy: IfNotPresent
-                            volumeMounts:
-                            - name: mvn-repo-cert
-                              mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
-                              subPath: mvn-repo.crt
-                              readOnly: true
-                            lifecycle:
-                              postStart:
-                                exec:
-                                  command: ["update-ca-certificates"]
-                            command:
-                            - cat
-                            tty: true
-                            resources:
-                              requests:
-                                cpu: 250m
-                                memory: ${podMemoryRequestMb}
-                              limits:
-                                cpu: 2
-                                memory: 10G
-                            priorityClassName: "jenkins-agent-priority"
-                            env:
-                            - name: ELASTIC_USERNAME
-                              value: ${params.elasticSearchUserName}
-                            - name: ELASTIC_PASSWORD
-                              valueFrom:
-                                secretKeyRef:
-                                  name: ${params.elasticSearchSecretName}
-                                  key: elastic
-                                  optional: true
-                    """.stripIndent()
-                }
-            }
-            stages {
-                stage("Build project") {
-                    options {
-                      timeout(time: 2, unit: "HOURS")
-                    } 
-                    steps {
-                      timestamps{
+
+        stage("Build project") {
+          steps {
+            podTemplate(
+              podRetention: never(),
+              activeDeadlineSeconds: 60,
+              yaml: """
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      name: project-builder
+                    spec:
+                      volumes:
+                      - name: mvn-repo-cert
+                        configMap:
+                          name: mvn-repo-cert
+                      containers:
+                      - name: project-builder
+                        image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.9
+                        imagePullPolicy: IfNotPresent
+                        volumeMounts:
+                        - name: mvn-repo-cert
+                          mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
+                          subPath: mvn-repo.crt
+                          readOnly: true
+                        lifecycle:
+                          postStart:
+                            exec:
+                              command: ["update-ca-certificates"]
+                        command:
+                        - cat
+                        tty: true
+                        resources:
+                          requests:
+                            cpu: 250m
+                            memory: ${podMemoryRequestMb}
+                          limits:
+                            cpu: 2
+                            memory: 10G
+                        priorityClassName: "jenkins-agent-priority"
+                    """.stripIndent()){
+                    timeout(time: 2, unit: "HOURS"){
+                    conditionalRetry([
+                      agentLabel: POD_LABEL,
+                      runSteps: {
                         catchError(stageResult: 'FAILURE', catchInterruptions: false) {
                             container('project-builder') {
                                 script {
@@ -137,54 +125,75 @@ pipeline {
                                 }
                             }
                         }
+                      },
+                      postAlways: {
+                        archiveArtifacts(artifacts: "build-*.txt")
+                        stash(name: "buildResults", includes: "build-*.txt")
                       }
-                    }
-                }
-                stage("Report build results") {
-                    steps {
-                      container('project-builder') {
-                        timeout(unit: 'MINUTES', time: 10) {
-                            archiveArtifacts(artifacts: "build-logs.txt")
-                            archiveArtifacts(artifacts: "build-summary.txt")
-                            archiveArtifacts(artifacts: "build-status.txt")
-                            waitUntil {
-                                script {
-                                  retryOnConnectionError{
-                                    def elasticCredentialsDefined = sh(script: 'echo $ELASTIC_PASSWORD', returnStdout: true).trim()
-                                    if (elasticCredentialsDefined) {
-                                        def timestamp = java.time.LocalDateTime.now()
-                                        def buildStatus = getBuildStatus()
-                                        0 == sh (
-                                          script: "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt '${params.version}' '${params.scalaVersion}' '${params.buildName}' '${env.BUILD_URL}'",
-                                          returnStatus: true
-                                        )
-                                    } else true
-                                  }
-                                }
-                            }
-                        }
-                      }
-                    }
-                }
+                    ])
+                  }
             }
-            post { 
-                always { 
-                    script {
-                      retryOnConnectionError {
-                        for (projectName in downstreamProjects) {
-                            resumeLastLabeledBuild("/buildCommunityProject", "${params.buildName} :: ${projectName}")
-                        }
-                      }
+          }
+          post { 
+            always { 
+                script {
+                  retryOnConnectionError {
+                    for (projectName in downstreamProjects) {
+                        resumeLastLabeledBuild("/buildCommunityProject", "${params.buildName} :: ${projectName}")
                     }
-                }
-                failure {
-                  script {
-                    echo "Build failed, reproduce it locally using following command:"
-                    echo "scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/cli/scb-cli.scala -- reproduce ${env.BUILD_NUMBER}"
                   }
                 }
             }
+            failure {
+              script {
+                echo "Build failed, reproduce it locally using following command:"
+                echo "scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/cli/scb-cli.scala -- reproduce ${env.BUILD_NUMBER}"
+              }
+            }
+          }
         }
-    }
+
+        stage("Report build results") {
+            steps {
+              podTemplate(
+                name: "build-reporter-${env.BUILD_NUMBER}",
+                containers: [
+                  containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.9', command: 'sleep', args: '15m')
+                ],
+                envVars: [
+                  envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
+                  secretEnvVar(key: 'ELASTIC_PASSWORD', secretName: params.elasticSearchSecretName, secretKey: 'elastic'),
+                ],
+                resourceRequestMemory: '250M'
+              ){
+                conditionalRetry([
+                  agentLabel: POD_LABEL,
+                  runSteps: {
+                    container('reporter') {
+                      timeout(unit: 'MINUTES', time: 15) {
+                        unstash("buildResults")
+                        waitUntil {
+                            script {
+                              retryOnConnectionError{
+                                def elasticCredentialsDefined = sh(script: 'echo $ELASTIC_PASSWORD', returnStdout: true).trim()
+                                if (elasticCredentialsDefined) {
+                                    def timestamp = java.time.LocalDateTime.now()
+                                    def buildStatus = getBuildStatus()
+                                    0 == sh (
+                                      script: "/build/feed-elastic.sh '${params.elasticSearchUrl}' '${params.projectName}' '${buildStatus}' '${timestamp}' build-summary.txt build-logs.txt '${params.version}' '${params.scalaVersion}' '${params.buildName}' '${env.BUILD_URL}'",
+                                      returnStatus: true
+                                    )
+                                } else true
+                              }
+                            }
+                        }
+                    }
+                  }
+                }
+              ])
+            }
+          }
+        }
+  }
 }
 

@@ -169,9 +169,7 @@ pipeline {
                             )
                         }
                     }
-                    timestamps{
-                      parallel jobs
-                    }
+                    parallel jobs
                 }
             }
         }
