@@ -179,7 +179,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       private val DefOrVal = matchEnclosed("def|val|var")
       private val OptType = matchEnclosed(raw":\s*String")
       private val FullMatchPattern =
-        raw"(.*($DefOrVal $Scala3VersionNamesAlt$OptType)\s*=\s*(.*))".r
+        raw".*(($DefOrVal $Scala3VersionNamesAlt$OptType)\s*=\s*(.*))".r
       def unapply(line: String): Option[Replecement] = line match {
         case FullMatchPattern(wholeDefn, definition, value) =>
           Some(Replecement(wholeDefn, s"$definition = <SCALA_VERSION>"))
