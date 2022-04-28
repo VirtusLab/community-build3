@@ -158,13 +158,18 @@ pipeline {
               podTemplate(
                 name: "build-reporter-${env.BUILD_NUMBER}",
                 containers: [
-                  containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.9', command: 'sleep', args: '15m')
+                  containerTemplate(
+                    name: 'reporter',
+                    image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.9',
+                    command: 'sleep',
+                    args: '15m',
+                    resourceRequestMemory: '250M'
+                  )
                 ],
                 envVars: [
                   envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
                   secretEnvVar(key: 'ELASTIC_PASSWORD', secretName: params.elasticSearchSecretName, secretKey: 'elastic'),
                 ],
-                resourceRequestMemory: '250M'
               ){
                 conditionalRetry([
                   agentLabel: POD_LABEL,
