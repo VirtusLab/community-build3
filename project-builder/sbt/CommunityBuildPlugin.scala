@@ -374,12 +374,15 @@ object CommunityBuildPlugin extends AutoPlugin {
           |************************""".stripMargin)
       IO.write(file("..") / "build-summary.txt", buildSummary.toJson)
 
-      val hasFailedSteps = projectsBuildResults.exists(_.hasFailedStep)
+      val failedModules = projectsBuildResults
+        .filter(_.hasFailedStep)
+        .map(_.artifactName)
+      val hasFailedSteps = failedModules.nonEmpty
       val buildStatus =
         if (hasFailedSteps) "failure"
         else "success"
       IO.write(file("..") / "build-status.txt", buildStatus)
-      if (hasFailedSteps) throw new ProjectBuildFailureException
+      if (hasFailedSteps) throw new ProjectBuildFailureException(failedModules)
     },
     (runBuild / aggregate) := false
   )

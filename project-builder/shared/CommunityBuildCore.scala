@@ -242,8 +242,10 @@ abstract class TaskEvaluator[Task[_]] {
   }
 }
 
-class ProjectBuildFailureException
-    extends Exception("At least 1 subproject finished with failures") {
+class ProjectBuildFailureException(failedModules: Seq[String])
+    extends Exception(
+      s"${failedModules.size} module(s) finished with failures: ${failedModules.mkString(", ")}"
+    ) {
   // Don't collect stack trace
   override def fillInStackTrace(): Throwable = this
 }
