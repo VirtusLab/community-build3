@@ -19,7 +19,12 @@ def parseCommaSeparated(String string) {
 def upstreamProjects = parseCommaSeparated(params.upstreamProjects)
 def downstreamProjects = parseCommaSeparated(params.downstreamProjects)
 def projectConfig = parseJson(params.projectConfig ?: "{}")
-def podMemoryRequestMb = Math.min(projectConfig?.memoryRequestMb ?: 2048, 8192).toString() + "M"
+def requestedMemoryMb = projectConfig?.memoryRequestMb ?: 0
+def podMemoryRequestMb = Math.min(
+      // Additional 0.5GB buffer
+      requestedMemoryMb > 0 ? requestedMemoryMb + 512 : 2048,
+      8192
+    ).toString() + "M"
 def retryOnBuildFailureCount = 1
 def retryOnBuildFailureMsg = "Enforcing retry of the build after failure."
 
@@ -59,7 +64,7 @@ pipeline {
           steps {
             podTemplate(
               podRetention: never(),
-              activeDeadlineSeconds: 60,
+              activeDeadlineSeconds: 300,
               yaml: """
                 apiVersion: v1
                 kind: Pod
@@ -111,6 +116,8 @@ pipeline {
                             echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
                             touch build-logs.txt build-summary.txt
                           """
+                          // Pre-stash in case of pipeline failure
+                          stash(name: "buildResults", includes: "build-*.txt")
                           ansiColor('xterm') {
                             def status = sh(
                               returnStatus: true,
