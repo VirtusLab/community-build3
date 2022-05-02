@@ -27,7 +27,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.8")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.10")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
