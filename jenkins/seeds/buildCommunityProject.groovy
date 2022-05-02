@@ -75,6 +75,7 @@ pipeline {
                   - name: mvn-repo-cert
                     configMap:
                       name: mvn-repo-cert
+                  shareProcessNamespace: true
                   containers:
                   - name: project-builder
                     image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.9
@@ -88,6 +89,15 @@ pipeline {
                       postStart:
                         exec:
                           command: ["update-ca-certificates"]
+                    livenessProbe:
+                      exec:
+                        command: 
+                        # Terminate container as soon as jnlp is terminated
+                        # Without that jnlp may terminate leaving project-builder alive leading to infinite resource lock. 
+                        - /bin/bash
+                        - -c
+                        - ps -ef | grep jenkins/agent.jar | grep -v grep
+                      initialDelaySeconds: 60
                     command:
                     - cat
                     tty: true
