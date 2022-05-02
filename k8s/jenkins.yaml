@@ -347,9 +347,8 @@ jenkinsConfigurationsAsCode:
               retriever:
                 modernSCM:
                   scm:
-                    github:
-                      configuredByUrl: true
-                      repositoryUrl: "https://github.com/camunda-community-hub/camunda-jenkins-shared-library"
+                    git:
+                      remote: "https://github.com/camunda-community-hub/camunda-jenkins-shared-library"
               cachingConfiguration:
                 refreshTimeMinutes: 1440
             - name: pipeline-logparser
@@ -357,9 +356,8 @@ jenkinsConfigurationsAsCode:
               retriever:
                 modernSCM:
                   scm:
-                    github:
-                      configuredByUrl: true
-                      repositoryUrl: "https://github.com/gdemengin/pipeline-logparser"
+                    git:
+                      remote: "https://github.com/gdemengin/pipeline-logparser"
               cachingConfiguration:
                 refreshTimeMinutes: 1440
         gitHubConfiguration:
