@@ -35,7 +35,7 @@ pipeline {
     }
     stages {
         stage("Initialize build") {
-            agent { label "default" }
+            agent any
             steps {
                 script {
                     currentBuild.setDescription("${params.buildName} :: ${params.projectName}")
@@ -151,9 +151,7 @@ pipeline {
                                 echo retryOnBuildFailureMsg
                                 extraMsg = ", retrying to check stability"
                               }
-                              def err = new Exception("Project build failed with exit code ${status}${extraMsg}")
-                              err.setStackTrace(new StackTraceElement[0])
-                              throw err
+                              throw new Exception("Project build failed with exit code ${status}${extraMsg}")
                             }
                           }
                         }
@@ -199,9 +197,18 @@ pipeline {
                   image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.9',
                   command: 'sleep',
                   args: '15m',
-                  resourceRequestMemory: '250M'
+                  resourceRequestMemory: '250M',
+                  livenessProbe: containerLivenessProbe(
+                    execArgs: '/bin/bash -c "ps -ef | grep jenkins/agent.jar | grep -v grep"',
+                    initialDelaySeconds: 60
+                  )
                 )
               ],
+              yaml: """
+                kind: Pod
+                spec:
+                  shareProcessNamespace: true
+                """,
               envVars: [
                 envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
                 secretEnvVar(key: 'ELASTIC_PASSWORD', secretName: params.elasticSearchSecretName, secretKey: 'elastic'),
