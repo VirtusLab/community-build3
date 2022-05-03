@@ -16,16 +16,21 @@ com-lihaoyi:ammonite:.*
 # Incorrect Scaladex info, no Scala 3 builds
 jvican:dijon:.*
 
+# The same git info between multiple projects, leading to multiple missing ids
+tulz-app:.*:.*
+weso:.*:.*
+
 # Build problems:
-# Too complex mill build
-virtuslab:scala-cli:.*
 
 # Failure on project init
 zio:zio-aws:.*
-dmurvihill:courier:.*
+
+# Cannot build scaladoc in Scala 3
+scalatest/scalatestplus-scalacheck
 
 # Missing defintions of DelayedReadChannel
 rssh:scala-gopher:.*
 
 # Depends on not published compiler plugin version
+kubukoz:spotify-next:.*
 kubukoz:sup:.* 

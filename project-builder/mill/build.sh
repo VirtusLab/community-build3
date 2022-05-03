@@ -27,6 +27,7 @@ cd $repoDir
 
 millSettings=(
   "--no-server"
+  "--silent"
   -D communitybuild.version="$version"
   -D communitybuild.maven.url="$mavenRepoUrl"
   -D communitybuild.scala="$scalaVersion"

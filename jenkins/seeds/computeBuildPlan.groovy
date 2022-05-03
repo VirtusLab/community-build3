@@ -2,9 +2,10 @@
 
 pipeline {
     options {
-        timeout(time: 60, unit: "MINUTES")
+        timeout(time: 120, unit: "MINUTES")
+        retry(3)
     }
-    agent none
+    agent { label "default" }
     stages {
         stage("Initialize build") {
             steps {
@@ -32,12 +33,14 @@ pipeline {
                             resources:
                               requests:
                                 memory: 4G
+                        priorityClassName: "jenkins-agent-priority"
                     '''
                 }
             }
             steps {
                 container('coordinator') {
                     script {
+                      retryOnConnectionError{
                         ansiColor('xterm') {
                             sh """
                               echo 'computing the build plan'
@@ -58,15 +61,17 @@ pipeline {
                             script: "cat /build/data/buildPlan.json",
                             returnStdout: true
                         )
+                      }
                     }
                 }
             }
         }
         stage("Persist build plan") {
-            agent any
             steps {
+              retryOnConnectionError {
                 writeFile(file: "buildPlan.json", text: buildPlan)
                 archiveArtifacts(artifacts: "buildPlan.json")
+              }
             }
         }
     }

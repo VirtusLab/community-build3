@@ -26,7 +26,7 @@ def inverseMultigraph(graph) {
 }
 
 pipeline {
-    agent none
+    agent { label "default" }
     options {
       timeout(time: 16, unit: "HOURS")
     }
@@ -40,7 +40,8 @@ pipeline {
                         def now = new Date()
                         def dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
                         def formattedDate = dateFormat.format(now)
-                        buildName = "${formattedDate}_${currentBuild.number}"
+                        def optScalaVersion = params.publishedScalaVersion ? params.publishedScalaVersion + "_" : ""
+                        buildName = "${optScalaVersion}${formattedDate}_${currentBuild.number}"
                     }
                     currentBuild.setDescription(buildName)
                     mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildName}"
@@ -94,7 +95,6 @@ pipeline {
             }
         }
         stage("Collect build metadata") {
-            agent any
             steps {
                 script {
                     dir(pwd(tmp: true)) {
@@ -179,7 +179,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-coordinator:v0.0.10', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.10', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
@@ -198,9 +198,7 @@ pipeline {
                     def reportFile = 'build-report.txt'
                     sh """
                       touch build-report.txt
-                      curl -s https://raw.githubusercontent.com/VirtusLab/scala-cli/v0.1.2/scala-cli.sh \
-                        | bash -s \
-                        -- run /build-scripts/buildReport.scala --quiet \
+                      scala-cli run /build-scripts/buildReport.scala --quiet \
                         -- "${params.elasticSearchUrl}" "${buildName}" "${reportFile}"
                       """
                     def report = readFile(reportFile)
@@ -214,15 +212,4 @@ pipeline {
         }
       }
     }
-}
-
-def retryOnConnectionError(Closure body, int retries = 50, int delayBeforeRetry = 1){
-  try {
-    return body()
-  } catch(io.fabric8.kubernetes.client.KubernetesClientException ex) {
-    if(retries > 0) {
-      sleep(delayBeforeRetry) // seconds
-      return retryOnConnectionError(body, retries - 1, Math.min(15, delayBeforeRetry * 2))
-    } else throw ex
-  }
 }

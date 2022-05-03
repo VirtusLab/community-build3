@@ -1,6 +1,5 @@
 def runBuildScript = new File("/var/jenkins_home/seeds/runBuild.groovy").text
 def runBuildToken = System.getenv("BUILD_TOKEN")
-def buildCronTrigger = System.getenv("BUILD_CRON_TRIGGER") ?: ""
 
 def getConfigContentOrEmpty(String filename) {
     def configsDir = "/var/jenkins_home/build-configs/"
@@ -25,6 +24,9 @@ pipelineJob('/runBuild') {
             script(runBuildScript)
             sandbox()
         }
+    }
+    properties{
+        disableConcurrentBuilds()
     }
     parameters {
         stringParam("buildName", null, "(Optional) Should be unique among all builds; Should be valid both as a file name and a part of a URL; Will be synthesized from current date and build number if not specified")
@@ -74,9 +76,6 @@ pipelineJob('/runBuild') {
         stringParam("elasticSearchUrl", "https://community-build-es-http:9200")
         stringParam("elasticSearchUserName", "elastic")
         stringParam("elasticSearchSecretName", "community-build-es-elastic-user")
-    }
-    triggers {
-        cron(buildCronTrigger)
     }
 }
 

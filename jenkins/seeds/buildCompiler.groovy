@@ -7,9 +7,10 @@ def publishedCompilerVersion
 
 pipeline {
     options {
-        timeout(time: 30, unit: "MINUTES")
+        timeout(time: 90, unit: "MINUTES")
+        retry(2)
     }
-    agent none
+    agent { label "default" }
     stages {
         stage("Initialize build") {
             steps {
@@ -50,11 +51,13 @@ pipeline {
                             resources:
                               requests:
                                 memory: 8G
+                        priorityClassName: "jenkins-agent-priority"
                     '''.stripIndent()
                 }
             }
             steps {
                 container('compiler-builder') {
+                  retryOnConnectionError {
                     ansiColor('xterm') {
                         sh """
                           echo 'building and publishing scala'
@@ -69,19 +72,21 @@ pipeline {
                         }
                         sh "/build/build.sh repo '${publishedCompilerVersion}' '${params.mvnRepoUrl}'"
                     }
+                  }
                 }
             }
         }
         stage("Persist build metadata") {
-            agent any
             steps {
                 script {
+                  retryOnConnectionError {
                     def metadata = [
                         commitHash: commitHash,
                         publishedCompilerVersion: publishedCompilerVersion
                     ]
                     writeFile(file: "compilerMetadata.json", text: JsonOutput.toJson(metadata))
                     archiveArtifacts(artifacts: "compilerMetadata.json")
+                  }
                 }
             }
         }

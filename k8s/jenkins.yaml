@@ -37,12 +37,25 @@ jenkins:
       # See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/ for details
       resources:
         limits:
-          cpu: 1500m
-          memory: 5Gi
+          cpu: 2
+          memory: 5G
         requests:
-          cpu: 1
-          memory: 3Gi
-      env: []
+          cpu: 500m
+          memory: 3G
+      env: 
+      # Enable JMX to allow connecting with profiler locally via port-forwarding
+      - name: JENKINS_JAVA_OPTS
+        value: >
+         -Dcom.sun.management.jmxremote 
+         -Dcom.sun.management.jmxremote.authenticate=false 
+         -Dcom.sun.management.jmxremote.ssl=false 
+         -Dcom.sun.management.jmxremote.local.only=false 
+         -Dcom.sun.management.jmxremote.port=1099 
+         -Dcom.sun.management.jmxremote.rmi.port=1099 
+         -Djava.rmi.server.hostname=127.0.0.1
+         -XX:+HeapDumpOnOutOfMemoryError
+         -XX:HeapDumpPath=/var/lib/jenkins/dumps
+         -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
       envFrom: []
       volumeMounts:
       - name: seed-jobs
@@ -75,7 +88,7 @@ jenkins:
     hostAliases: []
     podSecurityContext: {}
     affinity: {}
-    priorityClassName: ""
+    priorityClassName: "jenkins-priority"
     tolerations: []
 
   # homePVC allows to set PersistentVolumeClaim properties for Jenkins home
@@ -114,8 +127,8 @@ jenkins:
   plugins:
     - name: blueocean
       version: "1.25.3"
-    - name: depgraph-view
-      version: "1.0.5"
+    - name: timestamper
+      version: "1.17"
     - name: ansicolor
       version: "1.0.1"
     - name: parameter-separator
@@ -320,15 +333,37 @@ jenkinsConfigurationsAsCode:
           url: "https://scala3.westeurope.cloudapp.azure.com/"
         globalLibraries:
           libraries:
-            - defaultVersion: "master"
+            - name: "common-lib"
+              defaultVersion: "master"
               implicit: true
-              name: "common-lib"
               retriever:
                 modernSCM:
                   scm:
                     git:
                       id: "common-lib"
                       remote: "/var/lib/jenkins/common-lib"
+            - name: "camunda-community"
+              defaultVersion: "main"
+              retriever:
+                modernSCM:
+                  scm:
+                    git:
+                      remote: "https://github.com/camunda-community-hub/camunda-jenkins-shared-library"
+              cachingConfiguration:
+                refreshTimeMinutes: 1440
+            - name: pipeline-logparser
+              defaultVersion: "3.1.2"
+              retriever:
+                modernSCM:
+                  scm:
+                    git:
+                      remote: "https://github.com/gdemengin/pipeline-logparser"
+              cachingConfiguration:
+                refreshTimeMinutes: 1440
+        gitHubConfiguration:
+          apiRateLimitChecker: NoThrottle
+        timestamper:
+          allPipelines: true
 
     # secretRef is secret reference which allows to inject the secrets into Configuration As Code script
     #secretRef:
@@ -343,7 +378,7 @@ jenkinsKubernetesAgentEnabled: true
 # For configuration as code creation tutorial, check https://virtuslabrnd.github.io/operator-service-docs/operator-service-for-jenkins/latest/getting-started/seedjob-configuration/
 jenkinsKubernetesAgents:
   # name of resource
-  - name: first-agent
+  - name: default
 
     # labels are injected into metadata labels field. Each JenkinsKubernetesAgent Custom Resource need to reference corresponding
     # Jenkins Custom Resource via labels field
@@ -359,13 +394,17 @@ jenkinsKubernetesAgents:
         - name: jnlp
           image: jenkins/inbound-agent:4.10-3-alpine
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: 2Gi
+      priorityClassName: "jenkins-priority"
 
     properties:
       # Description of Jenkins Agent
       description: ""
 
       # Executors defines the maximum number of concurrent builds that Jenkins may perform on this node.
-      executors:
+      executors: 16
 
       # RemoteRootDirectory is directory dedicated to Jenkins for temporary files storage purposes.
       remoteRootDirectory: ""

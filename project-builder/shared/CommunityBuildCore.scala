@@ -165,8 +165,15 @@ object FailureContext {
       s"""{"type": "wrongVersion", "expected": "$expected", "actual": "$actual"}"""
   }
   case class BuildError(reasons: List[String]) extends FailureContext {
-    override def toJson: String =
-      s"""{"type": "buildError", "reasons": ${reasons.mkString("[", ", ", "]")}}"""
+    override def toJson: String = {
+      // Used to match output colored using scala.io.AnsiColor
+      // ; is optional, it is not a part of AnsiColor, but is allowed in general to specify both foreground and background color
+      val AnsiColorPattern = raw"\u001B\[[;\d]*m"
+      val reasonsArray = reasons
+        .mkString("[", ", ", "]")
+        .replaceAll(AnsiColorPattern, "")
+      s"""{"type": "buildError", "reasons": ${reasonsArray}"""
+    }
   }
 }
 
@@ -235,8 +242,10 @@ abstract class TaskEvaluator[Task[_]] {
   }
 }
 
-class ProjectBuildFailureException
-    extends Exception("At least 1 subproject finished with failures") {
+class ProjectBuildFailureException(failedModules: Seq[String])
+    extends Exception(
+      s"${failedModules.size} module(s) finished with failures: ${failedModules.mkString(", ")}"
+    ) {
   // Don't collect stack trace
   override def fillInStackTrace(): Throwable = this
 }

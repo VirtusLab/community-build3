@@ -2,7 +2,7 @@
 
 set -e
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
   echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <publish_version>, got $#: $@"
   exit 1
 fi
@@ -10,8 +10,25 @@ fi
 repoDir="$1" # e.g. /tmp/shapeless
 scalaVersion="$2" # e.g. 3.1.2-RC1
 publishVersion="$3" # version of the project
+projectConfig="$4" 
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+# Base64 is used to mitigate spliting json by whitespaces
+for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
+  function field() {
+    echo ${elem} | base64 --decode | jq -r ${1}
+  }
+  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/\"${scalaVersion}\"/")
+  path=$(field '.path')
+  pattern=$(field '.pattern')
+  set -x
+  # Cannot determinate did sed script was applied, so perform two ops each time
+  sed -i "s/$pattern/$replaceWith/" "$repoDir/$path" || true
+  sed -i -E "s/$pattern/$replaceWith/" "$repoDir/$path" || true
+  set +x
+done
+
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs

@@ -68,7 +68,7 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   }
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
-  override def zincWorker = CommunityBuildZincWorker
+  override def zincWorker: ZincWorkerModule = CommunityBuildZincWorker
   object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
     override def repositoriesTask() = T.task {
       mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
@@ -307,13 +307,16 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
   val outputDir = os.pwd / os.up
   os.write.over(outputDir / "build-summary.txt", buildSummary.toJson)
 
-  val hasFailedSteps = projectsBuildResults.exists(_.hasFailedStep)
+  val failedModules = projectsBuildResults
+    .filter(_.hasFailedStep)
+    .map(_.artifactName)
+  val hasFailedSteps = failedModules.nonEmpty
   val buildStatus =
     if (hasFailedSteps) "failure"
     else "success"
   os.write.over(outputDir / "build-status.txt", buildStatus)
   if (hasFailedSteps) {
-    throw new ProjectBuildFailureException
+    throw new ProjectBuildFailureException(failedModules)
   }
 }
 
