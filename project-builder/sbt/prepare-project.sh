@@ -2,13 +2,15 @@
 
 set -e
 
-if [ $# -ne 2 ]; then
+if [ $# -ne 4 ]; then
   echo "Wrong number of script arguments"
   exit 1
 fi
 
 repoDir="$1"            # e.g. /tmp/shapeless
 enforcedSbtVersion="$2" # e.g. '1.5.5' or empty ''
+scalaVersion="$3"
+projectConfig="$4"
 
 # Check if using a sbt with a supported version
 
@@ -52,6 +54,21 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 # Register command for setting up version, for more info check command impl comments
 echo -e "\ncommands += CommunityBuildPlugin.setPublishVersion\n" >>$repoDir/build.sbt
+
+# Base64 is used to mitigate spliting json by whitespaces
+for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
+  function field() {
+    echo ${elem} | base64 --decode | jq -r ${1}
+  }
+  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/\"${scalaVersion}\"/")
+  path=$(field '.path')
+  pattern=$(field '.pattern')
+  set -x
+  # Cannot determinate did sed script was applied, so perform two ops each time
+  sed -i "s/$pattern/$replaceWith/" "$repoDir/$path"
+  sed -i -E "s/$pattern/$replaceWith/" "$repoDir/$path"
+  set +x
+done
 
 ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala

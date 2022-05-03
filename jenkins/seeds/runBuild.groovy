@@ -179,7 +179,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.9', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.10', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),
