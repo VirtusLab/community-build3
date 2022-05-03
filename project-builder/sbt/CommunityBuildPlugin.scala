@@ -195,6 +195,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       val scalaBinaryVersionUsed = CrossVersion.binaryScalaVersion(scalaVersionArg)
       val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
       val scalaVersionSuffix = "_" + scalaVersionArg
+      val rootDirName = file(".").getCanonicalFile().getName()
 
       // Ignore projects for which crossScalaVersion does not contain any binary version
       // of currently used Scala version. This is important in case of usage projectMatrix and
@@ -258,8 +259,10 @@ object CommunityBuildPlugin extends AutoPlugin {
 
       println("Starting build...")
       // Find projects that matches maven
-      val topLevelProjects = (
-        for {
+      val topLevelProjects = {
+        var haveUsedRootModule = false
+        val idsWithMissingMappings = scala.collection.mutable.ListBuffer.empty[String]
+        val mappedProjects = for {
           id <- filteredIds
           testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
             Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
@@ -269,23 +272,33 @@ object CommunityBuildPlugin extends AutoPlugin {
               refsByName.get(fullId),
               originalModuleIds.get(fullId),
               moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId)),
-              // Single top level project with the name of the build directory
-              moduleIds.headOption.map(_._2).filter(_ => moduleIds.size == 1)
+              simplifiedModuleIds.get(simplifiedModuleId(fullId))
             ).flatten
-        } yield candidates.flatten.headOption.getOrElse {
-          println(s"""Module mapping missing:
-            |  id: $id
-            |  testedIds: $testedFullIds
-            |  scalaVersionSuffix: $scalaVersionSuffix
-            |  scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix
-            |  refsByName: ${refsByName.keySet}
-            |  originalModuleIds: ${originalModuleIds.keySet}
-            |  moduleIds: ${moduleIds.keySet}
-            |""")
-          throw new Exception("Module mapping missing")
+        } yield {
+          candidates.flatten.headOption
+            .orElse {
+              // Try use root project, it might not be explicitly declared or named
+              refsByName
+                .get(rootDirName)
+                .collect {
+                  case rootProject if !haveUsedRootModule =>
+                    haveUsedRootModule = true
+                    rootProject
+                }
+            }
+            .orElse {
+              idsWithMissingMappings += id
+              None
+            }
         }
-      ).toSet
+
+        if (idsWithMissingMappings.nonEmpty) {
+          throw new Exception(
+            s"Module mapping missing for: ${idsWithMissingMappings.toSeq.mkString(", ")}"
+          )
+        }
+        mappedProjects.flatten.toSet
+      }
 
       val projectDeps = s.allProjectPairs.map { case (rp, ref) =>
         ref -> rp.dependencies.map(_.project)
