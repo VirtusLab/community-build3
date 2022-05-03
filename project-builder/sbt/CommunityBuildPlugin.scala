@@ -287,6 +287,15 @@ object CommunityBuildPlugin extends AutoPlugin {
                 }
             }
             .orElse {
+              println(s"""Module mapping missing:
+                |  id: $id
+                |  testedIds: $testedFullIds
+                |  scalaVersionSuffix: $scalaVersionSuffix
+                |  scalaBinaryVersionSuffix: $scalaBinaryVersionSuffix
+                |  refsByName: ${refsByName.keySet}
+                |  originalModuleIds: ${originalModuleIds.keySet}
+                |  moduleIds: ${moduleIds.keySet}
+                |""".stripMargin)
               idsWithMissingMappings += id
               None
             }
