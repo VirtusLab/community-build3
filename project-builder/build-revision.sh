@@ -33,7 +33,7 @@ done
 
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
-  $scriptDir/mill/prepare-project.sh repo "$scalaVersion" "$version"
+  $scriptDir/mill/prepare-project.sh repo "$scalaVersion" "$version" "$projectConfig"
   $scriptDir/mill/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig"
 
 elif [ -f "repo/build.sbt" ]; then 

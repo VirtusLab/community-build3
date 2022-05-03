@@ -14,6 +14,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
 
     readProjectConfig(projectDir, repoUrl)
       .orElse(internalProjectConfigs(project.showName))
+      .orElse(Some(ProjectBuildConfig.empty))
       .map { c =>
         if c.java.version.nonEmpty then c
         else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
@@ -93,6 +94,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
             CannotReadFile(file, Some(_: FileNotFoundException))
           ) =>
         System.err.println("Internal conifg projects not configured")
+      case ConfigReaderFailures(ConvertFailure(KeyNotFound(`projectName`, _), _, _)) => ()
       case failure =>
         System.err.println(
           s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${failure.prettyPrint(0)}"
@@ -130,9 +132,11 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
   // Selects minimal supported version of Java used in the workflows
   private def discoverJavaVersion(projectDir: os.Path): Option[String] =
     val OptQuote = "['\"]?".r
-    val JavaVersion = raw"java-version:\s*(.*)".r
+    // java-version is used by setup-scala and setup-java actions
+    // jvm is used by scala-cli action
+    val JavaVersion = raw"(?:java-version|jvm):\s*(.*)".r
     val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
-    val JavaVersionDistroVer = raw"$OptQuote(\w+)@(.*)$OptQuote".r
+    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*)$OptQuote".r
     val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
     // We can only supported this versions
     val allowedVersions = Seq(8, 11, 17)
@@ -177,7 +181,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       private def matchEnclosed(pattern: String) = s"(?:$pattern)".r
       private val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
       private val DefOrVal = matchEnclosed("def|val|var")
-      private val OptType = matchEnclosed(raw":\s*String")
+      private val OptType = s"${matchEnclosed(raw":\s*String")}?"
       private val FullMatchPattern =
         raw".*(($DefOrVal $Scala3VersionNamesAlt$OptType)\s*=\s*(.*))".r
       def unapply(line: String): Option[Replecement] = line match {
