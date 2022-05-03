@@ -68,7 +68,7 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   }
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
-  override def zincWorker = CommunityBuildZincWorker
+  override def zincWorker: ZincWorkerModule = CommunityBuildZincWorker
   object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
     override def repositoriesTask() = T.task {
       mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
