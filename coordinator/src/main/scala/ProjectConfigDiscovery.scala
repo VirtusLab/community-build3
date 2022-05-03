@@ -25,6 +25,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
           val discovered = discoverMemoryRequest(projectDir).filter(_ > default).getOrElse(default)
           c.copy(memoryRequestMb = discovered)
       }
+      .map { c =>
+        if c.sourcePatches.nonEmpty then c
+        else c.copy(sourcePatches = discoverSourcePatches(projectDir))
+      }
       .filter(_ != ProjectBuildConfig.empty)
       .map { config =>
         println(s"Using custom project config for $name: ${toJson(config)}")
@@ -58,6 +62,14 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         .stream(workflowsDir)
         .filter(file => file.ext.contains("yml") || file.ext.contains("yaml"))
         .toList
+  }
+
+  private def commonBuildFiles(projectDir: os.Path) = {
+    val files = projectDir / "build.sc" ::
+      projectDir / "build.sbt" ::
+      List(projectDir / "project").filter(os.exists(_)).flatMap(os.walk(_)).toList
+
+    files.filter(f => os.exists(f) && os.isFile(f))
   }
 
   private lazy val referenceConfig =
@@ -153,6 +165,42 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       .minOption
       .map(_.toString)
 
+  private def discoverSourcePatches(projectDir: os.Path): List[SourcePatch] =
+    object Scala3VersionDef {
+      case class Replecement(toMatch: String, replecement: String)
+      final val scala3VersionNames = List(
+        "Scala3", // https://github.com/zio/zio/blob/5e56f0e252477a3aef60140bd05ae4f20b4f8f39/project/BuildHelper.scala#L25
+        "scala3", // https://github.com/ghostdogpr/caliban/blob/95c5bafac4b8c72e5eb2af9b52b6cb7554a7da2d/build.sbt#L6
+        "Scala3Version",
+        "scala3Version" // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
+      )
+      private def matchEnclosed(pattern: String) = s"(?:$pattern)".r
+      private val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
+      private val DefOrVal = matchEnclosed("def|val|var")
+      private val OptType = matchEnclosed(raw":\s*String")
+      private val FullMatchPattern =
+        raw".*(($DefOrVal $Scala3VersionNamesAlt$OptType)\s*=\s*(.*))".r
+      def unapply(line: String): Option[Replecement] = line match {
+        case FullMatchPattern(wholeDefn, definition, value) =>
+          Some(Replecement(wholeDefn, s"$definition = <SCALA_VERSION>"))
+        case _ => None
+      }
+    }
+    def scala3VersionDefs =
+      commonBuildFiles(projectDir).flatMap { file =>
+        import Scala3VersionDef.Replecement
+        os.read.lines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
+          SourcePatch(
+            path = file.relativeTo(projectDir).toString,
+            pattern = toMatch,
+            replaceWith = replecement
+          )
+        }
+      }
+    end scala3VersionDefs
+    scala3VersionDefs
+  end discoverSourcePatches
+
   // Selects recommened amount of memory for project pod, based on the config files
   private def discoverMemoryRequest(projectDir: os.Path): Option[Int] =
     def readXmx(file: os.Path): Seq[Xmx.MegaBytes] =
@@ -170,13 +218,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       )
       .flatMap(readXmx)
 
-    val fromBuild =
-      val toCheck = projectDir / "build.sc" ::
-        projectDir / "build.sbt" ::
-        List(projectDir / "project").filter(os.exists(_)).flatMap(os.walk(_)).toList
-      toCheck
-        .filter(f => os.exists(f) && os.isFile(f))
-        .flatMap(readXmx)
+    val fromBuild = commonBuildFiles(projectDir).flatMap(readXmx)
 
     val allCandidates = fromOptsFiles ++ fromWorkflows ++ fromBuild
     allCandidates.maxOption

@@ -69,6 +69,8 @@ case class ProjectsConfig(
     exclude: List[String] = Nil,
     overrides: Map[String, ProjectOverrides] = Map.empty
 ) derives ConfigReader
+// Describes a simple textual replecement performed on path (relative Unix-style path to the file
+case class SourcePatch(path: String, pattern: String, replaceWith: String) derives ConfigReader
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
     java: JavaConfig = JavaConfig(),
@@ -76,7 +78,8 @@ case class ProjectBuildConfig(
     mill: MillConfig = MillConfig(),
     tests: TestingMode = TestingMode.Full,
     // We should use Option[Int] here, but json4s fails to resolve signature https://github.com/json4s/json4s/issues/1035
-    memoryRequestMb: Int = 2048
+    memoryRequestMb: Int = 2048,
+    sourcePatches: List[SourcePatch] = Nil
 ) derives ConfigReader
 
 object ProjectBuildConfig {
