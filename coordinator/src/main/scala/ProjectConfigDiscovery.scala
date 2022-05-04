@@ -136,7 +136,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     // jvm is used by scala-cli action
     val JavaVersion = raw"(?:java-version|jvm):\s*(.*)".r
     val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
-    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*)$OptQuote".r
+    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*\S*)$OptQuote".r
     val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
     // We can only supported this versions
     val allowedVersions = Seq(8, 11, 17)
