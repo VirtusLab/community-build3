@@ -12,6 +12,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     val name = project.showName
     val projectDir = checkout(repoUrl, name, tagOrRevision)
 
+    println(s"Discover build config for project $name")
     readProjectConfig(projectDir, repoUrl)
       .orElse(internalProjectConfigs(project.showName))
       .orElse(Some(ProjectBuildConfig.empty))
@@ -143,8 +144,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
 
     githubWorkflows(projectDir)
       .flatMap { path =>
-        os.read
-          .lines(path)
+        tryReadLines(path)
           .map(_.trim)
           .flatMap {
             case MatrixEntry(key, valuesList) if key.toLowerCase.contains("java") =>
@@ -214,7 +214,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     def scala3VersionDefs =
       commonBuildFiles(projectDir).flatMap { file =>
         import Scala3VersionDef.Replecement
-        os.read.lines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
+        tryReadLines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
           SourcePatch(
             path = file.relativeTo(projectDir).toString,
             pattern = toMatch,
@@ -226,10 +226,19 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     scala3VersionDefs
   end discoverSourcePatches
 
+  private def tryReadLines(file: os.Path): Seq[String] = {
+    try os.read.lines(file).toSeq
+    catch {
+      case ex: Exception =>
+        println(s"Failed to read $file, reason: ${file}")
+        Nil
+    }
+  }
+
   // Selects recommened amount of memory for project pod, based on the config files
   private def discoverMemoryRequest(projectDir: os.Path): Option[Int] =
     def readXmx(file: os.Path): Seq[Xmx.MegaBytes] =
-      os.read.lines(file).collect { case Xmx(mBytes) => mBytes }
+      tryReadLines(file).collect { case Xmx(mBytes) => mBytes }
 
     val fromWorkflows = githubWorkflows(projectDir)
       .flatMap(readXmx)
