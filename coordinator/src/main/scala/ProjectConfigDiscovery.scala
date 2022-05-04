@@ -175,6 +175,8 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       final val scala3VersionNames = List(
         "Scala3", // https://github.com/zio/zio/blob/5e56f0e252477a3aef60140bd05ae4f20b4f8f39/project/BuildHelper.scala#L25
         "scala3", // https://github.com/ghostdogpr/caliban/blob/95c5bafac4b8c72e5eb2af9b52b6cb7554a7da2d/build.sbt#L6
+        "ScalaDotty", // https://github.com/zio/zio-json/blob/f190390f8a69422d3c9bfb5b8e51c5214618efe9/project/BuildHelper.scala#L23
+        "scalaDotty",
         "Scala3Version",
         "scala3Version" // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
       )
