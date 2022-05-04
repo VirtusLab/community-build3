@@ -178,17 +178,36 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         "Scala3Version",
         "scala3Version" // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
       )
-      private def matchEnclosed(pattern: String) = s"(?:$pattern)".r
-      private val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
-      private val DefOrVal = matchEnclosed("def|val|var")
-      private val OptType = s"${matchEnclosed(raw":\s*String")}?"
-      private val FullMatchPattern =
-        raw".*(($DefOrVal $Scala3VersionNamesAlt$OptType)\s*=\s*(.*))".r
-      def unapply(line: String): Option[Replecement] = line match {
-        case FullMatchPattern(wholeDefn, definition, value) =>
-          Some(Replecement(wholeDefn, s"$definition = <SCALA_VERSION>"))
-        case _ => None
-      }
+      val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
+      val DefOrVal = matchEnclosed("def|val|var")
+      val OptType = s"${matchEnclosed(raw":\s*String")}?"
+      val ScalaVersionDefn = s"$DefOrVal $Scala3VersionNamesAlt$OptType".r
+      def matchEnclosed(pattern: String) = s"(?:$pattern)".r
+      def defnPattern(rhsPattern: String) = raw".*(($ScalaVersionDefn)\s*=\s*($rhsPattern))\s*".r
+      val Scala3Version = """"3\.\d+\.\d+\S*""""
+
+      // https://github.com/ghostdogpr/caliban/blob/95c5bafac4b8c72e5eb2af9b52b6cb7554a7da2d/build.sbt#L6
+      val StringVersionDefn = defnPattern(Scala3Version)
+      // https://github.com/valskalla/odin/blob/db4444fe4efcb5c497d4e23bdf9bbcffd27269c2/build.sbt#L24
+      val VersionSeq = raw"""(Seq|Set|List|Vector)\((?:${Scala3Version},?)*\)"""
+      val VersionsSeqDefn = defnPattern(VersionSeq)
+      val VersionsSeqCondDefn = defnPattern(raw"""if\s*\(.*\) .* else ${VersionSeq}""")
+      // https://github.com/zio/zio/blob/39322c7b41b913cbadc44db7885cedc6c2505e08/project/BuildHelper.scala#L25
+      val BinVersionSelector = defnPattern(raw"""\S+\("3\.?\S*"\)""")
+
+      def unapply(line: String): Option[Replecement] =
+        val scalaVersionStringStub = """"<SCALA_VERSION>""""
+        line match {
+          case StringVersionDefn(wholeDefn, definition, value) =>
+            Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
+          case VersionsSeqDefn(wholeDefn, definition, value, seqType) =>
+            Some(Replecement(wholeDefn, s"$definition = $seqType(${scalaVersionStringStub})"))
+          case VersionsSeqCondDefn(wholeDefn, definition, value, seqType) =>
+            Some(Replecement(wholeDefn, s"$definition = $seqType(${scalaVersionStringStub})"))
+          case BinVersionSelector(wholeDefn, definition, value) =>
+            Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
+          case _ => None
+        }
     }
     def scala3VersionDefs =
       commonBuildFiles(projectDir).flatMap { file =>
