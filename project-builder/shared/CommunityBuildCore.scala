@@ -172,7 +172,7 @@ object FailureContext {
       val reasonsArray = reasons
         .mkString("[", ", ", "]")
         .replaceAll(AnsiColorPattern, "")
-      s"""{"type": "buildError", "reasons": ${reasonsArray}"""
+      s"""{"type": "buildError", "reasons": $reasonsArray}"""
     }
   }
 }
