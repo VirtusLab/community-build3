@@ -272,7 +272,9 @@ object CommunityBuildPlugin extends AutoPlugin {
               refsByName.get(fullId),
               originalModuleIds.get(fullId),
               moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId))
+              simplifiedModuleIds.get(simplifiedModuleId(fullId)),
+              // Single, top level, unnamed project
+              refsByName.headOption.map(_._2).filter(_ => refsByName.size == 1)
             ).flatten
         } yield {
           candidates.flatten.headOption
