@@ -111,14 +111,14 @@ pipeline {
                     priorityClassName: "jenkins-agent-priority"
                     """.stripIndent()
             ){
-              timeout(time: 2, unit: "HOURS"){
-                conditionalRetry([
-                  agentLabel: POD_LABEL,
-                  customFailurePatterns: [
-                    "manual-retry-trigger": ".*${retryOnBuildFailureMsg}.*"
-                  ],
-                  runSteps: {
-                    container('project-builder') {
+              conditionalRetry([
+                agentLabel: POD_LABEL,
+                customFailurePatterns: [
+                  "manual-retry-trigger": ".*${retryOnBuildFailureMsg}.*"
+                ],
+                runSteps: {
+                  container('project-builder') {
+                    timeout(time: 90, unit: "MINUTES"){
                       script {
                         retryOnConnectionError {
                           sh """
@@ -157,15 +157,15 @@ pipeline {
                         }
                       }
                     }
-                  },
-                  postAlways: {
-                    retryOnConnectionError {
-                      archiveArtifacts(artifacts: "build-*.txt")
-                      stash(name: "buildResults", includes: "build-*.txt")
-                    }
                   }
-                ])
-              }
+                },
+                postAlways: {
+                  retryOnConnectionError {
+                    archiveArtifacts(artifacts: "build-*.txt")
+                    stash(name: "buildResults", includes: "build-*.txt")
+                  }
+                }
+              ])
             }
           }
           post { 
