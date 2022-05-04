@@ -24,6 +24,10 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
+        resources:
+          requests:
+            cpu: 300m
+            memory: 1G
         volumeMounts:
         - name: mvn-repo-data
           mountPath: /mvn-repo/upload-dir
