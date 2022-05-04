@@ -41,7 +41,7 @@ jenkins:
           memory: 5G
         requests:
           cpu: 500m
-          memory: 3G
+          memory: 3500m
       env: 
       # Enable JMX to allow connecting with profiler locally via port-forwarding
       - name: JENKINS_JAVA_OPTS
@@ -56,6 +56,8 @@ jenkins:
          -XX:+HeapDumpOnOutOfMemoryError
          -XX:HeapDumpPath=/var/lib/jenkins/dumps
          -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
+         -Xmx3G
+         -Xms3G
       envFrom: []
       volumeMounts:
       - name: seed-jobs
