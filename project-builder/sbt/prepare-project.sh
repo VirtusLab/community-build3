@@ -60,7 +60,7 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   function field() {
     echo ${elem} | base64 --decode | jq -r ${1}
   }
-  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/\"${scalaVersion}\"/")
+  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
   path=$(field '.path')
   pattern=$(field '.pattern')
   set -x
