@@ -8,6 +8,6 @@ def call(String jobName, String label) {
   if(!buildsWithLabel) return false
   else {
     def last = buildsWithLabel.last()
-    return last && ( last.getResult() || last.getArtifacts().find { it.getFileName() == "build-status.txt" } )
+    return last && last.getResult()
   }
 }

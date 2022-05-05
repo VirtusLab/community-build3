@@ -1077,7 +1077,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       .getOrElse(sys.error("Cannot resolve current sbt version"))
     val belowMinimalSbtVersion =
       currentSbtVersion.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
-        case Array(1, minor, patch) => minor < 5 || patch < 5
+        case Array(1, minor, patch) => minor <= 5 && patch < 5
         case _                      => false
       }
 

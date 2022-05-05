@@ -193,6 +193,7 @@ def makeDependenciesBasedBuildPlan(
       scala.io.Source
         .fromFile(replacedProjectsConfigPath)
         .getLines
+        .map(_.trim)
         .filter(line => line.nonEmpty && !line.startsWith("#"))
         .map { case replacementPattern(org1, name1, org2, name2, branch) =>
           (org1, name1) -> ((org2, name2), Option(branch))

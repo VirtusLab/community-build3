@@ -41,9 +41,10 @@ jenkins:
           memory: 5G
         requests:
           cpu: 500m
-          memory: 3G
+          memory: 5G # 2G buffer over heap size, due to possible class-leak
       env: 
       # Enable JMX to allow connecting with profiler locally via port-forwarding
+      # Empty Jenkins instance can take ~140MB of Metaspace initially, default size ~20MB
       - name: JENKINS_JAVA_OPTS
         value: >
          -Dcom.sun.management.jmxremote 
@@ -56,6 +57,9 @@ jenkins:
          -XX:+HeapDumpOnOutOfMemoryError
          -XX:HeapDumpPath=/var/lib/jenkins/dumps
          -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
+         -Xmx3G
+         -Xms3G
+         -XX:MetaspaceSize=256M 
       envFrom: []
       volumeMounts:
       - name: seed-jobs

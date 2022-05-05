@@ -26,11 +26,20 @@ echo '##################################'
 
 cd $repoDir
 
+# + "" would replace null with empty string
+requestedMemoryMb=$(echo $projectConfig | jq -r '.memoryRequestMb // empty')
+memorySettings=()
+if [[ ! -z "$requestedMemoryMb" ]]; then
+  size="${requestedMemoryMb}m"
+  memorySettings=("-J-Xmx${size}" "-J-Xms${size}")
+fi
+
 sbtSettings=(
   --batch
   --no-colors
   --verbose
   -Dcommunitybuild.version="$version"
+  ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
