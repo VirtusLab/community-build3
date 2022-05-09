@@ -7,4 +7,4 @@ RUN gradle clean bootJar
 # Setup cron jobs
 RUN apt-get update && apt-get install -y cron
 RUN crontab -u root /mvn-repo/cronjobs/*
-ENTRYPOINT ["/mvn-repo/runJar.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "cron && /mvn-repo/runJar.sh"]
