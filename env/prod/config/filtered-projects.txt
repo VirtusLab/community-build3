@@ -23,8 +23,13 @@ weso:.*:.*
 tersesystems:blindsight.*
 
 # Build problems:
-# Incorrect handling of Scala 3 binary versions
+## Incorrect handling of Scala 3 binary versions
 dmurvihill:courier:.*
+# Needs -Ykind-projector:underscores , adds only in 3.1 (v3.3.0-RC7)
+zio:interop-cats:.*
+
+## Using io.github.davidgregory084.TpolecatModule which does not handle nighlty releases
+joan38:kubernetes-client:.*
 
 # Failure on project init
 zio:zio-aws:.*
@@ -38,3 +43,6 @@ rssh:scala-gopher:.*
 # Depends on not published compiler plugin version
 kubukoz:spotify-next:.*
 kubukoz:sup:.* 
+
+# Uses -source:future, but not adapted yet to 3.2.x
+laserdisc-io:fs2-aws:5.0.1
