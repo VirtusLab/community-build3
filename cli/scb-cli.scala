@@ -280,7 +280,7 @@ object BuildInfo:
       List(jobId)
     } { runId =>
       val r = requests.get(s"${config.reproducer.jenkinsRunBuildJob(runId)}/consoleText")
-      val StartedProject = raw"Starting building: buildCommunityProject #(\d+)".r
+      val StartedProject = raw".*Starting building: buildCommunityProject #(\d+)".r
       new String(r.data.array).linesIterator
         .collect { case StartedProject(id) => id }
         .toList
