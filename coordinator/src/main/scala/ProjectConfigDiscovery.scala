@@ -142,12 +142,16 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     // We can only supported this versions
     val allowedVersions = Seq(8, 11, 17)
 
+    def isJavaVersionMatrixEntry(key: String): Boolean = {
+      val name = key.toLowerCase
+      name.contains("java") || name.contains("jdk")
+    }
     githubWorkflows(projectDir)
       .flatMap { path =>
         tryReadLines(path)
           .map(_.trim)
           .flatMap {
-            case MatrixEntry(key, valuesList) if key.toLowerCase.contains("java") =>
+            case MatrixEntry(key, valuesList) if isJavaVersionMatrixEntry(key) =>
               valuesList.split(",").map(_.trim)
             case JavaVersion(value) => Option(value)
             case _                  => Nil
