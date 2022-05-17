@@ -172,9 +172,7 @@ pipeline {
                             )
                         }
                     }
-                    throttle(["buildCommunityProjects"]) {
-                      parallel jobs
-                    }
+                    parallel jobs
                   }
                 }
             }

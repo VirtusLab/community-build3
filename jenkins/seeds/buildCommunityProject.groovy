@@ -27,7 +27,11 @@ def retryOnBuildFailureMsg = "Enforcing retry of the build after failure."
 pipeline {
     agent none
     options {
-      timeout(time: 16, unit: "HOURS")
+      throttleJobProperty(
+        throttleEnabled: true,
+        throttleOption: 'project',
+        maxConcurrentTotal: 8
+      )
     }
     stages {
         stage("Initialize build") {
