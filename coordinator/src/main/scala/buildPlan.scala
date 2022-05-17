@@ -280,10 +280,44 @@ private given FromString[Seq[Project]] = str =>
     projectsConfigPath
   )
 
+  val planStages: List[List[ProjectBuildDef]] = {
+    @scala.annotation.tailrec
+    def groupByDeps(
+        remaining: Set[ProjectBuildDef],
+        done: Set[String],
+        acc: List[Set[ProjectBuildDef]]
+    ): List[Set[ProjectBuildDef]] =
+      if remaining.isEmpty then acc.reverse
+      else
+        val (currentStage, newRemainings) = remaining.partition {
+          _.dependencies.forall(done.contains)
+        }
+        if currentStage.isEmpty then {
+          val deps = plan.map(v => (v.name, v)).toMap
+          newRemainings
+            .filter(p => p.dependencies.exists { d => deps(d).dependencies.contains(p.name) })
+            .foreach(v =>
+              println(
+                s"cyclic dependency in  ${v.name} -> ${v.dependencies.toList.filterNot(done.contains)}"
+              )
+            )
+          sys.error("cyclic dependency")
+        }
+        val names = currentStage.map(_.name)
+        groupByDeps(newRemainings, done ++ names, currentStage :: acc)
+    end groupByDeps
+    groupByDeps(plan.toSet, Set.empty, Nil)
+      .map(_.toList.sortBy(_.name))
+  }
+
+  planStages.zipWithIndex.foreach { (group, idx) =>
+    println(s"Stage $idx: ${group.size} projects: ${group.map(_.name)}")
+  }
+
   import java.nio.file._
   val dataPath = Paths.get("data")
   val dest = dataPath.resolve("buildPlan.json")
   println("Projects in build plan: " + plan.size)
-  val json = toJson(plan.sortBy(_.dependencies.size))
+  val json = toJson(planStages)
   Files.createDirectories(dest.getParent)
   Files.write(dest, json.toString.getBytes)

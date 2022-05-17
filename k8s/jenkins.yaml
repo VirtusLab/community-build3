@@ -139,6 +139,8 @@ jenkins:
       version: "1.3"
     - name: copyartifact
       version: "1.46.3"
+    - name: throttle-concurrents
+      version: "2.8"
     - name: github-oauth
       version: "0.37"
     - name: matrix-auth
@@ -368,6 +370,10 @@ jenkinsConfigurationsAsCode:
           apiRateLimitChecker: NoThrottle
         timestamper:
           allPipelines: true
+        throttleJobProperty:
+          categories:
+          - categoryName: "buildCommunityProjects"
+            maxConcurrentTotal: 10
 
     # secretRef is secret reference which allows to inject the secrets into Configuration As Code script
     #secretRef:
