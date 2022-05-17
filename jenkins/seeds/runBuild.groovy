@@ -134,17 +134,19 @@ pipeline {
             }
         }
         stage("Build community projects") {
-            steps {
-                script {
-                  buildPlan.eachWithIndex { stagePlan, idx ->
-                    def stage = stagePlan // capture value for closure
-                    def projectsInStage = stage.collect{ it.name }.join(", ")
-                    echo "Running stage $idx/${buildPlan.size()}, projects [${stage.size()}]: ${projectsInStage}"
-                    def jobs = [:]
-                    def projectDeps = stage.collectEntries { project ->
-                        [project.name, project.dependencies]
-                    }
-                    def inversedProjectDeps = inverseMultigraph(projectDeps)
+          steps {
+            script {
+              buildPlan.eachWithIndex{ stagePlan, idx ->
+                stage("Stage $idx"){
+                  def stage = stagePlan // capture value for closure
+                  def projectsInStage = stage.collect{ it.name }.join(", ")
+                  echo "Running stage $idx/${buildPlan.size()}, projects [${stage.size()}]: ${projectsInStage}"
+                  def jobs = [:]
+                  def projectDeps = stage.collectEntries { project ->
+                      [project.name, project.dependencies]
+                  }
+                  def inversedProjectDeps = inverseMultigraph(projectDeps)
+                  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     for(project in stage) {
                         def proj = project // capture value for closure
                         def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
@@ -175,7 +177,9 @@ pipeline {
                     parallel jobs
                   }
                 }
+              }
             }
+          }
         }
     }
     post {
