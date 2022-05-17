@@ -320,9 +320,10 @@ object BuildInfo:
       val buildPlanJson = os.read(coordinatorDir / "data" / "buildPlan.json")
       parse(buildPlanJson)
 
-    val JArray(projectPlans) = prepareBuildPlan()
+    val JArray(buildPlan) = prepareBuildPlan()
     val projects = for
-      project <- projectPlans.take(1) // There should be only 1 project
+      JArray(buildStage) <- buildPlan.take(1) // There should be only 1 stage
+      project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
       configString = project \ "config" match {
