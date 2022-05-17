@@ -28,7 +28,7 @@ jenkins:
     sidecars: []
     jenkinsController:
       name: jenkins-controller
-      image: jenkins/jenkins:2.332.2-lts
+      image: jenkins/jenkins:2.332.3-lts
       imagePullPolicy: IfNotPresent
       command: []
       livenessProbe: {}
@@ -139,6 +139,8 @@ jenkins:
       version: "1.3"
     - name: copyartifact
       version: "1.46.3"
+    - name: throttle-concurrents
+      version: "2.8"
     - name: github-oauth
       version: "0.37"
     - name: matrix-auth

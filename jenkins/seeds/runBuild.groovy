@@ -136,13 +136,16 @@ pipeline {
         stage("Build community projects") {
             steps {
                 script {
+                  buildPlan.eachWithIndex { stagePlan, idx ->
+                    def stage = stagePlan // capture value for closure
+                    def projectsInStage = stage.collect{ it.name }.join(", ")
+                    echo "Running stage $idx/${buildPlan.size()}, projects [${stage.size()}]: ${projectsInStage}"
                     def jobs = [:]
-
-                    def projectDeps = buildPlan.collectEntries { project ->
+                    def projectDeps = stage.collectEntries { project ->
                         [project.name, project.dependencies]
                     }
                     def inversedProjectDeps = inverseMultigraph(projectDeps)
-                    for(project in buildPlan) {
+                    for(project in stage) {
                         def proj = project // capture value for closure
                         def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
                         jobs[proj.name] = {
@@ -170,6 +173,7 @@ pipeline {
                         }
                     }
                     parallel jobs
+                  }
                 }
             }
         }
@@ -179,7 +183,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.10', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.11', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),

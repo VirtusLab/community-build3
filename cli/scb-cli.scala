@@ -27,7 +27,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.10")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.11")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
@@ -320,9 +320,10 @@ object BuildInfo:
       val buildPlanJson = os.read(coordinatorDir / "data" / "buildPlan.json")
       parse(buildPlanJson)
 
-    val JArray(projectPlans) = prepareBuildPlan()
+    val JArray(buildPlan) = prepareBuildPlan()
     val projects = for
-      project <- projectPlans.take(1) // There should be only 1 project
+      JArray(buildStage) <- buildPlan.take(1) // There should be only 1 stage
+      project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
       configString = project \ "config" match {
