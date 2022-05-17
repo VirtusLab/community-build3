@@ -10,6 +10,6 @@ RUN curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux
   && sh -c "scala-cli --version"
 
 # Project dependencies
-RUN apt -y install git-lfs 
+RUN apt -y install git-lfs protobuf-compiler
 
 COPY . /build/
