@@ -2,16 +2,26 @@ package fix
 
 object MillPublishVersionOverride {
   final val Version = "3.1.1"
-  def T[U](v: U): U = ???
+  object mill{
+    import scala.language.implicitConversions
+    trait T[U]
+    def T[U](v: U): U = ???
+    implicit def anyToT[U](v:U): T[U] = ??? 
+  }
+  import mill._
 
   object module {
-    val publishVersion = "1.2.3-RC4"
+    val publishVersion = mill.T("1.2.3-RC4")
   }
   class moduleDef {
-    def publishVersion: String = "1.2.3-RC4"
+    def publishVersion: T[String] = mill.T("1.2.3-RC4")
   }
   class moduleDef2 extends moduleDef {
-    override val publishVersion: String = "1.2.3-RC4"
+    override val publishVersion: T[String] = mill.T("1.2.3-RC4")
+  }
+
+  class otherDef {
+    def publishVersion() = "1.2.3"
   }
 
   val snippet = s"""
