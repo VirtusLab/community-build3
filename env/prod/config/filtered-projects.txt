@@ -9,6 +9,9 @@ typelevel:algebra.*:2.2.*
 # Gradle project with 1 Scala sub-module
 line:armeria:.*
 
+# Unsupported sbt layout
+wireapp:wire-signals:.*
+
 # Not an official release version
 sbt:.*:2.0.0-alpha.*
 com-lihaoyi:ammonite:.* 
@@ -26,9 +29,16 @@ tersesystems:blindsight.*
 ## Incorrect handling of Scala 3 binary versions
 dmurvihill:courier:.*
 inkytonik:kiama:.*
+rocketfuel:sdbc:.*
+emartech:scala-logger:.*
+## Incorrect source cross-version directory
+virtuslab:scala-cli:0.1.5
 
 ## Does not compile
 outr:perfolation:1.2.9
+## Outdated version, needs new release
+noelwelsh:mads:0.2.0
+kevin-lee:maven2sbt:1.4.0
 
 # Needs -Ykind-projector:underscores , adds only in 3.1 (v3.3.0-RC7)
 zio:interop-cats:.*
@@ -39,6 +49,7 @@ joan38:kubernetes-client:.*
 # Failure on project init
 zio:zio-aws:.*
 j-mie6:parsley:.*
+primetalk:typed-ontology:.*
 
 # Cannot build scaladoc in Scala 3
 scalatest/scalatestplus-scalacheck
@@ -49,6 +60,12 @@ rssh:scala-gopher:.*
 # Depends on not published compiler plugin version
 kubukoz:spotify-next:.*
 kubukoz:sup:.* 
+
+# Depends on no longer available pre-release
+oleg-py:shironeko:0.2.0-M.*
+
+# Uses -Xsource:2.13
+sciss:fscape-next:.*
 
 # Uses -source:future, but not adapted yet to 3.2.x
 laserdisc-io:fs2-aws:5.0.*

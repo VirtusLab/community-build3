@@ -27,9 +27,6 @@ def inverseMultigraph(graph) {
 
 pipeline {
     agent { label "default" }
-    options {
-      timeout(time: 16, unit: "HOURS")
-    }
     stages {
         stage("Initialize build") {
             steps {
@@ -187,7 +184,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.11', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.12', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),

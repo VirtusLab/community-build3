@@ -17,7 +17,7 @@ projectConfig="$4"
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
-  exit 1
+  echo "sbt.version=${enforcedSbtVersion}" > $buildPropsFile
 fi
 
 sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version= | awk -F= '{ print $2 }')

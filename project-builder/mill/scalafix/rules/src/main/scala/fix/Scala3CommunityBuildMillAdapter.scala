@@ -54,7 +54,7 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
           Patch.replaceTree(name, Replacment.CommunityBuildCross),
           Patch.addRight(
             init,
-            s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")")})"
+            s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)})"
           )
         ).asPatch
 
@@ -86,11 +86,14 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
     val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule = "MillCommunityBuild.CommunityBuildPublishModule"
     val CommunityBuildCoursierModule = "MillCommunityBuild.CommunityBuildCoursierModule"
-    def ScalaVersion(default: => String) = config.targetScalaVersion
-      .map(quoted(_))
-      .getOrElse(default)
+    def ScalaVersion(default: => String, asTarget: Boolean = true) =
+      config.targetScalaVersion
+        .map(quoted(_))
+        .map(v => if (asTarget) s"mill.T($v)" else v)
+        .getOrElse(default)
     def PublishVersion(default: => String) = config.targetPublishVersion
       .map(quoted(_))
+      .map(v => s"mill.T($v)")
       .getOrElse(default)
 
     private def quoted(v: String): String = {
@@ -122,7 +125,8 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
 
   object ValOrDefDef {
     def unapply(tree: Tree): Option[(Term.Name, Term)] = tree match {
-      case Defn.Def(_, name, _, _, _, body)           => Some(name -> body)
+      // Make sure def has no parameter lists 
+      case Defn.Def(_, name, _, Nil, _, body)         => Some(name -> body)
       case Defn.Val(_, Pat.Var(name) :: Nil, _, body) => Some(name -> body)
       case Defn.Var(_, Pat.Var(name) :: Nil, _, Some(body)) =>
         Some(name -> body)
@@ -130,7 +134,9 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
     }
   }
 
-  def anyTreeOfTypeName(has: Seq[String], butNot: Seq[String] = Nil)(trees: List[Tree]): Boolean = {
+  def anyTreeOfTypeName(has: Seq[String], butNot: Seq[String] = Nil)(
+      trees: List[Tree]
+  ): Boolean = {
     val exists = trees.exists {
       case WithTypeName(name) => has.contains(name)
       case _                  => false
