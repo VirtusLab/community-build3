@@ -2,14 +2,14 @@ import scala.collection.JavaConverters._
 import java.nio.file.Files
 import java.io.File
 
-import TaskEvaluator.EvalResult
 import scala.util.matching.Regex
 import scala.language.higherKinds
 
 // Wrap into object instead of package becouse mill does not handle packages in ammonite files
 object Scala3CommunityBuild {
-
-// Community projects configs
+  import TaskEvaluator.EvalResult
+  
+  // Community projects configs
   case class ProjectBuildConfig(
       projects: ProjectsConfig = ProjectsConfig(),
       tests: TestingMode = TestingMode.Full
