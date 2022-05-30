@@ -25,6 +25,15 @@ spec:
         permissions: 
           - Overall/Administer
       
+      - name: lampepfl*dotty-core
+        permissions:
+          - Overall/Read
+          - Job/Read
+          - Job/Build
+          - Job/Cancel
+          - Run/Replay
+          - Run/Update
+      
       # Not logged in users
       - name: anonymous
         permissions:
