@@ -1,15 +1,23 @@
 # Projects to exclude in format <org>:<project>:<version>
 # Org and project should match Github names, instead of names used for artifacts (Maven)
 # Not a Scala Project
+adampingel:axle-cicd:.*
+alexandru:alexandru:.*
+dacr:lorem-ipsum:.*
 didi:booster.*
+line:armeria:.*
+percontmx:cfdi:.*
+simy4:xpath-to-xml:.*
+tlsomers:scala-suspendable:.*
 
 # Moved to cats repo since 2.3
 typelevel:algebra.*:2.2.*
 
-# Gradle project with 1 Scala sub-module
-line:armeria:.*
-
 # Unsupported sbt layout
+cchantep:play-reactivemongo:.*
+cucumber:action-publish-sbt:.*
+pityka:aten-scala:.*
+stryker:mutator_mutation-testing-elements:.*
 wireapp:wire-signals:.*
 
 # Not an official release version
@@ -17,6 +25,7 @@ sbt:.*:2.0.0-alpha.*
 com-lihaoyi:ammonite:.* 
 
 # Incorrect Scaladex info, no Scala 3 builds
+dataoperandz:cassper:.*
 jvican:dijon:.*
 mdedetrich:scalajson:.*
 
@@ -28,17 +37,47 @@ tersesystems:blindsight.*
 # Build problems:
 ## Incorrect handling of Scala 3 binary versions
 dmurvihill:courier:.*
-inkytonik:kiama:.*
-rocketfuel:sdbc:.*
 emartech:scala-logger:.*
+inkytonik:kiama:.*
+kevin-lee:can-equal:.*
+kevin-lee:just-fp:.*
+kevin-lee:logger-f:.*
+outr:testy:.*
+rocketfuel:sdbc:.*
+sciss:pdflitz:.*
+sciss:processor:.*
+sciss:scalainterpreterpane:.*
+sciss:scala-chart:.*
+sciss:span:.*
+sciss:swingplus:.*
+
 ## Incorrect source cross-version directory
-virtuslab:scala-cli:0.1.5
+virtuslab:scala-cli:.*
 
 ## Does not compile
+2m:yabai-scala:2.0.1
+arturopala:gitignore:0.2.0
+lorandszakacs:sprout:0.0.5
+losizm:little-sql:4.0.0
 outr:perfolation:1.2.9
+rssh:scala-gopher:.*
+
 ## Outdated version, needs new release
-noelwelsh:mads:0.2.0
-kevin-lee:maven2sbt:1.4.0
+hsci-r:lucene-perfieldpostingsformatordtermvectorscodec:.*
+kevin-lee:maven2sbt:.*
+noelwelsh:mads:.*
+ruimo:csvparser:.*
+ruimo:graphics:.*
+ruimo:scoins:.*
+sciss:serial:.*
+
+## Invalid dependency versions
+abdolence:circe-tagged-adt-codec:.*
+errors4s:errors4s-core-circe:.*
+kag0:ninny-json:.*
+nrktkt:ninny-json:.*
+karazinscalausersgroup:circe-literal-extras:.*
+jsfwa:zio-cassandra:.*
 
 # Needs -Ykind-projector:underscores , adds only in 3.1 (v3.3.0-RC7)
 zio:interop-cats:.*
@@ -47,17 +86,30 @@ zio:interop-cats:.*
 joan38:kubernetes-client:.*
 
 # Failure on project init
-zio:zio-aws:.*
+aptusproject:aptus-core:.*
 j-mie6:parsley:.*
+jphmrst:scala-outlines:.*
+labra:srdf:.*
 primetalk:typed-ontology:.*
+vigoo:zio-aws:.*
+zio:zio-aws:.*
 
 # Cannot build scaladoc in Scala 3
-scalatest/scalatestplus-scalacheck
+scalatest:scalatestplus-easymock:.*
+scalatest:scalatestplus-jmock:.*
+scalatest:scalatestplus-junit:.*
+scalatest:scalatestplus-mockito:.*
+scalatest:scalatestplus-scalacheck:.*
+scalatest:scalatestplus-selenium:.*
 
-# Missing defintions of DelayedReadChannel
-rssh:scala-gopher:.*
+# Depends on not published lib with CrossVersion.full
+## wartremover
+cognitedata:cognite-sdk-scala:.*
+kevin-lee:just-sysprocess:.*
+xuwei-k:wartremover-scalikejdbc:.*
 
-# Depends on not published compiler plugin version
+## better2string
+kubukoz:drops:.*
 kubukoz:spotify-next:.*
 kubukoz:sup:.* 
 
