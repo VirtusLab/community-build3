@@ -17,6 +17,7 @@ projectConfig="$4"
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
+  mkdir ${repoDir}/project || true 
   echo "sbt.version=${enforcedSbtVersion}" > $buildPropsFile
 fi
 

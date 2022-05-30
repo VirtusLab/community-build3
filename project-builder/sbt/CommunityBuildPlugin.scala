@@ -8,6 +8,7 @@ import xsbti.compile.{FileAnalysisStore, CompileAnalysis}
 import xsbti.{Severity, CompileFailed, Problem}
 import scala.collection.JavaConverters._
 
+import Scala3CommunityBuild._
 import TaskEvaluator.EvalResult
 
 class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
