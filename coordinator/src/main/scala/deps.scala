@@ -90,6 +90,7 @@ val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 
 def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
+  println(version -> scalaBinaryVersion)
   val url =
     s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
@@ -125,8 +126,13 @@ def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): L
         asTarget(scalaBinaryVersion)(_)
       }(ModuleVersion(module, version, projectModules.project))
     }
+      .map(Some(_))
+      .recover { case ex: Exception =>
+        println(ex)
+        None
+      }
   }
-  val targets = Await.result(toTargetsTask, 5.minute)
+  val targets = Await.result(toTargetsTask, 5.minute).flatten
   LoadedProject(projectModules.project, version, targets)
 
   /** @param scalaBinaryVersion
