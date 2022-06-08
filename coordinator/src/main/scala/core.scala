@@ -94,34 +94,13 @@ given Conversion[String, SemVersion] = version =>
   val parts = version.split('.').flatMap(_.split('-')).filter(_.nonEmpty)
   val versionNums = parts.take(3).takeWhile(_.forall(_.isDigit))
   def versionPart(idx: Int) = versionNums.lift(idx).flatMap(_.toIntOption).getOrElse(0)
-  val milestoneParts = parts.drop(versionNums.size)
+  val milestone = Some(parts.drop(versionNums.size))
+    .filter(_.nonEmpty)
+    .map(_.mkString("-"))
   SemVersion(
     major = versionPart(0),
     minor = versionPart(1),
     patch = versionPart(2),
-    milestone = Option.when(milestoneParts.nonEmpty)(milestoneParts.mkString("-"))
+    milestone = milestone
   )
 
-given Ordering[SemVersion] = (x: SemVersion, y: SemVersion) => {
-  def compareMilestones = (x.milestone, y.milestone) match {
-    case (None, None)    => 0
-    case (Some(_), None) => -1 // x.y.z-RC1 < x.y.z
-    case (None, Some(_)) => 1 // x.y.z > x.y.z-RC1
-    case (Some(x), Some(y)) =>
-      val commonPrefix = x.intersect(y)
-      val left = x.stripPrefix(commonPrefix)
-      val right = y.stripPrefix(commonPrefix)
-      if left.isEmpty && right.isEmpty then 0
-      else if left.isEmpty then -1 // RC < RC2
-      else if right.isEmpty then 1 // RC2 > RC
-      else if left.forall(_.isDigit) && right.forall(_.isDigit) then left.toInt compare right.toInt
-      else left compare right
-  }
-
-  val ordering =
-    if x.major != y.major then x.major compare y.major
-    else if x.minor != y.minor then x.minor compare y.minor
-    else if x.patch != y.patch then x.patch compare y.patch
-    else compareMilestones
-  -ordering // We want to have results ordered starting with the latests version
-}
