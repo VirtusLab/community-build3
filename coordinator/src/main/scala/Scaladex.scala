@@ -3,7 +3,8 @@ import scala.concurrent.*
 
 object Scaladex {
   case class Pagination(current: Int, pageCount: Int, totalSize: Int)
-  case class ArtifactMetadata(version: String)
+  // releaseDate is always UTC zoned
+  case class ArtifactMetadata(version: String, releaseDate: java.time.OffsetDateTime)
   case class ArtifactMetadataResponse(pagination: Pagination, items: List[ArtifactMetadata])
   case class ProjectSummary(
       groupId: String,

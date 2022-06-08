@@ -58,7 +58,11 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
                     System.err.println(
                       "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
                     )
-                  val versions = response.items.map(_.version)
+                  // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
+                  // Previous approach with sorting SemVersion was not stable and could lead to runtime erros (due to not transitive order of elements)
+                  val versions = response.items
+                  .sortBy(_.releaseDate)(using summon[Ordering[java.time.OffsetDateTime]].reverse)
+                  .map(_.version)
                   artifact -> versions
                 }
             }
@@ -73,14 +77,10 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
     }
   val moduleVersions = Await.result(moduleVersionsTask, 5.minute)
 
-  // Make sure that versions are ordered, some libraries don't have correct order in scaladex matrix
-  // Eg. scalanlp/breeze lists versions: 2.0, 2.0-RC1, 2.0.1-RC2, 2.0.1-RC1
-  // We want to have latests versions in front of collection
   case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
   val modules = moduleVersions
     .filter(_.modules.nonEmpty)
     .map(mvs => VersionedModules(mvs, mvs.version))
-    .sortBy(_.semVersion)
     .map(_.modules)
   ProjectModules(project, modules)
 
@@ -90,7 +90,6 @@ val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 
 def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
-  println(version -> scalaBinaryVersion)
   val url =
     s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
