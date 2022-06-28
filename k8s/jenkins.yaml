@@ -47,19 +47,10 @@ jenkins:
       # Empty Jenkins instance can take ~140MB of Metaspace initially, default size ~20MB
       - name: JENKINS_JAVA_OPTS
         value: >
-         -Dcom.sun.management.jmxremote 
-         -Dcom.sun.management.jmxremote.authenticate=false 
-         -Dcom.sun.management.jmxremote.ssl=false 
-         -Dcom.sun.management.jmxremote.local.only=false 
-         -Dcom.sun.management.jmxremote.port=1099 
-         -Dcom.sun.management.jmxremote.rmi.port=1099 
-         -Djava.rmi.server.hostname=127.0.0.1
-         -XX:+HeapDumpOnOutOfMemoryError
-         -XX:HeapDumpPath=/var/lib/jenkins/dumps
-         -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
          -Xmx3G
          -Xms3G
-         -XX:MetaspaceSize=256M 
+         -XX:MetaspaceSize=256M
+         -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
       envFrom: []
       volumeMounts:
       - name: seed-jobs
@@ -130,17 +121,15 @@ jenkins:
   #   version: "3.1.1"
   plugins:
     - name: blueocean
-      version: "1.25.3"
+      version: "1.25.5"
     - name: timestamper
-      version: "1.17"
+      version: "1.18"
     - name: ansicolor
       version: "1.0.1"
     - name: parameter-separator
       version: "1.3"
     - name: copyartifact
       version: "1.46.3"
-    - name: throttle-concurrents
-      version: "2.8"
     - name: github-oauth
       version: "0.37"
     - name: matrix-auth
@@ -152,9 +141,9 @@ jenkins:
     - name: github
       version: "1.34.3"
     - name: git
-      version: "4.11.0"
+      version: "4.11.3"
     - name: kubernetes
-      version: "3546.v6103d89542d6"
+      version: "3651.v908e7db_10d06"
     - name: kubernetes-client-api
       version: "5.11.2-182.v0f1cf4c5904e"
 
