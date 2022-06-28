@@ -4,16 +4,6 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source $scriptDir/utils.sh
 
-if [ -z "$CB_DOCKER_USERNAME" ]; then
-  echo >&2 "CB_DOCKER_USERNAME env variable has to be set"
-  exit 1
-fi
-
-if [ -z "$CB_DOCKER_PASSWORD" ]; then
-  echo >&2 "CB_DOCKER_PASSWORD env variable has to be set"
-  exit 1
-fi
-
 if [ -z "$CB_K8S_NAMESPACE" ]; then
   echo >&2 "CB_K8S_NAMESPACE env variable has to be set"
   exit 1
@@ -24,9 +14,10 @@ if [[ -z "${CB_BUILD_TOKEN+x}" ]]; then
   CB_BUILD_TOKEN="$(echo $RANDOM | md5sum | head -c 32)"
 fi
 
-HELM_EXPERIMENTAL_OCI=1 helm registry login operatorservice.azurecr.io -u "$CB_DOCKER_USERNAME" -p "$CB_DOCKER_PASSWORD"
+# helm repo add carthago https://carthago-cloud.github.io/op-jenkins-helm/ 
+helm repo update carthago
 
-scbk apply -f $scriptDir/../k8s/auth/authz-matrix.yaml 
+scbk apply -f $scriptDir/../k8s/auth/githubOAuthSecret.yaml
 scbk apply -f $scriptDir/../k8s/jenkins-priority.yaml
 scbk create configmap jenkins-seed-jobs --from-file=$scriptDir/../jenkins/seeds --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/common-lib/vars --dry-run=client -o yaml | scbk apply -f -
@@ -39,7 +30,7 @@ jenkinsClientId=$(scbk get secret/jenkins-github-oauth-secret -o 'jsonpath={.dat
 
 # Make sure env ids starts from env count set in jenkins.yaml
 HELM_EXPERIMENTAL_OCI=1 helm --namespace="$CB_K8S_NAMESPACE" \
-  upgrade jenkins oci://operatorservice.azurecr.io/charts/op-svc-jenkins-crs --install --version 0.3.1 -f k8s/jenkins.yaml \
+  upgrade jenkins carthago/carthago-op-jenkins-crs --install -f k8s/jenkins.yaml \
   --set 'jenkins.podSpec.jenkinsController.env[1].name'=BUILD_TOKEN \
   --set 'jenkins.podSpec.jenkinsController.env[1].valueFrom.secretKeyRef.name'="$REMOTE_CREDS_SECRET" \
   --set 'jenkins.podSpec.jenkinsController.env[1].valueFrom.secretKeyRef.key'="runbuild-token" \

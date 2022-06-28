@@ -1,26 +1,18 @@
-# Operator Service for Jenkins Helm chart
+# Carthago Operator for Jenkins Helm chart
 
 # apiVersion is the version of the Custom Resources manifests
-apiVersion: operator-service.com/v1beta1
+apiVersion: carthago.cloud/v1beta1
 
 # operator is section for configuring operator deployment
 operator:
-  # namespace is the namespace where the operator will be deployed
-  # It's not recommended to use default namespace
-  # Create new namespace for jenkins (called e.g. operator-service)
-  # namespace: op-svc-jenkins-scala3
 
   replicaCount: 1
 
-  # image is the name (and tag) of the Operator Service for Jenkins image
-  image: operatorservice.azurecr.io/op-svc-jenkins:0.11.1
+  # image is the name (and tag) of the Carthago Operator for Jenkins image
+  image: carthago.azurecr.io/carthago-op-jenkins:0.17.0
 
   # imagePullPolicy defines policy for pulling images
   imagePullPolicy: IfNotPresent
-
-  # imagePullSecrets is used to pull images from private repository
-  imagePullSecrets:
-    - name: license-token
 
   # command
   command:
@@ -36,24 +28,34 @@ operator:
   # fullnameOverride overrides the deployment name
   fullnameOverride: ""
 
-  # Resource limit/request for Operator Service
+  # Resource limit/request for Carthago Operator
   # See https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/ for details
-  resources: { }
+  resources: {}
 
-  # NodeSelector for Operator Service
+  # NodeSelector for Carthago Operator
   # For more details see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
-  nodeSelector: { }
+  nodeSelector: {}
 
   # Tolerations are applied to pods, and allow the pods to schedule onto nodes with matching taints.
-  # See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ fore more details
-  tolerations: [ ]
+  # See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ for more details
+  tolerations: []
 
   # Affinity allows you to constrain which nodes your pod is eligible to be scheduled on, based on labels on the node.
   # For more details see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
-  affinity: { }
+  affinity: {}
 
-  # JenkinsNamespace is used by Operator Service to watch namespace where Jenkins will be deployed
-  # jenkinsNamespace: "jenkins-scala3"
+  # watchedNamespaces specifies namespaces that will be watched by the operator, empty array ([]) sets the operator to watch all namespaces
+  watchedNamespaces:
+    - jenkins
 
-  # JenkinsName is name of Jenkins to watch by Operator Service
-  jenkinsName: "jenkins"
+  # labelSelector sets a selector for Operator's Custom Resources, useful when the operator is set to watch all namespaces
+  labelSelector: ""
+
+  # useClusterRBAC, if set to true, will deploy cluster-scoped role and role bindings for the operator's service account.
+  # Set this to true, when configuring the operator to watch all namespaces in the cluster.
+  useClusterRBAC: false
+
+  # licenseSecretName specifies a name for the secret with license key. For paid plan features to be available,
+  # a secret with this name containing valid information must be present in the same namespace as Carthago Operator
+  # is deployed in.
+  licenseSecretName: "license"
