@@ -17,7 +17,7 @@ fi
 # helm repo add carthago https://carthago-cloud.github.io/op-jenkins-helm/ 
 helm repo update carthago
 
-scbk apply -f $scriptDir/../k8s/auth/githubOAuthSecret.yaml
+scbk create -f $scriptDir/../k8s/auth/githubOAuthSecret.yaml || true
 scbk apply -f $scriptDir/../k8s/jenkins-priority.yaml
 scbk create configmap jenkins-seed-jobs --from-file=$scriptDir/../jenkins/seeds --dry-run=client -o yaml | scbk apply -f -
 scbk create configmap jenkins-common-lib-vars --from-file=$scriptDir/../jenkins/common-lib/vars --dry-run=client -o yaml | scbk apply -f -
