@@ -18,6 +18,9 @@ spec:
           mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
           subPath: mvn-repo.crt
           readOnly: true
+        resources:
+          requests:
+            memory: 4G
         lifecycle:
           postStart:
             exec:
