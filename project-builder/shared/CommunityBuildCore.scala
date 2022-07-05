@@ -8,7 +8,7 @@ import scala.language.higherKinds
 // Wrap into object instead of package becouse mill does not handle packages in ammonite files
 object Scala3CommunityBuild {
   import TaskEvaluator.EvalResult
-  
+
   // Community projects configs
   case class ProjectBuildConfig(
       projects: ProjectsConfig = ProjectsConfig(),
@@ -76,10 +76,15 @@ object Scala3CommunityBuild {
       failureContext: Option[FailureContext] = None,
       warnings: Int,
       errors: Int,
-      tookMs: Int
+      tookMs: Int,
+      sourceVersion: Option[String] = None
   ) extends StepResult {
-    def toJson =
-      s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}}"""
+    def toJson = {
+      val optionals = Seq(
+        sourceVersion.map(v => s""""sourceVersion": "$v"""")
+      ).flatten.mkString(", ", ", ", "")
+      s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}$optionals}"""
+    }
   }
 
   case class DocsResult(
