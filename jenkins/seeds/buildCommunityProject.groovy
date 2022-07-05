@@ -61,7 +61,7 @@ pipeline {
                   shareProcessNamespace: true
                   containers:
                   - name: project-builder
-                    image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.13
+                    image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.14
                     imagePullPolicy: IfNotPresent
                     volumeMounts:
                     - name: mvn-repo-cert
@@ -168,7 +168,7 @@ pipeline {
               containers: [
                 containerTemplate(
                   name: 'reporter',
-                  image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.13',
+                  image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.14',
                   command: 'sleep',
                   args: '15m',
                   resourceRequestMemory: '250M',
