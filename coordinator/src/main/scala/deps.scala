@@ -5,6 +5,7 @@ import scala.sys.process._
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.time.OffsetDateTime
 
 // TODO scala3 should be more robust
 def loadProjects(scalaBinaryVersion: String): Seq[Project] =
@@ -49,7 +50,10 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
         System.err.println(s"No project summary for ${project.org}/${project.name}")
         Future.successful(Nil)
       case Some(projectSummary) =>
-        for artifactsMetadata <- Future
+        val releaseDates = collection.mutable.Map.empty[String, OffsetDateTime]
+        case class VersionRelease(version: String, releaseDate: OffsetDateTime)
+        for
+          artifactsMetadata <- Future
             .traverse(projectSummary.artifacts) { artifact =>
               Scaladex
                 .artifactMetadata(groupId = projectSummary.groupId, artifactId = s"${artifact}_3")
@@ -61,13 +65,17 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
                   // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
                   // Previous approach with sorting SemVersion was not stable and could lead to runtime erros (due to not transitive order of elements)
                   val versions = response.items
-                  .sortBy(_.releaseDate)(using summon[Ordering[java.time.OffsetDateTime]].reverse)
-                  .map(_.version)
+                    .tapEach(v => releaseDates += v.version -> v.releaseDate)
+                    .map(_.version)
                   artifact -> versions
                 }
             }
             .map(_.toMap)
-        yield for version <- projectSummary.versions
+          orderedVersions = projectSummary.versions
+            .flatMap(v => releaseDates.get(v).map(VersionRelease(v, _)))
+            .sortBy(_.releaseDate)(using summon[Ordering[OffsetDateTime]].reverse)
+            .map(_.version)
+        yield for version <- orderedVersions
         yield ModuleInVersion(
           version,
           modules = artifactsMetadata.collect {

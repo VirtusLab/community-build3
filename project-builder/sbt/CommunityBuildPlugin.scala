@@ -35,10 +35,12 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   }
 
   private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
+    val Limit = 10
     @scala.annotation.tailrec
     def loop(incomplete: List[Incomplete], acc: List[Throwable] = Nil): List[Throwable] = {
       incomplete match {
-        case Nil => acc
+        case Nil                     => acc
+        case _ if acc.length > Limit => acc
         case head :: tail =>
           loop(
             incomplete = tail ::: head.causes.toList,
@@ -114,7 +116,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     * Jcstress/version scopes, leading build failures
     */
   val setPublishVersion =
-    Command.args("setPublishVersion", "<args>") { case (state, args) =>
+    Command.args("setPublishVersion", "<version>") { case (state, args) =>
       args.headOption
         .orElse(sys.props.get("communitybuild.version"))
         .filter(_.nonEmpty)
@@ -144,6 +146,48 @@ object CommunityBuildPlugin extends AutoPlugin {
             }
           extracted.appendWithSession(updatedVersions, state)
         }
+    }
+
+  /** Helper command used to filter scalacOptions and set source migration flags
+    */
+  val enableMigrationMode =
+    Command.args("enableMigrationMode", "<source-version>") { case (state, args) =>
+      val extracted = sbt.Project.extract(state)
+      val updatedScalacOptions = extracted.structure.allProjectRefs
+        .flatMap { ref =>
+          def setMigrationFlags(
+              currentSettings: Seq[String],
+              sourceVersion: String
+          ): Seq[String] = {
+            val newEntries = Seq("-rewrite", s"-source:$sourceVersion")
+            println(s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}")
+            currentSettings.filter { setting =>
+              !setting.contains("-rewrite") &&
+              !setting.contains("-source") &&
+              !setting.contains("-migration") && 
+              !setting.contains("-Xfatal-warnings")
+            } ++ newEntries
+          }
+          args.headOption
+            .filter(_.nonEmpty)
+            .orElse {
+              CrossVersion.partialVersion(extracted.get(ref / scalaVersion)).collect {
+                case (3, 0) => "3.0-migration"
+                case (3, 1) => "3.0-migration"
+                case (3, 2) => "3.2-migration"
+                case (3, _) => "future-migration"
+              }
+            }
+            .map { sourceVersion =>
+              (ref / Compile / Keys.scalacOptions)
+                .transform(
+                  setMigrationFlags(_, sourceVersion),
+                  sbt.internal.util.NoPosition
+                )
+            }
+        }
+      extracted.appendWithSession(updatedScalacOptions, state)
+
     }
 
   // Create mapping from org%artifact_name to project name
@@ -352,6 +396,10 @@ object CommunityBuildPlugin extends AutoPlugin {
         val testingMode = overrideSettings.flatMap(_.tests).getOrElse(config.tests)
 
         import evaluator._
+        val scalacOptions = eval(Compile / Keys.scalacOptions) match {
+          case EvalResult.Value(settings, _) => settings
+          case _                             => Nil
+        }
         val compileResult = eval(Compile / compile)
         val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
         val testsCompileResult = evalWhen(testingMode != TestingMode.Disabled, compileResult)(
@@ -383,9 +431,9 @@ object CommunityBuildPlugin extends AutoPlugin {
 
         ModuleBuildResults(
           artifactName = projectName,
-          compile = collectCompileResult(compileResult),
+          compile = collectCompileResult(compileResult, scalacOptions),
           doc = DocsResult(docsResult),
-          testsCompile = collectCompileResult(testsCompileResult),
+          testsCompile = collectCompileResult(testsCompileResult, scalacOptions),
           testsExecute = collectTestResults(testsExecuteResult),
           publish = publishResult
         )
@@ -412,9 +460,17 @@ object CommunityBuildPlugin extends AutoPlugin {
     (runBuild / aggregate) := false
   )
 
-  private def collectCompileResult(evalResult: EvalResult[CompileAnalysis]): CompileResult = {
+  private def collectCompileResult(
+      evalResult: EvalResult[CompileAnalysis],
+      scalacOptions: Seq[String]
+  ): CompileResult = {
     def countProblems(severity: Severity, problems: Iterable[Problem]) =
       problems.count(_.severity == severity)
+
+    val sourceVersion = scalacOptions.collectFirst {
+      case s if s.contains("-source:") => s.split(":").last
+    }
+
     evalResult match {
       case EvalResult.Failure(reasons, tookTime) =>
         reasons
@@ -425,7 +481,8 @@ object CommunityBuildPlugin extends AutoPlugin {
               failureContext = evalResult.toBuildError,
               warnings = 0,
               errors = 0,
-              tookMs = tookTime
+              tookMs = tookTime,
+              sourceVersion = sourceVersion
             )
           ) { case (result, ctx) =>
             result.copy(
@@ -455,7 +512,8 @@ object CommunityBuildPlugin extends AutoPlugin {
           Status.Ok,
           warnings = stats.warnings,
           errors = stats.errors,
-          tookMs = tookTime
+          tookMs = tookTime,
+          sourceVersion = sourceVersion
         )
 
       case EvalResult.Skipped => CompileResult(Status.Skipped, warnings = 0, errors = 0, tookMs = 0)

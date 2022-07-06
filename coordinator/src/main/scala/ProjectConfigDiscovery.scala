@@ -8,7 +8,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       project: ProjectVersion,
       repoUrl: String,
       tagOrRevision: Option[String]
-  ): Option[ProjectBuildConfig] = {
+  ): Option[ProjectBuildConfig] = try {
     val name = project.showName
     val projectDir = checkout(repoUrl, name, tagOrRevision)
 
@@ -36,6 +36,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         println(s"Using custom project config for $name: ${toJson(config)}")
         config
       }
+  } catch {
+    case ex: Exception =>
+      System.err.println(s"Failed to resolve project config: ${ex.getMessage}")
+      None
   }
 
   private def checkout(
@@ -44,15 +48,21 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       tagOrRevision: Option[String]
   ): os.Path = {
     val projectDir = os.temp.dir(prefix = s"repo-$projectName")
-    os.proc(
-      "git",
-      "clone",
-      repoUrl,
-      projectDir,
-      "--quiet",
-      tagOrRevision.map("--branch=" + _).toList,
-      "--depth=1"
-    ).call(stderr = os.Pipe)
+    try {
+      os.proc(
+        "git",
+        "clone",
+        repoUrl,
+        projectDir,
+        "--quiet",
+        tagOrRevision.map("--branch=" + _).toList,
+        "--depth=1"
+      ).call(stderr = os.Pipe)
+    } catch {
+      case ex: Throwable =>
+        println(s"Failed to checkout $repoUrl at revision ${tagOrRevision}")
+        throw ex
+    }
     projectDir
   }
 
