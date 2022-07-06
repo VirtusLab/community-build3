@@ -1,7 +1,7 @@
-# Operator Service for Jenkins Custom Resources Helm chart
+# Carthago Operator for Jenkins Custom Resources Helm chart
 
 # apiVersion is the version of the Custom Resources manifests
-apiVersion: operator-service.com/v1beta1
+apiVersion: carthago.cloud/v1beta1
 
 # Jenkins instance configuration
 jenkins:
@@ -19,8 +19,10 @@ jenkins:
   # annotations are injected into metadata annotations field
   annotations: {}
 
-  # podLabels are injected into Jenkins Controller Pod's metadata labels field
-  podLabels: {}
+  # labels and annotations propagated to Jenkins Controller pod
+  podMetadata:
+    labels: {}
+    annotations: {}
 
   # podSpec
   podSpec:
@@ -47,19 +49,10 @@ jenkins:
       # Empty Jenkins instance can take ~140MB of Metaspace initially, default size ~20MB
       - name: JENKINS_JAVA_OPTS
         value: >
-         -Dcom.sun.management.jmxremote 
-         -Dcom.sun.management.jmxremote.authenticate=false 
-         -Dcom.sun.management.jmxremote.ssl=false 
-         -Dcom.sun.management.jmxremote.local.only=false 
-         -Dcom.sun.management.jmxremote.port=1099 
-         -Dcom.sun.management.jmxremote.rmi.port=1099 
-         -Djava.rmi.server.hostname=127.0.0.1
-         -XX:+HeapDumpOnOutOfMemoryError
-         -XX:HeapDumpPath=/var/lib/jenkins/dumps
-         -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
          -Xmx3G
          -Xms3G
-         -XX:MetaspaceSize=256M 
+         -XX:MetaspaceSize=256M
+         -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
       envFrom: []
       volumeMounts:
       - name: seed-jobs
@@ -95,21 +88,25 @@ jenkins:
     priorityClassName: "jenkins-priority"
     tolerations: []
 
-  # homePVC allows to set PersistentVolumeClaim properties for Jenkins home
-  homePVC: {}
+  # pvcSettings allows setting PersistentVolumeClaim properties for Jenkins home
+  pvcSettings:
+  # name of Jenkins Home PVC
+  # name: ""
 
-  # accessMode specifies the way the plugins cache can be mounted
+  # accessMode specifies the way Jenkins home Volume can be mounted
   # accessMode: ""
 
-  # resourceStorage is the plugins cache volume size
+  # resourceStorage is the volume size of Jenkins home Volume
   # resourceStorage: ""
 
   # storageClassName is the name of the StorageClass required by the claim
   # storageClassName: ""
   # storageClassName: ""
 
-  # pluginsCache allows to set plugins cache specific pvc properties
+  # pluginsCache allows setting PersistentVolumeClaim properties for plugins cache
   pluginsCache: {}
+  # name of plugins cache PVC
+  # name: ""
 
   # accessMode specifies the way the plugins cache can be mounted
   # accessMode: ""
@@ -130,44 +127,108 @@ jenkins:
   #   version: "3.1.1"
   plugins:
     - name: blueocean
-      version: "1.25.3"
+      version: "1.25.5"
     - name: timestamper
-      version: "1.17"
+      version: "1.18"
     - name: ansicolor
       version: "1.0.1"
     - name: parameter-separator
       version: "1.3"
     - name: copyartifact
-      version: "1.46.3"
-    - name: throttle-concurrents
-      version: "2.8"
+      version: "1.46.4"
     - name: github-oauth
-      version: "0.37"
+      version: "0.39"
     - name: matrix-auth
-      version: "3.0.1"
+      version: "3.1.3"
     - name: configuration-as-code
-      version: "1414.v878271fc496f"
+      version: "1464.vd8507b_82e41a_"
     - name: git-client
       version: "3.11.0"
     - name: github
       version: "1.34.3"
     - name: git
-      version: "4.11.0"
+      version: "4.11.3"
     - name: kubernetes
-      version: "3546.v6103d89542d6"
+      version: "3651.v908e7db_10d06"
     - name: kubernetes-client-api
-      version: "5.11.2-182.v0f1cf4c5904e"
+      version: "5.12.2-193.v26a_6078f65a_9"
+    - name: workflow-api
+      version: "1164.v760c223ddb_32"
+    - name: workflow-aggregator
+      version: "581.v0c46fa_697ffd"
+    - name: workflow-cps
+      version: "2725.v7b_c717eb_12ce"
+    - name: workflow-job
+      version: "1189.va_d37a_e9e4eda_"
+    - name: workflow-durable-task-step
+      version: "1155.v79567b_e0a_2de"
+    - name: workflow-basic-steps
+      version: "948.v2c72a_091b_b_68"
+    - name: workflow-support
+      version: "820.vd1a_6cc65ef33"
+    - name: pipeline-model-definition
+      version: "2.2097.v33db_b_de764b_e"
+    - name: pipeline-model-api
+      version: "2.2097.v33db_b_de764b_e"
+    - name: pipeline-stage-tags-metadata
+      version: "2.2097.v33db_b_de764b_e"
+    - name: pipeline-model-extensions
+      version: "2.2097.v33db_b_de764b_e"
+    - name: job-dsl
+      version: "1.79"
+    - name: junit
+      version: "1119.1121.vc43d0fc45561"
+    - name: script-security
+      version: "1175.v4b_d517d6db_f0"
+    - name: display-url-api
+      version: "2.3.6"
 
-  # roles defines list of extra RBAC roles for the Jenkins Master pod service account
+  # roles define a list of extra RBAC roles for the Jenkins Master pod service account
   roles: []
 
-  # defines authorization strategy of the operator for the Jenkins API
+  # services allow configuring Jenkins services
+  services: {}
+#    Http is Jenkins web UI service
+#    http:
+#      labels are injected into metadata labels field
+#      labels: {}
+#
+#      annotations are injected into metadata annotations field
+#      annotations: {}
+#
+#      Spec describes the attributes that a user creates on a service.
+#      spec: {}
+#
+#    Agent is Jenkins agent service
+#    agent:
+#      labels are injected into metadata labels field
+#      labels: {}
+#
+#      annotations are injected into metadata annotations field
+#      annotations: {}
+#
+#      Spec describes the attributes that a user creates on a service.
+#      spec: {}
+
+  # defines authorization strategy of the operator for the Jenkins API.
   authorizationStrategy: createUser
 
   # disableCSRFProtection can enable or disable operator built-in CSRF protection
   # Set it to true if you are using OpenShift Jenkins Plugin
   # See https://github.com/jenkinsci/kubernetes-operator/pull/193 for more info
   disableCSRFProtection: false
+
+  # pluginSnapshot creates a configMap containing all the plugins in Jenkins at a particular moment and allows to keep a history of changes and restore
+  pluginSnapshot: {}
+#    restoreEnabled makes Jenkins use plugins specified in snapshotConfigMapRef
+#    restoreEnabled: false
+#
+#    snapshotConfigMapRef specifies which configMap to use for restore if restoreEnabled is set. Otherwise it will overwrite the configMap whenever plugins change
+#    snapshotConfigMapRef:
+#      name: "config-map-name"
+#
+#    snapshotHistoryLength specifies, how many historical snapshots are to be kept. Has no effect if snapshotConfigMapRef is specified
+#    snapshotHistoryLength: 3
 
 # jenkinsGroovyScriptsEnabled can enable or disable the JenkinsGroovyScript instances
 # Set to false if you have configured CR(s) already and/or you want to deploy an operator only
@@ -182,7 +243,7 @@ jenkinsGroovyScripts:
     # labels are injected into metadata labels field. Each JenkinsSeedJob Custom Resource need to reference corresponding
     # Jenkins Custom Resource via labels field
     labels:
-      operator-service.com/jenkins: jenkins
+      carthago.cloud/jenkins: jenkins
 
     # annotations are injected into metadata annotations field
     annotations: {}
@@ -227,7 +288,7 @@ jenkinsGroovyScripts:
 jenkinsSeedJobsEnabled: false
 
 # JenkinsSeedJobs instances configuration
-# See https://virtuslabrnd.github.io/operator-service-docs/operator-service-for-jenkins/latest/getting-started/seedjob-configuration/ for additional info
+# See https://docs.carthago.cloud/latest-version/getting-started/seedjob-configuration/ for additional info
 jenkinsSeedJobs:
   # name of resource
   - name: example
@@ -235,7 +296,7 @@ jenkinsSeedJobs:
     # labels are injected into metadata labels field. Each JenkinsSeedJob Custom Resource need to reference corresponding
     # Jenkins Custom Resource via labels field
     labels:
-      operator-service.com/jenkins: jenkins
+      carthago.cloud/jenkins: jenkins
 
     # annotations are injected into metadata annotations field
     annotations: {}
@@ -290,7 +351,7 @@ jenkinsSeedJobs:
       # pollSCM is setting for polling changes in SCM (optional)
       pollSCM: ""
 
-    # settings configures the job build options
+    # settings configure the job build options
     settings:
 
       # ignoreMissingFiles is setting for Job DSL API plugin to ignore files that are missing (optional)
@@ -310,7 +371,7 @@ jenkinsSeedJobs:
 jenkinsConfigurationsAsCodeEnabled: true
 
 # JenkinsConfigurationAsCode instances configuration
-# For configuration as code creation tutorial, check https://virtuslabrnd.github.io/operator-service-docs/operator-service-for-jenkins/latest/getting-started/customization/
+# For configuration as code creation tutorial, check https://docs.carthago.cloud/latest-version/getting-started/customization/
 jenkinsConfigurationsAsCode:
   # name of resource
   - name: casc
@@ -318,7 +379,7 @@ jenkinsConfigurationsAsCode:
     # labels are injected into metadata labels field. Each JenkinsConfigurationAsCode Custom Resource need to reference corresponding
     # Jenkins Custom Resource via labels field
     labels:
-      operator-service.com/jenkins: jenkins
+      carthago.cloud/jenkins: jenkins
 
     # annotations are injected into metadata annotations field
     annotations: {}
@@ -381,7 +442,8 @@ jenkinsConfigurationsAsCode:
 jenkinsKubernetesAgentEnabled: true
 
 # JenkinsKubernetesAgent instances configuration
-# For configuration as code creation tutorial, check https://virtuslabrnd.github.io/operator-service-docs/operator-service-for-jenkins/latest/getting-started/seedjob-configuration/
+# In the free plan, only 1 jenkinsKubernetesAgent can be configured, and its name must be equal to seed-job-agent
+# For configuration as code creation tutorial, check https://docs.carthago.cloud/latest-version/getting-started/seedjob-configuration/
 jenkinsKubernetesAgents:
   # name of resource
   - name: default
@@ -389,80 +451,51 @@ jenkinsKubernetesAgents:
     # labels are injected into metadata labels field. Each JenkinsKubernetesAgent Custom Resource need to reference corresponding
     # Jenkins Custom Resource via labels field
     labels:
-      operator-service.com/jenkins: jenkins
+      carthago.cloud/jenkins: jenkins
 
     # annotations are injected into metadata annotations field
     annotations: {}
 
-    # PodSpec allows to set Jenkins Kubernetes Agent specific pod properties
+    # PodSpec allows setting Jenkins Kubernetes Agent specific pod properties
     podSpec:
       containers:
         - name: jnlp
-          image: jenkins/inbound-agent:4.10-3-alpine
+          image: jenkins/inbound-agent:4.11.2-4
           imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: 2Gi
       priorityClassName: "jenkins-priority"
 
-    properties:
-      # Description of Jenkins Agent
-      description: ""
+    # Description of Jenkins Agent
+    description: ""
 
-      # Executors defines the maximum number of concurrent builds that Jenkins may perform on this node.
-      executors: 16
+    # Executors defines the maximum number of concurrent builds that Jenkins may perform on this node.
+    executors: 10
 
-      # RemoteRootDirectory is directory dedicated to Jenkins for temporary files storage purposes.
-      remoteRootDirectory: ""
+    # RemoteRootDirectory is directory dedicated to Jenkins for temporary files storage purposes.
+    remoteRootDirectory: ""
 
-      # Usage controls how Jenkins schedules builds on this node.
-      # Available usage options are defined by AgentUsage enum
-      usage: ""
+    # Usage controls how Jenkins schedules builds on this node.
+    # Available usage options are defined by AgentUsage enum
+    usage: ""
 
-      # LaunchMethod controls how Jenkins starts this agent.
-      # AgentLaunchMethod is enum that defines the available launch methods
-      launchMethod: ""
+    # TunnelConnectionThrough allows to route connection to another host
+    # Field allowed values: "HOST:PORT", ":PORT" and "HOST:"
+    tunnelConnectionThrough: ""
 
-      # DisableWorkDir allows disabling Remoting Work Directory for the agent.
-      disableWorkDir: false
+    # JVMOptions are additional startup arguments for Java Virtual Machine which runs agent
+    jvmOptions: ""
 
-      # CustomWorkDirPath is a custom Remoting work directory will be used instead of the Agent Root Directory
-      customWorkDirPath: ""
-
-      # InternalDataDirectory defines a storage directory for the internal data
-      # By default it's "remoting"
-      internalDataDirectory: ""
-
-      # FailIfWorkspaceIsMissing if true, remoting will fail at startup if the target work directory is missing
-      failIfWorkplaceIsMissing: false
-
-      # UseWebSocket uses websocket to connect to the Jenkins Controller rather than the TCP port
-      useWebSocket: false
-
-      # TunnelConnectionThrough allows to route connection to another host
-      # Field allowed values: "HOST:PORT", ":PORT" and "HOST:"
-      tunnelConnectionThrough: ""
-
-      # JVMOptions are additional startup arguments for Java Virtual Machine which runs agent
-      jvmOptions: ""
-
-      # Availability controls when Jenkins starts and stops this agent.
-      availability: ""
-
-      # ToolLocations is list of tools location
-      toolLocations:
-        - name: ""
-          home: ""
-
-    # RoleRef defines list of extra RBAC roles for the Jenkins Kubernetes Agent pod service account
-    roleRef: []
+    # Roles defines list of extra RBAC roles for the Jenkins Kubernetes Agent pod service account
+    roles: []
 
 # JenkinsAuthenticationEnabled can enable or disable the JenkinsAuthentication instance
 # Set to true if you want to deploy the resource, set to false if have configured CR(s) already and/or you want to deploy an operator only
 jenkinsAuthenticationEnabled: true
 
 # JenkinsAuthentication configuration
-# For authentication creation tutorial, check https://virtuslabrnd.github.io/operator-service-docs/operator-service-for-jenkins/latest/getting-started/integrating-authentication/
+# For authentication creation tutorial, check https://docs.carthago.cloud/latest-version/getting-started/authentication/
 jenkinsAuthentication:
   # name of resource
   name: authentication
@@ -470,7 +503,7 @@ jenkinsAuthentication:
   # labels are injected into metadata labels field. Each JenkinsAuthentication Custom Resource need to reference corresponding
   # Jenkins Custom Resource via labels field
   labels:
-    operator-service.com/jenkins: jenkins
+    carthago.cloud/jenkins: jenkins
 
   # annotations are injected into metadata annotations field
   annotations: {}
@@ -481,13 +514,13 @@ jenkinsAuthentication:
   # githubOAuth is configuration for GitHub OAuth provider
   githubOAuth:
     # clientID is the client ID you received from GitHub for your OAuth App.
-    clientID: ""
+    clientID: "" # set in start-jenkins.sh script
 
     # clientSecretRef is a secret reference which allows to safely pass into Authorization Spec. Has to contain "clientSecret" key with value of
     # the client secret you received from GitHub for your OAuth App.
     clientSecretRef:
       name: jenkins-github-oauth-secret
-      namespace: ""
+      namespace: "" # set in start-jenkins.sh script
 
     # WebURI used if you are using GitHub Enterprise. The URL to the web UI root of your GitHub installation.
     # The 'https://' or 'http://' part needs to be specified. There should not be any trailing slash (/).
@@ -605,3 +638,152 @@ jenkinsAuthentication:
 
     # (optional)
     escapeHatchGroup: ""
+
+  samlAuth:
+    # idpMetadata is Identity Provider Metadata in XML format.
+    # idpMetadata:
+
+    # idpMetadataURL The Identity Provider metadata file source URL. If you provide idpMetadataURL please add refreshPeriod.
+    idpMetadataURL:
+
+    # refreshPeriod in minutes between Identity Provider metadata refreshes. Setting it to 0 disables refreshing metadata.
+    refreshPeriod:
+
+    # displayNameAttribute is the name of the attribute that carries the display name (optional)
+    displayNameAttribute:
+
+    # groupAttribute is the name of the attribute that carries user groups (optional)
+    groupAttribute:
+
+    # maximumAuthenticationLifetime is the number of seconds since the user was authenticated in IdP for which his authentication is considering as active.
+    maximumAuthenitcationLifetime:
+
+    # usernameAttribute is the name of the attribute that carries user name which will be used as the Jenkins ID (optional).
+    usernameAttribute:
+
+    # emailAttribute is the field name of email attribute in SAML response. (optional)
+    emailAttribute:
+
+    # usernameCaseConversion specifies how ID returned from SAML will be converted to the username for Authorization.
+    usernameCaseConversion:
+
+    # dataBindingMethod SAML specifies the method of redirection binding that will be used by SAML plugin.
+    # The plugin supports HTTP-Redirect and HTTP-POST and by default it uses HTTP-Redirect.
+    # Enum: http-post ; http-redirect
+    dataBindingMethod:
+
+    # logoutURL is the logout URL of your Identity Provider. Users will be redirected there on logout.
+    logoutURL:
+
+    # advancedConfiguration:
+
+      # forceAuthentication specifies whether to request the SAML IdP to force reauthentication of the user,
+      # rather than allowing an existing session with the IdP to be reused.
+      # (optional) bool
+      # forceAuthentication:
+
+      # authenticationContext makes SAML IdP use a specific authentication context instead of its default one.
+      # If left empty, default authentication context will be used.
+      # (optional)
+      # authenticationContext:
+
+      # SPEntityID it overrides the default Entity ID for this Service Provider.
+      # (optional)
+      # SPEntityID:
+
+      # nameIDPolicyFormat:
+
+    # encryptionConfiguration can be used to specify the keystore details if your provider requires encryption or signing.
+    # encryptionConfiguration:
+
+      # keystorePath is the path to the keystore file created with the keygen command.
+      # (optional)
+      # keystorePath:
+
+      # keystorePassword is the password used in the -storepass argument of the keytool command.
+      # (optional)
+      # keystorePasswordRef: 
+
+      # privateKeyAlias is the alias used in the -alias argument of the keytool< command.
+      # (optional)
+      # privateKeyAlias:
+
+      # privateKeyPassword is the password used in the -keypass argument of keytool.
+      # (optional)
+      # privateKeyPasswordRef:
+
+      # authRequestSignature enables signature of the Redirect Binding Auth Request.
+      # If you enable it the encryption and signing key would available in the SP metadata file and URL (JENKINS_URL/securityRealm/metadata).
+      # (optional) bool
+      # authRequestSignature:
+
+      # wantsAssertionSigned makes authentication accept only signed assertion sent by the IdP.
+      # (optional) bool
+      # wantsAssertionSigned:
+
+# JenkinsAuthorizationEnabled can enable or disable the jenkinsAuthorization instance
+# Set to true if you want to deploy the resource, set to false if have configured CR(s) already and/or you want to deploy an operator only
+jenkinsAuthorizationEnabled: true
+
+# JenkinsAuthorization configuration
+# For authorization creation tutorial, check https://docs.carthago.cloud/latest-version/getting-started/authorization/
+jenkinsAuthorization:
+  # name of resource
+  name: authorization
+
+  # labels are injected into metadata labels field. Each JenkinsAuthorization Custom Resource need to reference corresponding
+  # Jenkins Custom Resource via labels field
+  labels:
+    carthago.cloud/jenkins: jenkins
+
+  # annotations are injected into metadata annotations field
+  annotations: {}
+
+  # type indicates which authorization provider is set
+  type: "matrix"
+
+  # Matrix Authorization Strategy
+  matrix:
+    groups:
+        # Scala teams 
+        # On prod we use VirtuslabRnD*scala-3-devs, but its a private repo - github auth cannot check it
+        # and would report that the given group is missing
+        # To check to which groups you're assigned go to <jenkins.url>/whoAmI/
+    - name: "scala*virtuslab"
+      permissions:
+        - Overall/Administer
+
+    - name: "VirtuslabRnD*scala-3-devs"
+      permissions:
+        - Overall/Administer
+
+    # Operator service team
+    - name: VirtuslabRnD*operator-service
+      permissions: 
+        - Overall/Administer
+    
+    - name: lampepfl*dotty-core
+      permissions:
+        - Overall/Read
+        - Job/Read
+        - Job/Build
+        - Job/Cancel
+        - Run/Replay
+        - Run/Update
+    
+    # Not logged in users
+    users:
+    - name: anonymous
+      permissions:
+        - Overall/Read
+        - Job/Discover
+        - Job/Read
+
+  # Role-Based Authorization Strategy
+  roleBased:
+    roles:
+      - name: "reader"
+        permissions:
+          - Overall/Read
+        usersOrGroups:
+          - anonymous

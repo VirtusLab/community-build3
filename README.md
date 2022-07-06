@@ -132,10 +132,6 @@ To set up everything from scratch you can run
 
 ```shell
 # Ask the Jenkins Operator team to get credentials for local development
-echo "Enter CB_DOCKER_USERNAME:"
-read -s CB_DOCKER_USERNAME && export CB_DOCKER_USERNAME
-echo "Enter CB_DOCKER_PASSWORD:"
-read -s CB_DOCKER_PASSWORD && export CB_DOCKER_PASSWORD
 echo "Enter CB_LICENSE_CLIENT:"
 read -s CB_LICENSE_CLIENT && export CB_LICENSE_CLIENT
 echo "Enter CB_LICENSE_KEY:"
