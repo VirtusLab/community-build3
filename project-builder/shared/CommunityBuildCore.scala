@@ -82,8 +82,11 @@ object Scala3CommunityBuild {
     def toJson = {
       val optionals = Seq(
         sourceVersion.map(v => s""""sourceVersion": "$v"""")
-      ).flatten.mkString(", ", ", ", "")
-      s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}$optionals}"""
+      ).flatten
+      val optionalsString =
+        if (optionals.isEmpty) ""
+        else optionals.mkString(", ", ", ", "")
+      s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}$optionalsString}"""
     }
   }
 

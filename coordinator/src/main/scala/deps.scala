@@ -152,11 +152,15 @@ def loadDepenenecyGraph(
     requiredProjects: Seq[Project] = Nil,
     filterPatterns: Seq[String] = Nil
 ): DependencyGraph =
-  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersion))(p)
+  val patterns = filterPatterns.map(_.r)
+  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersion))
+    .andThen(projectModulesFilter(patterns))
+    .apply(p)
 
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
+
   val ChunkSize = 32
   val optionalStream = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
     .takeWhile(_.stars >= minStarsCount)
@@ -166,13 +170,7 @@ def loadDepenenecyGraph(
     .flatMap { (chunk, idx) =>
       println(s"Load projects - chunk #${idx}, projects indexes from ${idx * ChunkSize}")
       val calcChunk = Future
-        .traverse(chunk) { project =>
-          Future {
-            loadProject
-              .andThen(projectModulesFilter(filterPatterns.map(_.r)))
-              .apply(project)
-          }
-        }
+        .traverse(chunk) { project => Future { loadProject(project) } }
         .map(_.filter(_.mvs.nonEmpty))
       Await.result(calcChunk, 5.minute)
     }
