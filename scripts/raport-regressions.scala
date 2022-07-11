@@ -278,12 +278,24 @@ object Reporter:
     |
     |Open community build might have applied -source:X-migration flag if it is detected it could possibly fix the build.
     |Summary only contains projects that failed when compiling source or test files of at least 1 sub-project. 
-    | - Version - version of project being built, single version if both current and last successful build version of project are equal, otherwise 'LastSuccessfulProjectVersion -> CurrentProjectVersion>'
-    | - Build URL - link to the Open Community Build, containing logs and details of the failed project
-    | - Reproducer issue - link to the reproducer issue to be filled in
+    | - `Version` - version of project being built, single version if both current and last successful build version of project are equal, otherwise 'LastSuccessfulProjectVersion -> CurrentProjectVersion>'
+    | - `Build URL` - link to the Open Community Build, containing logs and details of the failed project
+    | - `Reproducer issue` - link to the reproducer issue to be filled in
     | 
-    | All tested projects: _
-    | Open Community build run: [Build #<BUILD_ID> - <BUILD_NAME>](<BUILD_URL>)
+    |All tested projects: _
+    |Open Community build run: [Build #<BUILD_ID> - <BUILD_NAME>](<BUILD_URL>)
+    |
+    |Notes for issue reproducers:
+    |To reproduce builds locally you can use:
+    |```
+    |scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/cli/scb-cli.scala -- reproduce --locally BUILD_ID
+    |```
+    |BUILD ID can be found in the BUILD_URL columns (eg. `Open CB #BUILD_ID`)
+    |Helpful options for reproducer scripts:
+    | - `--scalaVersion VERSION` - run build with the selected version of Scala (to check if the problem existed in given release)
+    | - `--withUpstream` - build also all upstream dependencies of failing project
+    | - `--locally` - checkout and build the project locally, without this flag it would try to start a minikube cluster to make the reproduction environment exactly the same as in the Open Community Build run (eg. to compile with the same version of the JDK)
+    |
     |""".stripMargin
 
     override def report(
