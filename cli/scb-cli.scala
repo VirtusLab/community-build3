@@ -1,5 +1,5 @@
 // Use Scala 3.0 until pretty stacktraces are fixed
-//> using scala "3.0.2"
+//> using scala "3.1.3"
 //> using lib "org.json4s::json4s-native:4.0.3"
 //> using lib "com.lihaoyi::requests:0.7.0"
 //> using lib "com.lihaoyi::os-lib:0.8.1"
@@ -55,7 +55,7 @@ case class JenkinsReproducerConfig(
     jobId: String = "custom",
     scalaVersionOverride: Option[String] = None,
     buildFailedModulesOnly: Boolean = false,
-    buildUpstream: Boolean = true,
+    buildUpstream: Boolean = false,
     ignoreFailedUpstream: Boolean = false,
     jenkinsEndpoint: String = "https://scala3.westeurope.cloudapp.azure.com"
 ):
@@ -76,8 +76,8 @@ object Config:
     case Minikube, Local
 
   case class MinikubeConfig(
-      keepCluster: Boolean = false,
-      keepMavenRepository: Boolean = false,
+      keepCluster: Boolean = true,
+      keepMavenRepository: Boolean = true,
       namespace: String = "scala3-community-build",
       k8sConfig: File = (os.home / ".kube" / "config").toIO
   )
@@ -89,11 +89,11 @@ object Config:
     OParser.sequence(
       head("Scala 3 Community Build tool", communityBuildVersion),
       // Minikube specific
-      opt[Unit]("keepCluster")
-        .action { (_, c) => c.withMinikube(_.copy(keepCluster = true)) }
+      opt[Unit]("removeCluster")
+        .action { (_, c) => c.withMinikube(_.copy(keepCluster = false)) }
         .text("Should Minikube cluster be kept after finishing the build"),
-      opt[Unit]("keepMavenRepo")
-        .action { (_, c) => c.withMinikube(_.copy(keepMavenRepository = true)) }
+      opt[Unit]("removeMavenRepo")
+        .action { (_, c) => c.withMinikube(_.copy(keepMavenRepository = false)) }
         .text("Should Maven repository instance should not be delete after finishing the build"),
       opt[File]("k8sConfig")
         .action { (x, c) => c.withMinikube(_.copy(k8sConfig = x)) }
@@ -128,8 +128,8 @@ object Config:
           opt[Unit]("ignoreFailedUpstream")
             .action { (x, c) => c.withReproducer(_.copy(ignoreFailedUpstream = true)) }
             .text("Ignore build failures of upstream projects"),
-          opt[Unit]("noUpstream")
-            .action { (x, c) => c.withReproducer(_.copy(buildUpstream = false)) }
+          opt[Unit]("withUpstream")
+            .action { (x, c) => c.withReproducer(_.copy(buildUpstream = true)) }
             .text("Do not build upstream projects of the target"),
           opt[String]("jenkinsEndpoint")
             .action { (x, c) => c.withReproducer(_.copy(jenkinsEndpoint = x)) }
@@ -263,20 +263,24 @@ object BuildInfo:
     )
     val jobId = config.reproducer.jobId
     println(s"Fetching build info from Jenkins based on project $jobId")
-    val runId = {
-      val r =
-        requests.get(
-          s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/api/json?tree=actions[causes[*]]"
-        )
-      val json = parse(r.data.toString)
-      for {
-        JArray(ids) <- (json \ "actions" \ "causes" \ "upstreamBuild").toOption
-        JInt(id) <- ids.headOption
-      } yield id.toString
-    }
+    val runId =
+      if !config.reproducer.buildUpstream then None
+      else {
+        val r =
+          requests.get(
+            s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/api/json?tree=actions[causes[*]]"
+          )
+        val json = parse(r.data.toString)
+        for {
+          JArray(ids) <- (json \ "actions" \ "causes" \ "upstreamBuild").toOption
+          JInt(id) <- ids.headOption
+        } yield id.toString
+      }.orElse {
+        println("No upstream project defined")
+        None
+      }
 
     val runProjectIds = runId.fold {
-      println("No upstream project defined")
       List(jobId)
     } { runId =>
       val r = requests.get(s"${config.reproducer.jenkinsRunBuildJob(runId)}/consoleText")
@@ -310,9 +314,9 @@ object BuildInfo:
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
-        /* replacedProjectsPath = */ "",
+        /* replacedProjectsPath = */ configsDir / "replaced-projects.txt",
         /* projectsConfigPath = */ configsDir / "projects-config.conf",
-        /* projectsFiterPath = */ ""
+        /* projectsFiterPath = */ configsDir / "filtered-projects.txt"
       ).map("\"" + _.toString + "\"").mkString(" ")
       val coordinatorDir = communityBuildDir / "coordinator"
       os.proc("sbt", "--no-colors", s"runMain storeDependenciesBasedBuildPlan $args")
@@ -366,28 +370,37 @@ case class BuildSummary(projects: List[BuildProjectSummary]):
 
 object BuildSummary:
   def fetchFromJenkins(jobId: String)(using config: Config): BuildSummary =
-    val r = requests.get(
-      s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/artifact/build-summary.txt",
-      check = false
-    )
+    val buildSummaryUrl =
+      s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/artifact/build-summary.txt"
+    val r = requests.get(buildSummaryUrl, check = false)
     val projects = if !r.is2xx then
       System.err.println(
-        s"Failed to get build summary for job $jobId, assuming it failed in all submodules"
+        s"Failed to get build summary $buildSummaryUrl, assuming project failed in all submodules"
       )
       Nil
     else
-      for
-        JObject(projects) <- parse(r.data.toString)
-        JField(artifactName, results: JObject) <- projects
-        BuildResult(compile) <- results \ "compile"
-        BuildResult(testCompile) <- results \ "test-compile"
-      yield BuildProjectSummary(
-        artifactName = artifactName,
-        results = ProjectTargetResults(
-          compile = compile,
-          testCompile = testCompile
+      try {
+        for
+          JArray(projects) <- parse(
+            // Might contain quoted strings
+            r.data.toString.replaceAll(""""reasons": \[.*\]""", """"reasons": []""")
+          )
+          project <- projects
+          JString(artifactName) <- project \ "module"
+          BuildResult(compile) <- project \ "compile" \ "status"
+          BuildResult(testCompile) <- project \ "test-compile" \ "status"
+        yield BuildProjectSummary(
+          artifactName = artifactName,
+          results = ProjectTargetResults(
+            compile = compile,
+            testCompile = testCompile
+          )
         )
-      )
+      } catch {
+        case ex: Throwable =>
+          System.err.println(s"Failed to parse build summary $buildSummaryUrl")
+          Nil
+      }
     BuildSummary(projects)
 
 case class BuildProjectSummary(
