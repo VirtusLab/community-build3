@@ -161,11 +161,11 @@ object CommunityBuildPlugin extends AutoPlugin {
           ): Seq[String] = {
             val newEntries = Seq("-rewrite", s"-source:$sourceVersion")
             println(s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}")
-            currentSettings.filter { setting =>
-              !setting.contains("-rewrite") &&
-              !setting.contains("-source") &&
-              !setting.contains("-migration") && 
-              !setting.contains("-Xfatal-warnings")
+            // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
+            val filteredSettings = Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
+            currentSettings.filterNot { setting =>
+              filteredSettings.exists(setting.contains(_)) ||
+              setting.matches(".*-Wconf.*any:e")
             } ++ newEntries
           }
           args.headOption
