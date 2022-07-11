@@ -14,11 +14,13 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.auth.*
 
 import scala.concurrent.*
+import scala.concurrent.duration.*
 import scala.io.AnsiColor.*
 
 given ExecutionContext = ExecutionContext.global
 
 val BuildSummariesIndex = "project-build-summary"
+val DefaultTimeout = 5.minutes
 val ElasticsearchUrl = "https://localhost:9200"
 // ./scripts/show-elastic-credentials.sh
 val ElasticsearchCredentials = new UsernamePasswordCredentials(
@@ -41,14 +43,18 @@ val StableScalaVersions = {
 }
 
 // Report all community build filures for given Scala version
-@main def report(scalaVersion: String) =
+@main def raportForScalaVersion(scalaVersion: String, opts: String*) =
+  val createIssueTrackerTable = opts.exists(_.contains("-issueTracker"))
   printLine()
   println(s"Reporting failed community build projects using Scala $scalaVersion")
   val failedProjects = listFailedProjects(scalaVersion)
-  if failedProjects.nonEmpty then reportCompilerRegressions(failedProjects, scalaVersion)
+  if failedProjects.nonEmpty then
+    reportCompilerRegressions(failedProjects, scalaVersion)(
+      if createIssueTrackerTable then Reporter.IssueTracker(scalaVersion)
+      else Reporter.Default
+    )
   printLine()
   esClient.close()
-end report
 
 case class Project(searchName: String) extends AnyVal {
   def orgRepoName = searchName.replace("_", "/")
@@ -109,7 +115,7 @@ def listFailedProjects(scalaVersion: String): Seq[FailedProject] =
             .subaggs(projectVersionsStatusAggregation)
         )
     }
-    .await
+    .await(DefaultTimeout)
     .fold(
       reportFailedQuery("GetFailedQueries").andThen(_ => Nil),
       resp => {
@@ -197,7 +203,7 @@ def projectHistory(project: FailedProject) =
           fieldSort("timestamp").desc()
         )
     }
-    .await
+    .await(DefaultTimeout)
     .fold[Seq[ProjectHistoryEntry]](
       reportFailedQuery(s"Project build history ${project.project.orgRepoName}")
         .andThen(_ => Nil),
@@ -218,12 +224,113 @@ def projectHistory(project: FailedProject) =
     )
 end projectHistory
 
-private def reportCompilerRegressions(projects: Seq[FailedProject], scalaVersion: String): Unit =
+trait Reporter {
+  def prelude: String = ""
+  def report(
+      scalaVersion: String,
+      failedProjects: Map[Project, FailedProject],
+      sameVersionRegressions: Seq[ProjectHistoryEntry],
+      diffVersionRegressions: Seq[ProjectHistoryEntry]
+  ): Unit
+}
+object Reporter:
+  object Default extends Reporter:
+    override def report(
+        scalaVersion: String,
+        failedProjects: Map[Project, FailedProject],
+        sameVersionRegressions: Seq[ProjectHistoryEntry],
+        diffVersionRegressions: Seq[ProjectHistoryEntry]
+    ): Unit = {
+      val allRegressions = sameVersionRegressions ++ diffVersionRegressions
+      def showFailed(failed: Seq[ProjectHistoryEntry]) = failed
+        .map(_.project.orgRepoName)
+        .map(v => s"${BOLD}$v${RESET}")
+        .mkString(", ")
+      def showDiffVersions() = diffVersionRegressions.foreach(v =>
+        println(
+          s" * $BOLD${v.project.orgRepoName}$RESET - ${v.version} -> ${failedProjects(v.project).version} "
+        )
+      )
+
+      val same = sameVersionRegressions
+      val diff = diffVersionRegressions
+      printLine()
+      println(
+        scalaVersion match {
+          case Some(scalaVersion) =>
+            s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:"
+          case None =>
+            s"Projects without successful builds data [${allRegressions.size}]:"
+        }
+      )
+      println(
+        s"""Same versions[${same.size}]:    ${showFailed(same)}
+           |Changed versions[${diff.size}]: ${showFailed(diff)}""".stripMargin
+      )
+      if diffVersionRegressions.nonEmpty then showDiffVersions()
+    }
+
+  class IssueTracker(testedScalaVersion: String) extends Reporter:
+    override def prelude: String = s"""
+    |Each table contains a list of projects that failed to compile with Scala ${testedScalaVersion}, but was successfuly built with the given previous version.
+    |A summary is based only on final and released candidate versions of Scala 3.
+    |Information about the last Scala version used for the last successful build might not always be correct, due to lack of data (lack of build for that project with given Scala version)
+    |
+    |Open community build might have applied -source:X-migration flag if it is detected it could possibly fix the build.
+    |Summary only contains projects that failed when compiling source or test files of at least 1 sub-project. 
+    | - Version - version of project being built, single version if both current and last successful build version of project are equal, otherwise 'LastSuccessfulProjectVersion -> CurrentProjectVersion>'
+    | - Build URL - link to the Open Community Build, containing logs and details of the failed project
+    | - Reproducer issue - link to the reproducer issue to be filled in
+    | 
+    | All tested projects: _
+    | Open Community build run: [Build #<BUILD_ID> - <BUILD_NAME>](<BUILD_URL>)
+    |""".stripMargin
+
+    override def report(
+        scalaVersion: Option[String],
+        failedProjects: Map[Project, FailedProject],
+        sameVersionRegressions: Seq[ProjectHistoryEntry],
+        diffVersionRegressions: Seq[ProjectHistoryEntry]
+    ): Unit = {
+      def showRow(project: String, version: String, buildURL: String, issueURL: String = "") =
+        println(s"| $project | $version | $issueURL | $buildURL |")
+      val allRegressions = sameVersionRegressions ++ diffVersionRegressions
+      printLine()
+      println(
+        scalaVersion match {
+          case Some(scalaVersion) =>
+            s"Projects with last successful builds using Scala <b>$BOLD$scalaVersion$RESET</b> [${allRegressions.size}]:"
+          case None =>
+            s"Projects without successful builds data [${allRegressions.size}]:"
+        }
+      )
+      showRow("Project", "Version", "Build URL", "Reproducer issue")
+      showRow("-------", "-------", "---------", "----------------")
+      for p <- allRegressions do
+        val version = failedProjects
+          .get(p.project)
+          .collect {
+            case failed if p.version != failed.version => s"${p.version} -> ${failed.version}"
+          }
+          .getOrElse(p.version)
+        val buildUrl = {
+          val url = failedProjects(p.project).buildURL
+          val buildId = url.split("/").reverse.dropWhile(_.isEmpty).head
+          s"[Open CB #$buildId]($url)"
+        }
+        showRow(p.project.orgRepoName, version, buildUrl)
+    }
+  end IssueTracker
+
+private def reportCompilerRegressions(
+    projects: Seq[FailedProject],
+    scalaVersion: String
+)(reporter: Reporter): Unit =
   val failedProjectHistory = Future
     .traverse(projects) { fp =>
       Future { (fp, this.projectHistory(fp)) }
     }
-    .await
+    .await(DefaultTimeout)
     .toMap
 
   val failedProjects = projects.map(v => v.project -> v).toMap
@@ -231,8 +338,7 @@ private def reportCompilerRegressions(projects: Seq[FailedProject], scalaVersion
   val allHistory = projectHistory.values.flatten.toSeq
 
   printLine()
-  println(s"Compiler regressions existing in Scala ${scalaVersion}:")
-  println("List does not include runtime (tests), docs and infrastructure failures.")
+  println(reporter.prelude)
   val alwaysFailing =
     StableScalaVersions.reverse
       .dropWhile(isVersionNewerOrEqualThen(_, scalaVersion))
@@ -241,7 +347,7 @@ private def reportCompilerRegressions(projects: Seq[FailedProject], scalaVersion
           .filter(v =>
             v.scalaVersion == scalaVersion &&
               v.isCurrentVersion == exactVersion &&
-              !v.compilerFailure && // was successfull in checked version
+              !v.compilerFailure && // was successful in checked version
               prev.contains(v.project) // failed in newer version
           )
           .sortBy(_.project.searchName)
@@ -249,32 +355,28 @@ private def reportCompilerRegressions(projects: Seq[FailedProject], scalaVersion
         val diffVersionRegressions = regressionsSinceLastVersion(exactVersion = false)
           .diff(sameVersionRegressions)
         val allRegressions = sameVersionRegressions ++ diffVersionRegressions
-        def showFailed(failed: Seq[ProjectHistoryEntry]) = failed
-          .map(_.project.orgRepoName)
-          .map(v => s"${BOLD}$v${RESET}")
-          .mkString(", ")
-        def showDiffVersions() = diffVersionRegressions.foreach(v =>
-          println(
-            s" * $BOLD${v.project.orgRepoName}$RESET - ${v.version} -> ${failedProjects(v.project).version} "
-          )
-        )
 
         if allRegressions.isEmpty then prev
         else
-          val same = sameVersionRegressions
-          val diff = diffVersionRegressions
-          printLine()
-          println(s"""Regressions since $BOLD$scalaVersion$RESET [${allRegressions.size}]:
-             |Same versions[${same.size}]:    ${showFailed(same)}
-             |Changed versions[${diff.size}]: ${showFailed(diff)}""".stripMargin)
-          if diffVersionRegressions.nonEmpty then showDiffVersions()
+          reporter.report(
+            scalaVersion,
+            failedProjects,
+            sameVersionRegressions,
+            diffVersionRegressions
+          )
           prev.diff(allRegressions.map(_.project).toSet)
       }
   if alwaysFailing.nonEmpty then
-    val projectNames =
-      alwaysFailing.map(_.orgRepoName).map(v => s"$BOLD$v$RESET").toSeq.sorted.mkString(", ")
-    printLine()
-    println(s"Always failing[${alwaysFailing.size}]: ${projectNames}")
+    reporter.report(
+      "with no successful builds data",
+      failedProjects,
+      alwaysFailing
+        .map(projectHistory(_).find(_.scalaVersion == scalaVersion).get)
+        .toSeq
+        .sortBy(_.project.orgRepoName),
+      Nil
+    )
+
 end reportCompilerRegressions
 
 def printLine() = println("- " * 40)
