@@ -1,4 +1,3 @@
-// Use Scala 3.0 until pretty stacktraces are fixed
 //> using scala "3.1.3"
 //> using lib "org.json4s::json4s-native:4.0.3"
 //> using lib "com.lihaoyi::requests:0.7.0"
@@ -27,7 +26,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.14")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.15")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
@@ -1082,22 +1081,30 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     val sbtSettings = sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
     val SbtVersion = raw"sbt\.version\s*=\s*(\d.*)".r
-    val currentSbtVersion = os
-      .read(sbtBuildProperties)
-      .linesIterator
-      .collectFirst { case SbtVersion(version) =>
-        version
-      }
-      .getOrElse(sys.error("Cannot resolve current sbt version"))
+    val currentSbtVersion =
+      if !os.exists(sbtBuildProperties) then None
+      else
+        os
+          .read(sbtBuildProperties)
+          .linesIterator
+          .collectFirst { case SbtVersion(version) =>
+            version
+          }
+        // .getOrElse(sys.error("Cannot resolve current sbt version"))
     val belowMinimalSbtVersion =
-      currentSbtVersion.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
-        case Array(1, minor, patch) => minor <= 5 && patch < 5
-        case _                      => false
+      currentSbtVersion.forall {
+        _.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
+          case Array(1, minor, patch) => minor <= 5 && patch < 5
+          case _                      => false
+        }
       }
 
     override def prepareBuild(): Unit =
+      val sbtProjectDir = sbtBuildProperties / os.up
+      if !os.exists(sbtProjectDir) then os.makeDir(sbtProjectDir)
       project.params.enforcedSbtVersion match {
-        case Some(version) => os.write.over(sbtBuildProperties, s"sbt.version=$version")
+        case Some(version) =>
+           os.write.over(sbtBuildProperties, s"sbt.version=$version")
         case _ =>
           if belowMinimalSbtVersion then
             println(
