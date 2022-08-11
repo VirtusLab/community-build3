@@ -43,6 +43,7 @@ inkytonik:kiama:.*
 kevin-lee:can-equal:.*
 kevin-lee:just-fp:.*
 kevin-lee:logger-f:.*
+kevin-lee:just-semver:.* 
 outr:testy:.*
 rocketfuel:sdbc:.*
 sciss:pdflitz:.*
@@ -52,6 +53,12 @@ sciss:scala-chart:.*
 sciss:span:.*
 sciss:swingplus:.*
 
+## Uses CrossVersion.scalaApiVersion giving incorrect results 
+# Problem defined in sbt plugin "com.sandinh" % "sd-devops-oss"
+ohze:akka-guice:.*
+ohze:couchbase-scala:.*
+ohze:sd-util:.*
+
 ## Usage of scala-output-version flag
 typelevel:kittens:3.0.0-M4
 
@@ -59,15 +66,19 @@ typelevel:kittens:3.0.0-M4
 virtuslab:scala-cli:.*
 
 ## Does not compile
-2m:yabai-scala:2.0.1
-arturopala:gitignore:0.2.0
-lorandszakacs:sprout:0.0.5
+arturopala:gitignore:.*
+fehu:opentracing-scala:.*
+katrix:minejson:.*
+lorandszakacs:sprout:0.0.[0-5]
 losizm:little-sql:4.0.0
 outr:perfolation:1.2.9
 rssh:scala-gopher:.*
 
 ## Outdated version, needs new release
+2m:yabai-scala:2.0.[0-1]
+caspercommunityio:casper-scala-sdk:1.[0-2].[0-1] 
 hsci-r:lucene-perfieldpostingsformatordtermvectorscodec:.*
+jcouyang:meow:0.4.1[0-3]
 kevin-lee:maven2sbt:.*
 noelwelsh:mads:.*
 ruimo:csvparser:.*
@@ -75,11 +86,47 @@ ruimo:graphics:.*
 ruimo:scoins:.*
 sciss:serial:.*
 
+## 3.2.x
+### Uses NonLocal Returns
+# 0.1-M4
+mvv:typine:.*
+
+### Source breaking change 
+# https://github.com/lampepfl/dotty/pull/14840#issuecomment-1182146696
+tinkoff:phobos:0.15.*
+
+# https://github.com/lampepfl/dotty/issues/15670 Won't fix, ignore until 2.1.x
+giiita:refuel:[0-2].[0-2].*
+
+#https://github.com/lampepfl/dotty/issues/15647#issuecomment-1183488713
+gzoller:scala-reflection:1.[0-1].[0-4]
+
+#https://github.com/lampepfl/dotty/issues/15678
+johnhungerford:generic-schema:1.1.*
+
+#https://github.com/lampepfl/dotty/issues/15668
+kevin-lee:extras:0.18.*
+
+#https://github.com/lampepfl/dotty/issues/15686
+vladkopanev:cats-saga:1.0.0-RC.*
+
+#https://github.com/lampepfl/dotty/issues/15647#issuecomment-1181291100
+tinkoff:phobos:0.15.[0-2]
+
+# opaque type overrides
+lorandszakacs:sprout:0.0.[0-5]	
+
+# Changes to Compiler API
+nrinaudo:kantan.repl:1.1.*
+sciss:soundprocesses:[0-4].[0.14].*
+virtuslab:pretty-stacktraces:0.0.*
+zygfryd:scala-zygf-cement:0.3.0
+
 ## Invalid dependency versions
 abdolence:circe-tagged-adt-codec:.*
 errors4s:errors4s-core-circe:.*
 kag0:ninny-json:.*
-nrktkt:ninny-json:.*
+nrktkt:ninny-json:.*  
 karazinscalausersgroup:circe-literal-extras:.*
 jsfwa:zio-cassandra:.*
 sdrafahl:migratepipeline:.*
@@ -140,3 +187,6 @@ japgolly:nyaya.*
 
 ## errors4s_errors4s-core
 errors4s:errors4s-core-scalacheck:.*
+
+#Fork of gzoller/scala-reflection
+pjfanning/scala3-reflection:.*
