@@ -66,6 +66,7 @@ function runSbt() {
   fi
   tq='"""'
   sbt ${sbtSettings[@]} \
+    "setCrossScalaVersions $scalaVersion" \
     "$setScalaVersionCmd -v" \
     "set every credentials := Nil" \
     "$customCommands" \
