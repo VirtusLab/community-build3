@@ -90,6 +90,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
     .getOrElse(Nil)
 
+  var disableFatalWarningsFlag = false
   override def projectSettings = Seq(
     scalacOptions := {
       // Flags need to be unique
@@ -99,11 +100,13 @@ object CommunityBuildPlugin extends AutoPlugin {
           // Ignore deprecations, replace them with info ()
           Seq("-Wconf:cat=deprecation:i")
       }
-      options.foldLeft(scalacOptions.value) { case (options, flag) =>
-        if (options.contains(flag)) options
-        else options :+ flag
-      }
-    }
+      val withAdditions = (scalacOptions.value ++ options).distinct
+      if (disableFatalWarningsFlag)
+        withAdditions.filter(_ != "-Xfatal-warnings")
+      else withAdditions
+    },
+    // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
+    crossScalaVersions := (thisProjectRef / crossScalaVersions).value
   ) ++ mvnRepoPublishSettings
 
   private def stripScala3Suffix(s: String) = s match {
@@ -116,78 +119,130 @@ object CommunityBuildPlugin extends AutoPlugin {
     * Jcstress/version scopes, leading build failures
     */
   val setPublishVersion =
-    Command.args("setPublishVersion", "<version>") { case (state, args) =>
-      args.headOption
-        .orElse(sys.props.get("communitybuild.version"))
+    keyTransformCommand("setPublishVersion", Keys.version) { (args, _) =>
+      val targetVersion = args.headOption
         .filter(_.nonEmpty)
-        .fold {
-          System.err.println("No explicit version found in setPublishVersion command, skipping")
-          state
-        } { targetVersion =>
-          println(s"Setting publish version to $targetVersion")
-          val extracted = sbt.Project.extract(state)
-          val updatedVersions = extracted.structure.allProjectRefs
-            .map { ref =>
-              (ref / Keys.version).transform(
-                currentVersion => {
-                  dualVersioning
-                    .filter(_.matches(targetVersion, currentVersion))
-                    .flatMap(_.apply(targetVersion))
-                    .map { version =>
-                      println(
-                        s"Setting version ${version.render} for ${ref.project} based on dual versioning ${dualVersioning}"
-                      )
-                      version.render
-                    }
-                    .getOrElse(targetVersion)
-                },
-                sbt.internal.util.NoPosition
-              )
-            }
-          extracted.appendWithSession(updatedVersions, state)
+        .orElse(sys.props.get("communitybuild.version"))
+        .getOrElse {
+          throw new RuntimeException(
+            "No explicit version found in setPublishVersion command"
+          )
         }
+      (ref: ProjectRef, currentVersion: String) => {
+        dualVersioning
+          .filter(_.matches(targetVersion, currentVersion))
+          .flatMap(_.apply(targetVersion))
+          .map { version =>
+            println(
+              s"Setting version ${version.render} for ${ref.project} based on dual versioning ${dualVersioning}"
+            )
+            version.render
+          }
+          .getOrElse(targetVersion)
+      }
     }
+
+  val disableFatalWarnings = keyTransformCommand(
+    "disableFatalWarnings",
+    Compile / scalacOptions,
+    Test / scalacOptions
+  ) { (_, _) =>
+    {
+      disableFatalWarningsFlag = true
+      (ref: ProjectRef, currentSettings: Seq[String]) =>
+        currentSettings // removed in projectSettings for durable effect
+    }
+  }
 
   /** Helper command used to filter scalacOptions and set source migration flags
     */
-  val enableMigrationMode =
-    Command.args("enableMigrationMode", "<source-version>") { case (state, args) =>
-      val extracted = sbt.Project.extract(state)
-      val updatedScalacOptions = extracted.structure.allProjectRefs
-        .flatMap { ref =>
-          def setMigrationFlags(
-              currentSettings: Seq[String],
-              sourceVersion: String
-          ): Seq[String] = {
-            val newEntries = Seq("-rewrite", s"-source:$sourceVersion")
-            println(s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}")
-            currentSettings.filter { setting =>
-              !setting.contains("-rewrite") &&
-              !setting.contains("-source") &&
-              !setting.contains("-migration") && 
-              !setting.contains("-Xfatal-warnings")
-            } ++ newEntries
+  val enableMigrationMode = keyTransformCommand(
+    "enableMigrationMode",
+    Compile / scalacOptions,
+    Test / scalacOptions
+  ) { (args, extracted) =>
+    val argSourceVersion = args.headOption.filter(_.nonEmpty)
+    def resolveSourceVersion(ref: ProjectRef) = CrossVersion
+      .partialVersion(extracted.get(ref / scalaVersion))
+      .collect {
+        case (3, 0) => "3.0-migration"
+        case (3, 1) => "3.0-migration"
+        case (3, 2) => "3.2-migration"
+        case (3, _) => "future-migration"
+      }
+
+    (ref: ProjectRef, currentSettings: Seq[String]) => {
+      argSourceVersion
+        .orElse(resolveSourceVersion(ref))
+        .fold(currentSettings) { sourceVersion =>
+          val newEntries = Seq(s"-source:$sourceVersion")
+          println(
+            s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
+          )
+          // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
+          val filteredSettings =
+            Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
+          currentSettings.filterNot { setting =>
+            filteredSettings.exists(setting.contains(_)) ||
+            setting.matches(".*-Wconf.*any:e")
+          } ++ newEntries
+        }
+    }
+  }
+
+  /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
+    * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
+    */
+  val setCrossScalaVersions =
+    keyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) { (args, _) =>
+      val scalaVersion = args.head
+      (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
+        currentCrossVersions.map { currentVersion =>
+          CrossVersion.partialVersion(currentVersion) match {
+            case Some((3, _)) =>
+              println(
+                s"Changing crossVersion $currentVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
+              )
+              scalaVersion
+            case _ => currentVersion
           }
-          args.headOption
-            .filter(_.nonEmpty)
-            .orElse {
-              CrossVersion.partialVersion(extracted.get(ref / scalaVersion)).collect {
-                case (3, 0) => "3.0-migration"
-                case (3, 1) => "3.0-migration"
-                case (3, 2) => "3.2-migration"
-                case (3, _) => "future-migration"
-              }
-            }
-            .map { sourceVersion =>
-              (ref / Compile / Keys.scalacOptions)
-                .transform(
-                  setMigrationFlags(_, sourceVersion),
+        }
+      }
+    }
+
+  val commands = Seq(
+    enableMigrationMode,
+    disableFatalWarnings,
+    setPublishVersion,
+    setCrossScalaVersions
+  )
+
+  type SettingMapping[T] = (Seq[String], Extracted) => (ProjectRef, T) => T
+  def keyTransformCommand[T](name: String, keys: Taskable[T]*)(
+      mapping: SettingMapping[T]
+  ) =
+    Command.args(name, "args") { case (state, args) =>
+      val extracted = sbt.Project.extract(state)
+      val withArgs = mapping(args, extracted)
+      println(s"Execute $name")
+      state.appendWithSession(
+        extracted.structure.allProjectRefs
+          .flatMap { ref =>
+            for (key <- keys) yield key match {
+              case key: TaskKey[T] =>
+                (ref / key).transform(
+                  withArgs(ref, _),
                   sbt.internal.util.NoPosition
                 )
+              case key: SettingKey[T] =>
+                (ref / key).transform(
+                  withArgs(ref, _),
+                  sbt.internal.util.NoPosition
+                )
+              case _ => ???
             }
-        }
-      extracted.appendWithSession(updatedScalacOptions, state)
-
+          }
+      )
     }
 
   // Create mapping from org%artifact_name to project name
