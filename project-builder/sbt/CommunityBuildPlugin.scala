@@ -194,19 +194,28 @@ object CommunityBuildPlugin extends AutoPlugin {
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
     */
   val setCrossScalaVersions =
-    keyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) { (args, _) =>
+    keyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) { (args, extracted) =>
       val scalaVersion = args.head
+      val partialVersion = CrossVersion.partialVersion(scalaVersion)
+      val targetsScala3 = partialVersion.exists(_._1 == 3)
+
       (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
-        currentCrossVersions.map { currentVersion =>
-          CrossVersion.partialVersion(currentVersion) match {
-            case Some((3, _)) =>
-              println(
-                s"Changing crossVersion $currentVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
-              )
-              scalaVersion
-            case _ => currentVersion
-          }
+        val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
+        def updateVersion(fromVersion: String) = {
+          println(
+            s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
+          )
+          scalaVersion
         }
+        // Check currently used version of given project
+        // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+        (currentCrossVersions ++ Seq(currentScalaVersion)).map { version =>
+          CrossVersion.partialVersion(version) match {
+            case Some((3, _)) if targetsScala3 => updateVersion(version)
+            case `partialVersion`              => updateVersion(version)
+            case _                             => version
+          }
+        }.distinct
       }
     }
 
