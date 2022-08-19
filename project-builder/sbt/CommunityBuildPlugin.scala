@@ -209,25 +209,26 @@ object CommunityBuildPlugin extends AutoPlugin {
         }
         def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
         val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
+        val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
         val partialCrossVersions = crossVersionsWithPartial.values.toSet
-        val allPartialVersions = crossVersionsWithPartial ++
-          Seq(currentScalaVersion).map(withCrossVersion).toMap
+        val allPartialVersions = crossVersionsWithPartial ++ currentScalaWithPartial
+
+        type PartialVersion = Option[(Long, Long)]
+        def mapVersions(versionsWithPartial: Map[String, PartialVersion]) = versionsWithPartial
+          .map {
+            case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
+            case (version, `partialVersion`)              => updateVersion(version)
+            case (version, _)                             => version // not changed
+          }
+          .toSeq
+          .distinct
 
         allPartialVersions(currentScalaVersion) match {
-          case pv if partialCrossVersions.contains(pv) =>
-            // Check currently used version of given project
-            // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
-            allPartialVersions
-              .map {
-                case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
-                case (version, `partialVersion`)              => updateVersion(version)
-                case (version, _)                             => version // not changed
-              }
-              .toSeq
-              .distinct
-
+          // Check currently used version of given project
+          // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+          case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
           case _ => // if version is not a part of cross version allow only current version
-            val allowedCrossVersions = Seq(currentScalaVersion)
+            val allowedCrossVersions = mapVersions(currentScalaWithPartial)
             println(
               s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
             )
