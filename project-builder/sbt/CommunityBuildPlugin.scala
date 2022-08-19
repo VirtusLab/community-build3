@@ -17,8 +17,28 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   override def eval[T](task: TaskKey[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
+    val updatedState =
+      if (!CommunityBuildPlugin.disableFatalWarningsFlag) state
+      else {
+        val extracted = sbt.Project.extract(state)
+        def disableFatalWarnings(key: TaskKey[Seq[String]]) =
+          key.transform(
+            _.filterNot(_ == "-Xfatal-warnings"),
+            sbt.internal.util.NoPosition
+          )
+        state.appendWithSession(
+          extracted.structure.allProjectRefs
+            .flatMap { ref =>
+              Seq(
+                disableFatalWarnings(ref / Compile / Keys.scalacOptions),
+                disableFatalWarnings(ref / Test / Keys.scalacOptions)
+              )
+            }
+        )
+      }
+
     sbt.Project
-      .runTask(scopedTask, state)
+      .runTask(scopedTask, updatedState)
       .fold[EvalResult[T]] {
         val reason = TaskEvaluator.UnkownTaskException(scopedTask.toString())
         EvalResult.Failure(reason :: Nil, 0)
