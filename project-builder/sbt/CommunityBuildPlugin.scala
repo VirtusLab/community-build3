@@ -207,15 +207,32 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
           scalaVersion
         }
-        // Check currently used version of given project
-        // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
-        (currentCrossVersions ++ Seq(currentScalaVersion)).map { version =>
-          CrossVersion.partialVersion(version) match {
-            case Some((3, _)) if targetsScala3 => updateVersion(version)
-            case `partialVersion`              => updateVersion(version)
-            case _                             => version
-          }
-        }.distinct
+        def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
+        val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
+        val partialCrossVersions = crossVersionsWithPartial.values.toSet
+        val allPartialVersions = crossVersionsWithPartial ++
+          Seq(currentScalaVersion).map(withCrossVersion).toMap
+
+        allPartialVersions(currentScalaVersion) match {
+          case pv if partialCrossVersions.contains(pv) =>
+            // Check currently used version of given project
+            // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+            allPartialVersions
+              .map {
+                case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
+                case (version, `partialVersion`)              => updateVersion(version)
+                case (version, _)                             => version // not changed
+              }
+              .toSeq
+              .distinct
+
+          case _ => // if version is not a part of cross version allow only current version
+            val allowedCrossVersions = Seq(currentScalaVersion)
+            println(
+              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
+            )
+            allowedCrossVersions
+        }
       }
     }
 
