@@ -3,12 +3,17 @@
 # Not a Scala Project
 adampingel:axle-cicd:.*
 alexandru:alexandru:.*
+atedeg:scala-release:.*
 dacr:lorem-ipsum:.*
 didi:booster.*
+eclipse-pass:pass-java-client:.*
 line:armeria:.*
+oyvindberg:bleep:.*
 percontmx:cfdi:.*
 simy4:xpath-to-xml:.*
+stryker-mutator:mutation-testing-elements:.*
 tlsomers:scala-suspendable:.*
+virtuoso:opensource:.*
 
 # Moved to cats repo since 2.3
 typelevel:algebra.*:2.2.*
@@ -20,9 +25,14 @@ pityka:aten-scala:.*
 stryker:mutator_mutation-testing-elements:.*
 wireapp:wire-signals:.*
 
+# Missing module moduleMappings
+busymachines:pureharm-db-core:.*
+eed3si9n:sbt-coursier:.*
+
 # Not an official release version
-sbt:.*:2.0.0-alpha.*
 com-lihaoyi:ammonite:.* 
+guardian:support-frontend:.*
+sbt:.*:2.0.0-alpha.*
 
 # Incorrect Scaladex info, no Scala 3 builds
 dataoperandz:cassper:.*
@@ -39,17 +49,18 @@ pme123:camundala-dsl:.*
 ## Incorrect handling of Scala 3 binary versions
 dmurvihill:courier:.*
 emartech:scala-logger:.*
+imrafaelmerino:json-scala-values:.*
 inkytonik:kiama:.*
 kevin-lee:can-equal:.*
 kevin-lee:just-fp:.*
-kevin-lee:logger-f:.*
 kevin-lee:just-semver:.* 
+kevin-lee:logger-f:.*
 outr:testy:.*
 rocketfuel:sdbc:.*
 sciss:pdflitz:.*
 sciss:processor:.*
-sciss:scalainterpreterpane:.*
 sciss:scala-chart:.*
+sciss:scalainterpreterpane:.*
 sciss:span:.*
 sciss:swingplus:.*
 
@@ -86,6 +97,10 @@ ruimo:graphics:.*
 ruimo:scoins:.*
 sciss:serial:.*
 
+# Syntax changes issues (dangling comma)
+es-meta:esmeta:0.[0-1].*
+neandertech:jsonrpclib:0.0.[0-3]
+
 ## 3.2.x
 ### Uses NonLocal Returns
 # 0.1-M4
@@ -105,7 +120,7 @@ gzoller:scala-reflection:1.[0-1].[0-4]
 johnhungerford:generic-schema:1.1.*
 
 #https://github.com/lampepfl/dotty/issues/15668
-kevin-lee:extras:0.18.*
+kevin-lee:extras:0.[0-1].*
 
 #https://github.com/lampepfl/dotty/issues/15686
 vladkopanev:cats-saga:1.0.0-RC.*

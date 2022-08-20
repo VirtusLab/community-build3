@@ -17,8 +17,28 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   override def eval[T](task: TaskKey[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
+    val updatedState =
+      if (!CommunityBuildPlugin.disableFatalWarningsFlag) state
+      else {
+        val extracted = sbt.Project.extract(state)
+        def disableFatalWarnings(key: TaskKey[Seq[String]]) =
+          key.transform(
+            _.filterNot(_ == "-Xfatal-warnings"),
+            sbt.internal.util.NoPosition
+          )
+        state.appendWithSession(
+          extracted.structure.allProjectRefs
+            .flatMap { ref =>
+              Seq(
+                disableFatalWarnings(ref / Compile / Keys.scalacOptions),
+                disableFatalWarnings(ref / Test / Keys.scalacOptions)
+              )
+            }
+        )
+      }
+
     sbt.Project
-      .runTask(scopedTask, state)
+      .runTask(scopedTask, updatedState)
       .fold[EvalResult[T]] {
         val reason = TaskEvaluator.UnkownTaskException(scopedTask.toString())
         EvalResult.Failure(reason :: Nil, 0)
@@ -207,15 +227,33 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
           scalaVersion
         }
-        // Check currently used version of given project
-        // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
-        (currentCrossVersions ++ Seq(currentScalaVersion)).map { version =>
-          CrossVersion.partialVersion(version) match {
-            case Some((3, _)) if targetsScala3 => updateVersion(version)
-            case `partialVersion`              => updateVersion(version)
-            case _                             => version
+        def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
+        val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
+        val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
+        val partialCrossVersions = crossVersionsWithPartial.values.toSet
+        val allPartialVersions = crossVersionsWithPartial ++ currentScalaWithPartial
+
+        type PartialVersion = Option[(Long, Long)]
+        def mapVersions(versionsWithPartial: Map[String, PartialVersion]) = versionsWithPartial
+          .map {
+            case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
+            case (version, `partialVersion`)              => updateVersion(version)
+            case (version, _)                             => version // not changed
           }
-        }.distinct
+          .toSeq
+          .distinct
+
+        allPartialVersions(currentScalaVersion) match {
+          // Check currently used version of given project
+          // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+          case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
+          case _ => // if version is not a part of cross version allow only current version
+            val allowedCrossVersions = mapVersions(currentScalaWithPartial)
+            println(
+              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
+            )
+            allowedCrossVersions
+        }
       }
     }
 
