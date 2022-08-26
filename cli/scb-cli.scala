@@ -313,9 +313,9 @@ object BuildInfo:
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
-        /* replacedProjectsPath = */ configsDir / "replaced-projects.txt",
+        /* replacedProjectsPath = */ "",
         /* projectsConfigPath = */ configsDir / "projects-config.conf",
-        /* projectsFiterPath = */ configsDir / "filtered-projects.txt"
+        /* projectsFiterPath = */ ""
       ).map("\"" + _.toString + "\"").mkString(" ")
       val coordinatorDir = communityBuildDir / "coordinator"
       os.proc("sbt", "--no-colors", s"runMain storeDependenciesBasedBuildPlan $args")
