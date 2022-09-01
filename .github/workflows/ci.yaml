@@ -4,7 +4,7 @@ on:
   pull_request:
 jobs:
   test-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Git Checkout
@@ -25,7 +25,7 @@ jobs:
         run: scripts/test-build.sh
 
   test-cli:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Git Checkout
