@@ -213,7 +213,11 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
 
       def unapply(line: String): Option[Replecement] =
         val scalaVersionStringStub = """"<SCALA_VERSION>""""
-        line match {
+        val uncommentedLine = line.indexOf("//") match {
+          case -1  => line
+          case idx => line.substring(0, idx)
+        }
+        uncommentedLine.trim match {
           case StringVersionDefn(wholeDefn, definition, value) =>
             Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
           case VersionsSeqDefn(wholeDefn, definition, value, seqType) =>
