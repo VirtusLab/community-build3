@@ -1,4 +1,3 @@
-//> using scala "3.1.3"
 //> using lib "org.json4s::json4s-native:4.0.3"
 //> using lib "com.lihaoyi::requests:0.7.0"
 //> using lib "com.lihaoyi::os-lib:0.8.1"
@@ -26,7 +25,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.17")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.18")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
