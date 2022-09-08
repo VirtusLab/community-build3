@@ -38,7 +38,8 @@ val StableScalaVersions = {
     versions("3.1.1")(rcVersions = 2),
     versions("3.1.2")(rcVersions = 3),
     versions("3.1.3")(rcVersions = 5),
-    versions("3.2.0")(rcVersions = 2)
+    versions("3.2.0")(rcVersions = 4),
+    versions("3.2.1")(rcVersions = 1)
   ).flatten
 }
 
@@ -78,7 +79,7 @@ extension (summary: List[SourceFields])
 end extension
 
 def listFailedProjects(scalaVersion: String): Seq[FailedProject] =
-  val Limit = 1000
+  val Limit = 2000
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
       .order(TermsOrder("buildTimestamp", asc = false))
@@ -101,15 +102,6 @@ def listFailedProjects(scalaVersion: String): Seq[FailedProject] =
         .size(Limit)
         .sortBy(fieldSort("projectName.keyword"), fieldSort("timestamp").desc())
         .aggs(
-          globalAggregation("global")
-            .subaggs(
-              filterAgg("allResults", termQuery("scalaVersion", scalaVersion))
-                .subaggs(
-                  termsAgg("projects", "projectName.keyword")
-                    .subaggs(projectVersionsStatusAggregation)
-                    .size(Limit)
-                )
-            ),
           termsAgg("failedProjects", "projectName.keyword")
             .size(Limit)
             .subaggs(projectVersionsStatusAggregation)
@@ -130,17 +122,27 @@ def listFailedProjects(scalaVersion: String): Seq[FailedProject] =
           .toMap
 
         def hasNewerPassingVersion(project: Project, failedVersion: String) =
-          resp.aggs
-            .global("global")
-            .filter("allResults")
-            .terms("projects")
-            .bucket(project.searchName)
-            .terms("versions")
-            .buckets
-            .filter(_.terms("status").buckets.exists(_.key == "success"))
-            .exists { bucket =>
-              isVersionNewerOrEqualThen(version = bucket.key, reference = failedVersion)
+          esClient
+            .execute {
+              search(BuildSummariesIndex)
+                .query(
+                  boolQuery().must(
+                    termQuery("projectName.keyword", project.searchName),
+                    termQuery("status", "success"),
+                    termQuery("scalaVersion", scalaVersion)
+                  )
+                )
+                .sortBy(fieldSort("timestamp").desc())
             }
+            .map(_.map(_.hits.hits.exists { result =>
+              isVersionNewerOrEqualThen(
+                version = result.sourceField("version").asInstanceOf[String],
+                reference = failedVersion
+              )
+            }))
+            .await(DefaultTimeout)
+            .result
+        end hasNewerPassingVersion
 
         resp.hits.hits
           .map(_.sourceAsMap)
@@ -203,25 +205,27 @@ def projectHistory(project: FailedProject) =
           fieldSort("timestamp").desc()
         )
     }
-    .await(DefaultTimeout)
-    .fold[Seq[ProjectHistoryEntry]](
-      reportFailedQuery(s"Project build history ${project.project.orgRepoName}")
-        .andThen(_ => Nil),
-      _.hits.hits
-        .map(_.sourceAsMap)
-        .distinctBy(fields => (fields("scalaVersion"), fields("version")))
-        .map { fields =>
-          val version = fields("version").asInstanceOf[String]
-          val isCurrentVersion = project.version == version
-          ProjectHistoryEntry(
-            project.project,
-            scalaVersion = fields("scalaVersion").asInstanceOf[String],
-            version = fields("version").asInstanceOf[String],
-            isCurrentVersion = isCurrentVersion,
-            compilerFailure = fields("summary").asInstanceOf[List[SourceFields]].compilerFailure
-          )
-        }
+    .map(
+      _.fold[Seq[ProjectHistoryEntry]](
+        reportFailedQuery(s"Project build history ${project.project.orgRepoName}")
+          .andThen(_ => Nil),
+        _.hits.hits
+          .map(_.sourceAsMap)
+          .distinctBy(fields => (fields("scalaVersion"), fields("version")))
+          .map { fields =>
+            val version = fields("version").asInstanceOf[String]
+            val isCurrentVersion = project.version == version
+            ProjectHistoryEntry(
+              project.project,
+              scalaVersion = fields("scalaVersion").asInstanceOf[String],
+              version = fields("version").asInstanceOf[String],
+              isCurrentVersion = isCurrentVersion,
+              compilerFailure = fields("summary").asInstanceOf[List[SourceFields]].compilerFailure
+            )
+          }
+      )
     )
+    .await(DefaultTimeout)
 end projectHistory
 
 trait Reporter {
@@ -256,12 +260,7 @@ object Reporter:
       val diff = diffVersionRegressions
       printLine()
       println(
-        scalaVersion match {
-          case Some(scalaVersion) =>
-            s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:"
-          case None =>
-            s"Projects without successful builds data [${allRegressions.size}]:"
-        }
+        s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:"
       )
       println(
         s"""Same versions[${same.size}]:    ${showFailed(same)}
@@ -299,7 +298,7 @@ object Reporter:
     |""".stripMargin
 
     override def report(
-        scalaVersion: Option[String],
+        scalaVersion: String,
         failedProjects: Map[Project, FailedProject],
         sameVersionRegressions: Seq[ProjectHistoryEntry],
         diffVersionRegressions: Seq[ProjectHistoryEntry]
@@ -309,12 +308,7 @@ object Reporter:
       val allRegressions = sameVersionRegressions ++ diffVersionRegressions
       printLine()
       println(
-        scalaVersion match {
-          case Some(scalaVersion) =>
-            s"Projects with last successful builds using Scala <b>$BOLD$scalaVersion$RESET</b> [${allRegressions.size}]:"
-          case None =>
-            s"Projects without successful builds data [${allRegressions.size}]:"
-        }
+        s"Projects with last successful builds using Scala <b>$BOLD$scalaVersion$RESET</b> [${allRegressions.size}]:"
       )
       showRow("Project", "Version", "Build URL", "Reproducer issue")
       showRow("-------", "-------", "---------", "----------------")
@@ -338,12 +332,10 @@ private def reportCompilerRegressions(
     projects: Seq[FailedProject],
     scalaVersion: String
 )(reporter: Reporter): Unit =
-  val failedProjectHistory = Future
-    .traverse(projects) { fp =>
-      Future { (fp, this.projectHistory(fp)) }
-    }
-    .await(DefaultTimeout)
-    .toMap
+  val failedProjectHistory =
+    projects
+      .zip(projects.map(this.projectHistory))
+      .toMap
 
   val failedProjects = projects.map(v => v.project -> v).toMap
   val projectHistory = failedProjectHistory.map { (key, value) => key.project -> value }
@@ -383,7 +375,19 @@ private def reportCompilerRegressions(
       "with no successful builds data",
       failedProjects,
       alwaysFailing
-        .map(projectHistory(_).find(_.scalaVersion == scalaVersion).get)
+        .map { project =>
+          projectHistory(project)
+            .find(_.scalaVersion == scalaVersion)
+            .getOrElse(
+              ProjectHistoryEntry(
+                project = project,
+                scalaVersion = scalaVersion,
+                version = "",
+                isCurrentVersion = true,
+                compilerFailure = true
+              )
+            )
+        }
         .toSeq
         .sortBy(_.project.orgRepoName),
       Nil
@@ -396,7 +400,7 @@ def reportFailedQuery(msg: String)(err: RequestFailure) =
   System.err.println(s"Query failure - $msg\n${err.error}")
 def isVersionNewerThen(version: String, reference: String) =
   val List(ref, ver) = List(reference, version)
-    .map(_.split("[.-]").map(_.filter(_.isDigit).toInt))
+    .map(_.split("[.-]").flatMap(_.toIntOption))
   if reference.startsWith(version) && ref.length > ver.length then true
   else if version.startsWith(reference) && ver.length > ref.length then false
   else
