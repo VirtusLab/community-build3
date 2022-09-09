@@ -26,7 +26,18 @@ pipelineJob('/runBuild') {
         }
     }
     properties{
-        disableConcurrentBuilds()
+      pipelineTriggers{
+        triggers{
+          parameterizedCron {
+          // follow convention of cron, schedule with name=value pairs at the end of each line.
+            parameterizedSpecification('''
+            # Run full build every Friday at 8 PM
+            TZ=Europe/Warsaw
+            H 20 * * 5 %minStarsCount=0;maxProjectsCount=-1
+            ''')
+          }
+        }
+      }
     }
     parameters {
         stringParam("buildName", null, "(Optional) Should be unique among all builds; Should be valid both as a file name and a part of a URL; Will be synthesized from current date and build number if not specified")

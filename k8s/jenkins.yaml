@@ -140,8 +140,6 @@ jenkins:
       version: "0.39"
     - name: matrix-auth
       version: "3.1.3"
-    - name: configuration-as-code
-      version: "1464.vd8507b_82e41a_"
     - name: git-client
       version: "3.11.0"
     - name: github
@@ -182,6 +180,8 @@ jenkins:
       version: "1175.v4b_d517d6db_f0"
     - name: display-url-api
       version: "2.3.6"
+    - name: parameterized-scheduler
+      version: "1.1"
 
   # roles define a list of extra RBAC roles for the Jenkins Master pod service account
   roles: []
@@ -250,8 +250,8 @@ jenkinsGroovyScripts:
 
     # data is inline Groovy script
     data: |
-      oldLibPath = "/var/jenkins_home/common-lib"
-      newLibPath = "/var/lib/jenkins/common-lib"
+      oldLibPath="/var/jenkins_home/common-lib"
+      newLibPath="/var/lib/jenkins/common-lib"
 
       // Set Kubernetes cloud config, cannot use casc, since it would override operator config
       def instance = Jenkins.getInstanceOrNull()
