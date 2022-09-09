@@ -48,7 +48,7 @@ pipelineJob('/runBuild') {
         stringParam("precomputedBuildPlan", null, "(Optional, for debugging purposes mainly): The build plan (in JSON format) to be used instead of computing the plan dynamically. When specified, the remaining parameters from this section are ignored")
         stringParam("scalaBinaryVersion", "3", "Scala binary version following Scaladex API convention used for detecting projects to be built")
         stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
-        stringParam("maxProjectsCount", "100", "Maximal number of projects to include into the build plan")
+        stringParam("maxProjectsCount", "200", "Maximal number of projects to include into the build plan")
         stringParam("requiredProjects", requiredProjectsConfig, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
         textParam("replacedProjects", replacedProjectsConfig, "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
         textParam("projectsConfig", projectsConfig, "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file")
