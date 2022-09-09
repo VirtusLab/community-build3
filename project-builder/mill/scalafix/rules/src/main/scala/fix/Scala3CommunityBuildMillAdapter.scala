@@ -16,8 +16,9 @@ object Scala3CommunityBuildMillAdapterConfig {
     metaconfig.generic.deriveDecoder(default)
 }
 
-class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterConfig)
-    extends SyntacticRule("Scala3CommunityBuildMillAdapter") {
+class Scala3CommunityBuildMillAdapter(
+    config: Scala3CommunityBuildMillAdapterConfig
+) extends SyntacticRule("Scala3CommunityBuildMillAdapter") {
   def this() = this(config = Scala3CommunityBuildMillAdapterConfig())
   override def withConfiguration(config: Configuration): Configured[Rule] = {
     config.conf
@@ -32,12 +33,25 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
 
         this.config
           .copy(
-            targetScalaVersion = propOrDefault("communitybuild.scala", _.targetScalaVersion),
-            targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion)
+            targetScalaVersion =
+              propOrDefault("communitybuild.scala", _.targetScalaVersion),
+            targetPublishVersion =
+              propOrDefault("communitybuild.version", _.targetPublishVersion)
           )
       }
       .map(new Scala3CommunityBuildMillAdapter(_))
   }
+
+  val scala3Identifiers = Seq(
+    "Scala3",
+    "scala3",
+    "ScalaDotty",
+    "scalaDotty",
+    "Scala3Version",
+    "scala3Version",
+    "Scala_3",
+    "scala_3"
+  )
 
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
@@ -63,7 +77,10 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
             has = Seq("ScalaModule", "JavaModule"),
             butNot = Seq("PublishModule", "CoursierModule")
           )(traits) =>
-        Patch.addRight(traits.last, s" with ${Replacment.CommunityBuildCoursierModule}")
+        Patch.addRight(
+          traits.last,
+          s" with ${Replacment.CommunityBuildCoursierModule}"
+        )
 
       case Init(name @ WithTypeName("CoursierModule"), _, _) =>
         Patch.replaceTree(name, Replacment.CommunityBuildCoursierModule)
@@ -72,6 +89,18 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
         Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
 
       case ValOrDefDef(Term.Name("scalaVersion"), body) =>
+        val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
+        // Don't override
+        def replace =
+          Patch.replaceTree(body, Replacment.ScalaVersion(body.toString))
+        body.toString().trim() match {
+          case Scala3Literal()                                        => replace
+          case id if id.split('.').exists(scala3Identifiers.contains) => replace
+          case _ =>
+            Patch.empty
+        }
+
+      case ValOrDefDef(Term.Name(id), body) if scala3Identifiers.contains(id) =>
         Patch.replaceTree(body, Replacment.ScalaVersion(body.toString))
 
       case ValOrDefDef(Term.Name("publishVersion"), body) =>
@@ -84,8 +113,10 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
 
   object Replacment {
     val CommunityBuildCross = "MillCommunityBuildCross"
-    val CommunityBuildPublishModule = "MillCommunityBuild.CommunityBuildPublishModule"
-    val CommunityBuildCoursierModule = "MillCommunityBuild.CommunityBuildCoursierModule"
+    val CommunityBuildPublishModule =
+      "MillCommunityBuild.CommunityBuildPublishModule"
+    val CommunityBuildCoursierModule =
+      "MillCommunityBuild.CommunityBuildCoursierModule"
     def ScalaVersion(default: => String, asTarget: Boolean = true) =
       config.targetScalaVersion
         .map(quoted(_))
@@ -125,7 +156,7 @@ class Scala3CommunityBuildMillAdapter(config: Scala3CommunityBuildMillAdapterCon
 
   object ValOrDefDef {
     def unapply(tree: Tree): Option[(Term.Name, Term)] = tree match {
-      // Make sure def has no parameter lists 
+      // Make sure def has no parameter lists
       case Defn.Def(_, name, _, Nil, _, body)         => Some(name -> body)
       case Defn.Val(_, Pat.Var(name) :: Nil, _, body) => Some(name -> body)
       case Defn.Var(_, Pat.Var(name) :: Nil, _, Some(body)) =>
