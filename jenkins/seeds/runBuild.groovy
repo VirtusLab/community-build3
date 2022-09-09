@@ -38,7 +38,11 @@ pipeline {
                         def dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
                         def formattedDate = dateFormat.format(now)
                         def optScalaVersion = params.publishedScalaVersion ? params.publishedScalaVersion + "_" : ""
-                        buildName = "${optScalaVersion}${formattedDate}_${currentBuild.number}"
+                        def maxProjectsCount = params.maxProjectsCount.toInteger()
+                        def minStarsCount = params.minStarsCount.toInteger()
+                        def isFullBuild = maxProjectsCount < 0 && minStarsCount <= 0
+                        def fullBuildSuffix = isFullBuild ? "_full" : ""
+                        buildName = "${optScalaVersion}${formattedDate}${fullBuildSuffix}_${currentBuild.number}"
                     }
                     currentBuild.setDescription(buildName)
                     mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildName}"
