@@ -503,7 +503,13 @@ object CommunityBuildPlugin extends AutoPlugin {
           case _                             => Nil
         }
         val compileResult = eval(Compile / compile)
-        val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
+
+        val shouldBuildDocs = eval(Compile / doc / skip) match {
+          case EvalResult.Value(skip, _) => !skip
+          case _                         => false
+        }
+        val docsResult = evalWhen(shouldBuildDocs, compileResult)(Compile / doc)
+
         val testsCompileResult = evalWhen(testingMode != TestingMode.Disabled, compileResult)(
           Test / compile
         )
@@ -525,9 +531,7 @@ object CommunityBuildPlugin extends AutoPlugin {
             )
           else
             PublishResult(
-              evalAsDependencyOf(compileResult, docsResult)(
-                Compile / publishResults
-              )
+              evalAsDependencyOf(compileResult)(Compile / publishResults)
             )
         }
 
