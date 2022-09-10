@@ -22,6 +22,9 @@ spec:
           postStart:
             exec:
               command: ["update-ca-certificates"]
+        resources:
+          requests:
+            memory: 6G
         command:
         - "bash"
         - "-c"
