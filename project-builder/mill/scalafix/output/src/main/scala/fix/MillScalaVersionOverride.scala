@@ -1,7 +1,7 @@
 package fix
 
 object MillScalaVersionOverride {
-  def scala3Version = mill.T("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
+  def scala3Version = "3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD"
   object mill{
     import scala.language.implicitConversions
     trait T[U]
@@ -11,7 +11,10 @@ object MillScalaVersionOverride {
   import mill._
 
   object module {
-    val scalaVersion = mill.T("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
+    val scalaVersion = "3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD"
+  }
+  object module2 {
+    val scalaVersion: String = "3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD"
   }
   class moduleDef {
     def scalaVersion: T[String] = mill.T("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
@@ -25,7 +28,7 @@ object MillScalaVersionOverride {
   class moduleDef4 extends moduleDef {
     override val scalaVersion = sv
     def sv = scala3
-    def scala3 = mill.T("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
+    def scala3 = "3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD"
   }
 
   class otherDef {

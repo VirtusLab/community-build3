@@ -16,6 +16,9 @@ object MillScalaVersionOverride {
   object module {
     val scalaVersion = "3.0.0"
   }
+  object module2 {
+    val scalaVersion: String = "3.0.0"
+  }
   class moduleDef {
     def scalaVersion: T[String] = "3.0.1"
   }
