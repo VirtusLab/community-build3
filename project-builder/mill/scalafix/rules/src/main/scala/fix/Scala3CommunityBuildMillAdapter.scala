@@ -33,10 +33,8 @@ class Scala3CommunityBuildMillAdapter(
 
         this.config
           .copy(
-            targetScalaVersion =
-              propOrDefault("communitybuild.scala", _.targetScalaVersion),
-            targetPublishVersion =
-              propOrDefault("communitybuild.version", _.targetPublishVersion)
+            targetScalaVersion = propOrDefault("communitybuild.scala", _.targetScalaVersion),
+            targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion)
           )
       }
       .map(new Scala3CommunityBuildMillAdapter(_))
@@ -57,6 +55,14 @@ class Scala3CommunityBuildMillAdapter(
     val headerInject = {
       if (sys.props.contains("communitybuild.noInjects")) Patch.empty
       else Patch.addLeft(doc.tree, Replacment.MillCommunityBuildInject)
+    }
+    def shouldWrapInTarget(body: Term, tpe: Option[Type]) = {
+      val isLiteral = body.isInstanceOf[Lit.String]
+      def hasTargetType = tpe match {
+        case Some(Type.Apply(Type.Name("T"), _)) => true
+        case _                                   => false
+      }
+      !isLiteral || hasTargetType
     }
     val patch = doc.tree.collect {
       case init @ Init(
@@ -88,23 +94,30 @@ class Scala3CommunityBuildMillAdapter(
       case Init(name @ WithTypeName("PublishModule"), _, _) =>
         Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
 
-      case ValOrDefDef(Term.Name("scalaVersion"), body) =>
+      case ValOrDefDef(Term.Name("scalaVersion"), tpe, body) =>
         val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
-        // Don't override
-        def replace =
-          Patch.replaceTree(body, Replacment.ScalaVersion(body.toString))
+        def replace(isLiteral: Boolean) =
+          Patch.replaceTree(
+            body,
+            Replacment.ScalaVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
+          )
         body.toString().trim() match {
-          case Scala3Literal()                                        => replace
-          case id if id.split('.').exists(scala3Identifiers.contains) => replace
-          case _ =>
-            Patch.empty
+          case Scala3Literal()                                        => replace(isLiteral = true)
+          case id if id.split('.').exists(scala3Identifiers.contains) => replace(isLiteral = false)
+          case _                                                      => Patch.empty
         }
 
-      case ValOrDefDef(Term.Name(id), body) if scala3Identifiers.contains(id) =>
-        Patch.replaceTree(body, Replacment.ScalaVersion(body.toString))
+      case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
+        Patch.replaceTree(
+          body,
+          Replacment.ScalaVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
+        )
 
-      case ValOrDefDef(Term.Name("publishVersion"), body) =>
-        Patch.replaceTree(body, Replacment.PublishVersion(body.toString))
+      case ValOrDefDef(Term.Name("publishVersion"), tpe, body) =>
+        Patch.replaceTree(
+          body,
+          Replacment.PublishVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
+        )
 
     }.asPatch
 
@@ -122,9 +135,9 @@ class Scala3CommunityBuildMillAdapter(
         .map(quoted(_))
         .map(v => if (asTarget) s"mill.T($v)" else v)
         .getOrElse(default)
-    def PublishVersion(default: => String) = config.targetPublishVersion
+    def PublishVersion(default: => String, asTarget: Boolean = true) = config.targetPublishVersion
       .map(quoted(_))
-      .map(v => s"mill.T($v)")
+      .map(v => if (asTarget) s"mill.T($v)" else v)
       .getOrElse(default)
 
     private def quoted(v: String): String = {
@@ -155,13 +168,12 @@ class Scala3CommunityBuildMillAdapter(
   }
 
   object ValOrDefDef {
-    def unapply(tree: Tree): Option[(Term.Name, Term)] = tree match {
+    def unapply(tree: Tree): Option[(Term.Name, Option[Type], Term)] = tree match {
       // Make sure def has no parameter lists
-      case Defn.Def(_, name, _, Nil, _, body)         => Some(name -> body)
-      case Defn.Val(_, Pat.Var(name) :: Nil, _, body) => Some(name -> body)
-      case Defn.Var(_, Pat.Var(name) :: Nil, _, Some(body)) =>
-        Some(name -> body)
-      case _ => None
+      case Defn.Def(_, name, _, Nil, tpe, body)               => Some((name, tpe, body))
+      case Defn.Val(_, Pat.Var(name) :: Nil, tpe, body)       => Some((name, tpe, body))
+      case Defn.Var(_, Pat.Var(name) :: Nil, tpe, Some(body)) => Some((name, tpe, body))
+      case _                                                  => None
     }
   }
 

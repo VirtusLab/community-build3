@@ -11,7 +11,7 @@ object MillPublishVersionOverride {
   import mill._
 
   object module {
-    val publishVersion = mill.T("1.2.3-RC4")
+    val publishVersion = "1.2.3-RC4"
   }
   class moduleDef {
     def publishVersion: T[String] = mill.T("1.2.3-RC4")
