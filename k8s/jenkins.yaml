@@ -250,9 +250,6 @@ jenkinsGroovyScripts:
 
     # data is inline Groovy script
     data: |
-      oldLibPath="/var/jenkins_home/common-lib"
-      newLibPath="/var/lib/jenkins/common-lib"
-
       // Set Kubernetes cloud config, cannot use casc, since it would override operator config
       def instance = Jenkins.getInstanceOrNull()
       def k8s = instance?.getCloud("kubernetes")
@@ -262,6 +259,10 @@ jenkinsGroovyScripts:
       instance?.save()
 
       // The directory has to be copied because of lack of write permissions in it
+      def oldLibPath="/var/jenkins_home/common-lib"
+      def newLibPath="/var/jenkins_home/scripts-repo"
+      def logFile=new java.io.File("/var/lib/jenkins/gitInit.log")
+
       new ProcessBuilder(['bash', '-c', """
         rm -rf $newLibPath && \
         cp -rL $oldLibPath $newLibPath && \
@@ -271,7 +272,11 @@ jenkinsGroovyScripts:
         git config user.email "<>" && \
         git add --all && \
         git commit -m "init"
-      """] as String[]).start()
+      """] as String[])
+      .redirectErrorStream(true)
+      .inheritIO()
+      .start()
+      .waitFor()
 
     # secretRef is secret reference which allows to inject the secrets into Groovy script code
     #secretRef:
@@ -408,7 +413,7 @@ jenkinsConfigurationsAsCode:
                   scm:
                     git:
                       id: "common-lib"
-                      remote: "/var/lib/jenkins/common-lib"
+                      remote: "/var/jenkins_home/scripts-repo"
             - name: "camunda-community"
               defaultVersion: "main"
               retriever:
