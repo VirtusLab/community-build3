@@ -1,4 +1,5 @@
-//> using scala "3.1.3"
+#!/usr/bin/env -S scala-cli shebang
+//> using scala "3"
 //> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.2.1"
 //> using lib "org.slf4j:slf4j-simple:1.6.4"
 
@@ -39,18 +40,31 @@ val StableScalaVersions = {
     versions("3.1.2")(rcVersions = 3),
     versions("3.1.3")(rcVersions = 5),
     versions("3.2.0")(rcVersions = 4),
-    versions("3.2.1")(rcVersions = 1)
+    versions("3.2.1")(rcVersions = 2)
   ).flatten
 }
 
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(scalaVersion: String, opts: String*) =
   val createIssueTrackerTable = opts.exists(_.contains("-issueTracker"))
+  val compareWithScalaVersion = opts.collectFirst {
+    case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
+  }
   printLine()
   println(s"Reporting failed community build projects using Scala $scalaVersion")
   val failedProjects = listFailedProjects(scalaVersion)
-  if failedProjects.nonEmpty then
-    reportCompilerRegressions(failedProjects, scalaVersion)(
+  printLine()
+  val reportedProjects = compareWithScalaVersion
+  .foldRight(failedProjects){case (comparedVersion, failedNow) =>
+    println(s"Excluding projects failing already in $comparedVersion")
+    val ignoredProjects = 
+      listFailedProjects(comparedVersion, logFailed = false)
+      .map(_.project)
+      .toSet
+    failedNow.filter(p => !ignoredProjects.contains(p.project))
+  }
+  if reportedProjects.nonEmpty then
+    reportCompilerRegressions(reportedProjects, scalaVersion)(
       if createIssueTrackerTable then Reporter.IssueTracker(scalaVersion)
       else Reporter.Default
     )
@@ -78,7 +92,7 @@ extension (summary: List[SourceFields])
   private def existsModuleThat(pred: SourceFields ?=> Boolean) = summary.exists(pred(using _))
 end extension
 
-def listFailedProjects(scalaVersion: String): Seq[FailedProject] =
+def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[FailedProject] =
   val Limit = 2000
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
@@ -154,7 +168,7 @@ def listFailedProjects(scalaVersion: String): Seq[FailedProject] =
             val lastFailedVersion = projectVersions(project.searchName)
 
             import scala.io.AnsiColor.{RED, YELLOW, MAGENTA, RESET, BOLD}
-            def logProject(label: String)(color: String) =
+            def logProject(label: String)(color: String) = if logFailed then
               println(
                 s"$color${label.padTo(8, " ").mkString}$RESET failure in $BOLD${project.orgRepoName} @ ${projectVersions(
                   project.searchName
