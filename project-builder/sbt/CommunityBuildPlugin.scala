@@ -57,7 +57,7 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
     val Limit = 10
     @scala.annotation.tailrec
-    def loop(incomplete: List[Incomplete], acc: List[Throwable] = Nil): List[Throwable] = {
+    def loop(incomplete: List[Incomplete], acc: List[Throwable]): List[Throwable] = {
       incomplete match {
         case Nil                     => acc
         case _ if acc.length > Limit => acc
@@ -169,7 +169,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   ) { (_, _) =>
     {
       disableFatalWarningsFlag = true
-      (ref: ProjectRef, currentSettings: Seq[String]) =>
+      (_: ProjectRef, currentSettings: Seq[String]) =>
         currentSettings // removed in projectSettings for durable effect
     }
   }
@@ -337,7 +337,6 @@ object CommunityBuildPlugin extends AutoPlugin {
       val cState = state.value
       val extracted = sbt.Project.extract(cState)
       val s = extracted.structure
-      val refs = s.allProjectRefs
       val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
       val scalaBinaryVersionUsed = CrossVersion.binaryScalaVersion(scalaVersionArg)
       val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
@@ -367,7 +366,6 @@ object CommunityBuildPlugin extends AutoPlugin {
 
       def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
         require(projects.nonEmpty, "selectProject with empty projects argument")
-        val target = projects.head._1
         projects.map(_._2) match {
           case Seq(project) => project
           case projects =>
