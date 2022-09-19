@@ -293,13 +293,13 @@ object Scala3CommunityBuild {
         sys.props.get("communitybuild.dualVersion") match {
           case Some(tpe) if tpe.startsWith(MinorPrefix) =>
             scala.util.Try(tpe.stripPrefix(MinorPrefix).toInt).map(DualMinor(_)).toOption
-          case v => None
+          case _ => None
         }
       }
       case class DualMinor(diff: Int) extends DualVersioningType {
         override def matches(globalVersion: String, currentVersion: String): Boolean = {
           (globalVersion, currentVersion) match {
-            case (SemVersionExt(source), SemVersionExt(target)) =>
+            case (SemVersionExt(_), SemVersionExt(target)) =>
               apply(globalVersion).get == target
             case _ => false
           }
@@ -316,7 +316,7 @@ object Scala3CommunityBuild {
     def filterTargets(targets: Seq[String], excludedPatterns: Seq[Regex]) = {
       targets.filter { target =>
         target.split('%') match {
-          case Array(org, name) =>
+          case Array(_, name) =>
             val excludingPattern = excludedPatterns.find { pattern =>
               // No Regex.matches in Scala 2.12 (!sic)
               pattern
