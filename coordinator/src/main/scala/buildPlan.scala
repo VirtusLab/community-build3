@@ -16,7 +16,8 @@ def findTag(repoUrl: String, version: String): Either[String, String] =
   val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
   Try {
     val lines = cmd.!!.linesIterator.filter(_.contains(version)).toList
-    lines.collectFirst { case TagRef(tag) => tag } match
+    val (exactMatch, partialMatch) = lines.partition(_.endsWith(version))
+    (exactMatch ::: partialMatch).collectFirst { case TagRef(tag) => tag } match
       case Some(tag) => Right(tag)
       case _         => Left(s"No tag in:\n${lines.map("-" + _ + "_").mkString("\n")}")
   }.toEither.left.map { e =>
