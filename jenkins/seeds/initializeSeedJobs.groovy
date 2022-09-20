@@ -25,6 +25,18 @@ pipelineJob('/runBuild') {
             sandbox()
         }
     }
+    properties {
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("")
+            numToKeepStr("100")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
+        }
+      }
+    }
     parameters {
         stringParam("buildName", null, "(Optional) Should be unique among all builds; Should be valid both as a file name and a part of a URL; Will be synthesized from current date and build number if not specified")
         separator {
@@ -86,20 +98,25 @@ pipelineJob('/runBuildWeekly') {
     }
   }
   properties{
-    pipelineTriggers{
-      triggers{
-        parameterizedCron {
-          parameterizedSpecification('''
-            # Run full build every Friday at 8 PM
-            TZ=Europe/Warsaw
-            H 20 * * 5
-            ''')
+    buildDiscarder{
+      strategy{
+        logRotator { 
+          daysToKeepStr("")
+          numToKeepStr("100")
+          artifactDaysToKeepStr("")
+          artifactNumToKeepStr("") 
         }
       }
     }
   }
+  triggers {
+    cron('''
+      // # Run full build every Friday at 8 PM
+      TZ=Europe/Warsaw
+      H 20 * * 5
+      ''')
+  }
 }
-
 
 def computeBuildPlanScript = new File("/var/jenkins_home/seeds/computeBuildPlan.groovy").text
 
@@ -111,9 +128,19 @@ pipelineJob('/computeBuildPlan') {
         }
     }
     properties {
-        copyArtifactPermission {
-            projectNames("*")
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("")
+            numToKeepStr("100")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
         }
+      }
+      copyArtifactPermission {
+        projectNames("*")
+      }
     }
     parameters {
         stringParam("buildName")
@@ -137,10 +164,20 @@ pipelineJob('/buildCompiler') {
             sandbox()
         }
     }
-    properties {
-        copyArtifactPermission {
-            projectNames("*")
+    properties{
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("")
+            numToKeepStr("100")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
         }
+      }
+      copyArtifactPermission {
+          projectNames("*")
+      }
     }
     parameters {
         stringParam("buildName")
@@ -159,6 +196,18 @@ pipelineJob('/buildCommunityProject') {
             script(buildCommunityProjectScript)
             sandbox()
         }
+    }
+    properties{
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("14")
+            numToKeepStr("8000")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
+        }
+      }
     }
     parameters {
         stringParam("buildName")
