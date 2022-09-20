@@ -9,4 +9,3 @@ $scriptDir/start-jenkins-operator.sh
 
 source $scriptDir/utils.sh
 scbk apply -f $k8sAuth/githubOAuthSecret.yaml
-scbk apply -f $k8sAuth/authz-matrix.yaml
