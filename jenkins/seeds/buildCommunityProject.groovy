@@ -26,6 +26,9 @@ def retryOnBuildFailureMsg = "Enforcing retry of the build after failure."
 
 pipeline {
     agent none
+    options {
+      timeout(time: 8, unit: 'HOURS') // timeout on whole pipeline job including queueing in k8s within the stage and execution
+    }
     stages {
         stage("Initialize build") {
             agent none
@@ -87,61 +90,63 @@ pipeline {
                     priorityClassName: "jenkins-agent-priority"
                     """.stripIndent()
             ){
-              conditionalRetry([
-                agentLabel: POD_LABEL,
-                customFailurePatterns: [
-                  "manual-retry-trigger": ".*${retryOnBuildFailureMsg}.*"
-                ],
-                runSteps: {
-                  container('project-builder') {
-                    timeout(time: 90, unit: "MINUTES"){
-                      script {
-                        retryOnConnectionError {
-                          sh """
-                            echo "building and publishing ${params.projectName}"
-                            echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
-                            touch build-logs.txt build-summary.txt
-                          """
-                          // Pre-stash in case of pipeline failure
-                          stash(name: "buildResults", includes: "build-*.txt")
-                          ansiColor('xterm') {
-                            def status = sh(
-                              returnStatus: true,
-                              script: """
-                                (/build/build-revision.sh \
-                                    '${params.repoUrl}' \
-                                    '${params.revision}' \
-                                    '${params.scalaVersion}' \
-                                    '${params.version}' \
-                                    '${params.targets}' \
-                                    '${params.mvnRepoUrl}' \
-                                    '${params.enforcedSbtVersion}' \
-                                    '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
-                                && [ "\$(cat build-status.txt)" = success ]
-                                """
-                            )
-                            if(status != 0){
-                              def extraMsg = ""
-                              if(retryOnBuildFailureCount-- > 0) {
-                                // Allow the run manager to catch known pattern to allow for retry
-                                echo retryOnBuildFailureMsg
-                                extraMsg = ", retrying to check stability"
+              timeout(time: 3, unit: "HOURS"){
+                conditionalRetry([
+                  agentLabel: POD_LABEL,
+                  customFailurePatterns: [
+                    "manual-retry-trigger": ".*${retryOnBuildFailureMsg}.*"
+                  ],
+                  runSteps: {
+                    container('project-builder') {
+                      timeout(time: 90, unit: "MINUTES"){
+                        script {
+                          retryOnConnectionError {
+                            sh """
+                              echo "building and publishing ${params.projectName}"
+                              echo 'failure' > build-status.txt # Assume failure unless overwritten by a successful build
+                              touch build-logs.txt build-summary.txt
+                            """
+                            // Pre-stash in case of pipeline failure
+                            stash(name: "buildResults", includes: "build-*.txt")
+                            ansiColor('xterm') {
+                              def status = sh(
+                                returnStatus: true,
+                                script: """
+                                  (/build/build-revision.sh \
+                                      '${params.repoUrl}' \
+                                      '${params.revision}' \
+                                      '${params.scalaVersion}' \
+                                      '${params.version}' \
+                                      '${params.targets}' \
+                                      '${params.mvnRepoUrl}' \
+                                      '${params.enforcedSbtVersion}' \
+                                      '${params.projectConfig}' 2>&1 | tee build-logs.txt) \
+                                  && [ "\$(cat build-status.txt)" = success ]
+                                  """
+                              )
+                              if(status != 0){
+                                def extraMsg = ""
+                                if(retryOnBuildFailureCount-- > 0) {
+                                  // Allow the run manager to catch known pattern to allow for retry
+                                  echo retryOnBuildFailureMsg
+                                  extraMsg = ", retrying to check stability"
+                                }
+                                throw new Exception("Project build failed with exit code ${status}${extraMsg}")
                               }
-                              throw new Exception("Project build failed with exit code ${status}${extraMsg}")
                             }
                           }
                         }
                       }
                     }
+                  },
+                  postAlways: {
+                    retryOnConnectionError {
+                      archiveArtifacts(artifacts: "build-*.txt")
+                      stash(name: "buildResults", includes: "build-*.txt")
+                    }
                   }
-                },
-                postAlways: {
-                  retryOnConnectionError {
-                    archiveArtifacts(artifacts: "build-*.txt")
-                    stash(name: "buildResults", includes: "build-*.txt")
-                  }
-                }
-              ])
+                ])
+              }
             }
           }
           post { 
