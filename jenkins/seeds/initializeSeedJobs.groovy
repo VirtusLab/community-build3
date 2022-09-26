@@ -108,13 +108,16 @@ pipelineJob('/runBuildWeekly') {
         }
       }
     }
-  }
-  triggers {
-    cron('''
-      // # Run full build every Friday at 8 PM
-      TZ=Europe/Warsaw
-      H 20 * * 5
-      ''')
+    pipelineTriggers{
+      triggers {
+        cron{
+          spec('''
+            # Run full build every Friday at 8 PM UTC
+            H 20 * * 5
+            ''')
+        }
+      }
+    }
   }
 }
 
