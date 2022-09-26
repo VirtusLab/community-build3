@@ -236,8 +236,8 @@ case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummar
 
     val excluded =
       for
-        JArray(excluded) <- params.config.map(parse(_) \ "projects" \ "exclude").toSeq
-        JString(entry) <- excluded
+        case JArray(excluded) <- params.config.map(parse(_) \ "projects" \ "exclude").toSeq
+        case JString(entry) <- excluded
       yield entry
     baseTargets.diff(excluded)
 }
@@ -270,8 +270,8 @@ object BuildInfo:
           )
         val json = parse(r.data.toString)
         for {
-          JArray(ids) <- (json \ "actions" \ "causes" \ "upstreamBuild").toOption
-          JInt(id) <- ids.headOption
+          case JArray(ids) <- (json \ "actions" \ "causes" \ "upstreamBuild").toOption
+          case JInt(id) <- ids.headOption
         } yield id.toString
       }.orElse {
         println("No upstream project defined")
@@ -322,9 +322,9 @@ object BuildInfo:
       val buildPlanJson = os.read(coordinatorDir / "data" / "buildPlan.json")
       parse(buildPlanJson)
 
-    val JArray(buildPlan) = prepareBuildPlan()
+    val JArray(buildPlan) = prepareBuildPlan(): @unchecked
     val projects = for
-      JArray(buildStage) <- buildPlan.take(1) // There should be only 1 stage
+      case JArray(buildStage) <- buildPlan.take(1) // There should be only 1 stage
       project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
@@ -379,14 +379,14 @@ object BuildSummary:
     else
       try {
         for
-          JArray(projects) <- parse(
+          case JArray(projects) <- parse(
             // Might contain quoted strings
             r.data.toString.replaceAll(""""reasons": \[.*\]""", """"reasons": []""")
           )
           project <- projects
-          JString(artifactName) <- project \ "module"
-          BuildResult(compile) <- project \ "compile" \ "status"
-          BuildResult(testCompile) <- project \ "test-compile" \ "status"
+          case JString(artifactName) <- project \ "module"
+          case BuildResult(compile) <- project \ "compile" \ "status"
+          case BuildResult(testCompile) <- project \ "test-compile" \ "status"
         yield BuildProjectSummary(
           artifactName = artifactName,
           results = ProjectTargetResults(
@@ -457,10 +457,10 @@ object BuildParameters:
       requests.get(s"$jobApi/json?tree=actions[parameters[*]]")
     val json = parse(r.data.toString)
     val params = for {
-      JArray(params) <- json \ "actions" \ "parameters"
-      JObject(param) <- params
-      JField("name", JString(name)) <- param
-      JField("value", JString(value)) <- param
+      case JArray(params) <- json \ "actions" \ "parameters"
+      case JObject(param) <- params
+      case JField("name", JString(name)) <- param
+      case JField("value", JString(value)) <- param
     } yield name -> value
     fromJenkinsParams(params.toMap)
 
