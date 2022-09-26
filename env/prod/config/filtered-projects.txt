@@ -62,6 +62,14 @@ sciss:scalainterpreterpane:.*
 sciss:span:.*
 sciss:swingplus:.*
 
+## Uses mill-tpolecat - it does fails to parse RC versions 
+joan38:kubernetes-client:.*
+carlosedp:riscvassembler:.*
+
+## Publishing artifact leads to failurs in  downstream projects
+### Publishes only pom, no artifacts
+msgpack4z:msgpack4z-native:.*
+
 ## Does not compile
 arturopala:gitignore:.*
 fehu:opentracing-scala:.*
@@ -123,13 +131,6 @@ primetalk:typed-ontology:.*
 vigoo:zio-aws:.*
 zio:zio-aws:.*
 
-# Cannot build scaladoc in Scala 3
-scalatest:scalatestplus-easymock:.*
-scalatest:scalatestplus-jmock:.*
-scalatest:scalatestplus-junit:.*
-scalatest:scalatestplus-mockito:.*
-scalatest:scalatestplus-scalacheck:.*
-scalatest:scalatestplus-selenium:.*
 
 # Depends on not published lib with CrossVersion.full
 ## wartremover
