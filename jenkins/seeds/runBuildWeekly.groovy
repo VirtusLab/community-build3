@@ -2,6 +2,7 @@
 
 def runBuildJobName = "/runBuild"
 def compilerVersion
+def buildName
 
 pipeline {
   agent { label "default" }
@@ -11,6 +12,7 @@ pipeline {
         script {
           compilerVersion = latestNightlyVersion()
           currentBuild.setDescription(compilerVersion)
+          buildName = "${compilerVersion}_weekly-${currentBuild.number}"
         }
       }
     }
@@ -20,8 +22,9 @@ pipeline {
           runBuildJobRef = build(
             job: runBuildJobName,
             parameters: [
+              string(name: "buildName", value: buildName)
               string(name: "publishedScalaVersion", value: compilerVersion),
-              string(name: "minStarsCount", value: "0"),
+              string(name: "minStarsCount", value: "-1"),
               string(name: "maxProjectsCount", value: "-1") // unlimited
             ]
           )
