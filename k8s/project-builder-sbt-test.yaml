@@ -21,15 +21,14 @@ spec:
           resources:
             requests:
               memory: 4G
-          lifecycle:
-            postStart:
-              exec:
-                command: ["bash", "-c", "cat /usr/local/share/ca-certificates/mvn-repo.crt && update-ca-certificates"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
           command:
             - "bash"
             - "-c"
             - |
-              (/build/build-revision.sh \
+              update-ca-certificates && (/build/build-revision.sh \
                 https://github.com/typelevel/shapeless-3.git \
                 "v3.0.4" \
                 3.1.0 \

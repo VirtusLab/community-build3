@@ -15,10 +15,10 @@ millProject="com-lihaoyi/os-lib --revision=0.8.1"
 scalaVersion=3.1.1
 
 echo "Test sbt custom build in minikube"
-scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts
+scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts --noPublishArtifacts
 echo
 echo "Test mill custom build in minikube"
-scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts
+scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts --noPublishArtifacts
 
 echo
 echo "Test sbt custom build locally"

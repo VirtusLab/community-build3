@@ -18,15 +18,14 @@ spec:
           mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
           subPath: mvn-repo.crt
           readOnly: true
-        lifecycle:
-          postStart:
-            exec:
-                command: ["bash", "-c", "cat /usr/local/share/ca-certificates/mvn-repo.crt && update-ca-certificates"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
         command:
         - "bash"
         - "-c"
         - |
-            (/build/build-revision.sh \
+            update-ca-certificates && (/build/build-revision.sh \
               https://github.com/com-lihaoyi/upickle.git \
               1.5.0 \
               3.1.0 \

@@ -20,6 +20,8 @@ if [[ $VERSION != "test" ]]; then
   done
 else 
   echo "Skipping accessory jdk images builds"
+  # Needed for compiler builder
+  $scriptDir/build-builder-base.sh "$VERSION" 8 
 fi
 
 # Compiler builder (build in build-quick) build accessory version images before default one

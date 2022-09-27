@@ -41,7 +41,8 @@ case class Config(
     reproducer: JenkinsReproducerConfig = JenkinsReproducerConfig(),
     customRun: CustomBuildConfig = CustomBuildConfig(null, null),
     minikube: Config.MinikubeConfig = Config.MinikubeConfig(),
-    redirectLogs: Boolean = true
+    redirectLogs: Boolean = true,
+    publishArtifacts: Boolean = true
 ):
   def withMinikube(fn: Config.MinikubeConfig => Config.MinikubeConfig) =
     copy(minikube = fn(minikube))
@@ -105,6 +106,10 @@ object Config:
       opt[Unit]("noRedirectLogs")
         .action { (_, c) => c.copy(redirectLogs = false) }
         .text("Do not redirect runners logs to file")
+        .hidden(),
+      opt[Unit]("noPublishArtifacts")
+        .action { (_, c) => c.copy(publishArtifacts = false) }
+        .text("Don't publish artifacts of the build")
         .hidden(),
       // Commands
       cmd("reproduce")
@@ -819,9 +824,9 @@ object MinikubeReproducer:
                   params.repositoryUrl,
                   params.repositoryRevision.getOrElse(""),
                   buildInfo.scalaVersion,
-                  params.version.getOrElse(""),
+                  if (!config.publishArtifacts) "" else params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
-                  params.mavenRepositoryUrl,
+                  if (!config.publishArtifacts) "" else params.mavenRepositoryUrl,
                   params.enforcedSbtVersion.getOrElse(config.command match {
                     case Command.RunCustomProject => "1.6.2"
                     case _                        => ""
@@ -1103,7 +1108,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       if !os.exists(sbtProjectDir) then os.makeDir(sbtProjectDir)
       project.params.enforcedSbtVersion match {
         case Some(version) =>
-           os.write.over(sbtBuildProperties, s"sbt.version=$version")
+          os.write.over(sbtBuildProperties, s"sbt.version=$version")
         case _ =>
           if belowMinimalSbtVersion then
             println(
