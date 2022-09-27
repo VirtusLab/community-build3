@@ -24,7 +24,7 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: ["update-ca-certificates"]
+                command: ["bash", "-c", "cat /usr/local/share/ca-certificates/mvn-repo.crt && update-ca-certificates"]
           command:
             - "bash"
             - "-c"
