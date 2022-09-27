@@ -9,6 +9,10 @@ projectBuilderTimeout=5m
 kubectl delete namespace $testNamespace --ignore-not-found=true
 kubectl create namespace $testNamespace
 
+CB_VERSION="test" \
+  CB_K8S_NAMESPACE="${testNamespace}" \
+  $scriptDir/start-mvn-repo.sh
+
 function projectBuilderFailed() {
   jobName="$1"
   echo "Failed to publish the community project"
