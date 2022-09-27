@@ -16,7 +16,7 @@ spec:
             - "bash"
             - "-c"
             - |
-              (/build/build-revision.sh \
+              update-ca-certificates && (/build/build-revision.sh \
                 https://github.com/typelevel/shapeless-3.git \
                 "v3.0.4" \
                 3.1.0 \
