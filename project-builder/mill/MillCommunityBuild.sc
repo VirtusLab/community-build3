@@ -1,5 +1,6 @@
 import $file.CommunityBuildCore,
 CommunityBuildCore.Scala3CommunityBuild.{TestingMode => _, ProjectBuildConfig => _, ProjectOverrides => _, _}
+import CommunityBuildCore.Scala3CommunityBuild.Utils._
 // Make sure that following classes are in sync with the ones defined in CommunityBuildcore,
 //  upickle has problems with classess imported from other file when creating readers
 case class ProjectBuildConfig(
@@ -129,11 +130,12 @@ def mapCrossVersions(
         (crossVersion, buildScalaVersion)
       case _ => crossEntry
     }
+    version <- Seq(crossEntry, mappedCrossVersion).distinct
   } yield {
-    if (mappedCrossVersion != crossEntry) {
-      println(s"Use cross-version $mappedCrossVersion instead of $crossEntry")
+    if (version != crossEntry) {
+      println(s"Use cross-version $version instead of $crossEntry")
     }
-    mappedCrossVersion
+    version
   }
 }
 
@@ -187,7 +189,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
   println(s"Build config: ${configJson}")
   val config = read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
-  val filteredTargets = Utils.filterTargets(targets, config.projects.exclude.map(_.r))
+  val filteredTargets = filterTargets(targets, config.projects.exclude.map(_.r))
   val mappings = checkedModuleMappings(filteredTargets.toSet)
   val topLevelModules = mappings.collect {
     case (target, info) if filteredTargets.contains(target) => info

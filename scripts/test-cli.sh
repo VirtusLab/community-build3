@@ -8,17 +8,17 @@ cd $scriptDir/../cli
 # Installation of scala-cli in the GH actions workflow was not very effective, and might have lead to missing binary on the PATH when executing this script
 
 testNamespace=scala3-community-build-test
-cliRunCmd="run scb-cli.scala --jvm=11 --java-prop communitybuild.version=test --java-prop communitybuild.local.dir=$scriptDir/.. --quiet -- "
-commonOpts="--namespace=$testNamespace --keepCluster --keepMavenRepo --noRedirectLogs"
-sbtProject=typelevel/shapeless-3
-millProject=com-lihaoyi/os-lib
+cliRunCmd="run scb-cli.scala --jvm=11 --java-prop communitybuild.version=test --java-prop communitybuild.local.dir=$scriptDir/..  -- "
+commonOpts="--namespace=$testNamespace --noRedirectLogs"
+sbtProject="typelevel/shapeless-3 --revision=v3.1.0"
+millProject="com-lihaoyi/os-lib --revision=0.8.1" 
 scalaVersion=3.1.1
 
 echo "Test sbt custom build in minikube"
-scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts
+scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts --noPublishArtifacts
 echo
 echo "Test mill custom build in minikube"
-scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts
+scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts --noPublishArtifacts
 
 echo
 echo "Test sbt custom build locally"
@@ -26,6 +26,5 @@ scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts --locally
 echo
 echo "Test mill custom build locally"
 scala-cli $cliRunCmd run $millProject $scalaVersion $commonOpts --locally
-
 
 echo "Tests passed"
