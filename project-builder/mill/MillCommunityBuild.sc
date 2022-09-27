@@ -129,10 +129,10 @@ def mapCrossVersions(
         (crossVersion, buildScalaVersion)
       case _ => crossEntry
     }
-    version <- Seq(cross, mappedCrossVersion).distinct
+    version <- Seq(crossEntry, mappedCrossVersion).distinct
   } yield {
     if (version != crossEntry) {
-      println(s"Use cross-version $mappedCrossVersion instead of $crossEntry")
+      println(s"Use cross-version $version instead of $crossEntry")
     }
     version
   }
