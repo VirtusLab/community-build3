@@ -9,6 +9,7 @@ import xsbti.{Severity, CompileFailed, Problem}
 import scala.collection.JavaConverters._
 
 import Scala3CommunityBuild._
+import Scala3CommunityBuild.Utils._
 import TaskEvaluator.EvalResult
 
 class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
@@ -310,7 +311,7 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   lazy val ourVersion =
     Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
-  lazy val dualVersioning = Utils.DualVersioningType.resolve
+  lazy val dualVersioning = DualVersioningType.resolve
   lazy val publishVersions = ourVersion.toList.map { version =>
     version :: dualVersioning.flatMap(_.apply(version)).map(_.render).toList
   }
@@ -400,7 +401,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         simplifiedModuleId(key) -> value
       }
 
-      val filteredIds = Utils.filterTargets(ids, config.projects.exclude.map(_.r))
+      val filteredIds = filterTargets(ids, config.projects.exclude.map(_.r))
 
       println("Starting build...")
       // Find projects that matches maven
