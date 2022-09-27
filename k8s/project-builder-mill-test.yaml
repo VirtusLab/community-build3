@@ -9,16 +9,11 @@ spec:
       - name: project-builder-mill-test
         image: virtuslab/scala-community-build-project-builder:jdk17-test
         imagePullPolicy: IfNotPresent
-        volumeMounts:
-        - name: mvn-repo-cert
-          mountPath: /usr/local/share/ca-certificates/mvn-repo.crt
-          subPath: mvn-repo.crt
-          readOnly: true
         command:
         - "bash"
         - "-c"
         - |
-            update-ca-certificates && (/build/build-revision.sh \
+            (/build/build-revision.sh \
               https://github.com/com-lihaoyi/upickle.git \
               1.5.0 \
               3.1.0 \
