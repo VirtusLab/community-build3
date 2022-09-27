@@ -824,9 +824,9 @@ object MinikubeReproducer:
                   params.repositoryUrl,
                   params.repositoryRevision.getOrElse(""),
                   buildInfo.scalaVersion,
-                  if (!config.publishArtifacts) "" else params.version.getOrElse(""),
+                  if !config.publishArtifacts then "" else params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
-                  if (!config.publishArtifacts) "" else params.mavenRepositoryUrl,
+                  params.mavenRepositoryUrl,
                   params.enforcedSbtVersion.getOrElse(config.command match {
                     case Command.RunCustomProject => "1.6.2"
                     case _                        => ""
