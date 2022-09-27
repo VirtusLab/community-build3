@@ -10,8 +10,20 @@ kubectl delete namespace $testNamespace --ignore-not-found=true
 kubectl create namespace $testNamespace
 
 CB_VERSION="test" \
-  CB_K8S_NAMESPACE="${testNamespace}" \
-  $scriptDir/start-mvn-repo.sh
+CB_K8S_NAMESPACE="${testNamespace}" \
+
+function mavenRepoFailed() {
+  echo "Failed to start maven repo:"
+  echo "Logs content:"
+  echo
+  kubectl -n $testNamespace logs deploy/mvn-repo
+  exit -1
+}
+
+$scriptDir/start-mvn-repo.sh
+kubectl -n $testNamespace get po
+kubectl -n $testNamespace wait --timeout=3m --for=condition=Available deploy/mvn-repo || mavenRepoFailed
+kubectl -n $testNamespace get po
 
 function projectBuilderFailed() {
   jobName="$1"
