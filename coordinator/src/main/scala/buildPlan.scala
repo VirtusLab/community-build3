@@ -290,19 +290,24 @@ private given FromString[Seq[Project]] = str =>
     ): List[Set[ProjectBuildDef]] =
       if remaining.isEmpty then acc.reverse
       else
-        val (currentStage, newRemainings) = remaining.partition {
+        var (currentStage, newRemainings) = remaining.partition {
           _.dependencies.forall(done.contains)
         }
         if currentStage.isEmpty then {
           val deps = plan.map(v => (v.name, v)).toMap
-          newRemainings
-            .filter(p => p.dependencies.exists { d => deps(d).dependencies.contains(p.name) })
-            .foreach(v =>
-              println(
-                s"cyclic dependency in  ${v.name} -> ${v.dependencies.toList.filterNot(done.contains)}"
-              )
+          def hasCyclicDependencies(p: ProjectBuildDef) =
+            p.dependencies.exists(deps(_).dependencies.contains(p.name))
+          val (cyclicDeps, remaining) = newRemainings.partition(hasCyclicDependencies)
+          currentStage ++= cyclicDeps
+          newRemainings --= cyclicDeps
+
+          cyclicDeps.foreach(v =>
+            println(
+              s"Mitigated cyclic dependency in  ${v.name} -> ${v.dependencies.toList.filterNot(done.contains)}"
             )
-          sys.error("cyclic dependency")
+          )
+          if remaining.nonEmpty then
+            sys.error(s"Unresolved cyclic dependencies involving: ${remaining.map(_.name)}")
         }
         val names = currentStage.map(_.name)
         groupByDeps(newRemainings, done ++ names, currentStage :: acc)
