@@ -51,6 +51,8 @@ class Scala3CommunityBuildMillAdapter(
     "scala_3"
   )
 
+  val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
+
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
       if (sys.props.contains("communitybuild.noInjects")) Patch.empty
@@ -95,7 +97,6 @@ class Scala3CommunityBuildMillAdapter(
         Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
 
       case ValOrDefDef(Term.Name("scalaVersion"), tpe, body) =>
-        val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
         def replace(isLiteral: Boolean) =
           Patch.replaceTree(
             body,
@@ -108,10 +109,14 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
-        Patch.replaceTree(
-          body,
-          Replacment.ScalaVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
-        )
+        body.toString().trim() match {
+          case Scala3Literal() =>
+            Patch.replaceTree(
+              body,
+              Replacment.ScalaVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
+            )
+          case _ => Patch.empty
+        }
 
       case ValOrDefDef(Term.Name("publishVersion"), tpe, body) =>
         Patch.replaceTree(

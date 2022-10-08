@@ -49,7 +49,7 @@ pme123:camundala-dsl:.*
 
 # Build problems:
 ## Incorrect handling of Scala 3 binary versions
-dmurvihill:courier:.*
+wartremover:.*
 inkytonik:kiama:.*
 kevin-lee:can-equal:.*
 kevin-lee:just-fp:.*
@@ -66,6 +66,24 @@ sciss:swingplus:.*
 ## Uses mill-tpolecat - it does fails to parse RC versions 
 joan38:kubernetes-client:.*
 carlosedp:riscvassembler:.*
+neandertech:jsonrpclib:.*
+
+
+## Missing artifacts in public repo
+# sbt-beangle-parent:0.6.0
+beangle:boot:.*
+beangle:cache:.*
+beangle:cdi:.*
+beangle:commons:.*
+beangle:data:.*
+beangle:security:.*
+beangle:serializer:.*
+beangle:template:.*
+beangle:web:.*
+beangle:webmvc:.*
+
+## Misconfigured + needs ruby on path
+makenowjust-labs:lite:.*
 
 ## Missing artifacts in public repo
 # sbt-beangle-parent:0.6.0
@@ -119,14 +137,14 @@ pjfanning:scala3-reflection:.*
 johnhungerford:generic-schema:1.[0-1].[0.1]
 
 #https://github.com/lampepfl/dotty/issues/15668
-kevin-lee:extras:0.[0-1].*
+kevin-lee:extras:0.*
 
 
 # opaque type overrides
 lorandszakacs:sprout:0.0.[0-5]	
 
 # Changes to Compiler API
-nrinaudo:kantan.repl:1.1.*
+nrinaudo:kantan.repl:1.*
 virtuslab:pretty-stacktraces:0.0.*
 zygfryd:scala-zygf-cement:0.3.0
 
@@ -176,16 +194,6 @@ laserdisc-io:fs2-aws:5.0.*
 # Uses no longer allowed syntax
 ## override opaque type
 tabdulradi:mazboot:.*
-
-# Cyclic dependency
-## reactivemongo/reactivemongo
-reactivemongo:reactivemongo-bson:.*
-
-##japgolly/microlibs-scala
-japgolly:nyaya.*
-
-## errors4s_errors4s-core
-errors4s:errors4s-core-scalacheck:.*
 
 # Unsupported minimal JDK version
 ## JDK 19

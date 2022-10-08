@@ -49,6 +49,9 @@ object MillScalaVersionOverride {
       def sv = scala213
       def scala213 = "2.13.8"
     }
+    object binVersions{
+      def scala3 = "3"
+    }
   }
 
   val snippet = s"""

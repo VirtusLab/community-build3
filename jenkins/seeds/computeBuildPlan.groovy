@@ -25,7 +25,7 @@ pipeline {
                         spec:
                           containers:
                           - name: coordinator
-                            image: virtuslab/scala-community-build-coordinator:v0.1.1
+                            image: virtuslab/scala-community-build-coordinator:v0.1.2
                             imagePullPolicy: IfNotPresent
                             command:
                             - cat
