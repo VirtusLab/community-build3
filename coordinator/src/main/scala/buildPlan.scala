@@ -297,7 +297,7 @@ private given FromString[Seq[Project]] = str =>
           val deps = plan.map(v => (v.name, v)).toMap
           def hasCyclicDependencies(p: ProjectBuildDef) =
             p.dependencies.exists(deps(_).dependencies.contains(p.name))
-          val (cyclicDeps, remaining) = newRemainings.partition(hasCyclicDependencies)
+          val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
           currentStage ++= cyclicDeps
           newRemainings --= cyclicDeps
 
@@ -306,8 +306,6 @@ private given FromString[Seq[Project]] = str =>
               s"Mitigated cyclic dependency in  ${v.name} -> ${v.dependencies.toList.filterNot(done.contains)}"
             )
           )
-          if remaining.nonEmpty then
-            sys.error(s"Unresolved cyclic dependencies involving: ${remaining.map(_.name)}")
         }
         val names = currentStage.map(_.name)
         groupByDeps(newRemainings, done ++ names, currentStage :: acc)
