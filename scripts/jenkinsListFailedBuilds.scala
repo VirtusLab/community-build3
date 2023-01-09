@@ -1,4 +1,5 @@
-//> using scala "3.1.3"
+#!/usr/bin/env -S scala-cli shebang
+//> using scala "3"
 //> using lib "com.lihaoyi::requests:0.7.0"
 //> using lib "com.lihaoyi::ujson:2.0.0"
 
@@ -64,7 +65,7 @@ def getFailedProjectsIds(buildId: Int) = Future {
       "_class"
     ).str == "org.jenkinsci.plugins.workflow.support.steps.build.DownstreamFailureCause"
     description = causes("shortDescription").str
-    StatusPattern(projectId, status) = description
+    StatusPattern(projectId, status) = description: @unchecked
   yield projectId.toInt -> status
 
   val groups = failedProjectStatus.groupMap(_._2)(_._1).mapValues(_.toSet)
