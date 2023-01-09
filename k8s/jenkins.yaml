@@ -446,7 +446,7 @@ jenkinsKubernetesAgents:
     description: ""
 
     # Executors defines the maximum number of concurrent builds that Jenkins may perform on this node.
-    executors: 10
+    executors: 16
 
     # RemoteRootDirectory is directory dedicated to Jenkins for temporary files storage purposes.
     remoteRootDirectory: ""
@@ -738,6 +738,15 @@ jenkinsAuthorization:
         - Overall/Administer
     
     - name: lampepfl*dotty-core
+      permissions:
+        - Overall/Read
+        - Job/Read
+        - Job/Build
+        - Job/Cancel
+        - Run/Replay
+        - Run/Update
+
+    - name: VirtusLab*scala-open-source
       permissions:
         - Overall/Read
         - Job/Read
