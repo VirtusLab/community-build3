@@ -4,6 +4,10 @@ import java.nio.file._
 import pureconfig._
 import pureconfig.generic.derivation.default._
 import pureconfig.generic.derivation.EnumConfigReader
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+
+type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
 case class Project(org: String, name: String)(val stars: Int): // stars may change...
   def show = s"$org%$name%$stars"
