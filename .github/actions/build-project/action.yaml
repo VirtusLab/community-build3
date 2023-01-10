@@ -19,13 +19,6 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
-    - name: Prepare output files
-      shell: bash
-      run: |
-        touch build-logs.txt  build-summary.txt
-        # Assume failure unless overwritten by a successful build
-        echo 'failure' > build-status.txt 
-
     - name: Build
       uses: addnab/docker-run-action@v3
       with:
@@ -37,6 +30,10 @@ runs:
           config () { 
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
           }
+
+          touch build-logs.txt  build-summary.txt
+          # Assume failure unless overwritten by a successful build
+          echo 'failure' > build-status.txt 
 
           /build/build-revision.sh \
             "$(config .repoUrl)" \
@@ -53,6 +50,11 @@ runs:
           mv build-status.txt /opencb/
           mv build-summary.txt /opencb
 
+    - name: Upload artifacts
+    - uses: actions/upload-artifact@v3
+      with:
+        name: build-results
+        path: ${{ github.workspace }}/build-*.txt
 
     - name: Check results
       shell: bash
