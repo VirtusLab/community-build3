@@ -15,8 +15,6 @@ runs:
       run: |
         ConfigFile=".github/workflows/buildConfig.json"
         DefaultJDK=11
-        set -x
-        head -n 10 $ConfigFile
         javaVersion=$(jq -r ".\"${{ inputs.project-name }}\".config.java.version // ${DefaultJDK}" $ConfigFile)
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
@@ -25,16 +23,19 @@ runs:
       uses: addnab/docker-run-action@v3
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
-        options: -v ${{ github.workspace }}:/build/
+        options: -v ${{ github.workspace }}:/opencb/
         run: |
-          ls -l /build/
+          set -x
+          ls -l 
+          ls -l /
+          ls -l /opencb/
 
-          ConfigFile="/build/.github/workflows/buildConfig.json"
+          ConfigFile="/opencb/.github/workflows/buildConfig.json"
           function config() { jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile }
 
           # echo "failure" > build-status.txt            
 
-          /build/build-revision.sh \
+          /opencb/build-revision.sh \
               "$(config .repoUrl)" \
               "$(config .revision)" \
               "${{ inputs.scala-version }}" \
