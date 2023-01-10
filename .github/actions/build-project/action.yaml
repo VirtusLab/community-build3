@@ -51,7 +51,7 @@ runs:
           mv build-summary.txt /opencb
 
     - name: Upload artifacts
-    - uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3
       with:
         name: build-results
         path: ${{ github.workspace }}/build-*.txt
