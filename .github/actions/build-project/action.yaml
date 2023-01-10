@@ -25,8 +25,9 @@ runs:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
         options: -v ${{ github.workspace }}:/opencb/
         run: |
+          set -x
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
-          function config { 
+          config () { 
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
           }
 
