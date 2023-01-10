@@ -22,9 +22,9 @@ runs:
     - name: Prepare output files
       shell: bash
       run: |
-        touch build-logs.txt
-        touch build-status.txt
-        touch build-summary.txt
+        touch build-logs.txt  build-summary.txt
+        # Assume failure unless overwritten by a successful build
+        echo 'failure' > build-status.txt 
 
     - name: Build
       uses: addnab/docker-run-action@v3
@@ -38,7 +38,7 @@ runs:
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
           }
 
-          /build/build-revision.sh \
+          (/build/build-revision.sh \
               "$(config .repoUrl)" \
               "$(config .revision)" \
               "${{ inputs.scala-version }}" \
@@ -46,10 +46,15 @@ runs:
               "$(config .targets)" \
               'https://repo1.maven.org/maven2' \
               '1.6.2' \
-              "$(config .config)" 2>&1 | tee build-logs.txt
+              "$(config .config)" 2>&1 | tee build-logs.txt) \
+            && [[ "$(cat build-status.txt)" == "success" ]]
 
     - name: Check results
       shell: bash
       run: |
+        set -x
         ls -l
-        cat build-*.txt
+        cat build-status.txt
+        cat build-summary.txt
+        cat build-logs.txt
+
