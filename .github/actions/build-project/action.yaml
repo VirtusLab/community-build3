@@ -38,16 +38,17 @@ runs:
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
           }
 
-          (/build/build-revision.sh \
-              "$(config .repoUrl)" \
-              "$(config .revision)" \
-              "${{ inputs.scala-version }}" \
-              '' \
-              "$(config .targets)" \
-              'https://repo1.maven.org/maven2' \
-              '1.6.2' \
-              "$(config .config)" 2>&1 | tee build-logs.txt) \
-            && [[ "$(cat build-status.txt)" == "success" ]]
+          /build/build-revision.sh \
+            "$(config .repoUrl)" \
+            "$(config .revision)" \
+            "${{ inputs.scala-version }}" \
+            '' \
+            "$(config .targets)" \
+            'https://repo1.maven.org/maven2' \
+            '1.6.2' \
+            "$(config .config)" 2>&1 | tee build-logs.txt
+          # Set the result of the build
+          [ "$(cat build-status.txt)" = "success" ]
 
     - name: Check results
       shell: bash
