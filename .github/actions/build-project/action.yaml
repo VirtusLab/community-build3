@@ -26,13 +26,16 @@ runs:
         options: -v ${{ github.workspace }}:/opencb/
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
+          DefaultConfig='{"memoryRequestMb":4096}'
           config () { 
-            jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
+            path=".\"${{ inputs.project-name }}\"$@" 
+            jq -c -r "$path" $ConfigFile 
           }
 
           touch build-logs.txt  build-summary.txt
           # Assume failure unless overwritten by a successful build
           echo 'failure' > build-status.txt 
+
 
           /build/build-revision.sh \
             "$(config .repoUrl)" \
@@ -42,8 +45,8 @@ runs:
             "$(config .targets)" \
             'https://repo1.maven.org/maven2' \
             '1.6.2' \
-            "$(config .config)" 2>&1 | tee build-logs.txt
-          
+            "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
+
           # Store results
           mv build-logs.txt /opencb/
           mv build-status.txt /opencb/
