@@ -118,21 +118,19 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           scala-version: ${{ inputs.scala-version }}
-      - run: ls -l
-
       
-  # stage-1:
-  #   runs-on: ubuntu-22.04
-  #   needs: stage-0
-  #   strategy:
-  #     matrix:
-  #       include:
+  stage-1:
+    runs-on: ubuntu-22.04
+    needs: stage-0
+    strategy:
+      matrix:
+        include:
   #       - name: 47degrees_scalacheck-toolbox
   #       - name: anatoliykmetyuk_simple-rockets-compiler
   #       - name: com-lihaoyi_castor
   #       - name: com-lihaoyi_fansi
-  #       - name: com-lihaoyi_os-lib
-  #       - name: com-lihaoyi_requests-scala
+        - name: com-lihaoyi_os-lib
+        - name: com-lihaoyi_requests-scala
   #       - name: com-lihaoyi_scalatags
   #       - name: com-lihaoyi_upickle
   #       - name: eed3si9n_expecty
@@ -157,9 +155,14 @@ jobs:
   #       - name: typelevel_jawn
   #       - name: typelevel_scalacheck-xml
   #       - name: vasilmkd_discipline
-  #   steps:
-  #     - name: "Echo"
-  #       run: echo '${{matrix.name}}'
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/build-project
+        with:
+          project-name: ${{ matrix.name }}
+          scala-version: ${{ inputs.scala-version }}
+      
   # stage-2:
   #   runs-on: ubuntu-22.04
   #   needs: stage-1

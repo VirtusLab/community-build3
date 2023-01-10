@@ -47,8 +47,15 @@ runs:
             'https://repo1.maven.org/maven2' \
             '1.6.2' \
             "$(config .config)" 2>&1 | tee build-logs.txt
+          
+          # Store results
+          mv build-logs.txt /opencb/
+          mv build-status.txt /opencb/
+          mv build-summary.txt /opencb
+          
           # Set the result of the build
           [ "$(cat build-status.txt)" = "success" ]
+
 
     - name: Check results
       shell: bash
