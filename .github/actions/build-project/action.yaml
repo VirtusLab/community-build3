@@ -13,6 +13,9 @@ runs:
     - name: Check java version
       shell: bash
       run: |
+        ls -l
+        echo ""
+        ls .github/workflows/
         ConfigFile=".github/workflows/buildConfig.json"
         DefaultJDK=11
         javaVersion=$(jq -r ".${{ inputs.project-name }}.config.java.version // ${DefaultJDK}" $ConfigFile)
