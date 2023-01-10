@@ -25,17 +25,14 @@ runs:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
         options: -v ${{ github.workspace }}:/opencb/
         run: |
-          set -x
-          ls -l 
-          ls -l /
-          ls -l /opencb/
-
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
-          function config() { jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile }
+          function config() { 
+            jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
+          }
 
           # echo "failure" > build-status.txt            
 
-          /opencb/build-revision.sh \
+          /build/build-revision.sh \
               "$(config .repoUrl)" \
               "$(config .revision)" \
               "${{ inputs.scala-version }}" \
