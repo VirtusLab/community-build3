@@ -19,6 +19,13 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
+    - name: Prepare output files
+      shell: bash
+      run: |
+        touch build-logs.txt
+        touch build-status.txt
+        touch build-summary.txt
+
     - name: Build
       uses: addnab/docker-run-action@v3
       with:
@@ -31,8 +38,6 @@ runs:
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
           }
 
-          # echo "failure" > build-status.txt            
-
           /build/build-revision.sh \
               "$(config .repoUrl)" \
               "$(config .revision)" \
@@ -43,8 +48,8 @@ runs:
               '1.6.2' \
               "$(config .config)" 2>&1 | tee build-logs.txt
 
-          ls -l /build/
-
     - name: Check results
       shell: bash
-      run: ls -l
+      run: |
+        ls -l
+        cat build-*.txt
