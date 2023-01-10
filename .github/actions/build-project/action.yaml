@@ -25,7 +25,6 @@ runs:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
         options: -v ${{ github.workspace }}:/opencb/
         run: |
-          set -x
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           config () { 
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
@@ -53,7 +52,7 @@ runs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ inputs.project-name }}-build-results
+        name: ${{ inputs.project-name }}
         path: ${{ github.workspace }}/build-*.txt
 
     - name: Check results
