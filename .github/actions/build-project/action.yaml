@@ -26,7 +26,7 @@ runs:
         options: -v ${{ github.workspace }}:/opencb/
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
-          function config() { 
+          function config { 
             jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile 
           }
 
