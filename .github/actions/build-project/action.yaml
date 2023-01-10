@@ -52,9 +52,6 @@ runs:
           mv build-logs.txt /opencb/
           mv build-status.txt /opencb/
           mv build-summary.txt /opencb
-          
-          # Set the result of the build
-          [ "$(cat build-status.txt)" = "success" ]
 
 
     - name: Check results
@@ -65,4 +62,7 @@ runs:
         cat build-status.txt
         cat build-summary.txt
         cat build-logs.txt
+
+        # Set the result of the build
+        [ "$(cat build-status.txt)" = "success" ]
 
