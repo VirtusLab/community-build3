@@ -24,7 +24,7 @@ runs:
     - name: Build
       uses: addnab/docker-run-action@v3
       with:
-        image: "virtuslab/scala-community-build-project-builder:jdk${{ inputs.java-version }}-v0.1.2"
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
         options: -v ${{ github.workspace }}:/build/
         run: |
           ls -l /build/
