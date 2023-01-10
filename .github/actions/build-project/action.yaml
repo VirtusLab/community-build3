@@ -17,7 +17,7 @@ runs:
         DefaultJDK=11
         set -x
         head -n 10 $ConfigFile
-        javaVersion=$(jq -r "${{ inputs.project-name }}.config.java.version // ${DefaultJDK}" $ConfigFile)
+        javaVersion=$(jq -r ".\"${{ inputs.project-name }}\".config.java.version // ${DefaultJDK}" $ConfigFile)
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
@@ -30,7 +30,7 @@ runs:
           ls -l /build/
 
           ConfigFile="/build/.github/workflows/buildConfig.json"
-          function config() { jq -c -r ".${{ inputs.project-name }}$1" $ConfigFile }
+          function config() { jq -c -r ".\"${{ inputs.project-name }}\"$1" $ConfigFile }
 
           # echo "failure" > build-status.txt            
 
