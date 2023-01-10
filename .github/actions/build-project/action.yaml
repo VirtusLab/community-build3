@@ -53,18 +53,12 @@ runs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: build-results
+        name: ${{ inputs.project-name }}-build-results
         path: ${{ github.workspace }}/build-*.txt
 
     - name: Check results
       shell: bash
       run: |
-        set -x
-        ls -l
-        cat build-status.txt
-        cat build-summary.txt
-        cat build-logs.txt
-
         # Set the result of the build
         [ "$(cat build-status.txt)" = "success" ]
 
