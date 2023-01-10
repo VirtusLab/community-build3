@@ -17,7 +17,7 @@ runs:
         DefaultJDK=11
         set -x
         head -n 10 $ConfigFile
-        javaVersion=$(jq -r ".${{ inputs.project-name }}.config.java.version // ${DefaultJDK}" $ConfigFile)
+        javaVersion=$(jq -r "${{ inputs.project-name }}.config.java.version // ${DefaultJDK}" $ConfigFile)
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
