@@ -57,9 +57,9 @@ runs:
       id: check-published
       run: |
         Version="${{ steps.calc-version.outputs.effective-scala-version }}"
-        CustomRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+        CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
         isPublished=false
-        if cs resolve org.scala-lang:scala3-compiler_3:${Version} -r $CustomRepo ; then
+        if cs resolve org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo ; then
           isPublished=true
         fi
         echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT
@@ -72,5 +72,5 @@ runs:
         options: -v ${{ github.workspace }}/compiler:/compiler/
         run: |
           Version="${{ steps.calc-version.outputs.effective-scala-version }}"
-          CustomRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
-          /build/build.sh /compiler "${Version}" ${CustomRepo}"
+          CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+          /build/build.sh /compiler "${Version}" "${CustomMavenRepo}"
