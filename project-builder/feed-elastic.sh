@@ -39,7 +39,7 @@ jsonFile=$(mktemp /tmp/feed-elastic-tmp.XXXXXX)
 echo "$json" > "$jsonFile"
 echo "$json" | jq 'del(.logs)'
 
-response=$(curl -v -i -k -w "\n%{http_code}" --user "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -H "Content-Type: application/json" "${elasticUrl}/project-build-summary/_doc" -d "@${jsonFile}")
+response=$(curl -i -k -w "\n%{http_code}" --user "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -H "Content-Type: application/json" "${elasticUrl}/project-build-summary/_doc" -d "@${jsonFile}")
 echo "Response: ${response}"
 responseStatus=$(tail -n1 <<< "$response")
 

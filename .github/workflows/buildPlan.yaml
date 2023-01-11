@@ -43,31 +43,31 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: afsalthaj_constraintless
-        # - name: alejandrohdezma_dummy
-        # - name: alejandrohdezma_sbt-propagate
-        # - name: almond-sh_almond
-        # - name: barnardb_tinyplate
-        # - name: com-lihaoyi_geny
-        # - name: com-lihaoyi_sourcecode
-        # - name: com-lihaoyi_utest
-        # - name: cornerman_simple-scalajs-requests
-        # - name: coursier_dependency
-        # - name: cquiroz_scala-java-time
-        # - name: dieproht_matr
-        # - name: dmytromitin_dotty-patched
-        # - name: eed3si9n_verify
-        # - name: eltherion_http4s-timer
-        # - name: fdietze_formidable
-        # - name: fiatjaf_nlog
-        # - name: fommil_jzon
-        # - name: gaeljw_typetrees
-        # - name: gemini-hlsw_lucuma-jts
-        # - name: getshaka-org_native-converter
-        # - name: hamnis_dataclass-scalafix
-        # - name: hsci-r_lucene-perfieldpostingsformatordtermvectorscodec
-        # - name: http4s_hpack
-        # - name: iheartradio_ficus
+        - name: afsalthaj_constraintless
+        - name: alejandrohdezma_dummy
+        - name: alejandrohdezma_sbt-propagate
+        - name: almond-sh_almond
+        - name: barnardb_tinyplate
+        - name: com-lihaoyi_geny
+        - name: com-lihaoyi_sourcecode
+        - name: com-lihaoyi_utest
+        - name: cornerman_simple-scalajs-requests
+        - name: coursier_dependency
+        - name: cquiroz_scala-java-time
+        - name: dieproht_matr
+        - name: dmytromitin_dotty-patched
+        - name: eed3si9n_verify
+        - name: eltherion_http4s-timer
+        - name: fdietze_formidable
+        - name: fiatjaf_nlog
+        - name: fommil_jzon
+        - name: gaeljw_typetrees
+        - name: gemini-hlsw_lucuma-jts
+        - name: getshaka-org_native-converter
+        - name: hamnis_dataclass-scalafix
+        - name: hsci-r_lucene-perfieldpostingsformatordtermvectorscodec
+        - name: http4s_hpack
+        - name: iheartradio_ficus
         - name: j5ik2o_akka-persistence-s3
         - name: jcouyang_jujiu
         - name: jodersky_identicon
@@ -145,6 +145,9 @@ jobs:
           project-name: ${{ matrix.name }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+ }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: stage-0
