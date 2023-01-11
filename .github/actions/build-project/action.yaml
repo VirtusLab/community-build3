@@ -30,7 +30,7 @@ runs:
       id: job-info
       uses: Tiryoh/gha-jobid-action@v0.1.2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ github.token }}
         job_name: ${{ github.job }}
 
     - name: Check can skip build
