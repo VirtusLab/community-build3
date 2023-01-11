@@ -84,11 +84,6 @@ runs:
           # Assume failure unless overwritten by a successful build
           echo 'failure' > build-status.txt 
 
-          printenv
-          echo "user: ${#ELASTIC_USERNAME} $(echo -n $ELASTIC_USERNAME | sha1sum)"
-          echo "pasw: ${#ELASTIC_PASSWORD} $(echo -n $ELASTIC_PASSWORD | sha1sum)"
-
-
           /build/build-revision.sh \
             "$(config .repoUrl)" \
             "$(config .revision)" \
@@ -101,14 +96,14 @@ runs:
 
           /build/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
-            '${{ inputs.project-name }}' \
+            "${{ inputs.project-name }}" \
             "$(cat build-status.txt)" \
-            '$(date --iso-8601=seconds)' \
+            "$(date --iso-8601=seconds)" \
             build-summary.txt \
             build-logs.txt \
             "$(config .version)" \
             "${{ inputs.scala-version }}" \
-            '${{ github.run_id }}' \
+            "${{ github.run_id }}" \
             "${{ steps.job-info.outputs.html_url }}"
           if [ $? != 0 ]; then 
             echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
