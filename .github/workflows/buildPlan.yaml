@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
-      - name: "Build project"
+      - name: "Setup build"
         uses: ./.github/actions/setup-build
         id: setup
         with:
