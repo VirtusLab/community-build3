@@ -85,8 +85,9 @@ runs:
           echo 'failure' > build-status.txt 
 
           printenv
-          echo ${ELASTIC_USERNAME}
-          echo ${{inputs.elastic-user}}
+          echo "user: ${#ELASTIC_USERNAME} $(echo -n $ELASTIC_USERNAME | sha1sum)"
+          echo "pasw: ${#ELASTIC_PASSWORD} $(echo -n $ELASTIC_PASSWORD | sha1sum)"
+
 
           /build/build-revision.sh \
             "$(config .repoUrl)" \
