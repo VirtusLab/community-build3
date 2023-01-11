@@ -40,8 +40,9 @@ runs:
         ConfigFile=".github/workflows/buildConfig.json"
         ScalaVersion="${{ inputs.scala-version }}"
         BinScalaVersion=3
-        CustomMavenRepo="${{ inputs.maven=repo-url }}"
+        CustomMavenRepo="${{ inputs.maven-repo-url }}"
 
+        echo "Build URL: ${{ steps.job-info.outputs.html_url }}"
         projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
 
         canSkip=true
