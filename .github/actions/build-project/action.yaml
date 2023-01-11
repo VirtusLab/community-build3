@@ -71,7 +71,7 @@ runs:
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
-        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME="${{ inputs.elastic-user }}" -e ELASTIC_PASSWORD="${{ inputs.elastic-password }}"
+        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           DefaultConfig='{"memoryRequestMb":4096}'
@@ -83,6 +83,10 @@ runs:
           touch build-logs.txt  build-summary.txt
           # Assume failure unless overwritten by a successful build
           echo 'failure' > build-status.txt 
+
+          printenv
+          echo ${ELASTIC_USERNAME}
+          echo ${{inputs.elastic-user}}
 
           /build/build-revision.sh \
             "$(config .repoUrl)" \
