@@ -54,8 +54,9 @@ runs:
         canSkip=true
         for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
           arr=($(echo $target | tr "%" " "))
-          org=${arr[1]}
-          name=${arr[2]}
+          #use offset:length for consistent indexing (zsh starts with 1, bash starts with 0)
+          org=${arr[@]:0:1}
+          name=${arr[@]:1:1}
           artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
 
           if ! cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
