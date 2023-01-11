@@ -5,10 +5,10 @@ inputs:
     description: "Scala version to check"
   repository-url:
     description: "GitHub repository URL for compiler to build"
-    default: "https://github.com/lampepfl/dotty.git"
+    required: true
   repository-branch:
     description: "GitHub repository branch for compiler to build"
-    default: "main"
+    required: true
 outputs:
   scala-version:
     description: "Effective Scala version, input val"
