@@ -58,7 +58,7 @@ runs:
         Version="${{ steps.calc-version.outputs.effective-scala-version }}"
         CustomRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
         isPublished=false
-        if [[ cs resolve org.scala-lang:scala3-compiler_3:${Version} -r $CustomRepo ]]; then
+        if cs resolve org.scala-lang:scala3-compiler_3:${Version} -r $CustomRepo ; then
           isPublished=true
         fi
         echo "is-compiler-published=${isPublished}" >> $GITHUB_ENV

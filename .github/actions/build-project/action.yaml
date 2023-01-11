@@ -43,9 +43,8 @@ runs:
           org=${arr[1]}
           name=${arr[2]}
           artifact="$org:$name_${BinScalaVersion}:${projectVersion}"
-          cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null
-          result=$?
-          if [[ $result -ne 0 ]]; then 
+          
+          if ! cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
             echo "Artifact $artifact not found, would build the rpoject"
             canSkip=false
             break;
