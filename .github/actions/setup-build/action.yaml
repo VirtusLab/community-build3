@@ -59,9 +59,11 @@ runs:
         Version="${{ steps.calc-version.outputs.effective-scala-version }}"
         CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
         isPublished=false
-        if cs resolve org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo ; then
+        # Download jar instead of checking only for pom to ensure that it's complete
+        if cs fetch org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo ; then
           isPublished=true
         fi
+        echo "Can skip compiler build: ${isPublished}"
         echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT
 
     - name: Build compiler
@@ -73,4 +75,5 @@ runs:
         run: |
           Version="${{ steps.calc-version.outputs.effective-scala-version }}"
           CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+          echo "Building Scala compiler, version ${Version}"
           /build/build.sh /compiler "${Version}" "${CustomMavenRepo}"
