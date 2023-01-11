@@ -57,6 +57,7 @@ runs:
             canSkip=false
             break;
           fi
+        done
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
 
     - name: Build project
