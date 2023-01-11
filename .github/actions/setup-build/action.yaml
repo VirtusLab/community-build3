@@ -24,7 +24,7 @@ runs:
       with:
         repository: ${{ inputs.repository-url }}
         ref: ${{ inputs.repository-branch }}
-        path: 'compiler'
+        path: "compiler"
 
     - name: Calculate version if missing
       id: calc-version
@@ -50,8 +50,7 @@ runs:
     - name: Install scala-cli
       uses: coursier/setup-action@v1
       with:
-        apps: cs sbt scala-cli
-
+        apps: cs
     - name: Check version is published
       shell: bash
       id: check-published
@@ -62,6 +61,9 @@ runs:
         # Download jar instead of checking only for pom to ensure that it's complete
         if cs fetch org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo ; then
           isPublished=true
+        elif [[  -z "${{ inputs.scala-version }}" ]]; then
+          echo "::error title=Compiler version unavailable::Requested compiler version ${{ inputs.scala-version }} is unavailable" 
+          exit 1
         fi
         echo "Can skip compiler build: ${isPublished}"
         echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT

@@ -9,14 +9,14 @@ on:
     inputs:
       published-scala-version:
         type: string
-        description: 'Published Scala version to use'
+        description: 'Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository'
       repository-url:
         type: string
-        description: "GitHub repository URL for compiler to build"
+        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
         default: "lampepfl/dotty"
       repository-branch:
         type: string
-        description: "GitHub repository branch for compiler to build"
+        description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"
         default: "main"
 jobs:
   setup-build:
@@ -147,7 +147,6 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-
   stage-1:
     runs-on: ubuntu-22.04
     needs: stage-0
@@ -155,21 +154,21 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: 47degrees_scalacheck-toolbox
-        # - name: anatoliykmetyuk_simple-rockets-compiler
-        # - name: com-lihaoyi_castor
-        # - name: com-lihaoyi_fansi
-        # - name: com-lihaoyi_os-lib
-        # - name: com-lihaoyi_requests-scala
-        # - name: com-lihaoyi_scalatags
-        # - name: com-lihaoyi_upickle
-        # - name: eed3si9n_expecty
-        # - name: ekrich_sconfig
-        # - name: fomkin_levsha
-        # - name: indoorvivants_sn-demangler
-        # - name: jd557_minart
-        # - name: jodersky_ustats
-        # - name: monix_minitest
+        - name: 47degrees_scalacheck-toolbox
+        - name: anatoliykmetyuk_simple-rockets-compiler
+        - name: com-lihaoyi_castor
+        - name: com-lihaoyi_fansi
+        - name: com-lihaoyi_os-lib
+        - name: com-lihaoyi_requests-scala
+        - name: com-lihaoyi_scalatags
+        - name: com-lihaoyi_upickle
+        - name: eed3si9n_expecty
+        - name: ekrich_sconfig
+        - name: fomkin_levsha
+        - name: indoorvivants_sn-demangler
+        - name: jd557_minart
+        - name: jodersky_ustats
+        - name: monix_minitest
         - name: rssh_shim--scala-async--dotty-cps-async
         - name: sbt-jib_sbt-jib
         - name: sbt_sbinary
@@ -192,7 +191,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: stage-1
@@ -200,36 +202,36 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: aaronp_args4c
-        # - name: aaronp_eie
-        # - name: aiyanbo_scala-i18n
-        # - name: akiomik_seaw
-        # - name: alexarchambault_scalacon-2022-demo
-        # - name: alexarchambault_scalacon2022-demo
-        # - name: altoo-ag_akka-kryo-serialization
-        # - name: andimiller_munit-cats-effect-styles
-        # - name: andyglow_scala-range
-        # - name: andyglow_scala-xml-diff
-        # - name: andyglow_typesafe-config-scala
-        # - name: aoiroaoino_nanolens
-        # - name: arainko_ducktape
-        # - name: ariskk_burner4s
-        # - name: arturopala_buffer-and-slice
-        # - name: arturopala_validator
-        # - name: ashwinbhaskar_sight-scala
-        # - name: beangle_db
-        # - name: beangle_doc
-        # - name: beangle_ids
-        # - name: beangle_notify
-        # - name: bilal-fazlani_rainbowcli
-        # - name: bilal-fazlani_swiftbar4s
-        # - name: blemale_scaffeine
-        # - name: bpholt_java-time-literals
-        # - name: carlosedp_scalautils
-        # - name: catap_scala-blake3
-        # - name: catap_scala-sha
-        # - name: changvvb_scala-protobuf-java
-        # - name: chrisokasaki_hwtest
+        - name: aaronp_args4c
+        - name: aaronp_eie
+        - name: aiyanbo_scala-i18n
+        - name: akiomik_seaw
+        - name: alexarchambault_scalacon-2022-demo
+        - name: alexarchambault_scalacon2022-demo
+        - name: altoo-ag_akka-kryo-serialization
+        - name: andimiller_munit-cats-effect-styles
+        - name: andyglow_scala-range
+        - name: andyglow_scala-xml-diff
+        - name: andyglow_typesafe-config-scala
+        - name: aoiroaoino_nanolens
+        - name: arainko_ducktape
+        - name: ariskk_burner4s
+        - name: arturopala_buffer-and-slice
+        - name: arturopala_validator
+        - name: ashwinbhaskar_sight-scala
+        - name: beangle_db
+        - name: beangle_doc
+        - name: beangle_ids
+        - name: beangle_notify
+        - name: bilal-fazlani_rainbowcli
+        - name: bilal-fazlani_swiftbar4s
+        - name: blemale_scaffeine
+        - name: bpholt_java-time-literals
+        - name: carlosedp_scalautils
+        - name: catap_scala-blake3
+        - name: catap_scala-sha
+        - name: changvvb_scala-protobuf-java
+        - name: chrisokasaki_hwtest
         - name: chronoscala_chronoscala
         - name: ciaraobrien_dottytags
         - name: clulab_fatdynet
@@ -450,7 +452,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-3:
     runs-on: ubuntu-22.04
     needs: stage-2
@@ -458,26 +463,26 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: acsgh_scala-common
-        # - name: akka_akka
-        # - name: atry_futurebinding.scala
-        # - name: beangle_otk
-        # - name: clockworkconsulting_csexp
-        # - name: clockworkconsulting_peregrin
-        # - name: com-lihaoyi_cask
-        # - name: com-lihaoyi_mainargs
-        # - name: cquiroz_scala-java-locales
-        # - name: cucumber_cucumber-jvm-scala
-        # - name: dvreeze_tqa
-        # - name: gchudnov_mindthegap
-        # - name: gekomad_scala-regex-collection
-        # - name: greenfossil_thorium
-        # - name: gzoller_scalajack
-        # - name: herminiogg_dmaog
-        # - name: hsci-r_octavo-indexer
-        # - name: hughsimpson_scalameter
-        # - name: ij-plugins_ijp-color
-        # - name: indoorvivants_sn-bindgen
+        - name: acsgh_scala-common
+        - name: akka_akka
+        - name: atry_futurebinding.scala
+        - name: beangle_otk
+        - name: clockworkconsulting_csexp
+        - name: clockworkconsulting_peregrin
+        - name: com-lihaoyi_cask
+        - name: com-lihaoyi_mainargs
+        - name: cquiroz_scala-java-locales
+        - name: cucumber_cucumber-jvm-scala
+        - name: dvreeze_tqa
+        - name: gchudnov_mindthegap
+        - name: gekomad_scala-regex-collection
+        - name: greenfossil_thorium
+        - name: gzoller_scalajack
+        - name: herminiogg_dmaog
+        - name: hsci-r_octavo-indexer
+        - name: hughsimpson_scalameter
+        - name: ij-plugins_ijp-color
+        - name: indoorvivants_sn-bindgen
         - name: jelly-rdf_jelly-jvm
         - name: jobial-io_scase
         - name: jodersky_scala-argparse
@@ -533,7 +538,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-4:
     runs-on: ubuntu-22.04
     needs: stage-3
@@ -609,41 +617,41 @@ jobs:
         - name: tharwaninitin_crypto4s
         - name: thoughtworksinc_bindable.scala
         - name: tomasmikula_libretto
-        # - name: tomasmikula_nutcracker
-        # - name: torrentdam_bencode
-        # - name: typelevel_case-insensitive
-        # - name: typelevel_cats-collections
-        # - name: typelevel_cats-mtl
-        # - name: typelevel_cats-parse
-        # - name: typelevel_cats-testkit-scalatest
-        # - name: typelevel_cats-time
-        # - name: typelevel_idna4s
-        # - name: typelevel_monoids
-        # - name: typelevel_mouse
-        # - name: typelevel_paiges
-        # - name: typelevel_shapeless-3
-        # - name: typelevel_spire
-        # - name: vitaliihonta_zio-temporal
-        # - name: vladkopanev_zio-saga
-        # - name: yakivy_dupin
-        # - name: yurikpanic_zio-postgres
-        # - name: zio_interop-guava
-        # - name: zio_interop-reactive-streams
-        # - name: zio_zio-cache
-        # - name: zio_zio-config
-        # - name: zio_zio-direct
-        # - name: zio_zio-logging
-        # - name: zio_zio-mock
-        # - name: zio_zio-nio
-        # - name: zio_zio-optics
-        # - name: zio_zio-parser
-        # - name: zio_zio-prelude
-        # - name: zio_zio-process
-        # - name: zio_zio-profiling
-        # - name: zio_zio-query
-        # - name: zio_zio-rocksdb
-        # - name: zio_zio-telemetry
-        # - name: zio_zio-test-intellij
+        - name: tomasmikula_nutcracker
+        - name: torrentdam_bencode
+        - name: typelevel_case-insensitive
+        - name: typelevel_cats-collections
+        - name: typelevel_cats-mtl
+        - name: typelevel_cats-parse
+        - name: typelevel_cats-testkit-scalatest
+        - name: typelevel_cats-time
+        - name: typelevel_idna4s
+        - name: typelevel_monoids
+        - name: typelevel_mouse
+        - name: typelevel_paiges
+        - name: typelevel_shapeless-3
+        - name: typelevel_spire
+        - name: vitaliihonta_zio-temporal
+        - name: vladkopanev_zio-saga
+        - name: yakivy_dupin
+        - name: yurikpanic_zio-postgres
+        - name: zio_interop-guava
+        - name: zio_interop-reactive-streams
+        - name: zio_zio-cache
+        - name: zio_zio-config
+        - name: zio_zio-direct
+        - name: zio_zio-logging
+        - name: zio_zio-mock
+        - name: zio_zio-nio
+        - name: zio_zio-optics
+        - name: zio_zio-parser
+        - name: zio_zio-prelude
+        - name: zio_zio-process
+        - name: zio_zio-profiling
+        - name: zio_zio-query
+        - name: zio_zio-rocksdb
+        - name: zio_zio-telemetry
+        - name: zio_zio-test-intellij
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -651,7 +659,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-5:
     runs-on: ubuntu-22.04
     needs: stage-4
@@ -659,17 +670,17 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: armanbilge_circe
-        # - name: bilal-fazlani_csv-schema
-        # - name: bilal-fazlani_jslt-parser
-        # - name: cheleb_zio-pravega
-        # - name: circe_circe
-        # - name: dvreeze_xpathparser
-        # - name: dwickern_scala-nameof
-        # - name: endpoints4s_endpoints4s
-        # - name: erikerlandson_coulomb
-        # - name: fd4s_vulcan
-        # - name: findify_flink-scala-api
+        - name: armanbilge_circe
+        - name: bilal-fazlani_csv-schema
+        - name: bilal-fazlani_jslt-parser
+        - name: cheleb_zio-pravega
+        - name: circe_circe
+        - name: dvreeze_xpathparser
+        - name: dwickern_scala-nameof
+        - name: endpoints4s_endpoints4s
+        - name: erikerlandson_coulomb
+        - name: fd4s_vulcan
+        - name: findify_flink-scala-api
         - name: gemini-hlsw_lucuma-refined
         - name: gemini-hlsw_refined-algebra
         - name: higherkindness_droste
@@ -708,7 +719,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-6:
     runs-on: ubuntu-22.04
     needs: stage-5
@@ -744,30 +758,30 @@ jobs:
         - name: mrdimosthenis_scala-synapses
         - name: msgpack4z_msgpack4z-circe
         - name: nafg_cloud-logging-logback-scala
-        # - name: openmole_container
-        # - name: openmole_gridscale
-        # - name: openmole_mgo
-        # - name: plokhotnyuk_jsoniter-scala
-        # - name: pureharm_pureharm-json-circe
-        # - name: quafadas_dedav4s
-        # - name: sangria-graphql_sangria-circe
-        # - name: scalameta_mdoc
-        # - name: scalapb-json_scalapb-circe
-        # - name: sciss_scalacollider-dot
-        # - name: sciss_scalacollider-if
-        # - name: sciss_sonogramoverview
-        # - name: sdrafahl_codec
-        # - name: sfxcode_sapphire-data
-        # - name: sirthias_borer
-        # - name: spaceteams_scala-json-logging
-        # - name: thatscalaguy_circe-jq
-        # - name: tmccarthy_ausgeo
-        # - name: tofu-tf_glass
-        # - name: unibas-gravis_scalismo
-        # - name: vitaliihonta_scala-ql
-        # - name: vlmiroshnikov_authz
-        # - name: yakivy_poppet
-        # - name: zio_zio-json
+        - name: openmole_container
+        - name: openmole_gridscale
+        - name: openmole_mgo
+        - name: plokhotnyuk_jsoniter-scala
+        - name: pureharm_pureharm-json-circe
+        - name: quafadas_dedav4s
+        - name: sangria-graphql_sangria-circe
+        - name: scalameta_mdoc
+        - name: scalapb-json_scalapb-circe
+        - name: sciss_scalacollider-dot
+        - name: sciss_scalacollider-if
+        - name: sciss_sonogramoverview
+        - name: sdrafahl_codec
+        - name: sfxcode_sapphire-data
+        - name: sirthias_borer
+        - name: spaceteams_scala-json-logging
+        - name: thatscalaguy_circe-jq
+        - name: tmccarthy_ausgeo
+        - name: tofu-tf_glass
+        - name: unibas-gravis_scalismo
+        - name: vitaliihonta_scala-ql
+        - name: vlmiroshnikov_authz
+        - name: yakivy_poppet
+        - name: zio_zio-json
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -775,7 +789,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-7:
     runs-on: ubuntu-22.04
     needs: stage-6
@@ -783,12 +800,12 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: alejandrohdezma_sbt-mdoc-toc
-        # - name: bilal-fazlani_zio-mongo
-        # - name: cornerman_chameleon
-        # - name: dacr_zio-lmdb
-        # - name: darrenjw_scala-glm
-        # - name: darrenjw_scala-smfsb
+        - name: alejandrohdezma_sbt-mdoc-toc
+        - name: bilal-fazlani_zio-mongo
+        - name: cornerman_chameleon
+        - name: dacr_zio-lmdb
+        - name: darrenjw_scala-glm
+        - name: darrenjw_scala-smfsb
         - name: finos_morphir-scala
         - name: frawa_typed-json
         - name: gnieh_geo-scala
@@ -796,11 +813,11 @@ jobs:
         - name: imrafaelmerino_json-scala-values
         - name: katrix_typenbt
         - name: sciss_scalacolliderswing
-        # - name: shiftleftsecurity_js2cpg
-        # - name: softwaremill_sttp-apispec
-        # - name: zio_zio-kafka
-        # - name: zio_zio-lambda
-        # - name: zio_zio-schema
+        - name: shiftleftsecurity_js2cpg
+        - name: softwaremill_sttp-apispec
+        - name: zio_zio-kafka
+        - name: zio_zio-lambda
+        - name: zio_zio-schema
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -808,7 +825,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-8:
     runs-on: ubuntu-22.04
     needs: stage-7
@@ -817,8 +837,8 @@ jobs:
       matrix:
         include:
         - name: katrix_minejson
-        # - name: sciss_soundprocesses
-        # - name: zio_zio-http
+        - name: sciss_soundprocesses
+        - name: zio_zio-http
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -826,7 +846,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-9:
     runs-on: ubuntu-22.04
     needs: stage-8
@@ -835,9 +858,9 @@ jobs:
       matrix:
         include:
         - name: sciss_lucrepi
-        # - name: sciss_patterns
-        # - name: sciss_wolkenpumpe
-        # - name: zio_zio-metrics-connectors
+        - name: sciss_patterns
+        - name: sciss_wolkenpumpe
+        - name: zio_zio-metrics-connectors
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -845,7 +868,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-10:
     runs-on: ubuntu-22.04
     needs: stage-9
@@ -854,13 +880,13 @@ jobs:
       matrix:
         include:
         - name: errors4s_errors4s-core
-        # - name: errors4s_errors4s-core-scalacheck
-        # - name: etorreborre_specs2
-        # - name: japgolly_microlibs-scala
-        # - name: japgolly_nyaya
-        # - name: reactivemongo_reactivemongo
-        # - name: reactivemongo_reactivemongo-bson
-        # - name: typelevel_cats-effect
+        - name: errors4s_errors4s-core-scalacheck
+        - name: etorreborre_specs2
+        - name: japgolly_microlibs-scala
+        - name: japgolly_nyaya
+        - name: reactivemongo_reactivemongo
+        - name: reactivemongo_reactivemongo-bson
+        - name: typelevel_cats-effect
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -868,7 +894,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-11:
     runs-on: ubuntu-22.04
     needs: stage-10
@@ -877,16 +906,16 @@ jobs:
       matrix:
         include:
         - name: 47degrees_fetch
-        # - name: akka_akka-http
-        # - name: alexarchambault_case-app
-        # - name: argonaut-io_argonaut
-        # - name: armanbilge_munit-cats-effect
-        # - name: armanbilge_scalacheck-effect
-        # - name: asflierl_sglicko2
-        # - name: babylonhealth_lit-fhir
-        # - name: benhutchison_scalaswingcontrib
-        # - name: bkirwi_decline
-        # - name: cb372_cats-retry
+        - name: akka_akka-http
+        - name: alexarchambault_case-app
+        - name: argonaut-io_argonaut
+        - name: armanbilge_munit-cats-effect
+        - name: armanbilge_scalacheck-effect
+        - name: asflierl_sglicko2
+        - name: babylonhealth_lit-fhir
+        - name: benhutchison_scalaswingcontrib
+        - name: bkirwi_decline
+        - name: cb372_cats-retry
         - name: cb372_scalacache
         - name: davenverse_cats-effect-time
         - name: davenverse_circuit
@@ -900,24 +929,24 @@ jobs:
         - name: davenverse_mapref
         - name: davenverse_os-detect
         - name: emartech_scala-logger
-        # - name: enragedginger_akka-quartz-scheduler
-        # - name: errors4s_errors4s-core-cats
-        # - name: folone_poi.scala
-        # - name: geirolz_cats-xml
-        # - name: geirolz_fly4s
-        # - name: gonzih_cats-nats
-        # - name: indoorvivants_mdoc-effect
-        # - name: janstenpickle_hotswap-ref
-        # - name: japgolly_clear-config
-        # - name: japgolly_scala-graal
-        # - name: japgolly_scalacss
-        # - name: japgolly_test-state
-        # - name: kovacshuni_circe-config
-        # - name: lhns_munit-tagless-final
-        # - name: liquibase4s_liquibase4s
-        # - name: monix_monix
-        # - name: nafg_simpleivr
-        # - name: ohze_sd-util
+        - name: enragedginger_akka-quartz-scheduler
+        - name: errors4s_errors4s-core-cats
+        - name: folone_poi.scala
+        - name: geirolz_cats-xml
+        - name: geirolz_fly4s
+        - name: gonzih_cats-nats
+        - name: indoorvivants_mdoc-effect
+        - name: janstenpickle_hotswap-ref
+        - name: japgolly_clear-config
+        - name: japgolly_scala-graal
+        - name: japgolly_scalacss
+        - name: japgolly_test-state
+        - name: kovacshuni_circe-config
+        - name: lhns_munit-tagless-final
+        - name: liquibase4s_liquibase4s
+        - name: monix_monix
+        - name: nafg_simpleivr
+        - name: ohze_sd-util
         - name: oranda_libanius
         - name: ovotech_meters4s
         - name: pityka_saddle
@@ -933,18 +962,18 @@ jobs:
         - name: sweet-delights_delightful-typeclasses
         - name: taig_babel
         - name: taig_scala-linguist
-        # - name: taig_scala-pygments
-        # - name: thatscalaguy_ulid4cats
-        # - name: tkrs_orcus
-        # - name: tmccarthy_tmmutils
-        # - name: tpolecat_pool-party
-        # - name: travisbrown_iteratee
-        # - name: typelevel_bobcats
-        # - name: typelevel_cats-effect-testing
-        # - name: typelevel_discipline-specs2
-        # - name: typelevel_munit-cats-effect
-        # - name: typelevel_unique
-        # - name: ua-parser_uap-scala
+        - name: taig_scala-pygments
+        - name: thatscalaguy_ulid4cats
+        - name: tkrs_orcus
+        - name: tmccarthy_tmmutils
+        - name: tpolecat_pool-party
+        - name: travisbrown_iteratee
+        - name: typelevel_bobcats
+        - name: typelevel_cats-effect-testing
+        - name: typelevel_discipline-specs2
+        - name: typelevel_munit-cats-effect
+        - name: typelevel_unique
+        - name: ua-parser_uap-scala
         - name: unfiltered_unfiltered
         - name: vasilmkd_discipline-specs2
         - name: virtuslab_avocado
@@ -957,7 +986,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-12:
     runs-on: ubuntu-22.04
     needs: stage-11
@@ -965,15 +997,15 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: akiomik_cats-nio-file
-        # - name: akka_akka-grpc
-        # - name: alhuelamo_dbjobs
-        # - name: armanbilge_cheshire
-        # - name: armanbilge_ip4s
-        # - name: armanbilge_log4cats
-        # - name: cchantep_acolyte
-        # - name: comcast_ip4s
-        # - name: davenverse_crossplatformioapp
+        - name: akiomik_cats-nio-file
+        - name: akka_akka-grpc
+        - name: alhuelamo_dbjobs
+        - name: armanbilge_cheshire
+        - name: armanbilge_ip4s
+        - name: armanbilge_log4cats
+        - name: cchantep_acolyte
+        - name: comcast_ip4s
+        - name: davenverse_crossplatformioapp
         - name: davenverse_epimetheus-circuit
         - name: davenverse_mules
         - name: davenverse_single-fibered
@@ -982,34 +1014,34 @@ jobs:
         - name: gnieh_diffson
         - name: http4s_http4s-crypto
         - name: jwt-scala_jwt-scala
-        # - name: kailuowang_mau
-        # - name: kevin-lee_effectie
-        # - name: lancewalton_treelog
-        # - name: lhns_cats-effect-utils
-        # - name: lhns_scala-trustmanager-utils
-        # - name: molarmanful_sclin
-        # - name: monix_monix-bio
-        # - name: msgpack4z_msgpack4z-argonaut
+        - name: kailuowang_mau
+        - name: kevin-lee_effectie
+        - name: lancewalton_treelog
+        - name: lhns_cats-effect-utils
+        - name: lhns_scala-trustmanager-utils
+        - name: molarmanful_sclin
+        - name: monix_monix-bio
+        - name: msgpack4z_msgpack4z-argonaut
         - name: msgpack4z_msgpack4z-play
         - name: ohze_couchbase-scala
         - name: outr_scribe
         - name: pityka_nspl
         - name: playframework_playframework
         - name: rallyhealth_weepickle
-        # - name: rewards-network_combos
-        # - name: sangria-graphql_sangria-argonaut
-        # - name: sangria-graphql_sangria-monix
-        # - name: sangria-graphql_sangria-play-json
-        # - name: scala-cli_scala-cli-signing
-        # - name: scalapb-json_scalapb-argonaut
-        # - name: sweet-delights_delightful-parsing
-        # - name: timwspence_cats-stm
-        # - name: tmccarthy_tmm-scala-collections
-        # - name: typelevel_cats-effect-cps
-        # - name: typelevel_keypool
-        # - name: typelevel_scalacheck-effect
-        # - name: typelevel_vault
-        # - name: vladkopanev_cats-saga
+        - name: rewards-network_combos
+        - name: sangria-graphql_sangria-argonaut
+        - name: sangria-graphql_sangria-monix
+        - name: sangria-graphql_sangria-play-json
+        - name: scala-cli_scala-cli-signing
+        - name: scalapb-json_scalapb-argonaut
+        - name: sweet-delights_delightful-parsing
+        - name: timwspence_cats-stm
+        - name: tmccarthy_tmm-scala-collections
+        - name: typelevel_cats-effect-cps
+        - name: typelevel_keypool
+        - name: typelevel_scalacheck-effect
+        - name: typelevel_vault
+        - name: vladkopanev_cats-saga
         - name: xuwei-k_httpz
         - name: xuwei-k_jwt-scala
         - name: zio_interop-monix
@@ -1020,7 +1052,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-13:
     runs-on: ubuntu-22.04
     needs: stage-12
@@ -1028,9 +1063,9 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: armanbilge_fs2
-        # - name: bilal-fazlani_akka-http-jwt-auth
-        # - name: carueda_tscfg
+        - name: armanbilge_fs2
+        - name: bilal-fazlani_akka-http-jwt-auth
+        - name: carueda_tscfg
         - name: davenverse_epimetheus-log4cats
         - name: emartech_jwt-akka-http
         - name: fiatjaf_scoin
@@ -1040,11 +1075,11 @@ jobs:
         - name: pityka_lamp
         - name: playframework_anorm
         - name: playframework_play-ws
-        # - name: sangria-graphql_sangria
-        # - name: stephennancekivell_scalatest-json
-        # - name: typelevel_fs2
-        # - name: typelevel_log4cats
-        # - name: virtuslab_scala-cli
+        - name: sangria-graphql_sangria
+        - name: stephennancekivell_scalatest-json
+        - name: typelevel_fs2
+        - name: typelevel_log4cats
+        - name: virtuslab_scala-cli
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1052,7 +1087,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-14:
     runs-on: ubuntu-22.04
     needs: stage-13
@@ -1060,15 +1098,15 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: andimiller_hedgehogs
-        # - name: armanbilge_calico
-        # - name: armanbilge_jawn-fs2
-        # - name: armanbilge_schrodinger
-        # - name: armanbilge_van-cats
-        # - name: banno_cosmos4s
-        # - name: benoitlouy_tele
-        # - name: circe_circe-fs2
-        # - name: creativescala_doodle
+        - name: andimiller_hedgehogs
+        - name: armanbilge_calico
+        - name: armanbilge_jawn-fs2
+        - name: armanbilge_schrodinger
+        - name: armanbilge_van-cats
+        - name: banno_cosmos4s
+        - name: benoitlouy_tele
+        - name: circe_circe-fs2
+        - name: creativescala_doodle
         - name: creativescala_doodle-explore
         - name: davenverse_catscript
         - name: davenverse_process
@@ -1087,21 +1125,21 @@ jobs:
         - name: lhns_fs2-utils
         - name: lhns_nifi-scala
         - name: mjakubowski84_parquet4s
-        # - name: mkroli_dns4s
-        # - name: naoh87_lettucef
-        # - name: ollls_quartz-h2
-        # - name: outr_scarango
-        # - name: outr_spice
-        # - name: permutive-engineering_refreshable
-        # - name: polystat_odin
-        # - name: profunktor_fs2-rabbit
-        # - name: profunktor_redis4cats
-        # - name: pureharm_pureharm-effects-cats
-        # - name: regis-leray_fs2-ftp
-        # - name: rewards-network_pure-aws
-        # - name: rssh_cps-async-connect
-        # - name: rustedbones_taxonomy
-        # - name: sageserpent-open_americium
+        - name: mkroli_dns4s
+        - name: naoh87_lettucef
+        - name: ollls_quartz-h2
+        - name: outr_scarango
+        - name: outr_spice
+        - name: permutive-engineering_refreshable
+        - name: polystat_odin
+        - name: profunktor_fs2-rabbit
+        - name: profunktor_redis4cats
+        - name: pureharm_pureharm-effects-cats
+        - name: regis-leray_fs2-ftp
+        - name: rewards-network_pure-aws
+        - name: rssh_cps-async-connect
+        - name: rustedbones_taxonomy
+        - name: sageserpent-open_americium
         - name: sangria-graphql_sangria-relay
         - name: sangria-graphql_sangria-slowlog
         - name: scalawilliam_xs4s
@@ -1112,14 +1150,14 @@ jobs:
         - name: timbertson_foperator
         - name: tinkoff_phobos
         - name: tmccarthy_scala-db
-        # - name: tpolecat_atto
-        # - name: tpolecat_doobie
-        # - name: trace4cats_trace4cats
-        # - name: typelevel_fs2-grpc
-        # - name: typelevel_jawn-fs2
-        # - name: valencik_textmogrify
-        # - name: zengularity_benji
-        # - name: zio_interop-cats
+        - name: tpolecat_atto
+        - name: tpolecat_doobie
+        - name: trace4cats_trace4cats
+        - name: typelevel_fs2-grpc
+        - name: typelevel_jawn-fs2
+        - name: valencik_textmogrify
+        - name: zengularity_benji
+        - name: zio_interop-cats
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1127,7 +1165,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-15:
     runs-on: ubuntu-22.04
     needs: stage-14
@@ -1135,17 +1176,17 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: aaronp_franz
-        # - name: ahjohannessen_sec
-        # - name: armanbilge_sadalsuud
-        # - name: armanbilge_stratus
-        # - name: atnos-org_eff
-        # - name: bplommer_launch-catsly
-        # - name: clevercloud_pulsar4s
-        # - name: davenverse_epimetheus-redis4cats
-        # - name: eikek_bitpeace
-        # - name: eikek_calev
-        # - name: eikek_emil
+        - name: aaronp_franz
+        - name: ahjohannessen_sec
+        - name: armanbilge_sadalsuud
+        - name: armanbilge_stratus
+        - name: atnos-org_eff
+        - name: bplommer_launch-catsly
+        - name: clevercloud_pulsar4s
+        - name: davenverse_epimetheus-redis4cats
+        - name: eikek_bitpeace
+        - name: eikek_calev
+        - name: eikek_emil
         - name: gaelrenoux_tranzactio
         - name: gnieh_fs2-data
         - name: guymers_ceesvee
@@ -1161,14 +1202,14 @@ jobs:
         - name: outr_robobrowser
         - name: permutive-engineering_prometheus4cats-contrib
         - name: polyvariant_scala-git-markers
-        # - name: polyvariant_treesitter4s
-        # - name: profunktor_neutron
-        # - name: pureharm_pureharm-aws
-        # - name: pureharm_pureharm-db-core-jdbc
-        # - name: pureharm_pureharm-testkit
-        # - name: rustedbones_scout
-        # - name: scodec_scodec-protocols
-        # - name: sideeffffect_zio-doobie
+        - name: polyvariant_treesitter4s
+        - name: profunktor_neutron
+        - name: pureharm_pureharm-aws
+        - name: pureharm_pureharm-db-core-jdbc
+        - name: pureharm_pureharm-testkit
+        - name: rustedbones_scout
+        - name: scodec_scodec-protocols
+        - name: sideeffffect_zio-doobie
         - name: trace4cats_trace4cats-avro
         - name: trace4cats_trace4cats-kafka
         - name: trace4cats_trace4cats-tail-sampling-extras
@@ -1176,9 +1217,9 @@ jobs:
         - name: trace4cats_trace4cats-zio
         - name: user-signal_fs2-mqtt
         - name: valskalla_odin
-        # - name: vigoo_desert
-        # - name: vigoo_prox
-        # - name: zio_zio-connect
+        - name: vigoo_desert
+        - name: vigoo_prox
+        - name: zio_zio-connect
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1186,7 +1227,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-16:
     runs-on: ubuntu-22.04
     needs: stage-15
@@ -1195,9 +1239,9 @@ jobs:
       matrix:
         include:
         - name: 47degrees_github4s
-        # - name: avast_datadog4s
-        # - name: banno_vault4s
-        # - name: davenverse_circuit-http4s
+        - name: avast_datadog4s
+        - name: banno_vault4s
+        - name: davenverse_circuit-http4s
         - name: davenverse_epimetheus-http4s
         - name: davenverse_fuuid
         - name: davenverse_github
@@ -1211,21 +1255,21 @@ jobs:
         - name: fthomas_fs2-cron
         - name: gemini-hlsw_clue
         - name: gemini-hlsw_lucuma-catalog
-        # - name: http4s_blaze
-        # - name: http4s_http4s-armeria
-        # - name: http4s_http4s-fabric
-        # - name: http4s_http4s-fs2-data
-        # - name: http4s_http4s-jdk-http-client
-        # - name: http4s_http4s-prometheus-metrics
-        # - name: http4s_http4s-scala-xml
-        # - name: http4s_http4s-scalatags
-        # - name: http4s_http4s-servlet
-        # - name: http4s_http4s-twirl
-        # - name: i10416_slackapis
-        # - name: ingarabr_http4s-cloud-functions
-        # - name: jbwheatley_pact4s
-        # - name: killaitis_http4s-cloud-functions
-        # - name: lego_woof
+        - name: http4s_blaze
+        - name: http4s_http4s-armeria
+        - name: http4s_http4s-fabric
+        - name: http4s_http4s-fs2-data
+        - name: http4s_http4s-jdk-http-client
+        - name: http4s_http4s-prometheus-metrics
+        - name: http4s_http4s-scala-xml
+        - name: http4s_http4s-scalatags
+        - name: http4s_http4s-servlet
+        - name: http4s_http4s-twirl
+        - name: i10416_slackapis
+        - name: ingarabr_http4s-cloud-functions
+        - name: jbwheatley_pact4s
+        - name: killaitis_http4s-cloud-functions
+        - name: lego_woof
         - name: lhns_http4s-errors
         - name: lhns_remote-io
         - name: mobimeo_fs2-gtfs
@@ -1239,10 +1283,10 @@ jobs:
         - name: tpolecat_natchez
         - name: trace4cats_trace4cats-avro-kafka
         - name: trace4cats_trace4cats-exporter-http
-        # - name: trace4cats_trace4cats-http4s
-        # - name: vigoo_clipp
-        # - name: vlovgr_ciris
-        # - name: y-yu_excel-reads
+        - name: trace4cats_trace4cats-http4s
+        - name: vigoo_clipp
+        - name: vlovgr_ciris
+        - name: y-yu_excel-reads
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1250,7 +1294,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-17:
     runs-on: ubuntu-22.04
     needs: stage-16
@@ -1258,12 +1305,12 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: 2m_ciris-hocon
-        # - name: ahjohannessen_smithy4s-repro-lib
-        # - name: armanbilge_bayou
-        # - name: armanbilge_feral
-        # - name: armanbilge_gcp4s
-        # - name: augustjune_canoe
+        - name: 2m_ciris-hocon
+        - name: ahjohannessen_smithy4s-repro-lib
+        - name: armanbilge_bayou
+        - name: armanbilge_feral
+        - name: armanbilge_gcp4s
+        - name: augustjune_canoe
         - name: davenverse_natchez-http4s-otel
         - name: davenverse_natchez-local
         - name: davenverse_rediculous
@@ -1276,14 +1323,14 @@ jobs:
         - name: itv_scala-pact
         - name: laserdisc-io_fs2-aws
         - name: lhns_http4s-spa
-        # - name: massimosiani_skunk
-        # - name: monix_monix-connect
-        # - name: ovotech_ciris-aws-secretsmanager
-        # - name: ovotech_natchez-extras
-        # - name: phillhenry_dreadnought
-        # - name: pureharm_pureharm-config-ciris
-        # - name: scalabin-no_http4s-directives
-        # - name: softwaremill_sttp
+        - name: massimosiani_skunk
+        - name: monix_monix-connect
+        - name: ovotech_ciris-aws-secretsmanager
+        - name: ovotech_natchez-extras
+        - name: phillhenry_dreadnought
+        - name: pureharm_pureharm-config-ciris
+        - name: scalabin-no_http4s-directives
+        - name: softwaremill_sttp
         - name: torrentdam_bittorrent
         - name: tpolecat_natchez-http4s
         - name: tpolecat_skunk
@@ -1291,12 +1338,12 @@ jobs:
         - name: trace4cats_trace4cats-datadog
         - name: trace4cats_trace4cats-jaeger-integration-test
         - name: trace4cats_trace4cats-natchez
-        # - name: trace4cats_trace4cats-newrelic
-        # - name: travisbrown_dhallj
-        # - name: typelevel_feral
-        # - name: valdemargr_gql
-        # - name: virtuslab_inkuire
-        # - name: zio_zio-metrics-legacy
+        - name: trace4cats_trace4cats-newrelic
+        - name: travisbrown_dhallj
+        - name: typelevel_feral
+        - name: valdemargr_gql
+        - name: virtuslab_inkuire
+        - name: zio_zio-metrics-legacy
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1304,7 +1351,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-18:
     runs-on: ubuntu-22.04
     needs: stage-17
@@ -1312,28 +1362,28 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: 47degrees_sbt-energymonitor
+        - name: 47degrees_sbt-energymonitor
         - name: andreamarcolin_oidc4s
         - name: besselstudio_coingecko
         - name: coralogix_zio-k8s
         - name: dacr_code-examples-manager
         - name: dapperware_zio-slack
         - name: davenverse_natchez-rediculous
-        # - name: davenverse_rediculous-concurrent
-        # - name: eventstore_eventstore.jvm
-        # - name: fgrutsch_emergence
-        # - name: gemini-hlsw_lucuma-sso
-        # - name: hamnis_jwk
-        # - name: hnaderi_edomata
-        # - name: hnaderi_scala-k8s
-        # - name: juliano_pokeapi-scala
-        # - name: jwojnowski_oidc4s
-        # - name: kierendavies_skunk-migrate
-        # - name: linyxus_papiers-core
-        # - name: ocadotechnology_sttp-oauth2
-        # - name: paoloboni_binance-scala-client
-        # - name: polynote_uzhttp
-        # - name: polystat_polystat-cli
+        - name: davenverse_rediculous-concurrent
+        - name: eventstore_eventstore.jvm
+        - name: fgrutsch_emergence
+        - name: gemini-hlsw_lucuma-sso
+        - name: hamnis_jwk
+        - name: hnaderi_edomata
+        - name: hnaderi_scala-k8s
+        - name: juliano_pokeapi-scala
+        - name: jwojnowski_oidc4s
+        - name: kierendavies_skunk-migrate
+        - name: linyxus_papiers-core
+        - name: ocadotechnology_sttp-oauth2
+        - name: paoloboni_binance-scala-client
+        - name: polynote_uzhttp
+        - name: polystat_polystat-cli
         - name: qwbarch_snowflake4s
         - name: shastick_zio-prefetcher
         - name: sksamuel_elastic4s
@@ -1342,9 +1392,9 @@ jobs:
         - name: tinkoff_muffin
         - name: tmccarthy_fetch
         - name: trace4cats_trace4cats-jaeger
-        # - name: trace4cats_trace4cats-opentelemetry
-        # - name: trace4cats_trace4cats-zipkin
-        # - name: wiringbits_wiringbits-webapp-utils
+        - name: trace4cats_trace4cats-opentelemetry
+        - name: trace4cats_trace4cats-zipkin
+        - name: wiringbits_wiringbits-webapp-utils
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1352,7 +1402,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-19:
     runs-on: ubuntu-22.04
     needs: stage-18
@@ -1360,29 +1413,29 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: alejandrohdezma_http4s-munit
-        # - name: apimorphism_telegramium
-        # - name: avast_scala-server-toolkit
-        # - name: carlos-verdes_zio-arangodb
+        - name: alejandrohdezma_http4s-munit
+        - name: apimorphism_telegramium
+        - name: avast_scala-server-toolkit
+        - name: carlos-verdes_zio-arangodb
         - name: danslapman_morphling
         - name: delimobil_cabbit
         - name: eventstore_eventstore.akka.persistence
         - name: evolution-gaming_derivation
         - name: fs2-blobstore_fs2-blobstore
         - name: gemini-hlsw_gsp-graphql
-        # - name: ghostdogpr_caliban
-        # - name: itv_quartz4s
-        # - name: jwojnowski_googlecloud4s
-        # - name: lolgab_snunit
-        # - name: permutive-engineering_fs2-google-pubsub
-        # - name: pme123_camundala
-        # - name: rediscala_rediscala
+        - name: ghostdogpr_caliban
+        - name: itv_quartz4s
+        - name: jwojnowski_googlecloud4s
+        - name: lolgab_snunit
+        - name: permutive-engineering_fs2-google-pubsub
+        - name: pme123_camundala
+        - name: rediscala_rediscala
         - name: scalikejdbc_scalikejdbc-async
         - name: scottweaver_testcontainers-for-zio
-        # - name: sideeffffect_zio-testcontainers
-        # - name: tinkoff_oolong
-        # - name: tototoshi_slick-joda-mapper
-        # - name: trace4cats_trace4cats-sttp
+        - name: sideeffffect_zio-testcontainers
+        - name: tinkoff_oolong
+        - name: tototoshi_slick-joda-mapper
+        - name: trace4cats_trace4cats-sttp
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1390,7 +1443,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-20:
     runs-on: ubuntu-22.04
     needs: stage-19
@@ -1399,11 +1455,11 @@ jobs:
       matrix:
         include:
         - name: gemini-hlsw_lucuma-graphql-routes
-        # - name: johnspade_tgbot-utils
-        # - name: kamon-io_kamon
-        # - name: polyvariant_caliban-gitlab
-        # - name: zio_caliban-deriving
-        # - name: zio_zio-protoquill
+        - name: johnspade_tgbot-utils
+        - name: kamon-io_kamon
+        - name: polyvariant_caliban-gitlab
+        - name: zio_caliban-deriving
+        - name: zio_zio-protoquill
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1411,7 +1467,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-21:
     runs-on: ubuntu-22.04
     needs: stage-20
@@ -1420,8 +1479,8 @@ jobs:
       matrix:
         include:
         - name: gemini-hlsw_lucuma-itc
-        # - name: liewhite_swopen
-        # - name: lloydmeta_enumeratum
+        - name: liewhite_swopen
+        - name: lloydmeta_enumeratum
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1429,7 +1488,10 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-22:
     runs-on: ubuntu-22.04
     needs: stage-21
@@ -1438,8 +1500,8 @@ jobs:
       matrix:
         include:
         - name: liewhite_common
-        # - name: pjfanning_jackson-module-enumeratum
-        # - name: swagger-akka-http_swagger-enumeratum-module
+        - name: pjfanning_jackson-module-enumeratum
+        - name: swagger-akka-http_swagger-enumeratum-module
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -1447,4 +1509,7 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
