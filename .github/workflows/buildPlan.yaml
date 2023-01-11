@@ -12,6 +12,16 @@ on:
         description: 'Scala version'
         required: true
 jobs:
+  setup-build:
+    runs-on: ubuntu-22.04
+    continue-on-error: false
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/setup-build
+        with:
+          scala-version: ${{ inputs.scala-version }}
   stage-0:
     runs-on: ubuntu-22.04
     continue-on-error: true

@@ -7,9 +7,16 @@ inputs:
   scala-version:
     description: "Scala Version to use"
     required: true
+  maven-repo-url:
+    description: "Custom Maven repository used to store artifacts"
+    required: true
 runs:
   using: "composite"
   steps:
+    - uses: coursier/setup-action@v1
+      with:
+        apps: cs sbt mill scala-cli
+
     - name: Check java version
       shell: bash
       run: |
@@ -19,8 +26,35 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
+    - name: Check can skip build
+      id: check-history
+      shell: bash
+      run: |
+        ConfigFile=".github/workflows/buildConfig.json"
+        ScalaVersion="${{ steps.calc-version.outputs.effective-scala-version }}"
+        BinScalaVersion=3
+        CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+
+        projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" " $ConfigFile)"
+
+        canSkip=true
+        for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" " $ConfigFile); do
+          arr=($(echo $t | tr "%" " "))
+          org=${arr[1]}
+          name=${arr[2]}
+          artifact="$org:$name_${BinScalaVersion}:${projectVersion}"
+          cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null
+          result=$?
+          if [[ $result -ne 0 ]]; then 
+            echo "Artifact $artifact not found, would build the rpoject"
+            canSkip=false
+            break;
+          fi
+        echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
+
     - name: Build
       uses: addnab/docker-run-action@v3
+      if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
         options: -v ${{ github.workspace }}:/opencb/
@@ -40,10 +74,11 @@ runs:
           /build/build-revision.sh \
             "$(config .repoUrl)" \
             "$(config .revision)" \
+
             "${{ inputs.scala-version }}" \
-            '' \
+            "$(config .version)" \
             "$(config .targets)" \
-            'https://repo1.maven.org/maven2' \
+            "${{ inputs.maven-repo-url }}" \
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
 
@@ -54,13 +89,14 @@ runs:
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
+      if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         name: ${{ inputs.project-name }}
         path: ${{ github.workspace }}/build-*.txt
 
     - name: Check results
       shell: bash
+      if: steps.check-history.outputs.can-skip-build != 'true'
       run: |
         # Set the result of the build
         [ "$(cat build-status.txt)" = "success" ]
-
