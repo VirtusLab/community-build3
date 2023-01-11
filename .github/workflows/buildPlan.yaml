@@ -6,24 +6,39 @@
 name: "Open Community Build"
 on:
   workflow_dispatch:
-   inputs:
-      scala-version:
+    inputs:
+      published-scala-version:
         type: string
-        description: 'Scala version'
-        required: true
+        description: 'Published Scala version to use'
+      repository-url:
+        type: string
+        description: "GitHub repository URL for compiler to build"
+        default: "https://github.com/lampepfl/dotty.git"
+      repository-branch:
+        type: string
+        description: "GitHub repository branch for compiler to build"
+        default: "main"
 jobs:
   setup-build:
     runs-on: ubuntu-22.04
     continue-on-error: false
+    outputs:
+      scala-version:  ${{ steps.setup.outputs.scala-version }}
+      maven-repo-url: ${{ steps.setup.outputs.maven-repo-url }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
       - name: "Build project"
         uses: ./.github/actions/setup-build
+        id: setup
         with:
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ inputs.published-scala-version }}
+          repository-url: ${{ inputs.repository-url }}
+          repository-branch: ${{ inputs.repository-branch }}
+
   stage-0:
     runs-on: ubuntu-22.04
+    needs: setup-build
     continue-on-error: true
     strategy:
       matrix:
@@ -128,7 +143,8 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ matrix.name }}
-          scala-version: ${{ inputs.scala-version }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: stage-0
