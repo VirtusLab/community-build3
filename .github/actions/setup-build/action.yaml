@@ -61,7 +61,7 @@ runs:
         # Download jar instead of checking only for pom to ensure that it's complete
         if cs fetch org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo ; then
           isPublished=true
-        elif [[  -z "${{ inputs.scala-version }}" ]]; then
+        elif [[ ! -z "${{ inputs.scala-version }}" ]]; then
           echo "::error title=Compiler version unavailable::Requested compiler version ${{ inputs.scala-version }} is unavailable" 
           exit 1
         fi
