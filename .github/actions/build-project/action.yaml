@@ -53,7 +53,7 @@ runs:
 
         canSkip=true
         for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
-          arr=($(echo $t | tr "%" " "))
+          arr=($(echo $target | tr "%" " "))
           org=${arr[1]}
           name=${arr[2]}
           artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
@@ -69,12 +69,9 @@ runs:
     - name: Build project
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
-      env:
-        ELASTIC_USERNAME: ${{ inputs.elastic-user }}
-        ELASTIC_PASSWORD: ${{ inputs.elastic-password }}
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
-        options: -v ${{ github.workspace }}:/opencb/
+        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME="${{ inputs.elastic-user }}" -e ELASTIC_PASSWORD="${{ inputs.elastic-password }}"
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           DefaultConfig='{"memoryRequestMb":4096}'
@@ -96,10 +93,6 @@ runs:
             "${{ inputs.maven-repo-url }}" \
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
-
-          echo ${ELASTIC_USERNAME}
-          echo ${{ inputs.elastic-user }}
-          printenv
 
           /build/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
