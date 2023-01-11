@@ -31,28 +31,28 @@ runs:
       uses: Tiryoh/gha-jobid-action@v0.1.2
       with:
         github_token: ${{ github.token }}
-        job_name: ${{ github.job }}
+        job_name: "${{ github.job }} (${{ matrix.name }})"
 
     - name: Check can skip build
       id: check-history
       shell: bash
       run: |
         ConfigFile=".github/workflows/buildConfig.json"
-        ScalaVersion="${{ steps.calc-version.outputs.effective-scala-version }}"
+        ScalaVersion="${{ inputs.scala-version }}"
         BinScalaVersion=3
-        CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+        CustomMavenRepo="${{ inputs.maven=repo-url }}"
 
-        projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" " $ConfigFile)"
+        projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
 
         canSkip=true
-        for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" " $ConfigFile); do
+        for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
           arr=($(echo $t | tr "%" " "))
           org=${arr[1]}
           name=${arr[2]}
-          artifact="$org:$name_${BinScalaVersion}:${projectVersion}"
+          artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
 
           if ! cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
-            echo "Artifact $artifact not found, would build the rpoject"
+            echo "Artifact $artifact not found, would build the project"
             canSkip=false
             break;
           fi
