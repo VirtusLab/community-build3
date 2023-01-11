@@ -59,7 +59,7 @@ runs:
           name=${arr[@]:1:1}
           artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
 
-          if ! cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
+          if ! cs resolve --intransitive "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
             echo "Artifact $artifact not found, would build the project"
             canSkip=false
             break;
