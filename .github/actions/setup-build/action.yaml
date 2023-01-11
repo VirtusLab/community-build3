@@ -24,6 +24,7 @@ runs:
       with:
         repository: ${{ inputs.repository-url }}
         ref: ${{ inputs.repository-branch }}
+        path: 'compiler'
 
     - name: Calculate version if missing
       id: calc-version
@@ -33,7 +34,7 @@ runs:
 
         scalaVersion=${{ inputs.scala-version }}
         if [[ -z $scalaVersion ]]; then
-          baseVersion=$(cat project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print $4 }') 
+          baseVersion=$(cat compiler/project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print $4 }') 
           scalaVersion="${baseVersion}-bin-${commitHash}"
         fi
 
@@ -68,7 +69,7 @@ runs:
       if: steps.check-published.outputs.is-compiler-published == 'false'
       with:
         image: "virtuslab/scala-community-build-compiler-builder:v0.1.2"
-        options: -v ${{ github.workspace }}:/compiler/
+        options: -v ${{ github.workspace }}/compiler:/compiler/
         run: |
           Version="${{ steps.calc-version.outputs.effective-scala-version }}"
           CustomRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
