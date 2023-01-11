@@ -26,6 +26,13 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
+    - name: Get Current Job Log URL
+      id: job-info
+      uses: Tiryoh/gha-jobid-action@v0.1.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        job_name: ${{ github.job }}
+
     - name: Check can skip build
       id: check-history
       shell: bash
@@ -69,11 +76,9 @@ runs:
           # Assume failure unless overwritten by a successful build
           echo 'failure' > build-status.txt 
 
-
           /build/build-revision.sh \
             "$(config .repoUrl)" \
             "$(config .revision)" \
-
             "${{ inputs.scala-version }}" \
             "$(config .version)" \
             "$(config .targets)" \
@@ -81,6 +86,18 @@ runs:
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
 
+          /build/feed-elastic.sh \ 
+            'https://scala3.westeurope.cloudapp.azure.com/data' \
+            '${{ inputs.project-name }}' \
+            "$(cat build-status.txt)" \
+            '$(date --iso-8601=seconds)' \ 
+            build-summary.txt \
+            build-logs.txt \
+            "$(config .version)" \
+            "${{ inputs.scala-version }}" \
+            '${{ github.run_id }}' \
+            "${{ steps.job-info.outputs.html_url }}"
+          
           # Store results
           mv build-logs.txt /opencb/
           mv build-status.txt /opencb/
