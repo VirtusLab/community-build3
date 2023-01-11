@@ -63,6 +63,9 @@ runs:
     - name: Build project
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
+      env:
+        ELASTIC_USERNAME: elastic
+        ELASTIC_PASSWORD: changeme
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.1.2"
         options: -v ${{ github.workspace }}:/opencb/
@@ -88,17 +91,20 @@ runs:
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
 
-          /build/feed-elastic.sh \ 
+          /build/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
             '${{ inputs.project-name }}' \
             "$(cat build-status.txt)" \
-            '$(date --iso-8601=seconds)' \ 
+            '$(date --iso-8601=seconds)' \
             build-summary.txt \
             build-logs.txt \
             "$(config .version)" \
             "${{ inputs.scala-version }}" \
             '${{ github.run_id }}' \
             "${{ steps.job-info.outputs.html_url }}"
+          if [[ $? -ne 0 ]]; then 
+            echo "::warning title={Indexing failure}::{Indexing results of ${{ inputs.project-name }} failed" 
+          fi
           
           # Store results
           mv build-logs.txt /opencb/
