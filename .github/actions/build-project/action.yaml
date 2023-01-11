@@ -97,6 +97,10 @@ runs:
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
 
+          echo ${ELASTIC_USERNAME}
+          echo ${{ inputs.elastic-user }}
+          printenv
+
           /build/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
             '${{ inputs.project-name }}' \
@@ -109,7 +113,7 @@ runs:
             '${{ github.run_id }}' \
             "${{ steps.job-info.outputs.html_url }}"
           if [ $? != 0 ]; then 
-            echo "::warning title={Indexing failure}::{Indexing results of ${{ inputs.project-name }} failed" 
+            echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
           fi
           
           # Store results
