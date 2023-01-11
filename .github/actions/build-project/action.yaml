@@ -102,7 +102,7 @@ runs:
             "${{ inputs.scala-version }}" \
             '${{ github.run_id }}' \
             "${{ steps.job-info.outputs.html_url }}"
-          if [[ $? -ne 0 ]]; then 
+          if [ $? != 0 ]; then 
             echo "::warning title={Indexing failure}::{Indexing results of ${{ inputs.project-name }} failed" 
           fi
           
