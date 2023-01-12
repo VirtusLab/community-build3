@@ -6,19 +6,23 @@ on:
     # Every friday at 8 PM
     - cron: "0 20 * * 5"
 jobs:
-  find-version:
+  detect-version:
     runs-on: ubuntu-22.04
     continue-on-error: false
+    outputs:
+      last-nightly-version: ${{ steps.detect.outputs.last-nightly-version }}
+      last-stable-version:  ${{ steps.detect.outputs.last-stable-version }}
+      last-rc-version:      ${{ steps.detect.outputs.last-rc-version }}
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3
 
-      - name: Install coursier
+      - name: Install scala-cli
         uses: coursier/setup-action@v1
         with:
           apps: scala-cli
 
-      - name: Find last nightly version
+      - name: Find last versions
         id: detect
         run: |
           echo "last-nightly-version=$(./scripts/lastVersionNightly.sc)" >> $GITHUB_OUTPUT
@@ -27,8 +31,9 @@ jobs:
 
   run-build:
     uses: ./.github/workflows/buildPlan.yaml
+    needs: [detect-version]
     with: 
-      published-scala-version: ${{ needs.find-version.detect.last-nightly-version }}
+      published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
 
   create-raport:
     needs: [run-build]
@@ -48,13 +53,13 @@ jobs:
           ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
           ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
         run: | 
-          scalaVersion=${{ needs.find-version.detect.last-nightly-version }}
-          lastRC=${{ needs.find-version.detect.last-rc-version }}
-          lastStable=${{ needs.find-version.detect.last-stable-version }}
+          scalaVersion=${{ needs.detect-version.outputs.last-nightly-version }}
+          lastRC=${{ needs.detect-version.outputs.last-rc-version }}
+          lastStable=${{ needs.detect-version.outputs.last-stable-version }}
 
           ./scripts/raport-regressions.scala $scalaVersion > raport-full.md
           ./scripts/raport-regressions.scala $scalaVersion --compare-with $lastRC > raport-compare-$lastRC.md
-          ./scripts/raport-regressions.scala $scalaVersion --compare-with $lastRC > raport-compare-$lastStable.md
+          ./scripts/raport-regressions.scala $scalaVersion --compare-with $lastStable > raport-compare-$lastStable.md
 
       - name: Upload raports
         uses: actions/upload-artifact@v3
