@@ -8,10 +8,11 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       project: ProjectVersion,
       repoUrl: String,
       tagOrRevision: Option[String]
-  ): Option[ProjectBuildConfig] = {
+  ): Option[ProjectBuildConfig] = try {
     val name = project.showName
     val projectDir = checkout(repoUrl, name, tagOrRevision)
 
+    println(s"Discover build config for project $name")
     readProjectConfig(projectDir, repoUrl)
       .orElse(internalProjectConfigs(project.showName))
       .orElse(Some(ProjectBuildConfig.empty))
@@ -35,6 +36,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         println(s"Using custom project config for $name: ${toJson(config)}")
         config
       }
+  } catch {
+    case ex: Exception =>
+      System.err.println(s"Failed to resolve project config: ${ex.getMessage}")
+      None
   }
 
   private def checkout(
@@ -43,15 +48,21 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       tagOrRevision: Option[String]
   ): os.Path = {
     val projectDir = os.temp.dir(prefix = s"repo-$projectName")
-    os.proc(
-      "git",
-      "clone",
-      repoUrl,
-      projectDir,
-      "--quiet",
-      tagOrRevision.map("--branch=" + _).toList,
-      "--depth=1"
-    ).call(stderr = os.Pipe)
+    try {
+      os.proc(
+        "git",
+        "clone",
+        repoUrl,
+        projectDir,
+        "--quiet",
+        tagOrRevision.map("--branch=" + _).toList,
+        "--depth=1"
+      ).call(stderr = os.Pipe)
+    } catch {
+      case ex: Throwable =>
+        println(s"Failed to checkout $repoUrl at revision ${tagOrRevision}")
+        throw ex
+    }
     projectDir
   }
 
@@ -136,18 +147,21 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     // jvm is used by scala-cli action
     val JavaVersion = raw"(?:java-version|jvm):\s*(.*)".r
     val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
-    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*)$OptQuote".r
+    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*\S*)$OptQuote".r
     val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
     // We can only supported this versions
     val allowedVersions = Seq(8, 11, 17)
 
+    def isJavaVersionMatrixEntry(key: String): Boolean = {
+      val name = key.toLowerCase
+      name.contains("java") || name.contains("jdk")
+    }
     githubWorkflows(projectDir)
       .flatMap { path =>
-        os.read
-          .lines(path)
+        tryReadLines(path)
           .map(_.trim)
           .flatMap {
-            case MatrixEntry(key, valuesList) if key.toLowerCase.contains("java") =>
+            case MatrixEntry(key, valuesList) if isJavaVersionMatrixEntry(key) =>
               valuesList.split(",").map(_.trim)
             case JavaVersion(value) => Option(value)
             case _                  => Nil
@@ -175,25 +189,52 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       final val scala3VersionNames = List(
         "Scala3", // https://github.com/zio/zio/blob/5e56f0e252477a3aef60140bd05ae4f20b4f8f39/project/BuildHelper.scala#L25
         "scala3", // https://github.com/ghostdogpr/caliban/blob/95c5bafac4b8c72e5eb2af9b52b6cb7554a7da2d/build.sbt#L6
+        "ScalaDotty", // https://github.com/zio/zio-json/blob/f190390f8a69422d3c9bfb5b8e51c5214618efe9/project/BuildHelper.scala#L23
+        "scalaDotty",
         "Scala3Version",
-        "scala3Version" // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
+        "scala3Version", // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
+        "Scala_3", // https://github.dev/kubukoz/sup/blob/644848c03173c726f19a40e6dd439b6905d42967/build.sbt#L10-L11
+        "scala_3"
       )
-      private def matchEnclosed(pattern: String) = s"(?:$pattern)".r
-      private val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
-      private val DefOrVal = matchEnclosed("def|val|var")
-      private val OptType = s"${matchEnclosed(raw":\s*String")}?"
-      private val FullMatchPattern =
-        raw".*(($DefOrVal $Scala3VersionNamesAlt$OptType)\s*=\s*(.*))".r
-      def unapply(line: String): Option[Replecement] = line match {
-        case FullMatchPattern(wholeDefn, definition, value) =>
-          Some(Replecement(wholeDefn, s"$definition = <SCALA_VERSION>"))
-        case _ => None
-      }
+      val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
+      val DefOrVal = matchEnclosed("def|val|var")
+      val OptType = s"${matchEnclosed(raw":\s*String")}?"
+      val ScalaVersionDefn = s"$DefOrVal $Scala3VersionNamesAlt$OptType".r
+      def matchEnclosed(pattern: String) = s"(?:$pattern)".r
+      def defnPattern(rhsPattern: String) = raw".*(($ScalaVersionDefn)\s*=\s*($rhsPattern))\s*".r
+      val Scala3Version = """"3\.\d+\.\d+\S*""""
+
+      // https://github.com/ghostdogpr/caliban/blob/95c5bafac4b8c72e5eb2af9b52b6cb7554a7da2d/build.sbt#L6
+      val StringVersionDefn = defnPattern(Scala3Version)
+      // https://github.com/valskalla/odin/blob/db4444fe4efcb5c497d4e23bdf9bbcffd27269c2/build.sbt#L24
+      val VersionSeq = raw"""(Seq|Set|List|Vector)\((?:${Scala3Version},?)*\)"""
+      val VersionsSeqDefn = defnPattern(VersionSeq)
+      val VersionsSeqCondDefn = defnPattern(raw"""if\s*\(.*\) .* else ${VersionSeq}""")
+      // https://github.com/zio/zio/blob/39322c7b41b913cbadc44db7885cedc6c2505e08/project/BuildHelper.scala#L25
+      val BinVersionSelector = defnPattern(raw"""\S+\("3\.?\S*"\)""")
+
+      def unapply(line: String): Option[Replecement] =
+        val scalaVersionStringStub = """"<SCALA_VERSION>""""
+        val uncommentedLine = line.indexOf("//") match {
+          case -1  => line
+          case idx => line.substring(0, idx)
+        }
+        uncommentedLine.trim match {
+          case StringVersionDefn(wholeDefn, definition, value) =>
+            Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
+          case VersionsSeqDefn(wholeDefn, definition, value, seqType) =>
+            Some(Replecement(wholeDefn, s"$definition = $seqType(${scalaVersionStringStub})"))
+          case VersionsSeqCondDefn(wholeDefn, definition, value, seqType) =>
+            Some(Replecement(wholeDefn, s"$definition = $seqType(${scalaVersionStringStub})"))
+          case BinVersionSelector(wholeDefn, definition, value) =>
+            Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
+          case _ => None
+        }
     }
     def scala3VersionDefs =
       commonBuildFiles(projectDir).flatMap { file =>
         import Scala3VersionDef.Replecement
-        os.read.lines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
+        tryReadLines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
           SourcePatch(
             path = file.relativeTo(projectDir).toString,
             pattern = toMatch,
@@ -205,10 +246,19 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     scala3VersionDefs
   end discoverSourcePatches
 
+  private def tryReadLines(file: os.Path): Seq[String] = {
+    try os.read.lines(file).toSeq
+    catch {
+      case ex: Exception =>
+        println(s"Failed to read $file, reason: $ex")
+        Nil
+    }
+  }
+
   // Selects recommened amount of memory for project pod, based on the config files
   private def discoverMemoryRequest(projectDir: os.Path): Option[Int] =
     def readXmx(file: os.Path): Seq[Xmx.MegaBytes] =
-      os.read.lines(file).collect { case Xmx(mBytes) => mBytes }
+      tryReadLines(file).collect { case Xmx(mBytes) => mBytes }
 
     val fromWorkflows = githubWorkflows(projectDir)
       .flatMap(readXmx)

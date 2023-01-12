@@ -25,8 +25,17 @@ pipelineJob('/runBuild') {
             sandbox()
         }
     }
-    properties{
-        disableConcurrentBuilds()
+    properties {
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("")
+            numToKeepStr("100")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
+        }
+      }
     }
     parameters {
         stringParam("buildName", null, "(Optional) Should be unique among all builds; Should be valid both as a file name and a part of a URL; Will be synthesized from current date and build number if not specified")
@@ -48,7 +57,7 @@ pipelineJob('/runBuild') {
         stringParam("precomputedBuildPlan", null, "(Optional, for debugging purposes mainly): The build plan (in JSON format) to be used instead of computing the plan dynamically. When specified, the remaining parameters from this section are ignored")
         stringParam("scalaBinaryVersion", "3", "Scala binary version following Scaladex API convention used for detecting projects to be built")
         stringParam("minStarsCount", "100", "Minimal number of start on GitHub required to include a project into the build plan")
-        stringParam("maxProjectsCount", "40", "Maximal number of projects to include into the build plan")
+        stringParam("maxProjectsCount", "200", "Maximal number of projects to include into the build plan")
         stringParam("requiredProjects", requiredProjectsConfig, "Comma-sepatrated list of projects that have to be included into the build plan (using GitHub coordinates), e.g. 'typelevel/cats,scalaz/scalaz'")
         textParam("replacedProjects", replacedProjectsConfig, "Mapping specifying which projects should be replaced by their forks. Each line in format: <original_org>/<original_name> <new_org>/<new_name> [<new_branch_name>], e.g. 'scalaz/scalaz dotty-staging/scalaz' or 'milessabin/shapeless dotty-staging/shapeless shapeless-3-staging'. Lines which are empty or start with # are ignored")
         textParam("projectsConfig", projectsConfig, "Configuration of project specific settings in the HOCOON format. Used only when project does not contain `scala3-community-build.conf` file")
@@ -79,6 +88,38 @@ pipelineJob('/runBuild') {
     }
 }
 
+def runBuildWeeklyScript = new File("/var/jenkins_home/seeds/runBuildWeekly.groovy").text
+
+pipelineJob('/runBuildWeekly') {
+  definition {
+    cps {
+      script(runBuildWeeklyScript)
+      sandbox()
+    }
+  }
+  properties{
+    buildDiscarder{
+      strategy{
+        logRotator { 
+          daysToKeepStr("")
+          numToKeepStr("100")
+          artifactDaysToKeepStr("")
+          artifactNumToKeepStr("") 
+        }
+      }
+    }
+    pipelineTriggers{
+      triggers {
+        cron{
+          spec('''
+            # Run full build every Friday at 8 PM UTC
+            H 20 * * 5
+            ''')
+        }
+      }
+    }
+  }
+}
 
 def computeBuildPlanScript = new File("/var/jenkins_home/seeds/computeBuildPlan.groovy").text
 
@@ -90,9 +131,19 @@ pipelineJob('/computeBuildPlan') {
         }
     }
     properties {
-        copyArtifactPermission {
-            projectNames("*")
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("")
+            numToKeepStr("100")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
         }
+      }
+      copyArtifactPermission {
+        projectNames("*")
+      }
     }
     parameters {
         stringParam("buildName")
@@ -116,10 +167,20 @@ pipelineJob('/buildCompiler') {
             sandbox()
         }
     }
-    properties {
-        copyArtifactPermission {
-            projectNames("*")
+    properties{
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("")
+            numToKeepStr("100")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
         }
+      }
+      copyArtifactPermission {
+          projectNames("*")
+      }
     }
     parameters {
         stringParam("buildName")
@@ -138,6 +199,18 @@ pipelineJob('/buildCommunityProject') {
             script(buildCommunityProjectScript)
             sandbox()
         }
+    }
+    properties{
+      buildDiscarder{
+        strategy{
+          logRotator { 
+            daysToKeepStr("14")
+            numToKeepStr("8000")
+            artifactDaysToKeepStr("")
+            artifactNumToKeepStr("") 
+          }
+        }
+      }
     }
     parameters {
         stringParam("buildName")

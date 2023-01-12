@@ -5,6 +5,7 @@ import scala.sys.process._
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.time.OffsetDateTime
 
 // TODO scala3 should be more robust
 def loadProjects(scalaBinaryVersion: String): Seq[Project] =
@@ -49,7 +50,10 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
         System.err.println(s"No project summary for ${project.org}/${project.name}")
         Future.successful(Nil)
       case Some(projectSummary) =>
-        for artifactsMetadata <- Future
+        val releaseDates = collection.mutable.Map.empty[String, OffsetDateTime]
+        case class VersionRelease(version: String, releaseDate: OffsetDateTime)
+        for
+          artifactsMetadata <- Future
             .traverse(projectSummary.artifacts) { artifact =>
               Scaladex
                 .artifactMetadata(groupId = projectSummary.groupId, artifactId = s"${artifact}_3")
@@ -58,12 +62,20 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
                     System.err.println(
                       "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
                     )
-                  val versions = response.items.map(_.version)
+                  // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
+                  // Previous approach with sorting SemVersion was not stable and could lead to runtime erros (due to not transitive order of elements)
+                  val versions = response.items
+                    .tapEach(v => releaseDates += v.version -> v.releaseDate)
+                    .map(_.version)
                   artifact -> versions
                 }
             }
             .map(_.toMap)
-        yield for version <- projectSummary.versions
+          orderedVersions = projectSummary.versions
+            .flatMap(v => releaseDates.get(v).map(VersionRelease(v, _)))
+            .sortBy(_.releaseDate)(using summon[Ordering[OffsetDateTime]].reverse)
+            .map(_.version)
+        yield for version <- orderedVersions
         yield ModuleInVersion(
           version,
           modules = artifactsMetadata.collect {
@@ -73,14 +85,10 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
     }
   val moduleVersions = Await.result(moduleVersionsTask, 5.minute)
 
-  // Make sure that versions are ordered, some libraries don't have correct order in scaladex matrix
-  // Eg. scalanlp/breeze lists versions: 2.0, 2.0-RC1, 2.0.1-RC2, 2.0.1-RC1
-  // We want to have latests versions in front of collection
   case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
   val modules = moduleVersions
     .filter(_.modules.nonEmpty)
     .map(mvs => VersionedModules(mvs, mvs.version))
-    .sortBy(_.semVersion)
     .map(_.modules)
   ProjectModules(project, modules)
 
@@ -125,8 +133,13 @@ def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): L
         asTarget(scalaBinaryVersion)(_)
       }(ModuleVersion(module, version, projectModules.project))
     }
+      .map(Some(_))
+      .recover { case ex: Exception =>
+        println(ex)
+        None
+      }
   }
-  val targets = Await.result(toTargetsTask, 5.minute)
+  val targets = Await.result(toTargetsTask, 5.minute).flatten
   LoadedProject(projectModules.project, version, targets)
 
   /** @param scalaBinaryVersion
@@ -139,11 +152,15 @@ def loadDepenenecyGraph(
     requiredProjects: Seq[Project] = Nil,
     filterPatterns: Seq[String] = Nil
 ): DependencyGraph =
-  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersion))(p)
+  val patterns = filterPatterns.map(_.r)
+  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersion))
+    .andThen(projectModulesFilter(patterns))
+    .apply(p)
 
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
+
   val ChunkSize = 32
   val optionalStream = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
     .takeWhile(_.stars >= minStarsCount)
@@ -153,13 +170,7 @@ def loadDepenenecyGraph(
     .flatMap { (chunk, idx) =>
       println(s"Load projects - chunk #${idx}, projects indexes from ${idx * ChunkSize}")
       val calcChunk = Future
-        .traverse(chunk) { project =>
-          Future {
-            loadProject
-              .andThen(projectModulesFilter(filterPatterns.map(_.r)))
-              .apply(project)
-          }
-        }
+        .traverse(chunk) { project => Future { loadProject(project) } }
         .map(_.filter(_.mvs.nonEmpty))
       Await.result(calcChunk, 5.minute)
     }

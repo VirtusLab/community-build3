@@ -1,5 +1,3 @@
-// Use Scala 3.0 until pretty stacktraces are fixed
-//> using scala "3.0.2"
 //> using lib "org.json4s::json4s-native:4.0.3"
 //> using lib "com.lihaoyi::requests:0.7.0"
 //> using lib "com.lihaoyi::os-lib:0.8.1"
@@ -27,7 +25,7 @@ given ExecutionContext = ExecutionContext.Implicits.global
 
 class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.0.10")
+val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.1.2")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
@@ -43,7 +41,8 @@ case class Config(
     reproducer: JenkinsReproducerConfig = JenkinsReproducerConfig(),
     customRun: CustomBuildConfig = CustomBuildConfig(null, null),
     minikube: Config.MinikubeConfig = Config.MinikubeConfig(),
-    redirectLogs: Boolean = true
+    redirectLogs: Boolean = true,
+    publishArtifacts: Boolean = true
 ):
   def withMinikube(fn: Config.MinikubeConfig => Config.MinikubeConfig) =
     copy(minikube = fn(minikube))
@@ -55,7 +54,7 @@ case class JenkinsReproducerConfig(
     jobId: String = "custom",
     scalaVersionOverride: Option[String] = None,
     buildFailedModulesOnly: Boolean = false,
-    buildUpstream: Boolean = true,
+    buildUpstream: Boolean = false,
     ignoreFailedUpstream: Boolean = false,
     jenkinsEndpoint: String = "https://scala3.westeurope.cloudapp.azure.com"
 ):
@@ -76,8 +75,8 @@ object Config:
     case Minikube, Local
 
   case class MinikubeConfig(
-      keepCluster: Boolean = false,
-      keepMavenRepository: Boolean = false,
+      keepCluster: Boolean = true,
+      keepMavenRepository: Boolean = true,
       namespace: String = "scala3-community-build",
       k8sConfig: File = (os.home / ".kube" / "config").toIO
   )
@@ -89,11 +88,11 @@ object Config:
     OParser.sequence(
       head("Scala 3 Community Build tool", communityBuildVersion),
       // Minikube specific
-      opt[Unit]("keepCluster")
-        .action { (_, c) => c.withMinikube(_.copy(keepCluster = true)) }
+      opt[Unit]("removeCluster")
+        .action { (_, c) => c.withMinikube(_.copy(keepCluster = false)) }
         .text("Should Minikube cluster be kept after finishing the build"),
-      opt[Unit]("keepMavenRepo")
-        .action { (_, c) => c.withMinikube(_.copy(keepMavenRepository = true)) }
+      opt[Unit]("removeMavenRepo")
+        .action { (_, c) => c.withMinikube(_.copy(keepMavenRepository = false)) }
         .text("Should Maven repository instance should not be delete after finishing the build"),
       opt[File]("k8sConfig")
         .action { (x, c) => c.withMinikube(_.copy(k8sConfig = x)) }
@@ -107,6 +106,10 @@ object Config:
       opt[Unit]("noRedirectLogs")
         .action { (_, c) => c.copy(redirectLogs = false) }
         .text("Do not redirect runners logs to file")
+        .hidden(),
+      opt[Unit]("noPublishArtifacts")
+        .action { (_, c) => c.copy(publishArtifacts = false) }
+        .text("Don't publish artifacts of the build")
         .hidden(),
       // Commands
       cmd("reproduce")
@@ -128,8 +131,8 @@ object Config:
           opt[Unit]("ignoreFailedUpstream")
             .action { (x, c) => c.withReproducer(_.copy(ignoreFailedUpstream = true)) }
             .text("Ignore build failures of upstream projects"),
-          opt[Unit]("noUpstream")
-            .action { (x, c) => c.withReproducer(_.copy(buildUpstream = false)) }
+          opt[Unit]("withUpstream")
+            .action { (x, c) => c.withReproducer(_.copy(buildUpstream = true)) }
             .text("Do not build upstream projects of the target"),
           opt[String]("jenkinsEndpoint")
             .action { (x, c) => c.withReproducer(_.copy(jenkinsEndpoint = x)) }
@@ -238,8 +241,8 @@ case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummar
 
     val excluded =
       for
-        JArray(excluded) <- params.config.map(parse(_) \ "projects" \ "exclude").toSeq
-        JString(entry) <- excluded
+        case JArray(excluded) <- params.config.map(parse(_) \ "projects" \ "exclude").toSeq
+        case JString(entry) <- excluded
       yield entry
     baseTargets.diff(excluded)
 }
@@ -263,24 +266,28 @@ object BuildInfo:
     )
     val jobId = config.reproducer.jobId
     println(s"Fetching build info from Jenkins based on project $jobId")
-    val runId = {
-      val r =
-        requests.get(
-          s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/api/json?tree=actions[causes[*]]"
-        )
-      val json = parse(r.data.toString)
-      for {
-        JArray(ids) <- (json \ "actions" \ "causes" \ "upstreamBuild").toOption
-        JInt(id) <- ids.headOption
-      } yield id.toString
-    }
+    val runId =
+      if !config.reproducer.buildUpstream then None
+      else {
+        val r =
+          requests.get(
+            s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/api/json?tree=actions[causes[*]]"
+          )
+        val json = parse(r.data.toString)
+        for {
+          case JArray(ids) <- (json \ "actions" \ "causes" \ "upstreamBuild").toOption
+          case JInt(id) <- ids.headOption
+        } yield id.toString
+      }.orElse {
+        println("No upstream project defined")
+        None
+      }
 
     val runProjectIds = runId.fold {
-      println("No upstream project defined")
       List(jobId)
     } { runId =>
       val r = requests.get(s"${config.reproducer.jenkinsRunBuildJob(runId)}/consoleText")
-      val StartedProject = raw"Starting building: buildCommunityProject #(\d+)".r
+      val StartedProject = raw".*Starting building: buildCommunityProject #(\d+)".r
       new String(r.data.array).linesIterator
         .collect { case StartedProject(id) => id }
         .toList
@@ -320,9 +327,10 @@ object BuildInfo:
       val buildPlanJson = os.read(coordinatorDir / "data" / "buildPlan.json")
       parse(buildPlanJson)
 
-    val JArray(projectPlans) = prepareBuildPlan()
+    val JArray(buildPlan) = prepareBuildPlan(): @unchecked
     val projects = for
-      project <- projectPlans.take(1) // There should be only 1 project
+      case JArray(buildStage) <- buildPlan.take(1) // There should be only 1 stage
+      project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
       configString = project \ "config" match {
@@ -365,28 +373,37 @@ case class BuildSummary(projects: List[BuildProjectSummary]):
 
 object BuildSummary:
   def fetchFromJenkins(jobId: String)(using config: Config): BuildSummary =
-    val r = requests.get(
-      s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/artifact/build-summary.txt",
-      check = false
-    )
+    val buildSummaryUrl =
+      s"${config.reproducer.jenkinsBuildProjectJob(jobId)}/artifact/build-summary.txt"
+    val r = requests.get(buildSummaryUrl, check = false)
     val projects = if !r.is2xx then
       System.err.println(
-        s"Failed to get build summary for job $jobId, assuming it failed in all submodules"
+        s"Failed to get build summary $buildSummaryUrl, assuming project failed in all submodules"
       )
       Nil
     else
-      for
-        JObject(projects) <- parse(r.data.toString)
-        JField(artifactName, results: JObject) <- projects
-        BuildResult(compile) <- results \ "compile"
-        BuildResult(testCompile) <- results \ "test-compile"
-      yield BuildProjectSummary(
-        artifactName = artifactName,
-        results = ProjectTargetResults(
-          compile = compile,
-          testCompile = testCompile
+      try {
+        for
+          case JArray(projects) <- parse(
+            // Might contain quoted strings
+            r.data.toString.replaceAll(""""reasons": \[.*\]""", """"reasons": []""")
+          )
+          project <- projects
+          case JString(artifactName) <- project \ "module"
+          case BuildResult(compile) <- project \ "compile" \ "status"
+          case BuildResult(testCompile) <- project \ "test-compile" \ "status"
+        yield BuildProjectSummary(
+          artifactName = artifactName,
+          results = ProjectTargetResults(
+            compile = compile,
+            testCompile = testCompile
+          )
         )
-      )
+      } catch {
+        case ex: Throwable =>
+          System.err.println(s"Failed to parse build summary $buildSummaryUrl")
+          Nil
+      }
     BuildSummary(projects)
 
 case class BuildProjectSummary(
@@ -445,10 +462,10 @@ object BuildParameters:
       requests.get(s"$jobApi/json?tree=actions[parameters[*]]")
     val json = parse(r.data.toString)
     val params = for {
-      JArray(params) <- json \ "actions" \ "parameters"
-      JObject(param) <- params
-      JField("name", JString(name)) <- param
-      JField("value", JString(value)) <- param
+      case JArray(params) <- json \ "actions" \ "parameters"
+      case JObject(param) <- params
+      case JField("name", JString(name)) <- param
+      case JField("value", JString(value)) <- param
     } yield name -> value
     fromJenkinsParams(params.toMap)
 
@@ -807,7 +824,7 @@ object MinikubeReproducer:
                   params.repositoryUrl,
                   params.repositoryRevision.getOrElse(""),
                   buildInfo.scalaVersion,
-                  params.version.getOrElse(""),
+                  if !config.publishArtifacts then "" else params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
                   params.mavenRepositoryUrl,
                   params.enforcedSbtVersion.getOrElse(config.command match {
@@ -1068,22 +1085,30 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     val sbtSettings = sbtConfig.options
     val sbtBuildProperties = projectDir / "project" / "build.properties"
     val SbtVersion = raw"sbt\.version\s*=\s*(\d.*)".r
-    val currentSbtVersion = os
-      .read(sbtBuildProperties)
-      .linesIterator
-      .collectFirst { case SbtVersion(version) =>
-        version
-      }
-      .getOrElse(sys.error("Cannot resolve current sbt version"))
+    val currentSbtVersion =
+      if !os.exists(sbtBuildProperties) then None
+      else
+        os
+          .read(sbtBuildProperties)
+          .linesIterator
+          .collectFirst { case SbtVersion(version) =>
+            version
+          }
+        // .getOrElse(sys.error("Cannot resolve current sbt version"))
     val belowMinimalSbtVersion =
-      currentSbtVersion.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
-        case Array(1, minor, patch) => minor < 5 || patch < 5
-        case _                      => false
+      currentSbtVersion.forall {
+        _.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
+          case Array(1, minor, patch) => minor <= 5 && patch < 5
+          case _                      => false
+        }
       }
 
     override def prepareBuild(): Unit =
+      val sbtProjectDir = sbtBuildProperties / os.up
+      if !os.exists(sbtProjectDir) then os.makeDir(sbtProjectDir)
       project.params.enforcedSbtVersion match {
-        case Some(version) => os.write.over(sbtBuildProperties, s"sbt.version=$version")
+        case Some(version) =>
+          os.write.over(sbtBuildProperties, s"sbt.version=$version")
         case _ =>
           if belowMinimalSbtVersion then
             println(

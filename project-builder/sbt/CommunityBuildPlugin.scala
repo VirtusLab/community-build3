@@ -8,6 +8,8 @@ import xsbti.compile.{FileAnalysisStore, CompileAnalysis}
 import xsbti.{Severity, CompileFailed, Problem}
 import scala.collection.JavaConverters._
 
+import Scala3CommunityBuild._
+import Scala3CommunityBuild.Utils._
 import TaskEvaluator.EvalResult
 
 class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
@@ -16,8 +18,28 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   override def eval[T](task: TaskKey[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
+    val updatedState =
+      if (!CommunityBuildPlugin.disableFatalWarningsFlag) state
+      else {
+        val extracted = sbt.Project.extract(state)
+        def disableFatalWarnings(key: TaskKey[Seq[String]]) =
+          key.transform(
+            _.filterNot(_ == "-Xfatal-warnings"),
+            sbt.internal.util.NoPosition
+          )
+        state.appendWithSession(
+          extracted.structure.allProjectRefs
+            .flatMap { ref =>
+              Seq(
+                disableFatalWarnings(ref / Compile / Keys.scalacOptions),
+                disableFatalWarnings(ref / Test / Keys.scalacOptions)
+              )
+            }
+        )
+      }
+
     sbt.Project
-      .runTask(scopedTask, state)
+      .runTask(scopedTask, updatedState)
       .fold[EvalResult[T]] {
         val reason = TaskEvaluator.UnkownTaskException(scopedTask.toString())
         EvalResult.Failure(reason :: Nil, 0)
@@ -34,10 +56,12 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   }
 
   private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
+    val Limit = 10
     @scala.annotation.tailrec
-    def loop(incomplete: List[Incomplete], acc: List[Throwable] = Nil): List[Throwable] = {
+    def loop(incomplete: List[Incomplete], acc: List[Throwable]): List[Throwable] = {
       incomplete match {
-        case Nil => acc
+        case Nil                     => acc
+        case _ if acc.length > Limit => acc
         case head :: tail =>
           loop(
             incomplete = tail ::: head.causes.toList,
@@ -87,6 +111,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
     .getOrElse(Nil)
 
+  var disableFatalWarningsFlag = false
   override def projectSettings = Seq(
     scalacOptions := {
       // Flags need to be unique
@@ -96,11 +121,13 @@ object CommunityBuildPlugin extends AutoPlugin {
           // Ignore deprecations, replace them with info ()
           Seq("-Wconf:cat=deprecation:i")
       }
-      options.foldLeft(scalacOptions.value) { case (options, flag) =>
-        if (options.contains(flag)) options
-        else options :+ flag
-      }
-    }
+      val withAdditions = (scalacOptions.value ++ options).distinct
+      if (disableFatalWarningsFlag)
+        withAdditions.filter(_ != "-Xfatal-warnings")
+      else withAdditions
+    },
+    // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
+    crossScalaVersions := (thisProjectRef / crossScalaVersions).value
   ) ++ mvnRepoPublishSettings
 
   private def stripScala3Suffix(s: String) = s match {
@@ -113,36 +140,157 @@ object CommunityBuildPlugin extends AutoPlugin {
     * Jcstress/version scopes, leading build failures
     */
   val setPublishVersion =
-    Command.args("setPublishVersion", "<args>") { case (state, args) =>
-      args.headOption
-        .orElse(sys.props.get("communitybuild.version"))
+    keyTransformCommand("setPublishVersion", Keys.version) { (args, _) =>
+      val targetVersion = args.headOption
         .filter(_.nonEmpty)
-        .fold {
-          System.err.println("No explicit version found in setPublishVersion command, skipping")
-          state
-        } { targetVersion =>
-          println(s"Setting publish version to $targetVersion")
-          val extracted = sbt.Project.extract(state)
-          val updatedVersions = extracted.structure.allProjectRefs
-            .map { ref =>
-              (ref / Keys.version).transform(
-                currentVersion => {
-                  dualVersioning
-                    .filter(_.matches(targetVersion, currentVersion))
-                    .flatMap(_.apply(targetVersion))
-                    .map { version =>
-                      println(
-                        s"Setting version ${version.render} for ${ref.project} based on dual versioning ${dualVersioning}"
-                      )
-                      version.render
-                    }
-                    .getOrElse(targetVersion)
-                },
-                sbt.internal.util.NoPosition
-              )
-            }
-          extracted.appendWithSession(updatedVersions, state)
+        .orElse(sys.props.get("communitybuild.version"))
+        .getOrElse {
+          throw new RuntimeException(
+            "No explicit version found in setPublishVersion command"
+          )
         }
+      (ref: ProjectRef, currentVersion: String) => {
+        dualVersioning
+          .filter(_.matches(targetVersion, currentVersion))
+          .flatMap(_.apply(targetVersion))
+          .map { version =>
+            println(
+              s"Setting version ${version.render} for ${ref.project} based on dual versioning ${dualVersioning}"
+            )
+            version.render
+          }
+          .getOrElse(targetVersion)
+      }
+    }
+
+  val disableFatalWarnings = keyTransformCommand(
+    "disableFatalWarnings",
+    Compile / scalacOptions,
+    Test / scalacOptions
+  ) { (_, _) =>
+    {
+      disableFatalWarningsFlag = true
+      (_: ProjectRef, currentSettings: Seq[String]) =>
+        currentSettings // removed in projectSettings for durable effect
+    }
+  }
+
+  /** Helper command used to filter scalacOptions and set source migration flags
+    */
+  val enableMigrationMode = keyTransformCommand(
+    "enableMigrationMode",
+    Compile / scalacOptions,
+    Test / scalacOptions
+  ) { (args, extracted) =>
+    val argSourceVersion = args.headOption.filter(_.nonEmpty)
+    def resolveSourceVersion(ref: ProjectRef) = CrossVersion
+      .partialVersion(extracted.get(ref / scalaVersion))
+      .collect {
+        case (3, 0) => "3.0-migration"
+        case (3, 1) => "3.0-migration"
+        case (3, 2) => "3.2-migration"
+        case (3, _) => "future-migration"
+      }
+
+    (ref: ProjectRef, currentSettings: Seq[String]) => {
+      argSourceVersion
+        .orElse(resolveSourceVersion(ref))
+        .fold(currentSettings) { sourceVersion =>
+          val newEntries = Seq(s"-source:$sourceVersion")
+          println(
+            s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
+          )
+          // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
+          val filteredSettings =
+            Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
+          currentSettings.filterNot { setting =>
+            filteredSettings.exists(setting.contains(_)) ||
+            setting.matches(".*-Wconf.*any:e")
+          } ++ newEntries
+        }
+    }
+  }
+
+  /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
+    * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
+    */
+  val setCrossScalaVersions =
+    keyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) { (args, extracted) =>
+      val scalaVersion = args.head
+      val partialVersion = CrossVersion.partialVersion(scalaVersion)
+      val targetsScala3 = partialVersion.exists(_._1 == 3)
+
+      (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
+        val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
+        def updateVersion(fromVersion: String) = {
+          println(
+            s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
+          )
+          scalaVersion
+        }
+        def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
+        val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
+        val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
+        val partialCrossVersions = crossVersionsWithPartial.values.toSet
+        val allPartialVersions = crossVersionsWithPartial ++ currentScalaWithPartial
+
+        type PartialVersion = Option[(Long, Long)]
+        def mapVersions(versionsWithPartial: Map[String, PartialVersion]) = versionsWithPartial
+          .map {
+            case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
+            case (version, `partialVersion`)              => updateVersion(version)
+            case (version, _)                             => version // not changed
+          }
+          .toSeq
+          .distinct
+
+        allPartialVersions(currentScalaVersion) match {
+          // Check currently used version of given project
+          // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+          case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
+          case _ => // if version is not a part of cross version allow only current version
+            val allowedCrossVersions = mapVersions(currentScalaWithPartial)
+            println(
+              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
+            )
+            allowedCrossVersions
+        }
+      }
+    }
+
+  val commands = Seq(
+    enableMigrationMode,
+    disableFatalWarnings,
+    setPublishVersion,
+    setCrossScalaVersions
+  )
+
+  type SettingMapping[T] = (Seq[String], Extracted) => (ProjectRef, T) => T
+  def keyTransformCommand[T](name: String, keys: Taskable[T]*)(
+      mapping: SettingMapping[T]
+  ) =
+    Command.args(name, "args") { case (state, args) =>
+      val extracted = sbt.Project.extract(state)
+      val withArgs = mapping(args, extracted)
+      println(s"Execute $name")
+      state.appendWithSession(
+        extracted.structure.allProjectRefs
+          .flatMap { ref =>
+            for (key <- keys) yield key match {
+              case key: TaskKey[T] =>
+                (ref / key).transform(
+                  withArgs(ref, _),
+                  sbt.internal.util.NoPosition
+                )
+              case key: SettingKey[T] =>
+                (ref / key).transform(
+                  withArgs(ref, _),
+                  sbt.internal.util.NoPosition
+                )
+              case _ => ???
+            }
+          }
+      )
     }
 
   // Create mapping from org%artifact_name to project name
@@ -163,7 +311,7 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   lazy val ourVersion =
     Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
-  lazy val dualVersioning = Utils.DualVersioningType.resolve
+  lazy val dualVersioning = DualVersioningType.resolve
   lazy val publishVersions = ourVersion.toList.map { version =>
     version :: dualVersioning.flatMap(_.apply(version)).map(_.render).toList
   }
@@ -190,7 +338,6 @@ object CommunityBuildPlugin extends AutoPlugin {
       val cState = state.value
       val extracted = sbt.Project.extract(cState)
       val s = extracted.structure
-      val refs = s.allProjectRefs
       val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
       val scalaBinaryVersionUsed = CrossVersion.binaryScalaVersion(scalaVersionArg)
       val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
@@ -220,7 +367,6 @@ object CommunityBuildPlugin extends AutoPlugin {
 
       def selectProject(projects: Seq[(String, ProjectRef)]): ProjectRef = {
         require(projects.nonEmpty, "selectProject with empty projects argument")
-        val target = projects.head._1
         projects.map(_._2) match {
           case Seq(project) => project
           case projects =>
@@ -255,7 +401,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         simplifiedModuleId(key) -> value
       }
 
-      val filteredIds = Utils.filterTargets(ids, config.projects.exclude.map(_.r))
+      val filteredIds = filterTargets(ids, config.projects.exclude.map(_.r))
 
       println("Starting build...")
       // Find projects that matches maven
@@ -272,7 +418,9 @@ object CommunityBuildPlugin extends AutoPlugin {
               refsByName.get(fullId),
               originalModuleIds.get(fullId),
               moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId))
+              simplifiedModuleIds.get(simplifiedModuleId(fullId)),
+              // Single, top level, unnamed project
+              refsByName.headOption.map(_._2).filter(_ => refsByName.size == 1)
             ).flatten
         } yield {
           candidates.flatten.headOption
@@ -349,8 +497,18 @@ object CommunityBuildPlugin extends AutoPlugin {
         val testingMode = overrideSettings.flatMap(_.tests).getOrElse(config.tests)
 
         import evaluator._
+        val scalacOptions = eval(Compile / Keys.scalacOptions) match {
+          case EvalResult.Value(settings, _) => settings
+          case _                             => Nil
+        }
         val compileResult = eval(Compile / compile)
-        val docsResult = evalAsDependencyOf(compileResult)(Compile / doc)
+
+        val shouldBuildDocs = eval(Compile / doc / skip) match {
+          case EvalResult.Value(skip, _) => !skip
+          case _                         => false
+        }
+        val docsResult = evalWhen(shouldBuildDocs, compileResult)(Compile / doc)
+
         val testsCompileResult = evalWhen(testingMode != TestingMode.Disabled, compileResult)(
           Test / compile
         )
@@ -372,17 +530,15 @@ object CommunityBuildPlugin extends AutoPlugin {
             )
           else
             PublishResult(
-              evalAsDependencyOf(compileResult, docsResult)(
-                Compile / publishResults
-              )
+              evalAsDependencyOf(compileResult)(Compile / publishResults)
             )
         }
 
         ModuleBuildResults(
           artifactName = projectName,
-          compile = collectCompileResult(compileResult),
+          compile = collectCompileResult(compileResult, scalacOptions),
           doc = DocsResult(docsResult),
-          testsCompile = collectCompileResult(testsCompileResult),
+          testsCompile = collectCompileResult(testsCompileResult, scalacOptions),
           testsExecute = collectTestResults(testsExecuteResult),
           publish = publishResult
         )
@@ -409,9 +565,17 @@ object CommunityBuildPlugin extends AutoPlugin {
     (runBuild / aggregate) := false
   )
 
-  private def collectCompileResult(evalResult: EvalResult[CompileAnalysis]): CompileResult = {
+  private def collectCompileResult(
+      evalResult: EvalResult[CompileAnalysis],
+      scalacOptions: Seq[String]
+  ): CompileResult = {
     def countProblems(severity: Severity, problems: Iterable[Problem]) =
       problems.count(_.severity == severity)
+
+    val sourceVersion = scalacOptions.collectFirst {
+      case s if s.contains("-source:") => s.split(":").last
+    }
+
     evalResult match {
       case EvalResult.Failure(reasons, tookTime) =>
         reasons
@@ -422,7 +586,8 @@ object CommunityBuildPlugin extends AutoPlugin {
               failureContext = evalResult.toBuildError,
               warnings = 0,
               errors = 0,
-              tookMs = tookTime
+              tookMs = tookTime,
+              sourceVersion = sourceVersion
             )
           ) { case (result, ctx) =>
             result.copy(
@@ -452,7 +617,8 @@ object CommunityBuildPlugin extends AutoPlugin {
           Status.Ok,
           warnings = stats.warnings,
           errors = stats.errors,
-          tookMs = tookTime
+          tookMs = tookTime,
+          sourceVersion = sourceVersion
         )
 
       case EvalResult.Skipped => CompileResult(Status.Skipped, warnings = 0, errors = 0, tookMs = 0)

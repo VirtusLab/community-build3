@@ -23,6 +23,7 @@ $scriptDir/checkout.sh "$repoUrl" "$rev" repo
 # especially in cli immediately after starting minikube
 for i in {1..10}; do
   if errMsg=$(curl $mvnRepoUrl 2>&1); then
+    echo "Connected with $mvnRepoUrl."
     break
   else
     echo "${errMsg}"

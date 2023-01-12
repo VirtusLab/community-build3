@@ -1,10 +1,6 @@
 // Look at initializeSeedJobs.groovy for how this file gets parameterized
 @Library(['camunda-community', 'pipeline-logparser']) _
 
-def labeledProjectWasBuilt(String label) {
-    return isLastLabeledBuildFinished("/buildCommunityProject", label)
-}
-
 def getBuildStatus() {
     return sh(
         script: "cat build-status.txt",
@@ -31,31 +27,14 @@ def retryOnBuildFailureMsg = "Enforcing retry of the build after failure."
 pipeline {
     agent none
     options {
-      timeout(time: 16, unit: "HOURS")
+      timeout(time: 8, unit: 'HOURS') // timeout on whole pipeline job including queueing in k8s within the stage and execution
     }
     stages {
         stage("Initialize build") {
-            agent any
+            agent none
             steps {
                 script {
                     currentBuild.setDescription("${params.buildName} :: ${params.projectName}")
-                }
-            }
-        }
-        stage("Wait for dependencies") {
-            // Because the builds of all community projects are started at the same time
-            // we need to manually check if the builds of ALL the dependencies of this particular project actually finished (not necessarily without errors).
-            // If some dependencies haven't finished running yet, we suspend the job and let it be resumed later by some other dependency's build job.
-            steps {
-                script {
-                    def missingDependencies = upstreamProjects.collect()
-                    while (!missingDependencies.isEmpty()) {
-                        missingDependencies.removeAll { projectName ->  labeledProjectWasBuilt("${params.buildName} :: ${projectName}") }
-                        if (!missingDependencies.isEmpty()) {
-                            echo "Some dependencies haven't been built yet: ${missingDependencies.join(", ")}"
-                            sleep time: 2 * missingDependencies.size() , unit: 'MINUTES'
-                        }
-                    }
                 }
             }
         }
@@ -78,7 +57,7 @@ pipeline {
                   shareProcessNamespace: true
                   containers:
                   - name: project-builder
-                    image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.0.10
+                    image: virtuslab/scala-community-build-project-builder:jdk${params.javaVersion?: 11}-v0.1.2
                     imagePullPolicy: IfNotPresent
                     volumeMounts:
                     - name: mvn-repo-cert
@@ -111,14 +90,14 @@ pipeline {
                     priorityClassName: "jenkins-agent-priority"
                     """.stripIndent()
             ){
-              timeout(time: 2, unit: "HOURS"){
-                conditionalRetry([
-                  agentLabel: POD_LABEL,
-                  customFailurePatterns: [
-                    "manual-retry-trigger": ".*${retryOnBuildFailureMsg}.*"
-                  ],
-                  runSteps: {
-                    container('project-builder') {
+              conditionalRetry([
+                agentLabel: POD_LABEL,
+                customFailurePatterns: [
+                  "manual-retry-trigger": ".*${retryOnBuildFailureMsg}.*"
+                ],
+                runSteps: {
+                  container('project-builder') {
+                    timeout(time: 90, unit: "MINUTES"){
                       script {
                         retryOnConnectionError {
                           sh """
@@ -157,27 +136,18 @@ pipeline {
                         }
                       }
                     }
-                  },
-                  postAlways: {
-                    retryOnConnectionError {
-                      archiveArtifacts(artifacts: "build-*.txt")
-                      stash(name: "buildResults", includes: "build-*.txt")
-                    }
                   }
-                ])
-              }
+                },
+                postAlways: {
+                  retryOnConnectionError {
+                    archiveArtifacts(artifacts: "build-*.txt")
+                    stash(name: "buildResults", includes: "build-*.txt")
+                  }
+                }
+              ])
             }
           }
           post { 
-            always { 
-              script {
-                retryOnConnectionError {
-                  for (projectName in downstreamProjects) {
-                      resumeLastLabeledBuild("/buildCommunityProject", "${params.buildName} :: ${projectName}")
-                  }
-                }
-              }
-            }
             failure {
               script {
                 echo "Build failed, reproduce it locally using following command:"
@@ -194,7 +164,7 @@ pipeline {
               containers: [
                 containerTemplate(
                   name: 'reporter',
-                  image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.0.10',
+                  image: 'virtuslab/scala-community-build-project-builder:jdk11-v0.1.2',
                   command: 'sleep',
                   args: '15m',
                   resourceRequestMemory: '250M',

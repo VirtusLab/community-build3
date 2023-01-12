@@ -27,9 +27,6 @@ def inverseMultigraph(graph) {
 
 pipeline {
     agent { label "default" }
-    options {
-      timeout(time: 16, unit: "HOURS")
-    }
     stages {
         stage("Initialize build") {
             steps {
@@ -41,7 +38,11 @@ pipeline {
                         def dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
                         def formattedDate = dateFormat.format(now)
                         def optScalaVersion = params.publishedScalaVersion ? params.publishedScalaVersion + "_" : ""
-                        buildName = "${optScalaVersion}${formattedDate}_${currentBuild.number}"
+                        def maxProjectsCount = params.maxProjectsCount.toInteger()
+                        def minStarsCount = params.minStarsCount.toInteger()
+                        def isFullBuild = maxProjectsCount < 0 && minStarsCount <= 0
+                        def fullBuildSuffix = isFullBuild ? "_full" : ""
+                        buildName = "${optScalaVersion}${formattedDate}${fullBuildSuffix}_${currentBuild.number}"
                     }
                     currentBuild.setDescription(buildName)
                     mvnRepoUrl = "${params.mvnRepoBaseUrl}/${buildName}"
@@ -134,15 +135,20 @@ pipeline {
             }
         }
         stage("Build community projects") {
-            steps {
-                script {
-                    def jobs = [:]
-
-                    def projectDeps = buildPlan.collectEntries { project ->
-                        [project.name, project.dependencies]
-                    }
-                    def inversedProjectDeps = inverseMultigraph(projectDeps)
-                    for(project in buildPlan) {
+          steps {
+            script {
+              buildPlan.eachWithIndex{ stagePlan, idx ->
+                stage("Stage $idx"){
+                  def stage = stagePlan // capture value for closure
+                  def projectsInStage = stage.collect{ it.name }.join(", ")
+                  echo "Running stage $idx/${buildPlan.size()}, projects [${stage.size()}]: ${projectsInStage}"
+                  def jobs = [:]
+                  def projectDeps = stage.collectEntries { project ->
+                      [project.name, project.dependencies]
+                  }
+                  def inversedProjectDeps = inverseMultigraph(projectDeps)
+                  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    for(project in stage) {
                         def proj = project // capture value for closure
                         def projectConfigJson = proj.config ? groovy.json.JsonOutput.toJson(proj.config) : "{}"
                         jobs[proj.name] = {
@@ -170,8 +176,11 @@ pipeline {
                         }
                     }
                     parallel jobs
+                  }
                 }
+              }
             }
+          }
         }
     }
     post {
@@ -179,7 +188,7 @@ pipeline {
         podTemplate(
           containers: [
             // Any container having a curl or pre-installed scala-cli would work 
-            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.0.10', command: 'sleep', args: '15m'),
+            containerTemplate(name: 'reporter', image: 'virtuslab/scala-community-build-project-builder:jdk17-v0.1.2', command: 'sleep', args: '15m'),
           ],
           envVars: [
             envVar(key: 'ELASTIC_USERNAME', value: params.elasticSearchUserName),

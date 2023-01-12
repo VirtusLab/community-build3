@@ -16,7 +16,8 @@ def findTag(repoUrl: String, version: String): Either[String, String] =
   val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
   Try {
     val lines = cmd.!!.linesIterator.filter(_.contains(version)).toList
-    lines.collectFirst { case TagRef(tag) => tag } match
+    val (exactMatch, partialMatch) = lines.partition(_.endsWith(version))
+    (exactMatch ::: partialMatch).collectFirst { case TagRef(tag) => tag } match
       case Some(tag) => Right(tag)
       case _         => Left(s"No tag in:\n${lines.map("-" + _ + "_").mkString("\n")}")
   }.toEither.left.map { e =>
@@ -193,6 +194,7 @@ def makeDependenciesBasedBuildPlan(
       scala.io.Source
         .fromFile(replacedProjectsConfigPath)
         .getLines
+        .map(_.trim)
         .filter(line => line.nonEmpty && !line.startsWith("#"))
         .map { case replacementPattern(org1, name1, org2, name2, branch) =>
           (org1, name1) -> ((org2, name2), Option(branch))
@@ -279,10 +281,47 @@ private given FromString[Seq[Project]] = str =>
     projectsConfigPath
   )
 
+  val planStages: List[List[ProjectBuildDef]] = {
+    @scala.annotation.tailrec
+    def groupByDeps(
+        remaining: Set[ProjectBuildDef],
+        done: Set[String],
+        acc: List[Set[ProjectBuildDef]]
+    ): List[Set[ProjectBuildDef]] =
+      if remaining.isEmpty then acc.reverse
+      else
+        var (currentStage, newRemainings) = remaining.partition {
+          _.dependencies.forall(done.contains)
+        }
+        if currentStage.isEmpty then {
+          val deps = plan.map(v => (v.name, v)).toMap
+          def hasCyclicDependencies(p: ProjectBuildDef) =
+            p.dependencies.exists(deps(_).dependencies.contains(p.name))
+          val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
+          currentStage ++= cyclicDeps
+          newRemainings --= cyclicDeps
+
+          cyclicDeps.foreach(v =>
+            println(
+              s"Mitigated cyclic dependency in  ${v.name} -> ${v.dependencies.toList.filterNot(done.contains)}"
+            )
+          )
+        }
+        val names = currentStage.map(_.name)
+        groupByDeps(newRemainings, done ++ names, currentStage :: acc)
+    end groupByDeps
+    groupByDeps(plan.toSet, Set.empty, Nil)
+      .map(_.toList.sortBy(_.name))
+  }
+
+  planStages.zipWithIndex.foreach { (group, idx) =>
+    println(s"Stage $idx: ${group.size} projects: ${group.map(_.name)}")
+  }
+
   import java.nio.file._
   val dataPath = Paths.get("data")
   val dest = dataPath.resolve("buildPlan.json")
   println("Projects in build plan: " + plan.size)
-  val json = toJson(plan.sortBy(_.dependencies.size))
+  val json = toJson(planStages)
   Files.createDirectories(dest.getParent)
   Files.write(dest, json.toString.getBytes)

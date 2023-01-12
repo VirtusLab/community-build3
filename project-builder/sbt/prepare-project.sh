@@ -17,7 +17,8 @@ projectConfig="$4"
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
-  exit 1
+  mkdir ${repoDir}/project || true
+  echo "sbt.version=${enforcedSbtVersion}" >$buildPropsFile
 fi
 
 sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version= | awk -F= '{ print $2 }')
@@ -52,15 +53,15 @@ fi
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-# Register command for setting up version, for more info check command impl comments
-echo -e "\ncommands += CommunityBuildPlugin.setPublishVersion\n" >>$repoDir/build.sbt
+# Register utility commands, for more info check command impl comments
+echo -e "\ncommands ++= CommunityBuildPlugin.commands\n" >>$repoDir/build.sbt
 
 # Base64 is used to mitigate spliting json by whitespaces
 for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
   function field() {
     echo ${elem} | base64 --decode | jq -r ${1}
   }
-  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/\"${scalaVersion}\"/")
+  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
   path=$(field '.path')
   pattern=$(field '.pattern')
   set -x
