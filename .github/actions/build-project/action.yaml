@@ -1,0 +1,130 @@
+name: "Build projects"
+description: "Used to build a project withing the Open cOmunityu Build"
+inputs:
+  project-name:
+    description: "Name of the project to build"
+    required: true
+  scala-version:
+    description: "Scala Version to use"
+    required: true
+  maven-repo-url:
+    description: "Custom Maven repository used to store artifacts"
+    required: true
+  elastic-user:
+    description: "Secret with auth user to elasticsearch"
+    required: true
+  elastic-password:
+    description: "Secret with auth token to elasticsearch"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: coursier/setup-action@v1
+      with:
+        apps: cs
+
+    - name: Check java version
+      shell: bash
+      run: |
+        ConfigFile=".github/workflows/buildConfig.json"
+        DefaultJDK=11
+        javaVersion=$(jq -r ".\"${{ inputs.project-name }}\".config.java.version // ${DefaultJDK}" $ConfigFile)
+        echo "java-version=$javaVersion" >> $GITHUB_ENV
+        echo "JavaVersion set to $javaVersion"
+
+    - name: Get Current Job Log URL
+      id: job-info
+      uses: Tiryoh/gha-jobid-action@v0.2.0
+      with:
+        github_token: ${{ github.token }}
+        job_name: "${{ github.job }} (${{ matrix.name }})"
+
+    - name: Check can skip build
+      id: check-history
+      shell: bash
+      run: |
+        ConfigFile=".github/workflows/buildConfig.json"
+        ScalaVersion="${{ inputs.scala-version }}"
+        BinScalaVersion=3
+        CustomMavenRepo="${{ inputs.maven-repo-url }}"
+
+        echo "Build URL: ${{ steps.job-info.outputs.html_url }}"
+        projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
+
+        canSkip=true
+        for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
+          arr=($(echo $target | tr "%" " "))
+          #use offset:length for consistent indexing (zsh starts with 1, bash starts with 0)
+          org=${arr[@]:0:1}
+          name=${arr[@]:1:1}
+          artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
+
+          if ! cs resolve "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
+            echo "Artifact $artifact not found, would build the project"
+            canSkip=false
+            break;
+          fi
+        done
+        echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
+
+    - name: Build project
+      uses: addnab/docker-run-action@v3
+      if: steps.check-history.outputs.can-skip-build != 'true'
+      with:
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.0"
+        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
+        run: |
+          ConfigFile="/opencb/.github/workflows/buildConfig.json"
+          DefaultConfig='{"memoryRequestMb":4096}'
+          config () { 
+            path=".\"${{ inputs.project-name }}\"$@" 
+            jq -c -r "$path" $ConfigFile 
+          }
+
+          touch build-logs.txt  build-summary.txt
+          # Assume failure unless overwritten by a successful build
+          echo 'failure' > build-status.txt 
+
+          /build/build-revision.sh \
+            "$(config .repoUrl)" \
+            "$(config .revision)" \
+            "${{ inputs.scala-version }}" \
+            "$(config .version)" \
+            "$(config .targets)" \
+            "${{ inputs.maven-repo-url }}" \
+            '1.6.2' \
+            "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
+
+          /build/feed-elastic.sh \
+            'https://scala3.westeurope.cloudapp.azure.com/data' \
+            "${{ inputs.project-name }}" \
+            "$(cat build-status.txt)" \
+            "$(date --iso-8601=seconds)" \
+            build-summary.txt \
+            build-logs.txt \
+            "$(config .version)" \
+            "${{ inputs.scala-version }}" \
+            "${{ github.run_id }}" \
+            "${{ steps.job-info.outputs.html_url }}"
+          if [ $? != 0 ]; then 
+            echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
+          fi
+          
+          # Store results
+          mv build-logs.txt /opencb/
+          mv build-status.txt /opencb/
+          mv build-summary.txt /opencb
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      if: steps.check-history.outputs.can-skip-build != 'true'
+      with:
+        name: ${{ inputs.project-name }}
+        path: ${{ github.workspace }}/build-*.txt
+
+    - name: Check results
+      shell: bash
+      if: steps.check-history.outputs.can-skip-build != 'true'
+      run: |
+        # Set the result of the build
+        [ "$(cat build-status.txt)" = "success" ]

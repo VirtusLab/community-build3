@@ -1,0 +1,50 @@
+name: Auto update build plan
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every friday at 4 PM
+    - cron: "0 16 * * 5"
+jobs:
+  build-plan:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Install scala-cli
+        run: sdk install scalacli
+
+      - name: Build plan
+        run: scala-cli run coordinator/ -- 3 -1 -1 "" env/prod/config/replaced-projects.txt env/prod/config/projects-config.conf env/prod/config/filtered-projects.txt
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v4
+        id: cpr
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update build config
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: build/scheduled-update
+          branch-suffix: timestamp
+          delete-branch: true
+          title: "[Bot] Update build config"
+          draft: false
+          add-paths: |
+            .github/workflows/buildPlan.yaml
+            .github/workflows/buildConfig.json
+
+      - name: Auto approve
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.cpr.outputs.pull-request-number }}
+      
+      - name: Auto merge PR
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
