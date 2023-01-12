@@ -1,7 +1,7 @@
 #!/usr/bin/env -S scala-cli shebang
 //> using scala "3"
-//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.5.1"
-//> using lib "org.slf4j:slf4j-simple:2.0.5"
+//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.5.2"
+//> using lib "org.slf4j:slf4j-simple:2.0.6"
 
 import com.sksamuel.elastic4s
 import elastic4s.*
@@ -19,27 +19,57 @@ import scala.io.Source
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.io.AnsiColor.*
+import org.elasticsearch.client.RestClient
+import org.apache.http.HttpHost
 
 given ExecutionContext = ExecutionContext.global
 
 val BuildSummariesIndex = "project-build-summary"
 val DefaultTimeout = 5.minutes
-val ElasticsearchUrl = "https://localhost:9200"
+val ElasticsearchHost = "scala3.westeurope.cloudapp.azure.com"
+val ElasticsearchUrl = s"https://$ElasticsearchHost/data/"
 // ./scripts/show-elastic-credentials.sh
 val ElasticsearchCredentials = new UsernamePasswordCredentials(
   sys.env.getOrElse("ES_USERNAME", "elastic"),
   sys.env.getOrElse("ES_PASSWORD", "changeme")
 )
+lazy val esClient = {
+  val clientConfig = new HttpClientConfigCallback {
+    override def customizeHttpClient(
+        httpClientBuilder: HttpAsyncClientBuilder
+    ): HttpAsyncClientBuilder = {
+      val creds = new BasicCredentialsProvider()
+      creds
+        .setCredentials(AuthScope.ANY, ElasticsearchCredentials)
+      httpClientBuilder
+        .setDefaultCredentialsProvider(creds)
+    }
+  }
+
+  ElasticClient(
+    JavaClient.fromRestClient(
+      RestClient
+        .builder(HttpHost(ElasticsearchHost, -1, "https"))
+        .setPathPrefix("/data")
+        .setHttpClientConfigCallback(clientConfig)
+        .build()
+    )
+  )
+}
 
 lazy val NightlyReleases = {
   val re = raw"(?<=title=$")(.+-bin-\d{8}-\w{7}-NIGHTLY)(?=/$")".r
-  val html = Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/")
+  val html = Source.fromURL(
+    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/"
+  )
   re.findAllIn(html.mkString).toVector
 }
 
 lazy val StableScalaVersions = {
   val re = raw"(?<=title=$")(\d+\.\d+\.\d+(-RC\d+)?)(?=/$")".r
-  val html = Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/")
+  val html = Source.fromURL(
+    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/"
+  )
   re.findAllIn(html.mkString).toVector
 }
 def PreviousScalaReleases = NightlyReleases
@@ -50,7 +80,9 @@ def PreviousScalaReleases = NightlyReleases
     case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
   }
   printLine()
-  println(s"Reporting failed community build projects using Scala $scalaVersion")
+  println(
+    s"Reporting failed community build projects using Scala $scalaVersion"
+  )
   val failedProjects = listFailedProjects(scalaVersion)
   printLine()
   val reportedProjects = compareWithScalaVersion
@@ -63,7 +95,9 @@ def PreviousScalaReleases = NightlyReleases
       failedNow.filter(p => !ignoredProjects.contains(p.project))
     }
   if reportedProjects.nonEmpty then
-    reportCompilerRegressions(reportedProjects, scalaVersion)(Reporter.Default(scalaVersion))
+    reportCompilerRegressions(reportedProjects, scalaVersion)(
+      Reporter.Default(scalaVersion)
+    )
   printLine()
   esClient.close()
 
@@ -85,11 +119,15 @@ extension (summary: List[SourceFields])
     val taskResults = module(task).asInstanceOf[SourceFields]
     taskResults("status") == "failed"
   }
-  private def existsModuleThat(pred: SourceFields ?=> Boolean) = summary.exists(pred(using _))
+  private def existsModuleThat(pred: SourceFields ?=> Boolean) =
+    summary.exists(pred(using _))
 end extension
 
-def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[FailedProject] =
-  val Limit = 1000
+def listFailedProjects(
+    scalaVersion: String,
+    logFailed: Boolean = true
+): Seq[FailedProject] =
+  val Limit = 1200
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
       .order(TermsOrder("buildTimestamp", asc = false))
@@ -97,7 +135,7 @@ def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[Fai
         maxAgg("buildTimestamp", "timestamp"),
         termsAgg("status", "status")
       )
-      .size(20) // last 5 versions
+      .size(100) // last 5 versions
 
   def process(resp: SearchResponse): Seq[FailedProject] = {
     val projectVersions = resp.aggs
@@ -147,11 +185,12 @@ def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[Fai
         def logProject(label: String)(color: String) = if logFailed then
           println(
             s"$color${label.padTo(8, " ").mkString}$RESET failure in $BOLD${project.orgRepoName} @ ${projectVersions(
-              project.searchName
-            )}$RESET - $buildURL"
+                project.searchName
+              )}$RESET - $buildURL"
           )
         val compilerFailure = summary.compilerFailure
-        if hasNewerPassingVersion(project, lastFailedVersion) then None // ignore failure
+        if hasNewerPassingVersion(project, lastFailedVersion) then
+          None // ignore failure
         else
           if summary.compilerFailure then logProject("COMPILER")(RED)
           if summary.testsFailure then logProject("TEST")(YELLOW)
@@ -219,11 +258,13 @@ def projectHistory(project: FailedProject) =
           fieldSort("scalaVersion").desc(),
           fieldSort("timestamp").desc()
         )
-        .sourceInclude("scalaVersion","version","summary")
+        .sourceInclude("scalaVersion", "version", "summary")
     }
     .map(
       _.fold[Seq[ProjectHistoryEntry]](
-        reportFailedQuery(s"Project build history ${project.project.orgRepoName}")
+        reportFailedQuery(
+          s"Project build history ${project.project.orgRepoName}"
+        )
           .andThen(_ => Nil),
         _.hits.hits
           .map(_.sourceAsMap)
@@ -236,7 +277,9 @@ def projectHistory(project: FailedProject) =
               scalaVersion = fields("scalaVersion").asInstanceOf[String],
               version = fields("version").asInstanceOf[String],
               isCurrentVersion = isCurrentVersion,
-              compilerFailure = fields("summary").asInstanceOf[List[SourceFields]].compilerFailure
+              compilerFailure = fields("summary")
+                .asInstanceOf[List[SourceFields]]
+                .compilerFailure
             )
           }
       )
@@ -263,7 +306,12 @@ object Reporter:
         sameVersionRegressions: Seq[ProjectHistoryEntry],
         diffVersionRegressions: Seq[ProjectHistoryEntry]
     ): Unit = {
-      def showRow(project: String, version: String, buildURL: String, issueURL: String = "") =
+      def showRow(
+          project: String,
+          version: String,
+          buildURL: String,
+          issueURL: String = ""
+      ) =
         println(s"| $project | $version | $issueURL | $buildURL |")
       val allRegressions = sameVersionRegressions ++ diffVersionRegressions
       printLine()
@@ -276,7 +324,8 @@ object Reporter:
         val version = failedProjects
           .get(p.project)
           .collect {
-            case failed if p.version != failed.version => s"${p.version} -> ${failed.version}"
+            case failed if p.version != failed.version =>
+              s"${p.version} -> ${failed.version}"
           }
           .getOrElse(p.version)
         val buildUrl = {
@@ -298,7 +347,9 @@ private def reportCompilerRegressions(
       .toMap
 
   val failedProjects = projects.map(v => v.project -> v).toMap
-  val projectHistory = failedProjectHistory.map { (key, value) => key.project -> value }
+  val projectHistory = failedProjectHistory.map { (key, value) =>
+    key.project -> value
+  }
   val allHistory = projectHistory.values.flatten.toSeq
 
   if reporter.prelude.nonEmpty then
@@ -316,9 +367,11 @@ private def reportCompilerRegressions(
               prev.contains(v.project) // failed in newer version
           )
           .sortBy(_.project.searchName)
-        val sameVersionRegressions = regressionsSinceLastVersion(exactVersion = true)
-        val diffVersionRegressions = regressionsSinceLastVersion(exactVersion = false)
-          .diff(sameVersionRegressions)
+        val sameVersionRegressions =
+          regressionsSinceLastVersion(exactVersion = true)
+        val diffVersionRegressions =
+          regressionsSinceLastVersion(exactVersion = false)
+            .diff(sameVersionRegressions)
         val allRegressions = sameVersionRegressions ++ diffVersionRegressions
 
         if allRegressions.isEmpty then prev
@@ -379,57 +432,3 @@ def isVersionNewerThen(version: String, reference: String) =
 end isVersionNewerThen
 def isVersionNewerOrEqualThen(version: String, reference: String) =
   version == reference || isVersionNewerThen(version, reference)
-
-lazy val esClient =
-  val clientConfig = new HttpClientConfigCallback {
-    override def customizeHttpClient(
-        httpClientBuilder: HttpAsyncClientBuilder
-    ): HttpAsyncClientBuilder = {
-      val creds = new BasicCredentialsProvider()
-      creds.setCredentials(AuthScope.ANY, ElasticsearchCredentials)
-      httpClientBuilder
-        .setDefaultCredentialsProvider(creds)
-        // Custom SSL context that would not require ES certificate
-        .setSSLContext(unsafe.UnsafeSSLContext)
-        .setHostnameVerifier(unsafe.VerifiesAllHostNames)
-    }
-  }
-
-  ElasticClient(
-    JavaClient(
-      ElasticProperties(ElasticsearchUrl),
-      clientConfig
-    )
-  )
-end esClient
-
-// Used to connect in localhost port-forwarding to K8s cluster without certifacates
-object unsafe:
-  import javax.net.ssl.{SSLSocket, SSLSession}
-  import java.security.cert.X509Certificate
-  import org.apache.http.conn.ssl.X509HostnameVerifier
-  object VerifiesAllHostNames extends X509HostnameVerifier {
-    override def verify(x: String, y: SSLSession): Boolean = true
-    override def verify(x: String, y: SSLSocket): Unit = ()
-    override def verify(x: String, y: X509Certificate): Unit = ()
-    override def verify(x: String, y: Array[String], x$2: Array[String]): Unit = ()
-  }
-
-  lazy val UnsafeSSLContext = {
-    object TrustAll extends javax.net.ssl.X509TrustManager {
-      override def getAcceptedIssuers(): Array[X509Certificate] = Array()
-      override def checkClientTrusted(
-          x509Certificates: Array[X509Certificate],
-          s: String
-      ) = ()
-      override def checkServerTrusted(
-          x509Certificates: Array[X509Certificate],
-          s: String
-      ) = ()
-    }
-
-    val instance = javax.net.ssl.SSLContext.getInstance("SSL")
-    instance.init(null, Array(TrustAll), new java.security.SecureRandom())
-    instance
-  }
-end unsafe
