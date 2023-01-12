@@ -34,6 +34,13 @@ if [[ ! -z "$requestedMemoryMb" ]]; then
   memorySettings=("-J-Xmx${size}" "-J-Xms${size}")
 fi
 
+# Don't set version if not publishing
+setVersionCmd="setPublishVersion $version"
+if [[ -z $version  ]]; then
+  setVersionCmd=""
+fi
+
+
 sbtSettings=(
   --batch
   --no-colors
@@ -48,6 +55,7 @@ logFile=build.log
 
 shouldRetry=false
 forceScalaVersion=false
+# TODO should enable only in Scala3 projects
 enableMigrationMode=false
 sourceVersionToUseForMigration=""
 
@@ -70,7 +78,7 @@ function runSbt() {
     "$setScalaVersionCmd -v" \
     "set every credentials := Nil" \
     "$customCommands" \
-    "setPublishVersion $version" \
+    "$setVersionCmd" \
     "$enableMigrationModeCmd $sourceVersionToUseForMigration" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
