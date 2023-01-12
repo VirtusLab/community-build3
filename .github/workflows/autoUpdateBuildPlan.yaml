@@ -1,5 +1,9 @@
 name: Auto update build plan
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   workflow_dispatch:
   schedule:
@@ -24,7 +28,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         id: cpr
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
           commit-message: Update build config
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
@@ -48,5 +52,5 @@ jobs:
       - name: Auto merge PR
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
