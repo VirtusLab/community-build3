@@ -5,6 +5,11 @@
 
 name: "Open Community Build"
 on:
+  workflow_call:
+    inputs:
+      published-scala-version:
+        type: string
+        description: 'Published Scala version to use, if empty compiler would be build with default name'
   workflow_dispatch:
     inputs:
       published-scala-version:
