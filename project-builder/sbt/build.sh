@@ -55,7 +55,6 @@ logFile=build.log
 
 shouldRetry=false
 forceScalaVersion=false
-# TODO should enable only in Scala3 projects
 enableMigrationMode=false
 sourceVersionToUseForMigration=""
 

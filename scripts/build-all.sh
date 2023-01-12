@@ -7,10 +7,10 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION="$1"
-export PREV_CB_VERSION="v0.1.2"
+export PREV_CB_VERSION="v0.2.0"
 
 javaDefault=11
-javaAccessoryVersions=(8 17)
+javaAccessoryVersions=(8 17 19)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 for javaVersion in "${javaAccessoryVersions[@]}"; do
