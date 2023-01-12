@@ -25,9 +25,17 @@ jobs:
       - name: Find last versions
         id: detect
         run: |
-          echo "last-nightly-version=$(./scripts/lastVersionNightly.sc)" >> $GITHUB_OUTPUT
-          echo "last-stable-version=$(./scripts/lastVersionStable.sc)" >> $GITHUB_OUTPUT
-          echo "last-rc-version=$(./scripts/lastVersionRC.sc)" >> $GITHUB_OUTPUT
+          lastNightly="$(./scripts/lastVersionNightly.sc)"
+          lastStable="$(./scripts/lastVersionStable.sc)"
+          lastRC="$(./scripts/lastVersionRC.sc)" 
+
+          echo "Detected last nightly version: $lastNightly (used)"
+          echo "Detected last stable version:  $lastStable"
+          echo "Detected last RC version:      $lastRC"
+
+          echo "last-nightly-version=$lastNightly" >> $GITHUB_OUTPUT
+          echo "last-stable-version=$lastStable" >> $GITHUB_OUTPUT
+          echo "last-rc-version=$lastRC" >> $GITHUB_OUTPUT
 
   run-build:
     uses: ./.github/workflows/buildPlan.yaml
