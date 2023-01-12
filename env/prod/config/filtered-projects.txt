@@ -24,11 +24,16 @@ cucumber:action-publish-sbt:.*
 pityka:aten-scala:.*
 stryker:mutator_mutation-testing-elements:.*
 wireapp:wire-signals:.*
+davidledwards:zookeeper:.*
 
 # Missing module moduleMappings
 busymachines:pureharm-db-core:.*
 eed3si9n:sbt-coursier:.*
 neandertech:jsonrpclib:.*
+
+## maybe mill issues when mapping
+finos:morphir-scala:.*
+iltotore:iron:.*
 
 # Not an official release version
 com-lihaoyi:ammonite:.* 
@@ -96,6 +101,10 @@ arturopala:gitignore:.*
 fehu:opentracing-scala:.*
 lorandszakacs:sprout:0.0.[0-5]
 rssh:scala-gopher:.*
+wangzaixiang:wjson:.*
+
+# Missing dependencies - requires submodules
+scalacenter_scala-debug-adapter
 
 ## Outdated version, needs new release
 2m:yabai-scala:2.0.[0-1]
@@ -157,6 +166,7 @@ zio:zio-aws:.*
 ## wartremover
 atedeg:mdm:.*
 cognitedata:cognite-sdk-scala:.*
+guymers_ceesvee
 kevin-lee:just-semver:.* 
 kevin-lee:just-sysprocess:.*
 medeia:medeia:.*
@@ -171,6 +181,7 @@ kubukoz:spotify-next:.*
 kubukoz:sup:.* 
 polyvariant:colorize-scala:.*
 polyvariant:scodec-java-classfile:.*
+polyvariant:treesitter4s:.*
 
 # Depends on no longer available pre-release
 oleg-py:shironeko:0.2.0-M.*
@@ -185,6 +196,10 @@ laserdisc-io:fs2-aws:5.0.*
 ## override opaque type
 tabdulradi:mazboot:.*
 
-# Unsupported minimal JDK version
-## JDK 19
-softwaremill:tapir-loom:.*
+
+# scala-cli project
+alexarchambault:scalacon-2022-demo:.*
+alexarchambault:scalacon2022-demo:.*
+
+# bleep projects
+oyvindberg:tui-scala:.*
