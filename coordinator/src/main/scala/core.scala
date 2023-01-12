@@ -4,6 +4,10 @@ import java.nio.file._
 import pureconfig._
 import pureconfig.generic.derivation.default._
 import pureconfig.generic.derivation.EnumConfigReader
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+
+type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
 case class Project(org: String, name: String)(val stars: Int): // stars may change...
   def show = s"$org%$name%$stars"
@@ -22,7 +26,7 @@ case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[Stri
 
 object MvnMapping:
   def load(s: String) =
-    val Array(name, version, mvn, deps*) = s.split(",")
+    val Array(name, version, mvn, deps*) = s.split(","): @unchecked
     MvnMapping(name, version, mvn, deps)
 
 case class TargetId(org: String, name: String):
@@ -103,4 +107,3 @@ given Conversion[String, SemVersion] = version =>
     patch = versionPart(2),
     milestone = milestone
   )
-

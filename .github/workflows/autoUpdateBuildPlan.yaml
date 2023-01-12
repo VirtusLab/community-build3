@@ -11,8 +11,9 @@ jobs:
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3
-      - uses: coursier/cache-action@v6
-      - uses: VirtusLab/scala-cli-setup@main
+
+      - name: Install scala-cli
+        run: sdk install scalacli
 
       - name: Build plan
         run: scala-cli run coordinator/ -- 3 -1 -1 "" env/prod/config/replaced-projects.txt env/prod/config/projects-config.conf env/prod/config/filtered-projects.txt

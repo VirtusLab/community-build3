@@ -93,19 +93,19 @@ eval $(minikube -p minikube docker-env)
 Most likely you'll need to build the base image only once (it doesn't get modified too often but building it takes quite a lot of time), e.g.:
 
 ```shell
-scripts/build-builder-base.sh v0.1.2
+scripts/build-builder-base.sh v0.2.0
 ```
 
 Build all the remaining images
 
 ```shell
-scripts/build-quick.sh v0.1.2
+scripts/build-quick.sh v0.2.0
 ```
 
 or (re)build each image separately e.g.
 
 ```shell
-scripts/build-mvn-repo.sh v0.1.2
+scripts/build-mvn-repo.sh v0.2.0
 ```
 
 ### Deploying and debugging in k8s
@@ -211,22 +211,6 @@ You should then bump the versions in the yaml config.
 
 For easier development of shared jenkins libraries you can use `scripts/push-jenkins-lib.sh`
 to upload the locally modified files without having to restart jenkins.
-
-### Accelerating development and testing in jenkins
-
-As the entire flow is quite time consuming you might find it more convenient to skip some parts of it to test some of your changes, e.g.
-
-* Compute the build plan only once locally and pass it as a parameter of the build when triggering the daily build
-
-* Use a manually prepared build plan inluding only a few repositories whose builds are very fast. You can use the ones included in this project (in `sample-repos` directory) for this purpose.
-First set up a pod hosting the repositories as shown below and then use the build plan from `sample-repos/buildPlan.json`
-```shell
-eval $(minikube -p minikube docker-env)
-scripts/build-sample-repos.sh
-scripts/start-sample-repos.sh
-```
-
-* Use a version of the compiler which is already published (e.g. `3.1.0`) - this will skip the local build
 
 ### Building a community project locally
 

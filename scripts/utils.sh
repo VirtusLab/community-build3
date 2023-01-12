@@ -7,18 +7,9 @@ function scbk() {
   kubectl -n "$CB_K8S_NAMESPACE" "$@"
 }
 
-function scbok() {
-  if [ -z "$CB_K8S_JENKINS_OPERATOR_NAMESPACE" ]; then
-    echo >&2 "CB_K8S_JENKINS_OPERATOR_NAMESPACE env variable has to be set"
-    exit 1
-  fi
-
-  kubectl -n "$CB_K8S_JENKINS_OPERATOR_NAMESPACE" "$@"
-}
-
 function checkJavaVersion() {
   version="$1"
-  supportedVersions=(8 11 17)
+  supportedVersions=(8 11 17 19)
   
   if [ -z "$version" ]; then
     echo >&2 "Java version has to be set"

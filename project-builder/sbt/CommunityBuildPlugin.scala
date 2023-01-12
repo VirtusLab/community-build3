@@ -182,9 +182,8 @@ object CommunityBuildPlugin extends AutoPlugin {
     Compile / scalacOptions,
     Test / scalacOptions
   ) { (args, extracted) =>
-    val argSourceVersion = args.headOption.filter(_.nonEmpty)
-    def resolveSourceVersion(ref: ProjectRef) = CrossVersion
-      .partialVersion(extracted.get(ref / scalaVersion))
+    def resolveSourceVersion(scalaVersion: String) = CrossVersion
+      .partialVersion(scalaVersion)
       .collect {
         case (3, 0) => "3.0-migration"
         case (3, 1) => "3.0-migration"
@@ -193,21 +192,24 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
 
     (ref: ProjectRef, currentSettings: Seq[String]) => {
-      argSourceVersion
-        .orElse(resolveSourceVersion(ref))
-        .fold(currentSettings) { sourceVersion =>
-          val newEntries = Seq(s"-source:$sourceVersion")
-          println(
-            s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
-          )
-          // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
-          val filteredSettings =
-            Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
-          currentSettings.filterNot { setting =>
-            filteredSettings.exists(setting.contains(_)) ||
-            setting.matches(".*-Wconf.*any:e")
-          } ++ newEntries
-        }
+      val scalaVersion = extracted.get(ref / scalaVersion)
+      if (!scalaVersion.startsWith("3.")) currentSettings
+      else
+        argSourceVersion
+          .orElse(resolveSourceVersion(ref))
+          .fold(currentSettings) { sourceVersion =>
+            val newEntries = Seq(s"-source:$sourceVersion")
+            println(
+              s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
+            )
+            // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
+            val filteredSettings =
+              Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
+            currentSettings.filterNot { setting =>
+              filteredSettings.exists(setting.contains(_)) ||
+              setting.matches(".*-Wconf.*any:e")
+            } ++ newEntries
+          }
     }
   }
 

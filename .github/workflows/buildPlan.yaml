@@ -5,6 +5,11 @@
 
 name: "Open Community Build"
 on:
+  workflow_call:
+    inputs:
+      published-scala-version:
+        type: string
+        description: 'Published Scala version to use, if empty compiler would be build with default name'
   workflow_dispatch:
     inputs:
       published-scala-version:
@@ -65,6 +70,7 @@ jobs:
         - name: gemini-hlsw_lucuma-jts
         - name: getshaka-org_native-converter
         - name: hamnis_dataclass-scalafix
+        - name: hnaderi_scala-readpass
         - name: hsci-r_lucene-perfieldpostingsformatordtermvectorscodec
         - name: http4s_hpack
         - name: iheartradio_ficus
@@ -119,6 +125,8 @@ jobs:
         - name: softwaremill_odelay
         - name: softwaremill_scala-common
         - name: spray_spray
+        - name: swaldman_mchange-codegenutil
+        - name: swaldman_mchange-literal
         - name: swaldman_mlog-scala
         - name: t2v_holidays
         - name: tabdulradi_happypath
@@ -206,8 +214,6 @@ jobs:
         - name: aaronp_eie
         - name: aiyanbo_scala-i18n
         - name: akiomik_seaw
-        - name: alexarchambault_scalacon-2022-demo
-        - name: alexarchambault_scalacon2022-demo
         - name: altoo-ag_akka-kryo-serialization
         - name: andimiller_munit-cats-effect-styles
         - name: andyglow_scala-range
@@ -495,13 +501,13 @@ jobs:
         - name: pjfanning_jackson-module-scala-duration
         - name: pjfanning_jackson-module-scala3-enum
         - name: pjfanning_jackson-scala3-reflection-extensions
+        - name: playframework_play-ws
         - name: rallyhealth_scalacheck-ops
         - name: raquo_waypoint
         - name: rtyley_line-break-preserving-line-splitting
         - name: ruimo_csvparser
         - name: ruimo_graphics
         - name: sangria-graphql_sangria-marshalling-testkit
-        - name: sbt_sbt
         - name: scala-native_scala-native-cli
         - name: scala-stm_scala-stm
         - name: scalacenter_scala-debug-adapter
@@ -1026,7 +1032,6 @@ jobs:
         - name: ohze_couchbase-scala
         - name: outr_scribe
         - name: pityka_nspl
-        - name: playframework_playframework
         - name: rallyhealth_weepickle
         - name: rewards-network_combos
         - name: sangria-graphql_sangria-argonaut
@@ -1044,6 +1049,7 @@ jobs:
         - name: vladkopanev_cats-saga
         - name: xuwei-k_httpz
         - name: xuwei-k_jwt-scala
+        - name: zengularity_benji
         - name: zio_interop-monix
     steps:
       - name: "Git Checkout"
@@ -1074,7 +1080,6 @@ jobs:
         - name: permutive-engineering_prometheus4cats
         - name: pityka_lamp
         - name: playframework_anorm
-        - name: playframework_play-ws
         - name: sangria-graphql_sangria
         - name: stephennancekivell_scalatest-json
         - name: typelevel_fs2
@@ -1122,6 +1127,7 @@ jobs:
         - name: kory33_s2mc-test
         - name: kovstas_fs2-throttler
         - name: laserdisc-io_log-effect
+        - name: lhns_fs2-compress
         - name: lhns_fs2-utils
         - name: lhns_nifi-scala
         - name: mjakubowski84_parquet4s
@@ -1156,7 +1162,6 @@ jobs:
         - name: typelevel_fs2-grpc
         - name: typelevel_jawn-fs2
         - name: valencik_textmogrify
-        - name: zengularity_benji
         - name: zio_interop-cats
     steps:
       - name: "Git Checkout"
