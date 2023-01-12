@@ -26,7 +26,8 @@ object Scaladex {
       )
       fromJson[ArtifactMetadataResponse](response.text())
     }.recoverWith {
-      case err: org.jsoup.HttpStatusException if err.getStatusCode == 503 && !Thread.interrupted() =>
+      case err: org.jsoup.HttpStatusException
+          if err.getStatusCode == 503 && !Thread.interrupted() =>
         Console.err.println(
           s"Failed to fetch artifact metadata, Scaladex unavailable, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
         )

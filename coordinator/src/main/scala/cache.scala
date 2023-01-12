@@ -15,8 +15,7 @@ def cachedSingle[V](dest: String)(op: => V)(using CacheDriver[String, V]): V =
 def cached[V, K](op: K => V)(using cacheDriver: CacheDriver[K, V]): K => V =
   (k: K) =>
     val dest = cacheDriver.dest(k)
-    if Files.exists(dest) then
-      cacheDriver.load(String(Files.readAllBytes(dest)), k)
+    if Files.exists(dest) then cacheDriver.load(String(Files.readAllBytes(dest)), k)
     else
       val res = op(k)
       Files.createDirectories(dest.getParent)
@@ -28,8 +27,7 @@ def cachedAsync[V, K](op: K => AsyncResponse[V])(using
 ): K => AsyncResponse[V] =
   (k: K) =>
     val dest = cacheDriver.dest(k)
-    if Files.exists(dest) then
-      Future { cacheDriver.load(String(Files.readAllBytes(dest)), k) }
+    if Files.exists(dest) then Future { cacheDriver.load(String(Files.readAllBytes(dest)), k) }
     else
       op(k).map { res =>
         Files.createDirectories(dest.getParent)
@@ -45,7 +43,7 @@ given CacheDriver[Project, ProjectModules] with
 
   def load(data: String, key: Project): ProjectModules =
     val mvs = data.linesIterator.toSeq.map { l =>
-      val v +: mds = l.split(",").toSeq
+      val v +: mds = l.split(",").toSeq: @unchecked
       ModuleInVersion(v, mds)
     }
     ProjectModules(key, mvs)
@@ -73,10 +71,10 @@ object DepOps:
 
 given CacheDriver[ModuleVersion, Target] with
   def write(v: Target): String =
-    (Dep(v.id, "_") +: v.deps).map(DepOps.write).mkString("\n")
+    (Dep(v.id, "_") +: v.deps).map(DepOps.write).mkString("\n"): @unchecked
 
   def load(data: String, key: ModuleVersion): Target =
-    val Dep(id, _) +: deps = data.linesIterator.toSeq.map(DepOps.load)
+    val Dep(id, _) +: deps = data.linesIterator.toSeq.map(DepOps.load): @unchecked
     Target(id, deps)
 
   def dest(v: ModuleVersion): Path =

@@ -6,6 +6,8 @@ import scala.concurrent.*
 import scala.concurrent.duration.*
 import java.time.OffsetDateTime
 import java.util.concurrent.TimeUnit.SECONDS
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 // TODO scala3 should be more robust
 def loadProjects(scalaBinaryVersion: String): Seq[Project] =
@@ -50,7 +52,7 @@ def loadScaladexProject(scalaBinaryVersion: String)(
     .projectSummary(project.org, project.name, scalaBinaryVersion)
     .flatMap {
       case None =>
-        System.err.println(
+        Console.err.println(
           s"No project summary for ${project.org}/${project.name}"
         )
         Future.successful(Nil)
@@ -67,7 +69,7 @@ def loadScaladexProject(scalaBinaryVersion: String)(
                 )
                 .map { response =>
                   if (response.pagination.pageCount != 1)
-                    System.err.println(
+                    Console.err.println(
                       "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
                     )
                   // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
@@ -81,9 +83,7 @@ def loadScaladexProject(scalaBinaryVersion: String)(
             .map(_.toMap)
           orderedVersions = projectSummary.versions
             .flatMap(v => releaseDates.get(v).map(VersionRelease(v, _)))
-            .sortBy(_.releaseDate)(using
-              summon[Ordering[OffsetDateTime]].reverse
-            )
+            .sortBy(_.releaseDate)(using summon[Ordering[OffsetDateTime]].reverse)
             .map(_.version)
         yield for version <- orderedVersions
         yield ModuleInVersion(
@@ -110,11 +110,9 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
   val url =
     s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
-  println(url)
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
-  println(gradle)
-  val GradleDep(o, n, v) = gradle
+  val GradleDep(o, n, v) = gradle: @unchecked
   val orgParsed = o.split('.').mkString("/")
   val mCentralUrl =
     s"https://repo1.maven.org/maven2/$orgParsed/$n/$v/$n-$v.pom"
@@ -141,42 +139,47 @@ def loadMavenInfo(scalaBinaryVersion: String)(
     s"Empty modules list in ${projectModules.project}"
   )
   val ModuleInVersion(version, modules) = projectModules.mvs
-    .find(v => findTag(repoName, v.version).isRight)
+    .find(v => findTag(repoName, v.version).isDefined)
     .getOrElse(projectModules.mvs.head)
 
-    val tasks = modules.map{module => 
-      def tryFetch(backoffSeconds: Int): AsyncResponse[Option[Target]] =
-        Future({
-          val target = cached {
-            asTarget(scalaBinaryVersion)(_)
-          }(ModuleVersion(module, version, projectModules.project))
-          Some(target)
-        })
-          .recoverWith {
-            case ex: HttpStatusException if ex.getStatusCode == 503  && !Thread.interrupted() =>
-              Console.err.println(
-                          s"Failed to load maven info for $org/$name: retry with backoff ${backoffSeconds}s"
-                        )
-            SECONDS.sleep(backoffSeconds)
-            tryFetch((backoffSeconds * 2).min(60))
-
-            case ex: Exception =>
-              Console.err.println(
-                s"Failed to load maven info for $org/$name: ${ex}"
-              )
-              Future.failed(ex)
-          }
-      tryFetch(1)
+  val tasks = modules.map { module =>
+    def tryFetch(backoffSeconds: Int): AsyncResponse[Option[Target]] = {
+      inline def backoff(reason: => String) = {
+        Console.err.println(
+          s"Failed to load maven info for $org/$name, reason: $reason: retry with backoff ${backoffSeconds}s"
+        )
+        SECONDS.sleep(backoffSeconds)
+        tryFetch((backoffSeconds * 2).min(60))
+      }
+      Future({
+        val target = cached {
+          asTarget(scalaBinaryVersion)(_)
+        }(ModuleVersion(module, version, projectModules.project))
+        Some(target)
+      })
+        .recoverWith {
+          case ex: UnknownHostException   => backoff("service not found")
+          case ex: SocketTimeoutException => backoff("socket timeout exception")
+          case ex: HttpStatusException if ex.getStatusCode == 503 =>
+            backoff("service unavailable")
+          case ex: Exception =>
+            Console.err.println(
+              s"Failed to load maven info for $org/$name: ${ex}"
+            )
+            Future.failed(ex)
+        }
     }
+    tryFetch(1)
+  }
 
-    Future.foldLeft(tasks)(List.empty[Target]){
-      case (acc, target) => acc ::: target.toList
+  Future
+    .foldLeft(tasks)(List.empty[Target]) { case (acc, target) =>
+      acc ::: target.toList
     }
     .map(LoadedProject(projectModules.project, version, _))
 
   /** @param scalaBinaryVersion
-    *   Scala binary version name (major.minor) or `3` for scala 3 - following
-    *   scaladex's convention
+    *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
     */
 def loadDepenenecyGraph(
     scalaBinaryVersion: String,
@@ -186,10 +189,9 @@ def loadDepenenecyGraph(
     filterPatterns: Seq[String] = Nil
 ): AsyncResponse[DependencyGraph] =
   val patterns = filterPatterns.map(_.r)
-  def loadProject(p: Project): AsyncResponse[ProjectModules] = cachedAsync {
-    (p: Project) =>
-      loadScaladexProject(scalaBinaryVersion)(p)
-        .map(projectModulesFilter(patterns))
+  def loadProject(p: Project): AsyncResponse[ProjectModules] = cachedAsync { (p: Project) =>
+    loadScaladexProject(scalaBinaryVersion)(p)
+      .map(projectModulesFilter(patterns))
   }(p)
 
   val required = LazyList
@@ -222,8 +224,7 @@ def loadDepenenecyGraph(
             loadMavenInfo(scalaBinaryVersion)(project)
               .map(Option(_))
               .recover {
-                case ex: org.jsoup.HttpStatusException
-                    if ex.getStatusCode() == 404 =>
+                case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
                   System.err.println(s"Missing Maven info: ${ex.getUrl()}")
                   None
               }

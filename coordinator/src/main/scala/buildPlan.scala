@@ -10,21 +10,114 @@ import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.ForkJoinPool
+import os.write
+import scala.collection.mutable
+import scala.collection.SortedMap
+import os.CommandResult
+
+@main def storeDependenciesBasedBuildPlan(
+    scalaBinaryVersion: String,
+    minStarsCount: Int,
+    maxProjectsCount: Int,
+    requiredProjects: Seq[Project],
+    replacedProjectsConfigPath: os.Path,
+    projectsConfigPath: os.Path,
+    projectsFilterPath: os.Path
+) = {
+  // Most of the time is spend in IO, though we can use higher parallelism
+  val threadPool = new ForkJoinPool(
+    Runtime.getRuntime().availableProcessors() * 4
+  )
+  given ExecutionContext = ExecutionContext.fromExecutor(threadPool)
+
+  val task = for {
+    dependencyGraph <- loadDepenenecyGraph(
+      scalaBinaryVersion,
+      minStarsCount = minStarsCount,
+      maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
+      requiredProjects = requiredProjects,
+      filterPatterns = loadFilters(projectsFilterPath)
+    )
+    buildPlan <- makeDependenciesBasedBuildPlan(
+      dependencyGraph,
+      replacedProjectsConfigPath,
+      projectsConfigPath
+    )
+  } yield {
+    val configMap = SortedMap.from(buildPlan.map(p => p.name -> p))
+    val staged = splitIntoStages(buildPlan)
+    val meta = BuildMeta(
+      minStarsCount = minStarsCount,
+      maxProjectsCount = maxProjectsCount,
+      totalProjects = configMap.size
+    )
+
+    println("Projects in build plan: " + buildPlan.size)
+    if sys.props.contains("opencb.coordinator.reproducer-mode")
+    then {
+      os.write.over(
+        os.pwd / "data" / "buildPlan.json",
+        toJson(staged),
+        createFolders = true
+      )
+      println("Build plan saved")
+    } else {
+      os.write.over(
+        workflowsDir / "buildConfig.json",
+        toJson(configMap, pretty = true),
+        createFolders = true
+      )
+      println("CI build config saved")
+      os.write.over(
+        workflowsDir / "buildPlan.yaml",
+        createGithubActionJob(staged, meta)
+      )
+      println("CI build plan updated")
+    }
+  }
+  try Await.result(task, 30.minute)
+  catch {
+    case ex: Throwable =>
+      println(s"Uncought exception: $ex")
+      ex.printStackTrace()
+      threadPool.shutdownNow()
+      threadPool.awaitTermination(10, SECONDS)
+  }
+}
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
-def findTag(repoUrl: String, version: String): Either[String, String] =
-  val cmd = Seq("git", "ls-remote", "--tags", repoUrl)
-  Try {
-    val lines = cmd.!!.linesIterator.filter(_.contains(version)).toList
-    val (exactMatch, partialMatch) = lines.partition(_.endsWith(version))
-    (exactMatch ::: partialMatch).collectFirst { case TagRef(tag) => tag } match
-      case Some(tag) => Right(tag)
-      case _ => Left(s"No tag in:\n${lines.map("-" + _ + "_").mkString("\n")}")
-  }.toEither.left.map { e =>
-    e.printStackTrace()
-    e.getMessage
-  }.flatten
+def findTag(repoUrl: String, version: String): Option[String] = {
+  def retryConnect(retries: Int, backoffSeconds: Int = 1): CommandResult =
+    val proc =
+      os.proc("git", "ls-remote", "--tags", repoUrl)
+        .call(check = false, stderr = os.Pipe)
+    if (proc.exitCode == 0) proc
+    else if retries > 0 && proc.err
+        .lines()
+        .exists(_.contains("Could not resolve host: github.com"))
+    then
+      Console.err.println(
+        s"Github unavailable, retry with backoff ${backoffSeconds}s"
+      )
+      Thread.sleep(backoffSeconds)
+      retryConnect(retries - 1, (backoffSeconds * 2) min 60)
+    else
+      Console.err.println(s"Failed to list tags of $repoUrl: ")
+      proc.err.lines().foreach(Console.err.println)
+      proc
+
+  val lsRemote = retryConnect(10)
+  if lsRemote.exitCode != 0
+  then None
+  else {
+    val lines = lsRemote.out.lines().filter(_.contains(version)).toList
+    val (exactMatch, partialMatch) = lines
+      .partition(_.endsWith(version))
+    (exactMatch ::: partialMatch) // sorted candidates
+      .collectFirst { case TagRef(tag) => tag }.headOption
+  }
+}
 
 object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
@@ -186,54 +279,24 @@ def makeStepsBasedBuildPlan(depGraph: DependencyGraph): BuildPlan =
 
   BuildPlan(depGraph.scalaRelease, computedSteps._1)
 
-@main def printBuildPlan: BuildPlan =
-  given ExecutionContext = scala.concurrent.ExecutionContext.global
-  val result = for
-    deps <- loadDepenenecyGraph("3", minStarsCount = 100)
-    plan = makeStepsBasedBuildPlan(deps)
-  yield {
-    val niceSteps = plan.steps.zipWithIndex.map { case (steps, nr) =>
-      val items =
-        def versionMap(step: BuildStep) =
-          step.originalVersion + step.publishVersion.fold("")(" -> " + _)
-        def overrides(step: BuildStep) = step.depOverrides match
-          case Nil  => ""
-          case deps => "\n    with " + deps.map(_.asMvnStr).mkString(", ")
-
-        steps.map(step =>
-          "  " + step.p.org + "/" + step.p.name + " @ " + versionMap(
-            step
-          ) + overrides(step)
-        )
-      items.mkString(s"Step ${nr + 1}:\n", "\n", "\n")
-    }
-
-    val bp = "Buildplan:\n" + niceSteps.mkString("\n")
-
-    Files.write(Paths.get("data", "bp.txt"), bp.getBytes)
-    plan
-  }
-  Await.result(result, ???)
-
 def makeDependenciesBasedBuildPlan(
     depGraph: DependencyGraph,
-    replacedProjectsConfigPath: String,
-    internalProjectConfigsPath: String
+    replacedProjectsConfigPath: os.Path,
+    internalProjectConfigsPath: os.Path
 ): AsyncResponse[Array[ProjectBuildDef]] =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
-  val configDiscovery = ProjectConfigDiscovery(
-    java.io.File(internalProjectConfigsPath)
-  )
+  val configDiscovery = ProjectConfigDiscovery(internalProjectConfigsPath.toIO)
 
   val dottyProjectName = "lampepfl_dotty"
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =
-    if (!Paths.get(replacedProjectsConfigPath).toFile.exists) Map.empty
+    if !os.exists(replacedProjectsConfigPath) ||
+      os.isDir(replacedProjectsConfigPath)
+    then Map.empty
     else
-      scala.io.Source
-        .fromFile(replacedProjectsConfigPath)
-        .getLines
+      os.read
+        .lines(replacedProjectsConfigPath)
         .map(_.trim)
         .filter(line => line.nonEmpty && !line.startsWith("#"))
         .map { case replacementPattern(org1, name1, org2, name2, branch) =>
@@ -258,7 +321,7 @@ def makeDependenciesBasedBuildPlan(
       Future {
         val repoUrl = projectRepoUrl(project.p)
         val tag =
-          getRevision(project.p).orElse(findTag(repoUrl, project.v).toOption)
+          getRevision(project.p).orElse(findTag(repoUrl, project.v))
         val name = project.showName
         val dependencies = deps
           .map(_.showName)
@@ -283,99 +346,173 @@ def makeDependenciesBasedBuildPlan(
     }
     .map(_.filter(_.name != dottyProjectName).toArray)
 
+private def loadFilters(projectsFilterPath: os.Path): Seq[String] =
+  if !os.exists(projectsFilterPath) || os.isDir(projectsFilterPath) then Nil
+  else
+    os.read
+      .lines(projectsFilterPath)
+      .map(_.trim())
+      .filterNot(_.startsWith("#"))
+      .filter(_.nonEmpty)
+      .toSeq
+
+type StagedBuildPlan = List[List[ProjectBuildDef]]
+def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
+  val deps = projects.map(v => (v.name, v)).toMap
+  val maxStageSize = 255 // due to GitHub actions limit
+  @scala.annotation.tailrec
+  def groupByDeps(
+      remaining: Set[ProjectBuildDef],
+      done: Set[String],
+      acc: List[Set[ProjectBuildDef]]
+  ): List[Set[ProjectBuildDef]] = {
+    if remaining.isEmpty then acc.reverse
+    else
+      var (currentStage, newRemainings) = remaining.partition {
+        _.dependencies.forall(done.contains)
+      }
+      if currentStage.isEmpty then {
+        def hasCyclicDependencies(p: ProjectBuildDef) =
+          p.dependencies.exists(deps(_).dependencies.contains(p.name))
+        val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
+        currentStage ++= cyclicDeps
+        newRemainings --= cyclicDeps
+
+        cyclicDeps.foreach(v =>
+          println(
+            s"Mitigated cyclic dependency in  ${v.name} -> ${v.dependencies.toList
+              .filterNot(done.contains)}"
+          )
+        )
+      }
+      val names = currentStage.map(_.name)
+      val currentStages = currentStage.grouped(maxStageSize).toList
+      groupByDeps(newRemainings, done ++ names, currentStages ::: acc)
+  }
+
+  groupByDeps(projects.toSet, Set.empty, Nil)
+    .map(_.toList.sortBy(_.name))
+}
+
+private given FromString[os.Path] = { str =>
+  val nio = java.nio.file.Paths.get(str)
+  os.Path(nio.toAbsolutePath())
+}
 private given FromString[Seq[Project]] = str =>
   str.split(",").toSeq.filter(_.nonEmpty).map {
     case s"${org}/${name}" => Project(org, name)(Int.MaxValue)
     case _                 => throw new IllegalArgumentException
   }
 
-@main def storeDependenciesBasedBuildPlan(
-    scalaBinaryVersion: String,
+lazy val workflowsDir: os.Path = {
+  val githubDir = os.rel / ".github"
+  def loop(cwd: os.Path): os.Path = {
+    val path = cwd / githubDir
+    if os.exists(path) then path
+    else loop(cwd / os.up)
+  }
+  loop(os.pwd) / "workflows"
+}
+
+case class BuildMeta(
     minStarsCount: Int,
     maxProjectsCount: Int,
-    requiredProjects: Seq[Project],
-    replacedProjectsConfigPath: String,
-    projectsConfigPath: String,
-    projectsFilterPath: String
-) =
-  val threadPool = new ForkJoinPool()
-  given ExecutionContext = ExecutionContext.fromExecutor(threadPool)
-  val filterPatterns =
-    if (!Paths.get(projectsFilterPath).toFile.exists) Nil
-    else
-      io.Source
-        .fromFile(projectsFilterPath)
-        .getLines
-        .map(_.trim())
-        .filterNot(_.startsWith("#"))
-        .filter(_.nonEmpty)
-        .toSeq
+    totalProjects: Int
+)
+def createGithubActionJob(
+    plan: List[List[ProjectBuildDef]],
+    meta: BuildMeta
+): String = {
+  class Printer() {
+    private val buffer = mutable.StringBuilder()
+    private var indentation = 0
+    private def indent: String = "  " * indentation
 
-  val task = for {
-    depGraph <- loadDepenenecyGraph(
-      scalaBinaryVersion,
-      minStarsCount = minStarsCount,
-      maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
-      requiredProjects = requiredProjects,
-      filterPatterns = filterPatterns
-    )
-    plan <- makeDependenciesBasedBuildPlan(
-      depGraph,
-      replacedProjectsConfigPath,
-      projectsConfigPath
-    )
-  } yield {
-    val planStages: List[List[ProjectBuildDef]] = {
-      @scala.annotation.tailrec
-      def groupByDeps(
-          remaining: Set[ProjectBuildDef],
-          done: Set[String],
-          acc: List[Set[ProjectBuildDef]]
-      ): List[Set[ProjectBuildDef]] =
-        if remaining.isEmpty then acc.reverse
-        else
-          var (currentStage, newRemainings) = remaining.partition {
-            _.dependencies.forall(done.contains)
-          }
-          if currentStage.isEmpty then {
-            val deps = plan.map(v => (v.name, v)).toMap
-            def hasCyclicDependencies(p: ProjectBuildDef) =
-              p.dependencies.exists(deps(_).dependencies.contains(p.name))
-            val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
-            currentStage ++= cyclicDeps
-            newRemainings --= cyclicDeps
-
-            cyclicDeps.foreach(v =>
-              println(
-                s"Mitigated cyclic dependency in  ${v.name} -> ${v.dependencies.toList
-                    .filterNot(done.contains)}"
-              )
-            )
-          }
-          val names = currentStage.map(_.name)
-          groupByDeps(newRemainings, done ++ names, currentStage :: acc)
-      end groupByDeps
-      groupByDeps(plan.toSet, Set.empty, Nil)
-        .map(_.toList.sortBy(_.name))
+    def println(line: String) =
+      buffer.append(s"${indent}${line}${System.lineSeparator()}")
+    def indented(block: => Unit) = {
+      indentation += 1
+      try block
+      finally indentation -= 1
     }
-
-    planStages.zipWithIndex.foreach { (group, idx) =>
-      println(s"Stage $idx: ${group.size} projects: ${group.map(_.name)}")
+    def mkString = buffer.mkString
+  }
+  type StageName = String
+  def stageId(idx: Int): StageName = s"stage-$idx"
+  val setupId = "setup-build"
+  val setupOutputs = s"needs.$setupId.outputs"
+  val printer = new Printer()
+  import printer._
+  println(s"""
+    |# projects total:     ${meta.totalProjects}
+    |# min stars count:    ${meta.minStarsCount}
+    |# max projects count: ${meta.maxProjectsCount}
+    |
+    |name: "Open Community Build"
+    |on:
+    |  workflow_dispatch:
+    |    inputs:
+    |      published-scala-version:
+    |        type: string
+    |        description: 'Published Scala version to use, if empty compiler would be build with default name'
+    |      repository-url:
+    |        type: string
+    |        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
+    |        default: "lampepfl/dotty"
+    |      repository-branch:
+    |        type: string
+    |        description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"
+    |        default: "main"
+    |jobs:
+    |  $setupId:
+    |    runs-on: ubuntu-22.04
+    |    continue-on-error: false
+    |    outputs:
+    |      scala-version:  $${{ steps.setup.outputs.scala-version }}
+    |      maven-repo-url: $${{ steps.setup.outputs.maven-repo-url }}
+    |    steps:
+    |      - name: "Git Checkout"
+    |        uses: actions/checkout@v3
+    |      - name: "Setup build"
+    |        uses: ./.github/actions/setup-build
+    |        id: setup
+    |        with:
+    |          scala-version: $${{ inputs.published-scala-version }}
+    |          repository-url: $${{ inputs.repository-url }}
+    |          repository-branch: $${{ inputs.repository-branch }}
+    |""".stripMargin)
+  plan.zipWithIndex.foreach { case (projects, idx) =>
+    indented {
+      println(s"${stageId(idx)}:")
+      indented {
+        println("runs-on: ubuntu-22.04")
+        println(s"needs: ${if idx == 0 then setupId else stageId(idx - 1)}")
+        println("continue-on-error: true")
+        println("strategy:")
+        indented {
+          println("matrix:")
+          indented {
+            println("include:")
+            for project <- projects
+            do println(s"- name: ${project.name}")
+          }
+        }
+        println("steps:")
+        indented {
+          println("- name: \"Git Checkout\"")
+          println("  uses: actions/checkout@v3")
+          println("- name: \"Build project\"")
+          println("  uses: ./.github/actions/build-project")
+          println("  with:")
+          println("    project-name: ${{ matrix.name }}")
+          println(s"    scala-version: $${{ $setupOutputs.scala-version }}")
+          println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
+          println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")
+          println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
+        }
+      }
     }
-
-    import java.nio.file._
-    val dataPath = Paths.get("data")
-    val dest = dataPath.resolve("buildPlan.json")
-    println("Projects in build plan: " + plan.size)
-    val json = toJson(planStages)
-    Files.createDirectories(dest.getParent)
-    Files.write(dest, json.toString.getBytes)
   }
-  try Await.ready(task, 15.minute)
-  catch {
-    case ex: Throwable =>
-      println(s"Exception $ex")
-      threadPool.shutdownNow()
-      threadPool.awaitTermination(1, MINUTES)
 
-  }
+  printer.mkString
+}

@@ -26,7 +26,7 @@ case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[Stri
 
 object MvnMapping:
   def load(s: String) =
-    val Array(name, version, mvn, deps*) = s.split(",")
+    val Array(name, version, mvn, deps*) = s.split(","): @unchecked
     MvnMapping(name, version, mvn, deps)
 
 case class TargetId(org: String, name: String):
@@ -107,4 +107,3 @@ given Conversion[String, SemVersion] = version =>
     patch = versionPart(2),
     milestone = milestone
   )
-
