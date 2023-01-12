@@ -1,10 +1,10 @@
-name: Auto update build plan
+name: Scheduled weekly build
 
 on:
   workflow_dispatch:
   schedule:
     # Every friday at 8 PM
-    - cron: "0 16 * * 8"
+    - cron: "0 20 * * 5"
 jobs:
   find-version:
     runs-on: ubuntu-22.04
