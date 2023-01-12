@@ -25,7 +25,7 @@ jobs:
           echo "last-rc-version=$(./scripts/lastVersionRC.sc) >> $GITHUB_OUTPUT
 
   run-build:
-    uses: .github/workflows/buildPlan.yaml
+    uses: ./.github/workflows/buildPlan.yaml
     with: 
       published-scala-version: ${{ needs.find-version.detect.last-nightly-version }}
 
