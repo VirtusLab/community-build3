@@ -35,8 +35,10 @@ millSettings=(
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 
-mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}" ||
-  (
-    echo "Retrying with local mill distro" &&
-      ./mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
-  )
+function tryBuild() {
+  mill=$1
+  echo "Try build using $mill"
+  $mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+}
+
+tryBuild mill || [[ -f ./mill ]] && tryBuild ./mill
