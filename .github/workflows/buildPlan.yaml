@@ -1,20 +1,15 @@
 
-# projects total:     1063
+# projects total:     1060
 # min stars count:    -1
 # max projects count: -1
 
 name: "Open Community Build"
 on:
-  workflow_call:
-    inputs:
-      published-scala-version:
-        type: string
-        description: 'Published Scala version to use, if empty compiler would be build with default name'
   workflow_dispatch:
     inputs:
       published-scala-version:
         type: string
-        description: 'Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository'
+        description: 'Published Scala version to use, if empty compiler would be build with default name'
       repository-url:
         type: string
         description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
@@ -95,7 +90,6 @@ jobs:
         - name: openmole_scaladget
         - name: otavia-projects_mill-rust-jni
         - name: outr_perfolation
-        - name: oyvindberg_tui-scala
         - name: raistlintao_scalalogger
         - name: rssh_dotty-cps-async
         - name: sangria-graphql_sangria-streaming-api
@@ -257,7 +251,6 @@ jobs:
         - name: davegurnell_unindent
         - name: davenverse_namecase
         - name: davidledwards_scalop
-        - name: davidledwards_zookeeper
         - name: dvreeze_yaidom
         - name: eed3si9n_gigahorse
         - name: eed3si9n_sjson-new
@@ -441,7 +434,6 @@ jobs:
         - name: varwise_prometheus-akka-http
         - name: vincenzobaz_spark-scala3
         - name: wangzaixiang_scala-sql
-        - name: wangzaixiang_wjson
         - name: whisklabs_docker-it-scala
         - name: wolfendale_scalacheck-gen-regexp
         - name: wvlet_airframe
@@ -679,6 +671,7 @@ jobs:
         - name: armanbilge_circe
         - name: bilal-fazlani_csv-schema
         - name: bilal-fazlani_jslt-parser
+        - name: bilal-fazlani_zio-ulid
         - name: cheleb_zio-pravega
         - name: circe_circe
         - name: dvreeze_xpathparser
@@ -812,10 +805,8 @@ jobs:
         - name: dacr_zio-lmdb
         - name: darrenjw_scala-glm
         - name: darrenjw_scala-smfsb
-        - name: finos_morphir-scala
         - name: frawa_typed-json
         - name: gnieh_geo-scala
-        - name: iltotore_iron
         - name: imrafaelmerino_json-scala-values
         - name: katrix_typenbt
         - name: sciss_scalacolliderswing
@@ -1207,7 +1198,6 @@ jobs:
         - name: outr_robobrowser
         - name: permutive-engineering_prometheus4cats-contrib
         - name: polyvariant_scala-git-markers
-        - name: polyvariant_treesitter4s
         - name: profunktor_neutron
         - name: pureharm_pureharm-aws
         - name: pureharm_pureharm-db-core-jdbc
@@ -1260,6 +1250,7 @@ jobs:
         - name: fthomas_fs2-cron
         - name: gemini-hlsw_clue
         - name: gemini-hlsw_lucuma-catalog
+        - name: hnaderi_portainer-client
         - name: http4s_blaze
         - name: http4s_http4s-armeria
         - name: http4s_http4s-fabric
@@ -1438,6 +1429,7 @@ jobs:
         - name: scalikejdbc_scalikejdbc-async
         - name: scottweaver_testcontainers-for-zio
         - name: sideeffffect_zio-testcontainers
+        - name: softwaremill_tapir-loom
         - name: tinkoff_oolong
         - name: tototoshi_slick-joda-mapper
         - name: trace4cats_trace4cats-sttp
@@ -1518,3 +1510,35 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+
+  create-raport:
+    needs: [stage-22]
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+      - name: Install coursier
+        uses: coursier/setup-action@v1
+        with:
+          apps: scala-cli
+      
+      - name: Generate raport
+        env: 
+          ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
+          ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+        run: | 
+          scalaVersion=${{ needs.setup-build.outputs.scala-version }}
+          lastRC="$(./scripts/lastVersionRC.sc)"
+          lastStable=$(./scripts/lastVersionStable.sc)
+
+          ./scripts/raport-regressions.scala $scalaVersion > raport-full.md
+          ./scripts/raport-regressions.scala $scalaVersion --compare-with $lastRC > raport-compare-$lastRC.md
+          ./scripts/raport-regressions.scala $scalaVersion --compare-with $lastRC > raport-compare-$lastStable.md
+
+      - name: Upload raports
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-raports
+          path: ${{ github.workspace }}/raport-*.md
+

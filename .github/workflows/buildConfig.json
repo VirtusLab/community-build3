@@ -3583,6 +3583,52 @@
       ]
     }
   },
+  "bilal-fazlani_zio-ulid":{
+    "name":"bilal-fazlani_zio-ulid",
+    "dependencies":[
+      "zio_zio",
+      "zio_zio-direct"
+    ],
+    "repoUrl":"https://github.com/bilal-fazlani/zio-ulid.git",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
+    "targets":"com.bilal-fazlani%zio-ulid",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.2.1\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "billzabob_fordeckmacia":{
     "name":"billzabob_fordeckmacia",
     "dependencies":[
@@ -7799,16 +7845,6 @@
     "version":"2.3.1",
     "targets":"com.loopfor.scalop%scalop"
   },
-  "davidledwards_zookeeper":{
-    "name":"davidledwards_zookeeper",
-    "dependencies":[
-      "scalatest_scalatest"
-    ],
-    "repoUrl":"https://github.com/davidledwards/zookeeper.git",
-    "revision":"release-1.6.1",
-    "version":"1.6.1",
-    "targets":"com.loopfor.zookeeper%zookeeper-client"
-  },
   "delimobil_cabbit":{
     "name":"delimobil_cabbit",
     "dependencies":[
@@ -10052,54 +10088,6 @@
       },
       "tests":"full",
       "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "finos_morphir-scala":{
-    "name":"finos_morphir-scala",
-    "dependencies":[
-      "zio_zio",
-      "zio_zio-json",
-      "sirthias_borer",
-      "com-lihaoyi_sourcecode",
-      "zio_zio-prelude",
-      "zio_zio-cli",
-      "zio_zio-process",
-      "lemonlabsuk_scala-uri"
-    ],
-    "repoUrl":"https://github.com/finos/morphir-scala.git",
-    "revision":"v0.2.1",
-    "version":"0.2.1",
-    "targets":"org.finos.morphir%morphir-contrib-flowz org.finos.morphir%morphir-tools-backend org.finos.morphir%morphir-lib-core org.finos.morphir%morphir-testing org.finos.morphir%morphir-toolkit-codec-zio-json org.finos.morphir%morphir-experimental-ir org.finos.morphir%morphir-toolkit-codec org.finos.morphir%morphir-toolkit-interpreter org.finos.morphir%morphir-experimental-ir-zio-json org.finos.morphir%morphir-toolkit-util org.finos.morphir%morphir-toolkit-core-testing org.finos.morphir%morphir-tools-cli org.finos.morphir%morphir-lib-interop org.finos.morphir%morphir-toolkit-mir org.finos.morphir%morphir-toolkit-core org.finos.morphir%morphir-experimental-formats-core",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":5120,
       "sourcePatches":[
         
       ]
@@ -12989,6 +12977,53 @@
       ]
     }
   },
+  "hnaderi_portainer-client":{
+    "name":"hnaderi_portainer-client",
+    "dependencies":[
+      "typelevel_cats-effect",
+      "http4s_http4s",
+      "armanbilge_munit-cats-effect"
+    ],
+    "repoUrl":"https://github.com/hnaderi/portainer-client.git",
+    "revision":"v0.0.1",
+    "version":"0.0.1",
+    "targets":"dev.hnaderi%portainer-client",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":7168,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.2.0\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "hnaderi_scala-k8s":{
     "name":"hnaderi_scala-k8s",
     "dependencies":[
@@ -14279,50 +14314,6 @@
         ]
       },
       "tests":"compile-only",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "iltotore_iron":{
-    "name":"iltotore_iron",
-    "dependencies":[
-      "zio_zio-json",
-      "circe_circe",
-      "plokhotnyuk_jsoniter-scala",
-      "typelevel_cats"
-    ],
-    "repoUrl":"https://github.com/iltotore/iron.git",
-    "revision":"v2.0.0-RC2",
-    "version":"2.0.0-RC2",
-    "targets":"io.github.iltotore%iron-zio-json io.github.iltotore%iron-circe io.github.iltotore%iron-jsoniter io.github.iltotore%iron io.github.iltotore%iron-cats",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
       "memoryRequestMb":2048,
       "sourcePatches":[
         
@@ -22428,16 +22419,6 @@
       ]
     }
   },
-  "oyvindberg_tui-scala":{
-    "name":"oyvindberg_tui-scala",
-    "dependencies":[
-      
-    ],
-    "repoUrl":"https://github.com/oyvindberg/tui-scala.git",
-    "revision":"v0.0.4",
-    "version":"0.0.4",
-    "targets":"com.olvind.tui%cassowary com.olvind.tui%tui"
-  },
   "pac4j_http4s-pac4j":{
     "name":"pac4j_http4s-pac4j",
     "dependencies":[
@@ -23821,8 +23802,8 @@
       "circe_circe"
     ],
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.20.2",
-    "version":"2.20.2",
+    "revision":"v2.20.3",
+    "version":"2.20.3",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros",
     "config":{
       "projects":{
@@ -23907,8 +23888,8 @@
       "softwaremill_sttp"
     ],
     "repoUrl":"https://github.com/pme123/camundala.git",
-    "revision":"0.13.0",
-    "version":"0.13.0",
+    "revision":"0.14.0",
+    "version":"0.14.0",
     "targets":"io.github.pme123%camundala-bpmn io.github.pme123%camundala-api io.github.pme123%camundala-domain io.github.pme123%camundala-simulation",
     "config":{
       "projects":{
@@ -24156,51 +24137,6 @@
     "revision":"v0.1.0",
     "version":"0.1.0",
     "targets":"org.polyvariant%scala-git-markers",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.2.0\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "polyvariant_treesitter4s":{
-    "name":"polyvariant_treesitter4s",
-    "dependencies":[
-      "disneystreaming_weaver-test"
-    ],
-    "repoUrl":"https://github.com/polyvariant/treesitter4s.git",
-    "revision":"v0.1.0",
-    "version":"0.1.0",
-    "targets":"org.polyvariant.treesitter4s%bindings org.polyvariant.treesitter4s%bindings-python org.polyvariant.treesitter4s%bindings-scala org.polyvariant.treesitter4s%core",
     "config":{
       "projects":{
         "exclude":[
@@ -32009,6 +31945,52 @@
       ]
     }
   },
+  "softwaremill_tapir-loom":{
+    "name":"softwaremill_tapir-loom",
+    "dependencies":[
+      "softwaremill_tapir",
+      "scalatest_scalatest"
+    ],
+    "repoUrl":"https://github.com/softwaremill/tapir-loom.git",
+    "revision":"v0.1.1",
+    "version":"0.1.1",
+    "targets":"com.softwaremill.sttp.tapir%tapir-netty-server-id com.softwaremill.sttp.tapir%tapir-nima-server",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = List(\"3.2.0\")",
+          "replaceWith":"val scala3 = List(\"<SCALA_VERSION>\")"
+        }
+      ]
+    }
+  },
   "spaceteams_scala-json-logging":{
     "name":"spaceteams_scala-json-logging",
     "dependencies":[
@@ -39185,17 +39167,6 @@
     "revision":"",
     "version":"3.0.0-RC1",
     "targets":"com.github.wangzaixiang%wsql"
-  },
-  "wangzaixiang_wjson":{
-    "name":"wangzaixiang_wjson",
-    "dependencies":[
-      "scalatest_scalatest",
-      "scala_scala-parser-combinators"
-    ],
-    "repoUrl":"https://github.com/wangzaixiang/wjson.git",
-    "revision":"",
-    "version":"0.1.0-RC4",
-    "targets":"com.github.wangzaixiang%wjson"
   },
   "webjars_webjars-play":{
     "name":"webjars_webjars-play",
