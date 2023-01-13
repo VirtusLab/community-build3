@@ -44,8 +44,6 @@ runs:
 
     - name: Check can skip build
       id: check-history
-      # Build always when using custom scalacOptions
-      if: inputs.extra-scalac-options == ""
       shell: bash
       run: |
         ConfigFile=".github/workflows/buildConfig.json"
@@ -57,19 +55,24 @@ runs:
         projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
 
         canSkip=true
-        for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
-          arr=($(echo $target | tr "%" " "))
-          #use offset:length for consistent indexing (zsh starts with 1, bash starts with 0)
-          org=${arr[@]:0:1}
-          name=${arr[@]:1:1}
-          artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
+        if [[ -n "${{ inputs.extra-scalac-options }}" ]]; then
+          echo "Using custom scalacOption, cannot skip"
+          canSkip=false
+        else
+          for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
+            arr=($(echo $target | tr "%" " "))
+            #use offset:length for consistent indexing (zsh starts with 1, bash starts with 0)
+            org=${arr[@]:0:1}
+            name=${arr[@]:1:1}
+            artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
 
-          if ! cs resolve --intransitive "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
-            echo "Artifact $artifact not found, would build the project"
-            canSkip=false
-            break;
-          fi
-        done
+            if ! cs resolve --intransitive "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
+              echo "Artifact $artifact not found, would build the project"
+              canSkip=false
+              break;
+            fi
+          done
+        fi
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
 
     - name: Build project
