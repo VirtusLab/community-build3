@@ -516,8 +516,8 @@ def createGithubActionJob(
           println("    extra-scalac-options: ${{ inputs.extra-scalac-options }}")
           println(s"    scala-version: $${{ $setupOutputs.scala-version }}")
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
-          println("    elastic-user: ${{ secrets.elastic-user }}")
-          println("    elastic-password: ${{ secrets.elastic-password }}")
+          println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")
+          println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
         }
       }
     }

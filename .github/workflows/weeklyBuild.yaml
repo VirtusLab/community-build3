@@ -1,4 +1,4 @@
-name: Execute weekly build
+name: Open CB - weekly
 
 on:
   workflow_dispatch:
@@ -42,9 +42,7 @@ jobs:
     uses: ./.github/workflows/buildPlan.yaml
     with: 
       published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
-    secrets:
-      elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-      elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+    secrets: inherit
 
   create-raport:
     needs: [execute-build-plan]
