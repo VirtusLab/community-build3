@@ -79,6 +79,7 @@ runs:
     - name: Build project
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
+      timeout-minutes: 60
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.1"
         options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
