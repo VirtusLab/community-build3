@@ -454,12 +454,6 @@ def createGithubActionJob(
     |    inputs:
     |      published-scala-version:
     |        type: string
-    |        description: 'Published Scala version to use'
-    |        required: true
-    |  workflow_dispatch:
-    |    inputs:
-    |      published-scala-version:
-    |        type: string
     |        description: 'Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository'
     |      repository-url:
     |        type: string
@@ -473,6 +467,16 @@ def createGithubActionJob(
     |        type: string
     |        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
     |        default: ""
+    |      elastic-user:
+    |        description: "Secret with auth user to elasticsearch"
+    |        required: true
+    |      elastic-password:
+    |        description: "Secret with auth token to elasticsearch"
+    |        required: true
+    |    outputs:
+    |      used-scala-version:
+    |        description: "Version of Scala used to run the build"
+    |        value: ${{ steps.setup-build.outputs.scala-version }}
     |jobs:
     |  $setupId:
     |    runs-on: ubuntu-22.04
@@ -515,47 +519,14 @@ def createGithubActionJob(
           println("  uses: ./.github/actions/build-project")
           println("  with:")
           println("    project-name: ${{ matrix.name }}")
-          println("    extra-scalac-options: $${{ inputs.extra-scalac-options }}")
+          println("    extra-scalac-options: ${{ inputs.extra-scalac-options }}")
           println(s"    scala-version: $${{ $setupOutputs.scala-version }}")
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
-          println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")
-          println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
+          println("    elastic-user: ${{ inputs.elastic-user }}")
+          println("    elastic-password: ${{ inputs.elastic-password }}")
         }
       }
     }
   }
-  println(s"""
-  |  create-raport:
-  |    needs: [${stageId(plan.indices.last)}]
-  |    runs-on: ubuntu-22.04
-  |    continue-on-error: true
-  |    steps:
-  |      - name: Git Checkout
-  |        uses: actions/checkout@v3
-  |      - name: Install coursier
-  |        uses: coursier/setup-action@v1
-  |        with:
-  |          apps: scala-cli
-  |      
-  |      - name: Generate raport
-  |        env: 
-  |          ES_USER: $${{ secrets.OPENCB_ELASTIC_USER }}
-  |          ES_PASSWORD: $${{ secrets.OPENCB_ELASTIC_PSWD }}
-  |        run: | 
-  |          scalaVersion=$${{ $setupOutputs.scala-version }}
-  |          lastRC="$$(./scripts/lastVersionRC.sc)"
-  |          lastStable=$$(./scripts/lastVersionStable.sc)
-  |
-  |          ./scripts/raport-regressions.scala $$scalaVersion > raport-full.md
-  |          ./scripts/raport-regressions.scala $$scalaVersion --compare-with $$lastRC > raport-compare-$$lastRC.md
-  |          ./scripts/raport-regressions.scala $$scalaVersion --compare-with $$lastRC > raport-compare-$$lastStable.md
-  |
-  |      - name: Upload raports
-  |        uses: actions/upload-artifact@v3
-  |        with:
-  |          name: build-raports
-  |          path: $${{ github.workspace }}/raport-*.md
-  |""".stripMargin)
-
   printer.mkString
 }

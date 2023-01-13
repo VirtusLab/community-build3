@@ -11,7 +11,7 @@ inputs:
     required: true
 outputs:
   scala-version:
-    description: "Effective Scala version, input val"
+    description: "Effective Scala version, input value of scala-version if using published version or version of builded compiler"
     value: ${{ steps.calc-version.outputs.effective-scala-version }}
   maven-repo-url:
     description: "Effective Maven repository subdirectory to use"

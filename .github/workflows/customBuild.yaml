@@ -1,47 +1,31 @@
-name: Scheduled weekly build
+name: Custom Open CB build
 
 on:
   workflow_dispatch:
-  schedule:
-    # Every friday at 8 PM
-    - cron: "0 20 * * 5"
+    inputs:
+      published-scala-version:
+        type: string
+        description: 'Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository'
+      repository-url:
+        type: string
+        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
+        default: "lampepfl/dotty"
+      repository-branch:
+        type: string
+        description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"
+        default: "main"
+      extra-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        default: ""
 jobs:
-  detect-version:
-    runs-on: ubuntu-22.04
-    continue-on-error: false
-    outputs:
-      last-nightly-version: ${{ steps.detect.outputs.last-nightly-version }}
-      last-stable-version:  ${{ steps.detect.outputs.last-stable-version }}
-      last-rc-version:      ${{ steps.detect.outputs.last-rc-version }}
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v3
-
-      - name: Install scala-cli
-        uses: coursier/setup-action@v1
-        with:
-          apps: scala-cli
-
-      - name: Find last versions
-        id: detect
-        run: |
-          lastNightly="$(./scripts/lastVersionNightly.sc)"
-          lastStable="$(./scripts/lastVersionStable.sc)"
-          lastRC="$(./scripts/lastVersionRC.sc)" 
-
-          echo "Detected last nightly version: $lastNightly (used)"
-          echo "Detected last stable version:  $lastStable"
-          echo "Detected last RC version:      $lastRC"
-
-          echo "last-nightly-version=$lastNightly" >> $GITHUB_OUTPUT
-          echo "last-stable-version=$lastStable" >> $GITHUB_OUTPUT
-          echo "last-rc-version=$lastRC" >> $GITHUB_OUTPUT
-
   execute-build-plan:
     uses: ./.github/workflows/buildPlan.yaml
-    needs: [detect-version]
     with: 
-      published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
+      published-scala-version: ${{ inputs.published-scala-version }}
+      repository-url: ${{ repository-url }}
+      repository-branch: ${{ repository-branch }}
+      extra-scalac-options: ${{ extra-scalac-options }}
       elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
       elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
 
@@ -75,4 +59,3 @@ jobs:
         with:
           name: build-raports
           path: ${{ github.workspace }}/raport-*.md
-
