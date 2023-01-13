@@ -2,6 +2,10 @@ name: Infra CI
 
 on:
   pull_request:
+    paths-ignore:
+      - '.github/actions/**'
+      - '.github/workflows/build*'
+
 jobs:
   test-build:
     runs-on: ubuntu-22.04
