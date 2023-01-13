@@ -10,8 +10,8 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source $scriptDir/utils.sh
 
 VERSION="$1"
-# Use base image with Java 8
-TAG_NAME=$(buildTag $VERSION 8)
+# Use base image with Java 11
+TAG_NAME=$(buildTag $VERSION 11)
 CACHE_FROM_TAG="$PREV_CB_VERSION"
 
 imageName=virtuslab/scala-community-build-compiler-builder

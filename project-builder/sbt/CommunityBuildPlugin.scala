@@ -7,6 +7,7 @@ import sbt.protocol.testing.TestResult
 import xsbti.compile.{FileAnalysisStore, CompileAnalysis}
 import xsbti.{Severity, CompileFailed, Problem}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 import Scala3CommunityBuild._
 import Scala3CommunityBuild.Utils._
@@ -18,21 +19,29 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   override def eval[T](task: TaskKey[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
+    val hasModifiedOptions = {
+      CommunityBuildPlugin.extraScalacOptions.nonEmpty ||
+      CommunityBuildPlugin.disabledScalacOptions.nonEmpty
+    }
     val updatedState =
-      if (!CommunityBuildPlugin.disableFatalWarningsFlag) state
+      if (!hasModifiedOptions) state
       else {
         val extracted = sbt.Project.extract(state)
-        def disableFatalWarnings(key: TaskKey[Seq[String]]) =
+        def setScalacOptions(key: TaskKey[Seq[String]]) =
           key.transform(
-            _.filterNot(_ == "-Xfatal-warnings"),
+            scalacOptions => {
+              (scalacOptions ++ CommunityBuildPlugin.extraScalacOptions)
+                .diff(CommunityBuildPlugin.disabledScalacOptions.toSeq)
+                .distinct
+            },
             sbt.internal.util.NoPosition
           )
         state.appendWithSession(
           extracted.structure.allProjectRefs
             .flatMap { ref =>
               Seq(
-                disableFatalWarnings(ref / Compile / Keys.scalacOptions),
-                disableFatalWarnings(ref / Test / Keys.scalacOptions)
+                setScalacOptions(ref / Compile / Keys.scalacOptions),
+                setScalacOptions(ref / Test / Keys.scalacOptions)
               )
             }
         )
@@ -110,8 +119,16 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     }
     .getOrElse(Nil)
-
-  var disableFatalWarningsFlag = false
+  private def getCustomScalacOptions(propName: String) = {
+    val mutableOpts = mutable.Set.empty[String]
+    mutableOpts ++= sys.props
+      .get(propName)
+      .toSeq
+      .flatMap(_.split(","))
+    mutableOpts
+  }
+  val extraScalacOptions = getCustomScalacOptions("communitybuild.extra-scalac-options")
+  val disabledScalacOptions = getCustomScalacOptions("communitybuild.disabled-scalac-options")
   override def projectSettings = Seq(
     scalacOptions := {
       // Flags need to be unique
@@ -121,10 +138,9 @@ object CommunityBuildPlugin extends AutoPlugin {
           // Ignore deprecations, replace them with info ()
           Seq("-Wconf:cat=deprecation:i")
       }
-      val withAdditions = (scalacOptions.value ++ options).distinct
-      if (disableFatalWarningsFlag)
-        withAdditions.filter(_ != "-Xfatal-warnings")
-      else withAdditions
+      (scalacOptions.value ++ options ++ extraScalacOptions)
+        .diff(disabledScalacOptions.toSeq)
+        .distinct
     },
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value
@@ -169,7 +185,8 @@ object CommunityBuildPlugin extends AutoPlugin {
     Test / scalacOptions
   ) { (_, _) =>
     {
-      disableFatalWarningsFlag = true
+      disabledScalacOptions += "-Xfatal-warnings"
+      extraScalacOptions -= "-Xfatal-warnings"
       (_: ProjectRef, currentSettings: Seq[String]) =>
         currentSettings // removed in projectSettings for durable effect
     }
@@ -182,6 +199,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     Compile / scalacOptions,
     Test / scalacOptions
   ) { (args, extracted) =>
+    val argSourceVersion = args.headOption.filter(_.nonEmpty)
     def resolveSourceVersion(scalaVersion: String) = CrossVersion
       .partialVersion(scalaVersion)
       .collect {
@@ -192,11 +210,11 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
 
     (ref: ProjectRef, currentSettings: Seq[String]) => {
-      val scalaVersion = extracted.get(ref / scalaVersion)
+      val scalaVersion = extracted.get(ref / Keys.scalaVersion)
       if (!scalaVersion.startsWith("3.")) currentSettings
       else
         argSourceVersion
-          .orElse(resolveSourceVersion(ref))
+          .orElse(resolveSourceVersion(scalaVersion))
           .fold(currentSettings) { sourceVersion =>
             val newEntries = Seq(s"-source:$sourceVersion")
             println(

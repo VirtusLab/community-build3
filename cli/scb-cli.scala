@@ -4,7 +4,7 @@
 //> using lib "com.lihaoyi::requests:0.8.0"
 //> using lib "com.lihaoyi::os-lib:0.9.0"
 //> using lib "io.get-coursier:coursier_2.13:2.0.16"
-//> using lib "com.goyeau::kubernetes-client:0.9.0"
+//> using lib "com.goyeau::kubernetes-client:0.8.1"
 //> using lib "org.slf4j:slf4j-simple:2.0.6"
 //> using lib "com.github.scopt::scopt:4.1.0"
 
@@ -22,18 +22,25 @@ import scala.util.control.NoStackTrace
 
 import Config.*
 import os.PathConvertible
+import io.k8s.api.core.v1.ContainerState
 given Formats = DefaultFormats
 given ExecutionContext = ExecutionContext.Implicits.global
 
-class FailedProjectException(msg: String) extends RuntimeException(msg) with NoStackTrace
+class FailedProjectException(msg: String)
+    extends RuntimeException(msg)
+    with NoStackTrace
 
-val communityBuildVersion = sys.props.getOrElse("communitybuild.version", "v0.2.0")
+val communityBuildVersion =
+  sys.props.getOrElse("communitybuild.version", "v0.2.1")
 private val CBRepoName = "VirtusLab/community-build3"
-val projectBuilderUrl = s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
+val projectBuilderUrl =
+  s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
 lazy val communityBuildDir = sys.props
   .get("communitybuild.local.dir")
   .map(os.Path(_))
-  .getOrElse(gitCheckout(s"https://github.com/$CBRepoName.git", None)(os.temp.dir()))
+  .getOrElse(
+    gitCheckout(s"https://github.com/$CBRepoName.git", None)(os.temp.dir())
+  )
 lazy val scriptsDir = communityBuildDir / "scripts"
 lazy val projectBuilderDir = communityBuildDir / "project-builder"
 
@@ -43,14 +50,15 @@ case class Config(
     customRun: CustomBuildConfig = CustomBuildConfig(null, null),
     minikube: Config.MinikubeConfig = Config.MinikubeConfig(),
     redirectLogs: Boolean = true,
-    publishArtifacts: Boolean = true,
+    publishArtifacts: Boolean = false,
     jobId: String = "custom",
     buildUpstream: Boolean = false,
     ignoreFailedUpstream: Boolean = false
 ):
   def withMinikube(fn: Config.MinikubeConfig => Config.MinikubeConfig) =
     copy(minikube = fn(minikube))
-  def withCustomBuild(fn: CustomBuildConfig => CustomBuildConfig) = copy(customRun = fn(customRun))
+  def withCustomBuild(fn: CustomBuildConfig => CustomBuildConfig) =
+    copy(customRun = fn(customRun))
 
 case class CustomBuildConfig(
     projectName: String,
@@ -83,8 +91,12 @@ object Config:
         .action { (_, c) => c.withMinikube(_.copy(keepCluster = false)) }
         .text("Should Minikube cluster be kept after finishing the build"),
       opt[Unit]("removeMavenRepo")
-        .action { (_, c) => c.withMinikube(_.copy(keepMavenRepository = false)) }
-        .text("Should Maven repository instance should not be delete after finishing the build"),
+        .action { (_, c) =>
+          c.withMinikube(_.copy(keepMavenRepository = false))
+        }
+        .text(
+          "Should Maven repository instance should not be delete after finishing the build"
+        ),
       opt[File]("k8sConfig")
         .action { (x, c) => c.withMinikube(_.copy(k8sConfig = x)) }
         .text("Path to kubernetes config file, defaults to ~/.kube/config"),
@@ -95,13 +107,12 @@ object Config:
         .action { (_, c) => c.copy(mode = Mode.Local) }
         .text("Run build locally without minikube cluster"),
       opt[Unit]("noRedirectLogs")
-        .action { (_, c) => c.copy(redirectLogs = false) }
+        .action { (_, c) => c.copy(redirectLogs = true) }
         .text("Do not redirect runners logs to file")
         .hidden(),
-      opt[Unit]("noPublishArtifacts")
+      opt[Unit]("publishArtifacts")
         .action { (_, c) => c.copy(publishArtifacts = false) }
-        .text("Don't publish artifacts of the build")
-        .hidden(),
+        .text("Publish artifacts of the build"),
       // Commands
       cmd("run")
         .action { (_, c) => c.copy(command = Config.Command.RunCustomProject) }
@@ -117,7 +128,9 @@ object Config:
             .required(),
           opt[String]("revision")
             .text("Name of repository tag or branch that should be used")
-            .action { (x, c) => c.withCustomBuild(_.copy(revisionOverride = Some(x))) }
+            .action { (x, c) =>
+              c.withCustomBuild(_.copy(revisionOverride = Some(x)))
+            }
         ),
       checkConfig { c =>
         if c.command == null then failure("Missing required command name")
@@ -146,7 +159,8 @@ object ProjectBuildPlan:
     .fold(()) { implicit config: Config =>
       println("Gathering build info...")
       given BuildInfo = config.command match {
-        case Command.RunCustomProject => BuildInfo.forCustomProject(config, config.jobId)
+        case Command.RunCustomProject =>
+          BuildInfo.forCustomProject(config, config.jobId)
       }
       config.mode match {
         case Mode.Minikube => MinikubeReproducer().run()
@@ -154,7 +168,11 @@ object ProjectBuildPlan:
       }
     }
 
-case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummary) {
+case class ProjectInfo(
+    id: String,
+    params: BuildParameters,
+    summary: BuildSummary
+) {
   def projectName = params.name
 
   // Resolve organization name based on build targets, (<org>%<artifactId>)
@@ -169,7 +187,9 @@ case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummar
     val deps = params.upstreamProjects.flatMap { name =>
       build.projectsByName.get(name).orElse {
         // Can only happen if project was replayed - then upstream info would be empty
-        println(s"Not found upstream project $name in build info, it would be ignored")
+        println(
+          s"Not found upstream project $name in build info, it would be ignored"
+        )
         None
       }
     }.toSet
@@ -197,7 +217,9 @@ case class ProjectInfo(id: String, params: BuildParameters, summary: BuildSummar
     val baseTargets = params.buildTargets
     val excluded =
       for
-        case JArray(excluded) <- params.config.map(parse(_) \ "projects" \ "exclude").toSeq
+        case JArray(excluded) <- params.config
+          .map(parse(_) \ "projects" \ "exclude")
+          .toSeq
         case JString(entry) <- excluded
       yield entry
     baseTargets.diff(excluded)
@@ -217,7 +239,7 @@ object BuildInfo:
 
     def prepareBuildPlan(): JValue =
       val configsDir = communityBuildDir / "env" / "prod" / "config"
-      val args = Seq[ os.Shellable](
+      val args = Seq[os.Shellable](
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
@@ -226,7 +248,8 @@ object BuildInfo:
         /* projectsConfigPath = */ configsDir / "projects-config.conf",
         /* projectsFiterPath = */ ""
       )
-      val javaProps = Seq("--java-prop", "opencb.coordinator.reproducer-mode=true")
+      val javaProps =
+        Seq("--java-prop", "opencb.coordinator.reproducer-mode=true")
       val coordinatorDir = communityBuildDir / "coordinator"
       os.proc("scala-cli", "run", coordinatorDir, javaProps, "--", args)
         .call(cwd = coordinatorDir, stdout = os.Inherit)
@@ -235,7 +258,9 @@ object BuildInfo:
 
     val JArray(buildPlan) = prepareBuildPlan(): @unchecked
     val projects = for
-      case JArray(buildStage) <- buildPlan.take(1) // There should be only 1 stage
+      case JArray(buildStage) <- buildPlan.take(
+        1
+      ) // There should be only 1 stage
       project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
@@ -244,7 +269,13 @@ object BuildInfo:
         case value            => Option(compact(render(value)))
       }
       plan = project.extract[ProjectBuildPlan].copy(config = configString)
-      jdkVersion = plan.config.map(parse(_) \ "java" \ "version").flatMap(_.extractOpt[String])
+      jdkVersion = sys.props
+        .get("communitybuild.forced-java-version")
+        .orElse(
+          plan.config
+            .map(parse(_) \ "java" \ "version")
+            .flatMap(_.extractOpt[String])
+        )
     yield ProjectInfo(
       id = jobId,
       params = BuildParameters(
@@ -258,7 +289,8 @@ object BuildInfo:
         scalaVersion = scalaVersion,
         jdkVersion = jdkVersion,
         enforcedSbtVersion = None,
-        mavenRepositoryUrl = s"https://mvn-repo:8081/maven2/custom-${scalaVersion}",
+        mavenRepositoryUrl =
+          s"https://mvn-repo:8081/maven2/custom-${scalaVersion}",
         buildTargets = plan.targets.split(' ').toList,
         upstreamProjects = Nil
       ),
@@ -271,7 +303,8 @@ end BuildInfo
 
 case class BuildSummary(projects: List[BuildProjectSummary]):
   lazy val failedArtifacts = projects.collect {
-    case BuildProjectSummary(artifactName, results) if results.hasFailure => artifactName
+    case BuildProjectSummary(artifactName, results) if results.hasFailure =>
+      artifactName
   }
   def failedTargets(project: ProjectInfo) =
     for artifact <- failedArtifacts
@@ -283,7 +316,10 @@ case class BuildProjectSummary(
 )
 
 // Ignore publish step
-case class ProjectTargetResults(compile: BuildResult, testCompile: BuildResult) {
+case class ProjectTargetResults(
+    compile: BuildResult,
+    testCompile: BuildResult
+) {
   def hasFailure = productIterator.contains(BuildResult.Failed)
 }
 
@@ -297,7 +333,9 @@ object BuildResult:
     case _                 => None
   }
 
-def gitCheckout(repoUrl: String, revision: Option[String])(cwd: os.Path): os.Path =
+def gitCheckout(repoUrl: String, revision: Option[String])(
+    cwd: os.Path
+): os.Path =
   val repoDir = cwd
   println(s"Checkout $repoUrl")
   val projectDir = repoDir / "repo"
@@ -326,7 +364,6 @@ case class BuildParameters(
     upstreamProjects: List[String]
 )
 
-
 private def checkRequiredApps(executables: String*): Unit =
   val isWindows = sys.props("os.name").toLowerCase.startsWith("windows")
   val which = if isWindows then "where" else "which"
@@ -337,7 +374,8 @@ private def checkRequiredApps(executables: String*): Unit =
 
   if missing.nonEmpty then
     System.err.println(
-      "Required programs are not installed or installed or set on PATH: " + missing.mkString(" ")
+      "Required programs are not installed or installed or set on PATH: " + missing
+        .mkString(" ")
     )
     sys.exit(1)
 
@@ -384,7 +422,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
               import DependenciesChecker.*
               for {
                 _ <- logger.info("Starting")
-                _ <- buildScalaCompilerIfMissing[IO](withLocalMaven(localMavenUrl))
+                _ <- buildScalaCompilerIfMissing[IO](
+                  withLocalMaven(localMavenUrl)
+                )
                 _ <- buildProjectDependencies[IO](onlyLocalMaven(localMavenUrl))
                 _ <- buildMainProject[IO]
                 _ <- logger.info("Build finished")
@@ -395,7 +435,10 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       }
     finally
       if !config.minikube.keepCluster then bash("minikube", "stop")
-      else println("Keeping minikube alive, run 'minikube delete' to delete minikube local cluster")
+      else
+        println(
+          "Keeping minikube alive, run 'minikube delete' to delete minikube local cluster"
+        )
 
   private def startMinikube() =
     val isRunning = os
@@ -404,7 +447,8 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       .out
       .text()
       .startsWith("Running")
-    if !isRunning then bash("minikube", "start", s"--namespace=${k8s.namespace}")
+    if !isRunning then
+      bash("minikube", "start", s"--namespace=${k8s.namespace}")
     else println("Reusing existing minikube instance")
 
   private def setupCluster() =
@@ -414,25 +458,41 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       s"kubectl create namespace ${k8s.namespace} --dry-run=client -o yaml | kubectl apply -f -"
     )
     val mavenIsRunning =
-      os.proc("kubectl", "get", "deploy/mvn-repo", s"--namespace=${k8s.namespace}", "--output=name")
-        .call(check = false, stderr = os.Pipe)
+      os.proc(
+        "kubectl",
+        "get",
+        "deploy/mvn-repo",
+        s"--namespace=${k8s.namespace}",
+        "--output=name"
+      ).call(check = false, stderr = os.Pipe)
         .exitCode == 0
     if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
 
-  private def buildScalaCompilerIfMissing[F[_]: Async: Logger: KubernetesClient](
+  private def buildScalaCompilerIfMissing[F[
+      _
+  ]: Async: Logger: KubernetesClient](
       checkDeps: DependenciesChecker
   ): F[Unit] =
     val log = Logger[F]
     for
-      scalaReleaseExists <- Sync[F].blocking(checkDeps.scalaReleaseAvailable(build.scalaVersion))
+      scalaReleaseExists <- Sync[F].blocking(
+        checkDeps.scalaReleaseAvailable(build.scalaVersion)
+      )
       _ <-
         if !scalaReleaseExists then
-          log.info(s"Scala toolchain for version ${build.scalaVersion} is missing") *>
+          log.info(
+            s"Scala toolchain for version ${build.scalaVersion} is missing"
+          ) *>
             runJob(compilerBuilderJob, label = "Scala", canFail = false).void
-        else log.info(s"Scala toolchain for version ${build.scalaVersion} already exists")
+        else
+          log.info(
+            s"Scala toolchain for version ${build.scalaVersion} already exists"
+          )
     yield ()
 
-  private def buildProjectDependencies[F[_]: Async: Concurrent: Logger: KubernetesClient](
+  private def buildProjectDependencies[F[
+      _
+  ]: Async: Concurrent: Logger: KubernetesClient](
       depsCheck: DependenciesChecker
   )(using
       build: BuildInfo,
@@ -453,13 +513,20 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         else
           log.info(
             s"Starting to build dependency project $name"
-          ) *> runJob(projectBuilderJob(using dependency), label = name, canFail = true).void
+          ) *> runJob(
+            projectBuilderJob(using dependency),
+            label = name,
+            canFail = true
+          ).void
       }
 
-    if !config.buildUpstream then log.info("Skipping building upstream projects")
+    if !config.buildUpstream then
+      log.info("Skipping building upstream projects")
     else
       for
-        buildPlan <- Sync[F].blocking(targetProject.buildPlanForDependencies.zipWithIndex)
+        buildPlan <- Sync[F].blocking(
+          targetProject.buildPlanForDependencies.zipWithIndex
+        )
         _ <- buildPlan.traverse { (group, idx) =>
           val projectsInGroup = group.map(_.params.name)
           log.info(
@@ -470,7 +537,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
 
   private def buildMainProject[F[_]: Async: Logger: KubernetesClient] =
     for {
-      _ <- Logger[F].info(s"Starting build for target project ${targetProject.projectName}")
+      _ <- Logger[F].info(
+        s"Starting build for target project ${targetProject.projectName}"
+      )
       _ <- runJob(
         projectBuilderJob(using targetProject),
         label = targetProject.projectName,
@@ -495,7 +564,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       podsApi.deleteAll(selectorLabels) *>
       podsApi.list(selectorLabels).iterateUntil(_.items.isEmpty)
 
-    def getContainerState = podsApi
+    def getContainerState(retries: Int = 60): F[ContainerState] = podsApi
       .list(selectorLabels)
       .delayBy(5.seconds)
       .map { pods =>
@@ -509,10 +578,16 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       }
       .iterateUntil(_.nonEmpty)
       .map(_.get)
+      .recoverWith{
+        case ex: Exception if retries > 0 =>
+           Console.err.println(s"Failed to get container state, retry with backoff, reason: ${ex}")
+          Thread.sleep(1000)
+          getContainerState(retries - 1)
+      } 
 
     def waitForStart =
       for
-        finalState <- getContainerState.iterateWhile { state =>
+        finalState <- getContainerState().iterateWhile { state =>
           state.waiting.flatMap(_.reason) match {
             case Some("ContainerCreating" | "ImagePullBackOff") => true
             case _                                              => false
@@ -521,36 +596,48 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         _ <-
           if finalState.running.isDefined then Sync[F].pure(())
           else
-            os.proc("kubectl", "logs", s"job/$jobName", s"--namespace=${k8s.namespace}")
-              .call(stdout = os.Inherit, check = false)
+            os.proc(
+              "kubectl",
+              "logs",
+              s"job/$jobName",
+              s"--namespace=${k8s.namespace}"
+            ).call(stdout = os.Inherit, check = false)
             Sync[F].raiseError(
-              FailedProjectException(s"Failed to start pod of job ${jobName} ($label)")
+              FailedProjectException(
+                s"Failed to start pod of job ${jobName} ($label)"
+              )
             )
       yield ()
 
-    def redirectLogs = Sync[F].blocking {
+    def redirectLogs = Sync[F].delay {
       val logsFile = os.temp(
         prefix = s"cb-reproduce-log-$jobName",
         deleteOnExit = false
       )
       // workaround, using os.PathRedirect to file was not working
-      val stdout =
-        Future {
-          val logs = os
-            .proc(
-              "kubectl",
-              "-n",
-              k8s.namespace,
-              "logs",
-              s"job/$jobName",
-              "-f",
-              "--timestamps=true"
-            )
-            .spawn(stdout = if config.redirectLogs then os.Pipe else os.Inherit)
-          val res = os.write.over(logsFile, logs.stdout)
-        }
+      def getLogs(): Future[Unit] = Future {
+        val logs = os
+          .proc(
+            "kubectl",
+            "-n",
+            k8s.namespace,
+            "logs",
+            s"job/$jobName",
+            "-f",
+            "--timestamps=true"
+          )
+          .spawn(stdout = if config.redirectLogs then os.Pipe else os.Inherit)
+        os.write.over(logsFile, logs.stdout)
+      }.recoverWith { case ex: Exception =>
+        Console.err.println(s"Error when streaming logs: ${ex}, would retry")
+        Thread.sleep(1000)
+        getLogs()
+      }
+      val stdout=  getLogs()
+
       logsFile
     }
+
     val projectRun =
       for
         _ <- logger.info(s"Starting build for job $label")
@@ -569,11 +656,13 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
               s"Logs of job ${jobName} ($label) redirected to ${logsFile.toNIO.toAbsolutePath}"
             )
 
-        exitCode <- getContainerState
+        exitCode <- getContainerState()
           .iterateUntil(_.terminated.isDefined)
           .map(_.terminated.get.exitCode)
           .timeout(60.minute)
-        _ <- logger.info(s"Job $jobName ($label) terminated with exit code $exitCode")
+        _ <- logger.info(
+          s"Job $jobName ($label) terminated with exit code $exitCode"
+        )
 
         _ <- Sync[F].whenA(exitCode != 0) {
           val errMsg = s"Build failed for job ${jobName} ($label)"
@@ -583,7 +672,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       yield exitCode
 
     projectRun
-      .onError(logger.error(_)(s"Failed to build project in job $jobName ($label)"))
+      .onError(
+        logger.error(_)(s"Failed to build project in job $jobName ($label)")
+      )
       .guarantee {
         performCleanup
           .onError(
@@ -597,7 +688,9 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
   end runJob
 
   private def bash(args: os.Shellable*): os.CommandResult = bash(args: _*)()
-  private def bash(args: os.Shellable*)(check: Boolean = true): os.CommandResult =
+  private def bash(
+      args: os.Shellable*
+  )(check: Boolean = true): os.CommandResult =
     os.proc(args)
       .call(
         check = check,
@@ -624,7 +717,9 @@ object MinikubeReproducer:
   private val mvnRepoCrtSecret = "mvn-repo-cert"
   private val mvnRepoCrt = "mvn-repo.crt"
 
-  def usingMavenServiceForwarder[T](fn: MavenForwarderPort ?=> T)(using k8s: MinikubeConfig): T =
+  def usingMavenServiceForwarder[T](fn: MavenForwarderPort ?=> T)(using
+      k8s: MinikubeConfig
+  ): T =
     // Wait until mvn-repo is started
     def waitForPod() = os
       .proc(
@@ -652,7 +747,10 @@ object MinikubeReproducer:
   ): Job =
     val params = project.params
     Job(
-      metadata = ObjectMeta(name = s"build-project-${project.id}", namespace = k8s.namespace),
+      metadata = ObjectMeta(
+        name = s"build-project-${project.id}",
+        namespace = k8s.namespace
+      ),
       spec = JobSpec(
         template = PodTemplateSpec(
           metadata = ObjectMeta(
@@ -663,16 +761,20 @@ object MinikubeReproducer:
             volumes = Seq(mvnRepoSecretVolume),
             containers = Seq(
               builderContainer(
-                imageName = s"project-builder:jdk${params.jdkVersion.getOrElse("11")}-",
+                imageName =
+                  s"project-builder:jdk${params.jdkVersion.getOrElse("11")}-",
                 args = Seq(
                   params.repositoryUrl,
                   params.repositoryRevision.getOrElse(""),
                   buildInfo.scalaVersion,
-                  if !config.publishArtifacts then "" else params.version.getOrElse(""),
+                  if !config.publishArtifacts then ""
+                  else params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
                   params.mavenRepositoryUrl,
                   params.enforcedSbtVersion.getOrElse("1.6.2"),
-                  params.config.getOrElse("{}")
+                  params.config.getOrElse("{}"),
+                  /* extra-scalac-options    = */ "",
+                  /* disabled-scalac-options = */ ""
                 )
               )
             ),
@@ -725,7 +827,8 @@ object MinikubeReproducer:
     import io.k8s.apimachinery.pkg.api.resource.Quantity
     Container(
       name = "builder",
-      image = s"virtuslab/scala-community-build-$imageName$communityBuildVersion",
+      image =
+        s"virtuslab/scala-community-build-$imageName$communityBuildVersion",
       volumeMounts = Seq(
         VolumeMount(
           name = mvnRepoCrtSecret,
@@ -734,8 +837,9 @@ object MinikubeReproducer:
           readOnly = true
         )
       ),
-      lifecycle =
-        Lifecycle(postStart = LifecycleHandler(ExecAction(command = Seq("update-ca-certificates")))),
+      lifecycle = Lifecycle(postStart =
+        Handler(ExecAction(command = Seq("update-ca-certificates")))
+      ),
       command = Seq("/build/build-revision.sh"),
       args = args,
       tty = true,
@@ -754,8 +858,14 @@ object MinikubeReproducer:
   private lazy val unsafeSSLContext = {
     object TrustAll extends X509TrustManager {
       override def getAcceptedIssuers(): Array[X509Certificate] = Array()
-      override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String) = ()
-      override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String) = ()
+      override def checkClientTrusted(
+          x509Certificates: Array[X509Certificate],
+          s: String
+      ) = ()
+      override def checkServerTrusted(
+          x509Certificates: Array[X509Certificate],
+          s: String
+      ) = ()
     }
 
     val instance = SSLContext.getInstance("SSL")
@@ -764,12 +874,18 @@ object MinikubeReproducer:
   }
 
   def usingUnsafeSSLContext[T](fn: SSLContext ?=> T): T = {
-    def withDefault[In, Res](set: In => Unit, newValue: In, oldValue: In)(block: => Res) = {
+    def withDefault[In, Res](set: In => Unit, newValue: In, oldValue: In)(
+        block: => Res
+    ) = {
       set(newValue)
       try block
       finally set(oldValue)
     }
-    withDefault(SSLContext.setDefault(_), unsafeSSLContext, SSLContext.getDefault) {
+    withDefault(
+      SSLContext.setDefault(_),
+      unsafeSSLContext,
+      SSLContext.getDefault
+    ) {
       withDefault(
         HttpsURLConnection.setDefaultSSLSocketFactory,
         unsafeSSLContext.getSocketFactory,
@@ -786,21 +902,30 @@ object MinikubeReproducer:
     }
   }
 
-  private def usingServiceForwarder[T](serviceName: String, servicePort: Int)(fn: Int => T)(using
+  private def usingServiceForwarder[T](serviceName: String, servicePort: Int)(
+      fn: Int => T
+  )(using
       k8s: MinikubeConfig
   ) =
     val service = s"service/$serviceName"
     val ForwardingLocallyOnPort = raw"Forwarding from 127.0.0.1:(\d+).*".r
     def startForwarder(): (os.SubProcess, Int) =
       val forwarder = os
-        .proc("kubectl", "-n", k8s.namespace, "port-forward", service, s":$servicePort")
+        .proc(
+          "kubectl",
+          "-n",
+          k8s.namespace,
+          "port-forward",
+          service,
+          s":$servicePort"
+        )
         .spawn(stderr = os.Pipe)
       forwarder.stdout.buffered.readLine match {
         case null =>
           Thread.sleep(1000)
           startForwarder()
         case ForwardingLocallyOnPort(port) => (forwarder, port.toInt)
-        case out                           => sys.error(s"Failed to forward $service - $out")
+        case out => sys.error(s"Failed to forward $service - $out")
       }
 
     val (forwarder, port) = startForwarder()
@@ -843,24 +968,36 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       project.params.repositoryUrl,
       project.params.repositoryRevision
     )(os.pwd)
-    val logsFile = os.temp(prefix = s"cb-logs-build-project-${project.id}", deleteOnExit = false)
+    val logsFile = os.temp(
+      prefix = s"cb-logs-build-project-${project.id}",
+      deleteOnExit = false
+    )
     val impl =
-      if os.exists(projectDir / "build.sbt") then SbtReproducer(projectDir, logsFile)
-      else if os.exists(projectDir / "build.sc") then MillReproducer(projectDir, logsFile)
+      if os.exists(projectDir / "build.sc") then
+        MillReproducer(projectDir, logsFile)
+      else if os.exists(projectDir / "build.sbt") then
+        SbtReproducer(projectDir, logsFile)
       else sys.error("Unsupported build tool")
     try
-      val redirectMessage = if config.redirectLogs then s", logs redirected to $logsFile" else ""
-      println(s"Starting build for project ${project.id} (${project.projectName})$redirectMessage")
+      val redirectMessage =
+        if config.redirectLogs then s", logs redirected to $logsFile" else ""
+      println(
+        s"Starting build for project ${project.id} (${project.projectName})$redirectMessage"
+      )
       impl.prepareBuild()
       impl.runBuild()
     catch
       case ex: Exception if canFail =>
-        System.err.println(s"Build for project ${project.id} (${project.projectName}) failed.")
+        System.err.println(
+          s"Build for project ${project.id} (${project.projectName}) failed."
+        )
 
   private def prepareScalaVersion(): Unit =
-    val needsCompilation = !DependenciesChecker().scalaReleaseAvailable(effectiveScalaVersion)
+    val needsCompilation =
+      !DependenciesChecker().scalaReleaseAvailable(effectiveScalaVersion)
 
-    if !needsCompilation then println(s"Scala ${effectiveScalaVersion} toolchain already present")
+    if !needsCompilation then
+      println(s"Scala ${effectiveScalaVersion} toolchain already present")
     else
       println(
         s"Building Scala compiler for version $effectiveScalaVersion"
@@ -876,12 +1013,19 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         case VersionCommitSha(revision) => Some(revision)
         case _                          => None
       }
-      val projectDir = gitCheckout("https://github.com/lampepfl/dotty.git", revision)(os.temp.dir())
+      val projectDir =
+        gitCheckout("https://github.com/lampepfl/dotty.git", revision)(
+          os.temp.dir()
+        )
 
       // Overwrite compiler baseVersion
       val buildFile = projectDir / "project" / "Build.scala"
       val updatedBuild =
-        os.read(buildFile).replaceAll("(val baseVersion) = .*", s"$$1 = \"$effectiveScalaVersion\"")
+        os.read(buildFile)
+          .replaceAll(
+            "(val baseVersion) = .*",
+            s"$$1 = \"$effectiveScalaVersion\""
+          )
       os.write.over(buildFile, updatedBuild)
       os
         .proc("sbt", "scala3-bootstrapped/publishLocal")
@@ -891,7 +1035,9 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           stdout = logsOutput,
           stderr = logsOutput
         )
-      println(s"Scala ${effectiveScalaVersion} was successfully published locally")
+      println(
+        s"Scala ${effectiveScalaVersion} was successfully published locally"
+      )
   end prepareScalaVersion
 
   // Build reproducer impls
@@ -962,7 +1108,9 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         replaceExisting = true
       )
       os.list(projectBuilderDir / "shared")
-        .foreach(os.copy.into(_, projectDir / "project", replaceExisting = true))
+        .foreach(
+          os.copy.into(_, projectDir / "project", replaceExisting = true)
+        )
 
     override def runBuild(): Unit =
       def runSbt(forceScalaVersion: Boolean) =
@@ -991,7 +1139,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
 
       def shouldRetryWithForcedScalaVerion = {
         val output = os.read(logsFile).toString
-        def failedToSwitch = output.contains("RuntimeException: Switch failed: no subproject")
+        def failedToSwitch = output.contains("Switch failed: no subproject")
         def missingMapping = output.contains("Module mapping missing:")
         failedToSwitch || missingMapping
       }
@@ -1000,7 +1148,9 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         s"Sucessfully finished build for project ${project.id} (${project.projectName})"
       )
       def onFailure(code: Int) = {
-        System.err.println(s"Failed to run the build, for details check logs in $logsFile")
+        System.err.println(
+          s"Failed to run the build, for details check logs in $logsFile"
+        )
         throw FailedProjectException(
           s"Build for project ${project.id} (${project.projectName}) failed with exit code $code"
         )
@@ -1028,7 +1178,8 @@ class LocalReproducer(using config: Config, build: BuildInfo):
       "-D",
       s"communitybuild.scala=${effectiveScalaVersion}"
     )
-    val scalafixRulePath = "scalafix/rules/src/main/scala/fix/Scala3CommunityBuildMillAdapter.scala"
+    val scalafixRulePath =
+      "scalafix/rules/src/main/scala/fix/Scala3CommunityBuildMillAdapter.scala"
     val scalafixSettings = List(
       "--stdout",
       "--syntactic",
@@ -1047,7 +1198,10 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         .Fetch()
         .addDependencies(
           coursier.Dependency(
-            Module(Organization("ch.epfl.scala"), ModuleName("scalafix-cli_2.13.8")),
+            Module(
+              Organization("ch.epfl.scala"),
+              ModuleName("scalafix-cli_2.13.8")
+            ),
             "0.9.34"
           )
         )
@@ -1066,13 +1220,18 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         scalafixSettings
       ).call(cwd = projectDir, stdout = os.PathRedirect(buildFile))
       os.remove(buildFileCopy)
-      os.copy.into(millBuilder / MillCommunityBuildSc, projectDir, replaceExisting = true)
+      os.copy.into(
+        millBuilder / MillCommunityBuildSc,
+        projectDir,
+        replaceExisting = true
+      )
       val sharedSourcesDir = projectBuilderDir / "shared"
       os.list(sharedSourcesDir)
         .foreach { path =>
           // We need to rename .scala files into .sc to allow for their usage in Mill
           val relPath = path.relativeTo(sharedSourcesDir).toNIO
-          val fileSc = relPath.getFileName().toString.stripSuffix(".scala") + ".sc"
+          val fileSc =
+            relPath.getFileName().toString.stripSuffix(".scala") + ".sc"
           val outputPath =
             Option(relPath.getParent)
               .map(os.RelPath(_))
@@ -1116,17 +1275,21 @@ object DependenciesChecker:
   val noLocalIvy: RepositoriesMapping = _.filterNot(isIvyRepo)
   val onlyLocalIvy: RepositoriesMapping = _.filter(isIvyRepo)
 
-  def withLocalMaven(localMavenUrl: String)(using SSLContext) = DependenciesChecker(
-    withRepositories = DependenciesChecker.noLocalIvy(_) :+ MavenRepository(localMavenUrl),
-    fileCache = DependenciesChecker.unsafeFileCache
-  )
-  def onlyLocalMaven(localMavenUrl: String)(using SSLContext) = DependenciesChecker(
-    withRepositories = _ => MavenRepository(localMavenUrl) :: Nil,
-    fileCache = DependenciesChecker.unsafeFileCache
-  )
-  private def unsafeFileCache(using sslContext: SSLContext) = FileCache().noCredentials
-    .withHostnameVerifier(MinikubeReproducer.VerifiesAllHostNames)
-    .withSslSocketFactory(sslContext.getSocketFactory)
+  def withLocalMaven(localMavenUrl: String)(using SSLContext) =
+    DependenciesChecker(
+      withRepositories =
+        DependenciesChecker.noLocalIvy(_) :+ MavenRepository(localMavenUrl),
+      fileCache = DependenciesChecker.unsafeFileCache
+    )
+  def onlyLocalMaven(localMavenUrl: String)(using SSLContext) =
+    DependenciesChecker(
+      withRepositories = _ => MavenRepository(localMavenUrl) :: Nil,
+      fileCache = DependenciesChecker.unsafeFileCache
+    )
+  private def unsafeFileCache(using sslContext: SSLContext) =
+    FileCache().noCredentials
+      .withHostnameVerifier(MinikubeReproducer.VerifiesAllHostNames)
+      .withSslSocketFactory(sslContext.getSocketFactory)
 
 class DependenciesChecker(
     withRepositories: RepositoriesMapping = identity,
@@ -1148,13 +1311,17 @@ class DependenciesChecker(
     // By default coursier checks `.ivy2/local` (publishLocal target) and Maven repo
     val coursierDeps =
       for Dependency(org, name, version) <- dependencies
-      yield coursier.Dependency(Module(Organization(org), ModuleName(name)), version)
+      yield coursier.Dependency(
+        Module(Organization(org), ModuleName(name)),
+        version
+      )
 
     // Ignore missing transitive dependencies, they would be always missing in local maven repo
     def checkResoulationError(err: ResolutionError): Boolean =
       val expectedModules = coursierDeps.map(_.module)
       !err.errors.exists {
-        case err: ResolutionError.CantDownloadModule => expectedModules.contains(err.module)
+        case err: ResolutionError.CantDownloadModule =>
+          expectedModules.contains(err.module)
         case _ =>
           System.err.println(err)
           false
@@ -1179,7 +1346,11 @@ class DependenciesChecker(
       val organization = project.organization
       val summaryProjects =
         for project <- project.summary.projects
-        yield Dependency(organization, project.artifactName + binarySuffix, projectVersion)
+        yield Dependency(
+          organization,
+          project.artifactName + binarySuffix,
+          projectVersion
+        )
 
       val deps = (targetProjects ++ summaryProjects).distinct
       // If empty then we have not enough info -> always build

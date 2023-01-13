@@ -30,9 +30,7 @@ jobs:
         with:
           token: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
           commit-message: Update build config
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          signoff: false
+          assignees: WojciechMazur
           branch: build/scheduled-update
           branch-suffix: timestamp
           delete-branch: true
@@ -52,5 +50,5 @@ jobs:
       - name: Auto merge PR
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
-          token: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}

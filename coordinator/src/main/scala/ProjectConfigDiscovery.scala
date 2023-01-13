@@ -209,7 +209,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       .toList
       .distinct
       .flatMap(version => allowedVersions.find(_ >= version))
-      .minOption
+      .maxOption
       .map(_.toString)
 
   private def discoverSourcePatches(projectDir: os.Path): List[SourcePatch] =

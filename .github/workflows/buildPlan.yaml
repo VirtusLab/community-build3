@@ -5,6 +5,11 @@
 
 name: "Open Community Build"
 on:
+  workflow_call:
+    inputs:
+      published-scala-version:
+        type: string
+        description: 'Published Scala version to use'
   workflow_dispatch:
     inputs:
       published-scala-version:
@@ -18,6 +23,11 @@ on:
         type: string
         description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"
         default: "main"
+      extra-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        default: ""
+
 jobs:
   setup-build:
     runs-on: ubuntu-22.04

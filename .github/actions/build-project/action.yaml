@@ -7,6 +7,9 @@ inputs:
   scala-version:
     description: "Scala Version to use"
     required: true
+  extra-scalac-options:
+    description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+    default: ""
   maven-repo-url:
     description: "Custom Maven repository used to store artifacts"
     required: true
@@ -41,6 +44,8 @@ runs:
 
     - name: Check can skip build
       id: check-history
+      # Build always when using custom scalacOptions
+      if: inputs.extra-scalac-options == ""
       shell: bash
       run: |
         ConfigFile=".github/workflows/buildConfig.json"
@@ -71,11 +76,12 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
-        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.0"
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.1"
         options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           DefaultConfig='{"memoryRequestMb":4096}'
+          disabledScalacOptions='' // Currently disabled
           config () { 
             path=".\"${{ inputs.project-name }}\"$@" 
             jq -c -r "$path" $ConfigFile 
@@ -93,7 +99,9 @@ runs:
             "$(config .targets)" \
             "${{ inputs.maven-repo-url }}" \
             '1.6.2' \
-            "$(config .config // ${DefaultConfig})" 2>&1 | tee build-logs.txt
+            "$(config .config // ${DefaultConfig})" \
+            "${{ inputs.extra-scalac-options }}" \
+            "${disabledScalacOptions}" 2>&1 | tee build-logs.txt
 
           /build/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
