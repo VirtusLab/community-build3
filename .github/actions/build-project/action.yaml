@@ -41,6 +41,7 @@ runs:
       with:
         github_token: ${{ github.token }}
         job_name: "${{ github.job }} (${{ matrix.name }})"
+        per_page: 100
 
     - name: Check can skip build
       id: check-history
