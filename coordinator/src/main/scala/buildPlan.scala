@@ -448,7 +448,7 @@ def createGithubActionJob(
     |# min stars count:    ${meta.minStarsCount}
     |# max projects count: ${meta.maxProjectsCount}
     |
-    |name: "Open Community Build plan"
+    |name: "Execute Open Community Build plan"
     |on:
     |  workflow_call:
     |    inputs:
@@ -467,12 +467,6 @@ def createGithubActionJob(
     |        type: string
     |        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
     |        default: ""
-    |      elastic-user:
-    |        description: "Secret with auth user to elasticsearch"
-    |        required: true
-    |      elastic-password:
-    |        description: "Secret with auth token to elasticsearch"
-    |        required: true
     |    outputs:
     |      used-scala-version:
     |        description: "Version of Scala used to run the build"
@@ -522,8 +516,8 @@ def createGithubActionJob(
           println("    extra-scalac-options: ${{ inputs.extra-scalac-options }}")
           println(s"    scala-version: $${{ $setupOutputs.scala-version }}")
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
-          println("    elastic-user: ${{ inputs.elastic-user }}")
-          println("    elastic-password: ${{ inputs.elastic-password }}")
+          println("    elastic-user: ${{ secrets.elastic-user }}")
+          println("    elastic-password: ${{ secrets.elastic-password }}")
         }
       }
     }

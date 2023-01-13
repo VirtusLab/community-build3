@@ -3,7 +3,7 @@
 # min stars count:    -1
 # max projects count: -1
 
-name: "Open Community Build plan"
+name: "Execute Open Community Build plan"
 on:
   workflow_call:
     inputs:
@@ -22,12 +22,6 @@ on:
         type: string
         description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
         default: ""
-      elastic-user:
-        description: "Secret with auth user to elasticsearch"
-        required: true
-      elastic-password:
-        description: "Secret with auth token to elasticsearch"
-        required: true
     outputs:
       used-scala-version:
         description: "Version of Scala used to run the build"
@@ -160,8 +154,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: stage-0
@@ -209,8 +203,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: stage-1
@@ -467,8 +461,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-3:
     runs-on: ubuntu-22.04
     needs: stage-2
@@ -554,8 +548,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-4:
     runs-on: ubuntu-22.04
     needs: stage-3
@@ -676,8 +670,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-5:
     runs-on: ubuntu-22.04
     needs: stage-4
@@ -738,8 +732,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-6:
     runs-on: ubuntu-22.04
     needs: stage-5
@@ -809,8 +803,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-7:
     runs-on: ubuntu-22.04
     needs: stage-6
@@ -844,8 +838,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-8:
     runs-on: ubuntu-22.04
     needs: stage-7
@@ -866,8 +860,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-9:
     runs-on: ubuntu-22.04
     needs: stage-8
@@ -889,8 +883,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-10:
     runs-on: ubuntu-22.04
     needs: stage-9
@@ -916,8 +910,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-11:
     runs-on: ubuntu-22.04
     needs: stage-10
@@ -1009,8 +1003,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-12:
     runs-on: ubuntu-22.04
     needs: stage-11
@@ -1076,8 +1070,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-13:
     runs-on: ubuntu-22.04
     needs: stage-12
@@ -1111,8 +1105,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-14:
     runs-on: ubuntu-22.04
     needs: stage-13
@@ -1190,8 +1184,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-15:
     runs-on: ubuntu-22.04
     needs: stage-14
@@ -1252,8 +1246,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-16:
     runs-on: ubuntu-22.04
     needs: stage-15
@@ -1321,8 +1315,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-17:
     runs-on: ubuntu-22.04
     needs: stage-16
@@ -1379,8 +1373,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-18:
     runs-on: ubuntu-22.04
     needs: stage-17
@@ -1431,8 +1425,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-19:
     runs-on: ubuntu-22.04
     needs: stage-18
@@ -1474,8 +1468,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-20:
     runs-on: ubuntu-22.04
     needs: stage-19
@@ -1499,8 +1493,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-21:
     runs-on: ubuntu-22.04
     needs: stage-20
@@ -1521,8 +1515,8 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}
   stage-22:
     runs-on: ubuntu-22.04
     needs: stage-21
@@ -1543,5 +1537,5 @@ jobs:
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ inputs.elastic-user }}
-          elastic-password: ${{ inputs.elastic-password }}
+          elastic-user: ${{ secrets.elastic-user }}
+          elastic-password: ${{ secrets.elastic-password }}

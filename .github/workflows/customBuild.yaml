@@ -1,4 +1,4 @@
-name: Custom Open CB build
+name: Execute custom build
 
 on:
   workflow_dispatch:
@@ -26,6 +26,7 @@ jobs:
       repository-url: ${{ inputs.repository-url }}
       repository-branch: ${{ inputs.repository-branch }}
       extra-scalac-options: ${{ inputs.extra-scalac-options }}
+    secrets:
       elastic-user: "${{ secrets.OPENCB_ELASTIC_USER }}"
       elastic-password: "${{ secrets.OPENCB_ELASTIC_PSWD }}"
 

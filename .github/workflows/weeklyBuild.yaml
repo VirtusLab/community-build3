@@ -1,4 +1,4 @@
-name: Scheduled weekly build
+name: Execute weekly build
 
 on:
   workflow_dispatch:
@@ -42,8 +42,9 @@ jobs:
     uses: ./.github/workflows/buildPlan.yaml
     with: 
       published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
-      elastic-user: "${{ secrets.OPENCB_ELASTIC_USER }}"
-      elastic-password: "${{ secrets.OPENCB_ELASTIC_PSWD }}"
+    secrets:
+      elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+      elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
 
   create-raport:
     needs: [execute-build-plan]
