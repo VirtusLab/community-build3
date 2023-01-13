@@ -448,7 +448,7 @@ def createGithubActionJob(
     |# min stars count:    ${meta.minStarsCount}
     |# max projects count: ${meta.maxProjectsCount}
     |
-    |name: "Open Community Build"
+    |name: "Open Community Build plan"
     |on:
     |  workflow_call:
     |    inputs:

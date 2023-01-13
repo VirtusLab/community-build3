@@ -23,9 +23,9 @@ jobs:
     uses: ./.github/workflows/buildPlan.yaml
     with: 
       published-scala-version: ${{ inputs.published-scala-version }}
-      repository-url: ${{ repository-url }}
-      repository-branch: ${{ repository-branch }}
-      extra-scalac-options: ${{ extra-scalac-options }}
+      repository-url: ${{ inputs.repository-url }}
+      repository-branch: ${{ inputs.repository-branch }}
+      extra-scalac-options: ${{ inputs.extra-scalac-options }}
       elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
       elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
 

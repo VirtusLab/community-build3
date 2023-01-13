@@ -38,8 +38,8 @@ jobs:
           echo "last-rc-version=$lastRC" >> $GITHUB_OUTPUT
 
   execute-build-plan:
-    uses: ./.github/workflows/buildPlan.yaml
     needs: [detect-version]
+    uses: ./.github/workflows/buildPlan.yaml
     with: 
       published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
       elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
