@@ -470,7 +470,13 @@ def createGithubActionJob(
     |    outputs:
     |      used-scala-version:
     |        description: "Version of Scala used to run the build"
-    |        value: ${{ steps.setup-build.outputs.scala-version }}
+    |        value: ${{ jobs.setup-build.outputs.scala-version }}
+    |    secrets:
+    |      OPENCB_ELASTIC_USER:
+    |        required: true
+    |      OPENCB_ELASTIC_PSWD:
+    |        required: true
+    |
     |jobs:
     |  $setupId:
     |    runs-on: ubuntu-22.04
