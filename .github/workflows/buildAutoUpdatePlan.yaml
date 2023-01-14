@@ -9,6 +9,10 @@ on:
   schedule:
     # Every friday at 4 PM
     - cron: "0 16 * * 5"
+  push:
+    paths:
+      - coordinator/**
+      - env/**
 jobs:
   build-plan:
     runs-on: ubuntu-22.04
