@@ -39,13 +39,19 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
-    - name: Get Current Job Log URL
+    - name: Get current job URL
       id: job-info
-      uses: Tiryoh/gha-jobid-action@v0.1.2
-      with:
-        github_token: ${{ github.token }}
-        job_name: "execute-build-plan / ${{ github.job }} (${{ matrix.name }})"
-        per_page: 100
+      shell: bash
+      run: |
+        GITHUB_API="/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs"
+        JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
+        PARAMS="?per_page=100"
+        SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
+        buildURL=$(gh api --paginate ${GITHUB_API}${PARAMS} --jq ${SELECT_URL})
+        
+        echo "Build URL: $buildURL"
+        echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
+        
 
     - name: Check can skip build
       id: check-history
@@ -56,7 +62,6 @@ runs:
         BinScalaVersion=3
         CustomMavenRepo="${{ inputs.maven-repo-url }}"
 
-        echo "Build URL: ${{ steps.job-info.outputs.html_url }}"
         projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
 
         canSkip=true
@@ -124,7 +129,7 @@ runs:
             "$(config .version)" \
             "${{ inputs.scala-version }}" \
             "${{ github.run_id }}" \
-            "${{ steps.job-info.outputs.html_url }}"
+            "${{ steps.job-info.outputs.buildURL }}"
           if [ $? != 0 ]; then 
             echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
           fi
