@@ -1,5 +1,5 @@
 
-# projects total:     1059
+# projects total:     1058
 # min stars count:    -1
 # max projects count: -1
 
@@ -21,6 +21,10 @@ on:
       extra-scalac-options:
         type: string
         description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        default: ""
+      disabled-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be filtered out when building projects."
         default: ""
     outputs:
       used-scala-version:
@@ -160,6 +164,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -210,6 +215,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -222,45 +228,45 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: aaronp_eie
         - name: altoo-ag_akka-kryo-serialization
-        - name: aoiroaoino_nanolens
-        - name: ciaraobrien_dottytags
-        - name: clulab_fatdynet
-        - name: cornerman_scala-cuid
-        - name: dacr_jassh
-        - name: dacr_unittools
-        - name: davidledwards_scalop
-        - name: dvreeze_yaidom
-        - name: eed3si9n_sjson-new
-        - name: emartech_escher-akka-http
-        - name: gzoller_deploysample
-        - name: http4s_http4s-finagle
-        - name: irevive_union-derivation
-        - name: l-space_types
+        - name: andyglow_typesafe-config-scala
+        - name: ariskk_burner4s
+        - name: beangle_notify
+        - name: blemale_scaffeine
+        - name: creativescala_doodle-svg
+        - name: dacr_naturalsort
+        - name: dacr_split
+        - name: daghemberg_problemutils
+        - name: davegurnell_unindent
+        - name: foundweekends_knockoff
+        - name: hedgehogqa_scala-hedgehog
+        - name: i10416_cssminifier
+        - name: indoorvivants_opaque-newtypes
+        - name: indoorvivants_rendition
+        - name: jcouyang_dhall-generic
+        - name: jphmrst_scalautils
+        - name: kcrypt_scala-blake3
+        - name: kcrypt_scala-sha
+        - name: kzmake_uuid7s
+        - name: lightbend-labs_lightbend-emoji
         - name: lightbend_mima
-        - name: log4s_log4s
-        - name: lomigmegard_akka-http-cors
-        - name: losizm_bolster
+        - name: losizm_little-config
         - name: losizm_little-json
-        - name: losizm_little-sql
-        - name: mkroli_lpm
-        - name: monix_implicitbox
-        - name: mutsuhiro6_ulid-scala3
-        - name: paoloboni_spray-json-derived-codecs
-        - name: playframework_twirl
-        - name: plokhotnyuk_rtree2d
-        - name: rssh_trackedfuture
-        - name: scalaprops_scalaprops
-        - name: scalatest_scalatestplus-mockito
-        - name: sciss_scalaosc
-        - name: sciss_topology
-        - name: sirthias_spliff
-        - name: sullis_jms-testkit
-        - name: tkrs_mess
-        - name: varwise_prometheus-akka-http
-        - name: whisklabs_docker-it-scala
-        - name: wolfendale_scalacheck-gen-regexp
-        - name: wvlet_airframe
+        - name: nicolasfara_ecscala
+        - name: pdal_java
+        - name: pjfanning_scala3-sample-classes
+        - name: rmgk_slips
+        - name: ruimo_scoins
+        - name: scala-workers_commons-lang3-bridge
+        - name: scalikejdbc_scalikejdbc
+        - name: sciss_model
+        - name: sirthias_scala-ssh
+        - name: sweet-delights_delightful-cron
+        - name: tmccarthy_digest4s
+        - name: tototoshi_scala-csv
+        - name: yrichika_scalahtml
+        - name: zygfryd_scala-zygf-jackshaft
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -269,6 +275,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -281,104 +288,104 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: aaronp_eie
         - name: akiomik_seaw
         - name: andimiller_munit-cats-effect-styles
-        - name: andyglow_scala-xml-diff
-        - name: andyglow_typesafe-config-scala
-        - name: ashwinbhaskar_sight-scala
-        - name: beangle_doc
-        - name: beangle_notify
-        - name: bpholt_java-time-literals
-        - name: catap_scala-sha
-        - name: cquiroz_sbt-locales
-        - name: creativescala_doodle-svg
-        - name: dacr_naturalsort
-        - name: dacr_split
+        - name: aoiroaoino_nanolens
+        - name: arainko_ducktape
+        - name: arturopala_validator
+        - name: beangle_db
+        - name: beangle_ids
+        - name: bilal-fazlani_rainbowcli
+        - name: carlosedp_scalautils
+        - name: changvvb_scala-protobuf-java
+        - name: chronoscala_chronoscala
+        - name: ciaraobrien_dottytags
+        - name: clulab_fatdynet
+        - name: com-lihaoyi_pprint
+        - name: dacr_drools-scripting
+        - name: dacr_jassh
+        - name: daghemberg_paut-program
         - name: davenverse_namecase
-        - name: eed3si9n_gigahorse
-        - name: failurewall_failurewall
-        - name: foundweekends_knockoff
-        - name: frawa_inline-files
-        - name: gekomad_scala-compress
-        - name: giabao_paho-akka
+        - name: emartech_escher-akka-http
+        - name: frugalmechanic_scala-optparse
         - name: giiita_refuel
+        - name: gochaorg_json4s3
+        - name: greenleafoss_green-leaf-mongo
+        - name: guardian_fastly-api-client
+        - name: gzoller_deploysample
         - name: gzoller_scala-reflection
         - name: h8io_borscht
-        - name: hedgehogqa_scala-hedgehog
-        - name: herminiogg_label2thesaurus
-        - name: herminiogg_shexml
-        - name: i10416_munkres
-        - name: ij-plugins_ijp-debayer2sx
+        - name: hseeberger_slf4s
+        - name: http4s_http4s-finagle
         - name: ij-plugins_ijp-javacv
-        - name: indoorvivants_detective
-        - name: indoorvivants_rendition
+        - name: irevive_union-derivation
         - name: j5ik2o_intervals-scala
         - name: jandom-devel_scalafix
         - name: jkugiya_aws-v4-signer-scala
         - name: jodersky_yamlesque
         - name: jozic_scalax-collection
-        - name: jphmrst_bps
-        - name: kcrypt_scala-sha
-        - name: lightbend-labs_lightbend-emoji
+        - name: jphmrst_scala-automata
         - name: lightbend-labs_scala-logging
-        - name: losizm_little-cli
-        - name: losizm_little-io
-        - name: marchliu_jaskell-dotty
-        - name: mrdimosthenis_glicko2
-        - name: nafg_simple-router
-        - name: nicolasfara_ecscala
-        - name: outr_lucene4s
-        - name: outr_moduload
-        - name: outr_profig
+        - name: losizm_bolster
+        - name: losizm_grapple
+        - name: losizm_little-time
+        - name: losizm_t2
+        - name: malliina_mobile-push
+        - name: malyszaryczlowiek_kessenger-lib
+        - name: metarank_cfor
+        - name: mkroli_lpm
+        - name: monix_implicitbox
+        - name: mutsuhiro6_ulid-scala3
+        - name: nafg_css-dsl
+        - name: note_mini-refined
+        - name: ohze_php-utils
+        - name: opaliasystems_opalia-commons-core
         - name: outr_reactify
-        - name: phaller_spores3
+        - name: paoloboni_spray-json-derived-codecs
+        - name: petitviolet_scala-operator
+        - name: phenoscape_scowl
         - name: pityka_pairwisealignment
-        - name: pjfanning_scala3-sample-classes
-        - name: playframework_cachecontrol
+        - name: pjfanning_scala-faker
+        - name: playframework_twirl
         - name: pmeheut_nscala-java-time
-        - name: purplekingdomgames_tyrian
-        - name: raquo_scala-dom-types
-        - name: rtyley_scala-collection-plus
-        - name: rtyley_scala-textmatching
+        - name: postgresql-async_postgresql-async
         - name: sangria-graphql_macro-visit
         - name: sangria-graphql_sangria-marshalling-api
-        - name: sbt_io
+        - name: scala-tessella_ring-seq
         - name: scala_scala-swing
         - name: scalafx_scalafx
-        - name: scalapb_scalapb
-        - name: scalapy_scalapy
+        - name: scalaprops_scalaprops
         - name: scalatest_scalatestplus-easymock
-        - name: scalatest_scalatestplus-junit
+        - name: scalatest_scalatestplus-jmock
         - name: scalatest_scalatestplus-scalacheck
-        - name: scalikejdbc_scalikejdbc
+        - name: scalatest_scalatestplus-selenium
         - name: scallop_scallop
-        - name: scf37_config3
         - name: scf37_filewatch
+        - name: sciss_equal
         - name: sciss_fingertree
-        - name: sciss_kollflitz
-        - name: sciss_model
-        - name: sciss_numbers
-        - name: scoverage_scalac-scoverage-plugin
-        - name: sfxcode_pebble-scala
-        - name: sh4869_semver-parser-scala
+        - name: scodec_scodec-bits
         - name: sherpal_url-dsl
-        - name: shiftleftsecurity_overflowdb-codegen
-        - name: sirthias_scala-ssh
+        - name: sirthias_spliff
         - name: softwaremill_macwire
+        - name: softwaremill_quicklens
         - name: softwaremill_sttp-model
+        - name: ssanj_delight
+        - name: sullis_jms-testkit
         - name: tabdulradi_nullable
         - name: takezoe_scala-jdbc
-        - name: takezoe_solr-scala-client
+        - name: tarao_collection-scala
         - name: thoughtworksinc_binding.scala
         - name: thoughtworksinc_tryt.scala
-        - name: tmccarthy_digest4s
-        - name: tototoshi_scala-csv
-        - name: typelevel_discipline-scalatest
+        - name: tkrs_mess
+        - name: tofu-tf_cherry
+        - name: tpolecat_typename
+        - name: typelevel_discipline-munit
+        - name: typelevel_fabric
         - name: typelevel_scalac-compat
-        - name: vincenzobaz_spark-scala3
-        - name: xuwei-k_zeroapply
-        - name: yrichika_scalahtml
+        - name: typelevel_scalac-options
+        - name: typesafeconfigops_typesafeconfigops
+        - name: whisklabs_docker-it-scala
+        - name: wolfendale_scalacheck-gen-regexp
         - name: zero-deps_proto
         - name: zio_izumi-reflect
     steps:
@@ -389,6 +396,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -404,103 +412,103 @@ jobs:
         - name: aaronp_args4c
         - name: aiyanbo_scala-i18n
         - name: andyglow_scala-range
-        - name: arainko_ducktape
-        - name: ariskk_burner4s
+        - name: andyglow_scala-xml-diff
         - name: arturopala_buffer-and-slice
-        - name: arturopala_validator
-        - name: beangle_db
-        - name: beangle_ids
-        - name: bilal-fazlani_rainbowcli
+        - name: ashwinbhaskar_sight-scala
+        - name: beangle_doc
         - name: bilal-fazlani_swiftbar4s
-        - name: blemale_scaffeine
-        - name: carlosedp_scalautils
+        - name: bpholt_java-time-literals
         - name: catap_scala-blake3
-        - name: changvvb_scala-protobuf-java
+        - name: catap_scala-sha
         - name: chrisokasaki_hwtest
-        - name: chronoscala_chronoscala
-        - name: com-lihaoyi_pprint
-        - name: dacr_drools-scripting
+        - name: cornerman_scala-cuid
+        - name: cquiroz_sbt-locales
         - name: dacr_json2props
         - name: dacr_primes
-        - name: daghemberg_paut-program
-        - name: daghemberg_problemutils
-        - name: davegurnell_unindent
+        - name: dacr_unittools
+        - name: davidledwards_scalop
+        - name: dvreeze_yaidom
+        - name: eed3si9n_gigahorse
+        - name: eed3si9n_sjson-new
+        - name: failurewall_failurewall
         - name: fasterxml_jackson-module-scala
-        - name: frugalmechanic_scala-optparse
-        - name: gochaorg_json4s3
+        - name: frawa_inline-files
+        - name: gekomad_scala-compress
+        - name: giabao_paho-akka
         - name: greenfossil_commons-i18n
         - name: greenfossil_commons-json
-        - name: greenleafoss_green-leaf-mongo
-        - name: guardian_fastly-api-client
-        - name: hseeberger_slf4s
-        - name: i10416_cssminifier
+        - name: herminiogg_label2thesaurus
+        - name: herminiogg_shexml
+        - name: i10416_munkres
+        - name: ij-plugins_ijp-debayer2sx
         - name: ij-plugins_ijp-toolkit
-        - name: indoorvivants_opaque-newtypes
+        - name: indoorvivants_detective
         - name: j5ik2o_base64scala
         - name: j5ik2o_docker-controller-scala
-        - name: jcouyang_dhall-generic
-        - name: jphmrst_scala-automata
-        - name: jphmrst_scalautils
+        - name: jphmrst_bps
         - name: kcrypt_scala-biginteger
-        - name: kcrypt_scala-blake3
-        - name: kzmake_uuid7s
+        - name: l-space_types
+        - name: log4s_log4s
+        - name: lomigmegard_akka-http-cors
         - name: lorandszakacs_enclosure
         - name: losizm_ergo
-        - name: losizm_grapple
-        - name: losizm_little-config
+        - name: losizm_little-cli
+        - name: losizm_little-io
         - name: losizm_little-security
-        - name: losizm_little-time
+        - name: losizm_little-sql
         - name: losizm_scamper
-        - name: losizm_t2
-        - name: malliina_mobile-push
         - name: malyszaryczlowiek_foo-repo
-        - name: malyszaryczlowiek_kessenger-lib
+        - name: marchliu_jaskell-dotty
         - name: mateuszkubuszok_pipez
-        - name: metarank_cfor
+        - name: mrdimosthenis_glicko2
         - name: mvv_typine
-        - name: nafg_css-dsl
-        - name: note_mini-refined
+        - name: nafg_simple-router
         - name: nremond_pbkdf2-scala
         - name: ohze_akka-guice
-        - name: ohze_php-utils
-        - name: opaliasystems_opalia-commons-core
-        - name: pdal_java
-        - name: petitviolet_scala-operator
-        - name: phenoscape_scowl
-        - name: pjfanning_scala-faker
+        - name: outr_lucene4s
+        - name: outr_moduload
+        - name: outr_profig
+        - name: phaller_spores3
+        - name: playframework_cachecontrol
         - name: plokhotnyuk_fast-string-interpolator
-        - name: postgresql-async_postgresql-async
+        - name: plokhotnyuk_rtree2d
+        - name: purplekingdomgames_tyrian
+        - name: raquo_scala-dom-types
         - name: rescala-lang_rescala
-        - name: rmgk_slips
+        - name: rssh_trackedfuture
         - name: rtyley_rate-limit-status
+        - name: rtyley_scala-collection-plus
+        - name: rtyley_scala-textmatching
         - name: ruimo_gh-sonatype-example
-        - name: ruimo_scoins
         - name: sakulk_serval
+        - name: sbt_io
         - name: scala-native_scala-native
-        - name: scala-tessella_ring-seq
-        - name: scala-workers_commons-lang3-bridge
         - name: scalacenter_tasty-query
+        - name: scalapb_scalapb
         - name: scalapy_python-native-libs
-        - name: scalatest_scalatestplus-jmock
-        - name: scalatest_scalatestplus-selenium
-        - name: sciss_equal
-        - name: scodec_scodec-bits
-        - name: softwaremill_quicklens
+        - name: scalapy_scalapy
+        - name: scalatest_scalatestplus-junit
+        - name: scalatest_scalatestplus-mockito
+        - name: scf37_config3
+        - name: sciss_kollflitz
+        - name: sciss_numbers
+        - name: sciss_scalaosc
+        - name: sciss_topology
+        - name: scoverage_scalac-scoverage-plugin
+        - name: sfxcode_pebble-scala
+        - name: sh4869_semver-parser-scala
+        - name: shiftleftsecurity_overflowdb-codegen
         - name: softwaremill_retry
-        - name: ssanj_delight
-        - name: sweet-delights_delightful-cron
-        - name: tarao_collection-scala
-        - name: tofu-tf_cherry
+        - name: takezoe_solr-scala-client
         - name: tpolecat_sourcepos
-        - name: tpolecat_typename
-        - name: typelevel_discipline-munit
-        - name: typelevel_fabric
-        - name: typelevel_scalac-options
+        - name: typelevel_discipline-scalatest
         - name: typelevel_squants
-        - name: typesafeconfigops_typesafeconfigops
+        - name: varwise_prometheus-akka-http
+        - name: vincenzobaz_spark-scala3
         - name: wangzaixiang_scala-sql
+        - name: wvlet_airframe
         - name: xuwei-k_iarray
-        - name: zygfryd_scala-zygf-jackshaft
+        - name: xuwei-k_zeroapply
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -509,6 +517,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -597,6 +606,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -609,9 +619,9 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: fthomas_refined
-        - name: mpollmeier_scala-repl-pp
-        - name: tharwaninitin_crypto4s
+        - name: typelevel_spire
+        - name: vitaliihonta_zio-temporal
+        - name: zio_zio-query
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -620,6 +630,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -650,6 +661,7 @@ jobs:
         - name: erikvanoosten_metrics-scala
         - name: fgrutsch_akka-persistence-mapdb
         - name: findify_flink-adt
+        - name: fthomas_refined
         - name: gchudnov_bscript
         - name: gchudnov_swearwolf
         - name: geirolz_fluent-copy
@@ -666,6 +678,7 @@ jobs:
         - name: marcinzh_turbolift
         - name: marcinzh_yamlike
         - name: massimosiani_monix-newtypes-cats
+        - name: mpollmeier_scala-repl-pp
         - name: msgpack4z_msgpack4z-jawn
         - name: narma_zio-docker
         - name: noelwelsh_mads
@@ -695,6 +708,7 @@ jobs:
         - name: sky-uk_kafka-topic-loader
         - name: swagger-akka-http_swagger-scala3-enum-module
         - name: tharwaninitin_cache4s
+        - name: tharwaninitin_crypto4s
         - name: thoughtworksinc_bindable.scala
         - name: tomasmikula_libretto
         - name: tomasmikula_nutcracker
@@ -710,8 +724,6 @@ jobs:
         - name: typelevel_mouse
         - name: typelevel_paiges
         - name: typelevel_shapeless-3
-        - name: typelevel_spire
-        - name: vitaliihonta_zio-temporal
         - name: vladkopanev_zio-saga
         - name: yakivy_dupin
         - name: yurikpanic_zio-postgres
@@ -728,7 +740,6 @@ jobs:
         - name: zio_zio-prelude
         - name: zio_zio-process
         - name: zio_zio-profiling
-        - name: zio_zio-query
         - name: zio_zio-rocksdb
         - name: zio_zio-telemetry
         - name: zio_zio-test-intellij
@@ -740,6 +751,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -754,7 +766,6 @@ jobs:
         include:
         - name: armanbilge_circe
         - name: bilal-fazlani_csv-schema
-        - name: bilal-fazlani_jslt-parser
         - name: bilal-fazlani_zio-ulid
         - name: cheleb_zio-pravega
         - name: circe_circe
@@ -803,6 +814,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -875,6 +887,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -911,6 +924,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -934,6 +948,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -958,6 +973,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -986,6 +1002,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1080,6 +1097,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1148,6 +1166,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1184,6 +1203,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1264,6 +1284,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1327,6 +1348,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1397,6 +1419,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1456,6 +1479,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1509,6 +1533,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1553,6 +1578,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1579,6 +1605,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1602,6 +1629,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
@@ -1625,6 +1653,7 @@ jobs:
         with:
           project-name: ${{ matrix.name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
