@@ -1,4 +1,3 @@
-ARG BASE_IMAGE
-FROM $BASE_IMAGE
-COPY . /build/
+FROM lampepfl/dotty:2021-03-22
 
+COPY . /build/
