@@ -45,7 +45,7 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        GITHUB_API="/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs"
+        GITHUB_API="/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
         JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
         PARAMS="?per_page=100"
         SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
