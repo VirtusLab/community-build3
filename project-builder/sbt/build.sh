@@ -52,7 +52,6 @@ fi
 
 sbtSettings=(
   --batch
-  --no-colors
   --verbose
   -Dcommunitybuild.version="$version"
   -Dcommunitybuild.extra-scalac-options="$extraScalacOptions"
