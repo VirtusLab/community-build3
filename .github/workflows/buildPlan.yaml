@@ -52,7 +52,7 @@ jobs:
 
   stage-0:
     runs-on: ubuntu-22.04
-    needs: setup-build
+    needs: [ setup-build ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -166,7 +166,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-1:
     runs-on: ubuntu-22.04
-    needs: stage-0
+    needs: [ setup-build, stage-0 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -216,51 +216,51 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-2:
     runs-on: ubuntu-22.04
-    needs: stage-1
+    needs: [ setup-build, stage-1 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
       matrix:
         include:
-        - name: aaronp_args4c
+        - name: altoo-ag_akka-kryo-serialization
         - name: aoiroaoino_nanolens
-        - name: arturopala_buffer-and-slice
+        - name: ciaraobrien_dottytags
         - name: clulab_fatdynet
-        - name: com-lihaoyi_pprint
+        - name: cornerman_scala-cuid
+        - name: dacr_jassh
+        - name: dacr_unittools
+        - name: davidledwards_scalop
+        - name: dvreeze_yaidom
         - name: eed3si9n_sjson-new
-        - name: greenfossil_commons-json
-        - name: h8io_borscht
-        - name: hedgehogqa_scala-hedgehog
+        - name: emartech_escher-akka-http
+        - name: gzoller_deploysample
         - name: http4s_http4s-finagle
-        - name: ij-plugins_ijp-toolkit
+        - name: irevive_union-derivation
+        - name: l-space_types
         - name: lightbend_mima
-        - name: lorandszakacs_enclosure
-        - name: malyszaryczlowiek_kessenger-lib
-        - name: metarank_cfor
+        - name: log4s_log4s
+        - name: lomigmegard_akka-http-cors
+        - name: losizm_bolster
+        - name: losizm_little-json
+        - name: losizm_little-sql
         - name: mkroli_lpm
         - name: monix_implicitbox
-        - name: mvv_typine
-        - name: note_mini-refined
-        - name: nremond_pbkdf2-scala
-        - name: ohze_php-utils
-        - name: outr_lucene4s
-        - name: outr_reactify
+        - name: mutsuhiro6_ulid-scala3
         - name: paoloboni_spray-json-derived-codecs
-        - name: phaller_spores3
-        - name: pityka_pairwisealignment
-        - name: rtyley_rate-limit-status
-        - name: rtyley_scala-collection-plus
-        - name: ruimo_gh-sonatype-example
-        - name: scalacenter_tasty-query
-        - name: scalapy_scalapy
-        - name: scallop_scallop
-        - name: sciss_model
-        - name: scodec_scodec-bits
-        - name: softwaremill_sttp-model
-        - name: takezoe_solr-scala-client
-        - name: typesafeconfigops_typesafeconfigops
-        - name: xuwei-k_iarray
-        - name: yrichika_scalahtml
+        - name: playframework_twirl
+        - name: plokhotnyuk_rtree2d
+        - name: rssh_trackedfuture
+        - name: scalaprops_scalaprops
+        - name: scalatest_scalatestplus-mockito
+        - name: sciss_scalaosc
+        - name: sciss_topology
+        - name: sirthias_spliff
+        - name: sullis_jms-testkit
+        - name: tkrs_mess
+        - name: varwise_prometheus-akka-http
+        - name: whisklabs_docker-it-scala
+        - name: wolfendale_scalacheck-gen-regexp
+        - name: wvlet_airframe
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -275,230 +275,110 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-3:
     runs-on: ubuntu-22.04
-    needs: stage-2
+    needs: [ setup-build, stage-2 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
       matrix:
         include:
         - name: aaronp_eie
-        - name: altoo-ag_akka-kryo-serialization
+        - name: akiomik_seaw
         - name: andimiller_munit-cats-effect-styles
-        - name: andyglow_scala-range
         - name: andyglow_scala-xml-diff
         - name: andyglow_typesafe-config-scala
-        - name: ariskk_burner4s
-        - name: arturopala_validator
         - name: ashwinbhaskar_sight-scala
-        - name: beangle_db
-        - name: blemale_scaffeine
-        - name: bpholt_java-time-literals
-        - name: carlosedp_scalautils
-        - name: catap_scala-blake3
-        - name: catap_scala-sha
-        - name: changvvb_scala-protobuf-java
-        - name: chrisokasaki_hwtest
-        - name: chronoscala_chronoscala
-        - name: cornerman_scala-cuid
-        - name: cquiroz_sbt-locales
-        - name: dacr_drools-scripting
-        - name: dacr_primes
-        - name: dacr_unittools
-        - name: davegurnell_unindent
-        - name: davenverse_namecase
-        - name: davidledwards_scalop
-        - name: failurewall_failurewall
-        - name: fasterxml_jackson-module-scala
-        - name: frawa_inline-files
-        - name: gekomad_scala-compress
-        - name: giiita_refuel
-        - name: greenfossil_commons-i18n
-        - name: gzoller_deploysample
-        - name: ij-plugins_ijp-javacv
-        - name: indoorvivants_rendition
-        - name: irevive_union-derivation
-        - name: j5ik2o_docker-controller-scala
-        - name: jkugiya_aws-v4-signer-scala
-        - name: jodersky_yamlesque
-        - name: jphmrst_bps
-        - name: jphmrst_scala-automata
-        - name: kcrypt_scala-blake3
-        - name: lightbend-labs_lightbend-emoji
-        - name: lightbend-labs_scala-logging
-        - name: log4s_log4s
-        - name: losizm_ergo
-        - name: losizm_little-json
-        - name: losizm_little-sql
-        - name: malyszaryczlowiek_foo-repo
-        - name: marchliu_jaskell-dotty
-        - name: mateuszkubuszok_pipez
-        - name: nafg_css-dsl
-        - name: nafg_simple-router
-        - name: ohze_akka-guice
-        - name: opaliasystems_opalia-commons-core
-        - name: outr_moduload
-        - name: petitviolet_scala-operator
-        - name: phenoscape_scowl
-        - name: pjfanning_scala-faker
-        - name: pjfanning_scala3-sample-classes
-        - name: playframework_cachecontrol
-        - name: plokhotnyuk_fast-string-interpolator
-        - name: plokhotnyuk_rtree2d
-        - name: purplekingdomgames_tyrian
-        - name: rescala-lang_rescala
-        - name: sakulk_serval
-        - name: sangria-graphql_macro-visit
-        - name: sbt_io
-        - name: scala-workers_commons-lang3-bridge
-        - name: scalafx_scalafx
-        - name: scalapb_scalapb
-        - name: scalapy_python-native-libs
-        - name: scalatest_scalatestplus-easymock
-        - name: scalatest_scalatestplus-jmock
-        - name: scf37_config3
-        - name: sciss_equal
-        - name: sciss_kollflitz
-        - name: sciss_numbers
-        - name: sciss_scalaosc
-        - name: scoverage_scalac-scoverage-plugin
-        - name: sherpal_url-dsl
-        - name: softwaremill_macwire
-        - name: softwaremill_quicklens
-        - name: tabdulradi_nullable
-        - name: tarao_collection-scala
-        - name: thoughtworksinc_tryt.scala
-        - name: tofu-tf_cherry
-        - name: tototoshi_scala-csv
-        - name: typelevel_discipline-munit
-        - name: typelevel_discipline-scalatest
-        - name: typelevel_fabric
-        - name: typelevel_scalac-compat
-        - name: typelevel_scalac-options
-        - name: typelevel_squants
-        - name: varwise_prometheus-akka-http
-        - name: vincenzobaz_spark-scala3
-        - name: wolfendale_scalacheck-gen-regexp
-        - name: wvlet_airframe
-        - name: xuwei-k_zeroapply
-        - name: zygfryd_scala-zygf-jackshaft
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v3
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        with:
-          project-name: ${{ matrix.name }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-4:
-    runs-on: ubuntu-22.04
-    needs: stage-3
-    continue-on-error: true
-    timeout-minutes: 60
-    strategy:
-      matrix:
-        include:
-        - name: aiyanbo_scala-i18n
-        - name: akiomik_seaw
-        - name: arainko_ducktape
         - name: beangle_doc
-        - name: beangle_ids
         - name: beangle_notify
-        - name: bilal-fazlani_rainbowcli
-        - name: bilal-fazlani_swiftbar4s
-        - name: ciaraobrien_dottytags
+        - name: bpholt_java-time-literals
+        - name: catap_scala-sha
+        - name: cquiroz_sbt-locales
         - name: creativescala_doodle-svg
-        - name: dacr_jassh
-        - name: dacr_json2props
         - name: dacr_naturalsort
         - name: dacr_split
-        - name: daghemberg_paut-program
-        - name: daghemberg_problemutils
-        - name: dvreeze_yaidom
+        - name: davenverse_namecase
         - name: eed3si9n_gigahorse
-        - name: emartech_escher-akka-http
+        - name: failurewall_failurewall
         - name: foundweekends_knockoff
-        - name: frugalmechanic_scala-optparse
+        - name: frawa_inline-files
+        - name: gekomad_scala-compress
         - name: giabao_paho-akka
-        - name: gochaorg_json4s3
-        - name: greenleafoss_green-leaf-mongo
-        - name: guardian_fastly-api-client
+        - name: giiita_refuel
         - name: gzoller_scala-reflection
+        - name: h8io_borscht
+        - name: hedgehogqa_scala-hedgehog
         - name: herminiogg_label2thesaurus
         - name: herminiogg_shexml
-        - name: hseeberger_slf4s
-        - name: i10416_cssminifier
         - name: i10416_munkres
         - name: ij-plugins_ijp-debayer2sx
+        - name: ij-plugins_ijp-javacv
         - name: indoorvivants_detective
-        - name: indoorvivants_opaque-newtypes
-        - name: j5ik2o_base64scala
+        - name: indoorvivants_rendition
         - name: j5ik2o_intervals-scala
         - name: jandom-devel_scalafix
-        - name: jcouyang_dhall-generic
+        - name: jkugiya_aws-v4-signer-scala
+        - name: jodersky_yamlesque
         - name: jozic_scalax-collection
-        - name: jphmrst_scalautils
-        - name: kcrypt_scala-biginteger
+        - name: jphmrst_bps
         - name: kcrypt_scala-sha
-        - name: kzmake_uuid7s
-        - name: l-space_types
-        - name: lomigmegard_akka-http-cors
-        - name: losizm_bolster
-        - name: losizm_grapple
+        - name: lightbend-labs_lightbend-emoji
+        - name: lightbend-labs_scala-logging
         - name: losizm_little-cli
-        - name: losizm_little-config
         - name: losizm_little-io
-        - name: losizm_little-security
-        - name: losizm_little-time
-        - name: losizm_scamper
-        - name: losizm_t2
-        - name: malliina_mobile-push
+        - name: marchliu_jaskell-dotty
         - name: mrdimosthenis_glicko2
-        - name: mutsuhiro6_ulid-scala3
+        - name: nafg_simple-router
         - name: nicolasfara_ecscala
+        - name: outr_lucene4s
+        - name: outr_moduload
         - name: outr_profig
-        - name: pdal_java
-        - name: playframework_twirl
+        - name: outr_reactify
+        - name: phaller_spores3
+        - name: pityka_pairwisealignment
+        - name: pjfanning_scala3-sample-classes
+        - name: playframework_cachecontrol
         - name: pmeheut_nscala-java-time
-        - name: postgresql-async_postgresql-async
+        - name: purplekingdomgames_tyrian
         - name: raquo_scala-dom-types
-        - name: rmgk_slips
-        - name: rssh_trackedfuture
+        - name: rtyley_scala-collection-plus
         - name: rtyley_scala-textmatching
-        - name: ruimo_scoins
+        - name: sangria-graphql_macro-visit
         - name: sangria-graphql_sangria-marshalling-api
-        - name: scala-native_scala-native
-        - name: scala-tessella_ring-seq
+        - name: sbt_io
         - name: scala_scala-swing
-        - name: scalaprops_scalaprops
+        - name: scalafx_scalafx
+        - name: scalapb_scalapb
+        - name: scalapy_scalapy
+        - name: scalatest_scalatestplus-easymock
         - name: scalatest_scalatestplus-junit
-        - name: scalatest_scalatestplus-mockito
         - name: scalatest_scalatestplus-scalacheck
-        - name: scalatest_scalatestplus-selenium
         - name: scalikejdbc_scalikejdbc
+        - name: scallop_scallop
+        - name: scf37_config3
         - name: scf37_filewatch
         - name: sciss_fingertree
-        - name: sciss_topology
+        - name: sciss_kollflitz
+        - name: sciss_model
+        - name: sciss_numbers
+        - name: scoverage_scalac-scoverage-plugin
         - name: sfxcode_pebble-scala
         - name: sh4869_semver-parser-scala
+        - name: sherpal_url-dsl
         - name: shiftleftsecurity_overflowdb-codegen
         - name: sirthias_scala-ssh
-        - name: sirthias_spliff
-        - name: softwaremill_retry
-        - name: ssanj_delight
-        - name: sullis_jms-testkit
-        - name: sweet-delights_delightful-cron
+        - name: softwaremill_macwire
+        - name: softwaremill_sttp-model
+        - name: tabdulradi_nullable
         - name: takezoe_scala-jdbc
+        - name: takezoe_solr-scala-client
         - name: thoughtworksinc_binding.scala
-        - name: tkrs_mess
+        - name: thoughtworksinc_tryt.scala
         - name: tmccarthy_digest4s
-        - name: tpolecat_sourcepos
-        - name: tpolecat_typename
-        - name: wangzaixiang_scala-sql
-        - name: whisklabs_docker-it-scala
+        - name: tototoshi_scala-csv
+        - name: typelevel_discipline-scalatest
+        - name: typelevel_scalac-compat
+        - name: vincenzobaz_spark-scala3
+        - name: xuwei-k_zeroapply
+        - name: yrichika_scalahtml
         - name: zero-deps_proto
         - name: zio_izumi-reflect
     steps:
@@ -513,9 +393,129 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-4:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-3 ]
+    continue-on-error: true
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        include:
+        - name: aaronp_args4c
+        - name: aiyanbo_scala-i18n
+        - name: andyglow_scala-range
+        - name: arainko_ducktape
+        - name: ariskk_burner4s
+        - name: arturopala_buffer-and-slice
+        - name: arturopala_validator
+        - name: beangle_db
+        - name: beangle_ids
+        - name: bilal-fazlani_rainbowcli
+        - name: bilal-fazlani_swiftbar4s
+        - name: blemale_scaffeine
+        - name: carlosedp_scalautils
+        - name: catap_scala-blake3
+        - name: changvvb_scala-protobuf-java
+        - name: chrisokasaki_hwtest
+        - name: chronoscala_chronoscala
+        - name: com-lihaoyi_pprint
+        - name: dacr_drools-scripting
+        - name: dacr_json2props
+        - name: dacr_primes
+        - name: daghemberg_paut-program
+        - name: daghemberg_problemutils
+        - name: davegurnell_unindent
+        - name: fasterxml_jackson-module-scala
+        - name: frugalmechanic_scala-optparse
+        - name: gochaorg_json4s3
+        - name: greenfossil_commons-i18n
+        - name: greenfossil_commons-json
+        - name: greenleafoss_green-leaf-mongo
+        - name: guardian_fastly-api-client
+        - name: hseeberger_slf4s
+        - name: i10416_cssminifier
+        - name: ij-plugins_ijp-toolkit
+        - name: indoorvivants_opaque-newtypes
+        - name: j5ik2o_base64scala
+        - name: j5ik2o_docker-controller-scala
+        - name: jcouyang_dhall-generic
+        - name: jphmrst_scala-automata
+        - name: jphmrst_scalautils
+        - name: kcrypt_scala-biginteger
+        - name: kcrypt_scala-blake3
+        - name: kzmake_uuid7s
+        - name: lorandszakacs_enclosure
+        - name: losizm_ergo
+        - name: losizm_grapple
+        - name: losizm_little-config
+        - name: losizm_little-security
+        - name: losizm_little-time
+        - name: losizm_scamper
+        - name: losizm_t2
+        - name: malliina_mobile-push
+        - name: malyszaryczlowiek_foo-repo
+        - name: malyszaryczlowiek_kessenger-lib
+        - name: mateuszkubuszok_pipez
+        - name: metarank_cfor
+        - name: mvv_typine
+        - name: nafg_css-dsl
+        - name: note_mini-refined
+        - name: nremond_pbkdf2-scala
+        - name: ohze_akka-guice
+        - name: ohze_php-utils
+        - name: opaliasystems_opalia-commons-core
+        - name: pdal_java
+        - name: petitviolet_scala-operator
+        - name: phenoscape_scowl
+        - name: pjfanning_scala-faker
+        - name: plokhotnyuk_fast-string-interpolator
+        - name: postgresql-async_postgresql-async
+        - name: rescala-lang_rescala
+        - name: rmgk_slips
+        - name: rtyley_rate-limit-status
+        - name: ruimo_gh-sonatype-example
+        - name: ruimo_scoins
+        - name: sakulk_serval
+        - name: scala-native_scala-native
+        - name: scala-tessella_ring-seq
+        - name: scala-workers_commons-lang3-bridge
+        - name: scalacenter_tasty-query
+        - name: scalapy_python-native-libs
+        - name: scalatest_scalatestplus-jmock
+        - name: scalatest_scalatestplus-selenium
+        - name: sciss_equal
+        - name: scodec_scodec-bits
+        - name: softwaremill_quicklens
+        - name: softwaremill_retry
+        - name: ssanj_delight
+        - name: sweet-delights_delightful-cron
+        - name: tarao_collection-scala
+        - name: tofu-tf_cherry
+        - name: tpolecat_sourcepos
+        - name: tpolecat_typename
+        - name: typelevel_discipline-munit
+        - name: typelevel_fabric
+        - name: typelevel_scalac-options
+        - name: typelevel_squants
+        - name: typesafeconfigops_typesafeconfigops
+        - name: wangzaixiang_scala-sql
+        - name: xuwei-k_iarray
+        - name: zygfryd_scala-zygf-jackshaft
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-5:
     runs-on: ubuntu-22.04
-    needs: stage-4
+    needs: [ setup-build, stage-4 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -603,15 +603,15 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-6:
     runs-on: ubuntu-22.04
-    needs: stage-5
+    needs: [ setup-build, stage-5 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
       matrix:
         include:
-        - name: ariskk_flink4s
-        - name: typelevel_cats-collections
-        - name: zio_interop-guava
+        - name: fthomas_refined
+        - name: mpollmeier_scala-repl-pp
+        - name: tharwaninitin_crypto4s
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -626,7 +626,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-7:
     runs-on: ubuntu-22.04
-    needs: stage-6
+    needs: [ setup-build, stage-6 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -635,6 +635,7 @@ jobs:
         - name: 47degrees_munit-akka
         - name: ahjohannessen_unum
         - name: andyglow_websocket-scala-client
+        - name: ariskk_flink4s
         - name: armanbilge_litter
         - name: armanbilge_saslprep
         - name: bcarter97_id-generator
@@ -649,7 +650,6 @@ jobs:
         - name: erikvanoosten_metrics-scala
         - name: fgrutsch_akka-persistence-mapdb
         - name: findify_flink-adt
-        - name: fthomas_refined
         - name: gchudnov_bscript
         - name: gchudnov_swearwolf
         - name: geirolz_fluent-copy
@@ -666,7 +666,6 @@ jobs:
         - name: marcinzh_turbolift
         - name: marcinzh_yamlike
         - name: massimosiani_monix-newtypes-cats
-        - name: mpollmeier_scala-repl-pp
         - name: msgpack4z_msgpack4z-jawn
         - name: narma_zio-docker
         - name: noelwelsh_mads
@@ -696,12 +695,12 @@ jobs:
         - name: sky-uk_kafka-topic-loader
         - name: swagger-akka-http_swagger-scala3-enum-module
         - name: tharwaninitin_cache4s
-        - name: tharwaninitin_crypto4s
         - name: thoughtworksinc_bindable.scala
         - name: tomasmikula_libretto
         - name: tomasmikula_nutcracker
         - name: torrentdam_bencode
         - name: typelevel_case-insensitive
+        - name: typelevel_cats-collections
         - name: typelevel_cats-mtl
         - name: typelevel_cats-parse
         - name: typelevel_cats-testkit-scalatest
@@ -716,6 +715,7 @@ jobs:
         - name: vladkopanev_zio-saga
         - name: yakivy_dupin
         - name: yurikpanic_zio-postgres
+        - name: zio_interop-guava
         - name: zio_interop-reactive-streams
         - name: zio_zio-cache
         - name: zio_zio-config
@@ -746,7 +746,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-8:
     runs-on: ubuntu-22.04
-    needs: stage-7
+    needs: [ setup-build, stage-7 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -809,7 +809,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-9:
     runs-on: ubuntu-22.04
-    needs: stage-8
+    needs: [ setup-build, stage-8 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -881,7 +881,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-10:
     runs-on: ubuntu-22.04
-    needs: stage-9
+    needs: [ setup-build, stage-9 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -917,7 +917,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-11:
     runs-on: ubuntu-22.04
-    needs: stage-10
+    needs: [ setup-build, stage-10 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -940,7 +940,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-12:
     runs-on: ubuntu-22.04
-    needs: stage-11
+    needs: [ setup-build, stage-11 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -964,7 +964,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-13:
     runs-on: ubuntu-22.04
-    needs: stage-12
+    needs: [ setup-build, stage-12 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -992,7 +992,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-14:
     runs-on: ubuntu-22.04
-    needs: stage-13
+    needs: [ setup-build, stage-13 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1086,7 +1086,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-15:
     runs-on: ubuntu-22.04
-    needs: stage-14
+    needs: [ setup-build, stage-14 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1154,7 +1154,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-16:
     runs-on: ubuntu-22.04
-    needs: stage-15
+    needs: [ setup-build, stage-15 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1190,7 +1190,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-17:
     runs-on: ubuntu-22.04
-    needs: stage-16
+    needs: [ setup-build, stage-16 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1270,7 +1270,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-18:
     runs-on: ubuntu-22.04
-    needs: stage-17
+    needs: [ setup-build, stage-17 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1333,7 +1333,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-19:
     runs-on: ubuntu-22.04
-    needs: stage-18
+    needs: [ setup-build, stage-18 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1403,7 +1403,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-20:
     runs-on: ubuntu-22.04
-    needs: stage-19
+    needs: [ setup-build, stage-19 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1462,7 +1462,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-21:
     runs-on: ubuntu-22.04
-    needs: stage-20
+    needs: [ setup-build, stage-20 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1515,7 +1515,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-22:
     runs-on: ubuntu-22.04
-    needs: stage-21
+    needs: [ setup-build, stage-21 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1559,7 +1559,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-23:
     runs-on: ubuntu-22.04
-    needs: stage-22
+    needs: [ setup-build, stage-22 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1585,7 +1585,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-24:
     runs-on: ubuntu-22.04
-    needs: stage-23
+    needs: [ setup-build, stage-23 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
@@ -1608,7 +1608,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-25:
     runs-on: ubuntu-22.04
-    needs: stage-24
+    needs: [ setup-build, stage-24 ]
     continue-on-error: true
     timeout-minutes: 60
     strategy:
