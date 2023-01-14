@@ -19,6 +19,7 @@ on:
         description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
         default: ""
 jobs:
+  # Name of this job need to match inputs of build-project/job-info
   execute-build-plan:
     uses: ./.github/workflows/buildPlan.yaml
     with: 

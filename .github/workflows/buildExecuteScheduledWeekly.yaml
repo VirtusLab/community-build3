@@ -37,6 +37,7 @@ jobs:
           echo "last-stable-version=$lastStable" >> $GITHUB_OUTPUT
           echo "last-rc-version=$lastRC" >> $GITHUB_OUTPUT
 
+  # Name of this job need to match inputs of build-project/job-info
   execute-build-plan:
     needs: [detect-version]
     uses: ./.github/workflows/buildPlan.yaml
