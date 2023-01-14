@@ -4,6 +4,7 @@
 # max projects count: -1
 
 name: "Execute Open Community Build plan"
+run-name: "Scala ${{ inputs.published-scala-version }} @ ${{ inputs.repository-url }}/${{ inputs.repository-branch}}, scalacOptions: ++'${{inputs.extra-scalac-options}}', --'${{ inputs.disabled-scalac-options }}' "
 on:
   workflow_call:
     inputs:
