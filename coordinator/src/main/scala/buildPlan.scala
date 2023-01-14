@@ -504,6 +504,7 @@ def createGithubActionJob(
         println("runs-on: ubuntu-22.04")
         println(s"needs: ${if idx == 0 then setupId else stageId(idx - 1)}")
         println("continue-on-error: true")
+        println("timeout-minutes: 60")
         println("strategy:")
         indented {
           println("matrix:")
