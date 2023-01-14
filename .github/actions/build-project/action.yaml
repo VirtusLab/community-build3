@@ -67,7 +67,7 @@ runs:
         projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
 
         canSkip=true
-        if [[ -n "${{ inputs.extra-scalac-options }}" || -n ${{ inputs.disabled-scalac-options }} ]]; then
+        if [[ -n "${{ inputs.extra-scalac-options }}" || -n "${{ inputs.disabled-scalac-options }}" ]]; then
           echo "Using custom scalacOption, cannot skip"
           canSkip=false
         else
