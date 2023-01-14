@@ -469,6 +469,10 @@ def createGithubActionJob(
     |        type: string
     |        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
     |        default: ""
+    |      disabled-scalac-options:
+    |        type: string
+    |        description: "List of scalacOptions which should be filtered out when building projects."
+    |        default: ""
     |    outputs:
     |      used-scala-version:
     |        description: "Version of Scala used to run the build"
@@ -525,6 +529,7 @@ def createGithubActionJob(
           println("  with:")
           println("    project-name: ${{ matrix.name }}")
           println("    extra-scalac-options: ${{ inputs.extra-scalac-options }}")
+          println("    disabled-scalac-options: ${{ inputs.disabled-scalac-options }}")
           println(s"    scala-version: $${{ $setupOutputs.scala-version }}")
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
           println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")

@@ -18,6 +18,10 @@ on:
         type: string
         description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
         default: ""
+      disabled-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be filtered out when building projects."
+        default: ""
 jobs:
   # Name of this job need to match inputs of build-project/job-info
   execute-build-plan:
@@ -27,6 +31,7 @@ jobs:
       repository-url: ${{ inputs.repository-url }}
       repository-branch: ${{ inputs.repository-branch }}
       extra-scalac-options: ${{ inputs.extra-scalac-options }}
+      disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
     secrets: inherit
 
   create-raport:

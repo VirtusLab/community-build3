@@ -10,6 +10,10 @@ inputs:
   extra-scalac-options:
     description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
     default: ""
+  disabled-scalac-options:
+    description: "List of scalacOptions which should be filted out when building projects."
+    default: ""
+  # Infrastructure inputs / secrets
   maven-repo-url:
     description: "Custom Maven repository used to store artifacts"
     required: true
@@ -56,7 +60,7 @@ runs:
         projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
 
         canSkip=true
-        if [[ -n "${{ inputs.extra-scalac-options }}" ]]; then
+        if [[ -n "${{ inputs.extra-scalac-options }}" || -n ${{ inputs.disabled-scalac-options }} ]]; then
           echo "Using custom scalacOption, cannot skip"
           canSkip=false
         else
@@ -86,7 +90,6 @@ runs:
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           DefaultConfig='{"memoryRequestMb":4096}'
-          disabledScalacOptions='' // Currently disabled
           config () { 
             path=".\"${{ inputs.project-name }}\"$@" 
             jq -c -r "$path" $ConfigFile 
@@ -106,7 +109,7 @@ runs:
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" \
             "${{ inputs.extra-scalac-options }}" \
-            "${disabledScalacOptions}" 2>&1 | tee build-logs.txt
+            "${{ inputs.disabled-scalac-options }}" 2>&1 | tee build-logs.txt
 
           /build/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
