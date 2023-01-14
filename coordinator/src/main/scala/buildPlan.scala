@@ -359,9 +359,9 @@ private def loadFilters(projectsFilterPath: os.Path): Seq[String] =
 type StagedBuildPlan = List[List[ProjectBuildDef]]
 def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
   val deps = projects.map(v => (v.name, v)).toMap
-  // GitHub Actions limits to 255 elements in matrix, 
-  // but action used to find URL of projects is limited to 100 
-  val maxStageSize = 100 
+  // GitHub Actions limits to 255 elements in matrix,
+  // but action used to find URL of projects is limited to 100
+  val maxStageSize = 100
   @scala.annotation.tailrec
   def groupByDeps(
       remaining: Set[ProjectBuildDef],
@@ -498,11 +498,13 @@ def createGithubActionJob(
     |          repository-branch: $${{ inputs.repository-branch }}
     |""".stripMargin)
   plan.zipWithIndex.foreach { case (projects, idx) =>
+    val prevStageId = Option.when(idx > 0) { stageId(idx - 1) }
+    val needs = (setupId :: prevStageId.toList).mkString(", ")
     indented {
       println(s"${stageId(idx)}:")
       indented {
         println("runs-on: ubuntu-22.04")
-        println(s"needs: ${if idx == 0 then setupId else stageId(idx - 1)}")
+        println(s"needs: [ $needs ]")
         println("continue-on-error: true")
         println("timeout-minutes: 60")
         println("strategy:")
