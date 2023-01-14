@@ -21,6 +21,17 @@ jobs:
         with:
           apps: scala-cli
 
+      - name: Get Date
+        id: get-date
+        run: echo "week-start=$(date -dmonday +%Y%m%d)" >> $GITHUB_OUTPUT
+
+      - name: Cache coordinator data
+        uses: actions/cache@v3
+        with:
+          # coordinator stores cache in current working directory
+          path: data/
+          key: coordinator-data-cache-${{ steps.get-date.outputs.week-start}}
+
       - name: Build plan
         run: scala-cli run coordinator/ -- 3 -1 -1 "" env/prod/config/replaced-projects.txt env/prod/config/projects-config.conf env/prod/config/filtered-projects.txt
 
@@ -46,7 +57,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.cpr.outputs.pull-request-number }}
-      
+
       - name: Auto merge PR
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
