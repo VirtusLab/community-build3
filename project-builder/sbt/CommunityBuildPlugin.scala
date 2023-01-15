@@ -129,6 +129,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   }
   val extraScalacOptions = getCustomScalacOptions("communitybuild.extra-scalac-options")
   val disabledScalacOptions = getCustomScalacOptions("communitybuild.disabled-scalac-options")
+  disabledScalacOptions ++= Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
   override def projectSettings = Seq(
     scalacOptions := {
       // Flags need to be unique
@@ -185,8 +186,9 @@ object CommunityBuildPlugin extends AutoPlugin {
     Test / scalacOptions
   ) { (_, _) =>
     {
-      disabledScalacOptions += "-Xfatal-warnings"
-      extraScalacOptions -= "-Xfatal-warnings"
+      val flags = Seq("-Xfatal-warnings", "-Werror")
+      disabledScalacOptions ++= flags
+      extraScalacOptions --= flags
       (_: ProjectRef, currentSettings: Seq[String]) =>
         currentSettings // removed in projectSettings for durable effect
     }
