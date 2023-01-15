@@ -359,9 +359,8 @@ private def loadFilters(projectsFilterPath: os.Path): Seq[String] =
 type StagedBuildPlan = List[List[ProjectBuildDef]]
 def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
   val deps = projects.map(v => (v.name, v)).toMap
-  // GitHub Actions limits to 255 elements in matrix,
-  // but action used to find URL of projects is limited to 100
-  val maxStageSize = 100
+  // GitHub Actions limits to 255 elements in matrix
+  val maxStageSize = 255
   @scala.annotation.tailrec
   def groupByDeps(
       remaining: Set[ProjectBuildDef],
