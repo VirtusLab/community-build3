@@ -39,41 +39,7 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
-    - name: Get current job URL
-      id: job-info
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        GITHUB_API="repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
-        JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
-        PARAMS="?per_page=100"
-        SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
-
-        set -o pipefail
-        
-        outFile="gh.out"
-        buildURL=""
-        for i in $(seq 1 10) ;do
-          if gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" 2>&1 | tee $outFile; then 
-            buildURL="$(cat $outFile | xargs)"
-            break
-          elif grep -q 'API rate limit exceeded' "$outFile"; then
-            echo "GitHub API rate limit exceeded, skip resolving build URL"
-            break
-          elif grep -q 'Server Error (HTTP 502)' "$outFile"; then
-            echo "Server error when resolving build URL, retry with backoff"
-            sleep 5
-          else 
-            echo "Unknown error when resolving build URL:"
-            cat $outFile
-            break
-          fi
-        done  
-        
-        echo "Build URL: $buildURL"
-        echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
-
+  
     - name: Check can skip build
       id: check-history
       shell: bash
@@ -106,6 +72,42 @@ runs:
         fi
         echo "Can skip build: $canSkip"
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
+
+    - name: Get current job URL
+      id: job-info
+      if: steps.check-history.outputs.can-skip-build != 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        GITHUB_API="repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
+        JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
+        PARAMS="?per_page=100"
+        SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
+
+        set -o pipefail
+        
+        outFile="gh.out"
+        buildURL=""
+        for i in $(seq 1 10) ;do
+          if gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" 2>&1 | tee $outFile; then 
+            buildURL="$(cat $outFile | xargs)"
+            break
+          elif grep -q 'API rate limit exceeded' "$outFile"; then
+            echo "GitHub API rate limit exceeded, skip resolving build URL"
+            break
+          elif grep -q 'Server Error (HTTP 502)' "$outFile"; then
+            echo "Server error when resolving build URL, retry with backoff"
+            sleep 5
+          else 
+            echo "Unknown error when resolving build URL:"
+            cat $outFile
+            break
+          fi
+        done  
+        
+        echo "Build URL: $buildURL"
+        echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
 
     - name: Build project
       uses: addnab/docker-run-action@v3
