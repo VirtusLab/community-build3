@@ -39,6 +39,7 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
     .map(load)
     .takeWhile(_.nonEmpty)
     .flatten
+    .sortBy(-_.stars)
 
 case class ModuleInVersion(version: String, modules: Seq[String])
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
@@ -166,7 +167,7 @@ def loadMavenInfo(scalaBinaryVersion: String)(
             Console.err.println(
               s"Failed to load maven info for $org/$name: ${ex}"
             )
-            Future.failed(ex)
+            Future.successful(None)
         }
     }
     tryFetch(1)
@@ -198,40 +199,57 @@ def loadDepenenecyGraph(
     .from(requiredProjects)
     .map(loadProject)
 
-  val ChunkSize = 32
   val optionalStream =
     cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
       .takeWhile(_.stars >= minStarsCount)
       .to(LazyList)
       .map(loadProject)
-  val optional =
-    maxProjectsCount
-      .map(_ - required.length)
-      .foldLeft(optionalStream)(_.take(_))
+  def optional(from: Int, limit: Option[Int]) =
+    limit.foldLeft(optionalStream.drop(from))(_.take(_))
 
-  Future
-    .traverse((required #::: optional).zipWithIndex) { (getProject, idx) =>
-      for
-        project <- getProject
-        name = s"${project.project.org}/${project.project.name}"
-        _ = println(
-          s"Load Maven info: #${idx}${maxProjectsCount.fold("")("/" + _)} - $name"
-        )
-        mvnInfo <-
-          if project.mvs.isEmpty
-          then Future.successful(None)
-          else
-            loadMavenInfo(scalaBinaryVersion)(project)
-              .map(Option(_))
-              .recover {
-                case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
-                  System.err.println(s"Missing Maven info: ${ex.getUrl()}")
-                  None
-              }
-      yield mvnInfo
+  def load(
+      candidates: LazyList[Future[ProjectModules]]
+  ): Future[Seq[Option[LoadedProject]]] = {
+    Future
+      .traverse(candidates.zipWithIndex) { (getProject, idx) =>
+        for
+          project <- getProject
+          name = s"${project.project.org}/${project.project.name}"
+          mvnInfo <-
+            if project.mvs.isEmpty
+            then Future.successful(None)
+            else
+              loadMavenInfo(scalaBinaryVersion)(project)
+                .map { result =>
+                  println(s"Loaded Maven info #${idx + 1} for $name")
+                  Option(result)
+                }
+                .recover {
+                  case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
+                    System.err.println(s"Missing Maven info: ${ex.getUrl()}")
+                    None
+                }
+        yield mvnInfo
+      }
+  }
+
+  load(
+    required #::: optional(
+      from = 0,
+      limit = maxProjectsCount.map(_ - requiredProjects.length)
+    )
+  ).flatMap { loaded =>
+    val available = loaded.flatten
+    maxProjectsCount.fold(Future.successful(available)) { limit =>
+      val remainingSlots = limit - available.size
+      val continueFrom = loaded.size - required.size
+      // Load '10 < 1/2n < 50' more projects then number of remaining slots to filter out possibly empty entries
+      val toLoad = remainingSlots + (remainingSlots * 0.5).toInt.max(10).min(50)
+      println(s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects")
+      load(optional(from = continueFrom, limit = Some(remainingSlots)))
+        .map(available ++ _.flatten.take(remainingSlots))
     }
-    .map(_.flatten)
-    .map(DependencyGraph(scalaBinaryVersion, _))
+  }.map(DependencyGraph(scalaBinaryVersion, _))
 
 def projectModulesFilter(
     filterPatterns: Seq[util.matching.Regex]
