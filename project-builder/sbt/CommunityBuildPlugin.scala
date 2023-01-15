@@ -20,6 +20,7 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
     val hasModifiedOptions = {
+      CommunityBuildPlugin.predefinedDisabledScalacOptions.nonEmpty ||
       CommunityBuildPlugin.extraScalacOptions.nonEmpty ||
       CommunityBuildPlugin.disabledScalacOptions.nonEmpty
     }
@@ -30,7 +31,9 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
         def setScalacOptions(key: TaskKey[Seq[String]]) =
           key.transform(
             scalacOptions => {
-              (scalacOptions ++ CommunityBuildPlugin.extraScalacOptions)
+              scalacOptions
+                .diff(CommunityBuildPlugin.predefinedDisabledScalacOptions
+                .++CommunityBuildPlugin.extraScalacOptions)
                 .diff(CommunityBuildPlugin.disabledScalacOptions.toSeq)
                 .distinct
             },
@@ -129,7 +132,8 @@ object CommunityBuildPlugin extends AutoPlugin {
   }
   val extraScalacOptions = getCustomScalacOptions("communitybuild.extra-scalac-options")
   val disabledScalacOptions = getCustomScalacOptions("communitybuild.disabled-scalac-options")
-  disabledScalacOptions ++= Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
+  val predefinedDisabledScalacOptions =
+    Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
   override def projectSettings = Seq(
     scalacOptions := {
       // Flags need to be unique
@@ -140,7 +144,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           Seq("-Wconf:cat=deprecation:i")
       }
       (scalacOptions.value ++ options ++ extraScalacOptions)
-        .diff(disabledScalacOptions.toSeq)
+        // .diff(disabledScalacOptions.toSeq) // has no effect here
         .distinct
     },
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???

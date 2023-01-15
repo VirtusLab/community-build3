@@ -236,18 +236,22 @@ def loadDepenenecyGraph(
   load(
     required #::: optional(
       from = 0,
-      limit = maxProjectsCount.map(_ - requiredProjects.length)
+      limit = maxProjectsCount.map(_ - requiredProjects.length).map(_ max 0)
     )
   ).flatMap { loaded =>
     val available = loaded.flatten
-    maxProjectsCount.fold(Future.successful(available)) { limit =>
+    def skip = Future.successful(available)
+    maxProjectsCount.fold(skip) { limit =>
       val remainingSlots = limit - available.size
-      val continueFrom = loaded.size - required.size
-      // Load '10 < 1/2n < 50' more projects then number of remaining slots to filter out possibly empty entries
-      val toLoad = remainingSlots + (remainingSlots * 0.5).toInt.max(10).min(50)
-      println(s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects")
-      load(optional(from = continueFrom, limit = Some(remainingSlots)))
-        .map(available ++ _.flatten.take(remainingSlots))
+      if remainingSlots <= 0 then skip
+      else {
+        val continueFrom = loaded.size - required.size
+        // Load '10 < 1/2n < 50' more projects then number of remaining slots to filter out possibly empty entries
+        val toLoad = remainingSlots + (remainingSlots * 0.5).toInt.max(10).min(50)
+        println(s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects")
+        load(optional(from = continueFrom, limit = Some(remainingSlots)))
+          .map(available ++ _.flatten.take(remainingSlots))
+      }
     }
   }.map(DependencyGraph(scalaBinaryVersion, _))
 
