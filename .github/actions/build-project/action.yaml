@@ -47,13 +47,32 @@ runs:
       run: |
         GITHUB_API="repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
         JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
-        PARAMS="?per_page=25"
+        PARAMS="?per_page=100"
         SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
-        buildURL=$(gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" | tr -d '\n' | xargs)
+
+        set -o pipefail
+        
+        outFile="gh.out"
+        buildURL=""
+        for i in $(seq 1 10) ;do
+          if gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" 2>&1 | tee $outFile; then 
+            buildURL="$(cat $outFile | xargs)"
+            break
+          elif grep -q 'API rate limit exceeded' "$outFile"; then
+            echo "GitHub API rate limit exceeded, skip resolving build URL"
+            break
+          elif grep -q 'Server Error (HTTP 502)' "$outFile"; then
+            echo "Server error when resolving build URL, retry with backoff"
+            sleep 5
+          else 
+            echo "Unknown error when resolving build URL:"
+            cat $outFile
+            break
+          fi
+        done  
         
         echo "Build URL: $buildURL"
         echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
-        
 
     - name: Check can skip build
       id: check-history
