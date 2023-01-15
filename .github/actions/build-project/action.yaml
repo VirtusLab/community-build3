@@ -116,7 +116,7 @@ runs:
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" \
             "${{ inputs.extra-scalac-options }}" \
-            "${{ inputs.disabled-scalac-options }}" 2>&1 > build-logs.txt
+            "${{ inputs.disabled-scalac-options }}" > build-logs.txt 2>&1
 
           # Remove ASCII coloring from the indexed logs
           cat build-logs.txt | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" > build-logs-uncolored.txt 
