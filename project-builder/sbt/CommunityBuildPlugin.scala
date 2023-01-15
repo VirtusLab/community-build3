@@ -32,8 +32,8 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
           key.transform(
             scalacOptions => {
               scalacOptions
-                .diff(CommunityBuildPlugin.predefinedDisabledScalacOptions
-                .++CommunityBuildPlugin.extraScalacOptions)
+                .diff(CommunityBuildPlugin.predefinedDisabledScalacOptions)
+                .++(CommunityBuildPlugin.extraScalacOptions)
                 .diff(CommunityBuildPlugin.disabledScalacOptions.toSeq)
                 .distinct
             },
