@@ -49,7 +49,7 @@ runs:
         JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
         PARAMS="?per_page=25"
         SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
-        buildURL=$(gh api "${GITHUB_API}${PARAMS}" ${HEADERS[@]} --paginate --jq "${SELECT_URL}" -H "Accept:application/vnd.github+json")
+        buildURL=$(gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" | tr -d '\n' | xargs)
         
         echo "Build URL: $buildURL"
         echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
