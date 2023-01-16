@@ -34,6 +34,8 @@ neandertech:jsonrpclib:.*
 ## maybe mill issues when mapping
 finos:morphir-scala:.*
 iltotore:iron:.*
+ichoran:kse3:.* 
+almond-sh:almond:.*
 
 # Not an official release version
 com-lihaoyi:ammonite:.* 
@@ -69,6 +71,9 @@ sciss:span:.*
 sciss:swingplus:.*
 dmurvihill:courier:.*
 
+## Problem with ScalaPB source generation
+jelly-rdf:jelly-jvm:.*
+
 ## Uses mill-tpolecat - it does fails to parse RC versions 
 joan38:kubernetes-client:.*
 carlosedp:riscvassembler:.*
@@ -92,6 +97,13 @@ beangle:webmvc:.*
 ## Misconfigured + needs ruby on path
 makenowjust-labs:lite:.*
 
+## Needs cmake
+pdal:java:.*
+
+## Some match issues
+scala-js:scala-js-macrotask-executor:.*
+
+
 ## Publishing artifact leads to failurs in  downstream projects
 ### Publishes only pom, no artifacts
 msgpack4z:msgpack4z-native:.*
@@ -104,7 +116,7 @@ rssh:scala-gopher:.*
 wangzaixiang:wjson:.*
 
 # Missing dependencies - requires submodules
-scalacenter_scala-debug-adapter
+scalacenter:scala-debug-adapter:.*
 
 ## Outdated version, needs new release
 2m:yabai-scala:2.0.[0-1]
@@ -134,6 +146,14 @@ johnhungerford:generic-schema:1.[0-1].[0.1]
 #https://github.com/lampepfl/dotty/issues/15668
 kevin-lee:extras:0.*
 
+## 3.3.x
+dmytromitin:dotty-patched:.*
+gzoller:scala-reflection:.*
+jphmrst:scala-automata:.*
+rmgk:slips:.*
+
+# var overrides
+caspercommunityio:casper-scala-sdk:*
 
 # opaque type overrides
 lorandszakacs:sprout:0.0.[0-5]	
@@ -142,6 +162,7 @@ lorandszakacs:sprout:0.0.[0-5]
 nrinaudo:kantan.repl:1.*
 virtuslab:pretty-stacktraces:0.0.*
 zygfryd:scala-zygf-cement:0.3.0
+pjfanning:jackson-scala3-reflection-extensions:.*
 
 ## Invalid dependency versions
 abdolence:circe-tagged-adt-codec:.*
@@ -166,7 +187,7 @@ zio:zio-aws:.*
 ## wartremover
 atedeg:mdm:.*
 cognitedata:cognite-sdk-scala:.*
-guymers_ceesvee
+guymers:ceesvee:.*
 kevin-lee:just-semver:.* 
 kevin-lee:just-sysprocess:.*
 medeia:medeia:.*
