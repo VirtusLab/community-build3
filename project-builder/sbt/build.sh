@@ -37,12 +37,13 @@ fi
 cd $repoDir
 
 # + "" would replace null with empty string
-requestedMemoryMb=$(echo $projectConfig | jq -r '.memoryRequestMb // empty')
-memorySettings=()
-if [[ ! -z "$requestedMemoryMb" ]]; then
-  size="${requestedMemoryMb}m"
-  memorySettings=("-J-Xmx${size}" "-J-Xms${size}")
-fi
+# requestedMemoryMb=$(echo $projectConfig | jq -r '.memoryRequestMb // empty')
+# memorySettings=()
+# if [[ ! -z "$requestedMemoryMb" ]]; then
+  # size="${requestedMemoryMb}m"
+# GithHub actions workers have maximally 7GB of RAM
+memorySettings=("-J-Xmx7G" "-J-Xms4G" "-XX:+UseG1GC")
+# fi
 
 # Don't set version if not publishing
 setVersionCmd="setPublishVersion $version"
