@@ -76,20 +76,32 @@ def PreviousScalaReleases = NightlyReleases
 
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(scalaVersion: String, opts: String*) =
+  val checkBuildId = opts.collectFirst {
+    case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
+  }
   val compareWithScalaVersion = opts.collectFirst {
     case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
   }
+  val compareWithBuildId = opts.collectFirst {
+    case opt if opt.contains("-compareWithBuildId=") =>
+      opt.dropWhile(_ != '=').tail
+  }
+
   printLine()
   println(
     s"Reporting failed community build projects using Scala $scalaVersion"
   )
-  val failedProjects = listFailedProjects(scalaVersion)
+  val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
   val reportedProjects = compareWithScalaVersion
     .foldRight(failedProjects) { case (comparedVersion, failedNow) =>
       println(s"Excluding projects failing already in $comparedVersion")
       val ignoredProjects =
-        listFailedProjects(comparedVersion, logFailed = false)
+        listFailedProjects(
+          comparedVersion,
+          buildId = compareWithBuildId,
+          logFailed = false
+        )
           .map(_.project)
           .toSet
       failedNow.filter(p => !ignoredProjects.contains(p.project))
@@ -125,8 +137,13 @@ end extension
 
 def listFailedProjects(
     scalaVersion: String,
+    buildId: Option[String],
     logFailed: Boolean = true
 ): Seq[FailedProject] =
+  println(
+    s"Listing failed projects in compiled with Scala ${scalaVersion}" +
+      buildId.fold("")(id => s"with buildId=$id")
+  )
   val Limit = 1200
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
@@ -212,8 +229,10 @@ def listFailedProjects(
         .query(
           boolQuery()
             .must(
-              termQuery("scalaVersion", scalaVersion),
-              termQuery("status", "failure")
+              Seq(
+                termQuery("scalaVersion", scalaVersion),
+                termQuery("status", "failure")
+              ) ++ buildId.map(termQuery("buildId", _))
             )
         )
         .size(Limit)
