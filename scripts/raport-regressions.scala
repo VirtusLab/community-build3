@@ -330,8 +330,7 @@ object Reporter:
           .getOrElse(p.version)
         val buildUrl = {
           val url = failedProjects(p.project).buildURL
-          val buildId = url.split("/").reverse.dropWhile(_.isEmpty).head
-          s"[Open CB #$buildId]($url)"
+          s"[Open CB logs]($url)"
         }
         showRow(p.project.orgRepoName, version, buildUrl)
     }
