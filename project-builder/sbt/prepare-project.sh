@@ -39,9 +39,9 @@ sbtMajor=${sbtSemVerParts[0]}
 sbtMinor=${sbtSemVerParts[1]}
 sbtPatch=${sbtSemVerParts[2]}
 
-if [ "$sbtMajor" -lt 1 ] ||
-  ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -lt 5 ]) ||
-  ([ "$sbtMajor" -eq 1 ] && [ "$sbtMinor" -eq 5 ] && [ "$sbtPatch" -lt 5 ]); then
+if [[ "$sbtMajor" -lt 1 ]] ||
+  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -lt 5 ]]) ||
+  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -eq 5 ]] && [[ "$sbtPatch" -lt 5 ]]); then
   echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.5.5"
   if [ -n "$enforcedSbtVersion" ]; then
     echo "Enforcing usage of sbt in version ${enforcedSbtVersion}"
