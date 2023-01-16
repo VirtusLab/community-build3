@@ -31,11 +31,11 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
         def setScalacOptions(key: TaskKey[Seq[String]]) =
           key.transform(
             scalacOptions => {
-              scalacOptions
+              val opts0: Seq[String] = scalacOptions
                 .diff(CommunityBuildPlugin.predefinedDisabledScalacOptions)
-                .++(CommunityBuildPlugin.extraScalacOptions)
+              opts0
+                .++(CommunityBuildPlugin.extraScalacOptions.toSeq.diff(opts0))
                 .diff(CommunityBuildPlugin.disabledScalacOptions.toSeq)
-                .distinct
             },
             sbt.internal.util.NoPosition
           )
@@ -135,13 +135,8 @@ object CommunityBuildPlugin extends AutoPlugin {
   val predefinedDisabledScalacOptions =
     Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
   override def projectSettings = Seq(
-    scalacOptions := {
-      // Flags need to be unique
-      scalacOptions.value
-        .++(extraScalacOptions)
-        .distinct
-      // .diff(disabledScalacOptions.toSeq) // has no effect here
-    },
+    // in projectSettings we can only add additional scalacOptions
+    scalacOptions := extraScalacOptions.toSeq,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value
   ) ++ mvnRepoPublishSettings
