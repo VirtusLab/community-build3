@@ -137,15 +137,10 @@ object CommunityBuildPlugin extends AutoPlugin {
   override def projectSettings = Seq(
     scalacOptions := {
       // Flags need to be unique
-      val options = CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((3, 0)) => Nil
-        case _            =>
-          // Ignore deprecations, replace them with info ()
-          Seq("-Wconf:cat=deprecation:i")
-      }
-      (scalacOptions.value ++ options ++ extraScalacOptions)
-        // .diff(disabledScalacOptions.toSeq) // has no effect here
+      scalacOptions.value
+        .++(extraScalacOptions)
         .distinct
+      // .diff(disabledScalacOptions.toSeq) // has no effect here
     },
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value
