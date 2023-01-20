@@ -1,12 +1,16 @@
 name: "Open CB: custom/manual builds"
-run-name: "Scala ${{ inputs.published-scala-version }} @ ${{ inputs.repository-url }}/${{ inputs.repository-branch}}, scalacOptions: ++'${{inputs.extra-scalac-options}}', --'${{ inputs.disabled-scalac-options }}' "
+run-name: ${{ inputs.build-name != '' && inputs.build-name || format('Scala {0}@{1}/{2}, scalacOptions++=({3}), scalacOptions--=({4})', inputs.published-scala-version != '' && inputs.published-scala-version || 'main', inputs.repository-url, inputs.repository-branch, inputs.extra-scalac-options, inputs.disabled-scalac-options) }}
 
 on:
   workflow_dispatch:
     inputs:
+      build-name:
+        type: string
+        description: "Custom name used to identify this job (has effect only in GitHub Actions Web GUI)"
+        default: ""
       published-scala-version:
         type: string
-        description: 'Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository'
+        description: "Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository"
       repository-url:
         type: string
         description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
@@ -27,7 +31,7 @@ jobs:
   # Name of this job need to match inputs of build-project/job-info
   execute-build-plan:
     uses: ./.github/workflows/buildPlan.yaml
-    with: 
+    with:
       published-scala-version: ${{ inputs.published-scala-version }}
       repository-url: ${{ inputs.repository-url }}
       repository-branch: ${{ inputs.repository-branch }}
@@ -46,12 +50,12 @@ jobs:
         uses: coursier/setup-action@v1
         with:
           apps: scala-cli
-      
+
       - name: Generate raport
-        env: 
+        env:
           ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
           ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-        run: | 
+        run: |
           scalaVersion=${{ needs.execute-build-plan.outputs.used-scala-version }}
           lastRC="$(./scripts/lastVersionRC.sc)"
           lastStable=$(./scripts/lastVersionStable.sc)
