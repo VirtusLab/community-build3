@@ -37,7 +37,7 @@ fi
 cd $repoDir
 
 # GithHub actions workers have maximally 7GB of RAM
-memorySettings=("-J-Xmx7G" "-J-Xms4G" "-J-XX:+UseG1GC")
+memorySettings=("-J-Xmx7G" "-J-Xms4G")
 
 # Don't set version if not publishing
 setVersionCmd="setPublishVersion $version"
