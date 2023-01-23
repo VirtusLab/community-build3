@@ -329,16 +329,16 @@ object Reporter:
           project: String,
           version: String,
           buildURL: String,
-          issueURL: String = ""
+          notes: String = ""
       ) =
-        println(s"| $project | $version | $issueURL | $buildURL |")
+        println(s"| $project | $version | $buildURL | $notes |")
       val allRegressions = sameVersionRegressions ++ diffVersionRegressions
       printLine()
       println(
         s"Projects with last successful builds using Scala <b>$BOLD$scalaVersion$RESET</b> [${allRegressions.size}]:"
       )
-      showRow("Project", "Version", "Build URL", "Reproducer issue")
-      showRow("-------", "-------", "---------", "----------------")
+      showRow("Project", "Version", "Build URL", "Notes")
+      showRow("-------", "-------", "---------", "-----")
       for p <- allRegressions do
         val version = failedProjects
           .get(p.project)
