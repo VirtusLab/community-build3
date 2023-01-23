@@ -171,7 +171,7 @@ def listFailedProjects(
           search(BuildSummariesIndex)
             .query(
               boolQuery().must(
-                termQuery("projectName.keyword", project.searchName),
+                termQuery("projectName", project.searchName),
                 termQuery("status", "success"),
                 termQuery("scalaVersion", scalaVersion)
               )
@@ -237,9 +237,9 @@ def listFailedProjects(
         )
         .size(Limit)
         .sourceInclude("projectName", "summary", "buildURL")
-        .sortBy(fieldSort("projectName.keyword"), fieldSort("timestamp").desc())
+        .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
         .aggs(
-          termsAgg("failedProjects", "projectName.keyword")
+          termsAgg("failedProjects", "projectName")
             .size(Limit)
             .subaggs(projectVersionsStatusAggregation)
         )
@@ -267,7 +267,7 @@ def projectHistory(project: FailedProject) =
           boolQuery()
             .must(
               termsQuery("scalaVersion", PreviousScalaReleases),
-              termQuery("projectName.keyword", project.project.searchName)
+              termQuery("projectName", project.project.searchName)
             )
             .should(
               termQuery("version", project.version)
