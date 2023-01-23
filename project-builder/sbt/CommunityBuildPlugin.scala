@@ -135,8 +135,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   val predefinedDisabledScalacOptions =
     Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
   override def projectSettings = Seq(
-    // in projectSettings we can only add additional scalacOptions
-    scalacOptions := extraScalacOptions.toSeq,
+    scalacOptions := scalacOptions.value ++ extraScalacOptions.toSeq,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value
   ) ++ mvnRepoPublishSettings
