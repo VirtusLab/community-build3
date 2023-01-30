@@ -1,5 +1,5 @@
 name: "Open CB: custom/manual builds"
-run-name: ${{ inputs.build-name != '' && inputs.build-name || format('Scala {0} @ {1} / {2}, scalacOptions ++= ({3}), scalacOptions --= ({4})', inputs.published-scala-version != '' && inputs.published-scala-version || 'snapshot', inputs.repository-url, inputs.repository-branch, inputs.extra-scalac-options, inputs.disabled-scalac-options) }}
+run-name: ${{ inputs.build-name != '' && inputs.build-name || format('Scala {0} @ {1} / {2} {3}{4}', inputs.published-scala-version != '' && inputs.published-scala-version || 'snapshot', inputs.repository-url, inputs.repository-branch, inputs.extra-scalac-options == '' && '' || format('extraScalacOptions={0} ', inputs.extra-scalac-options), inputs.disabled-scalac-options == '' && '' || format('disabledScalacOptions={0}', inputs.disabled-scalac-options) ) }}
 
 on:
   workflow_dispatch:
