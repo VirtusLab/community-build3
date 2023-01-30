@@ -72,7 +72,7 @@ lazy val StableScalaVersions = {
   )
   re.findAllIn(html.mkString).toVector
 }
-def PreviousScalaReleases = NightlyReleases
+lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted.tapEach(println)
 
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(scalaVersion: String, opts: String*) =
