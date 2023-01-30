@@ -72,7 +72,7 @@ lazy val StableScalaVersions = {
   )
   re.findAllIn(html.mkString).toVector
 }
-def PreviousScalaReleases = NightlyReleases
+lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
 
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(scalaVersion: String, opts: String*) =
@@ -104,6 +104,15 @@ def PreviousScalaReleases = NightlyReleases
         )
           .map(_.project)
           .toSet
+      println(s"Excluding ${ignoredProjects.size} project failing in ${comparedVersion}${compareWithBuildId.fold("")(" in buildId=" + _)}:")
+      ignoredProjects
+        .map(_.orgRepoName)
+        .groupBy(_.head)
+        .toList
+        .sortBy(_._1)
+        .map(_._2.toList.sorted.mkString(" - ",", ", ""))
+        .foreach(println)
+
       failedNow.filter(p => !ignoredProjects.contains(p.project))
     }
   if reportedProjects.nonEmpty then
@@ -144,7 +153,7 @@ def listFailedProjects(
     s"Listing failed projects in compiled with Scala ${scalaVersion}" +
       buildId.fold("")(id => s"with buildId=$id")
   )
-  val Limit = 1200
+  val Limit = 2000
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
       .order(TermsOrder("buildTimestamp", asc = false))
@@ -152,7 +161,7 @@ def listFailedProjects(
         maxAgg("buildTimestamp", "timestamp"),
         termsAgg("status", "status")
       )
-      .size(100) // last 5 versions
+      .size(10) // last versions
 
   def process(resp: SearchResponse): Seq[FailedProject] = {
     val projectVersions = resp.aggs
