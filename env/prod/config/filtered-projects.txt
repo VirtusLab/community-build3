@@ -24,11 +24,18 @@ cucumber:action-publish-sbt:.*
 pityka:aten-scala:.*
 stryker:mutator_mutation-testing-elements:.*
 wireapp:wire-signals:.*
+davidledwards:zookeeper:.*
 
 # Missing module moduleMappings
 busymachines:pureharm-db-core:.*
 eed3si9n:sbt-coursier:.*
 neandertech:jsonrpclib:.*
+
+## maybe mill issues when mapping
+finos:morphir-scala:.*
+iltotore:iron:.*
+ichoran:kse3:.* 
+almond-sh:almond:.*
 
 # Not an official release version
 com-lihaoyi:ammonite:.* 
@@ -62,6 +69,10 @@ sciss:scala-chart:.*
 sciss:scalainterpreterpane:.*
 sciss:span:.*
 sciss:swingplus:.*
+dmurvihill:courier:.*
+
+## Problem with ScalaPB source generation
+jelly-rdf:jelly-jvm:.*
 
 ## Uses mill-tpolecat - it does fails to parse RC versions 
 joan38:kubernetes-client:.*
@@ -76,6 +87,7 @@ beangle:cache:.*
 beangle:cdi:.*
 beangle:commons:.*
 beangle:data:.*
+beangle:ems:.*
 beangle:security:.*
 beangle:serializer:.*
 beangle:template:.*
@@ -85,21 +97,12 @@ beangle:webmvc:.*
 ## Misconfigured + needs ruby on path
 makenowjust-labs:lite:.*
 
-## Missing artifacts in public repo
-# sbt-beangle-parent:0.6.0
-beangle:boot:.*
-beangle:cache:.*
-beangle:cdi:.*
-beangle:commons:.*
-beangle:data:.*
-beangle:security:.*
-beangle:serializer:.*
-beangle:template:.*
-beangle:web:.*
-beangle:webmvc:.*
+## Needs cmake
+pdal:java:.*
 
-## Misconfigured + needs ruby on path
-makenowjust-labs:lite:.*
+## Some match issues
+scala-js:scala-js-macrotask-executor:.*
+
 
 ## Publishing artifact leads to failurs in  downstream projects
 ### Publishes only pom, no artifacts
@@ -110,6 +113,10 @@ arturopala:gitignore:.*
 fehu:opentracing-scala:.*
 lorandszakacs:sprout:0.0.[0-5]
 rssh:scala-gopher:.*
+wangzaixiang:wjson:.*
+
+# Missing dependencies - requires submodules
+scalacenter:scala-debug-adapter:.*
 
 ## Outdated version, needs new release
 2m:yabai-scala:2.0.[0-1]
@@ -139,6 +146,14 @@ johnhungerford:generic-schema:1.[0-1].[0.1]
 #https://github.com/lampepfl/dotty/issues/15668
 kevin-lee:extras:0.*
 
+## 3.3.x
+dmytromitin:dotty-patched:.*
+gzoller:scala-reflection:.*
+jphmrst:scala-automata:.*
+rmgk:slips:.*
+
+# var overrides
+caspercommunityio:casper-scala-sdk:*
 
 # opaque type overrides
 lorandszakacs:sprout:0.0.[0-5]	
@@ -147,6 +162,7 @@ lorandszakacs:sprout:0.0.[0-5]
 nrinaudo:kantan.repl:1.*
 virtuslab:pretty-stacktraces:0.0.*
 zygfryd:scala-zygf-cement:0.3.0
+pjfanning:jackson-scala3-reflection-extensions:.*
 
 ## Invalid dependency versions
 abdolence:circe-tagged-adt-codec:.*
@@ -171,16 +187,22 @@ zio:zio-aws:.*
 ## wartremover
 atedeg:mdm:.*
 cognitedata:cognite-sdk-scala:.*
+guymers:ceesvee:.*
 kevin-lee:just-semver:.* 
 kevin-lee:just-sysprocess:.*
 medeia:medeia:.*
+tharwaninitin:gcp4zio:.*
+tharwaninitin:cron4zio:.*
+tharwaninitin:etlflow:.*
 xuwei-k:wartremover-scalikejdbc:.*
 
 ## better2string
 kubukoz:drops:.*
 kubukoz:spotify-next:.*
 kubukoz:sup:.* 
+polyvariant:colorize-scala:.*
 polyvariant:scodec-java-classfile:.*
+polyvariant:treesitter4s:.*
 
 # Depends on no longer available pre-release
 oleg-py:shironeko:0.2.0-M.*
@@ -195,6 +217,10 @@ laserdisc-io:fs2-aws:5.0.*
 ## override opaque type
 tabdulradi:mazboot:.*
 
-# Unsupported minimal JDK version
-## JDK 19
-softwaremill:tapir-loom:.*
+
+# scala-cli project
+alexarchambault:scalacon-2022-demo:.*
+alexarchambault:scalacon2022-demo:.*
+
+# bleep projects
+oyvindberg:tui-scala:.*

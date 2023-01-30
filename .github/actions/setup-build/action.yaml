@@ -1,0 +1,81 @@
+name: "Prepare Open Community Build"
+description: "Ensure compiler version is published, resolve url for custom Maven repository"
+inputs:
+  scala-version:
+    description: "Scala version to check"
+  repository-url:
+    description: "GitHub repository URL for compiler to build"
+    required: true
+  repository-branch:
+    description: "GitHub repository branch for compiler to build"
+    required: true
+outputs:
+  scala-version:
+    description: "Effective Scala version, input value of scala-version if using published version or version of builded compiler"
+    value: ${{ steps.calc-version.outputs.effective-scala-version }}
+  maven-repo-url:
+    description: "Effective Maven repository subdirectory to use"
+    value: ${{ steps.calc-version.outputs.effective-maven-url }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repository-url }}
+        ref: ${{ inputs.repository-branch }}
+        path: "compiler"
+
+    - name: Calculate version if missing
+      id: calc-version
+      shell: bash
+      run: |
+        commitHash=$(git rev-parse HEAD)
+
+        scalaVersion=${{ inputs.scala-version }}
+        if [[ -z $scalaVersion ]]; then
+          baseVersion=$(cat compiler/project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print $4 }') 
+          scalaVersion="${baseVersion}-bin-${commitHash}"
+        fi
+
+        baseMavenRepo="https://scala3.westeurope.cloudapp.azure.com/maven2"
+        buildMavenRepo="${baseMavenRepo}/${scalaVersion}"
+
+        echo "Effective Scala version for this build: $scalaVersion"
+        echo "effective-scala-version=${scalaVersion}" >> $GITHUB_OUTPUT
+
+        echo "Effective Maven repository for this build: $buildMavenRepo"
+        echo "effective-maven-url=${buildMavenRepo}" >> $GITHUB_OUTPUT
+
+    - name: Install coursier
+      uses: coursier/setup-action@v1
+      with:
+        apps: cs
+    - name: Check version is published
+      shell: bash
+      id: check-published
+      run: |
+        Version="${{ steps.calc-version.outputs.effective-scala-version }}"
+        CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+        isPublished=false
+        # Download jar instead of checking only for pom to ensure that it's complete
+        if cs fetch org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo ; then
+          isPublished=true
+        elif [[ ! -z "${{ inputs.scala-version }}" ]]; then
+          echo "::error title=Compiler version unavailable::Requested compiler version ${{ inputs.scala-version }} is unavailable" 
+          exit 1
+        fi
+        echo "Can skip compiler build: ${isPublished}"
+        echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT
+
+    - name: Build compiler
+      uses: addnab/docker-run-action@v3
+      if: steps.check-published.outputs.is-compiler-published == 'false'
+      with:
+        image: "virtuslab/scala-community-build-compiler-builder:v0.2.1"
+        options: -v ${{ github.workspace }}/compiler:/compiler/
+        run: |
+          Version="${{ steps.calc-version.outputs.effective-scala-version }}"
+          CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
+          echo "Building Scala compiler, version ${Version}"
+          /build/build.sh /compiler "${Version}" "${CustomMavenRepo}"

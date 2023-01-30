@@ -1,4 +1,5 @@
 import java.time.ZonedDateTime
+import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.*
 
 object Scaladex {
@@ -14,18 +15,27 @@ object Scaladex {
   )
 
   final val ScaladexUrl = "https://index.scala-lang.org"
-  type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
   def artifactMetadata(
       groupId: String,
       artifactId: String
-  ): AsyncResponse[ArtifactMetadataResponse] =
-    Future {
+  ): AsyncResponse[ArtifactMetadataResponse] = {
+    def tryFetch(backoffSeconds: Int): AsyncResponse[ArtifactMetadataResponse] = Future {
       val response = requests.get(
         url = s"$ScaladexUrl/api/artifacts/$groupId/$artifactId"
       )
       fromJson[ArtifactMetadataResponse](response.text())
+    }.recoverWith {
+      case err: org.jsoup.HttpStatusException
+          if err.getStatusCode == 503 && !Thread.interrupted() =>
+        Console.err.println(
+          s"Failed to fetch artifact metadata, Scaladex unavailable, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
+        )
+        SECONDS.sleep(backoffSeconds)
+        tryFetch((backoffSeconds * 2).min(60))
     }
+    tryFetch(1)
+  }
 
   def projectSummary(
       organization: String,

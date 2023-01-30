@@ -2,68 +2,89 @@ import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.error.*
 import java.io.FileNotFoundException
+import scala.util.Try
+import scala.annotation.tailrec
 
 class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
   def apply(
       project: ProjectVersion,
       repoUrl: String,
       tagOrRevision: Option[String]
-  ): Option[ProjectBuildConfig] = try {
+  ): Option[ProjectBuildConfig] = {
     val name = project.showName
-    val projectDir = checkout(repoUrl, name, tagOrRevision)
 
-    println(s"Discover build config for project $name")
-    readProjectConfig(projectDir, repoUrl)
-      .orElse(internalProjectConfigs(project.showName))
-      .orElse(Some(ProjectBuildConfig.empty))
-      .map { c =>
-        if c.java.version.nonEmpty then c
-        else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
+    checkout(repoUrl, name, tagOrRevision)
+      .flatMap { projectDir =>
+        try {
+          readProjectConfig(projectDir, repoUrl)
+            .orElse(internalProjectConfigs(project.showName))
+            .orElse(Some(ProjectBuildConfig.empty))
+            .map { c =>
+              if c.java.version.nonEmpty then c
+              else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
+            }
+            .map { c =>
+              val default = ProjectBuildConfig.defaultMemoryRequest
+              if c.memoryRequestMb > default then c
+              else
+                val discovered = discoverMemoryRequest(projectDir)
+                  .filter(_ > default)
+                  .map(_ min 8192)
+                  .getOrElse(default)
+                c.copy(memoryRequestMb = discovered)
+            }
+            .map { c =>
+              c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
+            }
+            .filter(_ != ProjectBuildConfig.empty)
+        } catch {
+          case ex: Throwable =>
+            Console.err.println(
+              s"Failed to resolve project config: ${ex.getMessage}"
+            )
+            None
+        } finally os.remove.all(projectDir)
       }
-      .map { c =>
-        val default = ProjectBuildConfig.defaultMemoryRequest
-        if c.memoryRequestMb > default then c
-        else
-          val discovered = discoverMemoryRequest(projectDir).filter(_ > default).getOrElse(default)
-          c.copy(memoryRequestMb = discovered)
-      }
-      .map { c =>
-        if c.sourcePatches.nonEmpty then c
-        else c.copy(sourcePatches = discoverSourcePatches(projectDir))
-      }
-      .filter(_ != ProjectBuildConfig.empty)
-      .map { config =>
-        println(s"Using custom project config for $name: ${toJson(config)}")
-        config
-      }
-  } catch {
-    case ex: Exception =>
-      System.err.println(s"Failed to resolve project config: ${ex.getMessage}")
-      None
   }
 
   private def checkout(
       repoUrl: String,
       projectName: String,
       tagOrRevision: Option[String]
-  ): os.Path = {
-    val projectDir = os.temp.dir(prefix = s"repo-$projectName")
-    try {
-      os.proc(
-        "git",
-        "clone",
-        repoUrl,
-        projectDir,
-        "--quiet",
-        tagOrRevision.map("--branch=" + _).toList,
-        "--depth=1"
-      ).call(stderr = os.Pipe)
-    } catch {
-      case ex: Throwable =>
-        println(s"Failed to checkout $repoUrl at revision ${tagOrRevision}")
-        throw ex
+  ): Option[os.Path] = {
+    @tailrec def retry[T](
+        retries: Int,
+        backoffSeconds: Int = 1
+    ): Option[os.Path] = {
+      val projectDir = os.temp.dir(prefix = s"repo-$projectName")
+      val proc = os
+        .proc(
+          "git",
+          "clone",
+          repoUrl,
+          projectDir,
+          "--quiet",
+          tagOrRevision.map("--branch=" + _).toList,
+          "--depth=1"
+        )
+        .call(stderr = os.Pipe, check = false)
+
+      if proc.exitCode == 0 then Some(projectDir)
+      else if retries > 0 then
+        Console.err.println(
+          s"Failed to checkout $repoUrl at revision ${tagOrRevision}, backoff ${backoffSeconds}s"
+        )
+        proc.err.lines().foreach(Console.err.println)
+        Thread.sleep(backoffSeconds * 1000)
+        retry(retries - 1, (backoffSeconds * 2).min(60))
+      else
+        Console.err.println(
+          s"Failed to checkout $repoUrl at revision ${tagOrRevision}:"
+        )
+        proc.err.lines().foreach(Console.err.println)
+        None
     }
-    projectDir
+    retry(retries = 10)
   }
 
   private def githubWorkflows(projectDir: os.Path) = {
@@ -79,7 +100,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
   private def commonBuildFiles(projectDir: os.Path) = {
     val files = projectDir / "build.sc" ::
       projectDir / "build.sbt" ::
-      List(projectDir / "project").filter(os.exists(_)).flatMap(os.walk(_)).toList
+      List(projectDir / "project")
+        .filter(os.exists(_))
+        .flatMap(os.walk(_))
+        .toList
 
     files.filter(f => os.exists(f) && os.isFile(f))
   }
@@ -91,9 +115,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       .flatMap(_.asConfigValue)
       .toOption
 
-    // Resolve project config from mainted, internal project configs list
+  // Resolve project config from mainted, internal project configs list
   private def internalProjectConfigs(projectName: String) = {
-    val fallbackConfig = referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(projectName, _))
+    val fallbackConfig =
+      referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(projectName, _))
     val config = ConfigSource
       .file(internalProjectConfigsPath)
       .withFallback(ConfigSource.fromConfig(fallbackConfig))
@@ -104,10 +129,13 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       case ConfigReaderFailures(
             CannotReadFile(file, Some(_: FileNotFoundException))
           ) =>
-        System.err.println("Internal conifg projects not configured")
-      case ConfigReaderFailures(ConvertFailure(KeyNotFound(`projectName`, _), _, _)) => ()
+        System.err.println(s"Internal conifg projects not configured: $file")
+      case ConfigReaderFailures(
+            ConvertFailure(KeyNotFound(`projectName`, _), _, _)
+          ) =>
+        ()
       case failure =>
-        System.err.println(
+        throw new RuntimeException(
           s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${failure.prettyPrint(0)}"
         )
     }
@@ -127,8 +155,9 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
 
     config.left.foreach {
       case reasons: ConfigReaderFailures if reasons.toList.exists {
-            case CannotReadFile(_, Some(_: java.io.FileNotFoundException)) => true
-            case _                                                         => false
+            case CannotReadFile(_, Some(_: java.io.FileNotFoundException)) =>
+              true
+            case _ => false
           } =>
         ()
       case reason =>
@@ -145,16 +174,16 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     val OptQuote = "['\"]?".r
     // java-version is used by setup-scala and setup-java actions
     // jvm is used by scala-cli action
-    val JavaVersion = raw"(?:java-version|jvm):\s*(.*)".r
+    // release is used by oracle-actions/setup-java@v1
+    val JavaVersion = raw"(?:java-version|jdk|jvm|release):\s*(.*)".r
     val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
-    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*\S*)$OptQuote".r
+    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*[\w\-\_\.]*)$OptQuote".r
     val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
     // We can only supported this versions
-    val allowedVersions = Seq(8, 11, 17)
+    val allowedVersions = Seq(8, 11, 17, 19)
 
     def isJavaVersionMatrixEntry(key: String): Boolean = {
-      val name = key.toLowerCase
-      name.contains("java") || name.contains("jdk")
+      Set("java", "jdk", "jvm", "release").contains(key.toLowerCase)
     }
     githubWorkflows(projectDir)
       .flatMap { path =>
@@ -180,7 +209,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       .toList
       .distinct
       .flatMap(version => allowedVersions.find(_ >= version))
-      .minOption
+      .maxOption
       .map(_.toString)
 
   private def discoverSourcePatches(projectDir: os.Path): List[SourcePatch] =
@@ -196,12 +225,15 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         "Scala_3", // https://github.dev/kubukoz/sup/blob/644848c03173c726f19a40e6dd439b6905d42967/build.sbt#L10-L11
         "scala_3"
       )
-      val Scala3VersionNamesAlt = matchEnclosed(scala3VersionNames.mkString("|"))
+      val Scala3VersionNamesAlt = matchEnclosed(
+        scala3VersionNames.mkString("|")
+      )
       val DefOrVal = matchEnclosed("def|val|var")
       val OptType = s"${matchEnclosed(raw":\s*String")}?"
       val ScalaVersionDefn = s"$DefOrVal $Scala3VersionNamesAlt$OptType".r
       def matchEnclosed(pattern: String) = s"(?:$pattern)".r
-      def defnPattern(rhsPattern: String) = raw".*(($ScalaVersionDefn)\s*=\s*($rhsPattern))\s*".r
+      def defnPattern(rhsPattern: String) =
+        raw".*(($ScalaVersionDefn)\s*=\s*($rhsPattern))\s*".r
       val Scala3Version = """"3\.\d+\.\d+\S*""""
 
       // https://github.com/ghostdogpr/caliban/blob/95c5bafac4b8c72e5eb2af9b52b6cb7554a7da2d/build.sbt#L6
@@ -209,7 +241,9 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       // https://github.com/valskalla/odin/blob/db4444fe4efcb5c497d4e23bdf9bbcffd27269c2/build.sbt#L24
       val VersionSeq = raw"""(Seq|Set|List|Vector)\((?:${Scala3Version},?)*\)"""
       val VersionsSeqDefn = defnPattern(VersionSeq)
-      val VersionsSeqCondDefn = defnPattern(raw"""if\s*\(.*\) .* else ${VersionSeq}""")
+      val VersionsSeqCondDefn = defnPattern(
+        raw"""if\s*\(.*\) .* else ${VersionSeq}"""
+      )
       // https://github.com/zio/zio/blob/39322c7b41b913cbadc44db7885cedc6c2505e08/project/BuildHelper.scala#L25
       val BinVersionSelector = defnPattern(raw"""\S+\("3\.?\S*"\)""")
 
@@ -221,13 +255,27 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         }
         uncommentedLine.trim match {
           case StringVersionDefn(wholeDefn, definition, value) =>
-            Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
+            Some(
+              Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}")
+            )
           case VersionsSeqDefn(wholeDefn, definition, value, seqType) =>
-            Some(Replecement(wholeDefn, s"$definition = $seqType(${scalaVersionStringStub})"))
+            Some(
+              Replecement(
+                wholeDefn,
+                s"$definition = $seqType(${scalaVersionStringStub})"
+              )
+            )
           case VersionsSeqCondDefn(wholeDefn, definition, value, seqType) =>
-            Some(Replecement(wholeDefn, s"$definition = $seqType(${scalaVersionStringStub})"))
+            Some(
+              Replecement(
+                wholeDefn,
+                s"$definition = $seqType(${scalaVersionStringStub})"
+              )
+            )
           case BinVersionSelector(wholeDefn, definition, value) =>
-            Some(Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}"))
+            Some(
+              Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}")
+            )
           case _ => None
         }
     }
@@ -267,7 +315,8 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
       .list(projectDir)
       .filter(
         _.lastOpt.exists { name =>
-          name.contains("sbtopts") || name.contains("jvmopts") || name.contains("jvm-opts")
+          name.contains("sbtopts") || name.contains("jvmopts") ||
+          name.contains("jvm-opts")
         }
       )
       .flatMap(readXmx)
@@ -284,7 +333,8 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
 
     def unapply(text: String): Option[MegaBytes] =
       def commentStartIdx = text.indexOf("#") max text.indexOf("//")
-      def isNotCommented = commentStartIdx < 0 || text.indexOf("-Xmx") < commentStartIdx
+      def isNotCommented =
+        commentStartIdx < 0 || text.indexOf("-Xmx") < commentStartIdx
       text match {
         case XmxPattern(size, unit) if isNotCommented =>
           val sizeN = size.toInt

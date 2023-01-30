@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ $# -ne 6 ]; then
+if [ $# -ne 8 ]; then
   echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <sbt_version?> <project_config?>, got $#: $@"
   exit 1
 fi
@@ -12,6 +12,8 @@ version="$3"      # e.g. 1.0.2-communityBuild
 targets=($4)      # e.g. "com.example%foo com.example%bar"
 mavenRepoUrl="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
+extraScalacOptions="$7"
+disabledScalacOption="$8"
 
 if [[ -z $projectConfig ]]; then
   projectConfig="{}"
@@ -22,6 +24,15 @@ echo Scala version: $scalaVersion
 echo Disting version $version for ${#targets[@]} targets: ${targets[@]}
 echo Project projectConfig: $projectConfig
 echo '##################################'
+
+if [[ ! -z $extraScalacOptions ]]; then
+  echo "Support for setting extra scalacOptions in mill is unsupprted, ignoring: ${extraScalacOptions}"
+fi
+
+if [[ ! -z $disabledScalacOption ]]; then
+  echo "Support for filtering extra scalacOptions in mill is unsupprted, ignoring: ${disabledScalacOption}"
+fi
+
 
 cd $repoDir
 
@@ -35,8 +46,10 @@ millSettings=(
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 
-mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}" ||
-  (
-    echo "Retrying with local mill distro" &&
-      ./mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
-  )
+function tryBuild() {
+  mill=$1
+  echo "Try build using $mill"
+  $mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+}
+
+tryBuild mill || ([[ -f ./mill ]] && tryBuild ./mill)

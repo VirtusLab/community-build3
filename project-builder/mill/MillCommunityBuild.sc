@@ -1,5 +1,9 @@
-import $file.CommunityBuildCore,
-CommunityBuildCore.Scala3CommunityBuild.{TestingMode => _, ProjectBuildConfig => _, ProjectOverrides => _, _}
+import $file.CommunityBuildCore, CommunityBuildCore.Scala3CommunityBuild.{
+  TestingMode => _,
+  ProjectBuildConfig => _,
+  ProjectOverrides => _,
+  _
+}
 import CommunityBuildCore.Scala3CommunityBuild.Utils._
 // Make sure that following classes are in sync with the ones defined in CommunityBuildcore,
 //  upickle has problems with classess imported from other file when creating readers

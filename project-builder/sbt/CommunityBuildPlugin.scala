@@ -7,6 +7,7 @@ import sbt.protocol.testing.TestResult
 import xsbti.compile.{FileAnalysisStore, CompileAnalysis}
 import xsbti.{Severity, CompileFailed, Problem}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 import Scala3CommunityBuild._
 import Scala3CommunityBuild.Utils._
@@ -18,21 +19,32 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   override def eval[T](task: TaskKey[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
+    val hasModifiedOptions = {
+      CommunityBuildPlugin.predefinedDisabledScalacOptions.nonEmpty ||
+      CommunityBuildPlugin.extraScalacOptions.nonEmpty ||
+      CommunityBuildPlugin.disabledScalacOptions.nonEmpty
+    }
     val updatedState =
-      if (!CommunityBuildPlugin.disableFatalWarningsFlag) state
+      if (!hasModifiedOptions) state
       else {
         val extracted = sbt.Project.extract(state)
-        def disableFatalWarnings(key: TaskKey[Seq[String]]) =
+        def setScalacOptions(key: TaskKey[Seq[String]]) =
           key.transform(
-            _.filterNot(_ == "-Xfatal-warnings"),
+            scalacOptions => {
+              val opts0: Seq[String] = scalacOptions
+                .diff(CommunityBuildPlugin.predefinedDisabledScalacOptions)
+              opts0
+                .++(CommunityBuildPlugin.extraScalacOptions.toSeq.diff(opts0))
+                .diff(CommunityBuildPlugin.disabledScalacOptions.toSeq)
+            },
             sbt.internal.util.NoPosition
           )
         state.appendWithSession(
           extracted.structure.allProjectRefs
             .flatMap { ref =>
               Seq(
-                disableFatalWarnings(ref / Compile / Keys.scalacOptions),
-                disableFatalWarnings(ref / Test / Keys.scalacOptions)
+                setScalacOptions(ref / Compile / Keys.scalacOptions),
+                setScalacOptions(ref / Test / Keys.scalacOptions)
               )
             }
         )
@@ -110,22 +122,20 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     }
     .getOrElse(Nil)
-
-  var disableFatalWarningsFlag = false
+  private def getCustomScalacOptions(propName: String) = {
+    val mutableOpts = mutable.Set.empty[String]
+    mutableOpts ++= sys.props
+      .get(propName)
+      .toSeq
+      .flatMap(_.split(","))
+    mutableOpts
+  }
+  val extraScalacOptions = getCustomScalacOptions("communitybuild.extra-scalac-options")
+  val disabledScalacOptions = getCustomScalacOptions("communitybuild.disabled-scalac-options")
+  val predefinedDisabledScalacOptions =
+    Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
   override def projectSettings = Seq(
-    scalacOptions := {
-      // Flags need to be unique
-      val options = CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((3, 0)) => Nil
-        case _            =>
-          // Ignore deprecations, replace them with info ()
-          Seq("-Wconf:cat=deprecation:i")
-      }
-      val withAdditions = (scalacOptions.value ++ options).distinct
-      if (disableFatalWarningsFlag)
-        withAdditions.filter(_ != "-Xfatal-warnings")
-      else withAdditions
-    },
+    scalacOptions := scalacOptions.value ++ extraScalacOptions.toSeq,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value
   ) ++ mvnRepoPublishSettings
@@ -169,7 +179,9 @@ object CommunityBuildPlugin extends AutoPlugin {
     Test / scalacOptions
   ) { (_, _) =>
     {
-      disableFatalWarningsFlag = true
+      val flags = Seq("-Xfatal-warnings", "-Werror")
+      disabledScalacOptions ++= flags
+      extraScalacOptions --= flags
       (_: ProjectRef, currentSettings: Seq[String]) =>
         currentSettings // removed in projectSettings for durable effect
     }
@@ -183,8 +195,8 @@ object CommunityBuildPlugin extends AutoPlugin {
     Test / scalacOptions
   ) { (args, extracted) =>
     val argSourceVersion = args.headOption.filter(_.nonEmpty)
-    def resolveSourceVersion(ref: ProjectRef) = CrossVersion
-      .partialVersion(extracted.get(ref / scalaVersion))
+    def resolveSourceVersion(scalaVersion: String) = CrossVersion
+      .partialVersion(scalaVersion)
       .collect {
         case (3, 0) => "3.0-migration"
         case (3, 1) => "3.0-migration"
@@ -193,21 +205,24 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
 
     (ref: ProjectRef, currentSettings: Seq[String]) => {
-      argSourceVersion
-        .orElse(resolveSourceVersion(ref))
-        .fold(currentSettings) { sourceVersion =>
-          val newEntries = Seq(s"-source:$sourceVersion")
-          println(
-            s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
-          )
-          // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
-          val filteredSettings =
-            Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
-          currentSettings.filterNot { setting =>
-            filteredSettings.exists(setting.contains(_)) ||
-            setting.matches(".*-Wconf.*any:e")
-          } ++ newEntries
-        }
+      val scalaVersion = extracted.get(ref / Keys.scalaVersion)
+      if (!scalaVersion.startsWith("3.")) currentSettings
+      else
+        argSourceVersion
+          .orElse(resolveSourceVersion(scalaVersion))
+          .fold(currentSettings) { sourceVersion =>
+            val newEntries = Seq(s"-source:$sourceVersion")
+            println(
+              s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
+            )
+            // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
+            val filteredSettings =
+              Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
+            currentSettings.filterNot { setting =>
+              filteredSettings.exists(setting.contains(_)) ||
+              setting.matches(".*-Wconf.*any:e")
+            } ++ newEntries
+          }
     }
   }
 

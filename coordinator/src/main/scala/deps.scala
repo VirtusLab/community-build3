@@ -4,8 +4,10 @@ import java.nio.file._
 import scala.sys.process._
 import scala.concurrent.*
 import scala.concurrent.duration.*
-import scala.concurrent.ExecutionContext.Implicits.global
 import java.time.OffsetDateTime
+import java.util.concurrent.TimeUnit.SECONDS
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 // TODO scala3 should be more robust
 def loadProjects(scalaBinaryVersion: String): Seq[Project] =
@@ -21,7 +23,9 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
   ).map(_ + "=" + _).mkString("&")
   def load(page: Int) =
     val d = Jsoup
-      .connect(s"https://index.scala-lang.org/search?${commonSearchParams}&page=$page")
+      .connect(
+        s"https://index.scala-lang.org/search?${commonSearchParams}&page=$page"
+      )
       .get()
     d.select(".list-result .row").asScala.flatMap { e =>
       val texts = e.select("h4").get(0).text().split("/")
@@ -35,19 +39,23 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
     .map(load)
     .takeWhile(_.nonEmpty)
     .flatten
+    .sortBy(-_.stars)
 
 case class ModuleInVersion(version: String, modules: Seq[String])
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
-def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectModules =
-  import scala.concurrent.ExecutionContext.Implicits.global
+def loadScaladexProject(scalaBinaryVersion: String)(
+    project: Project
+): AsyncResponse[ProjectModules] =
   import util.*
   val binaryVersionSuffix = "_" + scalaBinaryVersion
-  val moduleVersionsTask = Scaladex
+  Scaladex
     .projectSummary(project.org, project.name, scalaBinaryVersion)
     .flatMap {
       case None =>
-        System.err.println(s"No project summary for ${project.org}/${project.name}")
+        Console.err.println(
+          s"No project summary for ${project.org}/${project.name}"
+        )
         Future.successful(Nil)
       case Some(projectSummary) =>
         val releaseDates = collection.mutable.Map.empty[String, OffsetDateTime]
@@ -56,10 +64,13 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
           artifactsMetadata <- Future
             .traverse(projectSummary.artifacts) { artifact =>
               Scaladex
-                .artifactMetadata(groupId = projectSummary.groupId, artifactId = s"${artifact}_3")
+                .artifactMetadata(
+                  groupId = projectSummary.groupId,
+                  artifactId = s"${artifact}_3"
+                )
                 .map { response =>
                   if (response.pagination.pageCount != 1)
-                    System.err.println(
+                    Console.err.println(
                       "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
                     )
                   // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
@@ -83,15 +94,15 @@ def loadScaladexProject(scalaBinaryVersion: String)(project: Project): ProjectMo
           }.toSeq
         )
     }
-  val moduleVersions = Await.result(moduleVersionsTask, 5.minute)
+    .map { moduleVersions =>
+      val modules = moduleVersions
+        .filter(_.modules.nonEmpty)
+        .map(mvs => VersionedModules(mvs, mvs.version))
+        .map(_.modules)
+      ProjectModules(project, modules)
+    }
 
-  case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
-  val modules = moduleVersions
-    .filter(_.modules.nonEmpty)
-    .map(mvs => VersionedModules(mvs, mvs.version))
-    .map(_.modules)
-  ProjectModules(project, modules)
-
+case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
 case class ModuleVersion(name: String, version: String, p: Project)
 
 val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
@@ -102,8 +113,7 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
     s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
-  println(gradle)
-  val GradleDep(o, n, v) = gradle
+  val GradleDep(o, n, v) = gradle: @unchecked
   val orgParsed = o.split('.').mkString("/")
   val mCentralUrl =
     s"https://repo1.maven.org/maven2/$orgParsed/$n/$v/$n-$v.pom"
@@ -120,27 +130,54 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
 
   Target(TargetId(o, n), deps.toSeq)
 
-def loadMavenInfo(scalaBinaryVersion: String)(projectModules: ProjectModules): LoadedProject =
+def loadMavenInfo(scalaBinaryVersion: String)(
+    projectModules: ProjectModules
+): AsyncResponse[LoadedProject] =
   import projectModules.project.{name, org}
   val repoName = s"https://github.com/$org/$name.git"
-  require(projectModules.mvs.nonEmpty, s"Empty modules list in ${projectModules.project}")
+  require(
+    projectModules.mvs.nonEmpty,
+    s"Empty modules list in ${projectModules.project}"
+  )
   val ModuleInVersion(version, modules) = projectModules.mvs
-    .find(v => findTag(repoName, v.version).isRight)
+    .find(v => findTag(repoName, v.version).isDefined)
     .getOrElse(projectModules.mvs.head)
-  val toTargetsTask = Future.traverse(modules) { module =>
-    Future {
-      cached {
-        asTarget(scalaBinaryVersion)(_)
-      }(ModuleVersion(module, version, projectModules.project))
-    }
-      .map(Some(_))
-      .recover { case ex: Exception =>
-        println(ex)
-        None
+
+  val tasks = modules.map { module =>
+    def tryFetch(backoffSeconds: Int): AsyncResponse[Option[Target]] = {
+      inline def backoff(reason: => String) = {
+        Console.err.println(
+          s"Failed to load maven info for $org/$name, reason: $reason: retry with backoff ${backoffSeconds}s"
+        )
+        SECONDS.sleep(backoffSeconds)
+        tryFetch((backoffSeconds * 2).min(60))
       }
+      Future({
+        val target = cached {
+          asTarget(scalaBinaryVersion)(_)
+        }(ModuleVersion(module, version, projectModules.project))
+        Some(target)
+      })
+        .recoverWith {
+          case ex: UnknownHostException   => backoff("service not found")
+          case ex: SocketTimeoutException => backoff("socket timeout exception")
+          case ex: HttpStatusException if ex.getStatusCode == 503 =>
+            backoff("service unavailable")
+          case ex: Exception =>
+            Console.err.println(
+              s"Failed to load maven info for $org/$name: ${ex}"
+            )
+            Future.successful(None)
+        }
+    }
+    tryFetch(1)
   }
-  val targets = Await.result(toTargetsTask, 5.minute).flatten
-  LoadedProject(projectModules.project, version, targets)
+
+  Future
+    .foldLeft(tasks)(List.empty[Target]) { case (acc, target) =>
+      acc ::: target.toList
+    }
+    .map(LoadedProject(projectModules.project, version, _))
 
   /** @param scalaBinaryVersion
     *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
@@ -151,49 +188,72 @@ def loadDepenenecyGraph(
     maxProjectsCount: Option[Int] = None,
     requiredProjects: Seq[Project] = Nil,
     filterPatterns: Seq[String] = Nil
-): DependencyGraph =
+): AsyncResponse[DependencyGraph] =
   val patterns = filterPatterns.map(_.r)
-  def loadProject(p: Project) = cached(loadScaladexProject(scalaBinaryVersion))
-    .andThen(projectModulesFilter(patterns))
-    .apply(p)
+  def loadProject(p: Project): AsyncResponse[ProjectModules] = cachedAsync { (p: Project) =>
+    loadScaladexProject(scalaBinaryVersion)(p)
+      .map(projectModulesFilter(patterns))
+  }(p)
 
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
 
-  val ChunkSize = 32
-  val optionalStream = cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
-    .takeWhile(_.stars >= minStarsCount)
-    .sliding(ChunkSize, ChunkSize)
-    .to(LazyList)
-    .zipWithIndex
-    .flatMap { (chunk, idx) =>
-      println(s"Load projects - chunk #${idx}, projects indexes from ${idx * ChunkSize}")
-      val calcChunk = Future
-        .traverse(chunk) { project => Future { loadProject(project) } }
-        .map(_.filter(_.mvs.nonEmpty))
-      Await.result(calcChunk, 5.minute)
-    }
-  val optional = maxProjectsCount
-    .map(_ - required.length)
-    .foldLeft(optionalStream)(_.take(_))
-  val projects = {
-    val loadProjects = Future.traverse((required #::: optional).zipWithIndex) { (project, idx) =>
-      Future {
-        val name = s"${project.project.org}/${project.project.name}"
-        println(
-          s"Load Maven info: #${idx}${maxProjectsCount.fold("")("/" + _)} - $name"
-        )
-        Option(loadMavenInfo(scalaBinaryVersion)(project))
-      }.recover {
-        case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
-          System.err.println(s"Missing Maven info: ${ex.getUrl()}")
-          None
+  val optionalStream =
+    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
+      .takeWhile(_.stars >= minStarsCount)
+      .to(LazyList)
+      .map(loadProject)
+  def optional(from: Int, limit: Option[Int]) =
+    limit.foldLeft(optionalStream.drop(from))(_.take(_))
+
+  def load(
+      candidates: LazyList[Future[ProjectModules]]
+  ): Future[Seq[Option[LoadedProject]]] = {
+    Future
+      .traverse(candidates.zipWithIndex) { (getProject, idx) =>
+        for
+          project <- getProject
+          name = s"${project.project.org}/${project.project.name}"
+          mvnInfo <-
+            if project.mvs.isEmpty
+            then Future.successful(None)
+            else
+              loadMavenInfo(scalaBinaryVersion)(project)
+                .map { result =>
+                  println(s"Loaded Maven info #${idx + 1} for $name")
+                  Option(result)
+                }
+                .recover {
+                  case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
+                    System.err.println(s"Missing Maven info: ${ex.getUrl()}")
+                    None
+                }
+        yield mvnInfo
+      }
+  }
+
+  load(
+    required #::: optional(
+      from = 0,
+      limit = maxProjectsCount.map(_ - requiredProjects.length).map(_ max 0)
+    )
+  ).flatMap { loaded =>
+    val available = loaded.flatten
+    def skip = Future.successful(available)
+    maxProjectsCount.fold(skip) { limit =>
+      val remainingSlots = limit - available.size
+      if remainingSlots <= 0 then skip
+      else {
+        val continueFrom = loaded.size - required.size
+        // Load '10 < 1/2n < 50' more projects then number of remaining slots to filter out possibly empty entries
+        val toLoad = remainingSlots + (remainingSlots * 0.5).toInt.max(10).min(50)
+        println(s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects")
+        load(optional(from = continueFrom, limit = Some(remainingSlots)))
+          .map(available ++ _.flatten.take(remainingSlots))
       }
     }
-    Await.result(loadProjects, 30.minutes).flatten
-  }
-  DependencyGraph(scalaBinaryVersion, projects)
+  }.map(DependencyGraph(scalaBinaryVersion, _))
 
 def projectModulesFilter(
     filterPatterns: Seq[util.matching.Regex]
@@ -202,7 +262,9 @@ def projectModulesFilter(
   def matchPatternAndLog(v: String): Boolean = {
     filterPatterns
       .find(_.matches(v))
-      .tapEach { pattern => println(s"Excluding entry $v, matched by pattern ${pattern.regex}") }
+      .tapEach { pattern =>
+        println(s"Excluding entry $v, matched by pattern ${pattern.regex}")
+      }
       .nonEmpty
   }
 
@@ -221,5 +283,3 @@ def projectModulesFilter(
       .filter(_.modules.nonEmpty)
   )
 }
-@main def runDeps =
-  loadDepenenecyGraph(scalaBinaryVersion = "3", minStarsCount = 100, maxProjectsCount = Some(100))

@@ -1,72 +1,114 @@
 #!/usr/bin/env -S scala-cli shebang
 //> using scala "3"
-//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.2.1"
-//> using lib "org.slf4j:slf4j-simple:1.6.4"
+//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.5.2"
+//> using lib "org.slf4j:slf4j-simple:2.0.6"
 
 import com.sksamuel.elastic4s
 import elastic4s.*
 import elastic4s.http.JavaClient
 import elastic4s.ElasticDsl.*
 import elastic4s.requests.searches.aggs.TermsOrder
+import elastic4s.requests.searches.*
 
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback
 import org.apache.http.impl.nio.client.*
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.auth.*
 
+import scala.io.Source
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import scala.io.AnsiColor.*
+import org.elasticsearch.client.RestClient
+import org.apache.http.HttpHost
 
 given ExecutionContext = ExecutionContext.global
 
 val BuildSummariesIndex = "project-build-summary"
 val DefaultTimeout = 5.minutes
-val ElasticsearchUrl = "https://localhost:9200"
+val ElasticsearchHost = "scala3.westeurope.cloudapp.azure.com"
+val ElasticsearchUrl = s"https://$ElasticsearchHost/data/"
 // ./scripts/show-elastic-credentials.sh
 val ElasticsearchCredentials = new UsernamePasswordCredentials(
   sys.env.getOrElse("ES_USERNAME", "elastic"),
   sys.env.getOrElse("ES_PASSWORD", "changeme")
 )
-val StableScalaVersions = {
-  def versions(version: String)(rcVersions: Int) =
-    1.to(rcVersions).map(v => s"$version-RC$v") ++ Seq(version)
-  Seq(
-    versions("3.0.0")(rcVersions = 0),
-    versions("3.0.1")(rcVersions = 2),
-    versions("3.0.2")(rcVersions = 2),
-    versions("3.1.0")(rcVersions = 3),
-    versions("3.1.1")(rcVersions = 2),
-    versions("3.1.2")(rcVersions = 3),
-    versions("3.1.3")(rcVersions = 5),
-    versions("3.2.0")(rcVersions = 4),
-    versions("3.2.1")(rcVersions = 2)
-  ).flatten
+lazy val esClient = {
+  val clientConfig = new HttpClientConfigCallback {
+    override def customizeHttpClient(
+        httpClientBuilder: HttpAsyncClientBuilder
+    ): HttpAsyncClientBuilder = {
+      val creds = new BasicCredentialsProvider()
+      creds
+        .setCredentials(AuthScope.ANY, ElasticsearchCredentials)
+      httpClientBuilder
+        .setDefaultCredentialsProvider(creds)
+    }
+  }
+
+  ElasticClient(
+    JavaClient.fromRestClient(
+      RestClient
+        .builder(HttpHost(ElasticsearchHost, -1, "https"))
+        .setPathPrefix("/data")
+        .setHttpClientConfigCallback(clientConfig)
+        .build()
+    )
+  )
 }
+
+lazy val NightlyReleases = {
+  val re = raw"(?<=title=$")(.+-bin-\d{8}-\w{7}-NIGHTLY)(?=/$")".r
+  val html = Source.fromURL(
+    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/"
+  )
+  re.findAllIn(html.mkString).toVector
+}
+
+lazy val StableScalaVersions = {
+  val re = raw"(?<=title=$")(\d+\.\d+\.\d+(-RC\d+)?)(?=/$")".r
+  val html = Source.fromURL(
+    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/"
+  )
+  re.findAllIn(html.mkString).toVector
+}
+def PreviousScalaReleases = NightlyReleases
 
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(scalaVersion: String, opts: String*) =
-  val createIssueTrackerTable = opts.exists(_.contains("-issueTracker"))
+  val checkBuildId = opts.collectFirst {
+    case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
+  }
   val compareWithScalaVersion = opts.collectFirst {
     case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
   }
+  val compareWithBuildId = opts.collectFirst {
+    case opt if opt.contains("-compareWithBuildId=") =>
+      opt.dropWhile(_ != '=').tail
+  }
+
   printLine()
-  println(s"Reporting failed community build projects using Scala $scalaVersion")
-  val failedProjects = listFailedProjects(scalaVersion)
+  println(
+    s"Reporting failed community build projects using Scala $scalaVersion"
+  )
+  val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
   val reportedProjects = compareWithScalaVersion
-  .foldRight(failedProjects){case (comparedVersion, failedNow) =>
-    println(s"Excluding projects failing already in $comparedVersion")
-    val ignoredProjects = 
-      listFailedProjects(comparedVersion, logFailed = false)
-      .map(_.project)
-      .toSet
-    failedNow.filter(p => !ignoredProjects.contains(p.project))
-  }
+    .foldRight(failedProjects) { case (comparedVersion, failedNow) =>
+      println(s"Excluding projects failing already in $comparedVersion")
+      val ignoredProjects =
+        listFailedProjects(
+          comparedVersion,
+          buildId = compareWithBuildId,
+          logFailed = false
+        )
+          .map(_.project)
+          .toSet
+      failedNow.filter(p => !ignoredProjects.contains(p.project))
+    }
   if reportedProjects.nonEmpty then
     reportCompilerRegressions(reportedProjects, scalaVersion)(
-      if createIssueTrackerTable then Reporter.IssueTracker(scalaVersion)
-      else Reporter.Default
+      Reporter.Default(scalaVersion)
     )
   printLine()
   esClient.close()
@@ -89,11 +131,20 @@ extension (summary: List[SourceFields])
     val taskResults = module(task).asInstanceOf[SourceFields]
     taskResults("status") == "failed"
   }
-  private def existsModuleThat(pred: SourceFields ?=> Boolean) = summary.exists(pred(using _))
+  private def existsModuleThat(pred: SourceFields ?=> Boolean) =
+    summary.exists(pred(using _))
 end extension
 
-def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[FailedProject] =
-  val Limit = 2000
+def listFailedProjects(
+    scalaVersion: String,
+    buildId: Option[String],
+    logFailed: Boolean = true
+): Seq[FailedProject] =
+  println(
+    s"Listing failed projects in compiled with Scala ${scalaVersion}" +
+      buildId.fold("")(id => s"with buildId=$id")
+  )
+  val Limit = 1200
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
       .order(TermsOrder("buildTimestamp", asc = false))
@@ -101,7 +152,76 @@ def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[Fai
         maxAgg("buildTimestamp", "timestamp"),
         termsAgg("status", "status")
       )
-      .size(5) // last 5 versions
+      .size(100) // last 5 versions
+
+  def process(resp: SearchResponse): Seq[FailedProject] = {
+    val projectVersions = resp.aggs
+      .terms("failedProjects")
+      .buckets
+      .map { bucket =>
+        val name = bucket.key
+        val lastVersion = bucket.terms("versions").buckets.head.key
+        name -> lastVersion
+      }
+      .toMap
+
+    def hasNewerPassingVersion(project: Project, failedVersion: String) =
+      esClient
+        .execute {
+          search(BuildSummariesIndex)
+            .query(
+              boolQuery().must(
+                termQuery("projectName", project.searchName),
+                termQuery("status", "success"),
+                termQuery("scalaVersion", scalaVersion)
+              )
+            )
+            .sourceInclude("version")
+            .sortBy(fieldSort("timestamp").desc())
+        }
+        .map(_.map(_.hits.hits.exists { result =>
+          isVersionNewerOrEqualThen(
+            version = result.sourceField("version").asInstanceOf[String],
+            reference = failedVersion
+          )
+        }))
+        .await(DefaultTimeout)
+        .result
+    end hasNewerPassingVersion
+
+    resp.hits.hits
+      .map(_.sourceAsMap)
+      .distinctBy(_("projectName"))
+      .flatMap { fields =>
+        val project = Project(fields("projectName").asInstanceOf[String])
+        val summary = fields("summary").asInstanceOf[List[SourceFields]]
+        val buildURL = fields("buildURL").asInstanceOf[String]
+        val lastFailedVersion = projectVersions(project.searchName)
+
+        import scala.io.AnsiColor.{RED, YELLOW, MAGENTA, RESET, BOLD}
+        def logProject(label: String)(color: String) = if logFailed then
+          println(
+            s"$color${label.padTo(8, " ").mkString}$RESET failure in $BOLD${project.orgRepoName} @ ${projectVersions(
+                project.searchName
+              )}$RESET - $buildURL"
+          )
+        val compilerFailure = summary.compilerFailure
+        if hasNewerPassingVersion(project, lastFailedVersion) then
+          None // ignore failure
+        else
+          if summary.compilerFailure then logProject("COMPILER")(RED)
+          if summary.testsFailure then logProject("TEST")(YELLOW)
+          if summary.docFailure then logProject("DOC")(MAGENTA)
+          if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
+          Option.when(compilerFailure) {
+            FailedProject(
+              project,
+              version = lastFailedVersion,
+              buildURL = buildURL
+            )
+          }
+      }
+  }
 
   esClient
     .execute {
@@ -109,14 +229,17 @@ def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[Fai
         .query(
           boolQuery()
             .must(
-              termQuery("scalaVersion", scalaVersion),
-              termQuery("status", "failure")
+              Seq(
+                termQuery("scalaVersion", scalaVersion),
+                termQuery("status", "failure")
+              ) ++ buildId.map(termQuery("buildId", _))
             )
         )
         .size(Limit)
-        .sortBy(fieldSort("projectName.keyword"), fieldSort("timestamp").desc())
+        .sourceInclude("projectName", "summary", "buildURL")
+        .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
         .aggs(
-          termsAgg("failedProjects", "projectName.keyword")
+          termsAgg("failedProjects", "projectName")
             .size(Limit)
             .subaggs(projectVersionsStatusAggregation)
         )
@@ -124,73 +247,9 @@ def listFailedProjects(scalaVersion: String, logFailed: Boolean = true): Seq[Fai
     .await(DefaultTimeout)
     .fold(
       reportFailedQuery("GetFailedQueries").andThen(_ => Nil),
-      resp => {
-        val projectVersions = resp.aggs
-          .terms("failedProjects")
-          .buckets
-          .map { bucket =>
-            val name = bucket.key
-            val lastVersion = bucket.terms("versions").buckets.head.key
-            name -> lastVersion
-          }
-          .toMap
-
-        def hasNewerPassingVersion(project: Project, failedVersion: String) =
-          esClient
-            .execute {
-              search(BuildSummariesIndex)
-                .query(
-                  boolQuery().must(
-                    termQuery("projectName.keyword", project.searchName),
-                    termQuery("status", "success"),
-                    termQuery("scalaVersion", scalaVersion)
-                  )
-                )
-                .sortBy(fieldSort("timestamp").desc())
-            }
-            .map(_.map(_.hits.hits.exists { result =>
-              isVersionNewerOrEqualThen(
-                version = result.sourceField("version").asInstanceOf[String],
-                reference = failedVersion
-              )
-            }))
-            .await(DefaultTimeout)
-            .result
-        end hasNewerPassingVersion
-
-        resp.hits.hits
-          .map(_.sourceAsMap)
-          .distinctBy(_("projectName"))
-          .flatMap { fields =>
-            val project = Project(fields("projectName").asInstanceOf[String])
-            val summary = fields("summary").asInstanceOf[List[SourceFields]]
-            val buildURL = fields("buildURL").asInstanceOf[String]
-            val lastFailedVersion = projectVersions(project.searchName)
-
-            import scala.io.AnsiColor.{RED, YELLOW, MAGENTA, RESET, BOLD}
-            def logProject(label: String)(color: String) = if logFailed then
-              println(
-                s"$color${label.padTo(8, " ").mkString}$RESET failure in $BOLD${project.orgRepoName} @ ${projectVersions(
-                  project.searchName
-                )}$RESET - ${fields("buildURL")}"
-              )
-            val compilerFailure = summary.compilerFailure
-            if hasNewerPassingVersion(project, lastFailedVersion) then None // ignore failure
-            else
-              if summary.compilerFailure then logProject("COMPILER")(RED)
-              if summary.testsFailure then logProject("TEST")(YELLOW)
-              if summary.docFailure then logProject("DOC")(MAGENTA)
-              if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
-              Option.when(compilerFailure) {
-                FailedProject(
-                  project,
-                  version = lastFailedVersion,
-                  buildURL = buildURL
-                )
-              }
-          }
-      }
+      process(_)
     )
+
 end listFailedProjects
 
 case class ProjectHistoryEntry(
@@ -207,8 +266,8 @@ def projectHistory(project: FailedProject) =
         .query {
           boolQuery()
             .must(
-              termsQuery("scalaVersion", StableScalaVersions),
-              termQuery("projectName.keyword", project.project.searchName)
+              termsQuery("scalaVersion", PreviousScalaReleases),
+              termQuery("projectName", project.project.searchName)
             )
             .should(
               termQuery("version", project.version)
@@ -218,10 +277,13 @@ def projectHistory(project: FailedProject) =
           fieldSort("scalaVersion").desc(),
           fieldSort("timestamp").desc()
         )
+        .sourceInclude("scalaVersion", "version", "summary")
     }
     .map(
       _.fold[Seq[ProjectHistoryEntry]](
-        reportFailedQuery(s"Project build history ${project.project.orgRepoName}")
+        reportFailedQuery(
+          s"Project build history ${project.project.orgRepoName}"
+        )
           .andThen(_ => Nil),
         _.hits.hits
           .map(_.sourceAsMap)
@@ -234,7 +296,9 @@ def projectHistory(project: FailedProject) =
               scalaVersion = fields("scalaVersion").asInstanceOf[String],
               version = fields("version").asInstanceOf[String],
               isCurrentVersion = isCurrentVersion,
-              compilerFailure = fields("summary").asInstanceOf[List[SourceFields]].compilerFailure
+              compilerFailure = fields("summary")
+                .asInstanceOf[List[SourceFields]]
+                .compilerFailure
             )
           }
       )
@@ -252,64 +316,8 @@ trait Reporter {
   ): Unit
 }
 object Reporter:
-  object Default extends Reporter:
-    override def report(
-        scalaVersion: String,
-        failedProjects: Map[Project, FailedProject],
-        sameVersionRegressions: Seq[ProjectHistoryEntry],
-        diffVersionRegressions: Seq[ProjectHistoryEntry]
-    ): Unit = {
-      val allRegressions = sameVersionRegressions ++ diffVersionRegressions
-      def showFailed(failed: Seq[ProjectHistoryEntry]) = failed
-        .map(_.project.orgRepoName)
-        .map(v => s"${BOLD}$v${RESET}")
-        .mkString(", ")
-      def showDiffVersions() = diffVersionRegressions.foreach(v =>
-        println(
-          s" * $BOLD${v.project.orgRepoName}$RESET - ${v.version} -> ${failedProjects(v.project).version} "
-        )
-      )
-
-      val same = sameVersionRegressions
-      val diff = diffVersionRegressions
-      printLine()
-      println(
-        s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:"
-      )
-      println(
-        s"""Same versions[${same.size}]:    ${showFailed(same)}
-           |Changed versions[${diff.size}]: ${showFailed(diff)}""".stripMargin
-      )
-      if diffVersionRegressions.nonEmpty then showDiffVersions()
-    }
-
-  class IssueTracker(testedScalaVersion: String) extends Reporter:
-    override def prelude: String = s"""
-    |Each table contains a list of projects that failed to compile with Scala ${testedScalaVersion}, but was successfuly built with the given previous version.
-    |A summary is based only on final and released candidate versions of Scala 3.
-    |Information about the last Scala version used for the last successful build might not always be correct, due to lack of data (lack of build for that project with given Scala version)
-    |
-    |Open community build might have applied -source:X-migration flag if it is detected it could possibly fix the build.
-    |Summary only contains projects that failed when compiling source or test files of at least 1 sub-project. 
-    | - `Version` - version of project being built, single version if both current and last successful build version of project are equal, otherwise 'LastSuccessfulProjectVersion -> CurrentProjectVersion>'
-    | - `Build URL` - link to the Open Community Build, containing logs and details of the failed project
-    | - `Reproducer issue` - link to the reproducer issue to be filled in
-    | 
-    |All tested projects: _
-    |Open Community build run: [Build #<BUILD_ID> - <BUILD_NAME>](<BUILD_URL>)
-    |
-    |Notes for issue reproducers:
-    |To reproduce builds locally you can use:
-    |```
-    |scala-cli run https://raw.githubusercontent.com/VirtusLab/community-build3/master/cli/scb-cli.scala -- reproduce --locally BUILD_ID
-    |```
-    |BUILD ID can be found in the BUILD_URL columns (eg. `Open CB #BUILD_ID`)
-    |Helpful options for reproducer scripts:
-    | - `--scalaVersion VERSION` - run build with the selected version of Scala (to check if the problem existed in given release)
-    | - `--withUpstream` - build also all upstream dependencies of failing project
-    | - `--locally` - checkout and build the project locally, without this flag it would try to start a minikube cluster to make the reproduction environment exactly the same as in the Open Community Build run (eg. to compile with the same version of the JDK)
-    |
-    |""".stripMargin
+  class Default(testedScalaVersion: String) extends Reporter:
+    override def prelude: String = ""
 
     override def report(
         scalaVersion: String,
@@ -317,30 +325,35 @@ object Reporter:
         sameVersionRegressions: Seq[ProjectHistoryEntry],
         diffVersionRegressions: Seq[ProjectHistoryEntry]
     ): Unit = {
-      def showRow(project: String, version: String, buildURL: String, issueURL: String = "") =
-        println(s"| $project | $version | $issueURL | $buildURL |")
+      def showRow(
+          project: String,
+          version: String,
+          buildURL: String,
+          notes: String = ""
+      ) =
+        println(s"| $project | $version | $buildURL | $notes |")
       val allRegressions = sameVersionRegressions ++ diffVersionRegressions
       printLine()
       println(
         s"Projects with last successful builds using Scala <b>$BOLD$scalaVersion$RESET</b> [${allRegressions.size}]:"
       )
-      showRow("Project", "Version", "Build URL", "Reproducer issue")
-      showRow("-------", "-------", "---------", "----------------")
+      showRow("Project", "Version", "Build URL", "Notes")
+      showRow("-------", "-------", "---------", "-----")
       for p <- allRegressions do
         val version = failedProjects
           .get(p.project)
           .collect {
-            case failed if p.version != failed.version => s"${p.version} -> ${failed.version}"
+            case failed if p.version != failed.version =>
+              s"${p.version} -> ${failed.version}"
           }
           .getOrElse(p.version)
         val buildUrl = {
           val url = failedProjects(p.project).buildURL
-          val buildId = url.split("/").reverse.dropWhile(_.isEmpty).head
-          s"[Open CB #$buildId]($url)"
+          s"[Open CB logs]($url)"
         }
         showRow(p.project.orgRepoName, version, buildUrl)
     }
-  end IssueTracker
+  end Default
 
 private def reportCompilerRegressions(
     projects: Seq[FailedProject],
@@ -352,13 +365,16 @@ private def reportCompilerRegressions(
       .toMap
 
   val failedProjects = projects.map(v => v.project -> v).toMap
-  val projectHistory = failedProjectHistory.map { (key, value) => key.project -> value }
+  val projectHistory = failedProjectHistory.map { (key, value) =>
+    key.project -> value
+  }
   val allHistory = projectHistory.values.flatten.toSeq
 
-  printLine()
-  println(reporter.prelude)
+  if reporter.prelude.nonEmpty then
+    printLine()
+    println(reporter.prelude)
   val alwaysFailing =
-    StableScalaVersions.reverse
+    PreviousScalaReleases.reverse
       .dropWhile(isVersionNewerOrEqualThen(_, scalaVersion))
       .foldLeft(failedProjects.keySet) { case (prev, scalaVersion) =>
         def regressionsSinceLastVersion(exactVersion: Boolean) = allHistory
@@ -369,9 +385,11 @@ private def reportCompilerRegressions(
               prev.contains(v.project) // failed in newer version
           )
           .sortBy(_.project.searchName)
-        val sameVersionRegressions = regressionsSinceLastVersion(exactVersion = true)
-        val diffVersionRegressions = regressionsSinceLastVersion(exactVersion = false)
-          .diff(sameVersionRegressions)
+        val sameVersionRegressions =
+          regressionsSinceLastVersion(exactVersion = true)
+        val diffVersionRegressions =
+          regressionsSinceLastVersion(exactVersion = false)
+            .diff(sameVersionRegressions)
         val allRegressions = sameVersionRegressions ++ diffVersionRegressions
 
         if allRegressions.isEmpty then prev
@@ -432,57 +450,3 @@ def isVersionNewerThen(version: String, reference: String) =
 end isVersionNewerThen
 def isVersionNewerOrEqualThen(version: String, reference: String) =
   version == reference || isVersionNewerThen(version, reference)
-
-lazy val esClient =
-  val clientConfig = new HttpClientConfigCallback {
-    override def customizeHttpClient(
-        httpClientBuilder: HttpAsyncClientBuilder
-    ): HttpAsyncClientBuilder = {
-      val creds = new BasicCredentialsProvider()
-      creds.setCredentials(AuthScope.ANY, ElasticsearchCredentials)
-      httpClientBuilder
-        .setDefaultCredentialsProvider(creds)
-        // Custom SSL context that would not require ES certificate
-        .setSSLContext(unsafe.UnsafeSSLContext)
-        .setHostnameVerifier(unsafe.VerifiesAllHostNames)
-    }
-  }
-
-  ElasticClient(
-    JavaClient(
-      ElasticProperties(ElasticsearchUrl),
-      clientConfig
-    )
-  )
-end esClient
-
-// Used to connect in localhost port-forwarding to K8s cluster without certifacates
-object unsafe:
-  import javax.net.ssl.{SSLSocket, SSLSession}
-  import java.security.cert.X509Certificate
-  import org.apache.http.conn.ssl.X509HostnameVerifier
-  object VerifiesAllHostNames extends X509HostnameVerifier {
-    override def verify(x: String, y: SSLSession): Boolean = true
-    override def verify(x: String, y: SSLSocket): Unit = ()
-    override def verify(x: String, y: X509Certificate): Unit = ()
-    override def verify(x: String, y: Array[String], x$2: Array[String]): Unit = ()
-  }
-
-  lazy val UnsafeSSLContext = {
-    object TrustAll extends javax.net.ssl.X509TrustManager {
-      override def getAcceptedIssuers(): Array[X509Certificate] = Array()
-      override def checkClientTrusted(
-          x509Certificates: Array[X509Certificate],
-          s: String
-      ) = ()
-      override def checkServerTrusted(
-          x509Certificates: Array[X509Certificate],
-          s: String
-      ) = ()
-    }
-
-    val instance = javax.net.ssl.SSLContext.getInstance("SSL")
-    instance.init(null, Array(TrustAll), new java.security.SecureRandom())
-    instance
-  }
-end unsafe

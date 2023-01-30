@@ -1,14 +1,17 @@
-name: scala3-community-build
+name: Infra CI
 
 on:
   pull_request:
+    paths-ignore:
+      - '.github/actions/**'
+      - '.github/workflows/build*'
+
 jobs:
   test-build:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Test mill scalafix rules
         run: cd project-builder/mill/scalafix && sbt test
@@ -17,6 +20,8 @@ jobs:
         run: minikube start
 
       - name: Build up base docker images
+        env: 
+          BUILD_ONLY_DEFAULT_JDK: true
         run: |
           eval $(minikube -p minikube docker-env)
           scripts/build-all.sh test
@@ -26,14 +31,13 @@ jobs:
 
   test-cli:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - uses: coursier/setup-action@v1
         with:
-          apps: scala sbt mill:0.10.2
+          apps: scala sbt mill:0.10.10
 
       - name: Install scala-cli
         run: |
@@ -47,6 +51,8 @@ jobs:
         run: minikube start
 
       - name: Build up base docker images
+        env: 
+          BUILD_ONLY_DEFAULT_JDK: true
         run: |
           eval $(minikube -p minikube docker-env)
           scripts/build-all.sh test

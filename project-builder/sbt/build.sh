@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-if [ $# -ne 6 ]; then
+if [ $# -ne 8 ]; then
   echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <project_config?>, got $#: $@"
   exit 1
 fi
@@ -13,6 +13,8 @@ version="$3"                # e.g. 1.0.2-communityBuild
 targets=($4)                # e.g. "com.example%foo com.example%bar"
 export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
+extraScalacOptions="$7"
+disabledScalacOption="$8"
 
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
@@ -24,21 +26,31 @@ echo Disting version $version for ${#targets[@]} targets: ${targets[@]}
 echo Project projectConfig: $projectConfig
 echo '##################################'
 
+if [[ ! -z $extraScalacOptions ]]; then
+  echo "Using extra scalacOptions: ${extraScalacOptions}"
+fi
+
+if [[ ! -z $disabledScalacOption ]]; then
+  echo "Filtering out scalacOptions: ${disabledScalacOption}"
+fi
+
 cd $repoDir
 
-# + "" would replace null with empty string
-requestedMemoryMb=$(echo $projectConfig | jq -r '.memoryRequestMb // empty')
-memorySettings=()
-if [[ ! -z "$requestedMemoryMb" ]]; then
-  size="${requestedMemoryMb}m"
-  memorySettings=("-J-Xmx${size}" "-J-Xms${size}")
+# GithHub actions workers have maximally 7GB of RAM
+memorySettings=("-J-Xmx7G" "-J-Xms4G")
+
+# Don't set version if not publishing
+setVersionCmd="setPublishVersion $version"
+if [[ -z $version ]]; then
+  setVersionCmd=""
 fi
 
 sbtSettings=(
   --batch
-  --no-colors
   --verbose
   -Dcommunitybuild.version="$version"
+  -Dcommunitybuild.extra-scalac-options="$extraScalacOptions"
+  -Dcommunitybuild.disabled-scalac-options="$disabledScalacOption"
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
@@ -70,7 +82,7 @@ function runSbt() {
     "$setScalaVersionCmd -v" \
     "set every credentials := Nil" \
     "$customCommands" \
-    "setPublishVersion $version" \
+    "$setVersionCmd" \
     "$enableMigrationModeCmd $sourceVersionToUseForMigration" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile

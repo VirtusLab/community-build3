@@ -7,16 +7,20 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION="$1"
-export PREV_CB_VERSION="v0.1.2"
+export PREV_CB_VERSION="v0.2.1"
 
 javaDefault=11
-javaAccessoryVersions=(8 17)
+javaAccessoryVersions=(8 17 19)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-for javaVersion in "${javaAccessoryVersions[@]}"; do
-  $scriptDir/build-builder-base.sh "$VERSION" "$javaVersion"
-  $scriptDir/build-project-builder.sh "$VERSION" "$javaVersion"
-done
+if [[ ! -z "${BUILD_ONLY_DEFAULT_JDK}" ]]; then
+  echo "Skipping build of accessory JDK images"
+else
+  for javaVersion in "${javaAccessoryVersions[@]}"; do
+    $scriptDir/build-builder-base.sh "$VERSION" "$javaVersion"
+    $scriptDir/build-project-builder.sh "$VERSION" "$javaVersion"
+  done
+fi
 
 # Compiler builder (build in build-quick) build accessory version images before default one
 $scriptDir/build-builder-base.sh "$VERSION" "$javaDefault"

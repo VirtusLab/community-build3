@@ -1,0 +1,58 @@
+name: Auto update build plan
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every friday at 4 PM
+    - cron: "0 16 * * 5"
+  push:
+    paths:
+      - coordinator/**
+      - env/**
+jobs:
+  build-plan:
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'schedule' && github.repository == 'VirtusLab/community-build3'
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Install coursier
+        uses: coursier/setup-action@v1
+        with:
+          apps: scala-cli
+
+      - name: Get Date
+        id: get-date
+        run: echo "week-start=$(date -dmonday +%Y%m%d)" >> $GITHUB_OUTPUT
+
+      - name: Cache coordinator data
+        uses: actions/cache@v3
+        with:
+          # coordinator stores cache in current working directory
+          path: data/
+          key: coordinator-data-cache-${{ steps.get-date.outputs.week-start}}
+
+      - name: Build plan
+        # Limit to 1000 most starred project. GitHub actions has problems when rendering workflow of more then 1k jobs
+        run: scala-cli run coordinator/ -- 3 -1 1000 "" env/prod/config/replaced-projects.txt env/prod/config/projects-config.conf env/prod/config/filtered-projects.txt
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v4
+        id: cpr
+        with:
+          token: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+          commit-message: Update build config
+          assignees: WojciechMazur
+          branch: build/scheduled-update
+          branch-suffix: timestamp
+          delete-branch: true
+          title: "[Bot] Update build config"
+          draft: false
+          add-paths: |
+            .github/workflows/buildPlan.yaml
+            .github/workflows/buildConfig.json
