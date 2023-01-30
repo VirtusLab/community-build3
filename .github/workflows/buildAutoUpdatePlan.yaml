@@ -16,6 +16,7 @@ on:
 jobs:
   build-plan:
     runs-on: ubuntu-22.04
+    if: github.event_name == 'schedule' && github.repository == 'VirtusLab/community-build3'
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3

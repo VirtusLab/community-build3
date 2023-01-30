@@ -14,6 +14,7 @@ jobs:
       last-nightly-version: ${{ steps.detect.outputs.last-nightly-version }}
       last-stable-version:  ${{ steps.detect.outputs.last-stable-version }}
       last-rc-version:      ${{ steps.detect.outputs.last-rc-version }}
+    if: github.event_name == 'schedule' && github.repository == 'VirtusLab/community-build3'
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3
