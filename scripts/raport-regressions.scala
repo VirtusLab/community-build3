@@ -104,6 +104,15 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         )
           .map(_.project)
           .toSet
+      println(s"Excluding ${ignoredProjects.size} project failing in ${comparedVersion}${compareWithBuildId.fold("")(" in buildId=" + _)}:")
+      ignoredProjects
+        .map(_.orgRepoName)
+        .groupBy(_.head)
+        .toList
+        .sortBy(_._1)
+        .map(_._2.toList.sorted.mkString(" - ",", ", ""))
+        .foreach(println)
+
       failedNow.filter(p => !ignoredProjects.contains(p.project))
     }
   if reportedProjects.nonEmpty then
