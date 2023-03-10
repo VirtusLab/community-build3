@@ -1,5 +1,5 @@
 name: "Build projects"
-description: "Used to build a project withing the Open cOmunityu Build"
+description: "Used to build a project withing the Open Community Build"
 inputs:
   project-name:
     description: "Name of the project to build"
@@ -161,13 +161,6 @@ runs:
           mv build-logs.txt /opencb/
           mv build-status.txt /opencb/
           mv build-summary.txt /opencb
-
-    # - name: Upload artifacts
-    #   uses: actions/upload-artifact@v3
-    #   if: steps.check-history.outputs.can-skip-build != 'true'
-    #   with:
-    #     name: ${{ inputs.project-name }}
-    #     path: ${{ github.workspace }}/build-*.txt
 
     - name: Check results
       shell: bash
