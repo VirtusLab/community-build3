@@ -41,11 +41,31 @@ jobs:
         # Limit to 1000 most starred project. GitHub actions has problems when rendering workflow of more then 1k jobs
         run: scala-cli run coordinator/ -- 3 -1 1000 "" env/prod/config/replaced-projects.txt env/prod/config/projects-config.conf env/prod/config/filtered-projects.txt
 
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "buildConfig"
+          path: |
+            .github/workflows/buildPlan.yaml
+            .github/workflows/buildConfig.json
+
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: 303718
+          private_key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v4
         id: cpr
         with:
-          token: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           commit-message: Update build config
           assignees: WojciechMazur
           branch: build/scheduled-update
