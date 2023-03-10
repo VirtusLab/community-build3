@@ -38,7 +38,7 @@ import os.CommandResult
       requiredProjects = requiredProjects,
       filterPatterns = loadFilters(projectsFilterPath)
     )
-    _ = println(s"Loaded dependency graph: projects=${dependencyGraph.size}")
+    _ = println(s"Loaded dependency graph")
     buildPlan <- makeDependenciesBasedBuildPlan(
       dependencyGraph,
       replacedProjectsConfigPath,
