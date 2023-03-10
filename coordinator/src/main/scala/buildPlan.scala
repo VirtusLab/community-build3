@@ -38,11 +38,13 @@ import os.CommandResult
       requiredProjects = requiredProjects,
       filterPatterns = loadFilters(projectsFilterPath)
     )
+    _ = println(s"Loaded dependency graph: projects=${dependencyGraph.size}")
     buildPlan <- makeDependenciesBasedBuildPlan(
       dependencyGraph,
       replacedProjectsConfigPath,
       projectsConfigPath
     )
+    _ = println("Generated build plan")
   } yield {
     val configMap = SortedMap.from(buildPlan.map(p => p.name -> p))
     val staged = splitIntoStages(buildPlan)
@@ -75,13 +77,14 @@ import os.CommandResult
       println("CI build plan updated")
     }
   }
-  try Await.result(task, 30.minute)
+  try Await.result(task, 60.minute)
   catch {
     case ex: Throwable =>
       println(s"Uncought exception: $ex")
       ex.printStackTrace()
       threadPool.shutdownNow()
       threadPool.awaitTermination(10, SECONDS)
+      throw ex
   }
 }
 
