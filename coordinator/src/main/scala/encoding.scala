@@ -3,9 +3,16 @@ import org.json4s.native.Serialization
 import org.json4s.ext.EnumSerializer
 import java.time.OffsetDateTime
 
-given Formats = Serialization.formats(
-  NoTypeHints
-) + TestingModeEnumSerializer() + UTCOffsetDateTimeSerializer()
+given Formats =
+  Serialization.formats(NoTypeHints) +
+    TestingModeEnumSerializer() + ProjectBuildDefSerializer +
+    UTCOffsetDateTimeSerializer()
+
+object ProjectBuildDefSerializer
+    extends FieldSerializer[ProjectBuildDef]({
+      import FieldSerializer.ignore
+      ignore("project") orElse ignore("dependencies")
+    })
 
 class TestingModeEnumSerializer
     extends CustomSerializer[TestingMode](format => {
