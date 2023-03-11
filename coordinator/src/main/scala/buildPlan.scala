@@ -15,15 +15,21 @@ import scala.collection.mutable
 import scala.collection.SortedMap
 import os.CommandResult
 
+class ConfigFiles(path: os.Path) {
+  val projectsConfig: os.Path = path / "projects-config.conf"
+  val filteredProjects: os.Path = path / "filtered-projects.txt"
+  val replacedProjects: os.Path = path / "replaced-projects.txt"
+  val slowProjects: os.Path = path / "slow-projects.txt"
+}
+
 @main def storeDependenciesBasedBuildPlan(
     scalaBinaryVersion: String,
     minStarsCount: Int,
     maxProjectsCount: Int,
     requiredProjects: Seq[Project],
-    replacedProjectsConfigPath: os.Path,
-    projectsConfigPath: os.Path,
-    projectsFilterPath: os.Path
+    configsPath: os.Path
 ) = {
+  given confFiles: ConfigFiles = ConfigFiles(configsPath)
   // Most of the time is spend in IO, though we can use higher parallelism
   val threadPool = new ForkJoinPool(
     Runtime.getRuntime().availableProcessors() * 4
@@ -36,18 +42,14 @@ import os.CommandResult
       minStarsCount = minStarsCount,
       maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
       requiredProjects = requiredProjects,
-      filterPatterns = loadFilters(projectsFilterPath)
+      filterPatterns = loadFilters
     )
     _ = println(s"Loaded dependency graph")
-    buildPlan <- makeDependenciesBasedBuildPlan(
-      dependencyGraph,
-      replacedProjectsConfigPath,
-      projectsConfigPath
-    )
+    buildPlan <- makeDependenciesBasedBuildPlan(dependencyGraph)
     _ = println("Generated build plan")
   } yield {
-    val configMap = SortedMap.from(buildPlan.map(p => p.name -> p))
-    val staged = splitIntoStages(buildPlan)
+    val configMap = SortedMap.from(buildPlan.map(p => p.project.coordinates -> p))
+    val staged = splitIntoStages(buildPlan, loadLongBuildingProjects)
     val meta = BuildMeta(
       minStarsCount = minStarsCount,
       maxProjectsCount = maxProjectsCount,
@@ -147,6 +149,7 @@ def stripScala3Suffix(s: String) = s match {
   case WithExtractedScala3Suffix(prefix, _) => prefix
 }
 
+object DottyProject extends StarredProject("lampepfl", "dotty")(0)
 def buildPlanCommons(depGraph: DependencyGraph) =
   val data = depGraph.projects
   val topLevelData = data
@@ -176,24 +179,19 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
     confFiles: ConfigFiles
 ): AsyncResponse[Array[ProjectBuildDef]] =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
-  val configDiscovery = ProjectConfigDiscovery(internalProjectConfigsPath.toIO)
+  val configDiscovery = ProjectConfigDiscovery(confFiles.projectsConfig.toIO)
 
   val dottyProjectName = "lampepfl_dotty"
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =
-    if !os.exists(replacedProjectsConfigPath) ||
-      os.isDir(replacedProjectsConfigPath)
+    if !os.exists(confFiles.replacedProjects) || os.isDir(confFiles.replacedProjects)
     then Map.empty
     else
-      os.read
-        .lines(replacedProjectsConfigPath)
-        .map(_.trim)
-        .filter(line => line.nonEmpty && !line.startsWith("#"))
-        .map { case replacementPattern(org1, name1, org2, name2, branch) =>
+      readNormalized(confFiles.replacedProjects).map {
+        case replacementPattern(org1, name1, org2, name2, branch) =>
           (org1, name1) -> ((org2, name2), Option(branch))
-        }
-        .toMap
+      }.toMap
 
   def projectRepoUrl(project: Project) =
     val originalCoords = (project.org, project.name)
@@ -205,7 +203,7 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
     val originalCoords = (project.org, project.name)
     replacements.get(originalCoords).map(_._2).flatten
 
-  val projectNames = projectsDeps.keys.map(_.showName).toList
+  val projects = projectsDeps.keys.map(_.p).toList
 
   Future
     .traverse(projectsDeps.toList) { (project, deps) =>
@@ -213,17 +211,17 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
         val repoUrl = projectRepoUrl(project.p)
         val tag =
           getRevision(project.p).orElse(findTag(repoUrl, project.v))
-        val name = project.showName
+        val self = project.p
         val dependencies = deps
-          .map(_.showName)
-          .filter(depName =>
-            projectNames.contains(
-              depName
-            ) && depName != name && depName != dottyProjectName
-          )
+          .map(_.p)
+          .filter {
+            case DottyProject => false
+            case `self`       => false
+            case dep          => projects.contains(dep)
+          }
           .distinct
         ProjectBuildDef(
-          name = name,
+          project = project.p,
           dependencies = dependencies.toArray,
           repoUrl = repoUrl,
           revision = tag.getOrElse(""),
@@ -235,27 +233,47 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
         )
       }
     }
-    .map(_.filter(_.name != dottyProjectName).toArray)
+    .map(_.filter(_.project != DottyProject).toArray)
 
-private def loadFilters(projectsFilterPath: os.Path): Seq[String] =
-  if !os.exists(projectsFilterPath) || os.isDir(projectsFilterPath) then Nil
+private def loadFilters(using confFiles: ConfigFiles): Seq[String] = readNormalized(
+  confFiles.filteredProjects
+)
+private def loadLongBuildingProjects(using confFiles: ConfigFiles): Seq[Project] =
+  readNormalized(confFiles.slowProjects).flatMap {
+    case s"$org/$repo" => Some(Project(org, repo))
+    case malformed =>
+      System.err.println(s"Malformed project long building project name: $malformed ")
+      None
+  }
+
+private def readNormalized(path: os.Path): Seq[String] =
+  if !os.exists(path)
+  then
+    System.err.println(s"Not found file: $path")
+    Nil
+  else if os.isDir(path) then
+    System.err.println(s"Unable to read directory: $path")
+    Nil
   else
     os.read
-      .lines(projectsFilterPath)
+      .lines(path)
       .map(_.trim())
       .filterNot(_.startsWith("#"))
       .filter(_.nonEmpty)
       .toSeq
 
 type StagedBuildPlan = List[List[ProjectBuildDef]]
-def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
-  val deps = projects.map(v => (v.name, v)).toMap
+def splitIntoStages(
+    projects: Array[ProjectBuildDef],
+    longBuildingProjects: Seq[Project]
+): StagedBuildPlan = {
+  val deps = projects.map(v => (v.project, v)).toMap
   // GitHub Actions limits to 255 elements in matrix
   val maxStageSize = 255
   @scala.annotation.tailrec
   def groupByDeps(
       remaining: Set[ProjectBuildDef],
-      done: Set[String],
+      done: Set[Project],
       acc: List[Set[ProjectBuildDef]]
   ): List[Set[ProjectBuildDef]] = {
     if remaining.isEmpty then acc.reverse
@@ -265,25 +283,37 @@ def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
       }
       if currentStage.isEmpty then {
         def hasCyclicDependencies(p: ProjectBuildDef) =
-          p.dependencies.exists(deps(_).dependencies.contains(p.name))
+          p.dependencies.exists(deps(_).dependencies.contains(p.project))
         val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
-        currentStage ++= cyclicDeps
-        newRemainings --= cyclicDeps
-
-        cyclicDeps.foreach(v =>
-          println(
-            s"Mitigated cyclic dependency in  ${v.name} -> ${v.dependencies.toList
-              .filterNot(done.contains)}"
+        if cyclicDeps.nonEmpty then
+          currentStage ++= cyclicDeps
+          newRemainings --= cyclicDeps
+          cyclicDeps.foreach(v =>
+            println(
+              s"Mitigated cyclic dependency in  ${v.project} -> ${v.dependencies.toList
+                .filterNot(done.contains)}"
+            )
           )
-        )
+        else
+          newRemainings.foreach { p =>
+            println(
+              s"${p.project.coordinates}: ${p.dependencies.map(_.coordinates).mkString(", ")}"
+            )
+          }
+          sys.error("Deadlock in splitting projects into stages")
       }
-      val names = currentStage.map(_.name)
+      val names = currentStage.map(_.project)
       val currentStages = currentStage.grouped(maxStageSize).toList
       groupByDeps(newRemainings, done ++ names, currentStages ::: acc)
   }
 
-  groupByDeps(projects.toSet, Set.empty, Nil)
-    .map(_.toList.sortBy(_.name))
+  val (longRunningDefs, toSplit) = projects.toSet
+    .partition(p => longBuildingProjects.contains(p.project))
+  val longRunning = longRunningDefs.map(_.project)
+  val staged = groupByDeps(toSplit, done = longRunning, Nil)
+
+  val all = longRunningDefs :: staged
+  all.map(_.toList.sortBy(_.project))
 }
 
 private given FromString[os.Path] = { str =>
@@ -291,10 +321,11 @@ private given FromString[os.Path] = { str =>
   os.Path(nio.toAbsolutePath())
 }
 private given FromString[Seq[Project]] = str =>
-  str.split(",").toSeq.filter(_.nonEmpty).map {
-    case s"${org}/${name}" => Project(org, name)(Int.MaxValue)
-    case _                 => throw new IllegalArgumentException
-  }
+  str
+    .split(",")
+    .toSeq
+    .filter(_.nonEmpty)
+    .map(Project.load)
 
 lazy val workflowsDir: os.Path = {
   val githubDir = os.rel / ".github"
@@ -392,7 +423,9 @@ def createGithubActionJob(
     |          repository-branch: $${{ inputs.repository-branch }}
     |""".stripMargin)
   plan.zipWithIndex.foreach { case (projects, idx) =>
-    val prevStageId = Option.when(idx > 0) { stageId(idx - 1) }
+    // stage 0 reserved for long running jobs, no other step depends on it
+    def hasExtendentBuildTime = idx == 0
+    val prevStageId = Option.when(idx > 1) { stageId(idx - 1) }
     val needs = (setupId :: prevStageId.toList).mkString(", ")
     indented {
       println(s"${stageId(idx)}:")
@@ -400,14 +433,16 @@ def createGithubActionJob(
         println("runs-on: ubuntu-22.04")
         println(s"needs: [ $needs ]")
         println("continue-on-error: true")
-        println("timeout-minutes: 60")
+        if hasExtendentBuildTime
+        then println("timeout-minutes: 240")
+        else println("timeout-minutes: 60")
         println("strategy:")
         indented {
           println("matrix:")
           indented {
             println("include:")
             for project <- projects
-            do println(s"- name: ${project.name}")
+            do println(s"- name: \"${project.project.coordinates}\"")
           }
         }
         println("steps:")

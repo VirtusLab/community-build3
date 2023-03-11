@@ -10,7 +10,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 // TODO scala3 should be more robust
-def loadProjects(scalaBinaryVersion: String): Seq[Project] =
+def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
   val release = scalaBinaryVersion match {
     case "3" => "3.x"
     case v   => v
@@ -31,7 +31,7 @@ def loadProjects(scalaBinaryVersion: String): Seq[Project] =
       val texts = e.select("h4").get(0).text().split("/")
       val stars = e.select(".stats [title=Stars]").asScala.map(_.text)
       Option.unless(texts.isEmpty || stars.isEmpty) {
-        Project(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
+        StarredProject(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
       }
     }
   LazyList
