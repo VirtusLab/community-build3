@@ -422,7 +422,7 @@ def createGithubActionJob(
     |          repository-url: $${{ inputs.repository-url }}
     |          repository-branch: $${{ inputs.repository-branch }}
     |""".stripMargin)
-  plan.zipWithIndex.foreach { case (projects, idx) =>
+  plan.zipWithIndex.foreach { case (projects, idx) if projects.nonEmpty =>
     // stage 0 reserved for long running jobs, no other step depends on it
     def hasExtendentBuildTime = idx == 0
     val prevStageId = Option.when(idx > 1) { stageId(idx - 1) }
