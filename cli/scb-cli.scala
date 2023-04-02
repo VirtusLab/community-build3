@@ -2,10 +2,10 @@
 //> using scala "3.2"
 //> using lib "org.json4s::json4s-native:4.0.6"
 //> using lib "com.lihaoyi::requests:0.8.0"
-//> using lib "com.lihaoyi::os-lib:0.9.0"
+//> using lib "com.lihaoyi::os-lib:0.9.1"
 //> using lib "io.get-coursier:coursier_2.13:2.0.16"
 //> using lib "com.goyeau::kubernetes-client:0.8.1"
-//> using lib "org.slf4j:slf4j-simple:2.0.6"
+//> using lib "org.slf4j:slf4j-simple:2.0.7"
 //> using lib "com.github.scopt::scopt:4.1.0"
 
 import org.json4s.*
@@ -140,7 +140,7 @@ object Config:
   }
 
 case class ProjectBuildPlan(
-    name: String,
+    project: String,
     dependencies: Array[String],
     repoUrl: String,
     revision: Option[String],
@@ -236,17 +236,13 @@ object BuildInfo:
     val scalaVersion = config.customRun.scalaVersion
     given StringManifest: Manifest[String] =
       scala.reflect.ManifestFactory.classType(classOf[String])
-
     def prepareBuildPlan(): JValue =
-      val configsDir = communityBuildDir / "env" / "prod" / "config"
       val args = Seq[os.Shellable](
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
-        /* replacedProjectsPath = */ "",
-        /* projectsConfigPath = */ configsDir / "projects-config.conf",
-        /* projectsFiterPath = */ ""
+        /* configsPath = */ communityBuildDir / "coordinator" / "configs",
       )
       val javaProps =
         Seq("--java-prop", "opencb.coordinator.reproducer-mode=true")
@@ -256,11 +252,12 @@ object BuildInfo:
       val buildPlanJson = os.read(coordinatorDir / "data" / "buildPlan.json")
       parse(buildPlanJson)
 
-    val JArray(buildPlan) = prepareBuildPlan(): @unchecked
+    val buildPlan = prepareBuildPlan() match
+      case JArray(plan) => plan.filter(_ != JArray(Nil))
+      case t => sys.error("Unexpected build plan input: " + t)
     val projects = for
-      case JArray(buildStage) <- buildPlan.take(
-        1
-      ) // There should be only 1 stage
+      case JArray(buildStage) <- buildPlan.take(1)
+       // There should be only 1 stage
       project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
@@ -279,7 +276,7 @@ object BuildInfo:
     yield ProjectInfo(
       id = jobId,
       params = BuildParameters(
-        name = plan.name,
+        name = plan.project,
         config = plan.config.filter(_.nonEmpty),
         repositoryUrl = plan.repoUrl,
         repositoryRevision = config.customRun.revisionOverride

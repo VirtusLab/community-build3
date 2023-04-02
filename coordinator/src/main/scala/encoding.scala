@@ -6,12 +6,23 @@ import java.time.OffsetDateTime
 given Formats =
   Serialization.formats(NoTypeHints) +
     TestingModeEnumSerializer() + ProjectBuildDefSerializer +
-    UTCOffsetDateTimeSerializer()
+    UTCOffsetDateTimeSerializer() + ProjectSerializer()
 
 object ProjectBuildDefSerializer
     extends FieldSerializer[ProjectBuildDef]({
       import FieldSerializer.ignore
-      ignore("project") orElse ignore("dependencies")
+      ignore("dependencies")
+    })
+
+class ProjectSerializer
+    extends CustomSerializer[Project](format => {
+      def deserialize: PartialFunction[JValue, Project] = { case JString(stringValue) =>
+        Project.load(stringValue)
+      }
+      def serialize: PartialFunction[Any, JValue] = { case p: Project =>
+        JString(p.coordinates)
+      }
+      (deserialize, serialize)
     })
 
 class TestingModeEnumSerializer
