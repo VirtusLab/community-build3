@@ -3,8 +3,8 @@
 //> using lib "org.json4s::json4s-native:4.0.6"
 //> using lib "com.lihaoyi::requests:0.8.0"
 //> using lib "com.lihaoyi::os-lib:0.9.1"
-//> using lib "io.get-coursier:coursier_2.13:2.0.16"
-//> using lib "com.goyeau::kubernetes-client:0.8.1"
+//> using lib "io.get-coursier:coursier_2.13:2.1.0"
+//> using lib "com.goyeau::kubernetes-client:0.9.0"
 //> using lib "org.slf4j:slf4j-simple:2.0.7"
 //> using lib "com.github.scopt::scopt:4.1.0"
 
@@ -835,7 +835,7 @@ object MinikubeReproducer:
         )
       ),
       lifecycle = Lifecycle(postStart =
-        Handler(ExecAction(command = Seq("update-ca-certificates")))
+        LifecycleHandler(ExecAction(command = Seq("update-ca-certificates")))
       ),
       command = Seq("/build/build-revision.sh"),
       args = args,
