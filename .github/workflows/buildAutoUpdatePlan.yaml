@@ -12,7 +12,6 @@ on:
   push:
     paths:
       - coordinator/**
-      - env/**
 jobs:
   build-plan:
     runs-on: ubuntu-22.04
@@ -39,7 +38,7 @@ jobs:
 
       - name: Build plan
         # Limit to 1000 most starred project. GitHub actions has problems when rendering workflow of more then 1k jobs
-        run: scala-cli run coordinator/ -- 3 -1 1000 "" env/prod/config/replaced-projects.txt env/prod/config/projects-config.conf env/prod/config/filtered-projects.txt
+        run: scala-cli run coordinator/ -- 3 -1 1000 "" coordinator/configs
 
       
       - name: Upload artifacts

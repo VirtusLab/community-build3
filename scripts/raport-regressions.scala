@@ -122,8 +122,8 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
   printLine()
   esClient.close()
 
-case class Project(searchName: String) extends AnyVal {
-  def orgRepoName = searchName.replace("_", "/")
+case class Project(orgRepoName: String) extends AnyVal {
+  def searchName = orgRepoName.replace("/", "_")
 }
 case class FailedProject(project: Project, version: String, buildURL: String)
 type SourceFields = Map[String, AnyRef]
@@ -180,7 +180,8 @@ def listFailedProjects(
           search(BuildSummariesIndex)
             .query(
               boolQuery().must(
-                termQuery("projectName", project.searchName),
+                // Either legact org_repo format or regular org/repo
+                termsQuery("projectName", project.searchName, project.orgRepoName),
                 termQuery("status", "success"),
                 termQuery("scalaVersion", scalaVersion)
               )
@@ -276,7 +277,7 @@ def projectHistory(project: FailedProject) =
           boolQuery()
             .must(
               termsQuery("scalaVersion", PreviousScalaReleases),
-              termQuery("projectName", project.project.searchName)
+              termsQuery("projectName", project.project.searchName, project.project.orgRepoName)
             )
             .should(
               termQuery("version", project.version)

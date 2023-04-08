@@ -3,9 +3,27 @@ import org.json4s.native.Serialization
 import org.json4s.ext.EnumSerializer
 import java.time.OffsetDateTime
 
-given Formats = Serialization.formats(
-  NoTypeHints
-) + TestingModeEnumSerializer() + UTCOffsetDateTimeSerializer()
+given Formats =
+  Serialization.formats(NoTypeHints) +
+    TestingModeEnumSerializer() + ProjectBuildDefSerializer +
+    UTCOffsetDateTimeSerializer() + ProjectSerializer()
+
+object ProjectBuildDefSerializer
+    extends FieldSerializer[ProjectBuildDef]({
+      import FieldSerializer.ignore
+      ignore("dependencies")
+    })
+
+class ProjectSerializer
+    extends CustomSerializer[Project](format => {
+      def deserialize: PartialFunction[JValue, Project] = { case JString(stringValue) =>
+        Project.load(stringValue)
+      }
+      def serialize: PartialFunction[Any, JValue] = { case p: Project =>
+        JString(p.coordinates)
+      }
+      (deserialize, serialize)
+    })
 
 class TestingModeEnumSerializer
     extends CustomSerializer[TestingMode](format => {

@@ -4,7 +4,7 @@ set -e
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 testNamespace=scala3-community-build-test
-projectBuilderTimeout=5m
+projectBuilderTimeout=15m
 
 kubectl delete namespace $testNamespace --ignore-not-found=true
 kubectl create namespace $testNamespace

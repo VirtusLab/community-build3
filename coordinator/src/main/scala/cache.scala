@@ -51,15 +51,12 @@ given CacheDriver[Project, ProjectModules] with
   def dest(v: Project): Path =
     dataPath.resolve("projectModules").resolve(v.org + "_" + v.name + ".csv")
 
-given CacheDriver[String, Seq[Project]] with
-  def write(v: Seq[Project]): String =
-    v.map(p => Seq(p.org, p.name, p.stars).mkString(",")).mkString("\n")
+given CacheDriver[String, Seq[StarredProject]] with
+  def write(v: Seq[StarredProject]): String =
+    v.map(_.serialize).mkString("\n")
 
-  def load(data: String, k: String): Seq[Project] =
-    data.linesIterator.map { l =>
-      val d = l.split(",")
-      Project(d(0), d(1))(d(2).toInt)
-    }.toSeq
+  def load(data: String, k: String): Seq[StarredProject] =
+    data.linesIterator.map (Project.load).collect{case sp :StarredProject => sp}.toSeq
 
   def dest(v: String): Path = dataPath.resolve(v)
 

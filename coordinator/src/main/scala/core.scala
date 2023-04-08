@@ -6,19 +6,36 @@ import pureconfig.generic.derivation.default._
 import pureconfig.generic.derivation.EnumConfigReader
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import org.json4s.FieldSerializer
 
 type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
-case class Project(org: String, name: String)(val stars: Int): // stars may change...
-  def show = s"$org%$name%$stars"
+sealed case class Project(org: String, name: String): 
+  lazy val show = s"${org}_$name"
+  def coordinates = s"$org/$name"
+  def serialize: String = s"$org;$name"
+
+  def raw = this match
+    case _: StarredProject => Project(org, name)
+    case _ => this
+
+class StarredProject(org: String, name: String)(val stars: Int) extends Project(org, name) {
+  override def serialize = s"$org;$name;$stars"
+}
 
 object Project:
-  def load(line: String) =
-    val splitted = line.split("%")
-    Project(splitted(0), splitted(1))(splitted(2).toInt)
+  given Ordering[Project] = Ordering.by(_.show)
+
+  def load(line: String) = 
+    line match {
+        case s"$org;$repo;$stars" => StarredProject(org, repo)(stars.toInt)
+        case s"$org;$repo" => Project(org, repo)
+        case s"$org/$repo" => Project(org, repo) 
+        case s"$org,$repo" => Project(org, repo) 
+    }
 
 case class ProjectVersion(p: Project, v: String) {
-  def showName = s"${p.org}_${p.name}"
+  def showName = p.show
 }
 
 case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[String]):
@@ -52,8 +69,8 @@ case class BuildStep(
 case class BuildPlan(scalaVersion: String, steps: Seq[Seq[BuildStep]])
 
 case class ProjectBuildDef(
-    name: String,
-    dependencies: Array[String],
+    project: Project,
+    dependencies: Array[Project],
     repoUrl: String,
     revision: String,
     version: String,
