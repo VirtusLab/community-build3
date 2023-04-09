@@ -1,7 +1,7 @@
 #!/usr/bin/env -S scala-cli shebang
 //> using scala "3"
-//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.5.2"
-//> using lib "org.slf4j:slf4j-simple:2.0.6"
+//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.6.0"
+//> using lib "org.slf4j:slf4j-simple:2.0.7"
 
 import com.sksamuel.elastic4s
 import elastic4s.*
@@ -75,7 +75,7 @@ lazy val StableScalaVersions = {
 lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
 
 // Report all community build filures for given Scala version
-@main def raportForScalaVersion(scalaVersion: String, opts: String*) =
+@main def raportForScalaVersion(scalaVersion: String, opts: String*) = try {
   val checkBuildId = opts.collectFirst {
     case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
   }
@@ -104,13 +104,16 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         )
           .map(_.project)
           .toSet
-      println(s"Excluding ${ignoredProjects.size} project failing in ${comparedVersion}${compareWithBuildId.fold("")(" in buildId=" + _)}:")
+      println(
+        s"Excluding ${ignoredProjects.size} project failing in ${comparedVersion}${compareWithBuildId
+            .fold("")(" in buildId=" + _)}:"
+      )
       ignoredProjects
-        .map(_.orgRepoName)
+        .map(_.name)
         .groupBy(_.head)
         .toList
         .sortBy(_._1)
-        .map(_._2.toList.sorted.mkString(" - ",", ", ""))
+        .map(_._2.toList.sorted.mkString(" - ", ", ", ""))
         .foreach(println)
 
       failedNow.filter(p => !ignoredProjects.contains(p.project))
@@ -120,10 +123,18 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
       Reporter.Default(scalaVersion)
     )
   printLine()
-  esClient.close()
+} finally esClient.close()
 
-case class Project(orgRepoName: String) extends AnyVal {
-  def searchName = orgRepoName.replace("/", "_")
+case class Project(name: String) extends AnyVal {
+  def searchName = name
+  def legacySearchName = name.replace("/", "_")
+}
+object Project {
+  def apply(rawName: String): Project = new Project(rawName match
+    case s"${org}/$repo"   => rawName
+    case s"${org}_${repo}" => s"$org/$repo"
+    case invalid => sys.error(s"Invalid project name format: ${invalid}")
+  )
 }
 case class FailedProject(project: Project, version: String, buildURL: String)
 type SourceFields = Map[String, AnyRef]
@@ -161,7 +172,7 @@ def listFailedProjects(
         maxAgg("buildTimestamp", "timestamp"),
         termsAgg("status", "status")
       )
-      .size(10) // last versions
+      .size(100) // last versions
 
   def process(resp: SearchResponse): Seq[FailedProject] = {
     val projectVersions = resp.aggs
@@ -170,7 +181,7 @@ def listFailedProjects(
       .map { bucket =>
         val name = bucket.key
         val lastVersion = bucket.terms("versions").buckets.head.key
-        name -> lastVersion
+        Project(name) -> lastVersion
       }
       .toMap
 
@@ -181,13 +192,18 @@ def listFailedProjects(
             .query(
               boolQuery().must(
                 // Either legact org_repo format or regular org/repo
-                termsQuery("projectName", project.searchName, project.orgRepoName),
+                termsQuery(
+                  "projectName",
+                  project.searchName,
+                  project.legacySearchName
+                ),
                 termQuery("status", "success"),
                 termQuery("scalaVersion", scalaVersion)
               )
             )
             .sourceInclude("version")
             .sortBy(fieldSort("timestamp").desc())
+            .size(100)
         }
         .map(_.map(_.hits.hits.exists { result =>
           isVersionNewerOrEqualThen(
@@ -199,6 +215,11 @@ def listFailedProjects(
         .result
     end hasNewerPassingVersion
 
+    case class TimedFailure(
+        project: FailedProject,
+        timestamp: String,
+        logProject: () => Unit
+    )
     resp.hits.hits
       .map(_.sourceAsMap)
       .distinctBy(_("projectName"))
@@ -206,30 +227,45 @@ def listFailedProjects(
         val project = Project(fields("projectName").asInstanceOf[String])
         val summary = fields("summary").asInstanceOf[List[SourceFields]]
         val buildURL = fields("buildURL").asInstanceOf[String]
-        val lastFailedVersion = projectVersions(project.searchName)
+        val timestamp = fields("timestamp").asInstanceOf[String]
+        val lastFailedVersion = projectVersions(project)
 
         import scala.io.AnsiColor.{RED, YELLOW, MAGENTA, RESET, BOLD}
         def logProject(label: String)(color: String) = if logFailed then
+          val name = label.padTo(8, " ").mkString
+          val ver = projectVersions(project)
           println(
-            s"$color${label.padTo(8, " ").mkString}$RESET failure in $BOLD${project.orgRepoName} @ ${projectVersions(
-                project.searchName
-              )}$RESET - $buildURL"
+            s"$color$name$RESET failure in $BOLD${project.name} @ $ver$RESET - $buildURL"
           )
         val compilerFailure = summary.compilerFailure
         if hasNewerPassingVersion(project, lastFailedVersion) then
           None // ignore failure
         else
-          if summary.compilerFailure then logProject("COMPILER")(RED)
-          if summary.testsFailure then logProject("TEST")(YELLOW)
-          if summary.docFailure then logProject("DOC")(MAGENTA)
-          if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
+          def lazyLogProject() =
+            if summary.compilerFailure then logProject("COMPILER")(RED)
+            if summary.testsFailure then logProject("TEST")(YELLOW)
+            if summary.docFailure then logProject("DOC")(MAGENTA)
+            if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
+          end lazyLogProject
           Option.when(compilerFailure) {
-            FailedProject(
-              project,
-              version = lastFailedVersion,
-              buildURL = buildURL
+            TimedFailure(
+              project = FailedProject(
+                project,
+                version = lastFailedVersion,
+                buildURL = buildURL
+              ),
+              timestamp = timestamp,
+              logProject = lazyLogProject _
             )
           }
+      }
+      .groupBy(_.project.project)
+      .toSeq
+      .sortBy { case (project, _) => project.name }
+      .map { case (_, failures) =>
+        val last = failures.maxBy(_.timestamp)
+        last.logProject()
+        last.project
       }
   }
 
@@ -246,7 +282,7 @@ def listFailedProjects(
             )
         )
         .size(Limit)
-        .sourceInclude("projectName", "summary", "buildURL")
+        .sourceInclude("projectName", "summary", "buildURL", "timestamp")
         .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
         .aggs(
           termsAgg("failedProjects", "projectName")
@@ -277,7 +313,11 @@ def projectHistory(project: FailedProject) =
           boolQuery()
             .must(
               termsQuery("scalaVersion", PreviousScalaReleases),
-              termsQuery("projectName", project.project.searchName, project.project.orgRepoName)
+              termsQuery(
+                "projectName",
+                project.project.searchName,
+                project.project.legacySearchName
+              )
             )
             .should(
               termQuery("version", project.version)
@@ -288,11 +328,12 @@ def projectHistory(project: FailedProject) =
           fieldSort("timestamp").desc()
         )
         .sourceInclude("scalaVersion", "version", "summary")
+        .size(100)
     }
     .map(
       _.fold[Seq[ProjectHistoryEntry]](
         reportFailedQuery(
-          s"Project build history ${project.project.orgRepoName}"
+          s"Project build history ${project.project.name}"
         )
           .andThen(_ => Nil),
         _.hits.hits
@@ -361,7 +402,7 @@ object Reporter:
           val url = failedProjects(p.project).buildURL
           s"[Open CB logs]($url)"
         }
-        showRow(p.project.orgRepoName, version, buildUrl)
+        showRow(p.project.name, version, buildUrl)
     }
   end Default
 
@@ -394,7 +435,7 @@ private def reportCompilerRegressions(
               !v.compilerFailure && // was successful in checked version
               prev.contains(v.project) // failed in newer version
           )
-          .sortBy(_.project.searchName)
+          .sortBy(_.project.name)
         val sameVersionRegressions =
           regressionsSinceLastVersion(exactVersion = true)
         val diffVersionRegressions =
@@ -431,7 +472,7 @@ private def reportCompilerRegressions(
             )
         }
         .toSeq
-        .sortBy(_.project.orgRepoName),
+        .sortBy(_.project.name),
       Nil
     )
 
