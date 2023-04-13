@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
     continue-on-error: true
-    timeout-minutes: 240
+    timeout-minutes: 600
     strategy:
       matrix:
         include:
@@ -123,6 +123,7 @@ jobs:
         - name: "devlaam/leucine"
         - name: "dieproht/matr"
         - name: "dobrynya/zio-jms"
+        - name: "dragonfly-ai/narr"
         - name: "eed3si9n/verify"
         - name: "eltherion/http4s-timer"
         - name: "erikvanoosten/metrics-scala"
@@ -136,9 +137,7 @@ jobs:
         - name: "gekomad/scala-compress"
         - name: "getshaka-org/native-converter"
         - name: "ghik/anodi"
-        - name: "giabao/asm-flow"
         - name: "giiita/refuel"
-        - name: "gnp/zio-data-streams"
         - name: "greenleafoss/green-leaf-mongo"
         - name: "guardian/fastly-api-client"
         - name: "h8io/borscht"
@@ -168,6 +167,7 @@ jobs:
         - name: "killaitis/http4s-cloud-functions"
         - name: "kitlangton/animus"
         - name: "kitlangton/quotidian"
+        - name: "kordyjan/typelogger"
         - name: "kubukoz/debug-utils"
         - name: "kuceramartin/tyqu"
         - name: "kzmake/uuid7s"
@@ -214,7 +214,6 @@ jobs:
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/scala-faker"
         - name: "playframework/play-ebean"
-        - name: "playframework/play-mailer"
         - name: "plokhotnyuk/fast-string-interpolator"
         - name: "plokhotnyuk/rtree2d"
         - name: "polynote/uzhttp"
@@ -230,6 +229,7 @@ jobs:
         - name: "sangria-graphql/sangria-marshalling-api"
         - name: "sangria-graphql/sangria-streaming-api"
         - name: "sbt/sbt-jni"
+        - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
         - name: "scala-js/scala-js-stubs"
         - name: "scala-ts/scala-ts"
@@ -292,6 +292,7 @@ jobs:
         - name: "typelevel/simulacrum-scalafix"
         - name: "vladkopanev/zio-saga"
         - name: "wangzaixiang/scala-sql"
+        - name: "webjars/webjars-play"
         - name: "whisklabs/docker-it-scala"
         - name: "wz7982/easysql-scala"
         - name: "xuwei-k/nobox"
@@ -324,6 +325,7 @@ jobs:
       matrix:
         include:
         - name: "47degrees/scalacheck-toolbox"
+        - name: "ablearthy/tdjson-bind"
         - name: "altoo-ag/akka-kryo-serialization"
         - name: "anatoliykmetyuk/simple-rockets-compiler"
         - name: "andyglow/scala-xml-diff"
@@ -372,7 +374,6 @@ jobs:
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala3-enum"
         - name: "pjfanning/zio-metrics-micrometer"
-        - name: "playframework/scalatestplus-play"
         - name: "postgresql-async/postgresql-async"
         - name: "rssh/shim--scala-async--dotty-cps-async"
         - name: "rtyley/line-break-preserving-line-splitting"
@@ -542,7 +543,6 @@ jobs:
         - name: "xuwei-k/applybuilder"
         - name: "xuwei-k/iarray"
         - name: "xuwei-k/zeroapply"
-        - name: "yurikpanic/zio-postgres"
         - name: "zio/zio-s3"
     steps:
       - name: "Git Checkout"
@@ -565,7 +565,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "clockworkconsulting/peregrin"
         - name: "clulab/processors"
         - name: "com-lihaoyi/mainargs"
         - name: "cquiroz/scala-java-locales"
@@ -598,7 +597,6 @@ jobs:
         - name: "typelevel/cats"
         - name: "virtuslab/scala-yaml"
         - name: "vitaliihonta/zio-temporal"
-        - name: "webjars/webjars-play"
         - name: "xuwei-k/optparse-applicative"
         - name: "zio/zio-quill"
     steps:
@@ -626,7 +624,6 @@ jobs:
         - name: "armanbilge/litter"
         - name: "bcarter97/id-generator"
         - name: "billzabob/fordeckmacia"
-        - name: "cheleb/zio-pravega"
         - name: "codedx/mapk"
         - name: "cornerman/sloth"
         - name: "davenverse/cats-scalacheck"
@@ -751,6 +748,7 @@ jobs:
         include:
         - name: "darrenjw/scala-glm"
         - name: "darrenjw/scala-smfsb"
+        - name: "stryker-mutator/weapon-regex"
         - name: "zio/zio-constraintless"
         - name: "zio/zio-kafka"
         - name: "zio/zio-mock"
@@ -870,7 +868,6 @@ jobs:
         - name: "carueda/tscfg"
         - name: "cb372/cats-retry"
         - name: "davenverse/cats-effect-time"
-        - name: "davenverse/circuit"
         - name: "davenverse/clippette"
         - name: "davenverse/condemned"
         - name: "davenverse/env"
@@ -911,11 +908,13 @@ jobs:
         - name: "ppurang/asynch"
         - name: "reactivemongo/reactivemongo-play-json"
         - name: "reactivemongo/reactivemongo-streaming"
+        - name: "rsemlal/clickhouse4cats"
         - name: "ruippeixotog/akka-testkit-specs2"
         - name: "ruippeixotog/scala-scraper"
         - name: "scala-works/scala-cmd"
         - name: "scalatra/scalatra"
-        - name: "sweet-delights/delightful-parsing"
+        - name: "swaldman/unstatic"
+        - name: "sweet-delights/delightful-typeclasses"
         - name: "tkrs/orcus"
         - name: "tpolecat/pool-party"
         - name: "travisbrown/iteratee"
@@ -953,13 +952,14 @@ jobs:
         - name: "akiomik/cats-nio-file"
         - name: "akka/akka-grpc"
         - name: "akka/akka-management"
+        - name: "armanbilge/ip4s"
         - name: "banno/vault4s"
         - name: "besselstudio/coingecko"
         - name: "cchantep/acolyte"
         - name: "cequence-io/openai-scala-client"
         - name: "comcast/ip4s"
+        - name: "davenverse/circuit"
         - name: "davenverse/crossplatformioapp"
-        - name: "davenverse/epimetheus-circuit"
         - name: "davenverse/mules"
         - name: "davenverse/single-fibered"
         - name: "emergentorder/onnx-scala"
@@ -981,10 +981,12 @@ jobs:
         - name: "sangria-graphql/sangria-monix"
         - name: "sangria-graphql/sangria-play-json"
         - name: "scalapb-json/scalapb-argonaut"
+        - name: "sweet-delights/delightful-parsing"
         - name: "timwspence/cats-stm"
         - name: "typelevel/cats-effect-cps"
         - name: "typelevel/keypool"
         - name: "typelevel/log4cats"
+        - name: "typelevel/twiddles"
         - name: "typelevel/vault"
         - name: "vladkopanev/cats-saga"
         - name: "wiringbits/wiringbits-webapp-utils"
@@ -1045,6 +1047,7 @@ jobs:
         include:
         - name: "akka/akka-persistence-r2dbc"
         - name: "armanbilge/calico"
+        - name: "armanbilge/jawn-fs2"
         - name: "armanbilge/porcupine"
         - name: "armanbilge/schrodinger"
         - name: "armanbilge/van-cats"
@@ -1064,6 +1067,7 @@ jobs:
         - name: "gekomad/itto-csv"
         - name: "http4s/http4s-armeria"
         - name: "http4s/http4s-jdk-http-client"
+        - name: "kailuowang/pencil"
         - name: "keirlawson/fs2-progress"
         - name: "kovstas/fs2-throttler"
         - name: "laserdisc-io/log-effect"
@@ -1091,7 +1095,6 @@ jobs:
         - name: "typelevel/fs2-grpc"
         - name: "typelevel/jawn-fs2"
         - name: "typelevel/otel4s"
-        - name: "valencik/textmogrify"
         - name: "zio/interop-cats"
     steps:
       - name: "Git Checkout"
@@ -1126,6 +1129,7 @@ jobs:
         - name: "polyvariant/scala-git-markers"
         - name: "rustedbones/scout"
         - name: "scodec/scodec-protocols"
+        - name: "timbertson/backpressure-sensor"
         - name: "trace4cats/trace4cats-exporter-http"
         - name: "trace4cats/trace4cats-http4s"
         - name: "trace4cats/trace4cats-sttp"
@@ -1274,7 +1278,6 @@ jobs:
         - name: "taig/flog"
         - name: "thatscalaguy/circe-jq"
         - name: "tmccarthy/ausgeo"
-        - name: "tmccarthy/tmm-scala-collections"
         - name: "tofu-tf/glass"
         - name: "tpolecat/doobie"
         - name: "trace4cats/trace4cats-avro"
@@ -1316,7 +1319,6 @@ jobs:
         - name: "atnos-org/eff"
         - name: "azhur/kafka-serde-scala"
         - name: "banno/cosmos4s"
-        - name: "bilal-fazlani/zio-mongo"
         - name: "bot4s/zmatrix"
         - name: "com-lihaoyi/cask"
         - name: "coralogix/zio-k8s"
@@ -1373,12 +1375,12 @@ jobs:
         - name: "theiterators/kebs"
         - name: "tinkoff/muffin"
         - name: "torrentdam/bittorrent"
-        - name: "tpolecat/natchez"
         - name: "trace4cats/trace4cats-avro-kafka"
         - name: "trace4cats/trace4cats-jaeger"
         - name: "trace4cats/trace4cats-kafka"
         - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-zipkin"
+        - name: "typelevel/natchez"
         - name: "virtuslab/scala-cli"
         - name: "vlovgr/ciris"
         - name: "yakivy/poppet"
@@ -1416,7 +1418,6 @@ jobs:
         - name: "davenverse/natchez-rediculous"
         - name: "davenverse/rediculous-concurrent"
         - name: "dylemma/xml-spac"
-        - name: "emartech/jwt-akka-http"
         - name: "etspaceman/kinesis4cats"
         - name: "fthomas/fs2-cron"
         - name: "gemini-hlsw/lucuma-catalog"
@@ -1441,9 +1442,9 @@ jobs:
         - name: "sangria-graphql/sangria-slowlog"
         - name: "shiftleftsecurity/js2cpg"
         - name: "tpolecat/natchez-http4s"
-        - name: "tpolecat/skunk"
         - name: "trace4cats/trace4cats-natchez"
         - name: "typelevel/feral"
+        - name: "typelevel/skunk"
         - name: "typelevel/toolkit"
         - name: "vigoo/clipp"
         - name: "y-yu/excel-reads"
@@ -1533,28 +1534,6 @@ jobs:
         - name: "kitlangton/neotype"
         - name: "liewhite/swopen"
         - name: "vigoo/desert"
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v3
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        with:
-          project-name: ${{ matrix.name }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-24:
-    runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-23 ]
-    continue-on-error: true
-    timeout-minutes: 60
-    strategy:
-      matrix:
-        include:
-        - name: "liewhite/common"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
