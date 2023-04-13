@@ -434,7 +434,7 @@ def createGithubActionJob(
         println(s"needs: [ $needs ]")
         println("continue-on-error: true")
         if hasExtendentBuildTime
-        then println("timeout-minutes: 240")
+        then println("timeout-minutes: 600")
         else println("timeout-minutes: 60")
         println("strategy:")
         indented {
