@@ -79,13 +79,18 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
   val checkBuildId = opts.collectFirst {
     case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
   }
-  val compareWithScalaVersion = opts.collectFirst {
-    case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
-  }
+  checkBuildId.foreach(v =>println("Checking buildId: " + v))
+
   val compareWithBuildId = opts.collectFirst {
     case opt if opt.contains("-compareWithBuildId=") =>
       opt.dropWhile(_ != '=').tail
-  }
+    }
+    compareWithBuildId.foreach(v => println("Comparing with buildId: " + v))
+
+    val compareWithScalaVersion = opts.collectFirst {
+      case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
+    }.orElse(Option.when(compareWithBuildId.isDefined)(scalaVersion))
+    compareWithScalaVersion.foreach(v => println("Comparing Wtih Scala version: " + v))
 
   printLine()
   println(
@@ -162,7 +167,7 @@ def listFailedProjects(
 ): Seq[FailedProject] =
   println(
     s"Listing failed projects in compiled with Scala ${scalaVersion}" +
-      buildId.fold("")(id => s"with buildId=$id")
+      buildId.fold("")(id => s" with buildId=$id")
   )
   val Limit = 2000
   val projectVersionsStatusAggregation =
