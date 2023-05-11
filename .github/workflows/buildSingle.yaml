@@ -1,0 +1,68 @@
+name: "Open CB: custom/manual builds"
+run-name: ${{ inputs.build-name != '' && inputs.build-name || format('{0} - Scala {1} @ {2} / {3} {4}{5}', inputs.project-name, inputs.published-scala-version != '' && inputs.published-scala-version || 'snapshot', inputs.repository-url, inputs.repository-branch, inputs.extra-scalac-options != '' && format('extraScalacOptions={0} ', inputs.extra-scalac-options) || '', inputs.disabled-scalac-options != '' && format('disabledScalacOptions={0}', inputs.disabled-scalac-options) || '' ) }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-name:
+        type: string
+        description: "Custom name of the job in GitHub Actions"
+        default: ""
+      project-name:
+        type: string
+        description: "Name of a project to build using GitHub coordinates <org>/<repo> eg. VirtusLab/scala-cli"
+      published-scala-version:
+        type: string
+        description: "Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository"
+      repository-url:
+        type: string
+        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
+        default: "lampepfl/dotty"
+      repository-branch:
+        type: string
+        description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"
+        default: "main"
+      extra-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        default: ""
+      disabled-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be filtered out when building projects."
+        default: ""
+jobs:
+  setup-build:
+    runs-on: ubuntu-22.04
+    continue-on-error: false
+    outputs:
+      scala-version: ${{ steps.setup.outputs.scala-version }}
+      maven-repo-url: ${{ steps.setup.outputs.maven-repo-url }}
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Setup build"
+        uses: ./.github/actions/setup-build
+        id: setup
+        with:
+          scala-version: ${{ inputs.published-scala-version }}
+          repository-url: ${{ inputs.repository-url }}
+          repository-branch: ${{ inputs.repository-branch }}
+
+  build-project:
+    runs-on: ubuntu-22.04
+    needs: [setup-build]
+    continue-on-error: false
+    timeout-minutes: 60
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        with:
+          project-name: ${{ inputs.project-name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
