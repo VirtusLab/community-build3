@@ -113,7 +113,7 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
-        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.1"
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.2"
         options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
