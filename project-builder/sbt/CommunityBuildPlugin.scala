@@ -4,8 +4,8 @@ import sjsonnew._, LList.:*:
 import sjsonnew.BasicJsonProtocol._
 import sjsonnew.support.scalajson.unsafe.{Converter, Parser}
 import sbt.protocol.testing.TestResult
-import xsbti.compile.{FileAnalysisStore, CompileAnalysis}
-import xsbti.{Severity, CompileFailed, Problem}
+import xsbti.compile.{CompileAnalysis, FileAnalysisStore}
+import xsbti.{CompileFailed, Problem, Severity}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -19,39 +19,9 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   override def eval[T](task: TaskKey[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val scopedTask = project / task
-    val hasModifiedOptions = {
-      CommunityBuildPlugin.predefinedDisabledScalacOptions.nonEmpty ||
-      CommunityBuildPlugin.extraScalacOptions.nonEmpty ||
-      CommunityBuildPlugin.disabledScalacOptions.nonEmpty
-    }
-    val updatedState =
-      if (!hasModifiedOptions) state
-      else {
-        val extracted = sbt.Project.extract(state)
-        def setScalacOptions(key: TaskKey[Seq[String]]) =
-          key.transform(
-            scalacOptions => {
-              val opts0: Seq[String] = scalacOptions
-                .diff(CommunityBuildPlugin.predefinedDisabledScalacOptions)
-              opts0
-                .++(CommunityBuildPlugin.extraScalacOptions.toSeq.diff(opts0))
-                .diff(CommunityBuildPlugin.disabledScalacOptions.toSeq)
-            },
-            sbt.internal.util.NoPosition
-          )
-        state.appendWithSession(
-          extracted.structure.allProjectRefs
-            .flatMap { ref =>
-              Seq(
-                setScalacOptions(ref / Compile / Keys.scalacOptions),
-                setScalacOptions(ref / Test / Keys.scalacOptions)
-              )
-            }
-        )
-      }
 
     sbt.Project
-      .runTask(scopedTask, updatedState)
+      .runTask(scopedTask, state)
       .fold[EvalResult[T]] {
         val reason = TaskEvaluator.UnkownTaskException(scopedTask.toString())
         EvalResult.Failure(reason :: Nil, 0)
@@ -109,7 +79,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   def mvnRepoPublishSettings = sys.env
     .get("CB_MVN_REPO_URL")
     .filter(_.nonEmpty)
-    .map("Community Build Repo" at _)
+    .map("Community Build Repo".at(_))
     .map { ourResolver =>
       Seq(
         publishResultsConf :=
@@ -122,23 +92,12 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     }
     .getOrElse(Nil)
-  private def getCustomScalacOptions(propName: String) = {
-    val mutableOpts = mutable.Set.empty[String]
-    mutableOpts ++= sys.props
-      .get(propName)
-      .toSeq
-      .flatMap(_.split(","))
-    mutableOpts
-  }
-  val extraScalacOptions = getCustomScalacOptions("communitybuild.extra-scalac-options")
-  val disabledScalacOptions = getCustomScalacOptions("communitybuild.disabled-scalac-options")
-  val predefinedDisabledScalacOptions =
-    Seq("-deprecation", "-feature", "-Xfatal-warnings", "-Werror")
-  override def projectSettings = Seq(
-    scalacOptions := scalacOptions.value ++ extraScalacOptions.toSeq,
-    // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
-    crossScalaVersions := (thisProjectRef / crossScalaVersions).value
-  ) ++ mvnRepoPublishSettings
+
+  override def projectSettings =
+    Seq(
+      // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
+      crossScalaVersions := (thisProjectRef / crossScalaVersions).value
+    ) ++ mvnRepoPublishSettings
 
   private def stripScala3Suffix(s: String) = s match {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s
@@ -155,17 +114,15 @@ object CommunityBuildPlugin extends AutoPlugin {
         .filter(_.nonEmpty)
         .orElse(sys.props.get("communitybuild.version"))
         .getOrElse {
-          throw new RuntimeException(
-            "No explicit version found in setPublishVersion command"
-          )
+          throw new RuntimeException("No explicit version found in setPublishVersion command")
         }
-      (ref: ProjectRef, currentVersion: String) => {
+      (scope: Scope, currentVersion: String) => {
         dualVersioning
           .filter(_.matches(targetVersion, currentVersion))
           .flatMap(_.apply(targetVersion))
           .map { version =>
             println(
-              s"Setting version ${version.render} for ${ref.project} based on dual versioning ${dualVersioning}"
+              s"Setting version ${version.render} for ${scope} based on dual versioning ${dualVersioning}"
             )
             version.render
           }
@@ -173,57 +130,43 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
     }
 
-  val disableFatalWarnings = keyTransformCommand(
-    "disableFatalWarnings",
-    Compile / scalacOptions,
-    Test / scalacOptions
-  ) { (_, _) =>
-    {
+  val disableFatalWarnings =
+    keyTransformCommand("disableFatalWarnings", Keys.scalacOptions) { (_, _) =>
       val flags = Seq("-Xfatal-warnings", "-Werror")
-      disabledScalacOptions ++= flags
-      extraScalacOptions --= flags
-      (_: ProjectRef, currentSettings: Seq[String]) =>
-        currentSettings // removed in projectSettings for durable effect
+      (_: Scope, currentSettings: Seq[String]) => currentSettings.filterNot(flags.contains)
     }
-  }
 
   /** Helper command used to filter scalacOptions and set source migration flags
     */
-  val enableMigrationMode = keyTransformCommand(
-    "enableMigrationMode",
-    Compile / scalacOptions,
-    Test / scalacOptions
-  ) { (args, extracted) =>
-    val argSourceVersion = args.headOption.filter(_.nonEmpty)
-    def resolveSourceVersion(scalaVersion: String) = CrossVersion
-      .partialVersion(scalaVersion)
-      .collect {
-        case (3, 0) => "3.0-migration"
-        case (3, 1) => "3.0-migration"
-        case (3, 2) => "3.2-migration"
-        case (3, _) => "future-migration"
-      }
+  val enableMigrationMode = keyTransformCommand("enableMigrationMode", Keys.scalacOptions) {
+    (args, extracted) =>
+      val argSourceVersion = args.headOption.filter(_.nonEmpty)
+      def resolveSourceVersion(scalaVersion: String) =
+        CrossVersion.partialVersion(scalaVersion).collect {
+          case (3, 0) => "3.0-migration"
+          case (3, 1) => "3.0-migration"
+          case (3, 2) => "3.2-migration"
+          case (3, _) => "future-migration"
+        }
 
-    (ref: ProjectRef, currentSettings: Seq[String]) => {
-      val scalaVersion = extracted.get(ref / Keys.scalaVersion)
-      if (!scalaVersion.startsWith("3.")) currentSettings
-      else
-        argSourceVersion
-          .orElse(resolveSourceVersion(scalaVersion))
-          .fold(currentSettings) { sourceVersion =>
-            val newEntries = Seq(s"-source:$sourceVersion")
-            println(
-              s"Setting migration mode ${newEntries.mkString(" ")} in ${ref.project}"
-            )
-            // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
-            val filteredSettings =
-              Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
-            currentSettings.filterNot { setting =>
-              filteredSettings.exists(setting.contains(_)) ||
-              setting.matches(".*-Wconf.*any:e")
-            } ++ newEntries
-          }
-    }
+      (scope: Scope, currentSettings: Seq[String]) => {
+        val scalaVersion = extracted.get(scope / Keys.scalaVersion)
+        if (!scalaVersion.startsWith("3.")) currentSettings
+        else
+          argSourceVersion
+            .orElse(resolveSourceVersion(scalaVersion))
+            .fold(currentSettings) { sourceVersion =>
+              val newEntries = Seq(s"-source:$sourceVersion")
+              println(s"Setting migration mode ${newEntries.mkString(" ")} in ${scope}")
+              // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
+              val filteredSettings =
+                Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
+              currentSettings.filterNot { setting =>
+                filteredSettings.exists(setting.contains(_)) ||
+                setting.matches(".*-Wconf.*any:e")
+              } ++ newEntries
+            }
+      }
   }
 
   /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
@@ -235,11 +178,11 @@ object CommunityBuildPlugin extends AutoPlugin {
       val partialVersion = CrossVersion.partialVersion(scalaVersion)
       val targetsScala3 = partialVersion.exists(_._1 == 3)
 
-      (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
-        val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
+      (scope: Scope, currentCrossVersions: Seq[String]) => {
+        val currentScalaVersion = extracted.get(scope / Keys.scalaVersion)
         def updateVersion(fromVersion: String) = {
           println(
-            s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
+            s"Changing crossVersion $fromVersion -> $scalaVersion in ${scope}/crossScalaVersions"
           )
           scalaVersion
         }
@@ -266,46 +209,49 @@ object CommunityBuildPlugin extends AutoPlugin {
           case _ => // if version is not a part of cross version allow only current version
             val allowedCrossVersions = mapVersions(currentScalaWithPartial)
             println(
-              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
+              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${scope.project}/crossScalaVersions"
             )
             allowedCrossVersions
         }
       }
     }
 
+  val appendScalacOptions = keyTransformCommand("appendScalacOptions", Keys.scalacOptions) {
+    (args, extracted) => (_: Scope, currentScalacOptions: Seq[String]) =>
+      (currentScalacOptions ++ args).distinct
+  }
+
+  val removeScalacOptions = keyTransformCommand("removeScalacOptions", Keys.scalacOptions) {
+    (args, extracted) => (_: Scope, currentScalacOptions: Seq[String]) =>
+      currentScalacOptions.filterNot(args.contains)
+  }
+
   val commands = Seq(
     enableMigrationMode,
     disableFatalWarnings,
     setPublishVersion,
-    setCrossScalaVersions
+    setCrossScalaVersions,
+    appendScalacOptions,
+    removeScalacOptions
   )
 
-  type SettingMapping[T] = (Seq[String], Extracted) => (ProjectRef, T) => T
-  def keyTransformCommand[T](name: String, keys: Taskable[T]*)(
-      mapping: SettingMapping[T]
-  ) =
+  type SettingMapping[T] = (Seq[String], Extracted) => (Scope, T) => T
+  def keyTransformCommand[T](name: String, task: ScopedTaskable[T])(mapping: SettingMapping[T]) =
     Command.args(name, "args") { case (state, args) =>
-      val extracted = sbt.Project.extract(state)
-      val withArgs = mapping(args, extracted)
       println(s"Execute $name")
-      state.appendWithSession(
-        extracted.structure.allProjectRefs
-          .flatMap { ref =>
-            for (key <- keys) yield key match {
-              case key: TaskKey[T] =>
-                (ref / key).transform(
-                  withArgs(ref, _),
-                  sbt.internal.util.NoPosition
-                )
-              case key: SettingKey[T] =>
-                (ref / key).transform(
-                  withArgs(ref, _),
-                  sbt.internal.util.NoPosition
-                )
-              case _ => ???
-            }
-          }
-      )
+      val extracted = sbt.Project.extract(state)
+      import extracted._
+      val withArgs = mapping(args, extracted)
+      val r = sbt.Project.relation(extracted.structure, true)
+      val allDefs = r._1s.toSeq
+      val scopes = allDefs.filter(_.key == task.key).map(_.scope).distinct
+      val redefined = task match {
+        case setting: SettingKey[T] =>
+          scopes.map(scope => scope / setting ~= (v => withArgs(scope, v)))
+        case task: TaskKey[T] => scopes.map(scope => scope / task ~= (v => withArgs(scope, v)))
+      }
+      val session = extracted.session.appendRaw(redefined)
+      BuiltinCommands.reapply(session, structure, state)
     }
 
   // Create mapping from org%artifact_name to project name

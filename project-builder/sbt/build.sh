@@ -49,8 +49,6 @@ sbtSettings=(
   --batch
   --verbose
   -Dcommunitybuild.version="$version"
-  -Dcommunitybuild.extra-scalac-options="$extraScalacOptions"
-  -Dcommunitybuild.disabled-scalac-options="$disabledScalacOption"
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
@@ -79,6 +77,8 @@ function runSbt() {
   tq='"""'
   sbt ${sbtSettings[@]} \
     "setCrossScalaVersions $scalaVersion" \
+    "removeScalacOptions -deprecation -feature -Xfatal-warnings -Werror ${disabledScalacOption}" \
+    "appendScalacOptions ${extraScalacOptions}" \
     "$setScalaVersionCmd -v" \
     "set every credentials := Nil" \
     "$customCommands" \
