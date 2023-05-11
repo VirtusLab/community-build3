@@ -43,9 +43,9 @@ elif [ -f "repo/build.sbt" ]; then
   echo "sbt project found: ${isSbtProject}"
   $scriptDir/sbt/prepare-project.sh repo "$enforcedSbtVersion" "$scalaVersion" "$projectConfig"
   $scriptDir/sbt/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
-
 else
-  echo "Unknown project build tool, project layout:"
+  echo "Not found sbt or mill build files, assuming scala-cli project"
   ls -l repo/
+  scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig"
   exit 1
 fi
