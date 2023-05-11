@@ -3,7 +3,7 @@
 //> using lib "org.json4s::json4s-native:4.0.6"
 //> using lib "com.lihaoyi::requests:0.8.0"
 //> using lib "com.lihaoyi::os-lib:0.9.1"
-//> using lib "io.get-coursier:coursier_2.13:2.1.0"
+//> using lib "io.get-coursier:coursier_2.13:2.1.3"
 //> using lib "com.goyeau::kubernetes-client:0.9.0"
 //> using lib "org.slf4j:slf4j-simple:2.0.7"
 //> using lib "com.github.scopt::scopt:4.1.0"
@@ -35,9 +35,9 @@ val communityBuildVersion =
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl =
   s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
-lazy val communityBuildDir = sys.props
-  .get("communitybuild.local.dir")
-  .map(os.Path(_))
+lazy val communityBuildLocalDir =
+  sys.props.get("communitybuild.local.dir").map(os.Path(_))
+lazy val communityBuildDir = communityBuildLocalDir
   .getOrElse(
     gitCheckout(s"https://github.com/$CBRepoName.git", None)(os.temp.dir())
   )
@@ -237,12 +237,13 @@ object BuildInfo:
     given StringManifest: Manifest[String] =
       scala.reflect.ManifestFactory.classType(classOf[String])
     def prepareBuildPlan(): JValue =
+      println(config.customRun.projectName)
       val args = Seq[os.Shellable](
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsCount = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
-        /* configsPath = */ communityBuildDir / "coordinator" / "configs",
+        /* configsPath = */ communityBuildDir / "coordinator" / "configs"
       )
       val javaProps =
         Seq("--java-prop", "opencb.coordinator.reproducer-mode=true")
@@ -254,10 +255,10 @@ object BuildInfo:
 
     val buildPlan = prepareBuildPlan() match
       case JArray(plan) => plan.filter(_ != JArray(Nil))
-      case t => sys.error("Unexpected build plan input: " + t)
+      case t            => sys.error("Unexpected build plan input: " + t)
     val projects = for
       case JArray(buildStage) <- buildPlan.take(1)
-       // There should be only 1 stage
+      // There should be only 1 stage
       project <- buildStage.take(1) // There should be only 1 project
       // Config is an object, though be default would be decoded to None when we expect Option[String]
       // We don't care about its content so we treat it as opaque string value
@@ -575,12 +576,14 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
       }
       .iterateUntil(_.nonEmpty)
       .map(_.get)
-      .recoverWith{
+      .recoverWith {
         case ex: Exception if retries > 0 =>
-           Console.err.println(s"Failed to get container state, retry with backoff, reason: ${ex}")
+          Console.err.println(
+            s"Failed to get container state, retry with backoff, reason: ${ex}"
+          )
           Thread.sleep(1000)
           getContainerState(retries - 1)
-      } 
+      }
 
     def waitForStart =
       for
@@ -630,7 +633,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         Thread.sleep(1000)
         getLogs()
       }
-      val stdout=  getLogs()
+      val stdout = getLogs()
 
       logsFile
     }
@@ -974,7 +977,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         MillReproducer(projectDir, logsFile)
       else if os.exists(projectDir / "build.sbt") then
         SbtReproducer(projectDir, logsFile)
-      else sys.error("Unsupported build tool")
+      else ScalaCliReproducer(projectDir, logsFile)
     try
       val redirectMessage =
         if config.redirectLogs then s", logs redirected to $logsFile" else ""
@@ -1046,6 +1049,45 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         case BuildResult.Failed => Some(ret)
         case _                  => None
       }
+
+  class ScalaCliReproducer(projectDir: os.Path, logsFile: os.Path)(using
+      project: ProjectInfo,
+      build: BuildInfo
+  ) extends BuildToolReproducer:
+    override def prepareBuild(): Unit = ()
+    override def runBuild(): Unit = {
+        val logsOutput =
+          if !config.redirectLogs then os.Inherit
+          else os.PathAppendRedirect(logsFile)
+        val effectiveConfig = project.params.config.getOrElse("{}")
+        val projectbuilderDirOrURI = communityBuildLocalDir
+          .map(_ / "project-builder")
+          .getOrElse(projectBuilderUrl)
+        os.proc(
+          "scala-cli",
+          "run",
+          s"${projectbuilderDirOrURI}/scala-cli/build.scala",
+          "--",
+          projectDir,
+          effectiveScalaVersion,
+          effectiveConfig
+        ).call(
+          check = false,
+          cwd = projectDir,
+          stdout = logsOutput,
+          stderr = logsOutput
+        )
+      }.exitCode match {
+        case 0 =>
+          println(
+            s"Sucessfully finished build for project ${project.id} (${project.projectName})"
+          )
+        case code =>
+          System.err.println(    s"Failed to run the build, for details check logs in $logsFile")
+          throw FailedProjectException(
+            s"Build for project ${project.id} (${project.projectName}) failed with exit code $code"
+          )
+    }
 
   class SbtReproducer(projectDir: os.Path, logsFile: os.Path)(using
       project: ProjectInfo,
