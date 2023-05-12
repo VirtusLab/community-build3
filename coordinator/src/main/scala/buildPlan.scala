@@ -295,18 +295,15 @@ def splitIntoStages(
             )
           )
         } else {
-          System.err.println(
-            "Deadlock in splitting projects into stages, joining into single group"
-          )
-          newRemainings
+          val (minDeps, tieBreakers) = newRemainings
+            .groupBy(_.dependencies.count(!done.contains(_)))
             .toSeq
-            .sortBy(_.project)
-            .foreach { p =>
-              println(
-                s"${p.project.coordinates}: ${p.dependencies.map(_.coordinates).mkString(", ")}"
-              )
-            }
-          val tieBreakers = newRemainings.take(25)
+            .sortBy { (depsCount, _) => depsCount }
+            .head
+          def showCurrent = tieBreakers.map(_.project.coordinates).mkString(", ")
+          System.err.println(
+            s"Not found projects without already resolved dependencies, using [${tieBreakers.size}] projects with minimal dependency size=$minDeps : ${showCurrent}"
+          )
           currentStage ++= tieBreakers
           newRemainings --= tieBreakers
         }
