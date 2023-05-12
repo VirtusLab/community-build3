@@ -322,6 +322,7 @@ object Scala3CommunityBuild {
               pattern
                 .findFirstIn(name)
                 .orElse(pattern.findFirstIn(target))
+                .filter(matched => matched == name || matched == target)
                 .isDefined
             }
             excludingPattern.foreach { pattern =>
