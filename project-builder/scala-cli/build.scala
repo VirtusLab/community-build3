@@ -131,6 +131,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String)
         EvalResult.Value(nullT, evalTime = tookMillis)
       case exitCode =>
         println(s"Failed to evaluated $task: exitCode ${exitCode}")
+        proc.err.lines().foreach(System.err.println)
         val failure = EvalResult.Failure(
           EvaluationFailure(proc.err.toString()) :: Nil,
           evalTime = tookMillis
