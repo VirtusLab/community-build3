@@ -135,7 +135,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
           ) =>
         ()
       case failure =>
-        throw new RuntimeException(
+        sys.error(
           s"Failed to decode content of ${internalProjectConfigsPath}, reason: ${failure.prettyPrint(0)}"
         )
     }
