@@ -10,6 +10,6 @@ RUN curl -fLo coursier https://github.com/coursier/launchers/raw/master/coursier
     && sh -c "scala-cli --version"
 
 # Project dependencies
-RUN apt update && apt -y install git-lfs protobuf-compiler
+RUN apt update && apt -y install git-lfs protobuf-compiler python3
 RUN java -version
 COPY . /build/
