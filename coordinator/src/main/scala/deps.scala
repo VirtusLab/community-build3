@@ -44,6 +44,10 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
     .sortBy(-_.stars)
 
 case class ModuleInVersion(version: String, modules: Seq[String])
+enum CandidateProject:
+  def project: Project
+  case BuildAll(project: Project)
+  case BuildSelected(project: Project, mvs: Seq[ModuleInVersion])
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
 def loadScaladexProject(scalaBinaryVersion: String)(
@@ -133,7 +137,7 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   Target(TargetId(o, n), deps.toSeq)
 
 def loadMavenInfo(scalaBinaryVersion: String)(
-    projectModules: ProjectModules
+    projectModules: CandidateProject.BuildSelected
 ): AsyncResponse[LoadedProject] =
   import projectModules.project.{name, org}
   val repoName = s"https://github.com/$org/$name.git"
@@ -189,28 +193,35 @@ def loadDepenenecyGraph(
     minStarsCount: Int,
     maxProjectsCount: Option[Int] = None,
     requiredProjects: Seq[Project] = Nil,
+    customProjects: Seq[Project] = Nil,
     filterPatterns: Seq[String] = Nil
 ): AsyncResponse[DependencyGraph] =
   val patterns = filterPatterns.map(_.r)
-  def loadProject(p: Project): AsyncResponse[ProjectModules] = cachedAsync { (p: Project) =>
-    loadScaladexProject(scalaBinaryVersion)(p)
-      .map(projectModulesFilter(patterns))
-  }(p)
+  def loadProject(p: Project): AsyncResponse[CandidateProject] =
+    if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
+    else
+      cachedAsync { (p: Project) =>
+        loadScaladexProject(scalaBinaryVersion)(p)
+          .map(projectModulesFilter(patterns))
+      }(p).map { case ProjectModules(project, mvs) => CandidateProject.BuildSelected(project, mvs) }
 
   val required = LazyList
     .from(requiredProjects)
     .map(loadProject)
 
+  val customProjectsStream = customProjects.to(LazyList).map(loadProject)
+
   val optionalStream =
-    cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
-      .takeWhile(_.stars >= minStarsCount)
-      .to(LazyList)
-      .map(loadProject)
+    customProjectsStream #:::
+      cachedSingle("projects.csv")(loadProjects(scalaBinaryVersion))
+        .takeWhile(_.stars >= minStarsCount)
+        .to(LazyList)
+        .map(loadProject)
   def optional(from: Int, limit: Option[Int]) =
     limit.foldLeft(optionalStream.drop(from))(_.take(_))
 
   def load(
-      candidates: LazyList[Future[ProjectModules]]
+      candidates: LazyList[Future[CandidateProject]]
   ): Future[Seq[Option[LoadedProject]]] = {
     Future
       .traverse(candidates.zipWithIndex) { (getProject, idx) =>
@@ -218,19 +229,23 @@ def loadDepenenecyGraph(
           project <- getProject
           name = s"${project.project.org}/${project.project.name}"
           mvnInfo <-
-            if project.mvs.isEmpty
-            then Future.successful(None)
-            else
-              loadMavenInfo(scalaBinaryVersion)(project)
-                .map { result =>
-                  println(s"Loaded Maven info #${idx + 1} for $name")
-                  Option(result)
-                }
-                .recover {
-                  case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
-                    System.err.println(s"Missing Maven info: ${ex.getUrl()}")
-                    None
-                }
+            project match
+              case CandidateProject.BuildAll(project) =>
+                Future.successful(Some(LoadedProject(project, "HEAD", Seq(Target.BuildAll))))
+              case candidate @ CandidateProject.BuildSelected(project, mvs) =>
+                if mvs.isEmpty
+                then Future.successful(None)
+                else
+                  loadMavenInfo(scalaBinaryVersion)(candidate)
+                    .map { result =>
+                      println(s"Loaded Maven info #${idx + 1} for $name")
+                      Option(result)
+                    }
+                    .recover {
+                      case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
+                        System.err.println(s"Missing Maven info: ${ex.getUrl()}")
+                        None
+                    }
         yield mvnInfo
       }
   }
@@ -238,7 +253,7 @@ def loadDepenenecyGraph(
   load(
     required #::: optional(
       from = 0,
-      limit = maxProjectsCount.map(_ - requiredProjects.length).map(_ max 0)
+      limit = maxProjectsCount.map(_ - requiredProjects.length - customProjects.length).map(_ max 0)
     )
   ).flatMap { loaded =>
     val available = loaded.flatten

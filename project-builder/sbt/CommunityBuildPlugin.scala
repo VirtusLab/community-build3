@@ -408,7 +408,11 @@ object CommunityBuildPlugin extends AutoPlugin {
         simplifiedModuleId(key) -> value
       }
 
-      val filteredIds = filterTargets(ids, config.projects.exclude.map(_.r))
+      val idsToUse = ids match {
+        case "*%*" :: _ => originalModuleIds.keys.toSeq
+        case ids        => ids
+      }
+      val filteredIds = filterTargets(idsToUse, config.projects.exclude.map(_.r))
 
       println("Starting build...")
       // Find projects that matches maven
