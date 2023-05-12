@@ -212,17 +212,9 @@ case class ProjectInfo(
     end groupByDeps
     groupByDeps(allDependencies, Set.empty, Nil)
   end buildPlanForDependencies
-
-  def effectiveTargets(using config: Config) =
-    val baseTargets = params.buildTargets
-    val excluded =
-      for
-        case JArray(excluded) <- params.config
-          .map(parse(_) \ "projects" \ "exclude")
-          .toSeq
-        case JString(entry) <- excluded
-      yield entry
-    baseTargets.diff(excluded)
+    
+  // Leave excluding project targets to the build tool internals
+  def effectiveTargets(using config: Config) = params.buildTargets
 }
 case class BuildInfo(projects: List[ProjectInfo]):
   lazy val projectsByName = projects.map(p => p.projectName -> p).toMap
@@ -1116,14 +1108,12 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         os
           .read(sbtBuildProperties)
           .linesIterator
-          .collectFirst { case SbtVersion(version) =>
-            version
-          }
+          .collectFirst { case SbtVersion(version) =>  version }
         // .getOrElse(sys.error("Cannot resolve current sbt version"))
     val belowMinimalSbtVersion =
       currentSbtVersion.forall {
         _.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
-          case Array(1, minor, patch) => minor <= 5 && patch < 5
+          case Array(1, minor, patch) => minor < 5 || (minor == 5 && patch < 5)
           case _                      => false
         }
       }
@@ -1150,6 +1140,12 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         .foreach(
           os.copy.into(_, projectDir / "project", replaceExisting = true)
         )
+      os.proc("bash","-c", s"cd $sbtProjectDir && git submodule sync && git submodule update --init --recursive")
+        .call(
+          check = false,
+          stdout = os.Inherit,
+          stderr = os.Inherit
+        ).exitCode
 
     override def runBuild(): Unit =
       def runSbt(forceScalaVersion: Boolean) =
@@ -1163,9 +1159,12 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           "sbt",
           "--no-colors",
           "--verbose",
+          "set commands ++= CommunityBuildPlugin.commands",
+          s"setCrossScalaVersions $effectiveScalaVersion",
           s"++$effectiveScalaVersion$versionSwitchSuffix -v",
           "set every credentials := Nil",
           "moduleMappings",
+          "removeScalacOptions -deprecation -feature -Xfatal-warnings -Werror",
           sbtConfig.commands,
           s"runBuild $effectiveScalaVersion $tq$effectiveConfig$tq ${project.effectiveTargets.mkString(" ")}"
         ).call(
