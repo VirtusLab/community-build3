@@ -44,7 +44,7 @@ class ConfigFiles(path: os.Path) {
       requiredProjects = requiredProjects,
       filterPatterns = loadFilters
     )
-    _ = println(s"Loaded dependency graph")
+    _ = println(s"Loaded dependency graph: ${dependencyGraph.projects.size} projects")
     buildPlan <- makeDependenciesBasedBuildPlan(dependencyGraph)
     _ = println("Generated build plan")
   } yield {

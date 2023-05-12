@@ -71,6 +71,9 @@ sciss:span:.*
 sciss:swingplus:.*
 dmurvihill:courier:.*
 
+## Outdated dependency using version not published for Scala3
+e257-fi:dirsuite:.*
+
 ## Non linear versioning
 ### scaladex lists only 1 Scala 3 project zio-resource in version 0.0.1 which is more recent then existing 0.1.12 version with only Scala 2 projects
 carlos-verdes:funkode:0.[0-1]\..*
@@ -100,16 +103,8 @@ beangle:webmvc:.*
 ## Misconfigured + needs ruby on path
 makenowjust-labs:lite:.*
 
-## Needs cmake
-pdal:java:.*
-ablearthy:tdjson-bind:.*
-
-## Needs python
-# in tests com-lihaoyi:fastparse:.*
-
 ## Some match issues
 scala-js:scala-js-macrotask-executor:.*
-
 
 ## Publishing artifact leads to failurs in  downstream projects
 ### Publishes only pom, no artifacts
@@ -121,9 +116,6 @@ fehu:opentracing-scala:.*
 lorandszakacs:sprout:0.0.[0-5]
 rssh:scala-gopher:.*
 wangzaixiang:wjson:.*
-
-# Missing dependencies - requires submodules
-scalacenter:scala-debug-adapter:.*
 
 ## Outdated version, needs new release
 2m:yabai-scala:2.0.[0-1]
@@ -192,28 +184,7 @@ zio:zio-aws:.*
 
 # Depends on not published lib with CrossVersion.full
 ## wartremover
-atedeg:mdm:.*
-cognitedata:cognite-sdk-scala:.*
-cheleb:zio-pravega:.*
-guymers:ceesvee:.*
-kevin-lee:just-semver:.*
-kevin-lee:just-sysprocess:.*
-medeia:medeia:.*
-tharwaninitin:gcp4zio:.*
-tharwaninitin:cron4zio:.*
-tharwaninitin:etlflow:.*
 xuwei-k:wartremover-scalikejdbc:.*
-
-## better2string
-kubukoz:drops:.*
-kubukoz:spotify-next:.*
-kubukoz:sup:.*
-polyvariant:colorize-scala:.*
-polyvariant:scodec-java-classfile:.*
-polyvariant:treesitter4s:.*
-
-## better-files plugin
-e257-fi:dirsuite:.*
 
 # Depends on no longer available pre-release
 oleg-py:shironeko:0.2.0-M.*
@@ -228,13 +199,13 @@ laserdisc-io:fs2-aws:5.0.*
 ## override opaque type
 tabdulradi:mazboot:.*
 
-# Requires JDK incubator/preview features
+# Requires JDK incubator/preview features (mill)
 markehammons:slinc:.*
-softwaremill:ox:.*
 
 # Not a real project
 alexarchambault:scalacon-2022-demo:.*
 alexarchambault:scalacon2022-demo:.*
+
 # Uses deprecated scala-cli directives
 quafadas:scautable:.*
 

@@ -116,7 +116,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         .getOrElse {
           throw new RuntimeException("No explicit version found in setPublishVersion command")
         }
-      (scope: Scope, currentVersion: String) => {
+      (scope: Scope, currentVersion: String) =>
         dualVersioning
           .filter(_.matches(targetVersion, currentVersion))
           .flatMap(_.apply(targetVersion))
@@ -127,7 +127,6 @@ object CommunityBuildPlugin extends AutoPlugin {
             version.render
           }
           .getOrElse(targetVersion)
-      }
     }
 
   val disableFatalWarnings =
@@ -186,7 +185,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
           scalaVersion
         }
-        def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
+        def withCrossVersion(version: String) = version -> CrossVersion.partialVersion(version)
         val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
         val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
         val partialCrossVersions = crossVersionsWithPartial.values.toSet
@@ -226,19 +225,45 @@ object CommunityBuildPlugin extends AutoPlugin {
       currentScalacOptions.filterNot(args.contains)
   }
 
+  import sbt.librarymanagement.InclExclRule
+  val excludeLibraryDependency =
+    keyTransformCommand("excludeLibraryDependency", Keys.allExcludeDependencies) {
+      (args, extracted) => (scope, currentExcludeDependencies: Seq[InclExclRule]) =>
+        val scalaVersion = extracted.get(scope / Keys.scalaVersion)
+        val newRules = args
+          .map(_.replace("{scalaVersion}", scalaVersion))
+          .map {
+            _.split(":").zipWithIndex.foldLeft(InclExclRule()) {
+              case (rule, (org, 0))      => rule.withOrganization(org)
+              case (rule, (name, 1))     => rule.withName(name)
+              case (rule, (artifact, 2)) => rule.withArtifact(artifact)
+              case (rule, (unexpected, idx)) =>
+                sys.error(s"unexpected argument $unexpected at idx: $idx")
+            }
+          }
+        currentExcludeDependencies ++ newRules.filterNot(currentExcludeDependencies.contains)
+    }
+  val removeScalacOptionsStartingWith =
+    keyTransformCommand("removeScalacOptionsStartingWith", Keys.scalacOptions) {
+      (args, _) => (_, currentScalacOptions: Seq[String]) =>
+        currentScalacOptions.filterNot(opt => args.exists(opt.startsWith))
+    }
+
   val commands = Seq(
     enableMigrationMode,
     disableFatalWarnings,
     setPublishVersion,
     setCrossScalaVersions,
     appendScalacOptions,
-    removeScalacOptions
+    removeScalacOptions,
+    excludeLibraryDependency,
+    removeScalacOptionsStartingWith
   )
 
   type SettingMapping[T] = (Seq[String], Extracted) => (Scope, T) => T
   def keyTransformCommand[T](name: String, task: ScopedTaskable[T])(mapping: SettingMapping[T]) =
     Command.args(name, "args") { case (state, args) =>
-      println(s"Execute $name")
+      println(s"Execute $name: ${args.mkString(" ")}")
       val extracted = sbt.Project.extract(state)
       import extracted._
       val withArgs = mapping(args, extracted)
@@ -369,22 +394,22 @@ object CommunityBuildPlugin extends AutoPlugin {
       val topLevelProjects = {
         var haveUsedRootModule = false
         val idsWithMissingMappings = scala.collection.mutable.ListBuffer.empty[String]
-        val mappedProjects = for {
-          id <- filteredIds
-          testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
-            Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
-          testedFullIds = testedSuffixes.map(id + _)
-          candidates = for (fullId <- testedFullIds)
-            yield Stream(
-              refsByName.get(fullId),
-              originalModuleIds.get(fullId),
-              moduleIds.get(fullId),
-              simplifiedModuleIds.get(simplifiedModuleId(fullId)),
-              // Single, top level, unnamed project
-              refsByName.headOption.map(_._2).filter(_ => refsByName.size == 1)
-            ).flatten
-        } yield {
-          candidates.flatten.headOption
+        val mappedProjects =
+          for {
+            id <- filteredIds
+            testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
+              Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
+            testedFullIds = testedSuffixes.map(id + _)
+            candidates = for (fullId <- testedFullIds)
+              yield Stream(
+                refsByName.get(fullId),
+                originalModuleIds.get(fullId),
+                moduleIds.get(fullId),
+                simplifiedModuleIds.get(simplifiedModuleId(fullId)),
+                // Single, top level, unnamed project
+                refsByName.headOption.map(_._2).filter(_ => refsByName.size == 1)
+              ).flatten
+          } yield candidates.flatten.headOption
             .orElse {
               // Try use root project, it might not be explicitly declared or named
               refsByName
@@ -408,7 +433,6 @@ object CommunityBuildPlugin extends AutoPlugin {
               idsWithMissingMappings += id
               None
             }
-        }
 
         if (idsWithMissingMappings.nonEmpty) {
           throw new Exception(
@@ -473,9 +497,12 @@ object CommunityBuildPlugin extends AutoPlugin {
         val testsCompileResult = evalWhen(testingMode != TestingMode.Disabled, compileResult)(
           Test / compile
         )
-        val testsExecuteResult = evalWhen(testingMode == TestingMode.Full, testsCompileResult)(
-          Test / executeTests
-        )
+        // Introduced to fix publishing artifact locally in scala-debug-adapter
+        lazy val testOptionsResult = eval(Test / testOptions)
+        val testsExecuteResult =
+          evalWhen(testingMode == TestingMode.Full, testsCompileResult, testOptionsResult)(
+            Test / executeTests
+          )
 
         val publishResult = ourVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { version =>
           val currentVersion = (r / Keys.version)
