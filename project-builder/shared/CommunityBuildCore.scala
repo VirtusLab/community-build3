@@ -249,10 +249,7 @@ object Scala3CommunityBuild {
     def evalAsDependencyOf[T](
         dependencies: EvalResult[_]*
     )(task: Task[T]): EvalResult[T] = {
-      val shouldSkip = dependencies.exists {
-        case _: EvalResult.Value[_] => false
-        case _                      => true
-      }
+      val shouldSkip = dependencies.exists(!_.isInstanceOf[EvalResult.Value[_]])
       if (shouldSkip) EvalResult.Skipped
       else eval(task)
     }
