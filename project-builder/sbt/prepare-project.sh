@@ -75,8 +75,9 @@ ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityB
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
 
 # Project dependencies
-repoUrl=$(git remote get-url origin || echo "unknown")
-if [[ "$repoUrl" == *"shiftleftsecurity/codepropertygraph".git ]]; then
-  # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
-  git lfs pull
-fi
+# https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
+cd $repoDir
+git lfs pull || true
+## scala-debug adapter
+(git submodule sync && git submodule update --init --recursive) || true
+
