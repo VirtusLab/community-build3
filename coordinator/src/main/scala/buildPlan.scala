@@ -20,6 +20,7 @@ class ConfigFiles(path: os.Path) {
   val filteredProjects: os.Path = path / "filtered-projects.txt"
   val replacedProjects: os.Path = path / "replaced-projects.txt"
   val slowProjects: os.Path = path / "slow-projects.txt"
+  val customProjects: os.Path = path / "custom-projects.txt"
 }
 
 @main def storeDependenciesBasedBuildPlan(
@@ -34,6 +35,7 @@ class ConfigFiles(path: os.Path) {
   val threadPool = new ForkJoinPool(
     Runtime.getRuntime().availableProcessors() * 4
   )
+  val customProjects = readNormalized(confFiles.customProjects).map(Project.load)
   given ExecutionContext = ExecutionContext.fromExecutor(threadPool)
 
   val task = for {
@@ -42,6 +44,7 @@ class ConfigFiles(path: os.Path) {
       minStarsCount = minStarsCount,
       maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
       requiredProjects = requiredProjects,
+      customProjects = customProjects,
       filterPatterns = loadFilters
     )
     _ = println(s"Loaded dependency graph: ${dependencyGraph.projects.size} projects")
@@ -227,7 +230,10 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
           revision = tag.getOrElse(""),
           version = project.v,
           targets = fullInfo(project.p).targets
-            .map(t => stripScala3Suffix(t.id.asMvnStr))
+            .map {
+              case t @ Target.BuildAll => t.id.asMvnStr
+              case t                   => stripScala3Suffix(t.id.asMvnStr)
+            }
             .mkString(" "),
           config = configDiscovery(project, repoUrl, tag)
         )
@@ -246,7 +252,7 @@ private def loadLongBuildingProjects(using confFiles: ConfigFiles): Seq[Project]
       None
   }
 
-private def readNormalized(path: os.Path): Seq[String] =
+def readNormalized(path: os.Path): Seq[String] =
   if !os.exists(path)
   then
     System.err.println(s"Not found file: $path")

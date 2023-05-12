@@ -10,14 +10,14 @@ import org.json4s.FieldSerializer
 
 type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
-sealed case class Project(org: String, name: String): 
+sealed case class Project(org: String, name: String):
   lazy val show = s"${org}_$name"
   def coordinates = s"$org/$name"
   def serialize: String = s"$org;$name"
 
   def raw = this match
     case _: StarredProject => Project(org, name)
-    case _ => this
+    case _                 => this
 
 class StarredProject(org: String, name: String)(val stars: Int) extends Project(org, name) {
   override def serialize = s"$org;$name;$stars"
@@ -26,12 +26,12 @@ class StarredProject(org: String, name: String)(val stars: Int) extends Project(
 object Project:
   given Ordering[Project] = Ordering.by(_.show)
 
-  def load(line: String) = 
+  def load(line: String) =
     line match {
-        case s"$org;$repo;$stars" => StarredProject(org, repo)(stars.toInt)
-        case s"$org;$repo" => Project(org, repo)
-        case s"$org/$repo" => Project(org, repo) 
-        case s"$org,$repo" => Project(org, repo) 
+      case s"$org;$repo;$stars" => StarredProject(org, repo)(stars.toInt)
+      case s"$org;$repo"        => Project(org, repo)
+      case s"$org/$repo"        => Project(org, repo)
+      case s"$org,$repo"        => Project(org, repo)
     }
 
 case class ProjectVersion(p: Project, v: String) {
@@ -53,6 +53,8 @@ case class Dep(id: TargetId, version: String):
   def asMvnStr = id.asMvnStr + "%" + version
 
 case class Target(id: TargetId, deps: Seq[Dep])
+object Target:
+  object BuildAll extends Target(TargetId("*", "*"), Nil)
 
 case class LoadedProject(p: Project, v: String, targets: Seq[Target])
 
