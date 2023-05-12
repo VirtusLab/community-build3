@@ -1,5 +1,5 @@
 import org.jsoup._
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import java.nio.file._
 import pureconfig._
 import pureconfig.generic.derivation.default._

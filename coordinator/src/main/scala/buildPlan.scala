@@ -1,5 +1,5 @@
 import org.jsoup._
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import java.nio.file._
 import java.net.URL
 import scala.sys.process._
@@ -299,6 +299,7 @@ def splitIntoStages(
             "Deadlock in splitting projects into stages, joining into single group"
           )
           newRemainings
+            .toSeq
             .sortBy(_.project)
             .foreach { p =>
               println(
