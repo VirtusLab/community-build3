@@ -285,7 +285,7 @@ def splitIntoStages(
         def hasCyclicDependencies(p: ProjectBuildDef) =
           p.dependencies.exists(deps(_).dependencies.contains(p.project))
         val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
-        if cyclicDeps.nonEmpty then
+        if cyclicDeps.nonEmpty then {
           currentStage ++= cyclicDeps
           newRemainings --= cyclicDeps
           cyclicDeps.foreach(v =>
@@ -294,13 +294,21 @@ def splitIntoStages(
                 .filterNot(done.contains)}"
             )
           )
-        else
-          newRemainings.foreach { p =>
-            println(
-              s"${p.project.coordinates}: ${p.dependencies.map(_.coordinates).mkString(", ")}"
-            )
-          }
-          sys.error("Deadlock in splitting projects into stages")
+        } else {
+          System.err.println(
+            "Deadlock in splitting projects into stages, joining into single group"
+          )
+          newRemainings
+            .sortBy(_.project)
+            .foreach { p =>
+              println(
+                s"${p.project.coordinates}: ${p.dependencies.map(_.coordinates).mkString(", ")}"
+              )
+            }
+          val tieBreakers = newRemainings.take(25)
+          currentStage ++= tieBreakers
+          newRemainings --= tieBreakers
+        }
       }
       val names = currentStage.map(_.project)
       val currentStages = currentStage.grouped(maxStageSize).toList
