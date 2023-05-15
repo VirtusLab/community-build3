@@ -7550,7 +7550,39 @@
     "repoUrl":"https://github.com/enriquerodbe/borsh4s.git",
     "revision":"v3.0.0",
     "version":"3.0.0",
-    "targets":"io.github.enriquerodbe%borsh4s"
+    "targets":"io.github.enriquerodbe%borsh4s",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          "excludeLibraryDependency org.wartremover:wartremover_{scalaVersion}",
+          "removeScalacOptionsStartingWith -P:wartremover"
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "erikerlandson/coulomb":{
     "project":"erikerlandson/coulomb",
