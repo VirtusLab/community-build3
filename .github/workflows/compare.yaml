@@ -1,0 +1,42 @@
+name: "Open CB: compare builds"
+run-name: ${{ inputs.build-name != '' && inputs.build-name || format('{0} - Scala {1} @ {2} / {3} {4}{5}', inputs.project-name, inputs.published-scala-version != '' && inputs.published-scala-version || 'snapshot', inputs.repository-url, inputs.repository-branch, inputs.extra-scalac-options != '' && format('extraScalacOptions={0} ', inputs.extra-scalac-options) || '', inputs.disabled-scalac-options != '' && format('disabledScalacOptions={0}', inputs.disabled-scalac-options) || '' ) }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-name:
+        type: string
+        description: "Custom name of the job in GitHub Actions"
+        default: ""
+      scala-version:
+        type: string
+        description: "Reference version of Scala"
+        default: ""
+      compare-with-scala-version:
+        type: string
+        description: "Version of Scala to compare against"
+        default: ""
+      build-id:
+        type: string
+        description: "Optional version of reference build id (id is equal to the GitHub action id, based on the format Action URL: `github.com/<org>/<repo>/actions/runs/<build-id>`)"
+        default: ""
+      compare-with-build-id:
+        type: string
+        description: "Optional version of build id to compare against"
+        default: ""
+jobs:
+  create-raport:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+      - name: Install coursier
+        uses: coursier/setup-action@v1
+        with:
+          apps: scala-cli
+
+      - name: Generate raport
+        env:
+          ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
+          ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+        run: ./scripts/raport-regressions.scala ${{ inputs.scala-version }} --compareWith=${{ inputs.compare-with-scala-version }} --buildId=${{ inputs.build-id }} --compareWithBuildId=${{ compare-with-build-id }}
