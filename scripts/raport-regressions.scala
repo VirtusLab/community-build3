@@ -75,44 +75,54 @@ lazy val StableScalaVersions = {
 lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
 
 // Report all community build filures for given Scala version
-@main def raportForScalaVersion(scalaVersion: String, opts: String*) = try {
+@main def raportForScalaVersion(opts: String*) = try {
+  val scalaVersion = opts.toList.filterNot(_.startsWith("-")) match {
+    case Nil => None
+    case version :: Nil => Some(version).filter(_.nonEmpty)
+    case multiple => sys.error("Expected a single argument <scalaVersion>")
+  }
+  scalaVersion.foreach(v =>println("Checking Scala: " + v))
+
   val checkBuildId = opts.collectFirst {
     case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
-  }
+  }.filter(_.nonEmpty)
   checkBuildId.foreach(v =>println("Checking buildId: " + v))
+
+  require(checkBuildId.orElse(scalaVersion).isDefined, "scalaVersion argument or --buildId argument required")
 
   val compareWithBuildId = opts.collectFirst {
     case opt if opt.contains("-compareWithBuildId=") =>
       opt.dropWhile(_ != '=').tail
-    }
-    compareWithBuildId.foreach(v => println("Comparing with buildId: " + v))
+    }.filter(_.nonEmpty)
+  compareWithBuildId.foreach(v => println("Comparing with buildId: " + v))
 
-    val compareWithScalaVersion = opts.collectFirst {
-      case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
-    }.orElse(Option.when(compareWithBuildId.isDefined)(scalaVersion))
-    compareWithScalaVersion.foreach(v => println("Comparing Wtih Scala version: " + v))
+  val compareWithScalaVersion = opts.collectFirst {
+    case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
+  }.filter(_.nonEmpty)
+  compareWithScalaVersion.foreach(v => println("Comparing Wtih Scala version: " + v))
 
   printLine()
   println(
-    s"Reporting failed community build projects using Scala $scalaVersion"
+    s"Reporting failed community build projects using Scala $scalaVersion "
   )
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
-  val reportedProjects = compareWithScalaVersion
-    .foldRight(failedProjects) { case (comparedVersion, failedNow) =>
-      println(s"Excluding projects failing already in $comparedVersion")
+  
+  val reportedProjects = 
+    if compareWithScalaVersion.orElse(compareWithBuildId).isEmpty 
+    then failedProjects
+    else {
+      def id = s"scalaVersion=$compareWithScalaVersion, buildId=${compareWithBuildId}"
+      println(s"Excluding projects failing already in $id")
       val ignoredProjects =
         listFailedProjects(
-          comparedVersion,
+          compareWithScalaVersion,
           buildId = compareWithBuildId,
           logFailed = false
         )
           .map(_.project)
           .toSet
-      println(
-        s"Excluding ${ignoredProjects.size} project failing in ${comparedVersion}${compareWithBuildId
-            .fold("")(" in buildId=" + _)}:"
-      )
+      println(      s"Excluding ${ignoredProjects.size} project failing in $id")
       ignoredProjects
         .map(_.name)
         .groupBy(_.head)
@@ -121,12 +131,13 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         .map(_._2.toList.sorted.mkString(" - ", ", ", ""))
         .foreach(println)
 
-      failedNow.filter(p => !ignoredProjects.contains(p.project))
+      failedProjects.filter(p => !ignoredProjects.contains(p.project))
     }
   if reportedProjects.nonEmpty then
-    reportCompilerRegressions(reportedProjects, scalaVersion)(
-      Reporter.Default(scalaVersion)
-    )
+    val comparedVersion = scalaVersion.getOrElse("<comparing builds ids>")
+      reportCompilerRegressions(reportedProjects, comparedVersion)(
+        Reporter.Default(comparedVersion)
+      )
   printLine()
 } finally esClient.close()
 
@@ -161,13 +172,12 @@ extension (summary: List[SourceFields])
 end extension
 
 def listFailedProjects(
-    scalaVersion: String,
+    scalaVersion: Option[String],
     buildId: Option[String],
     logFailed: Boolean = true
 ): Seq[FailedProject] =
   println(
-    s"Listing failed projects in compiled with Scala ${scalaVersion}" +
-      buildId.fold("")(id => s" with buildId=$id")
+    s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
   )
   val Limit = 2000
   val projectVersionsStatusAggregation =
@@ -190,7 +200,7 @@ def listFailedProjects(
       }
       .toMap
 
-    def hasNewerPassingVersion(project: Project, failedVersion: String) =
+    def hasNewerPassingVersion(scalaVersion: String, project: Project, failedVersion: String) =
       esClient
         .execute {
           search(BuildSummariesIndex)
@@ -243,7 +253,7 @@ def listFailedProjects(
             s"$color$name$RESET failure in $BOLD${project.name} @ $ver$RESET - $buildURL"
           )
         val compilerFailure = summary.compilerFailure
-        if hasNewerPassingVersion(project, lastFailedVersion) then
+        if scalaVersion.exists(hasNewerPassingVersion(_, project, lastFailedVersion)) then
           None // ignore failure
         else
           def lazyLogProject() =
@@ -280,10 +290,11 @@ def listFailedProjects(
         .query(
           boolQuery()
             .must(
-              Seq(
-                termQuery("scalaVersion", scalaVersion),
-                termQuery("status", "failure")
-              ) ++ buildId.map(termQuery("buildId", _))
+              Seq(termQuery("status", "failure"))
+              ++ Seq(
+                buildId.map(termQuery("buildId", _)),
+                scalaVersion.map(termQuery("scalaVersion", _))
+              ).flatten
             )
         )
         .size(Limit)
