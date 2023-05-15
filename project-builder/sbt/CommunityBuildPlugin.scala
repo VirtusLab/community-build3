@@ -172,47 +172,48 @@ object CommunityBuildPlugin extends AutoPlugin {
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
     */
   val setCrossScalaVersions =
-    keyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) { (args, extracted) =>
-      val scalaVersion = args.head
-      val partialVersion = CrossVersion.partialVersion(scalaVersion)
-      val targetsScala3 = partialVersion.exists(_._1 == 3)
+    projectBasedKeyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) {
+      (args, extracted) =>
+        val scalaVersion = args.head
+        val partialVersion = CrossVersion.partialVersion(scalaVersion)
+        val targetsScala3 = partialVersion.exists(_._1 == 3)
 
-      (scope: Scope, currentCrossVersions: Seq[String]) => {
-        val currentScalaVersion = extracted.get(scope / Keys.scalaVersion)
-        def updateVersion(fromVersion: String) = {
-          println(
-            s"Changing crossVersion $fromVersion -> $scalaVersion in ${scope}/crossScalaVersions"
-          )
-          scalaVersion
-        }
-        def withCrossVersion(version: String) = version -> CrossVersion.partialVersion(version)
-        val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
-        val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
-        val partialCrossVersions = crossVersionsWithPartial.values.toSet
-        val allPartialVersions = crossVersionsWithPartial ++ currentScalaWithPartial
-
-        type PartialVersion = Option[(Long, Long)]
-        def mapVersions(versionsWithPartial: Map[String, PartialVersion]) = versionsWithPartial
-          .map {
-            case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
-            case (version, `partialVersion`)              => updateVersion(version)
-            case (version, _)                             => version // not changed
-          }
-          .toSeq
-          .distinct
-
-        allPartialVersions(currentScalaVersion) match {
-          // Check currently used version of given project
-          // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
-          case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
-          case _ => // if version is not a part of cross version allow only current version
-            val allowedCrossVersions = mapVersions(currentScalaWithPartial)
+        (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
+          val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
+          def updateVersion(fromVersion: String) = {
             println(
-              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${scope.project}/crossScalaVersions"
+              s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
             )
-            allowedCrossVersions
+            scalaVersion
+          }
+          def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
+          val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
+          val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
+          val partialCrossVersions = crossVersionsWithPartial.values.toSet
+          val allPartialVersions = crossVersionsWithPartial ++ currentScalaWithPartial
+
+          type PartialVersion = Option[(Long, Long)]
+          def mapVersions(versionsWithPartial: Map[String, PartialVersion]) = versionsWithPartial
+            .map {
+              case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
+              case (version, `partialVersion`)              => updateVersion(version)
+              case (version, _)                             => version // not changed
+            }
+            .toSeq
+            .distinct
+
+          allPartialVersions(currentScalaVersion) match {
+            // Check currently used version of given project
+            // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+            case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
+            case _ => // if version is not a part of cross version allow only current version
+              val allowedCrossVersions = mapVersions(currentScalaWithPartial)
+              println(
+                s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
+              )
+              allowedCrossVersions
+          }
         }
-      }
     }
 
   val appendScalacOptions = keyTransformCommand("appendScalacOptions", Keys.scalacOptions) {
@@ -272,12 +273,32 @@ object CommunityBuildPlugin extends AutoPlugin {
       val scopes = allDefs.filter(_.key == task.key).map(_.scope).distinct
       val redefined = task match {
         case setting: SettingKey[T] =>
-          scopes.map(scope => scope / setting ~= (v => withArgs(scope, v)))
-        case task: TaskKey[T] => scopes.map(scope => scope / task ~= (v => withArgs(scope, v)))
+          scopes.map(scope => (scope / setting) ~= (v => withArgs(scope, v)))
+        case task: TaskKey[T] =>
+          scopes.map(scope => (scope / task) ~= (v => withArgs(scope, v)))
       }
       val session = extracted.session.appendRaw(redefined)
       BuiltinCommands.reapply(session, structure, state)
     }
+
+    type ProjectBasedSettingMapping[T] = (Seq[String], Extracted) => (ProjectRef, T) => T
+    def projectBasedKeyTransformCommand[T](name: String, task: ScopedTaskable[T])(
+        mapping: ProjectBasedSettingMapping[T]
+    ) =
+      Command.args(name, "args") { case (state, args) =>
+        println(s"Execute $name: ${args.mkString(" ")}")
+        val extracted = sbt.Project.extract(state)
+        val withArgs = mapping(args, extracted)
+        val refs = extracted.structure.allProjectRefs
+        state.appendWithSession(
+          task match {
+            case setting: SettingKey[T] =>
+              refs.map(ref => (ref / setting) ~= (v => withArgs(ref, v)))
+            case task: TaskKey[T] =>
+              refs.map(ref => (ref / task) ~= (v => withArgs(ref, v)))
+          }
+        )
+      }
 
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
