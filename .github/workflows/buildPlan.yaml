@@ -1,5 +1,5 @@
 
-# projects total:     992
+# projects total:     991
 # min stars count:    -1
 # max projects count: 1000
 
@@ -62,8 +62,13 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "akka/akka-persistence-cassandra"
+        - name: "babylonhealth/lit-fhir"
+        - name: "clulab/processors"
         - name: "disneystreaming/smithy4s"
-        - name: "scalacenter/scala-debug-adapter"
+        - name: "hnaderi/scala-k8s"
+        - name: "nickburkard/aws-cdk-scala"
+        - name: "profunktor/neutron"
         - name: "softwaremill/tapir"
         - name: "thoughtworksinc/dsl.scala"
     steps:
@@ -92,6 +97,7 @@ jobs:
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/sourcecode"
         - name: "com-lihaoyi/utest"
+        - name: "cornerman/simple-scalajs-requests"
         - name: "coursier/dependency"
         - name: "cquiroz/scala-java-time"
         - name: "davenverse/googleapis-http4s"
@@ -120,7 +126,6 @@ jobs:
         - name: "lunduniversity/introprog-scalalib"
         - name: "max-leuthaeuser/scroll"
         - name: "nafg/scala-phonenumber"
-        - name: "nickburkard/aws-cdk-scala"
         - name: "nscala-time/nscala-time"
         - name: "nthportal/spaghetti"
         - name: "olivierblanvillain/regsafe"
@@ -341,7 +346,6 @@ jobs:
         - name: "metarank/cfor"
         - name: "mixql/mixql-core"
         - name: "monix/implicitbox"
-        - name: "mrdimosthenis/glicko2"
         - name: "mvv/typine"
         - name: "nafg/css-dsl"
         - name: "nicolasfara/ecscala"
@@ -500,6 +504,7 @@ jobs:
         - name: "sangria-graphql/sangria-spray-json"
         - name: "scala-native/scala-native-cli"
         - name: "scala-stm/scala-stm"
+        - name: "scalacenter/scala-debug-adapter"
         - name: "scalacenter/tasty-mima"
         - name: "scalapb-json/scalapb-json-common"
         - name: "scalapb/common-protos"
@@ -553,7 +558,6 @@ jobs:
         - name: "billzabob/fordeckmacia"
         - name: "bitlap/rolls"
         - name: "carlosedp/zio-channel"
-        - name: "clulab/processors"
         - name: "codedx/mapk"
         - name: "cornerman/sloth"
         - name: "dacr/zio-worksheet"
@@ -587,9 +591,9 @@ jobs:
         - name: "marcinzh/yamlike"
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "noelwelsh/mads"
-        - name: "palanga/parana"
         - name: "palanga/zio-cassandra"
         - name: "pathikrit/better-files"
+        - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/zio-metrics-micrometer"
         - name: "poslegm/munit-zio"
@@ -869,6 +873,7 @@ jobs:
         - name: "scala-works/scala-cmd"
         - name: "scalatra/scalatra"
         - name: "sweet-delights/delightful-parsing"
+        - name: "thatscalaguy/ulid4cats"
         - name: "tkrs/orcus"
         - name: "tpolecat/pool-party"
         - name: "travisbrown/iteratee"
@@ -967,7 +972,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "akka/akka-persistence-cassandra"
         - name: "akka/akka-projection"
         - name: "davenverse/epimetheus-log4cats"
         - name: "fiatjaf/scoin"
@@ -1102,14 +1106,12 @@ jobs:
         - name: "armanbilge/scala-native-config-brew"
         - name: "atnos-org/eff"
         - name: "avast/datadog4s"
-        - name: "babylonhealth/lit-fhir"
         - name: "banno/vault4s"
         - name: "besselstudio/coingecko"
         - name: "bkirwi/decline"
         - name: "blackdoor/jose"
         - name: "bp3r/jsonrpc2"
         - name: "camunda-community-hub/camunda-dmn-tester"
-        - name: "caspercommunityio/casper-scala-sdk"
         - name: "cb372/scalacache"
         - name: "chatwork/scala-jwk"
         - name: "circe/circe"
@@ -1186,7 +1188,6 @@ jobs:
         - name: "mpollmeier/scala-repl-pp"
         - name: "mrdimosthenis/scala-synapses"
         - name: "msgpack4z/msgpack4z-circe"
-        - name: "nafg/cloud-logging-logback-scala"
         - name: "narma/tranzactio"
         - name: "note/dhallj-magnolia"
         - name: "ollls/zio-tls-http"
@@ -1204,7 +1205,6 @@ jobs:
         - name: "polystat/odin"
         - name: "polyvariant/caliban-gitlab"
         - name: "profunktor/fs2-rabbit"
-        - name: "profunktor/neutron"
         - name: "pureconfig/pureconfig"
         - name: "pureharm/pureharm-aws"
         - name: "pureharm/pureharm-config-ciris"
@@ -1465,7 +1465,6 @@ jobs:
         - name: "eventstore/eventstore.akka.persistence"
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "ghostdogpr/caliban"
-        - name: "hnaderi/scala-k8s"
         - name: "scottweaver/testcontainers-for-zio"
         - name: "zio/zio-metrics-connectors"
         - name: "zio/zio-openai"
