@@ -88,3 +88,11 @@ jobs:
         with:
           name: build-raports
           path: ${{ github.workspace }}/raport-*.md
+
+      - name: Push raport
+        uses: ./.github/actions/push-raport-to-gh-page
+        with:
+          artifact-name: build-raports
+          file-to-pick: raport-full.md
+          build-title: ${{ needs.execute-build-plan.outputs.used-scala-version }}
+          token: ${{ secrets.WORKFLOW_GIT_ACCESS_TOKEN }}
