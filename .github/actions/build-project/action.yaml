@@ -23,6 +23,9 @@ inputs:
   elastic-password:
     description: "Secret with auth token to elasticsearch"
     required: true
+  workflow-name:
+    description: "Name of the calling workflow, used to resolve build URL. Leave empty to use default (execute-build-plan / {{github.job}} (<project-name>))"
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -120,6 +123,9 @@ runs:
       run: |
         GITHUB_API="repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
         JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
+        if [[ "${{ inputs.workflow-name }}" != "" ]]; then
+          JOB_NAME="${{ inputs.workflow-name }}"
+        fi
         PARAMS="?per_page=100"
         SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
 
