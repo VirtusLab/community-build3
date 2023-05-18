@@ -40,7 +40,6 @@ runs:
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
-  
     - name: Check can skip build
       id: check-history
       shell: bash
@@ -74,51 +73,16 @@ runs:
         echo "Can skip build: $canSkip"
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
 
-    - name: Get current job URL
-      id: job-info
-      if: steps.check-history.outputs.can-skip-build != 'true'
-      shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        GITHUB_API="repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
-        JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
-        PARAMS="?per_page=100"
-        SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
-
-        set -o pipefail
-        
-        outFile="gh.out"
-        buildURL=""
-        for i in $(seq 1 10) ;do
-          if gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" 2>&1 | tee $outFile; then 
-            buildURL="$(cat $outFile | xargs)"
-            break
-          elif grep -q 'API rate limit exceeded' "$outFile"; then
-            echo "GitHub API rate limit exceeded, skip resolving build URL"
-            break
-          elif grep -q 'Server Error (HTTP 502)' "$outFile"; then
-            echo "Server error when resolving build URL, retry with backoff"
-            sleep 5
-          else 
-            echo "Unknown error when resolving build URL:"
-            cat $outFile
-            break
-          fi
-        done  
-        
-        echo "Build URL: $buildURL"
-        echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
-
     - name: Build project
       uses: addnab/docker-run-action@v3
+      id: build-project
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.3"
-        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
+        options: -v ${{ github.workspace }}:/opencb/
         run: |
-          ConfigFile="/opencb/.github/workflows/buildConfig.json"
           DefaultConfig='{"memoryRequestMb":4096}'
+          ConfigFile="/opencb/.github/workflows/buildConfig.json"
           config () { 
             path=".\"${{ inputs.project-name }}\"$@" 
             jq -c -r "$path" $ConfigFile 
@@ -140,6 +104,62 @@ runs:
             "${{ inputs.extra-scalac-options }}" \
             "${{ inputs.disabled-scalac-options }}" 2>&1 | tee build-logs.txt
 
+          echo "status=$(cat build-status.txt)" >> $GITHUB_OUTPUT
+
+          # Store results
+          mv build-logs.txt /opencb/
+          mv build-status.txt /opencb/
+          mv build-summary.txt /opencb
+
+    - name: Get current job URL
+      id: job-info
+      if: steps.build-project.outputs.status != 'success'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        GITHUB_API="repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs"
+        JOB_NAME="execute-build-plan / ${{ github.job }} (${{ inputs.project-name }})"
+        PARAMS="?per_page=100"
+        SELECT_URL=".jobs | map(select(.name == \"${JOB_NAME}\")) | .[0].html_url"
+
+        set -o pipefail
+
+        outFile="gh.out"
+        buildURL=""
+        for i in $(seq 1 10) ;do
+          if gh api "${GITHUB_API}${PARAMS}" --paginate --jq "${SELECT_URL}" 2>&1 | tee $outFile; then 
+            buildURL="$(cat $outFile | xargs)"
+            break
+          elif grep -q 'API rate limit exceeded' "$outFile"; then
+            echo "GitHub API rate limit exceeded, skip resolving build URL"
+            break
+          elif grep -q 'Server Error (HTTP 502)' "$outFile"; then
+            echo "Server error when resolving build URL, retry with backoff"
+            sleep 5
+          else 
+            echo "Unknown error when resolving build URL:"
+            cat $outFile
+            break
+          fi
+        done  
+
+        echo "Build URL: $buildURL"
+        echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
+
+    - name: Index results
+      uses: addnab/docker-run-action@v3
+      if: steps.check-history.outputs.can-skip-build != 'true'
+      with:
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.3"
+        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
+        run: |
+          ConfigFile="/opencb/.github/workflows/buildConfig.json"
+          config () { 
+            path=".\"${{ inputs.project-name }}\"$@" 
+            jq -c -r "$path" $ConfigFile 
+          }
+
           # Remove ASCII coloring from the indexed logs
           cat build-logs.txt | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" > build-logs-uncolored.txt 
 
@@ -157,18 +177,13 @@ runs:
           if [ $? != 0 ]; then 
             echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
           fi
-          
-          # Store results
-          mv build-logs.txt /opencb/
-          mv build-status.txt /opencb/
-          mv build-summary.txt /opencb
 
     - name: Check results
       shell: bash
       if: steps.check-history.outputs.can-skip-build != 'true'
       run: |
         # Set the result of the build
-        if [[ "$(cat build-status.txt)" == "success" ]]; then 
+        if [[ "${{ steps.build-project.outputs.build-status }}" == "success" ]]; then 
           echo "Build successful"
         else 
           echo "Build failure! Check logs for details"
