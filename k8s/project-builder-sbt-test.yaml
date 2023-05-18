@@ -18,12 +18,12 @@ spec:
             - |
               (/build/build-revision.sh \
                 https://github.com/typelevel/shapeless-3.git \
-                "v3.0.4" \
-                3.1.0 \
+                "v3.3.0" \
+                3.2.2 \
                 "" \
                 "org.typelevel%shapeless3-deriving org.typelevel%shapeless3-test org.typelevel%shapeless3-typeable dummy.org%dummy-project" \
                 https://mvn-repo:8081/maven2/test \
-                1.5.5 \
+                1.8.0 \
                 '{"sbt": {"commands": ["show crossScalaVersions", "show scalaVersion", "show scalacOptions"] }, "projects": {"exclude": ["dummy.org%dummy-.*"], "overrides": {"shapeless3-deriving": {"tests": "compile-only"}, "shapeless3-typeable": {"tests": "disabled"}} } }' \
                 "" \
                 "" \
