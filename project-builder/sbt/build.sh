@@ -77,13 +77,13 @@ function runSbt() {
   tq='"""'
   sbt ${sbtSettings[@]} \
     "setCrossScalaVersions $scalaVersion" \
+    "$setScalaVersionCmd -v" \
     "removeScalacOptions -deprecation -feature -Xfatal-warnings -Werror ${disabledScalacOption}" \
     "appendScalacOptions ${extraScalacOptions}" \
-    "$setScalaVersionCmd -v" \
     "set every credentials := Nil" \
-    "$customCommands" \
     "$setVersionCmd" \
     "$enableMigrationModeCmd $sourceVersionToUseForMigration" \
+    "$customCommands" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
 }
