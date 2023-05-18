@@ -30,6 +30,7 @@ jobs:
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3
+      - uses: coursier/cache-action@v6.3
       - name: Install coursier
         uses: coursier/setup-action@v1
         with:

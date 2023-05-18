@@ -26,6 +26,7 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - uses: coursier/cache-action@v6.3
     - uses: coursier/setup-action@v1
       with:
         apps: cs
