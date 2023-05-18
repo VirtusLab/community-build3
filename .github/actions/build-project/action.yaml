@@ -119,7 +119,7 @@ runs:
           mv build-status.txt /opencb/
           mv build-summary.txt /opencb/
 
-    - name: Check status status
+    - name: Check status
       id: check-status
       shell: bash
       if: steps.check-history.outputs.can-skip-build != 'true'

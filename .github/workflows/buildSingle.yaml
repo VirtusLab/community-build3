@@ -48,7 +48,8 @@ jobs:
           repository-url: ${{ inputs.repository-url }}
           repository-branch: ${{ inputs.repository-branch }}
 
-  build-project:
+  # This name is required to ensure we can get the build-url.
+  execute-build-plan:
     runs-on: ubuntu-22.04
     needs: [setup-build]
     continue-on-error: false
