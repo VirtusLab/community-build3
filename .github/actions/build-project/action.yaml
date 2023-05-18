@@ -202,7 +202,7 @@ runs:
       if: steps.check-history.outputs.can-skip-build != 'true'
       run: |
         # Set the result of the build
-        if [[ "${{ steps.check-status.outputs.status }}" == "success" ]]; then 
+        if [[ "${{ steps.check-status.outputs.build-status }}" == "success" ]]; then 
           echo "Build successful"
         else 
           echo "Build failure! Check logs for details"
