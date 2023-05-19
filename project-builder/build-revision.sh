@@ -46,6 +46,8 @@ elif [ -f "repo/build.sbt" ]; then
 else
   echo "Not found sbt or mill build files, assuming scala-cli project"
   ls -l repo/
+  scala-cli clean $scriptDir/scala-cli/
+  scala-cli clean repo
   scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig"
   exit 1
 fi

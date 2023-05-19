@@ -22,7 +22,7 @@ import os.CommandResult
   import evaluator.{eval, evalAsDependencyOf, evalWhen}
 
   val compileResult = eval[Unit](cmd("compile"))
-  val docResult = evalAsDependencyOf(compileResult)("doc")
+  val docResult = evalAsDependencyOf(compileResult)("doc", "--force")
   val testsCompileResult =
     evalWhen[Unit](config.tests != TestingMode.Disabled, compileResult)(
       cmd("compile", "--test")
@@ -117,6 +117,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String)
     val proc = os
       .proc(
         "scala-cli",
+        "--power",
         task.command,
         repositoryDir,
         s"--scala-version=${scalaVersion}"
