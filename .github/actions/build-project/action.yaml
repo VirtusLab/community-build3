@@ -23,6 +23,8 @@ inputs:
   elastic-password:
     description: "Secret with auth token to elasticsearch"
     required: true
+  github-key:
+    description: "Secret with GitHub SSH eky required to clone repositories/submodules using ssh
   workflow-name:
     description: "Name of the calling workflow, used to resolve build URL. Leave empty to use default (execute-build-plan / {{github.job}} (<project-name>))"
     default: ""
@@ -76,12 +78,17 @@ runs:
         echo "Can skip build: $canSkip"
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
 
+    - name: Prepare SSH keys
+      shell: bash
+      run: |
+        echo "${{ inputs.github-key }}" > ${{ github.workspace }}/github_rsa
+
     - name: Build project
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.3"
-        options: -v ${{ github.workspace }}:/opencb/
+        options: -v ${{ github.workspace }}:/opencb/ -v ${{ github.workspace }}/github_rsa:/root/.ssh/id_rsa:ro
         run: |
           DefaultConfig='{"memoryRequestMb":4096}'
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
