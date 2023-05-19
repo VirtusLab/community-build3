@@ -246,8 +246,8 @@
   "7mind/izumi":{
     "project":"7mind/izumi",
     "repoUrl":"https://github.com/7mind/izumi.git",
-    "revision":"v1.1.0-M21",
-    "version":"1.1.0-M21",
+    "revision":"v1.1.0-M22",
+    "version":"1.1.0-M22",
     "targets":"io.7mind.izumi%distage-framework io.7mind.izumi%distage-extension-plugins io.7mind.izumi%distage-testkit-core io.7mind.izumi%fundamentals-functional io.7mind.izumi%fundamentals-platform io.7mind.izumi%distage-framework-docker io.7mind.izumi%distage-framework-api io.7mind.izumi%fundamentals-collections io.7mind.izumi%logstage-core io.7mind.izumi%distage-core-proxy-bytebuddy io.7mind.izumi%distage-extension-config io.7mind.izumi%fundamentals-reflection io.7mind.izumi%fundamentals-literals io.7mind.izumi%fundamentals-language io.7mind.izumi%distage-extension-logstage io.7mind.izumi%distage-core-api io.7mind.izumi%fundamentals-bio io.7mind.izumi%logstage-adapter-slf4j io.7mind.izumi%logstage-rendering-circe io.7mind.izumi%fundamentals-json-circe io.7mind.izumi%fundamentals-orphans io.7mind.izumi%distage-testkit-scalatest io.7mind.izumi%distage-core io.7mind.izumi%logstage-sink-slf4j",
     "config":{
       "projects":{
@@ -305,8 +305,8 @@
   "ahjohannessen/sec":{
     "project":"ahjohannessen/sec",
     "repoUrl":"https://github.com/ahjohannessen/sec.git",
-    "revision":"v0.25.6",
-    "version":"0.25.6",
+    "revision":"v0.26.0",
+    "version":"0.26.0",
     "targets":"io.github.ahjohannessen%sec-core io.github.ahjohannessen%sec-fs2 io.github.ahjohannessen%sec-fs2-client io.github.ahjohannessen%sec-tsc",
     "config":{
       "projects":{
@@ -1009,13 +1009,6 @@
       ]
     }
   },
-  "andimiller/hedgehogs":{
-    "project":"andimiller/hedgehogs",
-    "repoUrl":"https://github.com/andimiller/hedgehogs.git",
-    "revision":"0.2.0",
-    "version":"0.2.0",
-    "targets":"net.andimiller%hedgehogs-circe net.andimiller%hedgehogs-core"
-  },
   "andreamarcolin/oidc4s":{
     "project":"andreamarcolin/oidc4s",
     "repoUrl":"https://github.com/andreamarcolin/oidc4s.git",
@@ -1124,44 +1117,6 @@
       ]
     }
   },
-  "aoiroaoino/nanolens":{
-    "project":"aoiroaoino/nanolens",
-    "repoUrl":"https://github.com/aoiroaoino/nanolens.git",
-    "revision":"v0.1.2",
-    "version":"0.1.2",
-    "targets":"dev.aoiroaoino%nanolens",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "apimorphism/telegramium":{
     "project":"apimorphism/telegramium",
     "repoUrl":"https://github.com/apimorphism/telegramium.git",
@@ -1207,8 +1162,8 @@
   "arainko/ducktape":{
     "project":"arainko/ducktape",
     "repoUrl":"https://github.com/arainko/ducktape.git",
-    "revision":"v0.1.7",
-    "version":"0.1.7",
+    "revision":"v0.1.8",
+    "version":"0.1.8",
     "targets":"io.github.arainko%ducktape",
     "config":{
       "projects":{
@@ -2431,13 +2386,6 @@
       ]
     }
   },
-  "besselstudio/coingecko":{
-    "project":"besselstudio/coingecko",
-    "repoUrl":"https://github.com/besselstudio/coingecko.git",
-    "revision":"v3.1.0",
-    "version":"3.1.0",
-    "targets":"com.besselstudio%coingecko"
-  },
   "bilal-fazlani/akka-http-jwt-auth":{
     "project":"bilal-fazlani/akka-http-jwt-auth",
     "repoUrl":"https://github.com/bilal-fazlani/akka-http-jwt-auth.git",
@@ -3119,6 +3067,48 @@
       ]
     }
   },
+  "cequence-io/pinecone-scala":{
+    "project":"cequence-io/pinecone-scala",
+    "repoUrl":"https://github.com/cequence-io/pinecone-scala.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"io.cequence%pinecone-scala-client io.cequence%pinecone-scala-core",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.2.2\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "changvvb/scala-protobuf-java":{
     "project":"changvvb/scala-protobuf-java",
     "repoUrl":"https://github.com/changvvb/scala-protobuf-java.git",
@@ -3206,8 +3196,8 @@
   "cheleb/zio-pravega":{
     "project":"cheleb/zio-pravega",
     "repoUrl":"https://github.com/cheleb/zio-pravega.git",
-    "revision":"v0.5.1",
-    "version":"0.5.1",
+    "revision":"v0.6.0",
+    "version":"0.6.0",
     "targets":"dev.cheleb%zio-pravega",
     "config":{
       "projects":{
@@ -3531,7 +3521,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "memoryRequestMb":8192,
       "sourcePatches":[
         
@@ -4302,44 +4292,6 @@
     "revision":"v0.1.0",
     "version":"0.1.0",
     "targets":"com.github.cornerman%scala-cuid",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "cornerman/simple-scalajs-requests":{
-    "project":"cornerman/simple-scalajs-requests",
-    "repoUrl":"https://github.com/cornerman/simple-scalajs-requests.git",
-    "revision":"v0.1.0",
-    "version":"0.1.0",
-    "targets":"com.github.cornerman%simple-scalajs-requests",
     "config":{
       "projects":{
         "exclude":[
@@ -5602,7 +5554,7 @@
     "project":"davenverse/googleapis-http4s",
     "repoUrl":"https://github.com/davenverse/googleapis-http4s.git",
     "revision":"",
-    "version":"0.6.0+0.0.5",
+    "version":"3.23.1+0.0.5",
     "targets":"",
     "config":{
       "projects":{
@@ -5940,44 +5892,6 @@
       ]
     }
   },
-  "davenverse/publicsuffix":{
-    "project":"davenverse/publicsuffix",
-    "repoUrl":"https://github.com/davenverse/publicsuffix.git",
-    "revision":"v0.0.1",
-    "version":"0.0.1",
-    "targets":"io.chrisdavenport%publicsuffix io.chrisdavenport%publicsuffix-retrieval io.chrisdavenport%publicsuffix-retrieval-client",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "davenverse/rediculous":{
     "project":"davenverse/rediculous",
     "repoUrl":"https://github.com/davenverse/rediculous.git",
@@ -6258,8 +6172,8 @@
   "devlaam/leucine":{
     "project":"devlaam/leucine",
     "repoUrl":"https://github.com/devlaam/leucine.git",
-    "revision":"v0.4.0",
-    "version":"0.4.0",
+    "revision":"v0.4.1",
+    "version":"0.4.1",
     "targets":"com.sense2act%leucine",
     "config":{
       "projects":{
@@ -6376,8 +6290,8 @@
   "disneystreaming/alloy":{
     "project":"disneystreaming/alloy",
     "repoUrl":"https://github.com/disneystreaming/alloy.git",
-    "revision":"v0.1.20",
-    "version":"0.1.20",
+    "revision":"v0.1.21",
+    "version":"0.1.21",
     "targets":"com.disneystreaming.alloy%alloy-openapi",
     "config":{
       "projects":{
@@ -6534,44 +6448,6 @@
         ]
       },
       "tests":"compile-only",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "dragonfly-ai/cliviz":{
-    "project":"dragonfly-ai/cliviz",
-    "repoUrl":"https://github.com/dragonfly-ai/cliviz.git",
-    "revision":"v0.1",
-    "version":"0.1",
-    "targets":"ai.dragonfly%cliviz",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
       "memoryRequestMb":2048,
       "sourcePatches":[
         
@@ -7466,8 +7342,8 @@
   "endpoints4s/endpoints4s":{
     "project":"endpoints4s/endpoints4s",
     "repoUrl":"https://github.com/endpoints4s/endpoints4s.git",
-    "revision":"v1.9.0",
-    "version":"1.9.0",
+    "revision":"v1.10.0",
+    "version":"1.10.0",
     "targets":"org.endpoints4s%json-schema-generic org.endpoints4s%algebra org.endpoints4s%algebra-json-schema org.endpoints4s%json-schema-playjson",
     "config":{
       "projects":{
@@ -7749,8 +7625,8 @@
   "etspaceman/kinesis4cats":{
     "project":"etspaceman/kinesis4cats",
     "repoUrl":"https://github.com/etspaceman/kinesis4cats.git",
-    "revision":"v0.0.15",
-    "version":"0.0.15",
+    "revision":"v0.0.18",
+    "version":"0.0.18",
     "targets":"io.github.etspaceman%kinesis4cats-compat io.github.etspaceman%kinesis4cats-smithy4s-client-logging-circe io.github.etspaceman%kinesis4cats-smithy4s-client-localstack io.github.etspaceman%kinesis4cats-shared-circe io.github.etspaceman%kinesis4cats-kinesis-client io.github.etspaceman%kinesis4cats-kcl io.github.etspaceman%kinesis4cats-kpl io.github.etspaceman%kinesis4cats-aws-v2-localstack io.github.etspaceman%kinesis4cats-shared-localstack io.github.etspaceman%kinesis4cats-shared-ciris io.github.etspaceman%kinesis4cats-kcl-logging-circe io.github.etspaceman%kinesis4cats-kcl-ciris io.github.etspaceman%kinesis4cats-kcl-http4s io.github.etspaceman%kinesis4cats-kcl-localstack io.github.etspaceman%kinesis4cats-kinesis-client-logging-circe io.github.etspaceman%kinesis4cats-kpl-logging-circe io.github.etspaceman%kinesis4cats-smithy4s-client io.github.etspaceman%kinesis4cats-kpl-localstack io.github.etspaceman%kinesis4cats-aws-v1-localstack io.github.etspaceman%kinesis4cats-kinesis-client-localstack io.github.etspaceman%kinesis4cats-shared io.github.etspaceman%kinesis4cats-kpl-ciris",
     "config":{
       "projects":{
@@ -7902,6 +7778,44 @@
       ]
     }
   },
+  "fabiopinheiro/scala-did":{
+    "project":"fabiopinheiro/scala-did",
+    "repoUrl":"https://github.com/fabiopinheiro/scala-did.git",
+    "revision":"v0.1.0-M2",
+    "version":"0.1.0-M2",
+    "targets":"app.fmgp%did app.fmgp%did-imp app.fmgp%did-method-peer app.fmgp%multiformats",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":5120,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "failurewall/failurewall":{
     "project":"failurewall/failurewall",
     "repoUrl":"https://github.com/failurewall/failurewall.git",
@@ -7943,8 +7857,8 @@
   "fasterxml/jackson-module-scala":{
     "project":"fasterxml/jackson-module-scala",
     "repoUrl":"https://github.com/fasterxml/jackson-module-scala.git",
-    "revision":"v2.14.3",
-    "version":"2.14.3",
+    "revision":"v2.15.1",
+    "version":"2.15.1",
     "targets":"com.fasterxml.jackson.module%jackson-module-scala",
     "config":{
       "projects":{
@@ -8373,6 +8287,44 @@
     "version":"3.0.0",
     "targets":"info.fingo%spata"
   },
+  "flink-extended/flink-scala-api":{
+    "project":"flink-extended/flink-scala-api",
+    "repoUrl":"https://github.com/flink-extended/flink-scala-api.git",
+    "revision":"v1.16.1.2",
+    "version":"1.16.1.2",
+    "targets":"org.flinkextended%flink-scala-api",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "folone/poi.scala":{
     "project":"folone/poi.scala",
     "repoUrl":"https://github.com/folone/poi.scala.git",
@@ -8553,8 +8505,8 @@
   "fs2-blobstore/fs2-blobstore":{
     "project":"fs2-blobstore/fs2-blobstore",
     "repoUrl":"https://github.com/fs2-blobstore/fs2-blobstore.git",
-    "revision":"v0.8.7",
-    "version":"0.8.7",
+    "revision":"v0.9.8",
+    "version":"0.9.8",
     "targets":"com.github.fs2-blobstore%s3 com.github.fs2-blobstore%gcs com.github.fs2-blobstore%url com.github.fs2-blobstore%azure com.github.fs2-blobstore%sftp com.github.fs2-blobstore%box com.github.fs2-blobstore%core",
     "config":{
       "projects":{
@@ -9206,8 +9158,8 @@
   "gemini-hlsw/crystal":{
     "project":"gemini-hlsw/crystal",
     "repoUrl":"https://github.com/gemini-hlsw/crystal.git",
-    "revision":"v0.33.11",
-    "version":"0.33.11",
+    "revision":"v0.33.12",
+    "version":"0.33.12",
     "targets":"edu.gemini%crystal",
     "config":{
       "projects":{
@@ -9324,8 +9276,8 @@
   "gemini-hlsw/lucuma-graphql-routes":{
     "project":"gemini-hlsw/lucuma-graphql-routes",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-graphql-routes.git",
-    "revision":"v0.6.1",
-    "version":"0.6.1",
+    "revision":"v0.6.4",
+    "version":"0.6.4",
     "targets":"edu.gemini%lucuma-graphql-routes-core edu.gemini%lucuma-graphql-routes-grackle edu.gemini%lucuma-graphql-routes-sangria",
     "config":{
       "projects":{
@@ -9956,6 +9908,48 @@
       ]
     }
   },
+  "greenfossil/data-mapping":{
+    "project":"greenfossil/data-mapping",
+    "repoUrl":"https://github.com/greenfossil/data-mapping.git",
+    "revision":"v1.0.2",
+    "version":"1.0.2",
+    "targets":"com.greenfossil%data-mapping",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.2.2\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "greenfossil/thorium":{
     "project":"greenfossil/thorium",
     "repoUrl":"https://github.com/greenfossil/thorium.git",
@@ -10074,6 +10068,48 @@
       ]
     }
   },
+  "guardian/pa-football-client":{
+    "project":"guardian/pa-football-client",
+    "repoUrl":"https://github.com/guardian/pa-football-client.git",
+    "revision":"v7.0.7",
+    "version":"7.0.7",
+    "targets":"com.gu%pa-client",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala_3: String = \"3.2.2\"",
+          "replaceWith":"val scala_3: String = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "guidoschmidt17/zio-pgcopy":{
     "project":"guidoschmidt17/zio-pgcopy",
     "repoUrl":"https://github.com/guidoschmidt17/zio-pgcopy.git",
@@ -10160,6 +10196,48 @@
       "memoryRequestMb":2048,
       "sourcePatches":[
         
+      ]
+    }
+  },
+  "hagay3/skuber":{
+    "project":"hagay3/skuber",
+    "repoUrl":"https://github.com/hagay3/skuber.git",
+    "revision":"v3.0.6",
+    "version":"3.0.6",
+    "targets":"io.github.hagay3%skuber io.github.hagay3%skuber-examples",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":8192,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.2.0\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
       ]
     }
   },
@@ -12958,13 +13036,6 @@
     "version":"1.0.1",
     "targets":"io.github.jkobejs%zio-cron io.github.jkobejs%zio1-cron"
   },
-  "jkugiya/aws-v4-signer-scala":{
-    "project":"jkugiya/aws-v4-signer-scala",
-    "repoUrl":"https://github.com/jkugiya/aws-v4-signer-scala.git",
-    "revision":"0.14",
-    "version":"0.14",
-    "targets":"com.github.jkugiya%aws-v4-signer-scala"
-  },
   "jkugiya/ulid-scala":{
     "project":"jkugiya/ulid-scala",
     "repoUrl":"https://github.com/jkugiya/ulid-scala.git",
@@ -13181,8 +13252,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v1.1.1715",
-    "version":"1.1.1715",
+    "revision":"v1.1.1723",
+    "version":"1.1.1723",
     "targets":"io.joern%c2cpg io.joern%x2cpg io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -13528,8 +13599,8 @@
   "jwt-scala/jwt-scala":{
     "project":"jwt-scala/jwt-scala",
     "repoUrl":"https://github.com/jwt-scala/jwt-scala.git",
-    "revision":"v9.2.0",
-    "version":"9.2.0",
+    "revision":"v9.3.0",
+    "version":"9.3.0",
     "targets":"com.github.jwt-scala%jwt-json4s-jackson com.github.jwt-scala%jwt-circe com.github.jwt-scala%jwt-argonaut com.github.jwt-scala%jwt-zio-json com.github.jwt-scala%jwt-json4s-native com.github.jwt-scala%jwt-core com.github.jwt-scala%jwt-upickle com.github.jwt-scala%jwt-json-common com.github.jwt-scala%jwt-json4s-common",
     "config":{
       "projects":{
@@ -13604,8 +13675,8 @@
   "kamon-io/kamon":{
     "project":"kamon-io/kamon",
     "repoUrl":"https://github.com/kamon-io/kamon.git",
-    "revision":"v2.6.0",
-    "version":"2.6.0",
+    "revision":"v2.6.1",
+    "version":"2.6.1",
     "targets":"io.kamon%kamon-prometheus io.kamon%kamon-core io.kamon%kamon-testkit io.kamon%kamon-system-metrics io.kamon%kamon-annotation io.kamon%kamon-opentelemetry io.kamon%kamon-scala-future io.kamon%kamon-newrelic io.kamon%kamon-graphite io.kamon%kamon-apm-reporter io.kamon%kamon-caffeine io.kamon%kamon-kafka io.kamon%kamon-zipkin io.kamon%kamon-status-page io.kamon%kamon-executors io.kamon%kamon-cats-io-3 io.kamon%kamon-influxdb io.kamon%kamon-instrumentation-common io.kamon%kamon-redis io.kamon%kamon-datadog io.kamon%kamon-statsd io.kamon%kamon-jaeger",
     "config":{
       "projects":{
@@ -14053,9 +14124,9 @@
   "kitlangton/neotype":{
     "project":"kitlangton/neotype",
     "repoUrl":"https://github.com/kitlangton/neotype.git",
-    "revision":"v0.0.8",
-    "version":"0.0.8",
-    "targets":"io.github.kitlangton%neotype-zio-json io.github.kitlangton%neotype-zio-config io.github.kitlangton%neotype-circe io.github.kitlangton%neotype-tapir io.github.kitlangton%neotype io.github.kitlangton%neotype-zio io.github.kitlangton%neotype-zio-quill"
+    "revision":"v0.0.9",
+    "version":"0.0.9",
+    "targets":"io.github.kitlangton%neotype-zio-json io.github.kitlangton%neotype-zio-config io.github.kitlangton%neotype-zio-schema io.github.kitlangton%neotype-circe io.github.kitlangton%neotype-tapir io.github.kitlangton%neotype io.github.kitlangton%neotype-zio io.github.kitlangton%neotype-zio-quill"
   },
   "kitlangton/quotidian":{
     "project":"kitlangton/quotidian",
@@ -14400,44 +14471,6 @@
     "revision":"v0.0.2",
     "version":"0.0.2",
     "targets":"ch.epfl.tyqu%tyqu"
-  },
-  "kzmake/uuid7s":{
-    "project":"kzmake/uuid7s",
-    "repoUrl":"https://github.com/kzmake/uuid7s.git",
-    "revision":"v0.1.3",
-    "version":"0.1.3",
-    "targets":"io.github.kzmake%uuid7s",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
   },
   "lambdaworks/scountries":{
     "project":"lambdaworks/scountries",
@@ -14812,8 +14845,8 @@
   "lhns/fs2-compress":{
     "project":"lhns/fs2-compress",
     "repoUrl":"https://github.com/lhns/fs2-compress.git",
-    "revision":"0.4.1",
-    "version":"0.4.1",
+    "revision":"0.5.0",
+    "version":"0.5.0",
     "targets":"de.lhns%fs2-compress-bzip2 de.lhns%fs2-compress de.lhns%fs2-compress-zstd de.lhns%fs2-compress-tar de.lhns%fs2-compress-brotli de.lhns%fs2-compress-zip de.lhns%fs2-compress-gzip",
     "config":{
       "projects":{
@@ -15037,44 +15070,6 @@
       ]
     }
   },
-  "lhns/scala-commandline":{
-    "project":"lhns/scala-commandline",
-    "repoUrl":"https://github.com/lhns/scala-commandline.git",
-    "revision":"0.4.0",
-    "version":"0.4.0",
-    "targets":"de.lhns%scala-commandline",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "lhns/scala-edifact":{
     "project":"lhns/scala-edifact",
     "repoUrl":"https://github.com/lhns/scala-edifact.git",
@@ -15107,6 +15102,127 @@
         ]
       },
       "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "lichess-org/lila":{
+    "project":"lichess-org/lila",
+    "repoUrl":"https://github.com/lichess-org/lila.git",
+    "revision":"",
+    "version":"HEAD",
+    "targets":"*%*",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "lichess-org/lila-ws":{
+    "project":"lichess-org/lila-ws",
+    "repoUrl":"https://github.com/lichess-org/lila-ws.git",
+    "revision":"",
+    "version":"HEAD",
+    "targets":"*%*",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "lichess-org/playframework-lila":{
+    "project":"lichess-org/playframework-lila",
+    "repoUrl":"https://github.com/lichess-org/playframework-lila.git",
+    "revision":"",
+    "version":"HEAD",
+    "targets":"*%*"
+  },
+  "lichess-org/scalachess":{
+    "project":"lichess-org/scalachess",
+    "repoUrl":"https://github.com/lichess-org/scalachess.git",
+    "revision":"",
+    "version":"HEAD",
+    "targets":"*%*",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
       "memoryRequestMb":2048,
       "sourcePatches":[
         
@@ -15648,57 +15764,12 @@
     "version":"4.0.0",
     "targets":"com.github.losizm%little-config"
   },
-  "losizm/little-io":{
-    "project":"losizm/little-io",
-    "repoUrl":"https://github.com/losizm/little-io.git",
-    "revision":"v9.0.0",
-    "version":"9.0.0",
-    "targets":"com.github.losizm%little-io"
-  },
   "losizm/little-json":{
     "project":"losizm/little-json",
     "repoUrl":"https://github.com/losizm/little-json.git",
     "revision":"v9.0.0",
     "version":"9.0.0",
     "targets":"com.github.losizm%little-json"
-  },
-  "losizm/little-sql":{
-    "project":"losizm/little-sql",
-    "repoUrl":"https://github.com/losizm/little-sql.git",
-    "revision":"v8.0.0",
-    "version":"8.0.0",
-    "targets":"com.github.losizm%little-sql",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
   },
   "losizm/little-time":{
     "project":"losizm/little-time",
@@ -15835,6 +15906,13 @@
         }
       ]
     }
+  },
+  "makiftutuncu/effect":{
+    "project":"makiftutuncu/effect",
+    "repoUrl":"https://github.com/makiftutuncu/effect.git",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
+    "targets":"dev.akif%effect-core"
   },
   "makingthematrix/signals3":{
     "project":"makingthematrix/signals3",
@@ -16630,12 +16708,12 @@
       ]
     }
   },
-  "mpollmeier/scala-repl-pp":{
-    "project":"mpollmeier/scala-repl-pp",
-    "repoUrl":"https://github.com/mpollmeier/scala-repl-pp.git",
-    "revision":"v0.1.18",
-    "version":"0.1.18",
-    "targets":"com.michaelpollmeier%scala-repl-pp com.michaelpollmeier%scala-repl-pp-all com.michaelpollmeier%scala-repl-pp-server",
+  "monix/monix-testing":{
+    "project":"monix/monix-testing",
+    "repoUrl":"https://github.com/monix/monix-testing.git",
+    "revision":"v0.4.0",
+    "version":"0.4.0",
+    "targets":"io.monix%monix-testing-minitest io.monix%monix-testing-scalatest io.monix%monix-testing-utest",
     "config":{
       "projects":{
         "exclude":[
@@ -16647,6 +16725,44 @@
       },
       "java":{
         "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "mpollmeier/scala-repl-pp":{
+    "project":"mpollmeier/scala-repl-pp",
+    "repoUrl":"https://github.com/mpollmeier/scala-repl-pp.git",
+    "revision":"v0.1.22",
+    "version":"0.1.22",
+    "targets":"com.michaelpollmeier%scala-repl-pp com.michaelpollmeier%scala-repl-pp-all com.michaelpollmeier%scala-repl-pp-server",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"19"
       },
       "sbt":{
         "commands":[
@@ -18067,8 +18183,8 @@
   "outr/scribe":{
     "project":"outr/scribe",
     "repoUrl":"https://github.com/outr/scribe.git",
-    "revision":"3.11.1",
-    "version":"3.11.1",
+    "revision":"3.11.3",
+    "version":"3.11.3",
     "targets":"com.outr%scribe-json-circe com.outr%scribe-logstash com.outr%scribe-slf4j com.outr%scribe-json-fabric com.outr%scribe-migration com.outr%scribe-slf4j2 com.outr%scribe-cats com.outr%scribe-slack com.outr%scribe-log4j com.outr%scribe-file com.outr%scribe-config com.outr%scribe-json com.outr%scribe",
     "config":{
       "projects":{
@@ -18109,8 +18225,8 @@
   "outr/spice":{
     "project":"outr/spice",
     "repoUrl":"https://github.com/outr/spice.git",
-    "revision":"0.0.29",
-    "version":"0.0.29",
+    "revision":"0.0.31",
+    "version":"0.0.31",
     "targets":"com.outr%spice-server-undertow com.outr%spice-core com.outr%spice-client com.outr%spice com.outr%spice-delta com.outr%spice-client-okhttp com.outr%spice-server",
     "config":{
       "projects":{
@@ -19938,7 +20054,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "memoryRequestMb":2048,
       "sourcePatches":[
         {
@@ -20119,48 +20235,6 @@
         {
           "path":"build.sbt",
           "pattern":"val Scala3      = \"3.0.1\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "pureharm/pureharm-json-circe":{
-    "project":"pureharm/pureharm-json-circe",
-    "repoUrl":"https://github.com/pureharm/pureharm-json-circe.git",
-    "revision":"v0.3.0-M1",
-    "version":"0.3.0-M1",
-    "targets":"com.busymachines%pureharm-json-circe",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3          = \"3.0.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -21317,8 +21391,8 @@
   "sangria-graphql/sangria":{
     "project":"sangria-graphql/sangria",
     "repoUrl":"https://github.com/sangria-graphql/sangria.git",
-    "revision":"v4.0.0-RC4",
-    "version":"4.0.0-RC4",
+    "revision":"v4.0.0-RC5",
+    "version":"4.0.0-RC5",
     "targets":"org.sangria-graphql%sangria-parser org.sangria-graphql%sangria-derivation org.sangria-graphql%sangria-ast org.sangria-graphql%sangria org.sangria-graphql%sangria-core org.sangria-graphql%sangria-cats-effect-experimental",
     "config":{
       "projects":{
@@ -22396,44 +22470,6 @@
       ]
     }
   },
-  "scala-works/scala-macros":{
-    "project":"scala-works/scala-macros",
-    "repoUrl":"https://github.com/scala-works/scala-macros.git",
-    "revision":"v0.0.3",
-    "version":"0.0.3",
-    "targets":"works.scala%macro-helpers",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "scala/scala-collection-compat":{
     "project":"scala/scala-collection-compat",
     "repoUrl":"https://github.com/scala/scala-collection-compat.git",
@@ -22690,8 +22726,8 @@
   "scalacenter/scala-debug-adapter":{
     "project":"scalacenter/scala-debug-adapter",
     "repoUrl":"https://github.com/scalacenter/scala-debug-adapter.git",
-    "revision":"v3.1.1",
-    "version":"3.1.1",
+    "revision":"v3.1.2",
+    "version":"3.1.2",
     "targets":"ch.epfl.scala%scala-debug-step-filter",
     "config":{
       "projects":{
@@ -22808,8 +22844,8 @@
   "scalacenter/tasty-query":{
     "project":"scalacenter/tasty-query",
     "repoUrl":"https://github.com/scalacenter/tasty-query.git",
-    "revision":"v0.7.8",
-    "version":"0.7.8",
+    "revision":"v0.7.9",
+    "version":"0.7.9",
     "targets":"ch.epfl.scala%tasty-query",
     "config":{
       "projects":{
@@ -23671,8 +23707,8 @@
   "scalatest/scalatest":{
     "project":"scalatest/scalatest",
     "repoUrl":"https://github.com/scalatest/scalatest.git",
-    "revision":"release-3.2.15",
-    "version":"3.2.15",
+    "revision":"release-3.2.16",
+    "version":"3.2.16",
     "targets":"org.scalatest%scalatest org.scalatest%scalatest-propspec org.scalatest%scalatest-shouldmatchers org.scalatest%scalatest-core org.scalatest%scalatest-funspec org.scalatest%scalatest-diagrams org.scalatest%scalatest-matchers-core org.scalatest%scalatest-refspec org.scalatest%scalatest-flatspec org.scalatest%scalatest-freespec org.scalatest%scalatest-featurespec org.scalatest%scalatest-funsuite org.scalatest%scalatest-mustmatchers org.scalatest%scalatest-wordspec",
     "config":{
       "projects":{
@@ -23712,9 +23748,9 @@
   "scalatest/scalatestplus-easymock":{
     "project":"scalatest/scalatestplus-easymock",
     "repoUrl":"https://github.com/scalatest/scalatestplus-easymock.git",
-    "revision":"release-3.2.15.0-for-easymock-4.3",
-    "version":"3.2.15.0",
-    "targets":"org.scalatestplus%easymock-4-3 org.scalatestplus%easymock-5-0 org.scalatestplus%easymock-5-1",
+    "revision":"release-3.2.16.0-for-easymock-5.1",
+    "version":"3.2.16.0",
+    "targets":"org.scalatestplus%easymock-5-1",
     "config":{
       "projects":{
         "exclude":[
@@ -23750,8 +23786,8 @@
   "scalatest/scalatestplus-junit":{
     "project":"scalatest/scalatestplus-junit",
     "repoUrl":"https://github.com/scalatest/scalatestplus-junit.git",
-    "revision":"release-3.2.15.0-for-junit-4.13",
-    "version":"3.2.15.0",
+    "revision":"release-3.2.16.0-for-junit-4.13",
+    "version":"3.2.16.0",
     "targets":"org.scalatestplus%junit-4-13",
     "config":{
       "projects":{
@@ -23788,9 +23824,9 @@
   "scalatest/scalatestplus-mockito":{
     "project":"scalatest/scalatestplus-mockito",
     "repoUrl":"https://github.com/scalatest/scalatestplus-mockito.git",
-    "revision":"release-3.2.15.0-for-mockito-4.6",
-    "version":"3.2.15.0",
-    "targets":"org.scalatestplus%mockito-4-6",
+    "revision":"release-3.2.16.0-for-mockito-4.11",
+    "version":"3.2.16.0",
+    "targets":"org.scalatestplus%mockito-4-11",
     "config":{
       "projects":{
         "exclude":[
@@ -23826,8 +23862,8 @@
   "scalatest/scalatestplus-scalacheck":{
     "project":"scalatest/scalatestplus-scalacheck",
     "repoUrl":"https://github.com/scalatest/scalatestplus-scalacheck.git",
-    "revision":"release-3.2.15.0-for-scalacheck-1.17",
-    "version":"3.2.15.0",
+    "revision":"release-3.2.16.0-for-scalacheck-1.17",
+    "version":"3.2.16.0",
     "targets":"org.scalatestplus%scalacheck-1-17",
     "config":{
       "projects":{
@@ -23864,9 +23900,9 @@
   "scalatest/scalatestplus-selenium":{
     "project":"scalatest/scalatestplus-selenium",
     "repoUrl":"https://github.com/scalatest/scalatestplus-selenium.git",
-    "revision":"release-3.2.15.0-for-selenium-4.7",
-    "version":"3.2.15.0",
-    "targets":"org.scalatestplus%selenium-4-7 org.scalatestplus%testng-7-5",
+    "revision":"release-3.2.16.0-for-selenium-4.9",
+    "version":"3.2.16.0",
+    "targets":"org.scalatestplus%selenium-4-9 org.scalatestplus%testng-7-5",
     "config":{
       "projects":{
         "exclude":[
@@ -25091,8 +25127,8 @@
   "shiftleftsecurity/codepropertygraph":{
     "project":"shiftleftsecurity/codepropertygraph",
     "repoUrl":"https://github.com/shiftleftsecurity/codepropertygraph.git",
-    "revision":"v1.3.600",
-    "version":"1.3.600",
+    "revision":"v1.3.603",
+    "version":"1.3.603",
     "targets":"io.shiftleft%schema2json io.shiftleft%codepropertygraph io.shiftleft%codepropertygraph-domain-classes io.shiftleft%codepropertygraph-schema io.shiftleft%codepropertygraph-protos",
     "config":{
       "projects":{
@@ -25104,7 +25140,7 @@
         }
       },
       "java":{
-        "version":"11"
+        "version":"19"
       },
       "sbt":{
         "commands":[
@@ -25167,9 +25203,9 @@
   "shiftleftsecurity/overflowdb":{
     "project":"shiftleftsecurity/overflowdb",
     "repoUrl":"https://github.com/shiftleftsecurity/overflowdb.git",
-    "revision":"v1.172",
-    "version":"1.172",
-    "targets":"io.shiftleft%overflowdb-formats io.shiftleft%overflowdb-traversal",
+    "revision":"v1.174",
+    "version":"1.174",
+    "targets":"io.shiftleft%overflowdb-core io.shiftleft%overflowdb-formats io.shiftleft%overflowdb-traversal",
     "config":{
       "projects":{
         "exclude":[
@@ -25180,7 +25216,7 @@
         }
       },
       "java":{
-        "version":"11"
+        "version":"19"
       },
       "sbt":{
         "commands":[
@@ -25205,8 +25241,8 @@
   "shiftleftsecurity/overflowdb-codegen":{
     "project":"shiftleftsecurity/overflowdb-codegen",
     "repoUrl":"https://github.com/shiftleftsecurity/overflowdb-codegen.git",
-    "revision":"v2.87",
-    "version":"2.87",
+    "revision":"v2.88",
+    "version":"2.88",
     "targets":"io.shiftleft%overflowdb-codegen",
     "config":{
       "projects":{
@@ -26348,8 +26384,8 @@
   "softwaremill/tapir":{
     "project":"softwaremill/tapir",
     "repoUrl":"https://github.com/softwaremill/tapir.git",
-    "revision":"v1.3.0",
-    "version":"1.3.0",
+    "revision":"v1.4.0",
+    "version":"1.4.0",
     "targets":"com.softwaremill.sttp.tapir%tapir-sttp-client com.softwaremill.sttp.tapir%tapir-redoc com.softwaremill.sttp.tapir%tapir-json-circe com.softwaremill.sttp.tapir%tapir-json-zio1 com.softwaremill.sttp.tapir%tapir-jsoniter-scala com.softwaremill.sttp.tapir%tapir-swagger-ui-bundle com.softwaremill.sttp.tapir%tapir-redoc-bundle com.softwaremill.sttp.tapir%tapir-aws-cdk com.softwaremill.sttp.tapir%tapir-cats com.softwaremill.sttp.tapir%tapir-http4s-server-zio1 com.softwaremill.sttp.tapir%tapir-aws-sam com.softwaremill.sttp.tapir%tapir-armeria-server-zio com.softwaremill.sttp.tapir%tapir-asyncapi-docs com.softwaremill.sttp.tapir%tapir-vertx-server-cats com.softwaremill.sttp.tapir%tapir-swagger-ui com.softwaremill.sttp.tapir%tapir-json-upickle com.softwaremill.sttp.tapir%tapir-netty-server com.softwaremill.sttp.tapir%tapir-armeria-server-zio1 com.softwaremill.sttp.tapir%tapir-server com.softwaremill.sttp.tapir%tapir-vertx-server com.softwaremill.sttp.tapir%tapir-http4s-server com.softwaremill.sttp.tapir%tapir-datadog-metrics com.softwaremill.sttp.tapir%tapir-zio1-http-server com.softwaremill.sttp.tapir%tapir-armeria-server-cats com.softwaremill.sttp.tapir%tapir-netty-server-cats com.softwaremill.sttp.tapir%tapir-netty-server-zio1 com.softwaremill.sttp.tapir%tapir-zio-prelude com.softwaremill.sttp.tapir%tapir-aws-lambda com.softwaremill.sttp.tapir%tapir-zio1 com.softwaremill.sttp.tapir%tapir-json-spray com.softwaremill.sttp.tapir%tapir-files com.softwaremill.sttp.tapir%tapir-vertx-server-zio com.softwaremill.sttp.tapir%tapir-zio-metrics com.softwaremill.sttp.tapir%tapir-core com.softwaremill.sttp.tapir%tapir-armeria-server com.softwaremill.sttp.tapir%tapir-zio com.softwaremill.sttp.tapir%tapir-http4s-server-zio com.softwaremill.sttp.tapir%tapir-prometheus-metrics com.softwaremill.sttp.tapir%tapir-zio-http-server com.softwaremill.sttp.tapir%tapir-enumeratum com.softwaremill.sttp.tapir%tapir-opentelemetry-metrics com.softwaremill.sttp.tapir%tapir-cats-effect com.softwaremill.sttp.tapir%tapir-server-tests com.softwaremill.sttp.tapir%tapir-vertx-server-zio1 com.softwaremill.sttp.tapir%tapir-openapi-docs com.softwaremill.sttp.tapir%tapir-apispec-docs com.softwaremill.sttp.tapir%tapir-netty-server-zio com.softwaremill.sttp.tapir%tapir-monix-newtype com.softwaremill.sttp.tapir%tapir-sttp-stub-server com.softwaremill.sttp.tapir%tapir-testing com.softwaremill.sttp.tapir%tapir-json-zio com.softwaremill.sttp.tapir%tapir-tests com.softwaremill.sttp.tapir%tapir-sttp-client-ws-zio1 com.softwaremill.sttp.tapir%tapir-client com.softwaremill.sttp.tapir%tapir-http4s-client com.softwaremill.sttp.tapir%tapir-refined",
     "config":{
       "projects":{
@@ -27620,8 +27656,8 @@
   "thatscalaguy/ulid4cats":{
     "project":"thatscalaguy/ulid4cats",
     "repoUrl":"https://github.com/thatscalaguy/ulid4cats.git",
-    "revision":"v1.3.0",
-    "version":"1.3.0",
+    "revision":"v1.3.1",
+    "version":"1.3.1",
     "targets":"de.thatscalaguy%ulid4cats",
     "config":{
       "projects":{
@@ -28873,48 +28909,6 @@
       ]
     }
   },
-  "trace4cats/trace4cats-jaeger-integration-test":{
-    "project":"trace4cats/trace4cats-jaeger-integration-test",
-    "repoUrl":"https://github.com/trace4cats/trace4cats-jaeger-integration-test.git",
-    "revision":"v0.14.0",
-    "version":"0.14.0",
-    "targets":"io.janstenpickle%trace4cats-jaeger-integration-test",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        {
-          "path":"project/Dependencies.scala",
-          "pattern":"val scala3 = \"3.1.3\"",
-          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "trace4cats/trace4cats-kafka":{
     "project":"trace4cats/trace4cats-kafka",
     "repoUrl":"https://github.com/trace4cats/trace4cats-kafka.git",
@@ -29044,8 +29038,8 @@
   "trace4cats/trace4cats-opentelemetry":{
     "project":"trace4cats/trace4cats-opentelemetry",
     "repoUrl":"https://github.com/trace4cats/trace4cats-opentelemetry.git",
-    "revision":"v0.14.0",
-    "version":"0.14.0",
+    "revision":"v0.14.1",
+    "version":"0.14.1",
     "targets":"io.janstenpickle%trace4cats-opentelemetry-common io.janstenpickle%trace4cats-opentelemetry-jaeger-exporter io.janstenpickle%trace4cats-opentelemetry-otlp-grpc-exporter io.janstenpickle%trace4cats-opentelemetry-otlp-http-exporter",
     "config":{
       "projects":{
@@ -30207,8 +30201,8 @@
   "typelevel/fs2-grpc":{
     "project":"typelevel/fs2-grpc",
     "repoUrl":"https://github.com/typelevel/fs2-grpc.git",
-    "revision":"v2.5.12",
-    "version":"2.5.12",
+    "revision":"v2.6.0",
+    "version":"2.6.0",
     "targets":"org.typelevel%fs2-grpc-codegen org.typelevel%fs2-grpc-runtime",
     "config":{
       "projects":{
@@ -31378,6 +31372,44 @@
       ]
     }
   },
+  "ulitol97/comet":{
+    "project":"ulitol97/comet",
+    "repoUrl":"https://github.com/ulitol97/comet.git",
+    "revision":"v0.1.7",
+    "version":"0.1.7",
+    "targets":"io.github.ulitol97%comet",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "unfiltered/unfiltered":{
     "project":"unfiltered/unfiltered",
     "repoUrl":"https://github.com/unfiltered/unfiltered.git",
@@ -32381,8 +32413,8 @@
   "wvlet/airframe":{
     "project":"wvlet/airframe",
     "repoUrl":"https://github.com/wvlet/airframe.git",
-    "revision":"v23.5.3",
-    "version":"23.5.3",
+    "revision":"v23.5.4",
+    "version":"23.5.4",
     "targets":"org.wvlet.airframe%airframe-http-recorder org.wvlet.airframe%airframe-config org.wvlet.airframe%airframe-jdbc org.wvlet.airframe%airframe-parquet org.wvlet.airframe%airframe-http org.wvlet.airframe%airframe-control org.wvlet.airframe%airframe-ulid org.wvlet.airframe%airframe-canvas org.wvlet.airframe%airframe-http-okhttp org.wvlet.airframe%airframe-http-grpc org.wvlet.airframe%airframe-codec org.wvlet.airframe%airframe-di-macros org.wvlet.airframe%airframe-http-netty org.wvlet.airframe%airframe-metrics org.wvlet.airframe%airframe-http-codegen org.wvlet.airframe%airframe-rx-html org.wvlet.airframe%airframe-jmx org.wvlet.airframe%airframe-log org.wvlet.airframe%airframe-json org.wvlet.airframe%airspec org.wvlet.airframe%airframe-sql org.wvlet.airframe%airframe-launcher org.wvlet.airframe%airframe-msgpack org.wvlet.airframe%airframe org.wvlet.airframe%airframe-rx org.wvlet.airframe%airframe-surface org.wvlet.airframe%airframe-fluentd",
     "config":{
       "projects":{
@@ -32428,7 +32460,7 @@
     "project":"wz7982/easysql-scala",
     "repoUrl":"https://github.com/wz7982/easysql-scala.git",
     "revision":"",
-    "version":"1.3.12",
+    "version":"1.3.13",
     "targets":"io.github.wz7982%core io.github.wz7982%jdbc"
   },
   "xebia-functional/fetch":{
@@ -33040,8 +33072,8 @@
   "zeal18/zio-mongodb":{
     "project":"zeal18/zio-mongodb",
     "repoUrl":"https://github.com/zeal18/zio-mongodb.git",
-    "revision":"v0.10.0",
-    "version":"0.10.0",
+    "revision":"v0.10.1",
+    "version":"0.10.1",
     "targets":"io.github.zeal18%zio-mongodb-bson io.github.zeal18%zio-mongodb-driver io.github.zeal18%zio-mongodb-testkit",
     "config":{
       "projects":{
@@ -33073,7 +33105,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3    = \"3.2.1\"",
+          "pattern":"val scala3    = \"3.2.2\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -33368,8 +33400,8 @@
   "zio/izumi-reflect":{
     "project":"zio/izumi-reflect",
     "repoUrl":"https://github.com/zio/izumi-reflect.git",
-    "revision":"v2.3.5",
-    "version":"2.3.5",
+    "revision":"v2.3.6",
+    "version":"2.3.6",
     "targets":"dev.zio%izumi-reflect dev.zio%izumi-reflect-thirdparty-boopickle-shaded",
     "config":{
       "projects":{
@@ -33996,8 +34028,8 @@
   "zio/zio-logging":{
     "project":"zio/zio-logging",
     "repoUrl":"https://github.com/zio/zio-logging.git",
-    "revision":"v2.1.12",
-    "version":"2.1.12",
+    "revision":"v2.1.13",
+    "version":"2.1.13",
     "targets":"dev.zio%zio-logging-slf4j2 dev.zio%zio-logging-slf4j2-bridge dev.zio%zio-logging-jpl dev.zio%zio-logging-slf4j-bridge dev.zio%zio-logging dev.zio%zio-logging-slf4j",
     "config":{
       "projects":{
