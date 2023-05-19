@@ -31,7 +31,7 @@ class FailedProjectException(msg: String)
     with NoStackTrace
 
 val communityBuildVersion =
-  sys.props.getOrElse("communitybuild.version", "v0.2.3")
+  sys.props.getOrElse("communitybuild.version", "v0.2.4")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl =
   s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
