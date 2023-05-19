@@ -79,5 +79,5 @@ ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlug
 cd $repoDir
 git lfs pull || true
 ## scala-debug adapter
+echo "StrictHostKeyChecking no" >> ~/.ssh/config
 (git submodule sync && git submodule update --init --recursive) || true
-
