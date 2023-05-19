@@ -61,8 +61,8 @@ jobs:
           lastStable=$(./scripts/lastVersionStable.sc)
 
           ./scripts/raport-regressions.scala $scalaVersion > raport-full.md
-          ./scripts/raport-regressions.scala $scalaVersion --compareWith $lastRC > raport-compare-$lastRC.md
-          ./scripts/raport-regressions.scala $scalaVersion --compareWith $lastStable > raport-compare-$lastStable.md
+          ./scripts/raport-regressions.scala $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
+          ./scripts/raport-regressions.scala $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
       - name: Upload raports
         uses: actions/upload-artifact@v3

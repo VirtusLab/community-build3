@@ -40,4 +40,9 @@ jobs:
         env:
           ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
           ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-        run: ./scripts/raport-regressions.scala ${{ inputs.scala-version }} --compareWith=${{ inputs.compare-with-scala-version }} --buildId=${{ inputs.build-id }} --compareWithBuildId=${{ inputs.compare-with-build-id }}
+        run: |
+          ./scripts/raport-regressions.scala \
+            ${{ inputs.scala-version }} \
+            --compareWith=${{ inputs.compare-with-scala-version }} \
+            --buildId=${{ inputs.build-id }} \
+            --compareWithBuildId=${{ inputs.compare-with-build-id }}
