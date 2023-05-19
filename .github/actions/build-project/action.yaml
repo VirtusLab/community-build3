@@ -24,7 +24,8 @@ inputs:
     description: "Secret with auth token to elasticsearch"
     required: true
   github-key:
-    description: "Secret with GitHub SSH eky required to clone repositories/submodules using ssh
+    description: "Secret with GitHub SSH eky required to clone repositories/submodules using ssh"
+    required: true
   workflow-name:
     description: "Name of the calling workflow, used to resolve build URL. Leave empty to use default (execute-build-plan / {{github.job}} (<project-name>))"
     default: ""
