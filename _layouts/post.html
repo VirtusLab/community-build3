@@ -3,9 +3,7 @@ layout: default
 ---
 <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
-  <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">{{ page.date | date: "%Y-%m-%d-%H:%M:%S" }}</h1>
-  </header>
+  <h1 class="page-heading">{{ page.title }} {{ page.date | date: "%Y-%m-%d" }}</h1>
 
   <div class="post-content e-content" itemprop="articleBody">
     {{ content }}
