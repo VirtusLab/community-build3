@@ -1,4 +1,3 @@
-// #!/usr/bin/env -S scala-cli shebang
 //> using scala "3"
 //> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.6.0"
 //> using lib "org.slf4j:slf4j-simple:2.0.7"
@@ -18,7 +17,6 @@ import org.apache.http.auth.*
 import scala.io.Source
 import scala.concurrent.*
 import scala.concurrent.duration.*
-// import scala.io.AnsiColor.*
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
 
@@ -28,7 +26,6 @@ val BuildSummariesIndex = "project-build-summary"
 val DefaultTimeout = 5.minutes
 val ElasticsearchHost = "scala3.westeurope.cloudapp.azure.com"
 val ElasticsearchUrl = s"https://$ElasticsearchHost/data/"
-// ./scripts/show-elastic-credentials.sh
 val ElasticsearchCredentials = new UsernamePasswordCredentials(
   sys.env.getOrElse("ES_USERNAME", "elastic"),
   sys.env.getOrElse("ES_PASSWORD", "changeme")
@@ -77,34 +74,43 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(opts: String*) = try {
   val scalaVersion = opts.toList.filterNot(_.startsWith("-")) match {
-    case Nil => None
+    case Nil            => None
     case version :: Nil => Some(version).filter(_.nonEmpty)
-    case multiple => sys.error("Expected a single argument <scalaVersion>")
+    case multiple       => sys.error("Expected a single argument <scalaVersion>")
   }
-   scalaVersion.foreach(v => Printer.println("Checking Scala: " + v))
+  scalaVersion.foreach(v => Printer.println("Checking Scala: " + v))
 
-  val checkBuildId = opts.collectFirst {
-    case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
-  }.filter(_.nonEmpty)
-   checkBuildId.foreach(v => Printer.println("Checking buildId: " + v))
+  val checkBuildId = opts
+    .collectFirst {
+      case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
+    }
+    .filter(_.nonEmpty)
+  checkBuildId.foreach(v => Printer.println("Checking buildId: " + v))
 
-  require(checkBuildId.orElse(scalaVersion).isDefined, "scalaVersion argument or --buildId argument required")
+  require(
+    checkBuildId.orElse(scalaVersion).isDefined,
+    "scalaVersion argument or --buildId argument required"
+  )
 
-  val compareWithBuildId = opts.collectFirst {
-    case opt if opt.contains("-compareWithBuildId=") =>
-      opt.dropWhile(_ != '=').tail
-  }.filter(_.nonEmpty)
-   compareWithBuildId.foreach(v => Printer.println("Comparing with buildId: " + v))
+  val compareWithBuildId = opts
+    .collectFirst {
+      case opt if opt.contains("-compareWithBuildId=") =>
+        opt.dropWhile(_ != '=').tail
+    }
+    .filter(_.nonEmpty)
+  compareWithBuildId.foreach(v => Printer.println("Comparing with buildId: " + v))
 
-  val compareWithScalaVersion = opts.collectFirst {
-    case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
-  }.filter(_.nonEmpty)
-   compareWithScalaVersion.foreach(v => Printer.println("Comparing Wtih Scala version: " + v))
+  val compareWithScalaVersion = opts
+    .collectFirst {
+      case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
+    }
+    .filter(_.nonEmpty)
+  compareWithScalaVersion.foreach(v => Printer.println("Comparing Wtih Scala version: " + v))
 
   printLine()
   Printer.println(
-     s"Reporting failed community build projects using Scala $scalaVersion "
-   )
+    s"Reporting failed community build projects using Scala $scalaVersion "
+  )
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
 
@@ -122,7 +128,7 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         )
           .map(_.project)
           .toSet
-      Printer.println(      s"Excluding ${ignoredProjects.size} project failing in $id")
+      Printer.println(s"Excluding ${ignoredProjects.size} project failing in $id")
       ignoredProjects
         .map(_.name)
         .groupBy(_.head)
@@ -135,9 +141,9 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
     }
   if reportedProjects.nonEmpty then
     val comparedVersion = scalaVersion.getOrElse("<comparing builds ids>")
-      reportCompilerRegressions(reportedProjects, comparedVersion)(
-        Reporter.Default(comparedVersion)
-      )
+    reportCompilerRegressions(reportedProjects, comparedVersion)(
+      Reporter.Default(comparedVersion)
+    )
   printLine()
 } finally esClient.close()
 
@@ -149,7 +155,7 @@ object Project {
   def apply(rawName: String): Project = new Project(rawName match
     case s"${org}/$repo"   => rawName
     case s"${org}_${repo}" => s"$org/$repo"
-    case invalid => sys.error(s"Invalid project name format: ${invalid}")
+    case invalid           => sys.error(s"Invalid project name format: ${invalid}")
   )
 }
 case class FailedProject(project: Project, version: String, buildURL: String)
@@ -177,7 +183,7 @@ def listFailedProjects(
     logFailed: Boolean = true
 ): Seq[FailedProject] =
   Printer.println(
-     s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
+    s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
   )
   val Limit = 2000
   val projectVersionsStatusAggregation =
@@ -249,7 +255,8 @@ def listFailedProjects(
           val name = label.padTo(8, " ").mkString
           val ver = projectVersions(project)
           Printer.println(
-            s"$color$name${Printer.RESET} failure in ${Printer.BOLD}${Printer.projectUrlString(project.name, ver, buildURL)}"
+            s"$color$name${Printer.RESET} failure in ${Printer.BOLD}${Printer
+              .projectUrlString(project.name, ver, buildURL)}"
           )
         val compilerFailure = summary.compilerFailure
         if scalaVersion.exists(hasNewerPassingVersion(_, project, lastFailedVersion)) then
@@ -290,10 +297,10 @@ def listFailedProjects(
           boolQuery()
             .must(
               Seq(termQuery("status", "failure"))
-              ++ Seq(
-                buildId.map(termQuery("buildId", _)),
-                scalaVersion.map(termQuery("scalaVersion", _))
-              ).flatten
+                ++ Seq(
+                  buildId.map(termQuery("buildId", _)),
+                  scalaVersion.map(termQuery("scalaVersion", _))
+                ).flatten
             )
         )
         .size(Limit)
