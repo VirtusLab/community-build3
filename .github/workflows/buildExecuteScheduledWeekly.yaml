@@ -74,13 +74,13 @@ jobs:
           lastRC="$(./scripts/lastVersionRC.sc)"
           lastStable=$(./scripts/lastVersionStable.sc)
 
-          ./scripts/raport-regressions.scala $scalaVersion > raport-full.md
-          ./scripts/raport-regressions.scala $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
-          ./scripts/raport-regressions.scala $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
+          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion > raport-full.md
+          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
+          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
           lastWeeklyVersionFile=./last-successfull-weekly-version
           lastWeeklyVersion=$(cat $lastWeeklyVersionFile) && \
-            ./scripts/raport-regressions.scala $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md || true
+            scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md || true
           echo "$scalaVersion" > $lastWeeklyVersionFile
 
       - name: Upload raports
