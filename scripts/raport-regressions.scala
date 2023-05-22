@@ -1,4 +1,4 @@
-#!/usr/bin/env -S scala-cli shebang
+// #!/usr/bin/env -S scala-cli shebang
 //> using scala "3"
 //> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.6.0"
 //> using lib "org.slf4j:slf4j-simple:2.0.7"
@@ -18,7 +18,7 @@ import org.apache.http.auth.*
 import scala.io.Source
 import scala.concurrent.*
 import scala.concurrent.duration.*
-import scala.io.AnsiColor.*
+// import scala.io.AnsiColor.*
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
 
@@ -81,39 +81,39 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
     case version :: Nil => Some(version).filter(_.nonEmpty)
     case multiple => sys.error("Expected a single argument <scalaVersion>")
   }
-  scalaVersion.foreach(v =>println("Checking Scala: " + v))
+   scalaVersion.foreach(v => Printer.println("Checking Scala: " + v))
 
   val checkBuildId = opts.collectFirst {
     case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
   }.filter(_.nonEmpty)
-  checkBuildId.foreach(v =>println("Checking buildId: " + v))
+   checkBuildId.foreach(v => Printer.println("Checking buildId: " + v))
 
   require(checkBuildId.orElse(scalaVersion).isDefined, "scalaVersion argument or --buildId argument required")
 
   val compareWithBuildId = opts.collectFirst {
     case opt if opt.contains("-compareWithBuildId=") =>
       opt.dropWhile(_ != '=').tail
-    }.filter(_.nonEmpty)
-  compareWithBuildId.foreach(v => println("Comparing with buildId: " + v))
+  }.filter(_.nonEmpty)
+   compareWithBuildId.foreach(v => Printer.println("Comparing with buildId: " + v))
 
   val compareWithScalaVersion = opts.collectFirst {
     case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
   }.filter(_.nonEmpty)
-  compareWithScalaVersion.foreach(v => println("Comparing Wtih Scala version: " + v))
+   compareWithScalaVersion.foreach(v => Printer.println("Comparing Wtih Scala version: " + v))
 
   printLine()
-  println(
-    s"Reporting failed community build projects using Scala $scalaVersion "
-  )
+  Printer.println(
+     s"Reporting failed community build projects using Scala $scalaVersion "
+   )
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
-  
-  val reportedProjects = 
-    if compareWithScalaVersion.orElse(compareWithBuildId).isEmpty 
+
+  val reportedProjects =
+    if compareWithScalaVersion.orElse(compareWithBuildId).isEmpty
     then failedProjects
     else {
       def id = s"scalaVersion=$compareWithScalaVersion, buildId=${compareWithBuildId}"
-      println(s"Excluding projects failing already in $id")
+      Printer.println(s"Excluding projects failing already in $id")
       val ignoredProjects =
         listFailedProjects(
           compareWithScalaVersion,
@@ -122,14 +122,14 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         )
           .map(_.project)
           .toSet
-      println(      s"Excluding ${ignoredProjects.size} project failing in $id")
+      Printer.println(      s"Excluding ${ignoredProjects.size} project failing in $id")
       ignoredProjects
         .map(_.name)
         .groupBy(_.head)
         .toList
         .sortBy(_._1)
         .map(_._2.toList.sorted.mkString(" - ", ", ", ""))
-        .foreach(println)
+        .foreach(Printer.println)
 
       failedProjects.filter(p => !ignoredProjects.contains(p.project))
     }
@@ -176,8 +176,8 @@ def listFailedProjects(
     buildId: Option[String],
     logFailed: Boolean = true
 ): Seq[FailedProject] =
-  println(
-    s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
+  Printer.println(
+     s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
   )
   val Limit = 2000
   val projectVersionsStatusAggregation =
@@ -245,22 +245,21 @@ def listFailedProjects(
         val timestamp = fields("timestamp").asInstanceOf[String]
         val lastFailedVersion = projectVersions(project)
 
-        import scala.io.AnsiColor.{RED, YELLOW, MAGENTA, RESET, BOLD}
         def logProject(label: String)(color: String) = if logFailed then
           val name = label.padTo(8, " ").mkString
           val ver = projectVersions(project)
-          println(
-            s"$color$name$RESET failure in $BOLD${project.name} @ $ver$RESET - $buildURL"
+          Printer.println(
+            s"$color$name${Printer.RESET} failure in ${Printer.BOLD}${Printer.projectUrlString(project.name, ver, buildURL)}"
           )
         val compilerFailure = summary.compilerFailure
         if scalaVersion.exists(hasNewerPassingVersion(_, project, lastFailedVersion)) then
           None // ignore failure
         else
           def lazyLogProject() =
-            if summary.compilerFailure then logProject("COMPILER")(RED)
-            if summary.testsFailure then logProject("TEST")(YELLOW)
-            if summary.docFailure then logProject("DOC")(MAGENTA)
-            if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
+            if summary.compilerFailure then logProject("COMPILER")(Printer.RED)
+            if summary.testsFailure then logProject("TEST")(Printer.YELLOW)
+            if summary.docFailure then logProject("DOC")(Printer.MAGENTA)
+            if summary.publishFailure then logProject("PUBLISH")(Printer.MAGENTA)
           end lazyLogProject
           Option.when(compilerFailure) {
             TimedFailure(
@@ -398,12 +397,14 @@ object Reporter:
           buildURL: String,
           notes: String = ""
       ) =
-        println(s"| $project | $version | $buildURL | $notes |")
+        print("\n") // markdown tables need one preceding empty line to be interpretted correctly
+        Printer.println(s"| $project | $version | $buildURL | $notes |")
       val allRegressions = sameVersionRegressions ++ diffVersionRegressions
       printLine()
-      println(
-        s"Projects with last successful builds using Scala <b>$BOLD$scalaVersion$RESET</b> [${allRegressions.size}]:"
+      Printer.println(
+        s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:"
       )
+
       showRow("Project", "Version", "Build URL", "Notes")
       showRow("-------", "-------", "---------", "-----")
       for p <- allRegressions do
@@ -416,7 +417,7 @@ object Reporter:
           .getOrElse(p.version)
         val buildUrl = {
           val url = failedProjects(p.project).buildURL
-          s"[Open CB logs]($url)"
+          if url.isEmpty then "" else s"[Open CB logs]($url)"
         }
         showRow(p.project.name, version, buildUrl)
     }
@@ -439,7 +440,7 @@ private def reportCompilerRegressions(
 
   if reporter.prelude.nonEmpty then
     printLine()
-    println(reporter.prelude)
+    Printer.println(reporter.prelude)
   val alwaysFailing =
     PreviousScalaReleases.reverse
       .dropWhile(isVersionNewerOrEqualThen(_, scalaVersion))
@@ -494,7 +495,7 @@ private def reportCompilerRegressions(
 
 end reportCompilerRegressions
 
-def printLine() = println("- " * 40)
+def printLine() = Printer.println("- " * 40)
 def reportFailedQuery(msg: String)(err: RequestFailure) =
   System.err.println(s"Query failure - $msg\n${err.error}")
 def isVersionNewerThen(version: String, reference: String) =
