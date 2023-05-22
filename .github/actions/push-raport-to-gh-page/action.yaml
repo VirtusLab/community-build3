@@ -35,44 +35,45 @@ runs:
         ref: gh-page
         token: ${{ inputs.token }}
 
+    - name: Exit if artifact file is empty
+      shell: bash
+      run: |
+        if [ ! -s ~/${{ inputs.file-to-pick }} ]; then
+          echo "::warning title=GH page upload failure::The input file ${{ inputs.file-to-pick }} is empty" 
+          exit 0
+        fi
     - name: Add the raport to _post dir and push
       shell: bash
       run: |
-        if [ -s ~/${{ inputs.file-to-pick }} ]; then
-          echo "The file is non-empty."
-        
-          # Get filename in lowercase kebab-case
-          normalized_build_title="$(echo '${{ inputs.build-title }}' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
-          filename="$(date -u '+%Y-%m-%d')-$normalized_build_title.md"
-        
-          # create _posts dir if not exists
-          mkdir -p "./_posts"
-        
-          # Find raport from same compiler version
-          same_ver_pattern=".*-$normalized_build_title\.md"
+        # Get filename in lowercase kebab-case
+        normalized_build_title="$(echo '${{ inputs.build-title }}' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+        filename="$(date -u '+%Y-%m-%d')-$normalized_build_title.md"
 
-          # Find first match
-          file_path=$(find "./_posts" -type f -regex "$same_ver_pattern" -print -quit)
-        
-          # Check if a file was found and replace it
-          if [[ -n "$file_path" ]]; then
-            cat ~/${{ inputs.file-to-pick }} > $file_path
-            if [[ $file_path != ./_posts/"$filename" ]]; then
-              mv $file_path ./_posts/"$filename"
-            fi
-          else
-            cat ~/${{ inputs.file-to-pick }} > ./_posts/"$filename"
+        # create _posts dir if not exists
+        mkdir -p "./_posts"
+
+        # Find raport from same compiler version
+        same_ver_pattern=".*-$normalized_build_title\.md"
+
+        # Find first match
+        file_path=$(find "./_posts" -type f -regex "$same_ver_pattern" -print -quit)
+
+        # Check if a file was found and replace it
+        if [[ -n "$file_path" ]]; then
+          cat ~/${{ inputs.file-to-pick }} > $file_path
+          if [[ $file_path != ./_posts/"$filename" ]]; then
+            mv $file_path ./_posts/"$filename"
           fi
-        
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "mgajek@virtuslab.com"
-        
-          git add ./_posts/"$filename"
-          git commit -m "Upload build raport"
-          git push origin gh-page
         else
-          echo "The file is empty."
-          exit 0
+          cat ~/${{ inputs.file-to-pick }} > ./_posts/"$filename"
         fi
+
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "mgajek@virtuslab.com"
+
+        git add ./_posts/"$filename"
+        git commit -m "Upload build raport"
+        git push origin gh-page
+
     - name: Git Checkout
       uses: actions/checkout@v3
