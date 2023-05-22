@@ -90,7 +90,7 @@ jobs:
           path: ${{ github.workspace }}/raport-*.md
 
       - name: Push raport
-        uses: ./.github/actions/push-raport-to-gh-page
+        uses: ./.github/actions/push-raport-to-gh-pages
         with:
           artifact-name: build-raports
           file-to-pick: raport-full.md
