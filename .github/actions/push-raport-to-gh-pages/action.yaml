@@ -1,5 +1,5 @@
-name: "Push raport to gh-page"
-description: "Used to push a raport file to the gh-page branch for the webiste to be updated"
+name: "Push raport to gh-pages"
+description: "Used to push a raport file to the gh-pages branch for the webiste to be updated"
 inputs:
   artifact-name:
     description: "Name of the artifact that has been uploaded"
@@ -32,7 +32,7 @@ runs:
     - name: Git Checkout
       uses: actions/checkout@v3
       with:
-        ref: gh-page
+        ref: gh-pages
         token: ${{ inputs.token }}
 
     - name: Exit if artifact file is empty
@@ -73,7 +73,7 @@ runs:
 
         git add ./_posts/"$filename"
         git commit -m "Upload build raport"
-        git push origin gh-page
+        git push origin gh-pages
 
     - name: Git Checkout
       uses: actions/checkout@v3
