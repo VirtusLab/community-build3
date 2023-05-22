@@ -27,6 +27,10 @@ on:
         type: string
         description: "List of scalacOptions which should be filtered out when building projects."
         default: ""
+      push-to-gh-page:
+        type: boolean
+        description: "Should the workflow push the generated raport to gh-page branch"
+        default: false
 jobs:
   # Name of this job need to match inputs of build-project/job-info
   execute-build-plan:
@@ -71,6 +75,7 @@ jobs:
           path: ${{ github.workspace }}/raport-*.md
 
       - name: Push raport
+        if: ${{ inputs.push-to-gh-page == 'true' }}
         uses: ./.github/actions/push-raport-to-gh-page
         with:
           artifact-name: build-raports
