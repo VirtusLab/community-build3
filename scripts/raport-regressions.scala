@@ -80,14 +80,14 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
     case version :: Nil => Some(version).filter(_.nonEmpty)
     case multiple       => sys.error("Expected a single argument <scalaVersion>")
   }
-  scalaVersion.foreach(v => println("Checking Scala: " + v))
+  scalaVersion.foreach(v => log("Checking Scala: " + v))
 
   val checkBuildId = opts
     .collectFirst {
       case opt if opt.contains("-buildId=") => opt.dropWhile(_ != '=').tail
     }
     .filter(_.nonEmpty)
-  checkBuildId.foreach(v => println("Checking buildId: " + v))
+  checkBuildId.foreach(v => log("Checking buildId: " + v))
 
   require(
     checkBuildId.orElse(scalaVersion).isDefined,
@@ -100,18 +100,18 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         opt.dropWhile(_ != '=').tail
     }
     .filter(_.nonEmpty)
-  compareWithBuildId.foreach(v => println("Comparing with buildId: " + v))
+  compareWithBuildId.foreach(v => log("Comparing with buildId: " + v))
 
   val compareWithScalaVersion = opts
     .collectFirst {
       case opt if opt.contains("-compareWith=") => opt.dropWhile(_ != '=').tail
     }
     .filter(_.nonEmpty)
-  compareWithScalaVersion.foreach(v => println("Comparing Wtih Scala version: " + v))
+  compareWithScalaVersion.foreach(v => log("Comparing Wtih Scala version: " + v))
 
   printLine()
   println(
-    s"Reporting failed community build projects using Scala $scalaVersion "
+    s"Reporting failed community build projects using Scala $scalaVersion:$LINE_BREAK\n"
   )
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
@@ -121,7 +121,7 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
     then failedProjects
     else {
       def id = s"scalaVersion=$compareWithScalaVersion, buildId=${compareWithBuildId}"
-      println(s"Excluding projects failing already in $id")
+      println(s"Excluding projects failing already in $id:$LINE_BREAK\n")
       val ignoredProjects =
         listFailedProjects(
           compareWithScalaVersion,
@@ -130,7 +130,7 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
         )
           .map(_.project)
           .toSet
-      println(s"Excluding ${ignoredProjects.size} project failing in $id")
+      println(s"Excluding ${ignoredProjects.size} project failing in $id:$LINE_BREAK\n")
       ignoredProjects
         .map(_.name)
         .groupBy(_.head)
@@ -184,7 +184,7 @@ def listFailedProjects(
     buildId: Option[String],
     logFailed: Boolean = true
 ): Seq[FailedProject] =
-  println(
+  log(
     s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
   )
   val Limit = 2000
@@ -258,7 +258,7 @@ def listFailedProjects(
           val ver = projectVersions(project)
           println(
             s"$color$name${RESET} failure in ${BOLD}${Printer
-              .projectUrlString(project.name, ver, buildURL)}"
+              .projectUrlString(project.name, ver, buildURL)}$LINE_BREAK"
           )
         val compilerFailure = summary.compilerFailure
         if scalaVersion.exists(hasNewerPassingVersion(_, project, lastFailedVersion)) then
@@ -405,13 +405,11 @@ object Reporter:
           version: String,
           buildURL: String,
           notes: String = ""
-      ) =
-        print("\n") // markdown tables need one preceding empty line to be interpretted correctly
-        println(s"| $project | $version | $buildURL | $notes |")
+      ) = println(s"| $project | $version | $buildURL | $notes |")
       val allRegressions = sameVersionRegressions ++ diffVersionRegressions
       printLine()
       println(
-        s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:"
+        s"Projects with last successful builds using Scala $BOLD$scalaVersion$RESET [${allRegressions.size}]:${LINE_BREAK}\n"
       )
 
       showRow("Project", "Version", "Build URL", "Notes")
@@ -504,7 +502,6 @@ private def reportCompilerRegressions(
 
 end reportCompilerRegressions
 
-def printLine() = println("- " * 40)
 def reportFailedQuery(msg: String)(err: RequestFailure) =
   System.err.println(s"Query failure - $msg\n${err.error}")
 def isVersionNewerThen(version: String, reference: String) =
