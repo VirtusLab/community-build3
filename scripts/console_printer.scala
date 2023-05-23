@@ -6,13 +6,12 @@ object Printer {
   val RESET = Console.RESET
   val BOLD = Console.BOLD
 
-  val println = println
-  val log = println
+  def println(text: String): Unit = Predef.println(text)
+  def log(text: String) = Predef.println(text)
 
   def projectUrlString(projectName: String, version: String, buildUrl: String): String = {
     val projectVerString = if version.isEmpty then projectName else s"$projectName @ $version"
 
-    if buildUrl.isEmpty then projectVerString else
-      s"$projectVerString - $buildUrl"
+    if buildUrl.isEmpty then projectVerString else s"$projectVerString - $buildUrl"
   }
 }
