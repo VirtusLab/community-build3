@@ -69,10 +69,10 @@ runs:
         fi
 
         git config --global user.name "GitHub Actions"
-        git config --global user.email "mgajek@virtuslab.com"
+        git config --global user.email "scala3-community-build@virtuslab.com"
 
         git add ./_posts/"$filename"
-        git commit -m "Upload build raport"
+        git commit -m "Upload build raport: ${{ inputs.build-title }}"
         git push origin gh-pages
 
     - name: Git Checkout
