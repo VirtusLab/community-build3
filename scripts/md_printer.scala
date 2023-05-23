@@ -4,10 +4,11 @@ object Printer {
   val MAGENTA = """<span style="color:magenta">"""
   val RESET = """</span>"""
   val BOLD = """<span style="font-weight:bold">"""
-  private val LINE_BREAK = "<br>"
+  val LINE_BREAK = "<br>"
 
-  def println(text: String): Unit = Predef.println(s"$text $LINE_BREAK")
+  def println(text: String): Unit = Predef.println(s"$text")
   def log(text: String) = ()
+  def printLine() = println("<hr>")
 
   /** make project name be a clickable link to the build */
   def projectUrlString(projectName: String, version: String, buildUrl: String): String = {
