@@ -1,5 +1,5 @@
 
-# projects total:     991
+# projects total:     992
 # min stars count:    -1
 # max projects count: 1000
 
@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 100
     strategy:
       matrix:
         include:
@@ -190,7 +190,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-1 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 75
     strategy:
       matrix:
         include:
@@ -245,7 +245,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-2 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 160
     strategy:
       matrix:
         include:
@@ -282,6 +282,7 @@ jobs:
         - name: "dacr/primes"
         - name: "davegurnell/unindent"
         - name: "davidledwards/scalop"
+        - name: "dragonfly-ai/cliviz"
         - name: "dvreeze/yaidom"
         - name: "eed3si9n/gigahorse"
         - name: "eed3si9n/sjson-new"
@@ -299,6 +300,7 @@ jobs:
         - name: "greenleafoss/green-leaf-mongo"
         - name: "guardian/fastly-api-client"
         - name: "guardian/pa-football-client"
+        - name: "guntiso/mojoz"
         - name: "gzoller/scalajack"
         - name: "h8io/borscht"
         - name: "hedgehogqa/scala-hedgehog"
@@ -373,7 +375,6 @@ jobs:
         - name: "raquo/scala-dom-types"
         - name: "rescala-lang/rescala"
         - name: "rssh/trackedfuture"
-        - name: "rtyley/rate-limit-status"
         - name: "rtyley/scala-collection-plus"
         - name: "rtyley/scala-textmatching"
         - name: "sake92/tupson"
@@ -471,7 +472,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-3 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 85
     strategy:
       matrix:
         include:
@@ -543,7 +544,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-4 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 105
     strategy:
       matrix:
         include:
@@ -593,6 +594,7 @@ jobs:
         - name: "marcinzh/yamlike"
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "noelwelsh/mads"
+        - name: "palanga/parana"
         - name: "palanga/zio-cassandra"
         - name: "pathikrit/better-files"
         - name: "pjfanning/akka-rabbitmq"
@@ -639,7 +641,6 @@ jobs:
         - name: "zio/zio-parser"
         - name: "zio/zio-profiling"
         - name: "zio/zio-rocksdb"
-        - name: "zio/zio-telemetry"
         - name: "zio/zio-test-intellij"
     steps:
       - name: "Git Checkout"
@@ -658,7 +659,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-5 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 70
     strategy:
       matrix:
         include:
@@ -707,7 +708,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-6 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 65
     strategy:
       matrix:
         include:
@@ -738,7 +739,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-7 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 65
     strategy:
       matrix:
         include:
@@ -756,6 +757,7 @@ jobs:
         - name: "zio/zio-process"
         - name: "zio/zio-query"
         - name: "zio/zio-sql"
+        - name: "zio/zio-telemetry"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -826,7 +828,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-10 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       matrix:
         include:
@@ -875,6 +877,7 @@ jobs:
         - name: "scala-works/scala-cmd"
         - name: "scalatra/scalatra"
         - name: "sweet-delights/delightful-parsing"
+        - name: "thatscalaguy/ulid4cats"
         - name: "tkrs/orcus"
         - name: "tpolecat/pool-party"
         - name: "travisbrown/iteratee"
@@ -907,7 +910,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-11 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 80
     strategy:
       matrix:
         include:
@@ -998,7 +1001,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-13 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 80
     strategy:
       matrix:
         include:
@@ -1026,7 +1029,7 @@ jobs:
         - name: "ollls/quartz-h2"
         - name: "outr/scarango"
         - name: "profunktor/redis4cats"
-        - name: "pureharm/pureharm-aws"
+        - name: "pureharm/pureharm-effects-cats"
         - name: "regis-leray/fs2-ftp"
         - name: "rssh/cps-async-connect"
         - name: "rustedbones/taxonomy"
@@ -1060,7 +1063,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-14 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 65
     strategy:
       matrix:
         include:
@@ -1071,6 +1074,7 @@ jobs:
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/treesitter4s"
+        - name: "pureharm/pureharm-aws"
         - name: "rustedbones/scout"
         - name: "scodec/scodec-protocols"
         - name: "trace4cats/trace4cats-tail-sampling-extras"
@@ -1096,7 +1100,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-15 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 135
     strategy:
       matrix:
         include:
@@ -1129,7 +1133,6 @@ jobs:
         - name: "davenverse/epimetheus-http4s"
         - name: "davenverse/http4s-grpc"
         - name: "davenverse/mules-http4s"
-        - name: "davenverse/publicsuffix"
         - name: "davenverse/rediculous"
         - name: "dylemma/xml-spac"
         - name: "eikek/emil"
@@ -1225,7 +1228,7 @@ jobs:
         - name: "shiftleftsecurity/js2cpg"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "snowplow/iglu-scala-core"
+        - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "softwaremill/diffx"
         - name: "softwaremill/sttp-openai"
         - name: "spaceteams/scala-json-logging"
@@ -1240,6 +1243,7 @@ jobs:
         - name: "trace4cats/trace4cats-avro"
         - name: "trace4cats/trace4cats-exporter-http"
         - name: "trace4cats/trace4cats-http4s"
+        - name: "trace4cats/trace4cats-kafka"
         - name: "trace4cats/trace4cats-natchez"
         - name: "typelevel/laika"
         - name: "ulitol97/comet"
@@ -1274,7 +1278,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-16 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 85
     strategy:
       matrix:
         include:
@@ -1317,7 +1321,6 @@ jobs:
         - name: "rallyhealth/weepickle"
         - name: "sangria-graphql/sangria"
         - name: "scalabin-no/http4s-directives"
-        - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "softwaremill/sttp-apispec"
         - name: "stephennancekivell/scalatest-json"
         - name: "taig/flog"
@@ -1352,7 +1355,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-17 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 70
     strategy:
       matrix:
         include:
@@ -1381,7 +1384,6 @@ jobs:
         - name: "torrentdam/bittorrent"
         - name: "trace4cats/trace4cats-jaeger"
         - name: "trace4cats/trace4cats-opentelemetry"
-        - name: "trace4cats/trace4cats-zipkin"
         - name: "typelevel/feral"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/skunk"
@@ -1403,7 +1405,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-18 ]
     continue-on-error: true
-    timeout-minutes: 60
+    timeout-minutes: 75
     strategy:
       matrix:
         include:
@@ -1424,7 +1426,6 @@ jobs:
         - name: "hamnis/jwk"
         - name: "hnaderi/edomata"
         - name: "imaxmelnyk/openai-scala"
-        - name: "janlisse/zio-jwt-validator"
         - name: "jwojnowski/oidc4s"
         - name: "kubukoz/sup"
         - name: "lambdaworks/zio-elasticsearch"
