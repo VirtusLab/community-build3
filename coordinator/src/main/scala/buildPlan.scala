@@ -445,10 +445,7 @@ def createGithubActionJob(
         println("runs-on: ubuntu-22.04")
         println(s"needs: [ $needs ]")
         println("continue-on-error: true")
-        if hasExtendentBuildTime
-        then println("timeout-minutes: 600")
-        // 60 minutes + additional 5min for every 10 projects in stage, max 185min
-        else println(s"timeout-minutes: ${60 + (projects.size / 10) * 5}")
+        println("timeout-minutes: 360") // 6h
         println("strategy:")
         indented {
           println("matrix:")
@@ -464,6 +461,10 @@ def createGithubActionJob(
           println("  uses: actions/checkout@v3")
           println("- name: \"Build project\"")
           println("  uses: ./.github/actions/build-project")
+          println("  timeout-minutes: " + {
+            if hasExtendentBuildTime then 360 // 6h
+            else 60 // 1h
+          })
           println("  with:")
           println("    project-name: ${{ matrix.name }}")
           println("    extra-scalac-options: ${{ inputs.extra-scalac-options }}")
