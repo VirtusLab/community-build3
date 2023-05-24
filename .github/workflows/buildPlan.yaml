@@ -1,5 +1,5 @@
 
-# projects total:     992
+# projects total:     991
 # min stars count:    -1
 # max projects count: 1000
 
@@ -62,6 +62,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "7mind/izumi"
         - name: "akka/akka-persistence-cassandra"
         - name: "babylonhealth/lit-fhir"
         - name: "clulab/processors"
@@ -107,6 +108,7 @@ jobs:
         - name: "dieproht/matr"
         - name: "dragonfly-ai/narr"
         - name: "eed3si9n/verify"
+        - name: "eltherion/http4s-timer"
         - name: "fdietze/formidable"
         - name: "fommil/jzon"
         - name: "gaeljw/typetrees"
@@ -119,7 +121,6 @@ jobs:
         - name: "jcouyang/jujiu"
         - name: "jodersky/simplesql"
         - name: "jphmrst/scala-latex"
-        - name: "kordyjan/typelogger"
         - name: "kubukoz/debug-utils"
         - name: "kuceramartin/tyqu"
         - name: "lichess-org/lila-ws"
@@ -258,6 +259,7 @@ jobs:
         - name: "andyglow/scala-range"
         - name: "andyglow/scala-xml-diff"
         - name: "andyglow/typesafe-config-scala"
+        - name: "aoiroaoino/nanolens"
         - name: "arainko/ducktape"
         - name: "ariskk/burner4s"
         - name: "arturopala/buffer-and-slice"
@@ -322,15 +324,12 @@ jobs:
         - name: "jandom-devel/scalafix"
         - name: "jcouyang/dhall-generic"
         - name: "jcouyang/meow"
-        - name: "jkugiya/aws-v4-signer-scala"
-        - name: "jkugiya/ulid-scala"
         - name: "jozic/scalax-collection"
         - name: "jphmrst/bps"
         - name: "kcrypt/scala-biginteger"
         - name: "kcrypt/scala-blake3"
         - name: "kcrypt/scala-sha"
         - name: "kzmake/uuid7s"
-        - name: "lambdaworks/scountries"
         - name: "lhns/scala-edifact"
         - name: "lightbend-labs/lightbend-emoji"
         - name: "lightbend-labs/scala-logging"
@@ -340,12 +339,10 @@ jobs:
         - name: "lomigmegard/akka-http-cors"
         - name: "lorandszakacs/enclosure"
         - name: "losizm/grapple"
-        - name: "losizm/little-config"
         - name: "losizm/little-json"
         - name: "losizm/little-sql"
         - name: "losizm/little-time"
         - name: "losizm/scamper"
-        - name: "losizm/t2"
         - name: "makiftutuncu/effect"
         - name: "makingthematrix/signals3"
         - name: "malliina/mobile-push"
@@ -378,7 +375,8 @@ jobs:
         - name: "raquo/scala-dom-types"
         - name: "rescala-lang/rescala"
         - name: "rssh/trackedfuture"
-        - name: "rtyley/scala-collection-plus"
+        - name: "rtyley/line-break-preserving-line-splitting"
+        - name: "rtyley/rate-limit-status"
         - name: "rtyley/scala-textmatching"
         - name: "sake92/tupson"
         - name: "sangria-graphql/macro-visit"
@@ -491,7 +489,6 @@ jobs:
         - name: "greenfossil/data-mapping"
         - name: "ij-plugins/ijp-color"
         - name: "ij-plugins/ijp-debayer2sx"
-        - name: "ij-plugins/ijp-scala-console"
         - name: "jobial-io/scase"
         - name: "json4s/json4s"
         - name: "kevin-lee/just-semver"
@@ -499,11 +496,9 @@ jobs:
         - name: "norbert-radyk/spoiwo"
         - name: "nrinaudo/kantan.parsers"
         - name: "outr/scalapass"
-        - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala3-enum"
         - name: "playframework/play-ws"
         - name: "rallyhealth/scalacheck-ops"
-        - name: "rtyley/line-break-preserving-line-splitting"
         - name: "sake92/hepek"
         - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-msgpack"
@@ -595,6 +590,7 @@ jobs:
         - name: "kitlangton/animus"
         - name: "kitlangton/quotidian"
         - name: "kubukoz/drops"
+        - name: "lhns/scala-commandline"
         - name: "marcinzh/turbolift"
         - name: "marcinzh/yamlike"
         - name: "msgpack4z/msgpack4z-jawn"
@@ -602,7 +598,6 @@ jobs:
         - name: "palanga/parana"
         - name: "palanga/zio-cassandra"
         - name: "pathikrit/better-files"
-        - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/zio-metrics-micrometer"
         - name: "poslegm/munit-zio"
@@ -618,7 +613,6 @@ jobs:
         - name: "senia-psm/zio-test-akka-http"
         - name: "sksamuel/avro4s"
         - name: "sky-uk/kafka-topic-loader"
-        - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swaldman/untemplate"
         - name: "tharwaninitin/cron4zio"
         - name: "thoughtworksinc/bindable.scala"
@@ -1125,7 +1119,6 @@ jobs:
         - name: "analogweb/analogweb-scala"
         - name: "andimiller/hedgehogs"
         - name: "armanbilge/bayou"
-        - name: "armanbilge/cheshire"
         - name: "armanbilge/circe-scala-yaml"
         - name: "armanbilge/scala-native-config-brew"
         - name: "atnos-org/eff"
@@ -1149,6 +1142,7 @@ jobs:
         - name: "davenverse/epimetheus-http4s"
         - name: "davenverse/http4s-grpc"
         - name: "davenverse/mules-http4s"
+        - name: "davenverse/publicsuffix"
         - name: "davenverse/rediculous"
         - name: "dylemma/xml-spac"
         - name: "eikek/emil"
@@ -1171,7 +1165,6 @@ jobs:
         - name: "gnieh/diffson"
         - name: "hamnis/jsonschema"
         - name: "higherkindness/mu-scala"
-        - name: "hireproof/screening"
         - name: "hnaderi/named-codec"
         - name: "http4s/blaze"
         - name: "http4s/http4s"
@@ -1183,6 +1176,7 @@ jobs:
         - name: "http4s/http4s-scalatags"
         - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-twirl"
+        - name: "ij-plugins/ijp-scala-console"
         - name: "itv/quartz4s"
         - name: "jap-company/fields"
         - name: "jmcardon/tsec"
@@ -1199,11 +1193,11 @@ jobs:
         - name: "kory33/s2mc-test"
         - name: "koterpillar/refinery"
         - name: "kovacshuni/circe-config"
+        - name: "lambdaworks/scountries"
+        - name: "laserdisc-io/scanamo-circe"
         - name: "lhns/http4s-errors"
         - name: "lhns/remote-io"
-        - name: "lloydmeta/enumeratum"
         - name: "m2-oss/calypso"
-        - name: "medeia/medeia"
         - name: "molarmanful/sclin"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
@@ -1219,12 +1213,12 @@ jobs:
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "phaller/spores3"
         - name: "pityka/nspl"
+        - name: "pjfanning/jackson-module-enumeratum"
         - name: "plokhotnyuk/jsoniter-scala"
         - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/caliban-gitlab"
         - name: "profunktor/fs2-rabbit"
-        - name: "pureconfig/pureconfig"
         - name: "pureharm/pureharm-config-ciris"
         - name: "raquo/waypoint"
         - name: "reactivecore/rc-circe-json-schema"
@@ -1244,11 +1238,12 @@ jobs:
         - name: "shiftleftsecurity/js2cpg"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "snowplow/snowplow-scala-analytics-sdk"
+        - name: "snowplow/iglu-scala-core"
         - name: "softwaremill/diffx"
         - name: "softwaremill/sttp-openai"
         - name: "spaceteams/scala-json-logging"
         - name: "svroonland/rezilience"
+        - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "taig/babel"
         - name: "testcontainers/testcontainers-scala"
         - name: "thatscalaguy/circe-jq"
@@ -1300,7 +1295,6 @@ jobs:
       matrix:
         include:
         - name: "47degrees/github4s"
-        - name: "7mind/izumi"
         - name: "alejandrohdezma/http4s-munit"
         - name: "alhuelamo/dbjobs"
         - name: "apimorphism/telegramium"
@@ -1311,7 +1305,6 @@ jobs:
         - name: "davenverse/github"
         - name: "davenverse/whale-tail"
         - name: "delimobil/cabbit"
-        - name: "geirolz/app-toolkit"
         - name: "gemini-hlsw/clue"
         - name: "gemini-hlsw/lucuma-core"
         - name: "gnieh/fs2-data"
@@ -1338,6 +1331,7 @@ jobs:
         - name: "rallyhealth/weepickle"
         - name: "sangria-graphql/sangria"
         - name: "scalabin-no/http4s-directives"
+        - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "softwaremill/sttp-apispec"
         - name: "stephennancekivell/scalatest-json"
         - name: "taig/flog"
@@ -1349,9 +1343,7 @@ jobs:
         - name: "trace4cats/trace4cats-newrelic"
         - name: "travisbrown/dhallj"
         - name: "typelevel/natchez"
-        - name: "valdemargr/gql"
         - name: "virtuslab/inkuire"
-        - name: "vlovgr/ciris"
         - name: "yakivy/poppet"
         - name: "zio/zio-json"
         - name: "zio/zio-metrics-legacy"
@@ -1378,7 +1370,6 @@ jobs:
       matrix:
         include:
         - name: "armanbilge/gcp4s"
-        - name: "avast/scala-server-toolkit"
         - name: "azhur/kafka-serde-scala"
         - name: "dacr/zio-lmdb"
         - name: "danslapman/morphling"
@@ -1387,7 +1378,6 @@ jobs:
         - name: "davenverse/rediculous-concurrent"
         - name: "davenverse/snickerdoodle"
         - name: "eikek/calev"
-        - name: "etspaceman/kinesis4cats"
         - name: "http4s/http4s-fs2-data"
         - name: "japgolly/webapp-util"
         - name: "jwt-scala/jwt-scala"
@@ -1395,13 +1385,13 @@ jobs:
         - name: "mobimeo/fs2-gtfs"
         - name: "ovotech/natchez-extras"
         - name: "pityka/lamp"
-        - name: "polystat/polystat-cli"
         - name: "sideeffffect/zio-doobie"
         - name: "softwaremill/sttp"
         - name: "theiterators/kebs"
         - name: "torrentdam/bittorrent"
         - name: "trace4cats/trace4cats-jaeger"
         - name: "trace4cats/trace4cats-opentelemetry"
+        - name: "trace4cats/trace4cats-zipkin"
         - name: "typelevel/feral"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/skunk"
@@ -1444,7 +1434,7 @@ jobs:
         - name: "getkyo/kyo"
         - name: "hamnis/jwk"
         - name: "hnaderi/edomata"
-        - name: "imaxmelnyk/openai-scala"
+        - name: "janlisse/zio-jwt-validator"
         - name: "jwojnowski/oidc4s"
         - name: "kubukoz/sup"
         - name: "lambdaworks/zio-elasticsearch"
@@ -1537,7 +1527,60 @@ jobs:
         include:
         - name: "kitlangton/neotype"
         - name: "liewhite/swopen"
+        - name: "lloydmeta/enumeratum"
         - name: "vigoo/desert"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-23:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-22 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "medeia/medeia"
+        - name: "pureconfig/pureconfig"
+        - name: "valdemargr/gql"
+        - name: "vlovgr/ciris"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-24:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-23 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "avast/scala-server-toolkit"
+        - name: "etspaceman/kinesis4cats"
+        - name: "geirolz/app-toolkit"
+        - name: "polystat/polystat-cli"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
