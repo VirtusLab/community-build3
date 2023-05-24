@@ -447,7 +447,8 @@ def createGithubActionJob(
         println("continue-on-error: true")
         if hasExtendentBuildTime
         then println("timeout-minutes: 600")
-        else println("timeout-minutes: 60")
+        // 60 minutes + additional 5min for every 10 projects in stage, max 185min
+        else println(s"timeout-minutes: ${60 + (projects.size / 10) * 5}")
         println("strategy:")
         indented {
           println("matrix:")
