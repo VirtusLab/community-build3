@@ -52,7 +52,7 @@ jobs:
             --compareWithBuildId=${{ inputs.compare-with-build-id }}
 
       - name: Generate GH-page raport
-        if: ${{ inputs.push-to-gh-pages == 'true' }}
+        if: ${{ inputs.push-to-gh-pages }}
         env:
           ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
           ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
@@ -62,20 +62,20 @@ jobs:
 
       - name: Upload raports
         uses: actions/upload-artifact@v3
-        if: ${{ inputs.push-to-gh-pages == 'true' && inputs.scala-version != '' }}
+        if: ${{ inputs.push-to-gh-pages && inputs.scala-version != '' }}
         with:
           name: build-raports
           path: ${{ github.workspace }}/raport-*.md
 
       - uses: tibdex/github-app-token@v1
-        if: ${{ inputs.push-to-gh-pages == 'true' && inputs.scala-version != '' }}
+        if: ${{ inputs.push-to-gh-pages && inputs.scala-version != '' }}
         id: generate-token
         with:
           app_id: 303718
           private_key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
 
       - name: Push raport
-        if: ${{ inputs.push-to-gh-pages == 'true' && inputs.scala-version != '' }}
+        if: ${{ inputs.push-to-gh-pages && inputs.scala-version != '' }}
         uses: ./.github/actions/push-raport-to-gh-pages
         with:
           artifact-name: build-raports
