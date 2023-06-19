@@ -79,8 +79,13 @@ jobs:
           scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
           lastWeeklyVersionFile=./last-successfull-weekly-version
-          lastWeeklyVersion=$(cat $lastWeeklyVersionFile) && \
-            scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md || true
+          if [[ -f "$lastWeeklyVersionFile" ]]; then
+            lastWeeklyVersion=$(cat $lastWeeklyVersionFile)
+            echo "Comparing with last foundly weekly version: ${lastWeeklyVersion}"
+            scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md
+          else 
+            echo "Not found previous weekly build version."
+          fi
           echo "$scalaVersion" > $lastWeeklyVersionFile
 
       - name: Upload raports
