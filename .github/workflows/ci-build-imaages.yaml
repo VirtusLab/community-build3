@@ -1,0 +1,27 @@
+name: Infra CI - publish docker images
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: "Custom tag to publish container image version"
+        required: true
+jobs:
+  publish-images:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to container image repository
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build all images
+        run: scripts/build-all.sh ${{ inputs.version }}
+
+      - name: Push images to image registry
+        run: scripts/publish-all.sh ${{ inputs.version }}
