@@ -1,0 +1,75 @@
+name: "Open CB: bisect"
+run-name: ${{ inputs.build-name != '' && inputs.build-name || format('Bisect {0}', inputs.project-name) }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-name:
+        type: string
+        description: "Custom name of the job in GitHub Actions"
+        default: ""
+      project-name:
+        type: string
+        description: "Name of a project to build using GitHub coordinates <org>/<repo> eg. VirtusLab/scala-cli"
+      project-targets:
+        type: string
+        description: "List of project targets to builds (comma deliomited)"
+        default: ""
+      repository-url:
+        type: string
+        description: "GitHub repository URL for compiler to build"
+        default: "lampepfl/dotty"
+      scala-version-start:
+        type: string
+        description: "The first version of Scala versions range to test against"
+        default: ""
+      scala-version-end:
+        type: string
+        description: "The last version of Scala versions range to test against"
+        default: ""
+      extra-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        default: ""
+      disabled-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be filtered out when building projects."
+        default: ""
+      
+jobs:
+  run-bisect:
+    runs-on: ubuntu-22.04
+    continue-on-error: false
+    timeout-minutes: 60
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+        with: 
+          path: opencb
+
+      - name: "Git Checkout compiler"
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repository-url }}
+          ref: main
+          fetch-depth: 0
+          path: "compiler"
+
+      - uses: coursier/cache-action@v6.4
+      - uses: VirtusLab/scala-cli-setup@v1.0.1
+
+      - name: "Bisect project"
+        shell: bash
+        run: |
+          cd ${{ github.workspace }}/compiler
+          echo "Last 3 Scala compiler commits:"
+          git --no-pager log -3
+          echo "---"
+          scala-cli ${{ github.workspace }}/opencb/scripts/bisect.scala -- \
+            --project-name=${{ inputs.project-name }} \
+            --targets=${{ inputs.project-targets }} \
+            --releases=${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
+            --extra-scalac-options=${{ inputs.extra-scalac-options }} \
+            --disabled-scalac-options=${{ inputs.disabled-scalac-options }} \
+            --community-build-dir=${{ github.workspace }}/opencb \
+            --compiler-dir=${{ github.workspace }}/compiler
