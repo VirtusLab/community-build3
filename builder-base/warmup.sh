@@ -2,7 +2,7 @@
 
 set -e
 
-scala_version=3.2.1 # TODO
+scala_version=3.3.0 # TODO
 
 mkdir warm_up
 

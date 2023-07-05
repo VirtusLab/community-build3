@@ -7,10 +7,10 @@ if [ $# -ne 1 ]; then
 fi
 
 VERSION="$1"
-export PREV_CB_VERSION="v0.2.4"
+export PREV_CB_VERSION="v0.2.5"
 
 javaDefault=11
-javaAccessoryVersions=(8 17 19)
+javaAccessoryVersions=(8 17 20)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 if [[ ! -z "${BUILD_ONLY_DEFAULT_JDK}" ]]; then

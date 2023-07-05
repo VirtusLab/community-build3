@@ -31,7 +31,7 @@ class FailedProjectException(msg: String)
     with NoStackTrace
 
 val communityBuildVersion =
-  sys.props.getOrElse("communitybuild.version", "v0.2.4")
+  sys.props.getOrElse("communitybuild.version", "v0.2.5")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl =
   s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
@@ -834,11 +834,7 @@ object MinikubeReproducer:
       ),
       command = Seq("/build/build-revision.sh"),
       args = args,
-      tty = true,
-      resources = ResourceRequirements(
-        requests = Map("memory" -> Quantity("4Gi")),
-        limits = Map("memory" -> Quantity("7Gi"))
-      )
+      tty = true
     )
 
   import javax.net.ssl.*

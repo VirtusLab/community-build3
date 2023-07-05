@@ -31,8 +31,8 @@ case $JDK_VERSION in
   jdkDistro="17.0.5-tem "
   ;;
 
-"19")
-  jdkDistro="19.0.1-tem"
+"20")
+  jdkDistro="20.0.1-tem"
   ;;
 
 *)
