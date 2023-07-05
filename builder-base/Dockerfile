@@ -1,4 +1,4 @@
-FROM lampepfl/dotty:2021-03-22
+FROM lampepfl/dotty:2023-06-21-2
 
 ARG JDK_VERSION
 
