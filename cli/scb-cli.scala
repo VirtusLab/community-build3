@@ -31,7 +31,7 @@ class FailedProjectException(msg: String)
     with NoStackTrace
 
 val communityBuildVersion =
-  sys.props.getOrElse("communitybuild.version", "v0.2.4")
+  sys.props.getOrElse("communitybuild.version", "v0.2.5")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl =
   s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
@@ -456,7 +456,7 @@ class MinikubeReproducer(using config: Config, build: BuildInfo):
         "--output=name"
       ).call(check = false, stderr = os.Pipe)
         .exitCode == 0
-    if !mavenIsRunning then bash(scriptsDir / "start-mvn-repo.sh")
+    if !mavenIsRunning then ()// bash(scriptsDir / "start-mvn-repo.sh")
 
   private def buildScalaCompilerIfMissing[F[
       _
@@ -724,11 +724,11 @@ object MinikubeReproducer:
         "--timeout=1m"
       )
       .call(check = false, stderr = os.Pipe)
-    println("Waiting for Maven repository to start...")
-    while {
-      val p = waitForPod()
-      p.exitCode != 0 && p.err.text().contains("error: no matching resources")
-    } do ()
+    // println("Waiting for Maven repository to start...")
+    // while {
+    //   val p = waitForPod()
+    //   p.exitCode != 0 && p.err.text().contains("error: no matching resources")
+    // } do ()
     usingServiceForwarder("mvn-repo", 8081)(fn(using _))
 
   def projectBuilderJob(using
@@ -835,10 +835,10 @@ object MinikubeReproducer:
       command = Seq("/build/build-revision.sh"),
       args = args,
       tty = true,
-      resources = ResourceRequirements(
-        requests = Map("memory" -> Quantity("4Gi")),
-        limits = Map("memory" -> Quantity("7Gi"))
-      )
+      // resources = ResourceRequirements(
+      //   requests = Map("memory" -> Quantity("4Gi")),
+      //   limits = Map("memory" -> Quantity("7Gi"))
+      // )
     )
 
   import javax.net.ssl.*
