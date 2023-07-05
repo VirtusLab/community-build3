@@ -1,127 +1,121 @@
 // Based on https://github.com/lampepfl/dotty/blob/main/project/scripts/bisect.scala
-
-/*
-This script will bisect a problem with the compiler based on success/failure of the validation script passed as an argument.
-It starts with a fast bisection on released nightly builds.
-Then it will bisect the commits between the last nightly that worked and the first nightly that failed.
-Look at the `usageMessage` below for more details.
-*/
-
-
-
+//> using lib "com.github.scopt::scopt:4.1.0"
+//> using scala 3.3
 
 import sys.process._
 import scala.io.Source
 import java.io.File
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.charset.StandardCharsets
-import java.nio.file.Files
+import java.nio.file._
 
-        //  --extra-scalac-options ${{ inputs.extra-scalac-options }} \
-        //     --disabled-scalac-options ${{ inputs.disabled-scalac-options }} \
-        //     --community-build-dir ${{ github.workspace }}/opencb
-
-val usageMessage = """
-  |Usage:
-  |  > scala-cli project/scripts/bisect.scala -- [<bisect-options>] <projectName> <targets>*
-  |
-  |The optional <bisect-options> may be any combination of:
-  |* --dry-run
-  |    Don't try to bisect - just make sure the validation command works correctly
-  |
-  |* --extra-scalac-options <options>
-  |    Comma delimited of additional scalacOptions passed to project build
-  |
-  |* --disabled-scalac-options <options>
-  |    Comma delimited of disabled scalacOptions passed to project build
-  |
-  |* --community-build-dir <path>
-  |    Directory with community build project from which the project config would be resolved
-  |
-  |* --compiler-dir <path>
-  |    Directory containing Scala compiler repository, required for commit-based bissect
-  |
-  |* --releases <releases-range>
-  |    Bisect only releases from the given range (defaults to all releases).
-  |    The range format is <first>..<last>, where both <first> and <last> are optional, e.g.
-  |    * 3.1.0-RC1-bin-20210827-427d313-NIGHTLY..3.2.1-RC1-bin-20220716-bb9c8ff-NIGHTLY
-  |    * 3.2.1-RC1-bin-20220620-de3a82c-NIGHTLY..
-  |    * ..3.3.0-RC1-bin-20221124-e25362d-NIGHTLY
-  |    The ranges are treated as inclusive.
-  |
-  |* --should-fail
-  |    Expect the validation command to fail rather that succeed. This can be used e.g. to find out when some illegal code started to compile.
-  |
-  |Warning: The bisect script should not be run multiple times in parallel because of a potential race condition while publishing artifacts locally.
-
-""".stripMargin
+val communityBuildVersion = "v0.2.4"
 
 @main def run(args: String*): Unit =
-  val scriptOptions =
-    try ScriptOptions.fromArgs(args)
-    catch
-      case _ =>
-        sys.error(s"Wrong script parameters.\n${usageMessage}")
-
-  val validationScript = scriptOptions.validationCommand.validationScript
-  val releases = Releases.fromRange(scriptOptions.releasesRange)
-  val releaseBisect = ReleaseBisect(validationScript, shouldFail = scriptOptions.shouldFail, releases)
+  val config = scopt.OParser
+    .parse(Config.parser, args, Config())
+    .getOrElse(sys.error("Failed to parse config"))
+    
+  val validationScript = config.validationScript
+  val releases = Releases.fromRange(config.releasesRange)
+  val releaseBisect = ReleaseBisect(validationScript, shouldFail = config.shouldFail, releases)
 
   releaseBisect.verifyEdgeReleases()
 
-  if (!scriptOptions.dryRun) then
+  if (!config.dryRun) then
     val (lastGoodRelease, firstBadRelease) = releaseBisect.bisectedGoodAndBadReleases()
     println(s"Last good release: ${lastGoodRelease.version}")
     println(s"First bad release: ${firstBadRelease.version}")
     println("\nFinished bisecting releases\n")
 
-    val commitBisect = CommitBisect(validationScript, shouldFail = scriptOptions.shouldFail, lastGoodRelease.hash, firstBadRelease.hash)
+    val commitBisect = CommitBisect(validationScript, shouldFail = config.shouldFail, lastGoodRelease.hash, firstBadRelease.hash)
     commitBisect.bisect()
 
+case class ValidationCommand(projectName: String = "", targets: String = "", extraScalacOptions: String = "", disabledScalacOption: String = "")
+case class Config(
+  dryRun: Boolean = false,
+  releasesRange: ReleasesRange = ReleasesRange.all, 
+  shouldFail: Boolean = false,
+  openCommunityBuildDir: Path = Path.of(""),
+  compilerDir: Path = Path.of(""),
+  command: ValidationCommand = ValidationCommand()
+){
+  inline def withCommand(mapping: ValidationCommand => ValidationCommand) = copy(command = mapping(command))
 
-case class ScriptOptions(validationCommand: ValidationCommand, dryRun: Boolean, releasesRange: ReleasesRange, shouldFail: Boolean)
-object ScriptOptions:
-  def fromArgs(args: Seq[String]) =
-    val defaultOptions = ScriptOptions(
-      validationCommand = null,
-      dryRun = false,
-      ReleasesRange(first = None, last = None),
-      shouldFail = false
-    )
-    parseArgs(args, defaultOptions)
-
-  private def parseArgs(args: Seq[String], options: ScriptOptions): ScriptOptions =
-    println(s"parse: $args")
-    args match
-      case "--dry-run" :: argsRest => parseArgs(argsRest, options.copy(dryRun = true))
-      case "--releases" :: argsRest =>
-        val range = ReleasesRange.tryParse(argsRest.head).get
-        parseArgs(argsRest.tail, options.copy(releasesRange = range))
-      case "--should-fail" :: argsRest => parseArgs(argsRest, options.copy(shouldFail = true))
-      case args =>
-        val command = ValidationCommand.fromArgs(args)
-        options.copy(validationCommand = command)
-
-case class ValidationCommand(projectName: String, openCommunityBuildDir: File,  targets: Seq[String]):
-  val remoteValidationScript: File = ValidationScript.buildProject(
-    projectName = projectName,
-    targets = Option.when(targets.nonEmpty)(targets.mkString(" ")),
-    extraScalacOptions = "",
-    disabledScalacOption="",
-    runId ="test",
-    buildURL="",
-    executeTests = false
+  lazy val remoteValidationScript: File = ValidationScript.buildProject(
+    projectName = command.projectName,
+    targets = Option(command.targets).filter(_.nonEmpty),
+    extraScalacOptions = command.extraScalacOptions,
+    disabledScalacOption= command.disabledScalacOption,
+    runId = s"bisect-${command.projectName}",
+    buildURL= "",
+    executeTests = false,
+    openCBDir = openCommunityBuildDir
   )
-  val validationScript: File = ValidationScript.dockerRunBuildProject(projectName, remoteValidationScript, openCommunityBuildDir)
+  lazy val validationScript: File = 
+    require(Files.exists(openCommunityBuildDir), "Open CB dir does not exist")
+    require(Files.exists(compilerDir), "Compiler dir does not exist")
+    ValidationScript.dockerRunBuildProject(command.projectName, remoteValidationScript, openCommunityBuildDir.toFile())
+}
 
-object ValidationCommand:
-  def fromArgs(args: Seq[String]) =
-    args match
-      case Seq(projectName, openCBDir, targets*) => ValidationCommand(projectName, new File(openCBDir), targets)
-
+object Config{
+  val parser = {
+    import scopt.OParser
+    val builder = OParser.builder[Config]
+    import builder.*
+    OParser.sequence(
+      head("Scala 3 Open Community Build bisect", communityBuildVersion),
+      opt[Unit]("dry-run")
+        .action:
+          (_, c) => c.copy(dryRun = true)
+        .text("Don't try to bisect - just make sure the validation command works correctly"),
+      opt[String]("releases")
+        .action:
+          (v, c) => c.copy(releasesRange = ReleasesRange.tryParse(v).getOrElse(c.releasesRange))
+        .text("Bisect only releases from the given range 'first..last' (defaults to all releases)"),
+      opt[Unit]("should-fail")
+        .action:
+          (_, c) => c.copy(shouldFail = true)
+        .text("Expect the validation command to fail rather that succeed. This can be used e.g. to find out when some illegal code started to compile"),
+      opt[String]("project-name")
+        .action:
+          (v, c) => c.withCommand(_.copy(projectName =v ))
+        .text("Name of the project to run using GitHub coordinates")
+        .required(),
+      opt[String]("targets")
+        .action:
+          (v, c) => c.withCommand(_.copy(targets = v))
+        .text("Comma delimited list of targets to limit scope of project building"),
+      opt[String]("extra-scalac-options")
+        .action:
+          (v, c) => c.withCommand(_.copy(extraScalacOptions = v))
+        .text("Extra scalac options passed to project build"),
+      opt[String]("disabled-scalac-options")
+        .action:
+          (v, c) => c.withCommand(_.copy(disabledScalacOption = v))
+        .text("Filtered out scalac options passed to project build"),
+      opt[String]("community-build-dir")
+        .action:
+          (v, c) => c.copy(openCommunityBuildDir = Path.of(v))
+        .text("Directory with community build project from which the project config would be resolved")
+        .required(),
+      opt[String]("compiler-dir")
+        .action:
+          (v, c) => c.copy(compilerDir = Path.of(v))
+        .text("Directory containing Scala compiler repository, required for commit-based bissect")
+        .required()
+      ,
+      checkConfig { c =>
+        if !Files.exists(c.compilerDir) then failure("Compiler directory does not exist")
+        else if !Files.exists(c.openCommunityBuildDir) then failure("Open Community Build directory does not exist")
+        else success
+      }
+    )
+  }
+}
 
 object ValidationScript:
-  def buildProject(projectName: String, targets: Option[String], extraScalacOptions: String, disabledScalacOption: String, runId: String, buildURL: String, executeTests: Boolean): File = tmpScript{
+  def buildProject(projectName: String, targets: Option[String], extraScalacOptions: String, disabledScalacOption: String, runId: String, buildURL: String, executeTests: Boolean, openCBDir: Path): File = tmpScript(openCBDir){
     val configPatch =
       if executeTests
       then ""
@@ -159,31 +153,16 @@ object ValidationScript:
     |  "$extraScalacOptions" \
     |  "$disabledScalacOption"
     |
-    |#/build/feed-elastic.sh \
-    |#  'https://scala3.westeurope.cloudapp.azure.com/data' \
-    |#  "${projectName}" \
-    |#  "$$(cat build-status.txt)" \
-    |#  "$$(date --iso-8601=seconds)" \
-    |#  build-summary.txt \
-    |#  build-logs.txt \
-    |#  "$$(config .version)" \
-    |#  "$${scalaVersion}" \
-    |#  "${runId}" \
-    |#  "${buildURL}"
-    |#
-    |#if [ $$? != 0 ]; then
-    |#  echo "::warning title=Indexing failure::Indexing results of ${projectName} failed"
-    |#fi
-    |
     |grep -q "success" build-status.txt;
     |exit $$?
     """.stripMargin
   }
 
   def dockerRunBuildProject(projectName: String, validationScript: File, openCBDir: File): File =
+    val scriptsPath = "/scripts/"
     val validationScriptPath="/scripts/validationScript.sh"
-    val imageVersion = "v0.2.4"
-    tmpScript(raw"""
+    assert(Files.exists(validationScript.toPath()))
+    tmpScript(openCBDir.toPath)(raw"""
       |#!/usr/bin/env bash
       |set -e
       |scalaVersion=$$1
@@ -193,13 +172,13 @@ object ValidationScript:
       |docker run --rm \
       |  -v ${validationScript.getAbsolutePath()}:$validationScriptPath \
       |  -v ${openCBDir.getAbsolutePath()}:/opencb/ \
-      |  virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-$imageVersion \
-      |  /bin/bash $validationScriptPath $$scalaVersion
+      |  virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-$communityBuildVersion \
+      |  /bin/bash -c "$validationScriptPath $$scalaVersion"
     """.stripMargin)
-
-  private def tmpScript(content: String): File =
+  
+  private def tmpScript(openCBDir: Path)(content: String): File =
     val executableAttr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
-    val tmpPath = Files.createTempFile("scala-bisect-validator", "", executableAttr)
+    val tmpPath = Files.createTempFile(openCBDir, "scala-bisect-validator", ".sh", executableAttr)
     val tmpFile = tmpPath.toFile
 
     print(s"Bisecting with validation script: ${tmpPath.toAbsolutePath}\n")

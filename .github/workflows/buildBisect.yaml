@@ -14,7 +14,7 @@ on:
       project-targets:
         type: string
         description: "List of project targets to builds (comma deliomited)"
-        default: "*"
+        default: ""
       repository-url:
         type: string
         description: "GitHub repository URL for compiler to build"
@@ -53,24 +53,19 @@ jobs:
           repository: ${{ inputs.repository-url }}
           ref: main
           path: "compiler"
-      - uses: coursier/cache-action@v6.4
 
-      - name: Check java version
-        shell: bash
-        run: |
-          ConfigFile=".github/workflows/buildConfig.json"
-          DefaultJDK=11
-          javaVersion=$(jq -r ".\"${{ inputs.project-name }}\".config.java.version // ${DefaultJDK}" $ConfigFile)
-          echo "java-version=$javaVersion" >> $GITHUB_ENV
-          echo "JavaVersion set to $javaVersion"
+      - uses: coursier/cache-action@v6.4
 
       - name: "Bisect project"
         shell: bash
         run: |
+          cd ${{ github.workspace }}/compiler
+          git --no-pager log -1
           ${{ github.workspace }}/opencb/scripts/bisect.scala -- \ 
-            --releases ${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
-            --extra-scalac-options ${{ inputs.extra-scalac-options }} \
-            --disabled-scalac-options ${{ inputs.disabled-scalac-options }} \
-            --community-build-dir ${{ github.workspace }}/opencb \
-            --compiler-dir ${{ github.workspace }}/compiler \
-            ${{ inputs.project-name }} ${{ inputs.project-targets }}
+            --project-name=${{ inputs.project-name }} \
+            --targets=${{ inputs.project-targets }} \
+            --releases=${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
+            --extra-scalac-options=${{ inputs.extra-scalac-options }} \
+            --disabled-scalac-options=${{ inputs.disabled-scalac-options }} \
+            --community-build-dir=${{ github.workspace }}/opencb \
+            --compiler-dir=${{ github.workspace }}/compiler
