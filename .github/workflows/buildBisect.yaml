@@ -1,5 +1,5 @@
 name: "Open CB: bisect"
-run-name: ${{ inputs.build-name != '' && inputs.build-name || format('{0} - Scala {1} @ {2} / {3} {4}{5}', inputs.project-name, inputs.published-scala-version != '' && inputs.published-scala-version || 'snapshot', inputs.repository-url, inputs.repository-branch, inputs.extra-scalac-options != '' && format('extraScalacOptions={0} ', inputs.extra-scalac-options) || '', inputs.disabled-scalac-options != '' && format('disabledScalacOptions={0}', inputs.disabled-scalac-options) || '' ) }}
+run-name: ${{ inputs.build-name != '' && inputs.build-name || format('Bisect {1}', inputs.project-name) }}
 
 on:
   workflow_dispatch:
@@ -11,9 +11,13 @@ on:
       project-name:
         type: string
         description: "Name of a project to build using GitHub coordinates <org>/<repo> eg. VirtusLab/scala-cli"
+      project-targets:
+        type: string
+        description: "List of project targets to builds (comma deliomited)"
+        default: "*"
       repository-url:
         type: string
-        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
+        description: "GitHub repository URL for compiler to build"
         default: "lampepfl/dotty"
       scala-version-start:
         type: string
@@ -31,6 +35,7 @@ on:
         type: string
         description: "List of scalacOptions which should be filtered out when building projects."
         default: ""
+      
 jobs:
   run-bisect:
     runs-on: ubuntu-22.04
@@ -38,6 +43,11 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: "Git Checkout"
+        uses: actions/checkout@v3
+        with: 
+          path: opencb
+
+      - name: "Git Checkout compiler"
         uses: actions/checkout@v3
         with:
           repository: ${{ inputs.repository-url }}
@@ -54,15 +64,13 @@ jobs:
           echo "java-version=$javaVersion" >> $GITHUB_ENV
           echo "JavaVersion set to $javaVersion"
 
-
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        with:
-          project-name: ${{ inputs.project-name }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          github-key: ${{ secrets.OPENCB_GITHUB_KEY }}
+      - name: "Bisect project"
+        shell: bash
+        run: |
+          ${{ github.workspace }}/opencb/scripts/bisect.scala -- \ 
+            --releases ${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
+            --extra-scalac-options ${{ inputs.extra-scalac-options }} \
+            --disabled-scalac-options ${{ inputs.disabled-scalac-options }} \
+            --community-build-dir ${{ github.workspace }}/opencb \
+            --compiler-dir ${{ github.workspace }}/compiler \
+            ${{ inputs.project-name }} ${{ inputs.project-targets }}

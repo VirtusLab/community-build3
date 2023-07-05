@@ -8,12 +8,18 @@ Look at the `usageMessage` below for more details.
 */
 
 
+
+
 import sys.process._
 import scala.io.Source
 import java.io.File
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+
+        //  --extra-scalac-options ${{ inputs.extra-scalac-options }} \
+        //     --disabled-scalac-options ${{ inputs.disabled-scalac-options }} \
+        //     --community-build-dir ${{ github.workspace }}/opencb
 
 val usageMessage = """
   |Usage:
@@ -23,16 +29,25 @@ val usageMessage = """
   |* --dry-run
   |    Don't try to bisect - just make sure the validation command works correctly
   |
+  |* --extra-scalac-options <options>
+  |    Comma delimited of additional scalacOptions passed to project build
+  |
+  |* --disabled-scalac-options <options>
+  |    Comma delimited of disabled scalacOptions passed to project build
+  |
+  |* --community-build-dir <path>
+  |    Directory with community build project from which the project config would be resolved
+  |
+  |* --compiler-dir <path>
+  |    Directory containing Scala compiler repository, required for commit-based bissect
+  |
   |* --releases <releases-range>
   |    Bisect only releases from the given range (defaults to all releases).
-  |    The range format is <first>...<last>, where both <first> and <last> are optional, e.g.
+  |    The range format is <first>..<last>, where both <first> and <last> are optional, e.g.
   |    * 3.1.0-RC1-bin-20210827-427d313-NIGHTLY..3.2.1-RC1-bin-20220716-bb9c8ff-NIGHTLY
   |    * 3.2.1-RC1-bin-20220620-de3a82c-NIGHTLY..
   |    * ..3.3.0-RC1-bin-20221124-e25362d-NIGHTLY
   |    The ranges are treated as inclusive.
-  |
-  |* --bootstrapped
-  |    Publish locally and test a bootstrapped compiler rather than a nonboostrapped one.
   |
   |* --should-fail
   |    Expect the validation command to fail rather that succeed. This can be used e.g. to find out when some illegal code started to compile.
@@ -60,17 +75,16 @@ val usageMessage = """
     println(s"First bad release: ${firstBadRelease.version}")
     println("\nFinished bisecting releases\n")
 
-    val commitBisect = CommitBisect(validationScript, shouldFail = scriptOptions.shouldFail, bootstrapped = scriptOptions.bootstrapped, lastGoodRelease.hash, firstBadRelease.hash)
+    val commitBisect = CommitBisect(validationScript, shouldFail = scriptOptions.shouldFail, lastGoodRelease.hash, firstBadRelease.hash)
     commitBisect.bisect()
 
 
-case class ScriptOptions(validationCommand: ValidationCommand, dryRun: Boolean, bootstrapped: Boolean, releasesRange: ReleasesRange, shouldFail: Boolean)
+case class ScriptOptions(validationCommand: ValidationCommand, dryRun: Boolean, releasesRange: ReleasesRange, shouldFail: Boolean)
 object ScriptOptions:
   def fromArgs(args: Seq[String]) =
     val defaultOptions = ScriptOptions(
       validationCommand = null,
       dryRun = false,
-      bootstrapped = false,
       ReleasesRange(first = None, last = None),
       shouldFail = false
     )
@@ -80,17 +94,15 @@ object ScriptOptions:
     println(s"parse: $args")
     args match
       case "--dry-run" :: argsRest => parseArgs(argsRest, options.copy(dryRun = true))
-      case "--bootstrapped" :: argsRest => parseArgs(argsRest, options.copy(bootstrapped = true))
       case "--releases" :: argsRest =>
         val range = ReleasesRange.tryParse(argsRest.head).get
         parseArgs(argsRest.tail, options.copy(releasesRange = range))
       case "--should-fail" :: argsRest => parseArgs(argsRest, options.copy(shouldFail = true))
       case args =>
-        println(s"command: $args")
         val command = ValidationCommand.fromArgs(args)
         options.copy(validationCommand = command)
 
-case class ValidationCommand(projectName: String, openCommunityBuildDir: File, targets: Seq[String]):
+case class ValidationCommand(projectName: String, openCommunityBuildDir: File,  targets: Seq[String]):
   val remoteValidationScript: File = ValidationScript.buildProject(
     projectName = projectName,
     targets = Option.when(targets.nonEmpty)(targets.mkString(" ")),
@@ -104,7 +116,6 @@ case class ValidationCommand(projectName: String, openCommunityBuildDir: File, t
 
 object ValidationCommand:
   def fromArgs(args: Seq[String]) =
-    println(args)
     args match
       case Seq(projectName, openCBDir, targets*) => ValidationCommand(projectName, new File(openCBDir), targets)
 
@@ -119,7 +130,7 @@ object ValidationScript:
     |#!/usr/bin/env bash
     |set -e
     |
-    |scalaVersion="$$1"       # e.g. 3.0.0-RC3
+    |scalaVersion="$$1"       # e.g. 3.3.3
     |
     |DefaultConfig='{"memoryRequestMb":4096}'
     |ConfigFile="/opencb/.github/workflows/buildConfig.json"
@@ -217,7 +228,7 @@ case class ReleasesRange(first: Option[String], last: Option[String]):
 object ReleasesRange:
   def all = ReleasesRange(None, None)
   def tryParse(range: String): Option[ReleasesRange] = range match
-    case s"${first}...${last}" => Some(ReleasesRange(
+    case s"${first}..${last}" => Some(ReleasesRange(
       Some(first).filter(_.nonEmpty),
       Some(last).filter(_.nonEmpty)
     ))
@@ -287,11 +298,12 @@ class ReleaseBisect(validationScript: File, shouldFail: Boolean, allReleases: Ve
       isGood
     })
 
-class CommitBisect(validationScript: File, shouldFail: Boolean, bootstrapped: Boolean, lastGoodHash: String, fistBadHash: String):
+class CommitBisect(validationScript: File, shouldFail: Boolean, lastGoodHash: String, fistBadHash: String):
   def bisect(): Unit =
     println(s"Starting bisecting commits $lastGoodHash..$fistBadHash\n")
-    val scala3CompilerProject = if bootstrapped then "scala3-compiler-bootstrapped" else "scala3-compiler"
-    val scala3Project = if bootstrapped then "scala3-bootstrapped" else "scala3"
+    // Always bootstrapped
+    val scala3CompilerProject = "scala3-compiler-bootstrapped"
+    val scala3Project = "scala3-bootstrapped"
     val mavenRepo = "https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/"
     val validationCommandStatusModifier = if shouldFail then "! " else "" // invert the process status if failure was expected
     val bisectRunScript = raw"""
