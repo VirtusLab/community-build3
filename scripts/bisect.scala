@@ -15,7 +15,7 @@ val communityBuildVersion = "v0.2.4"
   val config = scopt.OParser
     .parse(Config.parser, args, Config())
     .getOrElse(sys.error("Failed to parse config"))
-    
+
   val validationScript = config.validationScript
   val releases = Releases.fromRange(config.releasesRange)
   val releaseBisect = ReleaseBisect(validationScript, shouldFail = config.shouldFail, releases)
@@ -28,37 +28,55 @@ val communityBuildVersion = "v0.2.4"
     println(s"First bad release: ${firstBadRelease.version}")
     println("\nFinished bisecting releases\n")
 
-    val commitBisect = CommitBisect(validationScript, shouldFail = config.shouldFail, lastGoodRelease.hash, firstBadRelease.hash)
+    val commitBisect = CommitBisect(
+      validationScript,
+      compilerDir = config.compilerDir,
+      openCommunityBuildDir = config.openCommunityBuildDir,
+      shouldFail = config.shouldFail,
+      lastGoodRelease.hash,
+      firstBadRelease.hash
+    )
     commitBisect.bisect()
+end run
 
-case class ValidationCommand(projectName: String = "", targets: String = "", extraScalacOptions: String = "", disabledScalacOption: String = "")
+case class ValidationCommand(
+    projectName: String = "",
+    targets: String = "",
+    extraScalacOptions: String = "",
+    disabledScalacOption: String = ""
+)
 case class Config(
-  dryRun: Boolean = false,
-  releasesRange: ReleasesRange = ReleasesRange.all, 
-  shouldFail: Boolean = false,
-  openCommunityBuildDir: Path = Path.of(""),
-  compilerDir: Path = Path.of(""),
-  command: ValidationCommand = ValidationCommand()
-){
-  inline def withCommand(mapping: ValidationCommand => ValidationCommand) = copy(command = mapping(command))
+    dryRun: Boolean = false,
+    releasesRange: ReleasesRange = ReleasesRange.all,
+    shouldFail: Boolean = false,
+    openCommunityBuildDir: Path = Path.of(""),
+    compilerDir: Path = Path.of(""),
+    command: ValidationCommand = ValidationCommand()
+) {
+  inline def withCommand(mapping: ValidationCommand => ValidationCommand) =
+    copy(command = mapping(command))
 
   lazy val remoteValidationScript: File = ValidationScript.buildProject(
     projectName = command.projectName,
     targets = Option(command.targets).filter(_.nonEmpty),
     extraScalacOptions = command.extraScalacOptions,
-    disabledScalacOption= command.disabledScalacOption,
+    disabledScalacOption = command.disabledScalacOption,
     runId = s"bisect-${command.projectName}",
-    buildURL= "",
+    buildURL = "",
     executeTests = false,
     openCBDir = openCommunityBuildDir
   )
-  lazy val validationScript: File = 
+  lazy val validationScript: File =
     require(Files.exists(openCommunityBuildDir), "Open CB dir does not exist")
     require(Files.exists(compilerDir), "Compiler dir does not exist")
-    ValidationScript.dockerRunBuildProject(command.projectName, remoteValidationScript, openCommunityBuildDir.toFile())
+    ValidationScript.dockerRunBuildProject(
+      command.projectName,
+      remoteValidationScript,
+      openCommunityBuildDir.toFile()
+    )
 }
 
-object Config{
+object Config {
   val parser = {
     import scopt.OParser
     val builder = OParser.builder[Config]
@@ -103,11 +121,11 @@ object Config{
         .action:
           (v, c) => c.copy(compilerDir = Path.of(v))
         .text("Directory containing Scala compiler repository, required for commit-based bissect")
-        .required()
-      ,
+        .required() ,
       checkConfig { c =>
         if !Files.exists(c.compilerDir) then failure("Compiler directory does not exist")
-        else if !Files.exists(c.openCommunityBuildDir) then failure("Open Community Build directory does not exist")
+        else if !Files.exists(c.openCommunityBuildDir) then
+          failure("Open Community Build directory does not exist")
         else success
       }
     )
@@ -115,7 +133,16 @@ object Config{
 }
 
 object ValidationScript:
-  def buildProject(projectName: String, targets: Option[String], extraScalacOptions: String, disabledScalacOption: String, runId: String, buildURL: String, executeTests: Boolean, openCBDir: Path): File = tmpScript(openCBDir){
+  def buildProject(
+      projectName: String,
+      targets: Option[String],
+      extraScalacOptions: String,
+      disabledScalacOption: String,
+      runId: String,
+      buildURL: String,
+      executeTests: Boolean,
+      openCBDir: Path
+  ): File = tmpScript(openCBDir) {
     val configPatch =
       if executeTests
       then ""
@@ -158,9 +185,9 @@ object ValidationScript:
     """.stripMargin
   }
 
-  def dockerRunBuildProject(projectName: String, validationScript: File, openCBDir: File): File =
+  def dockerRunBuildProject(projectName: String, validationScript: File, openCBDir: File): File = {
     val scriptsPath = "/scripts/"
-    val validationScriptPath="/scripts/validationScript.sh"
+    val validationScriptPath = "/scripts/validationScript.sh"
     assert(Files.exists(validationScript.toPath()))
     tmpScript(openCBDir.toPath)(raw"""
       |#!/usr/bin/env bash
@@ -175,9 +202,36 @@ object ValidationScript:
       |  virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-$communityBuildVersion \
       |  /bin/bash -c "$validationScriptPath $$scalaVersion"
     """.stripMargin)
-  
-  private def tmpScript(openCBDir: Path)(content: String): File =
-    val executableAttr = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
+  }
+
+  def buildCompilerAndValidate(
+      shouldFail: Boolean,
+      validationScript: File,
+      openCBDir: Path
+  ): File = {
+    // Always bootstrapped
+    val scala3CompilerProject = "scala3-compiler-bootstrapped"
+    val scala3Project = "scala3-bootstrapped"
+    val mavenRepo = "https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/"
+    // invert the process status if failure was expected
+    val validationCommandStatusModifier = if shouldFail then "! " else ""
+
+    tmpScript(openCBDir)(raw"""
+      |#!/usr/bin/env bash  
+      |export NIGHTLYBUILD=yes
+      |#Why we need these strange pipe operations instead of `tail -n1`?
+      |#I don't know - it would work locally, but keeps failing in GithubAction CI
+      |scalaVersion=$$(sbt "print ${scala3CompilerProject}/version" | grep . | tail -n 2 | head -n 1)
+      |echo "ScalaVersion=$${scalaVersion}"
+      |rm -r out
+      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish"
+      |${validationCommandStatusModifier}${validationScript.getAbsolutePath} "$$scalaVersion"
+      """.stripMargin)
+  }
+
+  private def tmpScript(openCBDir: Path)(content: String): File = {
+    val executableAttr =
+      PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
     val tmpPath = Files.createTempFile(openCBDir, "scala-bisect-validator", ".sh", executableAttr)
     val tmpFile = tmpPath.toFile
 
@@ -189,7 +243,7 @@ object ValidationScript:
     tmpFile.deleteOnExit()
     Files.write(tmpPath, content.getBytes(StandardCharsets.UTF_8))
     tmpFile
-
+  }
 
 case class ReleasesRange(first: Option[String], last: Option[String]):
   def filter(releases: Seq[Release]) =
@@ -207,10 +261,13 @@ case class ReleasesRange(first: Option[String], last: Option[String]):
 object ReleasesRange:
   def all = ReleasesRange(None, None)
   def tryParse(range: String): Option[ReleasesRange] = range match
-    case s"${first}..${last}" => Some(ReleasesRange(
-      Some(first).filter(_.nonEmpty),
-      Some(last).filter(_.nonEmpty)
-    ))
+    case s"${first}..${last}" =>
+      Some(
+        ReleasesRange(
+          Some(first).filter(_.nonEmpty),
+          Some(last).filter(_.nonEmpty)
+        )
+      )
     case _ => None
 
 class Releases(val releases: Vector[Release])
@@ -228,14 +285,13 @@ case class Release(version: String):
   def date: String =
     version match
       case re(date, _) => date
-      case _ => sys.error(s"Could not extract date from release name: $version")
+      case _           => sys.error(s"Could not extract date from release name: $version")
   def hash: String =
     version match
       case re(_, hash) => hash
-      case _ => sys.error(s"Could not extract hash from release name: $version")
+      case _           => sys.error(s"Could not extract hash from release name: $version")
 
   override def toString: String = version
-
 
 class ReleaseBisect(validationScript: File, shouldFail: Boolean, allReleases: Vector[Release]):
   assert(allReleases.length > 1, "Need at least 2 releases to bisect")
@@ -244,20 +300,33 @@ class ReleaseBisect(validationScript: File, shouldFail: Boolean, allReleases: Ve
 
   def verifyEdgeReleases(): Unit =
     println(s"Verifying the first release: ${allReleases.head.version}")
-    assert(isGoodRelease(allReleases.head), s"The evaluation script unexpectedly failed for the first checked release")
+    assert(
+      isGoodRelease(allReleases.head),
+      s"The evaluation script unexpectedly failed for the first checked release"
+    )
     println(s"Verifying the last release: ${allReleases.last.version}")
-    assert(!isGoodRelease(allReleases.last), s"The evaluation script unexpectedly succeeded for the last checked release")
+    assert(
+      !isGoodRelease(allReleases.last),
+      s"The evaluation script unexpectedly succeeded for the last checked release"
+    )
 
   def bisectedGoodAndBadReleases(): (Release, Release) =
     val firstBadRelease = bisect(allReleases)
-    assert(!isGoodRelease(firstBadRelease), s"Bisection error: the 'first bad release' ${firstBadRelease.version} is not a bad release")
+    assert(
+      !isGoodRelease(firstBadRelease),
+      s"Bisection error: the 'first bad release' ${firstBadRelease.version} is not a bad release"
+    )
     val lastGoodRelease = firstBadRelease.previous
-    assert(isGoodRelease(lastGoodRelease), s"Bisection error: the 'last good release' ${lastGoodRelease.version} is not a good release")
+    assert(
+      isGoodRelease(lastGoodRelease),
+      s"Bisection error: the 'last good release' ${lastGoodRelease.version} is not a good release"
+    )
     (lastGoodRelease, firstBadRelease)
 
-  extension (release: Release) private def previous: Release =
-    val idx = allReleases.indexOf(release)
-    allReleases(idx - 1)
+  extension (release: Release)
+    private def previous: Release =
+      val idx = allReleases.indexOf(release)
+      allReleases(idx - 1)
 
   private def bisect(releases: Vector[Release]): Release =
     if releases.length == 2 then
@@ -269,31 +338,38 @@ class ReleaseBisect(validationScript: File, shouldFail: Boolean, allReleases: Ve
       else bisect(releases.take(releases.length / 2 + 1))
 
   private def isGoodRelease(release: Release): Boolean =
-    isGoodReleaseCache.getOrElseUpdate(release, {
-      println(s"Testing ${release.version}")
-      val result = Seq(validationScript.getAbsolutePath, release.version).!
-      val isGood = if(shouldFail) result != 0 else result == 0 // invert the process status if failure was expected
-      println(s"Test result: ${release.version} is a ${if isGood then "good" else "bad"} release\n")
-      isGood
-    })
+    isGoodReleaseCache.getOrElseUpdate(
+      release, {
+        println(s"Testing ${release.version}")
+        val result = Seq(validationScript.getAbsolutePath, release.version).!
+        val isGood =
+          if (shouldFail) result != 0
+          else result == 0 // invert the process status if failure was expected
+        println(
+          s"Test result: ${release.version} is a ${if isGood then "good" else "bad"} release\n"
+        )
+        isGood
+      }
+    )
 
-class CommitBisect(validationScript: File, shouldFail: Boolean, lastGoodHash: String, fistBadHash: String):
-  def bisect(): Unit =
+class CommitBisect(
+    validationScript: File,
+    compilerDir: Path,
+    openCommunityBuildDir: Path,
+    shouldFail: Boolean,
+    lastGoodHash: String,
+    fistBadHash: String
+):
+  def bisect(): Unit = {
     println(s"Starting bisecting commits $lastGoodHash..$fistBadHash\n")
-    // Always bootstrapped
-    val scala3CompilerProject = "scala3-compiler-bootstrapped"
-    val scala3Project = "scala3-bootstrapped"
-    val mavenRepo = "https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/"
-    val validationCommandStatusModifier = if shouldFail then "! " else "" // invert the process status if failure was expected
-    val bisectRunScript = raw"""
-      |export NIGHTLYBUILD=yes
-      |scalaVersion=$$(sbt "print ${scala3CompilerProject}/version" | tail -n1)
-      |rm -r out
-      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish"
-      |${validationCommandStatusModifier}${validationScript.getAbsolutePath} "$$scalaVersion"
-    """.stripMargin
+    val scriptFile = ValidationScript.buildCompilerAndValidate(
+      shouldFail,
+      validationScript,
+      openCBDir = openCommunityBuildDir
+    )
     "git bisect start".!
     s"git bisect bad $fistBadHash".!
     s"git bisect good $lastGoodHash".!
-    Seq("git", "bisect", "run", "sh", "-c", bisectRunScript).!
-    s"git bisect reset".!
+    Seq("git", "bisect", "run", scriptFile.getAbsolutePath()).!
+    "git bisect reset".!
+  }

@@ -52,6 +52,7 @@ jobs:
         with:
           repository: ${{ inputs.repository-url }}
           ref: main
+          fetch-depth: 0
           path: "compiler"
 
       - uses: coursier/cache-action@v6.4
@@ -60,8 +61,10 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/compiler
-          git --no-pager log -1
-          ${{ github.workspace }}/opencb/scripts/bisect.scala -- \ 
+          echo "Last 3 Scala compiler commits:"
+          git --no-pager log -3
+          echo "---"
+          scala-cli ${{ github.workspace }}/opencb/scripts/bisect.scala -- \
             --project-name=${{ inputs.project-name }} \
             --targets=${{ inputs.project-targets }} \
             --releases=${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
