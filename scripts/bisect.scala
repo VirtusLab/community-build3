@@ -224,15 +224,7 @@ object ValidationScript:
       |scalaVersion=$$(sbt "print ${scala3CompilerProject}/version" | grep . | tail -n 2 | head -n 1)
       |echo "ScalaVersion=$${scalaVersion}"
       |rm -r out
-      |
-      |JVM_HOME_SBT=""
-      |if [[ -v CI && -z "$${JAVA_HOME_8_X64}" ]]; then 
-      | echo "Java 8 HOME not set"; exit 1;
-      |else
-      | JVM_HOME_SBT="--java-home=$${JAVA_HOME_8_X64}"
-      |fi
-      |
-      |sbt $${JVM_HOME_SBT} "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish"
+      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish"
       |${validationCommandStatusModifier}${validationScript.getAbsolutePath} "$$scalaVersion"
       """.stripMargin)
   }
