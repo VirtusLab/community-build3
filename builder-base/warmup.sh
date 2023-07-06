@@ -14,5 +14,9 @@ echo 'scalaVersion := "'$scala_version'"' > build.sbt
 echo '@main def run = println("Warmed up.")' > A.scala
 
 for version in $(echo $SBT_VERSIONS); do
+  java -version
   sbt --sbt-version $version --batch run
 done
+
+cd ..
+rm -rf warm_up
