@@ -49,8 +49,8 @@ case class Config(
     dryRun: Boolean = false,
     releasesRange: ReleasesRange = ReleasesRange.all,
     shouldFail: Boolean = false,
-    openCommunityBuildDir: Path = Path.of(""),
-    compilerDir: Path = Path.of(""),
+    openCommunityBuildDir: Path = Paths.get(""),
+    compilerDir: Path = Paths.get(""),
     command: ValidationCommand = ValidationCommand()
 ) {
   inline def withCommand(mapping: ValidationCommand => ValidationCommand) =
@@ -114,12 +114,12 @@ object Config {
         .text("Filtered out scalac options passed to project build"),
       opt[String]("community-build-dir")
         .action:
-          (v, c) => c.copy(openCommunityBuildDir = Path.of(v))
+          (v, c) => c.copy(openCommunityBuildDir = Paths.get(v))
         .text("Directory with community build project from which the project config would be resolved")
         .required(),
       opt[String]("compiler-dir")
         .action:
-          (v, c) => c.copy(compilerDir = Path.of(v))
+          (v, c) => c.copy(compilerDir = Paths.get(v))
         .text("Directory containing Scala compiler repository, required for commit-based bissect")
         .required() ,
       checkConfig { c =>
