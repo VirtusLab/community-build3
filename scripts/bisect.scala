@@ -224,7 +224,7 @@ object ValidationScript:
       |scalaVersion=$$(sbt "print ${scala3CompilerProject}/version" | grep . | tail -n 2 | head -n 1)
       |echo "ScalaVersion=$${scalaVersion}"
       |rm -r out
-      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish"
+      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); set every doc := new File(\"unused\"); set scaladoc/Compile/resourceGenerators := (\`${scala3Project}\`/Compile/resourceGenerators).value; ${scala3Project}/publish"
       |${validationCommandStatusModifier}${validationScript.getAbsolutePath} "$$scalaVersion"
       """.stripMargin)
   }

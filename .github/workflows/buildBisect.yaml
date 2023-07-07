@@ -64,9 +64,6 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/compiler
-          echo "Last 3 Scala compiler commits:"
-          git --no-pager log -3
-          echo "---"
           scala-cli ${{ github.workspace }}/opencb/scripts/bisect.scala -- \
             --project-name=${{ inputs.project-name }} \
             --targets=${{ inputs.project-targets }} \
