@@ -122,6 +122,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String)
         "--power",
         task.command,
         repositoryDir,
+        s"--server=false",
         s"--scala-version=${scalaVersion}"
       )
       .call(check = false, stderr = os.Pipe)
