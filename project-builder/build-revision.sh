@@ -49,5 +49,4 @@ else
   scala-cli clean $scriptDir/scala-cli/
   scala-cli clean repo
   scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig"
-  exit 1
 fi
