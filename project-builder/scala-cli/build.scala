@@ -15,7 +15,9 @@ import os.CommandResult
     configJson: String
 ): Unit = {
   println(s"Build config: ${configJson}")
-  val config = read[ProjectBuildConfig](configJson)
+  val config =
+    if (configJson.isEmpty()) ProjectBuildConfig()
+    else read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
 
   val evaluator = CliTaskEvaluator(scalaVersion, repositoryDir)
