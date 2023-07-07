@@ -180,7 +180,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*[\w\-\_\.]*)$OptQuote".r
     val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
     // We can only supported this versions
-    val allowedVersions = Seq(8, 11, 17, 19)
+    val allowedVersions = Seq(8, 11, 17, 20)
 
     def isJavaVersionMatrixEntry(key: String): Boolean = {
       Set("java", "jdk", "jvm", "release").contains(key.toLowerCase)
