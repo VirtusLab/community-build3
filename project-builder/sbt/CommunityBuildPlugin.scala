@@ -217,12 +217,12 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
 
   val appendScalacOptions = keyTransformCommand("appendScalacOptions", Keys.scalacOptions) {
-    (args, extracted) => (_: Scope, currentScalacOptions: Seq[String]) =>
-      (currentScalacOptions ++ args).distinct
+    (args, _) => (_: Scope, currentScalacOptions: Seq[String]) =>
+      currentScalacOptions ++ args.filterNot(currentScalacOptions.contains)  
   }
 
   val removeScalacOptions = keyTransformCommand("removeScalacOptions", Keys.scalacOptions) {
-    (args, extracted) => (_: Scope, currentScalacOptions: Seq[String]) =>
+    (args, _) => (_: Scope, currentScalacOptions: Seq[String]) =>
       currentScalacOptions.filterNot(args.contains)
   }
 
@@ -238,7 +238,7 @@ object CommunityBuildPlugin extends AutoPlugin {
               case (rule, (org, 0))      => rule.withOrganization(org)
               case (rule, (name, 1))     => rule.withName(name)
               case (rule, (artifact, 2)) => rule.withArtifact(artifact)
-              case (rule, (unexpected, idx)) =>
+              case (_, (unexpected, idx)) =>
                 sys.error(s"unexpected argument $unexpected at idx: $idx")
             }
           }
