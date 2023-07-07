@@ -1133,7 +1133,7 @@
         }
       },
       "java":{
-        "version":"11"
+        "version":"8"
       },
       "sbt":{
         "commands":[
@@ -1159,44 +1159,6 @@
       ]
     }
   },
-  "apache/incubator-pekko-connectors":{
-    "project":"apache/incubator-pekko-connectors",
-    "repoUrl":"https://github.com/apache/incubator-pekko-connectors.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "apache/incubator-pekko-connectors-kafka":{
     "project":"apache/incubator-pekko-connectors-kafka",
     "repoUrl":"https://github.com/apache/incubator-pekko-connectors-kafka.git",
@@ -1209,7 +1171,9 @@
           
         ],
         "overrides":{
-          
+          "pekko-connectors-kafka-java-tests":{
+            "tests":"compile-only"
+          }
         }
       },
       "java":{
@@ -1290,7 +1254,12 @@
     "config":{
       "projects":{
         "exclude":[
-          
+          "pekko-http-scalafix-rules",
+          "pekko-http-scalafix-tests",
+          "http-scalafix-test-input",
+          "http-scalafix-test-output",
+          "pekko-http-tests",
+          "pekko-http-docs"
         ],
         "overrides":{
           
@@ -1365,48 +1334,6 @@
       ]
     }
   },
-  "apache/incubator-pekko-persistence-cassandra":{
-    "project":"apache/incubator-pekko-persistence-cassandra",
-    "repoUrl":"https://github.com/apache/incubator-pekko-persistence-cassandra.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        {
-          "path":"project/Dependencies.scala",
-          "pattern":"val scala3Version = \"3.1.2\"",
-          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "apache/incubator-pekko-persistence-dynamodb":{
     "project":"apache/incubator-pekko-persistence-dynamodb",
     "repoUrl":"https://github.com/apache/incubator-pekko-persistence-dynamodb.git",
@@ -1438,121 +1365,7 @@
           
         ]
       },
-      "tests":"full",
-      "memoryRequestMb":4096,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "apache/incubator-pekko-persistence-jdbc":{
-    "project":"apache/incubator-pekko-persistence-jdbc",
-    "repoUrl":"https://github.com/apache/incubator-pekko-persistence-jdbc.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":4096,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "apache/incubator-pekko-persistence-r2dbc":{
-    "project":"apache/incubator-pekko-persistence-r2dbc",
-    "repoUrl":"https://github.com/apache/incubator-pekko-persistence-r2dbc.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "apache/incubator-pekko-projection":{
-    "project":"apache/incubator-pekko-projection",
-    "repoUrl":"https://github.com/apache/incubator-pekko-projection.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
+      "tests":"compile-only",
       "memoryRequestMb":4096,
       "sourcePatches":[
         
@@ -8075,6 +7888,48 @@
       ]
     }
   },
+  "errors4s/errors4s-core":{
+    "project":"errors4s/errors4s-core",
+    "repoUrl":"https://github.com/errors4s/errors4s-core.git",
+    "revision":"v1.0.0.0",
+    "version":"1.0.0.0",
+    "targets":"org.errors4s%errors4s-core org.errors4s%errors4s-core-cats org.errors4s%errors4s-core-root org.errors4s%errors4s-core-scalacheck",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3        = \"3.0.2\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "etorreborre/specs2":{
     "project":"etorreborre/specs2",
     "repoUrl":"https://github.com/etorreborre/specs2.git",
@@ -9503,6 +9358,44 @@
       ]
     }
   },
+  "geirolz/fluent-copy":{
+    "project":"geirolz/fluent-copy",
+    "repoUrl":"https://github.com/geirolz/fluent-copy.git",
+    "revision":"v0.0.1",
+    "version":"0.0.1",
+    "targets":"com.github.geirolz%fluent-copy",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "geirolz/fly4s":{
     "project":"geirolz/fly4s",
     "repoUrl":"https://github.com/geirolz/fly4s.git",
@@ -9793,6 +9686,44 @@
       },
       "tests":"full",
       "memoryRequestMb":3072,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "gemini-hlsw/lucuma-graphql-routes":{
+    "project":"gemini-hlsw/lucuma-graphql-routes",
+    "repoUrl":"https://github.com/gemini-hlsw/lucuma-graphql-routes.git",
+    "revision":"v0.6.5",
+    "version":"0.6.5",
+    "targets":"edu.gemini%lucuma-graphql-routes-core edu.gemini%lucuma-graphql-routes-grackle edu.gemini%lucuma-graphql-routes-sangria",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
       "sourcePatches":[
         
       ]
@@ -10596,6 +10527,13 @@
         }
       ]
     }
+  },
+  "guidoschmidt17/zio-pgcopy":{
+    "project":"guidoschmidt17/zio-pgcopy",
+    "repoUrl":"https://github.com/guidoschmidt17/zio-pgcopy.git",
+    "revision":"",
+    "version":"0.1.0-RC1",
+    "targets":"com.guidoschmidt17%zio-pgcopy"
   },
   "guntiso/mojoz":{
     "project":"guntiso/mojoz",
@@ -16178,6 +16116,48 @@
       ]
     }
   },
+  "linyxus/papiers-core":{
+    "project":"linyxus/papiers-core",
+    "repoUrl":"https://github.com/linyxus/papiers-core.git",
+    "revision":"",
+    "version":"0.2.0",
+    "targets":"io.github.linyxus%papiers-core",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.3.0-RC3\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "liquibase4s/liquibase4s":{
     "project":"liquibase4s/liquibase4s",
     "repoUrl":"https://github.com/liquibase4s/liquibase4s.git",
@@ -17438,6 +17418,48 @@
       "memoryRequestMb":2048,
       "sourcePatches":[
         
+      ]
+    }
+  },
+  "mrdimosthenis/scala-synapses":{
+    "project":"mrdimosthenis/scala-synapses",
+    "repoUrl":"https://github.com/mrdimosthenis/scala-synapses.git",
+    "revision":"v8.0.0",
+    "version":"8.0.0",
+    "targets":"com.github.mrdimosthenis%synapses",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.0.1\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
       ]
     }
   },
@@ -27181,6 +27203,13 @@
       ]
     }
   },
+  "swaldman/untemplate":{
+    "project":"swaldman/untemplate",
+    "repoUrl":"https://github.com/swaldman/untemplate.git",
+    "revision":"v0.0.4",
+    "version":"0.0.4",
+    "targets":"com.mchange%untemplate"
+  },
   "sweet-delights/delightful-cron":{
     "project":"sweet-delights/delightful-cron",
     "repoUrl":"https://github.com/sweet-delights/delightful-cron.git",
@@ -27415,48 +27444,6 @@
         {
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.2.0\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "taig/flog":{
-    "project":"taig/flog",
-    "repoUrl":"https://github.com/taig/flog.git",
-    "revision":"0.14.0",
-    "version":"0.14.0",
-    "targets":"io.taig%flog-http4s io.taig%flog io.taig%flog-http4s-server io.taig%flog-http4s-client io.taig%flog-core io.taig%flog-slf4j",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.0\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
