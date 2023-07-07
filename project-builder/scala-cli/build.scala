@@ -76,7 +76,7 @@ import os.CommandResult
      |************************"
      |""".stripMargin)
 
-  val outputDir = os.pwd / os.up
+  val outputDir = os.pwd
   os.write.over(outputDir / "build-summary.txt", buildSummary.toJson)
 
   val failedModules = projectsBuildResults
