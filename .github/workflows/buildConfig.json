@@ -1158,9 +1158,9 @@
   "apache/incubator-pekko":{
     "project":"apache/incubator-pekko",
     "repoUrl":"https://github.com/apache/incubator-pekko.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
+    "targets":"org.apache.pekko%pekko-stream-typed org.apache.pekko%pekko-persistence org.apache.pekko%pekko-slf4j org.apache.pekko%pekko-actor org.apache.pekko%pekko-cluster-sharding-typed org.apache.pekko%pekko-persistence-query org.apache.pekko%pekko-cluster-tools org.apache.pekko%pekko-actor-typed org.apache.pekko%pekko-actor-testkit-typed org.apache.pekko%pekko-stream-testkit org.apache.pekko%pekko-persistence-testkit org.apache.pekko%pekko-bom org.apache.pekko%pekko-protobuf-v3 org.apache.pekko%pekko-persistence-typed org.apache.pekko%pekko-serialization-jackson org.apache.pekko%pekko-remote org.apache.pekko%pekko-persistence-tck org.apache.pekko%pekko-testkit org.apache.pekko%pekko-discovery org.apache.pekko%pekko-cluster-metrics org.apache.pekko%pekko-stream org.apache.pekko%pekko-osgi org.apache.pekko%pekko-coordination org.apache.pekko%pekko-distributed-data org.apache.pekko%pekko-cluster-sharding org.apache.pekko%pekko-multi-node-testkit org.apache.pekko%pekko-protobuf org.apache.pekko%pekko-cluster-typed org.apache.pekko%pekko-pki org.apache.pekko%pekko-cluster",
     "config":{
       "projects":{
         "exclude":[
@@ -1209,9 +1209,7 @@
           
         ],
         "overrides":{
-          "pekko-connectors-kafka-java-tests":{
-            "tests":"compile-only"
-          }
+          
         }
       },
       "java":{
@@ -1230,7 +1228,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "memoryRequestMb":4096,
       "sourcePatches":[
         {
@@ -5687,6 +5685,44 @@
       },
       "java":{
         "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "davenverse/epimetheus-redis4cats":{
+    "project":"davenverse/epimetheus-redis4cats",
+    "repoUrl":"https://github.com/davenverse/epimetheus-redis4cats.git",
+    "revision":"v0.2.0-M2",
+    "version":"0.2.0-M2",
+    "targets":"io.chrisdavenport%epimetheus-redis4cats",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
       },
       "sbt":{
         "commands":[
