@@ -12,7 +12,8 @@ import os.CommandResult
 @main def buildScalaCliProject(
     repositoryDir: String,
     scalaVersion: String,
-    configJson: String
+    configJson: String,
+    mavenRepoURL: String
 ): Unit = {
   println(s"Build config: ${configJson}")
   val config =
@@ -20,7 +21,11 @@ import os.CommandResult
     else read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
 
-  val evaluator = CliTaskEvaluator(scalaVersion, repositoryDir)
+  val evaluator = CliTaskEvaluator(
+    scalaVersion = scalaVersion,
+    repositoryDir = repositoryDir,
+    mavenRepoURL = Option(mavenRepoURL).filterNot(_.isEmpty)
+  )
   import evaluator.{eval, evalAsDependencyOf, evalWhen}
 
   val compileResult = eval[Unit](cmd("compile"))
@@ -99,7 +104,7 @@ case class CliCommand[T](
     errHandler: (CommandResult, EvalResult.Failure) => EvalResult[T]
 )
 def cmd(args: String*) = CliCommand[Unit](args, (_, failure) => failure)
-class CliTaskEvaluator(scalaVersion: String, repositoryDir: String)
+class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL: Option[String])
     extends TaskEvaluator[CliCommand] {
   import TaskEvaluator.*
 
@@ -124,9 +129,11 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String)
         repositoryDir,
         s"--server=false",
         s"--scala-version=${scalaVersion}",
-        "--scalac-option=-J-Xss8M",
+        "--scalac-option=-J-Xss10M",
         "--scalac-option=-J-Xmx=7G",
-        "--scalac-option=-J-Xms=4G"
+        "--scalac-option=-J-Xms=4G",
+        mavenRepoURL.map(s"--repository=" + _).getOrElse(""),
+        "-v"
       )
       .call(check = false, stderr = os.Pipe)
     val result = proc.exitCode
