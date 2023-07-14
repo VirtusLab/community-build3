@@ -93,19 +93,19 @@ eval $(minikube -p minikube docker-env)
 Most likely you'll need to build the base image only once (it doesn't get modified too often but building it takes quite a lot of time), e.g.:
 
 ```shell
-scripts/build-builder-base.sh v0.2.5
+scripts/build-builder-base.sh version
 ```
 
 Build all the remaining images
 
 ```shell
-scripts/build-quick.sh v0.2.5
+scripts/build-quick.sh version
 ```
 
 or (re)build each image separately e.g.
 
 ```shell
-scripts/build-mvn-repo.sh v0.2.5
+scripts/build-mvn-repo.sh version
 ```
 
 ### Deploying and debugging in k8s
