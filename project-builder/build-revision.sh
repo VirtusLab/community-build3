@@ -48,5 +48,5 @@ else
   ls -l repo/
   scala-cli clean $scriptDir/scala-cli/
   scala-cli clean repo
-  scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig"
+  scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl"
 fi
