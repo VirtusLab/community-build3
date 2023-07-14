@@ -123,7 +123,8 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String)
         task.command,
         repositoryDir,
         s"--server=false",
-        s"--scala-version=${scalaVersion}"
+        s"--scala-version=${scalaVersion}",
+        "--javac-option=-Xss=8M,-Xmx=6G"
       )
       .call(check = false, stderr = os.Pipe)
     val result = proc.exitCode
