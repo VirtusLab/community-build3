@@ -41,6 +41,7 @@ end run
 
 case class ValidationCommand(
     projectName: String = "",
+    revision: Option[String] = None,
     targets: String = "",
     extraScalacOptions: String = "",
     disabledScalacOption: String = ""
@@ -58,6 +59,7 @@ case class Config(
 
   lazy val remoteValidationScript: File = ValidationScript.buildProject(
     projectName = command.projectName,
+    projectRevision = command.revision,
     targets = Option(command.targets).filter(_.nonEmpty),
     extraScalacOptions = command.extraScalacOptions,
     disabledScalacOption = command.disabledScalacOption,
@@ -100,6 +102,11 @@ object Config {
           (v, c) => c.withCommand(_.copy(projectName =v ))
         .text("Name of the project to run using GitHub coordinates")
         .required(),
+      opt[String]("project-revision")
+        .action:
+          (v, c) => c.withCommand(_.copy(revision = Option(v).filter(_.nonEmpty) ))
+        .text("Version of project to bisect against")
+        .required(),
       opt[String]("targets")
         .action:
           (v, c) => c.withCommand(_.copy(targets = v))
@@ -135,6 +142,7 @@ object Config {
 object ValidationScript:
   def buildProject(
       projectName: String,
+      projectRevision: Option[String],
       targets: Option[String],
       extraScalacOptions: String,
       disabledScalacOption: String,
@@ -147,6 +155,7 @@ object ValidationScript:
       if executeTests
       then ""
       else """* { "tests": "compile-only"} """
+    val revision = projectRevision.getOrElse("$(config .revision)")
     raw"""
     |#!/usr/bin/env bash
     |set -e
@@ -170,7 +179,7 @@ object ValidationScript:
     |
     |/build/build-revision.sh \
     |  "$$(config .repoUrl)" \
-    |  "$$(config .revision)" \
+    |  "$revision" \
     |  "$${scalaVersion}" \
     |  "" \
     |  "${targets.getOrElse("$(config .targets)")}" \

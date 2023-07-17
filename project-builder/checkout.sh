@@ -19,4 +19,5 @@ branch=""
 if [ -n "$rev" ]; then
   branch="-b $rev"
 fi
-git clone --quiet "$repo" "$repoDir" $branch
+git clone --quiet "$repo" "$repoDir" $branch || 
+  ( git clone --quiet "$repo" "$repoDir" && git checkout $rev )

@@ -15,6 +15,10 @@ on:
         type: string
         description: "List of project targets to builds (comma deliomited)"
         default: ""
+      project-revision:
+        type: string
+        description: "Specific version of project to bisect against"
+        default: ""
       repository-url:
         type: string
         description: "GitHub repository URL for compiler to build"
@@ -66,6 +70,7 @@ jobs:
           cd ${{ github.workspace }}/compiler
           scala-cli ${{ github.workspace }}/opencb/scripts/bisect.scala -- \
             --project-name=${{ inputs.project-name }} \
+            --project-revision=${{ inputs.project-revision }}
             --targets=${{ inputs.project-targets }} \
             --releases=${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
             --extra-scalac-options=${{ inputs.extra-scalac-options }} \
