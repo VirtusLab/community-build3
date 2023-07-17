@@ -70,7 +70,7 @@ jobs:
           cd ${{ github.workspace }}/compiler
           scala-cli ${{ github.workspace }}/opencb/scripts/bisect.scala -- \
             --project-name=${{ inputs.project-name }} \
-            --project-revision=${{ inputs.project-revision }}
+            --project-revision=${{ inputs.project-revision }} \
             --targets=${{ inputs.project-targets }} \
             --releases=${{ inputs.scala-version-start}}..${{ inputs.scala-version-end}} \
             --extra-scalac-options=${{ inputs.extra-scalac-options }} \
