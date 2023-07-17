@@ -37,10 +37,12 @@ jobs:
           key: coordinator-data-cache-${{ steps.get-date.outputs.week-start}}
 
       - name: Build plan
-        # Limit to 1000 most starred project. GitHub actions has problems when rendering workflow of more then 1k jobs
-        run: scala-cli run coordinator/ -- 3 -1 1000 "" coordinator/configs
+        # Build only projects present in filtered out list
+        run:  |
+          filtered=$(grep -vE '^\s*#|^\s*$' coordinator/configs/filtered-projects.txt | awk -F: '$2 !~ /\*/ { print $1 "/" $2 }' | tr '\n' ',')
+          echo "" > coordinator/configs/filtered-projects.txt
+          scala-cli run coordinator/ -- 3 -1 0 "${filtered}" coordinator/configs
 
-      
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
