@@ -132,8 +132,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
         "--scalac-option=-J-Xss10M",
         "--scalac-option=-J-Xmx=7G",
         "--scalac-option=-J-Xms=4G",
-        mavenRepoURL.map(s"--repository=" + _).getOrElse(""),
-        "-v"
+        mavenRepoURL.map(s"--repository=" + _).getOrElse("")
       )
       .call(check = false, stderr = os.Pipe)
     val result = proc.exitCode
