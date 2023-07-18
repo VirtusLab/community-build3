@@ -3,7 +3,6 @@
 # Not a Scala Project
 adampingel:axle-cicd:.*
 alexandru:alexandru:.*
-atedeg:scala-release:.*
 dacr:lorem-ipsum:.*
 didi:booster.*
 eclipse-pass:pass-java-client:.*
@@ -11,7 +10,6 @@ line:armeria:.*
 percontmx:cfdi:.*
 simy4:xpath-to-xml:.*
 stryker-mutator:mutation-testing-elements:.*
-tlsomers:scala-suspendable:.*
 openlink:virtuoso-opensource:.*
 sensorsdata:sa-sdk-android-plugin2:.*
 
@@ -20,8 +18,6 @@ typelevel:algebra.*:2.2.*
 
 # Unsupported sbt layout
 cchantep:play-reactivemongo:.*
-cucumber:action-publish-sbt:.*
-pityka:aten-scala:.*
 stryker:mutator_mutation-testing-elements:.*
 wireapp:wire-signals:.*
 davidledwards:zookeeper:.*
@@ -29,13 +25,10 @@ davidledwards:zookeeper:.*
 # Missing module moduleMappings
 busymachines:pureharm-db-core:.*
 eed3si9n:sbt-coursier:.*
-neandertech:jsonrpclib:.*
 
 ## maybe mill issues when mapping
 finos:morphir-scala:.*
 iltotore:iron:.*
-ichoran:kse3:.*
-almond-sh:almond:.*
 
 # Not an official release version
 com-lihaoyi:ammonite:.*
@@ -44,9 +37,7 @@ sbt:.*:2.0.0-alpha.*
 
 # Incorrect Scaladex info, no Scala 3 builds
 dataoperandz:cassper:.*
-jvican:dijon:.*
 mdedetrich:scalajson:.*
-playframework:playframework:.*
 
 # The same git info between multiple projects, leading to multiple missing ids
 tulz-app:.*:.*
@@ -57,10 +48,8 @@ pme123:camundala-dsl:.*
 # Build problems:
 ## Incorrect handling of Scala 3 binary versions
 wartremover:.*
-inkytonik:kiama:.*
 kevin-lee:can-equal:.*
 kevin-lee:just-fp:.*
-kevin-lee:logger-f:.*
 outr:testy:.*
 rocketfuel:sdbc:.*
 sciss:pdflitz:.*
@@ -78,13 +67,8 @@ e257-fi:dirsuite:.*
 ### scaladex lists only 1 Scala 3 project zio-resource in version 0.0.1 which is more recent then existing 0.1.12 version with only Scala 2 projects
 carlos-verdes:funkode:0.[0-1]\..*
 
-## Problem with ScalaPB source generation
-jelly-rdf:jelly-jvm:.*
-
 ## Uses mill-tpolecat - it does fails to parse RC versions
-joan38:kubernetes-client:.*
 neandertech:jsonrpclib:.*
-
 
 ## Missing artifacts in public repo
 # sbt-beangle-parent:0.6.0
@@ -111,14 +95,11 @@ scala-js:scala-js-macrotask-executor:.*
 msgpack4z:msgpack4z-native:.*
 
 ## Does not compile
-arturopala:gitignore:.*
-fehu:opentracing-scala:.*
 lorandszakacs:sprout:0.0.[0-5]
 rssh:scala-gopher:.*
 wangzaixiang:wjson:.*
 
 ## Outdated version, needs new release
-2m:yabai-scala:2.0.[0-1]
 caspercommunityio:casper-scala-sdk:1.[0-2].[0-1]
 kevin-lee:maven2sbt:.*
 sciss:serial:.*
@@ -130,17 +111,11 @@ jcouyang:meow:0.4.1[0-3]
 es-meta:esmeta:0.[0-1].*
 
 ## 3.2.x
-### Source breaking change
-# https://github.com/lampepfl/dotty/pull/14840#issuecomment-1182146696
-tinkoff:phobos:0.1[5-6].*
 
 #https://github.com/lampepfl/dotty/issues/15647#issuecomment-1183488713
 gzoller:scala-reflection:1.[0-1].[0-4]
 #Fork of gzoller/scala-reflection
 pjfanning:scala3-reflection:.*
-
-#https://github.com/lampepfl/dotty/issues/15678
-johnhungerford:generic-schema:1.[0-1].[0.1]
 
 #https://github.com/lampepfl/dotty/issues/15668
 kevin-lee:extras:0.*
@@ -148,7 +123,6 @@ kevin-lee:extras:0.*
 ## 3.3.x
 dmytromitin:dotty-patched:.*
 gzoller:scala-reflection:.*
-jphmrst:scala-automata:.*
 rmgk:slips:.*
 
 # var overrides
@@ -160,7 +134,6 @@ lorandszakacs:sprout:0.0.[0-5]
 # Changes to Compiler API
 nrinaudo:kantan.repl:1.*
 virtuslab:pretty-stacktraces:0.0.*
-zygfryd:scala-zygf-cement:0.3.0
 pjfanning:jackson-scala3-reflection-extensions:.*
 mpollmeier:scala-repl-pp:0.1.*
 
@@ -175,12 +148,10 @@ sdrafahl:migratepipeline:.*
 
 # Failure on project init
 aptusproject:aptus-core:.*
-j-mie6:parsley:.*
 jphmrst:scala-outlines:.*
 labra:srdf:.*
 primetalk:typed-ontology:.*
 vigoo:zio-aws:.*
-zio:zio-aws:.*
 
 
 # Depends on not published lib with CrossVersion.full
@@ -192,9 +163,6 @@ oleg-py:shironeko:0.2.0-M.*
 
 # Uses -Xsource:2.13
 sciss:fscape-next:.*
-
-# Uses -source:future, but not adapted yet to 3.2.x
-laserdisc-io:fs2-aws:5.0.*
 
 # Uses no longer allowed syntax
 ## override opaque type
@@ -224,17 +192,9 @@ xebia-functional:xef:.*
 # mill 0.11.x projects (unsupprted yet)
 coursier:dependency:.*
 
-## Published using 3.3.0-RC3, cannot be tested with any other version
-webjars:webjars-play:2.9.0-M.*
-playframework:scalatestplus-play:6.0.0-M.*
-playframework:play-mailer:9.0.0-M.*
-
 ## Library fork
 # of minosiants/pencil, tests do not compile
 kailuowang:pencil:.* 
 
 ## Private project or wrong coordinates
 emartech:escher-akka-http:.*
-
-## Requires private sbt plugin
-scalax:simple:.*
