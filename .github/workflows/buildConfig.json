@@ -37,44 +37,6 @@
       ]
     }
   },
-  "2m/yabai-scala":{
-    "project":"2m/yabai-scala",
-    "repoUrl":"https://github.com/2m/yabai-scala.git",
-    "revision":"v2.0.1",
-    "version":"2.0.1",
-    "targets":"lt.dvim.yabai%yabai-scala",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "47degrees/github4s":{
     "project":"47degrees/github4s",
     "repoUrl":"https://github.com/47degrees/github4s.git",
@@ -1046,6 +1008,44 @@
       ]
     }
   },
+  "altoo-ag/pekko-kryo-serialization":{
+    "project":"altoo-ag/pekko-kryo-serialization",
+    "repoUrl":"https://github.com/altoo-ag/pekko-kryo-serialization.git",
+    "revision":"v1.0.0-RC1",
+    "version":"1.0.0-RC1",
+    "targets":"io.altoo%pekko-kryo-serialization io.altoo%pekko-kryo-serialization-typed",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"20"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "altoo-ag/scala-kryo-serialization":{
     "project":"altoo-ag/scala-kryo-serialization",
     "repoUrl":"https://github.com/altoo-ag/scala-kryo-serialization.git",
@@ -1377,7 +1377,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"20"
       },
       "sbt":{
         "commands":[
@@ -2294,44 +2294,6 @@
       },
       "tests":"full",
       "memoryRequestMb":4096,
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "atry/futurebinding.scala":{
-    "project":"atry/futurebinding.scala",
-    "repoUrl":"https://github.com/atry/futurebinding.scala.git",
-    "revision":"v12.1.1",
-    "version":"12.1.1",
-    "targets":"com.thoughtworks.binding%futurebinding",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "memoryRequestMb":2048,
       "sourcePatches":[
         
       ]
@@ -10407,6 +10369,13 @@
         }
       ]
     }
+  },
+  "greenfossil/commons-i18n":{
+    "project":"greenfossil/commons-i18n",
+    "repoUrl":"https://github.com/greenfossil/commons-i18n.git",
+    "revision":"v1.0.2",
+    "version":"1.0.2",
+    "targets":"com.greenfossil%commons-i18n"
   },
   "greenfossil/commons-json":{
     "project":"greenfossil/commons-json",
@@ -20481,6 +20450,48 @@
       ]
     }
   },
+  "polyvariant/caliban-gitlab":{
+    "project":"polyvariant/caliban-gitlab",
+    "repoUrl":"https://github.com/polyvariant/caliban-gitlab.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"com.kubukoz%caliban-gitlab",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "memoryRequestMb":2048,
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.0.0\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "polyvariant/colorize-scala":{
     "project":"polyvariant/colorize-scala",
     "repoUrl":"https://github.com/polyvariant/colorize-scala.git",
@@ -21143,6 +21154,13 @@
       ]
     }
   },
+  "qwbarch/snowflake4s":{
+    "project":"qwbarch/snowflake4s",
+    "repoUrl":"https://github.com/qwbarch/snowflake4s.git",
+    "revision":"v1.1.0-RC1",
+    "version":"1.1.0-RC1",
+    "targets":"io.github.qwbarch%snowflake4s io.github.qwbarch%snowflake4s-circe io.github.qwbarch%snowflake4s-http4s io.github.qwbarch%snowflake4s-skunk"
+  },
   "rallyhealth/scalacheck-ops":{
     "project":"rallyhealth/scalacheck-ops",
     "repoUrl":"https://github.com/rallyhealth/scalacheck-ops.git",
@@ -21728,13 +21746,6 @@
         
       ]
     }
-  },
-  "rssh/shim--scala-async--dotty-cps-async":{
-    "project":"rssh/shim--scala-async--dotty-cps-async",
-    "repoUrl":"https://github.com/rssh/shim--scala-async--dotty-cps-async.git",
-    "revision":"0.9.17",
-    "version":"0.9.17",
-    "targets":"com.github.rssh%shim-scala-async-dotty-cps-async"
   },
   "rssh/trackedfuture":{
     "project":"rssh/trackedfuture",
@@ -26566,8 +26577,8 @@
   "softwaremill/ox":{
     "project":"softwaremill/ox",
     "repoUrl":"https://github.com/softwaremill/ox.git",
-    "revision":"v0.0.8",
-    "version":"0.0.8",
+    "revision":"v0.0.9",
+    "version":"0.0.9",
     "targets":"com.softwaremill.ox%core com.softwaremill.ox%examples",
     "config":{
       "projects":{
@@ -35173,12 +35184,5 @@
         }
       ]
     }
-  },
-  "zygfryd/scala-zygf-cement":{
-    "project":"zygfryd/scala-zygf-cement",
-    "repoUrl":"https://github.com/zygfryd/scala-zygf-cement.git",
-    "revision":"",
-    "version":"0.3.0",
-    "targets":"net.zygfryd%cement"
   }
 }

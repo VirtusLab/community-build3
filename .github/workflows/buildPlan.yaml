@@ -213,7 +213,6 @@ jobs:
         - name: "jd557/minart"
         - name: "martinhh/scalacheck-derived"
         - name: "monix/minitest"
-        - name: "rssh/shim--scala-async--dotty-cps-async"
         - name: "sbt-jib/sbt-jib"
         - name: "sbt/sbinary"
         - name: "sbt/sbt-dynver"
@@ -254,7 +253,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "2m/yabai-scala"
         - name: "47degrees/munit-akka"
         - name: "aaronp/args4c"
         - name: "aaronp/eie"
@@ -262,6 +260,7 @@ jobs:
         - name: "akka/akka-persistence-r2dbc"
         - name: "akka/alpakka-kafka"
         - name: "altoo-ag/akka-kryo-serialization"
+        - name: "altoo-ag/pekko-kryo-serialization"
         - name: "altoo-ag/scala-kryo-serialization"
         - name: "andyglow/scala-range"
         - name: "andyglow/scala-xml-diff"
@@ -312,6 +311,7 @@ jobs:
         - name: "ghik/anodi"
         - name: "giabao/paho-akka"
         - name: "giiita/refuel"
+        - name: "greenfossil/commons-i18n"
         - name: "greenfossil/commons-json"
         - name: "greenleafoss/green-leaf-mongo"
         - name: "guardian/fastly-api-client"
@@ -464,7 +464,6 @@ jobs:
         - name: "xuwei-k/zeroapply"
         - name: "zero-deps/proto"
         - name: "zio/izumi-reflect"
-        - name: "zygfryd/scala-zygf-cement"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -489,7 +488,6 @@ jobs:
         include:
         - name: "akka/akka-grpc"
         - name: "akka/akka-management"
-        - name: "atry/futurebinding.scala"
         - name: "augustnagro/magnum"
         - name: "cquiroz/scala-java-locales"
         - name: "cucumber/cucumber-jvm-scala"
@@ -543,6 +541,7 @@ jobs:
         - name: "softwaremill/tapir-loom"
         - name: "stryker-mutator/stryker4s"
         - name: "swagger-akka-http/swagger-scala-module"
+        - name: "thoughtworksinc/bindable.scala"
         - name: "tinkoff/oolong"
         - name: "tkrs/fluflu"
         - name: "tototoshi/slick-joda-mapper"
@@ -631,7 +630,6 @@ jobs:
         - name: "sksamuel/avro4s"
         - name: "sky-uk/kafka-topic-loader"
         - name: "tharwaninitin/cron4zio"
-        - name: "thoughtworksinc/bindable.scala"
         - name: "tomasmikula/libretto"
         - name: "tomasmikula/nutcracker"
         - name: "typelevel/case-insensitive"
@@ -1241,6 +1239,7 @@ jobs:
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "plokhotnyuk/jsoniter-scala"
         - name: "polystat/odin"
+        - name: "polyvariant/caliban-gitlab"
         - name: "profunktor/fs2-rabbit"
         - name: "profunktor/neutron"
         - name: "raquo/waypoint"
@@ -1448,6 +1447,7 @@ jobs:
         - name: "jwojnowski/oidc4s"
         - name: "lhns/http4s-jwt-auth"
         - name: "profunktor/http4s-jwt-auth"
+        - name: "qwbarch/snowflake4s"
         - name: "zio/zio-http"
     steps:
       - name: "Git Checkout"
