@@ -1,5 +1,5 @@
 
-# projects total:     997
+# projects total:     994
 # min stars count:    -1
 # max projects count: 1000
 
@@ -72,7 +72,6 @@ jobs:
         - name: "haifengl/smile"
         - name: "hnaderi/scala-k8s"
         - name: "lichess-org/lila"
-        - name: "nickburkard/aws-cdk-scala"
         - name: "softwaremill/sttp"
         - name: "softwaremill/tapir"
         - name: "thoughtworksinc/dsl.scala"
@@ -376,6 +375,7 @@ jobs:
         - name: "phenoscape/scowl"
         - name: "pityka/pairwisealignment"
         - name: "pjfanning/micrometer-akka"
+        - name: "pjfanning/micrometer-pekko"
         - name: "playframework/cachecontrol"
         - name: "playframework/twirl"
         - name: "plokhotnyuk/fast-string-interpolator"
@@ -506,6 +506,7 @@ jobs:
         - name: "ij-plugins/ijp-debayer2sx"
         - name: "inkytonik/kiama"
         - name: "j-mie6/parsley"
+        - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "jelly-rdf/jelly-jvm"
         - name: "jobial-io/scase"
         - name: "json4s/json4s"
@@ -614,7 +615,6 @@ jobs:
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "noelwelsh/mads"
         - name: "outr/scalapass"
-        - name: "palanga/parana"
         - name: "palanga/zio-cassandra"
         - name: "pjfanning/zio-metrics-micrometer"
         - name: "polynote/uzhttp"
@@ -657,6 +657,7 @@ jobs:
         - name: "zio/zio-parser"
         - name: "zio/zio-profiling"
         - name: "zio/zio-rocksdb"
+        - name: "zio/zio-telemetry"
         - name: "zio/zio-test-intellij"
     steps:
       - name: "Git Checkout"
@@ -772,7 +773,6 @@ jobs:
         - name: "zio/zio-query"
         - name: "zio/zio-sql"
         - name: "zio/zio-sqs"
-        - name: "zio/zio-telemetry"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -912,7 +912,6 @@ jobs:
         - name: "ua-parser/uap-scala"
         - name: "unfiltered/unfiltered"
         - name: "virtuslab/avocado"
-        - name: "vlmiroshnikov/aero3"
         - name: "xebia-functional/fetch"
         - name: "yakivy/jam"
     steps:
@@ -962,6 +961,7 @@ jobs:
         - name: "ohze/couchbase-scala"
         - name: "playframework/playframework"
         - name: "purplekingdomgames/tyrian"
+        - name: "sangria-graphql/sangria-argonaut"
         - name: "sangria-graphql/sangria-monix"
         - name: "sangria-graphql/sangria-play-json"
         - name: "scalapb-json/scalapb-argonaut"
@@ -1039,7 +1039,6 @@ jobs:
         - name: "creativescala/doodle"
         - name: "davenverse/catscript"
         - name: "davenverse/process"
-        - name: "delimobil/fs2-hbase"
         - name: "disneystreaming/weaver-test"
         - name: "durban/choam"
         - name: "dwolla/fs2-aws"
@@ -1098,7 +1097,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "davenverse/epimetheus-redis4cats"
         - name: "indoorvivants/weaver-playwright"
         - name: "kaizen-solutions/virgil"
         - name: "mvv/sager"
@@ -1218,16 +1216,16 @@ jobs:
         - name: "katrix/typenbt"
         - name: "kiberstender/fjwt"
         - name: "kierendavies/skunk-migrate"
-        - name: "killaitis/http4s-cloud-functions"
         - name: "kordyjan/pytanie"
         - name: "kory33/s2mc-test"
         - name: "koterpillar/refinery"
-        - name: "kovacshuni/circe-config"
         - name: "lambdaworks/scountries"
+        - name: "lhns/http4s-errors"
         - name: "lhns/remote-io"
         - name: "m2-oss/calypso"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
+        - name: "mrdimosthenis/scala-synapses"
         - name: "msgpack4z/msgpack4z-circe"
         - name: "narma/tranzactio"
         - name: "nau/scalus"
@@ -1243,7 +1241,6 @@ jobs:
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "plokhotnyuk/jsoniter-scala"
         - name: "polystat/odin"
-        - name: "polyvariant/caliban-gitlab"
         - name: "profunktor/fs2-rabbit"
         - name: "profunktor/neutron"
         - name: "raquo/waypoint"
@@ -1343,6 +1340,7 @@ jobs:
         - name: "kamon-io/kamon-http4s"
         - name: "laserdisc-io/fs2-aws"
         - name: "lego/woof"
+        - name: "lhns/http4s-spa"
         - name: "logging4s/logging4s"
         - name: "minosiants/pencil"
         - name: "neandertech/langoustine"
@@ -1413,7 +1411,6 @@ jobs:
         - name: "pme123/camundala"
         - name: "sksamuel/elastic4s"
         - name: "theiterators/kebs"
-        - name: "tinkoff/muffin"
         - name: "torrentdam/bittorrent"
         - name: "typelevel/feral"
         - name: "typelevel/natchez-http4s"
@@ -1451,7 +1448,6 @@ jobs:
         - name: "jwojnowski/oidc4s"
         - name: "lhns/http4s-jwt-auth"
         - name: "profunktor/http4s-jwt-auth"
-        - name: "qwbarch/snowflake4s"
         - name: "zio/zio-http"
     steps:
       - name: "Git Checkout"
@@ -1479,6 +1475,7 @@ jobs:
         - name: "ghostdogpr/caliban"
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "scottweaver/testcontainers-for-zio"
+        - name: "tinkoff/muffin"
         - name: "zio/zio-metrics-connectors"
         - name: "zio/zio-openai"
     steps:
