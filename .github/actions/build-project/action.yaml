@@ -51,30 +51,42 @@ runs:
       shell: bash
       run: |
         ConfigFile=".github/workflows/buildConfig.json"
-        ScalaVersion="${{ inputs.scala-version }}"
-        BinScalaVersion=3
-        CustomMavenRepo="${{ inputs.maven-repo-url }}"
+        URL="https://scala3.westeurope.cloudapp.azure.com/data/project-build-summary/_search"
 
-        projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
-
-        canSkip=true
+        canSkip=false
         if [[ -n "${{ inputs.extra-scalac-options }}" || -n "${{ inputs.disabled-scalac-options }}" ]]; then
           echo "Using custom scalacOption, cannot skip"
-          canSkip=false
         else
-          for target in $(jq -r ".\"${{ inputs.project-name }}\".targets" $ConfigFile); do
-            arr=($(echo $target | tr "%" " "))
-            #use offset:length for consistent indexing (zsh starts with 1, bash starts with 0)
-            org=${arr[@]:0:1}
-            name=${arr[@]:1:1}
-            artifact="${org}:${name}_${BinScalaVersion}:${projectVersion}"
+          projectName="${{ inputs.project-name }}"
+          scalaVersion="${{ inputs.scala-version }}"
+          projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
+            
+          # Elasticsearch query JSON
+          query='
+          {
+            "_source": ["projectName", "scalaVersion", "version", "status"],
+            "query": {
+              "bool": {
+                "must": [
+                  { "term": { "projectName": "'$projectName'" } },
+                  { "term": { "scalaVersion": "'"$scalaVersion"'" } },
+                  { "term": { "version": "'"$version"'" } }
+                ]
+              }
+            }
+          }'
 
-            if ! cs resolve --intransitive "$artifact" -r "$CustomMavenRepo" --no-default >> /dev/null ; then 
-              echo "Artifact $artifact not found, would build the project"
-              canSkip=false
-              break;
-            fi
-          done
+          # Make the request to Elasticsearch
+          response=$(curl -s -u ${{ inputs.elastic-user }}:${{ inputs.elastic-password }} -XPOST -H "Content-Type: application/json" -d "$query" "$URL")
+
+          # Check if the request was successful
+          if [ "$(echo "$response" | jq -r '.error')" != "null" ]; then
+            echo "Error: Failed to fetch data from Elasticsearch."
+            echo "$response"
+          else 
+            echo "$response" | jq -r '.hits.hits'
+            canSkip=$(echo "$response" | jq -r 'any(.hits.hits[]; ._source.status == "success")')
+          fi
         fi
         echo "Can skip build: $canSkip"
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
