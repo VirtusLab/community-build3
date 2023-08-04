@@ -1,0 +1,109 @@
+name: "Open CB: scheduled weekly B"
+run-name: "Weekly build B #${{ github.run_number }}"
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every friday at 8 PM
+    - cron: "0 20 * * 5"
+jobs:
+  detect-version:
+    runs-on: ubuntu-22.04
+    continue-on-error: false
+    outputs:
+      last-nightly-version: ${{ steps.detect.outputs.last-nightly-version }}
+      last-stable-version: ${{ steps.detect.outputs.last-stable-version }}
+      last-rc-version: ${{ steps.detect.outputs.last-rc-version }}
+    if: github.event_name == 'schedule' && github.repository == 'VirtusLab/community-build3' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Install scala-cli
+        uses: coursier/setup-action@v1
+        with:
+          apps: scala-cli
+
+      - name: Find last versions
+        id: detect
+        run: |
+          lastNightly="$(./scripts/lastVersionNightly.sc)"
+          lastStable="$(./scripts/lastVersionStable.sc)"
+          lastRC="$(./scripts/lastVersionRC.sc)" 
+
+          echo "Detected last nightly version: $lastNightly (used)"
+          echo "Detected last stable version:  $lastStable"
+          echo "Detected last RC version:      $lastRC"
+
+          echo "last-nightly-version=$lastNightly" >> $GITHUB_OUTPUT
+          echo "last-stable-version=$lastStable" >> $GITHUB_OUTPUT
+          echo "last-rc-version=$lastRC" >> $GITHUB_OUTPUT
+
+  # Name of this job need to match inputs of build-project/job-info
+  execute-build-plan:
+    needs: [detect-version]
+    uses: ./.github/workflows/buildPlan-B.yaml
+    with:
+      published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
+    secrets: inherit
+
+  create-raport:
+    needs: [execute-build-plan]
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+      - name: Install coursier
+        uses: coursier/setup-action@v1
+        with:
+          apps: scala-cli
+
+      - name: Cache last successfull version
+        uses: actions/cache@v3
+        with:
+          path: ./last-successfull-weekly-version
+          key: last-successfull-weekly-version
+
+      - name: Generate raport
+        env:
+          ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
+          ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+        run: |
+          scalaVersion=${{ needs.execute-build-plan.outputs.used-scala-version }}
+          lastRC="$(./scripts/lastVersionRC.sc)"
+          lastStable=$(./scripts/lastVersionStable.sc)
+
+          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion > raport-full.md
+          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
+          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
+
+          lastWeeklyVersionFile=./last-successfull-weekly-version
+          if [[ -f "$lastWeeklyVersionFile" ]]; then
+            lastWeeklyVersion=$(cat $lastWeeklyVersionFile)
+            echo "Comparing with last foundly weekly version: ${lastWeeklyVersion}"
+            scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md
+          else 
+            echo "Not found previous weekly build version."
+          fi
+          echo "$scalaVersion" > $lastWeeklyVersionFile
+
+      - name: Upload raports
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-raports
+          path: ${{ github.workspace }}/raport-*.md
+
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: 303718
+          private_key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+
+      - name: Push raport
+        uses: ./.github/actions/push-raport-to-gh-pages
+        with:
+          artifact-name: build-raports
+          file-to-pick: raport-full.md
+          build-title: ${{ needs.execute-build-plan.outputs.used-scala-version }}
+          token: ${{ steps.generate-token.outputs.token }}
