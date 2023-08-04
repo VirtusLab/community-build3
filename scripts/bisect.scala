@@ -162,7 +162,7 @@ object ValidationScript:
     |
     |scalaVersion="$$1"       # e.g. 3.3.3
     |
-    |DefaultConfig='{"memoryRequestMb":4096}'
+    |DefaultConfig='{}'
     |ConfigFile="/opencb/.github/workflows/buildConfig.json"
     |if [[ ! -f "$$ConfigFile" ]]; then
     |    echo "Not found build config: $$ConfigFile"

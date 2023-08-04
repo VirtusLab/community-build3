@@ -24,16 +24,6 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
               else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
             }
             .map { c =>
-              val default = ProjectBuildConfig.defaultMemoryRequest
-              if c.memoryRequestMb > default then c
-              else
-                val discovered = discoverMemoryRequest(projectDir)
-                  .filter(_ > default)
-                  .map(_ min 8192)
-                  .getOrElse(default)
-                c.copy(memoryRequestMb = discovered)
-            }
-            .map { c =>
               c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
             }
             .filter(_ != ProjectBuildConfig.empty)
@@ -301,51 +291,5 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         println(s"Failed to read $file, reason: $ex")
         Nil
     }
-  }
-
-  // Selects recommened amount of memory for project pod, based on the config files
-  private def discoverMemoryRequest(projectDir: os.Path): Option[Int] =
-    def readXmx(file: os.Path): Seq[Xmx.MegaBytes] =
-      tryReadLines(file).collect { case Xmx(mBytes) => mBytes }
-
-    val fromWorkflows = githubWorkflows(projectDir)
-      .flatMap(readXmx)
-
-    val fromOptsFiles = os
-      .list(projectDir)
-      .filter(
-        _.lastOpt.exists { name =>
-          name.contains("sbtopts") || name.contains("jvmopts") ||
-          name.contains("jvm-opts")
-        }
-      )
-      .flatMap(readXmx)
-
-    val fromBuild = commonBuildFiles(projectDir).flatMap(readXmx)
-
-    val allCandidates = fromOptsFiles ++ fromWorkflows ++ fromBuild
-    allCandidates.maxOption
-  end discoverMemoryRequest
-
-  private object Xmx {
-    type MegaBytes = Int
-    final val XmxPattern = raw".*-Xmx(\d+)(\w)?.*".r
-
-    def unapply(text: String): Option[MegaBytes] =
-      def commentStartIdx = text.indexOf("#") max text.indexOf("//")
-      def isNotCommented =
-        commentStartIdx < 0 || text.indexOf("-Xmx") < commentStartIdx
-      text match {
-        case XmxPattern(size, unit) if isNotCommented =>
-          val sizeN = size.toInt
-          val mbytes = unit match {
-            case null      => sizeN / 1024 / 1024
-            case "k" | "K" => sizeN / 1024
-            case "m" | "M" => sizeN
-            case "g" | "G" => sizeN * 1024
-          }
-          Some(mbytes)
-        case nope => None
-      }
   }
 }
