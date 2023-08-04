@@ -23,10 +23,13 @@ class ConfigFiles(path: os.Path) {
   val customProjects: os.Path = path / "custom-projects.txt"
 }
 
+val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
+
 @main def storeDependenciesBasedBuildPlan(
     scalaBinaryVersion: String,
     minStarsCount: Int,
-    maxProjectsCount: Int,
+    maxProjectsInConfig: Int,
+    maxProjectsInBuildPlan: Int,
     requiredProjects: Seq[Project],
     configsPath: os.Path
 ) = {
@@ -42,45 +45,58 @@ class ConfigFiles(path: os.Path) {
     dependencyGraph <- loadDepenenecyGraph(
       scalaBinaryVersion,
       minStarsCount = minStarsCount,
-      maxProjectsCount = Option(maxProjectsCount).filter(_ >= 0),
+      maxProjectsCount = Option(maxProjectsInConfig).filter(_ >= 0),
       requiredProjects = requiredProjects,
       customProjects = customProjects,
       filterPatterns = loadFilters
     )
     _ = println(s"Loaded dependency graph: ${dependencyGraph.projects.size} projects")
-    buildPlan <- makeDependenciesBasedBuildPlan(dependencyGraph)
+    fullBuildPlan <- makeDependenciesBasedBuildPlan(dependencyGraph)
     _ = println("Generated build plan")
   } yield {
-    val configMap = SortedMap.from(buildPlan.map(p => p.project.coordinates -> p))
-    val staged = splitIntoStages(buildPlan, loadLongBuildingProjects)
-    val meta = BuildMeta(
-      minStarsCount = minStarsCount,
-      maxProjectsCount = maxProjectsCount,
-      totalProjects = configMap.size
-    )
-
-    println("Projects in build plan: " + buildPlan.size)
-    if sys.props.contains("opencb.coordinator.reproducer-mode")
-    then {
-      os.write.over(
-        os.pwd / "data" / "buildPlan.json",
-        toJson(staged),
-        createFolders = true
-      )
-      println("Build plan saved")
-    } else {
+    // Build config
+    if !ForReproducer then {
+      val configMap = SortedMap.from(fullBuildPlan.map(p => p.project.coordinates -> p))
       os.write.over(
         workflowsDir / "buildConfig.json",
         toJson(configMap, pretty = true),
         createFolders = true
       )
       println("CI build config saved")
-      os.write.over(
-        workflowsDir / "buildPlan.yaml",
-        createGithubActionJob(staged, meta)
-      )
-      println("CI build plan updated")
     }
+    // Build plan
+    val buildPlanProjectsLimit = Option(maxProjectsInBuildPlan).filter(_ >= 0)
+    buildPlanProjectsLimit
+      .fold(SplittedBuildPlan(fullBuildPlan) :: Nil)(
+        splitBuildPlan(fullBuildPlan, _)
+      )
+      .foreach { case SplittedBuildPlan(buildPlan, index) =>
+        val buildPlanId: String = ('A' + index).toChar.toString
+
+        val staged = splitIntoStages(buildPlan, loadLongBuildingProjects())
+        val meta = BuildMeta(
+          minStarsCount = minStarsCount,
+          maxProjectsCount = buildPlanProjectsLimit.getOrElse(-1),
+          totalProjects = buildPlan.size
+        )
+
+        println(s"Projects in build plan $buildPlanId: " + buildPlan.size)
+        if ForReproducer
+        then {
+          os.write.over(
+            os.pwd / "data" / "buildPlan.json",
+            toJson(staged),
+            createFolders = true
+          )
+          println("Build plan saved")
+        } else {
+          os.write.over(
+            workflowsDir / s"buildPlan-${buildPlanId}.yaml",
+            createGithubActionJob(staged, meta)
+          )
+          println("CI build plan updated")
+        }
+      }
   }
   try Await.result(task, 60.minute)
   catch {
@@ -91,6 +107,22 @@ class ConfigFiles(path: os.Path) {
       threadPool.awaitTermination(10, SECONDS)
       throw ex
   }
+}
+
+case class SplittedBuildPlan(projects: Array[ProjectBuildDef], index: Int = 0)
+def splitBuildPlan(buildPlan: Array[ProjectBuildDef], limit: Int): List[SplittedBuildPlan] = {
+  // Sort ascending by ammount of starts, required projects have highest priority
+  buildPlan
+    .sortBy {
+      _.project match {
+        case p: StarredProject => -p.stars
+        case _                 => Int.MinValue
+      }
+    }
+    .grouped(limit)
+    .zipWithIndex
+    .map(SplittedBuildPlan.apply)
+    .toList
 }
 
 val TagRef = """.+refs\/tags\/(.+)""".r
@@ -244,7 +276,7 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
 private def loadFilters(using confFiles: ConfigFiles): Seq[String] = readNormalized(
   confFiles.filteredProjects
 )
-private def loadLongBuildingProjects(using confFiles: ConfigFiles): Seq[Project] =
+private def loadLongBuildingProjects()(using confFiles: ConfigFiles): Seq[Project] =
   readNormalized(confFiles.slowProjects).flatMap {
     case s"$org/$repo" => Some(Project(org, repo))
     case malformed =>
@@ -285,11 +317,11 @@ def splitIntoStages(
     if remaining.isEmpty then acc.reverse
     else
       var (currentStage, newRemainings) = remaining.partition {
-        _.dependencies.forall(done.contains)
+        _.dependencies.filter(deps.contains).forall(done.contains)
       }
       if currentStage.isEmpty then {
         def hasCyclicDependencies(p: ProjectBuildDef) =
-          p.dependencies.exists(deps(_).dependencies.contains(p.project))
+          p.dependencies.exists(deps.get(_).fold(false)(_.dependencies.contains(p.project)))
         val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
         if cyclicDeps.nonEmpty then {
           currentStage ++= cyclicDeps

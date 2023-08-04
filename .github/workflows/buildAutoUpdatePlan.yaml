@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   schedule:
     # Every friday at 4 PM
-    - cron: "0 16 1 * *"
+    - cron: "0 16 * * 5"
   push:
     paths:
       - coordinator/**
@@ -37,16 +37,17 @@ jobs:
           key: coordinator-data-cache-${{ steps.get-date.outputs.week-start}}
 
       - name: Build plan
-        # Limit to 1000 most starred project. GitHub actions has problems when rendering workflow of more then 1k jobs
-        run: scala-cli run coordinator/ -- 3 -1 1000 "" coordinator/configs
+        # Limit each build plan to at most 1000 most project. 
+        # GitHub actions has problems when rendering workflow of more then 1k jobs
+        # Projects are grouped based on GitHub stars
+        run: scala-cli run coordinator/ -- 3 -1 -1 1000 "" coordinator/configs
 
-      
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: "buildConfig"
           path: |
-            .github/workflows/buildPlan.yaml
+            .github/workflows/buildPlan*.yaml
             .github/workflows/buildConfig.json
 
       - uses: tibdex/github-app-token@v1
@@ -67,5 +68,5 @@ jobs:
           title: "[Bot] Update build config"
           draft: false
           add-paths: |
-            .github/workflows/buildPlan.yaml
+            .github/workflows/buildPlan*.yaml
             .github/workflows/buildConfig.json

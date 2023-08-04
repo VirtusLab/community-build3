@@ -233,7 +233,8 @@ object BuildInfo:
       val args = Seq[os.Shellable](
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
-        /* maxProjectsCount = */ 0,
+        /* maxProjectsInConfig = */ 0,
+        /* maxProjectsInBuildPlan = */ 0,
         /* requiredProjects = */ config.customRun.projectName,
         /* configsPath = */ communityBuildDir / "coordinator" / "configs"
       )
