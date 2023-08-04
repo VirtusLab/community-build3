@@ -65,7 +65,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       println("CI build config saved")
     }
     // Build plan
-    val buildPlanProjectsLimit = Option(maxProjectsInBuildPlan).filter(_ >= 0)
+    val buildPlanProjectsLimit = Option(maxProjectsInBuildPlan).filter(_ >= 1)
     buildPlanProjectsLimit
       .fold(SplittedBuildPlan(fullBuildPlan) :: Nil)(
         splitBuildPlan(fullBuildPlan, _)

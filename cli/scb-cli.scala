@@ -234,7 +234,7 @@ object BuildInfo:
         /* scalaBinaryVersion = */ 3,
         /* minStartsCount = */ 0,
         /* maxProjectsInConfig = */ 0,
-        /* maxProjectsInBuildPlan = */ 0,
+        /* maxProjectsInBuildPlan = */ -1,
         /* requiredProjects = */ config.customRun.projectName,
         /* configsPath = */ communityBuildDir / "coordinator" / "configs"
       )
