@@ -103,7 +103,7 @@ runs:
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.6"
         options: -v ${{ github.workspace }}:/opencb/ -v ${{ github.workspace }}/github_rsa:/root/.ssh/id_rsa:ro
         run: |
-          DefaultConfig='{"memoryRequestMb":4096}'
+          DefaultConfig='{}'
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           config () { 
             path=".\"${{ inputs.project-name }}\"$@" 
