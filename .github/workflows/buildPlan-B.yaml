@@ -1,0 +1,601 @@
+
+# projects total:     391
+# min stars count:    -1
+# max projects count: 1000
+
+name: "Execute Open Community Build plan"
+on:
+  workflow_call:
+    inputs:
+      published-scala-version:
+        type: string
+        description: 'Published Scala version to use, if empty new version of compiler would be build with default name based on the selected repository'
+      repository-url:
+        type: string
+        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
+        default: "lampepfl/dotty"
+      repository-branch:
+        type: string
+        description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"
+        default: "main"
+      extra-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        default: ""
+      disabled-scalac-options:
+        type: string
+        description: "List of scalacOptions which should be filtered out when building projects."
+        default: ""
+    outputs:
+      used-scala-version:
+        description: "Version of Scala used to run the build"
+        value: ${{ jobs.setup-build.outputs.scala-version }}
+    secrets:
+      OPENCB_ELASTIC_USER:
+        required: true
+      OPENCB_ELASTIC_PSWD:
+        required: true
+
+jobs:
+  setup-build:
+    runs-on: ubuntu-22.04
+    continue-on-error: false
+    outputs:
+      scala-version:  ${{ steps.setup.outputs.scala-version }}
+      maven-repo-url: ${{ steps.setup.outputs.maven-repo-url }}
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Setup build"
+        uses: ./.github/actions/setup-build
+        id: setup
+        with:
+          scala-version: ${{ inputs.published-scala-version }}
+          repository-url: ${{ inputs.repository-url }}
+          repository-branch: ${{ inputs.repository-branch }}
+
+  stage-0:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "absaoss/absa-shaded-jackson-module-scala"
+        - name: "alexarchambault/case-app-entrypoint-annotation"
+        - name: "augustnagro/form-url-codec"
+        - name: "benoitlouy/tele"
+        - name: "bilal-fazlani/rainbowcli"
+        - name: "carlos-verdes/zio-resource"
+        - name: "codacy/codacy-plugins-api"
+        - name: "coursier/class-path-util"
+        - name: "creativescala/doodle-svg"
+        - name: "cric96/distributed-frp"
+        - name: "cucumber/action-publish-sbt"
+        - name: "datastrophic-games/dice"
+        - name: "davenverse/epimetheus-circuit"
+        - name: "dragonfly-ai/cliviz"
+        - name: "dragonfly-ai/democrossy"
+        - name: "eltherion/http4s-timer"
+        - name: "estrondo/sweet-mockito"
+        - name: "frugalmechanic/fm-html"
+        - name: "frugalmechanic/fm-xml"
+        - name: "gemini-hlsw/lucuma-schemas"
+        - name: "gonzih/cats-nats"
+        - name: "guardian/etag-caching"
+        - name: "hireproof/screening"
+        - name: "hjfruit/zio-pulsar"
+        - name: "hnaderi/scala-readpass"
+        - name: "http4s/http4s-tomcat"
+        - name: "indoorvivants/rendition"
+        - name: "indoorvivants/sn-demangler"
+        - name: "ist-dsi/scala-openstack-common-clients"
+        - name: "janlisse/zio-jwt-validator"
+        - name: "jodersky/redicl"
+        - name: "joohnnie/retry"
+        - name: "kevin-lee/just-sysprocess"
+        - name: "kierendavies/skunk-migrate"
+        - name: "kordyjan/typelogger"
+        - name: "laserdisc-io/scanamo-circe"
+        - name: "lhns/scala-edifact"
+        - name: "lhns/scala-trustmanager-utils"
+        - name: "mixql/mixql-engine-stub"
+        - name: "nafg/simple-router"
+        - name: "narma/tranzactio"
+        - name: "pjfanning/micrometer-pekko"
+        - name: "pjfanning/scala3-sample-classes"
+        - name: "pmeheut/nscala-java-time"
+        - name: "rolang/dumbo"
+        - name: "rtyley/rate-limit-status"
+        - name: "scalatest/scalatestplus-jmock"
+        - name: "scalatest/scalatestplus-junit5"
+        - name: "sciss/log"
+        - name: "sdrafahl/codec"
+        - name: "sinaghaffari/monadicsimplifier"
+        - name: "taig/geojson"
+        - name: "taig/scala-linguist"
+        - name: "tmccarthy/ausgeo"
+        - name: "tmccarthy/digest4s"
+        - name: "trace4cats/trace4cats-tail-sampling-extras"
+        - name: "typesafeconfigops/typesafeconfigops"
+        - name: "vlmiroshnikov/aero3"
+        - name: "xebia-functional/munit-snap"
+        - name: "yrichika/scalahtml"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 360
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-1:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "aaronp/code-template"
+        - name: "aaronp/franz"
+        - name: "ablearthy/td-types"
+        - name: "ablearthy/tdjson-bind"
+        - name: "acsgh/scala-common"
+        - name: "ahjohannessen/smithy4s-repro-lib"
+        - name: "ahjohannessen/unum"
+        - name: "aholland/aholland-scala-utils"
+        - name: "aiyanbo/scala-i18n"
+        - name: "ajozwik/protoquill-generic"
+        - name: "akiomik/seaw"
+        - name: "alejandrohdezma/dummy"
+        - name: "alejandrohdezma/sbt-mdoc-toc"
+        - name: "alejandrohdezma/sbt-propagate"
+        - name: "alexarchambault/class-path-inspector"
+        - name: "alexdupre/coinpayments-scala"
+        - name: "altoo-ag/pekko-kryo-serialization"
+        - name: "andimiller/hedgehogs"
+        - name: "aoiroaoino/nanolens"
+        - name: "aparo/zio-json-extra"
+        - name: "armanbilge/feral"
+        - name: "armanbilge/fs2"
+        - name: "armanbilge/litter"
+        - name: "armanbilge/munit-cats-effect"
+        - name: "armanbilge/saslprep"
+        - name: "armanbilge/scalacheck-effect"
+        - name: "atedeg/scala-release"
+        - name: "barnardb/tinyplate"
+        - name: "beangle/db"
+        - name: "beangle/doc"
+        - name: "beangle/ids"
+        - name: "beangle/notify"
+        - name: "besselstudio/coingecko"
+        - name: "bilal-fazlani/circe-json-schema"
+        - name: "bilal-fazlani/csv-codec"
+        - name: "bilal-fazlani/csv-schema"
+        - name: "bilal-fazlani/jslt-parser"
+        - name: "bilal-fazlani/scala-aql"
+        - name: "bilal-fazlani/swiftbar4s"
+        - name: "bilal-fazlani/zio-mongo"
+        - name: "bitmarck-service/fs2-secon"
+        - name: "bp3r/jsonrpc2"
+        - name: "cake-lier/tuples-space-core"
+        - name: "caspercommunityio/casper-scala-sdk"
+        - name: "catap/scala-blake3"
+        - name: "catap/scala-sha"
+        - name: "christian-schlichtherle/circe-kafka"
+        - name: "clockworkconsulting/csexp"
+        - name: "clockworkconsulting/peregrin"
+        - name: "clulab/fatdynet"
+        - name: "cornerman/simple-scalajs-requests"
+        - name: "cozydev-pink/snakecase"
+        - name: "creativescala/doodle-explore"
+        - name: "dacr/drools-scripting"
+        - name: "dacr/json2props"
+        - name: "dacr/naturalsort"
+        - name: "dacr/split"
+        - name: "dacr/unittools"
+        - name: "daenyth/cats-effect-guava"
+        - name: "daghemberg/paut-program"
+        - name: "daghemberg/problemutils"
+        - name: "damon-v79/cassandra-migration"
+        - name: "davenverse/namecase"
+        - name: "davenverse/natchez-local"
+        - name: "davenverse/natchez-rediculous"
+        - name: "davenverse/os-detect"
+        - name: "davenverse/publicsuffix"
+        - name: "davidledwards/scalop"
+        - name: "eikek/bitpeace"
+        - name: "estrondo/farango"
+        - name: "fenixedu/fenixedu-scala-sdk"
+        - name: "fgrutsch/akka-persistence-mapdb"
+        - name: "fiatjaf/nlog"
+        - name: "frawa/inline-files"
+        - name: "frugalmechanic/fm-http"
+        - name: "frugalmechanic/fm-json"
+        - name: "gchudnov/mindthegap"
+        - name: "gemini-hlsw/lucuma-jts"
+        - name: "gemini-hlsw/lucuma-refined"
+        - name: "giabao/asm-flow"
+        - name: "gnp/ident"
+        - name: "gnp/zio-data-streams"
+        - name: "gochaorg/json4s3"
+        - name: "greenfossil/typesafe-config-ext"
+        - name: "guardian/mobile-apps-api-models"
+        - name: "guymers/ceesvee"
+        - name: "guymers/foobie"
+        - name: "gzoller/deploysample"
+        - name: "h8io/borscht"
+        - name: "herminiogg/dmaog"
+        - name: "herminiogg/label2thesaurus"
+        - name: "hnaderi/named-codec"
+        - name: "hnaderi/yaml4s"
+        - name: "hsci-r/lucene-perfieldpostingsformatordtermvectorscodec"
+        - name: "http4s/hpack"
+        - name: "http4s/http4s-async-http-client"
+        - name: "hughsimpson/scalameter"
+        - name: "indoorvivants/detective"
+        - name: "indoorvivants/opaque-newtypes"
+        - name: "indoorvivants/yank"
+        - name: "ingarabr/gcs-lock"
+        - name: "ingarabr/http4s-cloud-functions"
+        - name: "ivoah/vial"
+        - name: "jamesward/zio-mavencentral"
+        - name: "jkobejs/cron"
+        - name: "jkugiya/ulid-scala"
+        - name: "jodersky/identicon"
+        - name: "jodersky/ustats"
+        - name: "johnhungerford/generic-schema"
+        - name: "jphmrst/scala-latex"
+        - name: "jphmrst/scalautils"
+        - name: "kalin-rudnicki/harness"
+        - name: "karazinscalausersgroup/mongo-literals"
+        - name: "katrix/minejson"
+        - name: "kevin-lee/openai4s"
+        - name: "kiberstender/fjwt"
+        - name: "kijuky/enumeratum-scalikejdbc"
+        - name: "kolemannix/spack"
+        - name: "krrrr38/protoquill-finagle-mysql"
+        - name: "kzmake/uuid7s"
+        - name: "l-space/types"
+        - name: "lhns/cats-effect-utils"
+        - name: "lhns/doobie-flyway"
+        - name: "lhns/fs2-functork"
+        - name: "lhns/fs2-utils"
+        - name: "lhns/http4s-jwt-auth"
+        - name: "lhns/http4s-spa"
+        - name: "lhns/nifi-scala"
+        - name: "lhns/scala-commandline"
+        - name: "liewhite/common"
+        - name: "likeligood-ab/scala-react"
+        - name: "linyxus/papiers-core"
+        - name: "losizm/bolster"
+        - name: "losizm/ergo"
+        - name: "losizm/little-cli"
+        - name: "losizm/little-config"
+        - name: "losizm/little-io"
+        - name: "losizm/little-json"
+        - name: "losizm/little-security"
+        - name: "losizm/little-sql"
+        - name: "losizm/t2"
+        - name: "lowmelvin/formify-scala"
+        - name: "lunatech-labs/lunatech-play-googleopenconnect"
+        - name: "malliina/sbt-utils"
+        - name: "malliina/util-base"
+        - name: "malyszaryczlowiek/foo-repo"
+        - name: "malyszaryczlowiek/kessenger-lib"
+        - name: "marcinzh/enterprise"
+        - name: "massimosiani/monix-newtypes-cats"
+        - name: "massimosiani/skunk"
+        - name: "mattlangsenkamp/svgbounds"
+        - name: "mbari-org/commons"
+        - name: "mdedetrich/pekko-streams-circe"
+        - name: "mdedetrich/scalacheck"
+        - name: "mimoguz/layeredfonticon"
+        - name: "mixql/mixql-protobuf"
+        - name: "mkroli/lpm"
+        - name: "molarmanful/sclin"
+        - name: "mpollmeier/colordiff"
+        - name: "mrdimosthenis/glicko2"
+        - name: "mutsuhiro6/ulid-scala3"
+        - name: "mvv/typine"
+        - name: "nafg/cloud-logging-logback-scala"
+        - name: "nafg/scheduler"
+        - name: "narma/zio-docker"
+        - name: "nationalarchives/dp-preservica-client"
+        - name: "nicolasfara/ecscala"
+        - name: "note/dhallj-magnolia"
+        - name: "nthportal/scala-platform"
+        - name: "ohze/sd-util"
+        - name: "opaliasystems/opalia-commons-core"
+        - name: "openmole/container"
+        - name: "outr/dd-scala"
+        - name: "outr/moduload"
+        - name: "outr/sendgrid4s"
+        - name: "oyvindberg/typo"
+        - name: "palanga/parana"
+        - name: "pbyrne84/scala-case-class-prettification"
+        - name: "pbyrne84/scala-wiremock-api"
+        - name: "permutive-engineering/refreshable"
+        - name: "phillhenry/dreadnought"
+        - name: "pjfanning/akka-rabbitmq"
+        - name: "pjfanning/aws-spi-pekko-http"
+        - name: "pjfanning/jackson-module-scala-duration"
+        - name: "pjfanning/pekko-http-session"
+        - name: "pjfanning/pekko-rabbitmq"
+        - name: "polyvariant/scodec-java-classfile"
+        - name: "pureharm/pureharm-core"
+        - name: "raistlintao/scalalogger"
+        - name: "rsemlal/clickhouse4cats"
+        - name: "rtyley/scala-collection-plus"
+        - name: "ruimo/gh-sonatype-example"
+        - name: "ruimo/scoins"
+        - name: "sakulk/serval"
+        - name: "sangria-graphql/sangria-marshalling-testkit"
+        - name: "saucam/shiva"
+        - name: "scala-cli/directive-handler"
+        - name: "scala-cli/java-class-name"
+        - name: "scf37/filewatch"
+        - name: "sciss/audiowidgets"
+        - name: "sciss/filecache"
+        - name: "sciss/linkernighantsp"
+        - name: "sciss/lucrepi"
+        - name: "sciss/model"
+        - name: "sciss/optional"
+        - name: "sciss/scalacollider-dot"
+        - name: "sciss/scalacollider-if"
+        - name: "sciss/transform4s"
+        - name: "sean-ideabank/rudolf"
+        - name: "shawjef3/tryutils"
+        - name: "shopstic/caliban"
+        - name: "snowplow/iglu-scala-core"
+        - name: "ssanj/delight"
+        - name: "swagger-akka-http/swagger-enumeratum-module"
+        - name: "swagger-akka-http/swagger-scala3-enum-module"
+        - name: "swaldman/audiofluidity-rss"
+        - name: "swaldman/mlog-scala"
+        - name: "swaldman/untemplate"
+        - name: "sweet-delights/delightful-typeclasses"
+        - name: "t-sasaki915/typesafe-scalajs"
+        - name: "taig/enumeration-ext"
+        - name: "taig/object-fit"
+        - name: "taig/scala-pygments"
+        - name: "taig/skunk-ext"
+        - name: "tharwaninitin/cache4s"
+        - name: "tharwaninitin/crypto4s"
+        - name: "throup/couldbe"
+        - name: "timbertson/auditspec"
+        - name: "timbertson/backpressure-sensor"
+        - name: "tkrs/mess"
+        - name: "tkrs/mmdb-grpc-scala"
+        - name: "tlsomers/scala-suspendable"
+        - name: "tmccarthy/scala-db"
+        - name: "tmccarthy/tmmutils"
+        - name: "todokr/grokschema"
+        - name: "toniogela/cross"
+        - name: "torrentdam/bencode"
+        - name: "trace4cats/trace4cats-exporter-http"
+        - name: "trace4cats/trace4cats-jaeger-integration-test"
+        - name: "trace4cats/trace4cats-kafka"
+        - name: "trace4cats/trace4cats-natchez"
+        - name: "trace4cats/trace4cats-xray"
+        - name: "troungtam70/wezterm"
+        - name: "ulitol97/comet"
+        - name: "varwise/prometheus-akka-http"
+        - name: "vasilmkd/discipline"
+        - name: "virtuslab/scala-cli-signing"
+        - name: "vlmiroshnikov/saga"
+        - name: "wiringbits/wiringbits-webapp-utils"
+        - name: "xuwei-k/scala3profile"
+        - name: "xuwei-k/unused-proto"
+        - name: "yurikpanic/zio-postgres"
+        - name: "yurique/embedded-files-macro"
+        - name: "zhranklin/scala-tricks"
+        - name: "zygfryd/scala-zygf-jackshaft"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-2:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-1 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "andimiller/munit-cats-effect-styles"
+        - name: "armanbilge/circe"
+        - name: "armanbilge/ip4s"
+        - name: "armanbilge/jawn-fs2"
+        - name: "armanbilge/log4cats"
+        - name: "armanbilge/sadalsuud"
+        - name: "armanbilge/stratus"
+        - name: "beangle/otk"
+        - name: "cake-lier/tuples-space-client"
+        - name: "davenverse/epimetheus-rediculous"
+        - name: "dwolla/epimetheus-server"
+        - name: "frawa/typed-json"
+        - name: "funkode-io/web3-auth"
+        - name: "gemini-hlsw/lucuma-catalog"
+        - name: "hnaderi/portainer-client"
+        - name: "hsci-r/octavo-indexer"
+        - name: "indoorvivants/mdoc-d2"
+        - name: "ist-dsi/scala-keystone-client"
+        - name: "jphmrst/scala-automata"
+        - name: "jwojnowski/fs2-aes"
+        - name: "kalin-rudnicki/slyce-zio"
+        - name: "kovacshuni/circe-config"
+        - name: "mixql/mixql-engine"
+        - name: "pismute/classy-optics"
+        - name: "pureharm/pureharm-config-ciris"
+        - name: "pureharm/pureharm-db-core-jdbc"
+        - name: "pureharm/pureharm-effects-cats"
+        - name: "pureharm/pureharm-json-circe"
+        - name: "ruimo/csvparser"
+        - name: "ruimo/graphics"
+        - name: "sangria-graphql/sangria-argonaut"
+        - name: "sangria-graphql/sangria-json4s-jackson"
+        - name: "sangria-graphql/sangria-json4s-native"
+        - name: "sciss/asyncfile"
+        - name: "sciss/lucreswing"
+        - name: "sciss/sonogramoverview"
+        - name: "swaldman/failable"
+        - name: "swaldman/unstatic"
+        - name: "sweet-delights/delightful-parsing"
+        - name: "thatscalaguy/nats4cats"
+        - name: "tmccarthy/tmm-scala-collections"
+        - name: "trace4cats/trace4cats-jaeger"
+        - name: "trace4cats/trace4cats-newrelic"
+        - name: "trace4cats/trace4cats-opentelemetry"
+        - name: "trace4cats/trace4cats-zipkin"
+        - name: "valencik/textmogrify"
+        - name: "vasilmkd/discipline-specs2"
+        - name: "xebia-functional/karat-scalacheck"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-3:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-2 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "armanbilge/cheshire"
+        - name: "davenverse/epimetheus-community"
+        - name: "davenverse/epimetheus-log4cats"
+        - name: "firstbirdtech/emergence"
+        - name: "gemini-hlsw/lucuma-itc"
+        - name: "ist-dsi/scala-cinder-client"
+        - name: "ist-dsi/scala-designate-client"
+        - name: "ist-dsi/scala-neutron-client"
+        - name: "ist-dsi/scala-nova-client"
+        - name: "jwojnowski/googlecloud4s"
+        - name: "mixql/mixql-platform-demo"
+        - name: "permutive-engineering/functional-google-clients"
+        - name: "permutive-engineering/odin-contrib"
+        - name: "permutive-engineering/prometheus4cats-contrib"
+        - name: "pureharm/pureharm-testkit"
+        - name: "spilne/spilne"
+        - name: "taig/cloud-sql-proxy"
+        - name: "taig/flog"
+        - name: "tmccarthy/fetch"
+        - name: "trace4cats/trace4cats-avro"
+        - name: "trace4cats/trace4cats-cloudtrace"
+        - name: "typelevel/log4cats-natchez"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-4:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-3 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "pureharm/pureharm-db-core"
+        - name: "trace4cats/trace4cats-avro-kafka"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-5:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-4 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "errors4s/errors4s-core"
+        - name: "errors4s/errors4s-core-scalacheck"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-6:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-5 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "errors4s/errors4s-core-cats"
+        - name: "errors4s/errors4s-http"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
