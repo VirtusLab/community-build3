@@ -213,7 +213,9 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         "Scala3Version",
         "scala3Version", // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
         "Scala_3", // https://github.dev/kubukoz/sup/blob/644848c03173c726f19a40e6dd439b6905d42967/build.sbt#L10-L11
-        "scala_3"
+        "scala_3",
+        "`Scala-3`", 
+        "`scala-3`" // https://github.com/rolang/dumbo/blob/7cc7f22ee45632b45bb1092418a3498ede8226da/build.sbt#L3
       )
       val Scala3VersionNamesAlt = matchEnclosed(
         scala3VersionNames.mkString("|")
