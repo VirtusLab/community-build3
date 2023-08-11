@@ -198,17 +198,16 @@ jobs:
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
         - name: "com-lihaoyi/fastparse"
-        - name: "com-lihaoyi/mainargs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/requests-scala"
         - name: "com-lihaoyi/scalatags"
         - name: "dragonfly-ai/vector"
         - name: "eed3si9n/expecty"
         - name: "ekrich/sconfig"
+        - name: "etorreborre/specs2"
         - name: "fomkin/levsha"
         - name: "ichoran/kse3"
         - name: "jd557/minart"
-        - name: "martinhh/scalacheck-derived"
         - name: "monix/minitest"
         - name: "rssh/shim--scala-async--dotty-cps-async"
         - name: "sbt-jib/sbt-jib"
@@ -269,6 +268,7 @@ jobs:
         - name: "arturopala/buffer-and-slice"
         - name: "arturopala/gitignore"
         - name: "arturopala/validator"
+        - name: "asflierl/sglicko2"
         - name: "ashwinbhaskar/sight-scala"
         - name: "atry/html.scala"
         - name: "autodeployai/pmml4s"
@@ -295,11 +295,13 @@ jobs:
         - name: "eed3si9n/gigahorse"
         - name: "eed3si9n/sjson-new"
         - name: "embeddedkafka/embedded-kafka"
+        - name: "enragedginger/akka-quartz-scheduler"
         - name: "enriquerodbe/borsh4s"
         - name: "erikvanoosten/metrics-scala"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fmonniot/scala3mock"
+        - name: "folone/poi.scala"
         - name: "foundweekends/knockoff"
         - name: "frugalmechanic/fm-common"
         - name: "frugalmechanic/scala-optparse"
@@ -329,7 +331,6 @@ jobs:
         - name: "jcouyang/dhall-generic"
         - name: "jcouyang/meow"
         - name: "jd557/interim"
-        - name: "jkugiya/aws-v4-signer-scala"
         - name: "jozic/scalaj"
         - name: "jozic/scalax-collection"
         - name: "jphmrst/bps"
@@ -371,6 +372,7 @@ jobs:
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/scala-faker"
         - name: "playframework/cachecontrol"
+        - name: "playframework/play-json"
         - name: "playframework/twirl"
         - name: "plokhotnyuk/fast-string-interpolator"
         - name: "plokhotnyuk/rtree2d"
@@ -382,6 +384,8 @@ jobs:
         - name: "rssh/trackedfuture"
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/scala-textmatching"
+        - name: "ruippeixotog/akka-testkit-specs2"
+        - name: "ruippeixotog/scala-scraper"
         - name: "sake92/tupson"
         - name: "sangria-graphql/macro-visit"
         - name: "sangria-graphql/sangria-marshalling-api"
@@ -445,10 +449,12 @@ jobs:
         - name: "tpolecat/typename"
         - name: "typelevel/discipline-munit"
         - name: "typelevel/discipline-scalatest"
+        - name: "typelevel/discipline-specs2"
         - name: "typelevel/fabric"
         - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
         - name: "typelevel/squants"
+        - name: "ua-parser/uap-scala"
         - name: "vincenzobaz/spark-scala3"
         - name: "wangzaixiang/scala-sql"
         - name: "whisklabs/docker-it-scala"
@@ -486,8 +492,11 @@ jobs:
         - name: "akka/akka-management"
         - name: "atry/futurebinding.scala"
         - name: "augustnagro/magnum"
+        - name: "benhutchison/scalaswingcontrib"
+        - name: "com-lihaoyi/mainargs"
         - name: "cquiroz/scala-java-locales"
         - name: "cucumber/cucumber-jvm-scala"
+        - name: "dfianthdl/dfiant"
         - name: "dvreeze/tqa"
         - name: "embeddedkafka/embedded-kafka-schema-registry"
         - name: "frugalmechanic/fm-lazyseq"
@@ -496,12 +505,13 @@ jobs:
         - name: "gitbucket/blocking-slick"
         - name: "gmethvin/directory-watcher"
         - name: "greenfossil/data-mapping"
+        - name: "hagay3/skuber"
         - name: "herminiogg/shexml"
         - name: "ij-plugins/ijp-color"
         - name: "ij-plugins/ijp-debayer2sx"
         - name: "inkytonik/kiama"
         - name: "j-mie6/parsley"
-        - name: "j5ik2o/pekko-persistence-dynamodb"
+        - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "jelly-rdf/jelly-jvm"
         - name: "jobial-io/scase"
         - name: "json4s/json4s"
@@ -511,13 +521,17 @@ jobs:
         - name: "msgpack4z/msgpack4z-core"
         - name: "norbert-radyk/spoiwo"
         - name: "nrinaudo/kantan.parsers"
+        - name: "ohze/couchbase-scala"
         - name: "outr/profig"
         - name: "pjfanning/jackson-module-scala3-enum"
+        - name: "playframework/play-file-watch"
+        - name: "playframework/play-ws"
         - name: "rallyhealth/scalacheck-ops"
         - name: "rediscala/rediscala"
         - name: "sake92/hepek"
         - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-msgpack"
+        - name: "sangria-graphql/sangria-play-json"
         - name: "sangria-graphql/sangria-spray-json"
         - name: "scala-native/scala-native-cli"
         - name: "scala-stm/scala-stm"
@@ -545,6 +559,7 @@ jobs:
         - name: "typelevel/cats"
         - name: "vagmcs/optimus"
         - name: "virtuslab/scala-yaml"
+        - name: "xuwei-k/jwt-scala"
         - name: "xuwei-k/optparse-applicative"
         - name: "zio/zio"
         - name: "zio/zio-quill"
@@ -572,12 +587,15 @@ jobs:
         include:
         - name: "akka/akka-projection"
         - name: "andyglow/websocket-scala-client"
+        - name: "argonaut-io/argonaut"
         - name: "ariskk/flink4s"
         - name: "bcarter97/id-generator"
         - name: "bilal-fazlani/zio-ulid"
         - name: "billzabob/fordeckmacia"
         - name: "bitlap/rolls"
         - name: "carlosedp/zio-channel"
+        - name: "cequence-io/openai-scala-client"
+        - name: "cequence-io/pinecone-scala"
         - name: "clulab/processors"
         - name: "codedx/mapk"
         - name: "dacr/zio-worksheet"
@@ -598,19 +616,21 @@ jobs:
         - name: "hmemcpy/zio-clippy"
         - name: "inoio/solrs"
         - name: "j-mie6/parsley-cats"
-        - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "japgolly/univeq"
         - name: "jatcwang/difflicious"
         - name: "jczuchnowski/zio-pulsar"
         - name: "kitlangton/animus"
         - name: "kitlangton/quotidian"
         - name: "kubukoz/drops"
+        - name: "marcinzh/turbolift"
         - name: "marcinzh/yamlike"
         - name: "msgpack4z/msgpack4z-jawn"
+        - name: "msgpack4z/msgpack4z-play"
         - name: "noelwelsh/mads"
         - name: "outr/scalapass"
         - name: "palanga/zio-cassandra"
         - name: "pjfanning/zio-metrics-micrometer"
+        - name: "playframework/playframework"
         - name: "polynote/uzhttp"
         - name: "poslegm/munit-zio"
         - name: "purplekingdomgames/tyrian"
@@ -618,6 +638,7 @@ jobs:
         - name: "scalapb/scalapb-json4s"
         - name: "scalapb/scalapb-validate"
         - name: "scalapb/zio-grpc"
+        - name: "scalatra/scalatra"
         - name: "sciss/lucre"
         - name: "sciss/scalacollider"
         - name: "scodec/scodec-cats"
@@ -645,9 +666,11 @@ jobs:
         - name: "typelevel/shapeless-3"
         - name: "typelevel/spire"
         - name: "typelevel/twiddles"
+        - name: "unfiltered/unfiltered"
         - name: "vitaliihonta/zio-temporal"
         - name: "vladkopanev/zio-saga"
         - name: "yakivy/dupin"
+        - name: "zengularity/benji"
         - name: "zio/interop-guava"
         - name: "zio/interop-reactive-streams"
         - name: "zio/zio-bson"
@@ -685,11 +708,18 @@ jobs:
         - name: "dwickern/scala-nameof"
         - name: "endpoints4s/endpoints4s"
         - name: "findify/flink-scala-api"
+        - name: "foundweekends/pamflet"
         - name: "higherkindness/droste"
         - name: "ironcorelabs/cats-scalatest"
         - name: "johnspade/csv3s"
+        - name: "lancewalton/treelog"
         - name: "lemonlabsuk/scala-uri"
         - name: "milessabin/shapeless"
+        - name: "msgpack4z/msgpack4z-argonaut"
+        - name: "playframework/play-ebean"
+        - name: "playframework/play-mailer"
+        - name: "playframework/play-slick"
+        - name: "playframework/scalatestplus-play"
         - name: "sagifogel/proptics"
         - name: "scalameta/metaconfig"
         - name: "scalanlp/breeze"
@@ -699,6 +729,8 @@ jobs:
         - name: "theiterators/sealed-monad"
         - name: "typelevel/coop"
         - name: "typelevel/kittens"
+        - name: "webjars/webjars-play"
+        - name: "xuwei-k/httpz"
         - name: "y-yu/slick-bulk-insert"
         - name: "zeal18/zio-mongodb"
         - name: "zio/zio-logging"
@@ -732,9 +764,11 @@ jobs:
         - name: "lambdaworks/scurl-detector"
         - name: "ollls/zio-quartz-h2"
         - name: "scalameta/mdoc"
+        - name: "scalapb-json/scalapb-argonaut"
         - name: "sciss/soundprocesses"
         - name: "svroonland/zio-kinesis"
         - name: "tharwaninitin/gcp4zio"
+        - name: "typelevel/cats-effect"
         - name: "unibas-gravis/scalismo"
     steps:
       - name: "Git Checkout"
@@ -758,12 +792,63 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "alexarchambault/case-app"
+        - name: "ant8e/uuid4cats-effect"
+        - name: "cb372/cats-retry"
+        - name: "comcast/ip4s"
         - name: "darrenjw/scala-glm"
         - name: "darrenjw/scala-smfsb"
+        - name: "davenverse/cats-effect-time"
+        - name: "davenverse/circuit"
+        - name: "davenverse/clippette"
+        - name: "davenverse/condemned"
+        - name: "davenverse/crossplatformioapp"
+        - name: "davenverse/env"
+        - name: "davenverse/epimetheus"
+        - name: "davenverse/fiberlocal"
+        - name: "davenverse/keysemaphore"
+        - name: "davenverse/lock"
+        - name: "davenverse/mapref"
+        - name: "davenverse/mules"
+        - name: "davenverse/single-fibered"
+        - name: "evolution-gaming/random"
+        - name: "evolution-gaming/scache"
         - name: "flink-extended/flink-scala-api"
+        - name: "geirolz/cats-xml"
+        - name: "geirolz/fly4s"
+        - name: "http4s/http4s-crypto"
+        - name: "indoorvivants/mdoc-effect"
+        - name: "itv/quartz4s"
+        - name: "janstenpickle/hotswap-ref"
+        - name: "kamon-io/kamon"
+        - name: "lhns/munit-tagless-final"
+        - name: "liquibase4s/liquibase4s"
+        - name: "monix/monix"
+        - name: "nafg/simpleivr"
+        - name: "ovotech/meters4s"
+        - name: "permutive-engineering/prometheus4cats"
+        - name: "ppurang/abctemplates"
+        - name: "ppurang/asynch"
         - name: "sciss/patterns"
         - name: "sciss/wolkenpumpe"
         - name: "stryker-mutator/weapon-regex"
+        - name: "thatscalaguy/ulid4cats"
+        - name: "timwspence/cats-stm"
+        - name: "tkrs/orcus"
+        - name: "tototoshi/nyanda"
+        - name: "tpolecat/pool-party"
+        - name: "travisbrown/iteratee"
+        - name: "typelevel/bobcats"
+        - name: "typelevel/cats-effect-testing"
+        - name: "typelevel/keypool"
+        - name: "typelevel/log4cats"
+        - name: "typelevel/munit-cats-effect"
+        - name: "typelevel/scalacheck-effect"
+        - name: "typelevel/unique"
+        - name: "typelevel/vault"
+        - name: "virtuslab/avocado"
+        - name: "xebia-functional/fetch"
+        - name: "yakivy/jam"
         - name: "zio/zio-constraintless"
         - name: "zio/zio-ftp"
         - name: "zio/zio-kafka"
@@ -796,11 +881,25 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "akiomik/cats-nio-file"
+        - name: "emergentorder/onnx-scala"
+        - name: "fiatjaf/scoin"
+        - name: "kailuowang/mau"
+        - name: "kevin-lee/effectie"
         - name: "kitlangton/zio-tui"
+        - name: "monix/monix-bio"
+        - name: "monix/monix-testing"
+        - name: "sangria-graphql/sangria-monix"
         - name: "stuartapp/zcaffeine"
         - name: "svroonland/zio-amqp"
+        - name: "typelevel/cats-effect-cps"
+        - name: "typelevel/fs2"
         - name: "univalence/zio-spark"
+        - name: "vladkopanev/cats-saga"
+        - name: "yoohaemin/decrel"
+        - name: "zio/interop-monix"
         - name: "zio/zio-direct"
+        - name: "zio/zio-wasm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
@@ -818,187 +917,6 @@ jobs:
   stage-10:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-9 ]
-    continue-on-error: true
-    timeout-minutes: 360
-    strategy:
-      matrix:
-        include:
-        - name: "etorreborre/specs2"
-        - name: "japgolly/microlibs-scala"
-        - name: "japgolly/nyaya"
-        - name: "outr/scribe"
-        - name: "outr/spice"
-        - name: "reactivemongo/reactivemongo"
-        - name: "reactivemongo/reactivemongo-bson"
-        - name: "typelevel/cats-effect"
-        - name: "zio/zio-config"
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v3
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        timeout-minutes: 60
-        with:
-          project-name: ${{ matrix.name }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-11:
-    runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-10 ]
-    continue-on-error: true
-    timeout-minutes: 360
-    strategy:
-      matrix:
-        include:
-        - name: "alexarchambault/case-app"
-        - name: "alterationx10/opinionated-zio"
-        - name: "ant8e/uuid4cats-effect"
-        - name: "argonaut-io/argonaut"
-        - name: "asflierl/sglicko2"
-        - name: "benhutchison/scalaswingcontrib"
-        - name: "carueda/tscfg"
-        - name: "cb372/cats-retry"
-        - name: "comcast/ip4s"
-        - name: "davenverse/cats-effect-time"
-        - name: "davenverse/circuit"
-        - name: "davenverse/clippette"
-        - name: "davenverse/condemned"
-        - name: "davenverse/crossplatformioapp"
-        - name: "davenverse/env"
-        - name: "davenverse/epimetheus"
-        - name: "davenverse/fiberlocal"
-        - name: "davenverse/keysemaphore"
-        - name: "davenverse/lock"
-        - name: "davenverse/mapref"
-        - name: "davenverse/mules"
-        - name: "davenverse/single-fibered"
-        - name: "enragedginger/akka-quartz-scheduler"
-        - name: "evolution-gaming/random"
-        - name: "evolution-gaming/scache"
-        - name: "folone/poi.scala"
-        - name: "geirolz/cats-xml"
-        - name: "geirolz/fly4s"
-        - name: "http4s/http4s-crypto"
-        - name: "indoorvivants/mdoc-effect"
-        - name: "itv/quartz4s"
-        - name: "janstenpickle/hotswap-ref"
-        - name: "japgolly/clear-config"
-        - name: "japgolly/scala-graal"
-        - name: "japgolly/scalacss"
-        - name: "japgolly/test-state"
-        - name: "kamon-io/kamon"
-        - name: "lhns/munit-tagless-final"
-        - name: "liquibase4s/liquibase4s"
-        - name: "marcinzh/turbolift"
-        - name: "monix/monix"
-        - name: "nafg/simpleivr"
-        - name: "outr/mailgun4s"
-        - name: "outr/robobrowser"
-        - name: "ovotech/meters4s"
-        - name: "permutive-engineering/prometheus4cats"
-        - name: "playframework/play-file-watch"
-        - name: "playframework/play-json"
-        - name: "playframework/play-ws"
-        - name: "ppurang/abctemplates"
-        - name: "ppurang/asynch"
-        - name: "reactivemongo/reactivemongo-play-json"
-        - name: "reactivemongo/reactivemongo-streaming"
-        - name: "ruippeixotog/akka-testkit-specs2"
-        - name: "ruippeixotog/scala-scraper"
-        - name: "scalamolecule/molecule"
-        - name: "scalatra/scalatra"
-        - name: "svroonland/rezilience"
-        - name: "thatscalaguy/ulid4cats"
-        - name: "timwspence/cats-stm"
-        - name: "tkrs/orcus"
-        - name: "tototoshi/nyanda"
-        - name: "tpolecat/pool-party"
-        - name: "travisbrown/iteratee"
-        - name: "typelevel/bobcats"
-        - name: "typelevel/cats-effect-testing"
-        - name: "typelevel/discipline-specs2"
-        - name: "typelevel/keypool"
-        - name: "typelevel/log4cats"
-        - name: "typelevel/munit-cats-effect"
-        - name: "typelevel/scalacheck-effect"
-        - name: "typelevel/unique"
-        - name: "typelevel/vault"
-        - name: "ua-parser/uap-scala"
-        - name: "unfiltered/unfiltered"
-        - name: "virtuslab/avocado"
-        - name: "xebia-functional/fetch"
-        - name: "yakivy/jam"
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v3
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        timeout-minutes: 60
-        with:
-          project-name: ${{ matrix.name }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-12:
-    runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-11 ]
-    continue-on-error: true
-    timeout-minutes: 360
-    strategy:
-      matrix:
-        include:
-        - name: "akiomik/cats-nio-file"
-        - name: "cchantep/acolyte"
-        - name: "cequence-io/openai-scala-client"
-        - name: "cequence-io/pinecone-scala"
-        - name: "emergentorder/onnx-scala"
-        - name: "fiatjaf/scoin"
-        - name: "foundweekends/pamflet"
-        - name: "hagay3/skuber"
-        - name: "kailuowang/mau"
-        - name: "kevin-lee/effectie"
-        - name: "lancewalton/treelog"
-        - name: "monix/monix-bio"
-        - name: "monix/monix-testing"
-        - name: "msgpack4z/msgpack4z-argonaut"
-        - name: "msgpack4z/msgpack4z-play"
-        - name: "ohze/couchbase-scala"
-        - name: "playframework/playframework"
-        - name: "sangria-graphql/sangria-monix"
-        - name: "sangria-graphql/sangria-play-json"
-        - name: "scalapb-json/scalapb-argonaut"
-        - name: "typelevel/cats-effect-cps"
-        - name: "typelevel/fs2"
-        - name: "vladkopanev/cats-saga"
-        - name: "xuwei-k/httpz"
-        - name: "xuwei-k/jwt-scala"
-        - name: "yoohaemin/decrel"
-        - name: "zengularity/benji"
-        - name: "zio/interop-monix"
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v3
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        timeout-minutes: 60
-        with:
-          project-name: ${{ matrix.name }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-13:
-    runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-12 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1024,18 +942,11 @@ jobs:
         - name: "keirlawson/fs2-progress"
         - name: "kevin-lee/logger-f"
         - name: "kovstas/fs2-throttler"
-        - name: "laserdisc-io/log-effect"
         - name: "lhns/fs2-compress"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
         - name: "naoh87/lettucef"
         - name: "ollls/quartz-h2"
-        - name: "outr/scarango"
-        - name: "playframework/anorm"
-        - name: "playframework/play-ebean"
-        - name: "playframework/play-mailer"
-        - name: "playframework/play-slick"
-        - name: "playframework/scalatestplus-play"
         - name: "profunktor/redis4cats"
         - name: "pureharm/pureharm-aws"
         - name: "regis-leray/fs2-ftp"
@@ -1052,7 +963,6 @@ jobs:
         - name: "typelevel/fs2-grpc"
         - name: "typelevel/jawn-fs2"
         - name: "typelevel/otel4s"
-        - name: "webjars/webjars-play"
         - name: "zio/interop-cats"
     steps:
       - name: "Git Checkout"
@@ -1068,9 +978,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-14:
+  stage-11:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-13 ]
+    needs: [ setup-build, stage-10 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1078,7 +988,6 @@ jobs:
         include:
         - name: "davenverse/epimetheus-redis4cats"
         - name: "indoorvivants/weaver-playwright"
-        - name: "kaizen-solutions/virgil"
         - name: "lowmelvin/formify-scala"
         - name: "lowmelvin/hammer-scala"
         - name: "mvv/sager"
@@ -1105,9 +1014,121 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-12:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-11 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "japgolly/microlibs-scala"
+        - name: "japgolly/nyaya"
+        - name: "outr/scribe"
+        - name: "outr/spice"
+        - name: "reactivemongo/reactivemongo"
+        - name: "reactivemongo/reactivemongo-bson"
+        - name: "zio/zio-config"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-13:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-12 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "alterationx10/opinionated-zio"
+        - name: "carueda/tscfg"
+        - name: "japgolly/clear-config"
+        - name: "japgolly/scala-graal"
+        - name: "japgolly/scalacss"
+        - name: "japgolly/test-state"
+        - name: "kaizen-solutions/virgil"
+        - name: "laserdisc-io/log-effect"
+        - name: "outr/mailgun4s"
+        - name: "outr/robobrowser"
+        - name: "outr/scarango"
+        - name: "reactivemongo/reactivemongo-play-json"
+        - name: "reactivemongo/reactivemongo-streaming"
+        - name: "scalamolecule/molecule"
+        - name: "svroonland/rezilience"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-14:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-13 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "cchantep/acolyte"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
   stage-15:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-14 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "playframework/anorm"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-16:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-15 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1178,11 +1199,11 @@ jobs:
         - name: "lhns/http4s-errors"
         - name: "lhns/remote-io"
         - name: "m2-oss/calypso"
+        - name: "mdedetrich/pekko-streams-circe"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
         - name: "mrdimosthenis/scala-synapses"
         - name: "msgpack4z/msgpack4z-circe"
-        - name: "narma/tranzactio"
         - name: "nau/scalus"
         - name: "ollls/zio-tls-http"
         - name: "openmole/gridscale"
@@ -1249,9 +1270,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-16:
+  stage-17:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-15 ]
+    needs: [ setup-build, stage-16 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1282,9 +1303,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-17:
+  stage-18:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-16 ]
+    needs: [ setup-build, stage-17 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1335,9 +1356,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-18:
+  stage-19:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-17 ]
+    needs: [ setup-build, stage-18 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1411,9 +1432,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-19:
+  stage-20:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-18 ]
+    needs: [ setup-build, stage-19 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1448,6 +1469,7 @@ jobs:
         - name: "scalabin-no/http4s-directives"
         - name: "torrentdam/bittorrent"
         - name: "trace4cats/trace4cats-datadog"
+        - name: "trace4cats/trace4cats-opentelemetry"
         - name: "travisbrown/dhallj"
         - name: "virtuslab/inkuire"
         - name: "zio/zio-http"
@@ -1466,9 +1488,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-20:
+  stage-21:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-19 ]
+    needs: [ setup-build, stage-20 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1497,9 +1519,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-21:
+  stage-22:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-20 ]
+    needs: [ setup-build, stage-21 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1522,9 +1544,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-22:
+  stage-23:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-21 ]
+    needs: [ setup-build, stage-22 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1548,9 +1570,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-23:
+  stage-24:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-22 ]
+    needs: [ setup-build, stage-23 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
@@ -1575,9 +1597,9 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-  stage-24:
+  stage-25:
     runs-on: ubuntu-22.04
-    needs: [ setup-build, stage-23 ]
+    needs: [ setup-build, stage-24 ]
     continue-on-error: true
     timeout-minutes: 360
     strategy:
