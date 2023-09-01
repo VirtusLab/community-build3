@@ -871,8 +871,8 @@
   "akka/akka-grpc":{
     "project":"akka/akka-grpc",
     "repoUrl":"https://github.com/akka/akka-grpc.git",
-    "revision":"v2.3.3",
-    "version":"2.3.3",
+    "revision":"v2.3.4",
+    "version":"2.3.4",
     "targets":"com.lightbend.akka.grpc%akka-grpc-interop-tests com.lightbend.akka.grpc%akka-grpc-runtime",
     "config":{
       "projects":{
@@ -19073,8 +19073,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.73",
-    "version":"2.0.73",
+    "revision":"v2.0.74",
+    "version":"2.0.74",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -23910,7 +23910,7 @@
     "project":"mixql/mixql-engine-stub",
     "repoUrl":"https://github.com/mixql/mixql-engine-stub.git",
     "revision":"",
-    "version":"0.7.2",
+    "version":"0.7.3",
     "targets":"org.mixql%mixql-engine-stub org.mixql%mixql-engine-sqlite org.mixql%mixql-engine-sqlite-local org.mixql%mixql-engine-stub-local"
   },
   "mixql/mixql-protobuf":{
@@ -25112,8 +25112,8 @@
   "nau/scalus":{
     "project":"nau/scalus",
     "repoUrl":"https://github.com/nau/scalus.git",
-    "revision":"v0.2.0",
-    "version":"0.2.0",
+    "revision":"v0.3.0",
+    "version":"0.3.0",
     "targets":"org.scalus%scalus org.scalus%scalus-plugin",
     "config":{
       "projects":{
@@ -26160,8 +26160,8 @@
   "outr/scribe":{
     "project":"outr/scribe",
     "repoUrl":"https://github.com/outr/scribe.git",
-    "revision":"3.12.1",
-    "version":"3.12.1",
+    "revision":"3.12.2",
+    "version":"3.12.2",
     "targets":"com.outr%scribe-json-circe com.outr%scribe-logstash com.outr%scribe-slf4j com.outr%scribe-json-fabric com.outr%scribe-migration com.outr%scribe-slf4j2 com.outr%scribe-cats com.outr%scribe-slack com.outr%scribe-log4j com.outr%scribe-file com.outr%scribe-config com.outr%scribe-json com.outr%scribe",
     "config":{
       "projects":{
@@ -36727,11 +36727,11 @@
     "version":"0.0.6",
     "targets":"com.mchange%failable com.mchange%failable-logging"
   },
-  "swaldman/mchange-literal":{
-    "project":"swaldman/mchange-literal",
-    "repoUrl":"https://github.com/swaldman/mchange-literal.git",
-    "revision":"",
-    "version":"0.1.2",
+  "swaldman/mchange-codegenutil":{
+    "project":"swaldman/mchange-codegenutil",
+    "repoUrl":"https://github.com/swaldman/mchange-codegenutil.git",
+    "revision":"v0.0.2",
+    "version":"0.0.2",
     "targets":""
   },
   "swaldman/mchange-sysadmin-scala":{
@@ -38005,9 +38005,9 @@
   "theiterators/kebs":{
     "project":"theiterators/kebs",
     "repoUrl":"https://github.com/theiterators/kebs.git",
-    "revision":"v1.9.5",
-    "version":"1.9.5",
-    "targets":"pl.iterators%kebs-instances pl.iterators%kebs-macro-utils pl.iterators%kebs-opaque pl.iterators%kebs-doobie pl.iterators%kebs-http4s",
+    "revision":"v1.9.6",
+    "version":"1.9.6",
+    "targets":"pl.iterators%kebs-scalacheck pl.iterators%kebs-instances pl.iterators%kebs-core pl.iterators%kebs-http4s-stir pl.iterators%kebs-macro-utils pl.iterators%kebs-opaque pl.iterators%kebs-pekko-http pl.iterators%kebs-circe pl.iterators%kebs-doobie pl.iterators%kebs-http4s",
     "config":{
       "projects":{
         "exclude":[
@@ -38035,7 +38035,11 @@
       },
       "tests":"full",
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"val scala_3                = \"3.3.0\"",
+          "replaceWith":"val scala_3 = \"<SCALA_VERSION>\""
+        }
       ]
     }
   },
