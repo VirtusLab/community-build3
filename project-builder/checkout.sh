@@ -19,5 +19,5 @@ branch=""
 if [ -n "$rev" ]; then
   branch="-b $rev"
 fi
-git clone --quiet "$repo" "$repoDir" $branch || 
-  ( git clone --quiet "$repo" "$repoDir" && cd $repoDir && git checkout $rev )
+git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch || 
+  ( git clone --quiet --recurse-submodules "$repo" "$repoDir" && cd $repoDir && git checkout $rev )
