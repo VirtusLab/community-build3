@@ -178,6 +178,7 @@ object ValidationScript:
     |echo 'failure' > build-status.txt
     |
     |/build/build-revision.sh \
+    |  "$$(config .project)" \
     |  "$$(config .repoUrl)" \
     |  "$revision" \
     |  "$${scalaVersion}" \
