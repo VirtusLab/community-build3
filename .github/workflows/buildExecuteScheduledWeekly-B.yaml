@@ -4,8 +4,8 @@ run-name: "Weekly build B #${{ github.run_number }}"
 on:
   workflow_dispatch:
   schedule:
-    # Every friday at 8 PM
-    - cron: "0 20 * * 5"
+    # Every friday at 11 PM
+    - cron: "0 23 * * 5"
 jobs:
   detect-version:
     runs-on: ubuntu-22.04
