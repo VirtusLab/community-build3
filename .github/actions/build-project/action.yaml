@@ -100,7 +100,7 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
-        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.6"
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.7"
         options: -v ${{ github.workspace }}:/opencb/ -v ${{ github.workspace }}/github_rsa:/root/.ssh/id_rsa:ro
         run: |
           DefaultConfig='{}'
