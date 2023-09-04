@@ -82,30 +82,8 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
 }
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
+// Left for compliance with legacy versions
 trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {
-  def publishCommunityBuild() = T.command {
-    val PublishModule.PublishData(metadata, artifacts) = publishArtifacts()
-    val artifactModulePath = {
-      val org = metadata.group.replace(".", "/")
-      s"$org/${metadata.id}/${metadata.version}"
-    }
-    for {
-      (artifactPath, artifactName) <- artifacts
-      repoUrl <- mavenRepoUrl
-      url = s"$repoUrl/$artifactModulePath/$artifactName"
-    } {
-      val res = put(
-        url = url,
-        data = RequestBlob.NioFileRequestBlob(artifactPath.path.toNIO),
-        verifySslCerts = false
-      )
-      if (!res.is2xx) {
-        throw new RuntimeException(
-          s"Failed to publish artifact ${url.stripPrefix(repoUrl)}: ${res.statusMessage}"
-        )
-      }
-    }
-  }
 }
 
 /** Replace all Scala in crossVersion with `buildScalaVersion` if its matching `buildScalaVersion`
@@ -268,7 +246,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
           tryEval(module.publishVersion) match {
             case Result.Success(`publishVersion`) =>
               PublishResult(
-                evalAsDependencyOf(compileResult, docResult)(module.publishCommunityBuild)
+                evalAsDependencyOf(compileResult, docResult)(module.publishLocal)
               )
             case Result.Success(version: String) =>
               PublishResult(
