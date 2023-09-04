@@ -307,7 +307,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"project/Deps.sc",
+          "pattern":"val scala300 = ScalaVersion\\((.*)\\)",
+          "replaceWith":"val scala300 = ScalaVersion(\"<SCALA_VERSION>\")"
+        }
       ]
     }
   },
