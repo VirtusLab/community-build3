@@ -2,18 +2,20 @@
 
 set -e
 
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
   echo "Wrong number of script arguments"
   exit 1
 fi
 
-repoDir="$1"            # e.g. /tmp/shapeless
-enforcedSbtVersion="$2" # e.g. '1.5.5' or empty ''
-scalaVersion="$3"
-projectConfig="$4"
+projectName="$1"
+repoDir="$2"            # e.g. /tmp/shapeless
+enforcedSbtVersion="$3" # e.g. '1.5.5' or empty ''
+scalaVersion="$4"
+projectConfig="$5"
+
+export OPENCB_PROJECT_DIR=$repoDir
 
 # Check if using a sbt with a supported version
-
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
@@ -21,7 +23,7 @@ if [ ! -f "${buildPropsFile}" ]; then
   echo "sbt.version=${enforcedSbtVersion}" >$buildPropsFile
 fi
 
-sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version= | awk -F= '{ print $2 }')
+sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version | awk -F= '{ print $2 }')
 
 function parseSemver() {
   local prefixSufix=($(echo ${1/-/ }))
@@ -64,6 +66,12 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
   path=$(field '.path')
   pattern=$(field '.pattern')
+  
+  echo "Try apply source patch:"
+  echo "Path:        $path"
+  echo "Pattern:     $pattern"
+  echo "Replacement: $replaceWith"
+
   set -x
   # Cannot determinate did sed script was applied, so perform two ops each time
   sed -i "s/$pattern/$replaceWith/" "$repoDir/$path" || true
@@ -73,6 +81,18 @@ done
 
 ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
+
+prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}.sh"
+if [[ -f "$prepareScript" ]]; then
+  if [[ -x "$prepareScript" ]]; then 
+    echo "Execute project prepare script: ${prepareScript}"
+    cat $prepareScript
+    bash "$prepareScript"
+  else echo "Project prepare script is not executable: $prepareScript"
+  fi
+else 
+  echo "No prepare script found for project $projectName"
+fi
 
 # Project dependencies
 # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code

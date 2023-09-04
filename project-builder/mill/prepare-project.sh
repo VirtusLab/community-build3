@@ -2,15 +2,18 @@
 
 set -e
 
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
   echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <publish_version>, got $#: $@"
   exit 1
 fi
 
-repoDir="$1" # e.g. /tmp/shapeless
-scalaVersion="$2" # e.g. 3.1.2-RC1
-publishVersion="$3" # version of the project
-projectConfig="$4" 
+projectName="$1"
+repoDir="$2" # e.g. /tmp/shapeless
+scalaVersion="$3" # e.g. 3.1.2-RC1
+publishVersion="$4" # version of the project
+projectConfig="$5" 
+
+export OPENCB_PROJECT_DIR=$repoDir
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
@@ -22,6 +25,11 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
   path=$(field '.path')
   pattern=$(field '.pattern')
+  echo "Try apply source patch:"
+  echo "Path:        $path"
+  echo "Pattern:     $pattern"
+  echo "Replacement: $replaceWith"
+
   set -x
   # Cannot determinate did sed script was applied, so perform two ops each time
   sed -i "s/$pattern/$replaceWith/" "$repoDir/$path" || true
@@ -29,6 +37,17 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   set +x
 done
 
+prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}.sh"
+if [[ -f "$prepareScript" ]]; then
+  if [[ -x "$prepareScript" ]]; then 
+    echo "Execute project prepare script: ${prepareScript}"
+    cat $prepareScript
+    bash "$prepareScript"
+  else echo "Project prepare script is not executable: $prepareScript"
+  fi
+else 
+  echo "No prepare script found for project $projectName"
+fi
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs

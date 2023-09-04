@@ -115,6 +115,7 @@ runs:
           echo 'failure' > build-status.txt 
 
           /build/build-revision.sh \
+            "$(config .project)" \
             "$(config .repoUrl)" \
             "$(config .revision)" \
             "${{ inputs.scala-version }}" \
