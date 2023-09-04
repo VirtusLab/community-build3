@@ -110,9 +110,6 @@ lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
   compareWithScalaVersion.foreach(v => log("Comparing Wtih Scala version: " + v))
 
   printLine()
-  println(
-    s"Reporting failed community build projects using Scala $scalaVersion:$LINE_BREAK\n"
-  )
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
   printLine()
 
