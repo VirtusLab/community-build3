@@ -71,8 +71,6 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   val runBuild = inputKey[Unit]("")
   val moduleMappings = inputKey[Unit]("")
-  val publishResults = taskKey[Unit]("")
-  val publishResultsConf = taskKey[PublishConfiguration]("")
 
   import complete.DefaultParsers._
 
@@ -82,12 +80,6 @@ object CommunityBuildPlugin extends AutoPlugin {
     .map("Community Build Repo".at(_))
     .map { ourResolver =>
       Seq(
-        publishResultsConf :=
-          publishM2Configuration.value
-            .withPublishMavenStyle(true)
-            .withResolverName(ourResolver.name)
-            .withOverwrite(true),
-        publishResults := Classpaths.publishTask(publishResultsConf).value,
         externalResolvers := ourResolver +: externalResolvers.value
       )
     }
@@ -543,7 +535,7 @@ object CommunityBuildPlugin extends AutoPlugin {
             )
           else
             PublishResult(
-              evalAsDependencyOf(compileResult)(Compile / publishResults)
+              evalAsDependencyOf(compileResult)(Compile / publishLocal)
             )
         }
 
