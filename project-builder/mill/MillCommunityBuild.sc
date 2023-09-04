@@ -83,8 +83,7 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
 // Left for compliance with legacy versions
-trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {
-}
+trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {}
 
 /** Replace all Scala in crossVersion with `buildScalaVersion` if its matching `buildScalaVersion`
   * binary version
@@ -246,7 +245,9 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
           tryEval(module.publishVersion) match {
             case Result.Success(`publishVersion`) =>
               PublishResult(
-                evalAsDependencyOf(compileResult, docResult)(module.publishLocal)
+                evalAsDependencyOf(compileResult, docResult)(
+                  module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
+                )
               )
             case Result.Success(version: String) =>
               PublishResult(
