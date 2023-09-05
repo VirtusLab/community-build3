@@ -55,8 +55,6 @@ fi
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-# Register utility commands, for more info check command impl comments
-echo -e "\ncommands ++= CommunityBuildPlugin.commands\n" >>$repoDir/build.sbt
 
 # Base64 is used to mitigate spliting json by whitespaces
 for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
@@ -79,9 +77,6 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   set +x
 done
 
-ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
-ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
-
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}.sh"
 if [[ -f "$prepareScript" ]]; then
   if [[ -x "$prepareScript" ]]; then 
@@ -93,6 +88,12 @@ if [[ -f "$prepareScript" ]]; then
 else 
   echo "No prepare script found for project $projectName"
 fi
+
+ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
+ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
+
+# Register utility commands, for more info check command impl comments
+echo -e "\ncommands ++= CommunityBuildPlugin.commands\n" >>$repoDir/build.sbt
 
 # Project dependencies
 # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
