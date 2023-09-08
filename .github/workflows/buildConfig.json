@@ -1086,8 +1086,8 @@
   "akka/akka-projection":{
     "project":"akka/akka-projection",
     "repoUrl":"https://github.com/akka/akka-projection.git",
-    "revision":"v1.5.0-M3",
-    "version":"1.5.0-M3",
+    "revision":"v1.5.0-M4",
+    "version":"1.5.0-M4",
     "targets":"com.lightbend.akka%akka-projection-jdbc com.lightbend.akka%akka-projection-r2dbc com.lightbend.akka%akka-projection-kafka com.lightbend.akka%akka-projection-eventsourced com.lightbend.akka%akka-projection-core com.lightbend.akka%akka-projection-grpc com.lightbend.akka%akka-projection-durable-state com.lightbend.akka%akka-projection-testkit com.lightbend.akka%akka-projection-cassandra",
     "config":{
       "projects":{
@@ -8230,7 +8230,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.0\"",
+          "pattern":"val Scala3 = \"3.3.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -8507,7 +8507,7 @@
     "project":"davenverse/googleapis-http4s",
     "repoUrl":"https://github.com/davenverse/googleapis-http4s.git",
     "revision":"",
-    "version":"3.14.1+0.0.5",
+    "version":"3.14.2+0.0.5",
     "targets":"",
     "config":{
       "projects":{
@@ -13315,8 +13315,8 @@
   "gemini-hlsw/lucuma-catalog":{
     "project":"gemini-hlsw/lucuma-catalog",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-catalog.git",
-    "revision":"v0.43.1",
-    "version":"0.43.1",
+    "revision":"v0.43.3",
+    "version":"0.43.3",
     "targets":"edu.gemini%lucuma-catalog edu.gemini%lucuma-ags edu.gemini%lucuma-catalog-testkit",
     "config":{
       "projects":{
@@ -13352,8 +13352,8 @@
   "gemini-hlsw/lucuma-core":{
     "project":"gemini-hlsw/lucuma-core",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-core.git",
-    "revision":"v0.84.1",
-    "version":"0.84.1",
+    "revision":"v0.85.0",
+    "version":"0.85.0",
     "targets":"edu.gemini%lucuma-core edu.gemini%lucuma-core-testkit",
     "config":{
       "projects":{
@@ -13426,9 +13426,39 @@
   "gemini-hlsw/lucuma-itc":{
     "project":"gemini-hlsw/lucuma-itc",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-itc.git",
-    "revision":"v0.18.2",
-    "version":"0.18.2",
-    "targets":"edu.gemini%lucuma-itc-testkit edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc edu.gemini%lucuma-itc-service"
+    "revision":"v0.19.0",
+    "version":"0.19.0",
+    "targets":"edu.gemini%lucuma-itc-testkit edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc edu.gemini%lucuma-itc-service",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "gemini-hlsw/lucuma-jts":{
     "project":"gemini-hlsw/lucuma-jts",
@@ -13581,8 +13611,8 @@
   "gemini-hlsw/lucuma-sso":{
     "project":"gemini-hlsw/lucuma-sso",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-sso.git",
-    "revision":"v0.6.4",
-    "version":"0.6.4",
+    "revision":"v0.6.5",
+    "version":"0.6.5",
     "targets":"edu.gemini%lucuma-sso-backend-client edu.gemini%lucuma-sso-frontend-client",
     "config":{
       "projects":{
@@ -15433,47 +15463,6 @@
       ]
     }
   },
-  "hjfruit/zio-nebula":{
-    "project":"hjfruit/zio-nebula",
-    "repoUrl":"https://github.com/hjfruit/zio-nebula.git",
-    "revision":"v0.0.4",
-    "version":"0.0.4",
-    "targets":"io.github.jxnu-liguobin%zio-nebula",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"11"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val scala3Version       = \"3.2.2\"",
-          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "hjfruit/zio-pulsar":{
     "project":"hjfruit/zio-pulsar",
     "repoUrl":"https://github.com/hjfruit/zio-pulsar.git",
@@ -15607,8 +15596,8 @@
   "hnaderi/named-codec":{
     "project":"hnaderi/named-codec",
     "repoUrl":"https://github.com/hnaderi/named-codec.git",
-    "revision":"v0.1.0",
-    "version":"0.1.0",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
     "targets":"dev.hnaderi%named-codec dev.hnaderi%named-codec-circe dev.hnaderi%named-codec-docs",
     "config":{
       "projects":{
@@ -15639,7 +15628,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.2.2\"",
+          "pattern":"val Scala3 = \"3.3.0\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -19161,8 +19150,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.79",
-    "version":"2.0.79",
+    "revision":"v2.0.81",
+    "version":"2.0.81",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -21673,8 +21662,8 @@
   "lhns/fs2-compress":{
     "project":"lhns/fs2-compress",
     "repoUrl":"https://github.com/lhns/fs2-compress.git",
-    "revision":"0.5.0",
-    "version":"0.5.0",
+    "revision":"1.0.0",
+    "version":"1.0.0",
     "targets":"de.lhns%fs2-compress-bzip2 de.lhns%fs2-compress de.lhns%fs2-compress-zstd de.lhns%fs2-compress-tar de.lhns%fs2-compress-brotli de.lhns%fs2-compress-zip de.lhns%fs2-compress-gzip",
     "config":{
       "projects":{
@@ -22080,8 +22069,8 @@
   "lhns/scala-trustmanager-utils":{
     "project":"lhns/scala-trustmanager-utils",
     "repoUrl":"https://github.com/lhns/scala-trustmanager-utils.git",
-    "revision":"0.3.5",
-    "version":"0.3.5",
+    "revision":"1.0.0",
+    "version":"1.0.0",
     "targets":"de.lhns%scala-trustmanager-utils",
     "config":{
       "projects":{
@@ -25275,6 +25264,43 @@
       ]
     }
   },
+  "nebula-contrib/zio-nebula":{
+    "project":"nebula-contrib/zio-nebula",
+    "repoUrl":"https://github.com/nebula-contrib/zio-nebula.git",
+    "revision":"v0.0.5",
+    "version":"0.0.5",
+    "targets":"io.github.jxnu-liguobin%zio-nebula",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "nicolasfara/ecscala":{
     "project":"nicolasfara/ecscala",
     "repoUrl":"https://github.com/nicolasfara/ecscala.git",
@@ -25858,8 +25884,8 @@
   "openmole/container":{
     "project":"openmole/container",
     "repoUrl":"https://github.com/openmole/container.git",
-    "revision":"v1.23",
-    "version":"1.23",
+    "revision":"v1.24",
+    "version":"1.24",
     "targets":"org.openmole%container"
   },
   "openmole/gridscale":{
@@ -30349,6 +30375,43 @@
       ]
     }
   },
+  "sake92/sharaf":{
+    "project":"sake92/sharaf",
+    "repoUrl":"https://github.com/sake92/sharaf.git",
+    "revision":"0.0.5",
+    "version":"0.0.5",
+    "targets":"ba.sake%sharaf ba.sake%formson ba.sake%querson ba.sake%validson",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "sake92/squery":{
     "project":"sake92/squery",
     "repoUrl":"https://github.com/sake92/squery.git",
@@ -34295,8 +34358,8 @@
   "scoverage/scalac-scoverage-plugin":{
     "project":"scoverage/scalac-scoverage-plugin",
     "repoUrl":"https://github.com/scoverage/scalac-scoverage-plugin.git",
-    "revision":"v2.0.10",
-    "version":"2.0.10",
+    "revision":"v2.0.11",
+    "version":"2.0.11",
     "targets":"org.scoverage%scalac-scoverage-domain org.scoverage%scalac-scoverage-reporter org.scoverage%scalac-scoverage-serializer",
     "config":{
       "projects":{
@@ -35618,8 +35681,8 @@
   "softwaremill/ox":{
     "project":"softwaremill/ox",
     "repoUrl":"https://github.com/softwaremill/ox.git",
-    "revision":"v0.0.12",
-    "version":"0.0.12",
+    "revision":"v0.0.13",
+    "version":"0.0.13",
     "targets":"com.softwaremill.ox%core com.softwaremill.ox%examples com.softwaremill.ox%kafka",
     "config":{
       "projects":{
@@ -35765,7 +35828,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.0\"",
+          "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -36816,25 +36879,11 @@
     "version":"0.0.6",
     "targets":"com.mchange%failable com.mchange%failable-logging"
   },
-  "swaldman/mchange-codegenutil":{
-    "project":"swaldman/mchange-codegenutil",
-    "repoUrl":"https://github.com/swaldman/mchange-codegenutil.git",
-    "revision":"v0.0.2",
-    "version":"0.0.2",
-    "targets":""
-  },
-  "swaldman/mchange-literal":{
-    "project":"swaldman/mchange-literal",
-    "repoUrl":"https://github.com/swaldman/mchange-literal.git",
-    "revision":"",
-    "version":"0.1.2",
-    "targets":""
-  },
   "swaldman/mchange-sysadmin-scala":{
     "project":"swaldman/mchange-sysadmin-scala",
     "repoUrl":"https://github.com/swaldman/mchange-sysadmin-scala.git",
-    "revision":"v0.0.7",
-    "version":"0.0.7",
+    "revision":"v0.0.8",
+    "version":"0.0.8",
     "targets":"com.mchange%mchange-sysadmin-scala"
   },
   "swaldman/mlog-scala":{
@@ -39328,6 +39377,47 @@
     "revision":"2.8.0",
     "version":"2.8.0",
     "targets":"com.github.tototoshi%slick-joda-mapper"
+  },
+  "tpataky/duckling":{
+    "project":"tpataky/duckling",
+    "repoUrl":"https://github.com/tpataky/duckling.git",
+    "revision":"",
+    "version":"0.0.2",
+    "targets":"io.github.tpataky%duckling",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.3.0\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
   },
   "tpolecat/atto":{
     "project":"tpolecat/atto",
@@ -43691,11 +43781,18 @@
       ]
     }
   },
+  "windymelt/happy-birthday":{
+    "project":"windymelt/happy-birthday",
+    "repoUrl":"https://github.com/windymelt/happy-birthday.git",
+    "revision":"v0.0.1",
+    "version":"0.0.1",
+    "targets":"io.github.windymelt%happy-birthday"
+  },
   "windymelt/qw.scala":{
     "project":"windymelt/qw.scala",
     "repoUrl":"https://github.com/windymelt/qw.scala.git",
-    "revision":"v0.1.3",
-    "version":"0.1.3",
+    "revision":"v0.1.4",
+    "version":"0.1.4",
     "targets":"io.github.windymelt%qw"
   },
   "wiringbits/wiringbits-webapp-utils":{
@@ -44543,6 +44640,43 @@
     "revision":"",
     "version":"0.1.1",
     "targets":"io.github.yrichika%scalahtml"
+  },
+  "ysthakur/sline":{
+    "project":"ysthakur/sline",
+    "repoUrl":"https://github.com/ysthakur/sline.git",
+    "revision":"",
+    "version":"0.0.0-1-7984e6",
+    "targets":"io.github.ysthakur%sline",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "yurikpanic/zio-postgres":{
     "project":"yurikpanic/zio-postgres",
@@ -46361,8 +46495,8 @@
   "zio/zio-schema":{
     "project":"zio/zio-schema",
     "repoUrl":"https://github.com/zio/zio-schema.git",
-    "revision":"v0.4.13",
-    "version":"0.4.13",
+    "revision":"v0.4.14",
+    "version":"0.4.14",
     "targets":"dev.zio%zio-schema-bson dev.zio%zio-schema-derivation dev.zio%zio-schema-docs dev.zio%zio-schema-zio-test dev.zio%zio-schema-macros dev.zio%zio-schema-msg-pack dev.zio%zio-schema-protobuf dev.zio%zio-schema-thrift dev.zio%zio-schema-json dev.zio%zio-schema-avro dev.zio%zio-schema dev.zio%zio-schema-optics",
     "config":{
       "projects":{
