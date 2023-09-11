@@ -3331,8 +3331,8 @@
   "asragab/unstructured4s":{
     "project":"asragab/unstructured4s",
     "repoUrl":"https://github.com/asragab/unstructured4s.git",
-    "revision":"v0.1.4",
-    "version":"0.1.4",
+    "revision":"v0.1.5",
+    "version":"0.1.5",
     "targets":"org.twelvehart%unstructured4s-core",
     "config":{
       "projects":{
@@ -3370,7 +3370,38 @@
     "repoUrl":"https://github.com/assist-iot-sripas/scala-mqtt-wrapper.git",
     "revision":"v3.0.0-RC2",
     "version":"3.0.0-RC2",
-    "targets":"io.github.assist-iot-sripas%scala-mqtt-wrapper"
+    "targets":"io.github.assist-iot-sripas%scala-mqtt-wrapper",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          "excludeLibraryDependency org.wartremover:wartremover_{scalaVersion}",
+          "removeScalacOptionsStartingWith -P:wartremover"
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "atedeg/mdm":{
     "project":"atedeg/mdm",
@@ -8507,7 +8538,7 @@
     "project":"davenverse/googleapis-http4s",
     "repoUrl":"https://github.com/davenverse/googleapis-http4s.git",
     "revision":"",
-    "version":"3.14.2+0.0.5",
+    "version":"1.19.0+0.0.5",
     "targets":"",
     "config":{
       "projects":{
@@ -13426,8 +13457,8 @@
   "gemini-hlsw/lucuma-itc":{
     "project":"gemini-hlsw/lucuma-itc",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-itc.git",
-    "revision":"v0.19.0",
-    "version":"0.19.0",
+    "revision":"v0.20.0",
+    "version":"0.20.0",
     "targets":"edu.gemini%lucuma-itc-testkit edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc edu.gemini%lucuma-itc-service",
     "config":{
       "projects":{
@@ -13500,8 +13531,8 @@
   "gemini-hlsw/lucuma-odb":{
     "project":"gemini-hlsw/lucuma-odb",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-odb.git",
-    "revision":"v0.5.1",
-    "version":"0.5.1",
+    "revision":"v0.6.0",
+    "version":"0.6.0",
     "targets":"edu.gemini%lucuma-odb edu.gemini%lucuma-odb-schema",
     "config":{
       "projects":{
@@ -13574,8 +13605,8 @@
   "gemini-hlsw/lucuma-schemas":{
     "project":"gemini-hlsw/lucuma-schemas",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-schemas.git",
-    "revision":"v0.59.0",
-    "version":"0.59.0",
+    "revision":"v0.60.0",
+    "version":"0.60.0",
     "targets":"edu.gemini%lucuma-schemas edu.gemini%lucuma-schemas-model edu.gemini%lucuma-schemas-testkit",
     "config":{
       "projects":{
@@ -13800,9 +13831,9 @@
   "ghostdogpr/caliban":{
     "project":"ghostdogpr/caliban",
     "repoUrl":"https://github.com/ghostdogpr/caliban.git",
-    "revision":"v2.3.0",
-    "version":"2.3.0",
-    "targets":"com.github.ghostdogpr%caliban-reporting com.github.ghostdogpr%caliban-monix com.github.ghostdogpr%caliban-tapir com.github.ghostdogpr%caliban-tools com.github.ghostdogpr%caliban-macros com.github.ghostdogpr%caliban-tracing com.github.ghostdogpr%caliban com.github.ghostdogpr%caliban-cats com.github.ghostdogpr%caliban-federation com.github.ghostdogpr%caliban-client com.github.ghostdogpr%caliban-http4s com.github.ghostdogpr%caliban-zio-http",
+    "revision":"v2.3.1",
+    "version":"2.3.1",
+    "targets":"com.github.ghostdogpr%caliban-reporting com.github.ghostdogpr%caliban-monix com.github.ghostdogpr%caliban-tapir com.github.ghostdogpr%caliban-tools com.github.ghostdogpr%caliban-pekko-http com.github.ghostdogpr%caliban-macros com.github.ghostdogpr%caliban-tracing com.github.ghostdogpr%caliban com.github.ghostdogpr%caliban-cats com.github.ghostdogpr%caliban-federation com.github.ghostdogpr%caliban-client com.github.ghostdogpr%caliban-http4s com.github.ghostdogpr%caliban-zio-http",
     "config":{
       "projects":{
         "exclude":[
@@ -17708,8 +17739,8 @@
   "j-mie6/parsley":{
     "project":"j-mie6/parsley",
     "repoUrl":"https://github.com/j-mie6/parsley.git",
-    "revision":"v4.4.0-M5",
-    "version":"4.4.0-M5",
+    "revision":"v4.4.0-M6",
+    "version":"4.4.0-M6",
     "targets":"com.github.j-mie6%parsley",
     "config":{
       "projects":{
@@ -18509,8 +18540,8 @@
   "jbwheatley/pact4s":{
     "project":"jbwheatley/pact4s",
     "repoUrl":"https://github.com/jbwheatley/pact4s.git",
-    "revision":"v0.9.0",
-    "version":"0.9.0",
+    "revision":"v0.10.1-java8",
+    "version":"0.10.1-java8",
     "targets":"io.github.jbwheatley%pact4s-spray-json io.github.jbwheatley%pact4s-scalatest io.github.jbwheatley%pact4s-circe io.github.jbwheatley%pact4s-play-json io.github.jbwheatley%pact4s-munit-cats-effect io.github.jbwheatley%pact4s-models io.github.jbwheatley%pact4s-core io.github.jbwheatley%pact4s-weaver",
     "config":{
       "projects":{
@@ -18541,7 +18572,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3           = \"3.2.2\"",
+          "pattern":"val scala3           = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -18592,8 +18623,8 @@
   "jcouyang/dhall-generic":{
     "project":"jcouyang/dhall-generic",
     "repoUrl":"https://github.com/jcouyang/dhall-generic.git",
-    "revision":"v0.3.93",
-    "version":"0.3.93",
+    "revision":"v0.3.94",
+    "version":"0.3.94",
     "targets":"us.oyanglul%dhall-generic",
     "config":{
       "projects":{
@@ -18624,7 +18655,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.0\"",
+          "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -18792,8 +18823,8 @@
   "jelly-rdf/jelly-jvm":{
     "project":"jelly-rdf/jelly-jvm",
     "repoUrl":"https://github.com/jelly-rdf/jelly-jvm.git",
-    "revision":"v0.0.5",
-    "version":"0.0.5",
+    "revision":"v0.0.6",
+    "version":"0.0.6",
     "targets":"eu.ostrzyciel.jelly%jelly-core eu.ostrzyciel.jelly%jelly-jvm eu.ostrzyciel.jelly%jelly-grpc eu.ostrzyciel.jelly%jelly-stream eu.ostrzyciel.jelly%jelly-jena eu.ostrzyciel.jelly%jelly-rdf4j"
   },
   "jilen/play-circe":{
@@ -19150,8 +19181,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.81",
-    "version":"2.0.81",
+    "revision":"v2.0.84",
+    "version":"2.0.84",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -20274,8 +20305,8 @@
   "kevin-lee/effectie":{
     "project":"kevin-lee/effectie",
     "repoUrl":"https://github.com/kevin-lee/effectie.git",
-    "revision":"v2.0.0-beta11",
-    "version":"2.0.0-beta11",
+    "revision":"v2.0.0-beta12",
+    "version":"2.0.0-beta12",
     "targets":"io.kevinlee%effectie-syntax io.kevinlee%effectie-cats-effect2 io.kevinlee%effectie-test4cats io.kevinlee%effectie-cats-effect3 io.kevinlee%effectie-cats io.kevinlee%effectie-monix3 io.kevinlee%effectie-core",
     "config":{
       "projects":{
@@ -20391,15 +20422,15 @@
   "kevin-lee/logger-f":{
     "project":"kevin-lee/logger-f",
     "repoUrl":"https://github.com/kevin-lee/logger-f.git",
-    "revision":"v2.0.0-beta19",
-    "version":"2.0.0-beta19",
+    "revision":"v2.0.0-beta20",
+    "version":"2.0.0-beta20",
     "targets":"io.kevinlee%logger-f-slf4j io.kevinlee%logger-f-log4j io.kevinlee%logger-f-sbt-logging io.kevinlee%logger-f-test-kit io.kevinlee%logger-f-core io.kevinlee%logger-f-log4s io.kevinlee%logger-f-logback-mdc-monix3 io.kevinlee%logger-f-cats"
   },
   "kevin-lee/openai4s":{
     "project":"kevin-lee/openai4s",
     "repoUrl":"https://github.com/kevin-lee/openai4s.git",
-    "revision":"v0.1.0-alpha4",
-    "version":"0.1.0-alpha4",
+    "revision":"v0.1.0-alpha5",
+    "version":"0.1.0-alpha5",
     "targets":"io.kevinlee%openai4s-api io.kevinlee%openai4s-config io.kevinlee%openai4s-core io.kevinlee%openai4s-http4s",
     "config":{
       "projects":{
@@ -20898,8 +20929,8 @@
   "kovstas/fs2-throttler":{
     "project":"kovstas/fs2-throttler",
     "repoUrl":"https://github.com/kovstas/fs2-throttler.git",
-    "revision":"v1.0.7",
-    "version":"1.0.7",
+    "revision":"v1.0.8",
+    "version":"1.0.8",
     "targets":"dev.kovstas%fs2-throttler",
     "config":{
       "projects":{
@@ -24156,8 +24187,8 @@
   "molarmanful/sclin":{
     "project":"molarmanful/sclin",
     "repoUrl":"https://github.com/molarmanful/sclin.git",
-    "revision":"v0.1.14",
-    "version":"0.1.14",
+    "revision":"v0.1.16",
+    "version":"0.1.16",
     "targets":"io.github.molarmanful%sclin",
     "config":{
       "projects":{
@@ -25884,8 +25915,8 @@
   "openmole/container":{
     "project":"openmole/container",
     "repoUrl":"https://github.com/openmole/container.git",
-    "revision":"v1.24",
-    "version":"1.24",
+    "revision":"v1.26",
+    "version":"1.26",
     "targets":"org.openmole%container"
   },
   "openmole/gridscale":{
@@ -26604,8 +26635,8 @@
   "paoloboni/spray-json-derived-codecs":{
     "project":"paoloboni/spray-json-derived-codecs",
     "repoUrl":"https://github.com/paoloboni/spray-json-derived-codecs.git",
-    "revision":"v2.3.10",
-    "version":"2.3.10",
+    "revision":"v2.3.11",
+    "version":"2.3.11",
     "targets":"io.github.paoloboni%spray-json-derived-codecs",
     "config":{
       "projects":{
@@ -26636,7 +26667,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3                 = \"3.2.1\"",
+          "pattern":"val scala3                 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -28677,8 +28708,8 @@
   "profunktor/neutron":{
     "project":"profunktor/neutron",
     "repoUrl":"https://github.com/profunktor/neutron.git",
-    "revision":"v0.7.2",
-    "version":"0.7.2",
+    "revision":"v0.8.0",
+    "version":"0.8.0",
     "targets":"dev.profunktor%neutron-circe dev.profunktor%neutron-core dev.profunktor%neutron-function",
     "config":{
       "projects":{
@@ -28709,7 +28740,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.2.2\"",
+          "pattern":"val scala3 = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -28718,8 +28749,8 @@
   "profunktor/redis4cats":{
     "project":"profunktor/redis4cats",
     "repoUrl":"https://github.com/profunktor/redis4cats.git",
-    "revision":"v1.4.3",
-    "version":"1.4.3",
+    "revision":"v1.5.0",
+    "version":"1.5.0",
     "targets":"dev.profunktor%redis4cats-core dev.profunktor%redis4cats-effects dev.profunktor%redis4cats-log4cats dev.profunktor%redis4cats-streams"
   },
   "pureconfig/pureconfig":{
@@ -29304,6 +29335,13 @@
         }
       ]
     }
+  },
+  "ranyitz/brush":{
+    "project":"ranyitz/brush",
+    "repoUrl":"https://github.com/ranyitz/brush.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"io.github.ranyitz%brush"
   },
   "raquo/scala-dom-types":{
     "project":"raquo/scala-dom-types",
@@ -30571,8 +30609,8 @@
   "sangria-graphql/macro-visit":{
     "project":"sangria-graphql/macro-visit",
     "repoUrl":"https://github.com/sangria-graphql/macro-visit.git",
-    "revision":"v0.2.0-RC1",
-    "version":"0.2.0-RC1",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
     "targets":"org.sangria-graphql%macro-visit",
     "config":{
       "projects":{
@@ -30584,7 +30622,7 @@
         }
       },
       "java":{
-        "version":"11"
+        "version":"8"
       },
       "sbt":{
         "commands":[
@@ -36896,8 +36934,8 @@
   "swaldman/unstatic":{
     "project":"swaldman/unstatic",
     "repoUrl":"https://github.com/swaldman/unstatic.git",
-    "revision":"v0.0.6",
-    "version":"0.0.6",
+    "revision":"v0.0.7",
+    "version":"0.0.7",
     "targets":"com.mchange%unstatic"
   },
   "swaldman/untemplate":{
@@ -41575,8 +41613,8 @@
   "typelevel/laika":{
     "project":"typelevel/laika",
     "repoUrl":"https://github.com/typelevel/laika.git",
-    "revision":"0.19.3",
-    "version":"0.19.3",
+    "revision":"0.19.4",
+    "version":"0.19.4",
     "targets":"org.planet42%laika-core org.planet42%laika-io org.planet42%laika-pdf org.planet42%laika-preview",
     "config":{
       "projects":{
@@ -43237,6 +43275,13 @@
       ]
     }
   },
+  "virtuslab/besom":{
+    "project":"virtuslab/besom",
+    "repoUrl":"https://github.com/virtuslab/besom.git",
+    "revision":"v0.0.1-beta",
+    "version":"0.0.1-beta",
+    "targets":"org.virtuslab%besom-cats org.virtuslab%besom-core org.virtuslab%besom-zio"
+  },
   "virtuslab/inkuire":{
     "project":"virtuslab/inkuire",
     "repoUrl":"https://github.com/virtuslab/inkuire.git",
@@ -43791,8 +43836,8 @@
   "windymelt/qw.scala":{
     "project":"windymelt/qw.scala",
     "repoUrl":"https://github.com/windymelt/qw.scala.git",
-    "revision":"v0.1.4",
-    "version":"0.1.4",
+    "revision":"v0.1.5",
+    "version":"0.1.5",
     "targets":"io.github.windymelt%qw"
   },
   "wiringbits/wiringbits-webapp-utils":{
