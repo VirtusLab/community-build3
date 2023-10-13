@@ -24,15 +24,15 @@ case $JDK_VERSION in
   ;;
 
 "11")
-  jdkDistro="11.0.17-tem"
+  jdkDistro="11.0.20-tem"
   ;;
 
 "17")
-  jdkDistro="17.0.5-tem "
+  jdkDistro="17.0.8-tem "
   ;;
 
-"20")
-  jdkDistro="20.0.1-tem"
+"21")
+  jdkDistro="21-tem"
   ;;
 
 *)
