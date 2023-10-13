@@ -27,5 +27,5 @@ ENV PATH="$JAVA_HOME/bin:$SBT_HOME/bin:$PATH"
 WORKDIR /build
 COPY . /build/
 
-ENV SBT_VERSIONS="1.7.3 1.8.2 1.9.1"
+ENV SBT_VERSIONS="1.9.6"
 RUN ./warmup.sh
