@@ -18,7 +18,7 @@ RUN apt-get update && apt-get upgrade -y && \
     echo "sdkman_auto_selfupdate=false" >> $SDKMAN_DIR/etc/config
 
 # Source sdkman to make the sdk command available and install candidate
-RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java $JDK_VERSION && sdk install sbt 1.9.1" 
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java $JDK_VERSION && sdk install sbt 1.9.6" 
 # Add candidate path to $PATH environment variable
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
 ENV SBT_HOME="$SDKMAN_DIR/candidates/sbt/current"
