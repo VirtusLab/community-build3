@@ -1471,8 +1471,8 @@
   "almond-sh/almond":{
     "project":"almond-sh/almond",
     "repoUrl":"https://github.com/almond-sh/almond.git",
-    "revision":"v0.14.0-RC13",
-    "version":"0.14.0-RC13",
+    "revision":"v0.14.0-RC14",
+    "version":"0.14.0-RC14",
     "targets":"sh.almond%shared-directives sh.almond%logger sh.almond%coursier-logger sh.almond%toree-hooks sh.almond%launcher",
     "config":{
       "projects":{
@@ -4729,6 +4729,13 @@
     "revision":"v1.1.0",
     "version":"1.1.0",
     "targets":"com.github.billzabob%fordeckmacia"
+  },
+  "bishabosha/enum-extensions":{
+    "project":"bishabosha/enum-extensions",
+    "repoUrl":"https://github.com/bishabosha/enum-extensions.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"io.github.bishabosha%enum-extensions"
   },
   "bitlap/rolls":{
     "project":"bitlap/rolls",
@@ -8773,7 +8780,7 @@
     "project":"davenverse/googleapis-http4s",
     "repoUrl":"https://github.com/davenverse/googleapis-http4s.git",
     "revision":"",
-    "version":"2.30.0+0.0.6",
+    "version":"2.27.0+0.0.6",
     "targets":"",
     "config":{
       "projects":{
@@ -10421,6 +10428,47 @@
       ]
     }
   },
+  "dvgica/periodic":{
+    "project":"dvgica/periodic",
+    "repoUrl":"https://github.com/dvgica/periodic.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"ca.dvgi%periodic-api ca.dvgi%periodic-jdk",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.3.1\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "dvreeze/tqa":{
     "project":"dvreeze/tqa",
     "repoUrl":"https://github.com/dvreeze/tqa.git",
@@ -11970,8 +12018,8 @@
   "fabiopinheiro/scala-did":{
     "project":"fabiopinheiro/scala-did",
     "repoUrl":"https://github.com/fabiopinheiro/scala-did.git",
-    "revision":"v0.1.0-M10",
-    "version":"0.1.0-M10",
+    "revision":"v0.1.0-M11",
+    "version":"0.1.0-M11",
     "targets":"app.fmgp%did app.fmgp%did-imp app.fmgp%did-method-peer app.fmgp%multiformats",
     "config":{
       "projects":{
@@ -14214,8 +14262,8 @@
   "ghostdogpr/caliban":{
     "project":"ghostdogpr/caliban",
     "repoUrl":"https://github.com/ghostdogpr/caliban.git",
-    "revision":"v2.4.0",
-    "version":"2.4.0",
+    "revision":"v2.4.1",
+    "version":"2.4.1",
     "targets":"com.github.ghostdogpr%caliban-reporting com.github.ghostdogpr%caliban-monix com.github.ghostdogpr%caliban-tapir com.github.ghostdogpr%caliban-tools com.github.ghostdogpr%caliban-pekko-http com.github.ghostdogpr%caliban-macros com.github.ghostdogpr%caliban-tracing com.github.ghostdogpr%caliban com.github.ghostdogpr%caliban-cats com.github.ghostdogpr%caliban-federation com.github.ghostdogpr%caliban-client com.github.ghostdogpr%caliban-http4s com.github.ghostdogpr%caliban-zio-http",
     "config":{
       "projects":{
@@ -16247,8 +16295,8 @@
   "hnaderi/scala-k8s":{
     "project":"hnaderi/scala-k8s",
     "repoUrl":"https://github.com/hnaderi/scala-k8s.git",
-    "revision":"v0.15.0",
-    "version":"0.15.0",
+    "revision":"v0.15.1",
+    "version":"0.15.1",
     "targets":"dev.hnaderi%scala-k8s-manifests dev.hnaderi%scala-k8s-java-ssl dev.hnaderi%scala-k8s-play-json dev.hnaderi%scala-k8s-objects dev.hnaderi%scala-k8s-docs dev.hnaderi%scala-k8s-zio dev.hnaderi%scala-k8s-scalacheck dev.hnaderi%scala-k8s-sttp dev.hnaderi%scala-k8s-http4s-jdk dev.hnaderi%scala-k8s-zio-json dev.hnaderi%scala-k8s-client dev.hnaderi%scala-k8s-spray-json dev.hnaderi%scala-k8s-json4s dev.hnaderi%scala-k8s-jawn dev.hnaderi%scala-k8s-circe dev.hnaderi%scala-k8s-http4s-ember dev.hnaderi%scala-k8s-http4s-netty dev.hnaderi%scala-k8s-http4s-blaze dev.hnaderi%scala-k8s-http4s",
     "config":{
       "projects":{
@@ -19883,8 +19931,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.124",
-    "version":"2.0.124",
+    "revision":"v2.0.126",
+    "version":"2.0.126",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -28846,9 +28894,9 @@
   "playframework/play-ebean":{
     "project":"playframework/play-ebean",
     "repoUrl":"https://github.com/playframework/play-ebean.git",
-    "revision":"7.0.0-RC2",
-    "version":"7.0.0-RC2",
-    "targets":"com.typesafe.play%play-ebean",
+    "revision":"8.0.0-M1",
+    "version":"8.0.0-M1",
+    "targets":"org.playframework%play-ebean",
     "config":{
       "projects":{
         "exclude":[
@@ -29010,9 +29058,9 @@
   "playframework/play-slick":{
     "project":"playframework/play-slick",
     "repoUrl":"https://github.com/playframework/play-slick.git",
-    "revision":"5.2.0-RC1",
-    "version":"5.2.0-RC1",
-    "targets":"com.typesafe.play%play-slick com.typesafe.play%play-slick-evolutions"
+    "revision":"6.0.0-M1",
+    "version":"6.0.0-M1",
+    "targets":"org.playframework%play-slick org.playframework%play-slick-evolutions"
   },
   "playframework/play-ws":{
     "project":"playframework/play-ws",
@@ -31451,8 +31499,8 @@
   "sageserpent-open/americium":{
     "project":"sageserpent-open/americium",
     "repoUrl":"https://github.com/sageserpent-open/americium.git",
-    "revision":"v1.16.1",
-    "version":"1.16.1",
+    "revision":"v1.17.0",
+    "version":"1.17.0",
     "targets":"com.sageserpent%americium",
     "config":{
       "projects":{
@@ -34701,8 +34749,8 @@
   "scalikejdbc/scalikejdbc":{
     "project":"scalikejdbc/scalikejdbc",
     "repoUrl":"https://github.com/scalikejdbc/scalikejdbc.git",
-    "revision":"4.0.0",
-    "version":"4.0.0",
+    "revision":"4.1.0",
+    "version":"4.1.0",
     "targets":"org.scalikejdbc%scalikejdbc-core org.scalikejdbc%scalikejdbc-interpolation org.scalikejdbc%scalikejdbc-syntax-support-macro org.scalikejdbc%scalikejdbc-streams org.scalikejdbc%scalikejdbc-config org.scalikejdbc%scalikejdbc-interpolation-macro org.scalikejdbc%scalikejdbc org.scalikejdbc%scalikejdbc-test org.scalikejdbc%scalikejdbc-joda-time org.scalikejdbc%scalikejdbc-mapper-generator-core",
     "config":{
       "projects":{
@@ -34714,7 +34762,7 @@
         }
       },
       "java":{
-        "version":"8"
+        "version":"11"
       },
       "sbt":{
         "commands":[
@@ -34733,7 +34781,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"def Scala3 = \"3.1.0\"",
+          "pattern":"def Scala3 = \"3.3.1\"",
           "replaceWith":"def Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -36025,8 +36073,8 @@
   "shiftleftsecurity/codepropertygraph":{
     "project":"shiftleftsecurity/codepropertygraph",
     "repoUrl":"https://github.com/shiftleftsecurity/codepropertygraph.git",
-    "revision":"v1.4.24",
-    "version":"1.4.24",
+    "revision":"v1.4.25",
+    "version":"1.4.25",
     "targets":"io.shiftleft%schema2json io.shiftleft%codepropertygraph io.shiftleft%codepropertygraph-domain-classes io.shiftleft%codepropertygraph-schema io.shiftleft%codepropertygraph-protos",
     "config":{
       "projects":{
@@ -39351,8 +39399,8 @@
   "thatscalaguy/ulid4cats":{
     "project":"thatscalaguy/ulid4cats",
     "repoUrl":"https://github.com/thatscalaguy/ulid4cats.git",
-    "revision":"v1.3.2",
-    "version":"1.3.2",
+    "revision":"v1.3.3",
+    "version":"1.3.3",
     "targets":"de.thatscalaguy%ulid4cats",
     "config":{
       "projects":{
@@ -39383,7 +39431,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.0\"",
+          "pattern":"val Scala3 = \"3.3.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
