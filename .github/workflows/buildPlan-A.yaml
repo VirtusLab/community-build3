@@ -35,6 +35,8 @@ on:
         required: true
       OPENCB_ELASTIC_PSWD:
         required: true
+      OPENCB_CONFIG_UPDATE_TOKEN:
+        required: true
 
 jobs:
   setup-build:
@@ -91,6 +93,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -190,6 +193,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-1 ]
@@ -245,6 +249,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-3:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-2 ]
@@ -340,11 +345,9 @@ jobs:
         - name: "kcrypt/scala-blake3"
         - name: "kcrypt/scala-sha"
         - name: "kolotaev/ride"
-        - name: "lambdaworks/scountries"
         - name: "lightbend-labs/lightbend-emoji"
         - name: "lightbend-labs/scala-logging"
         - name: "lightbend/mima"
-        - name: "lloydmeta/enumeratum"
         - name: "lloydmeta/ltsv-logger"
         - name: "log4s/log4s"
         - name: "lomigmegard/akka-http-cors"
@@ -478,6 +481,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-4:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-3 ]
@@ -508,7 +512,6 @@ jobs:
         - name: "herminiogg/shexml"
         - name: "ij-plugins/ijp-color"
         - name: "ij-plugins/ijp-debayer2sx"
-        - name: "ij-plugins/ijp-scala-console"
         - name: "inkytonik/kiama"
         - name: "j-mie6/parsley"
         - name: "j5ik2o/akka-persistence-dynamodb"
@@ -522,14 +525,12 @@ jobs:
         - name: "msgpack4z/msgpack4z-core"
         - name: "norbert-radyk/spoiwo"
         - name: "nrinaudo/kantan.parsers"
-        - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala3-enum"
         - name: "playframework/play-doc"
         - name: "playframework/play-file-watch"
         - name: "playframework/play-ws"
         - name: "rallyhealth/scalacheck-ops"
         - name: "rediscala/rediscala"
-        - name: "rustedbones/pekko-http-metrics"
         - name: "sake92/sharaf"
         - name: "sake92/squery"
         - name: "sangria-graphql/sangria-ion"
@@ -582,6 +583,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-5:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-4 ]
@@ -691,6 +693,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-6:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-5 ]
@@ -743,6 +746,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-7:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-6 ]
@@ -776,6 +780,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-8:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-7 ]
@@ -847,6 +852,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-9:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-8 ]
@@ -882,6 +888,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-10:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-9 ]
@@ -945,6 +952,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-11:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-10 ]
@@ -980,6 +988,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-12:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-11 ]
@@ -1013,6 +1022,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-13:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-12 ]
@@ -1068,6 +1078,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-14:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-13 ]
@@ -1099,6 +1110,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-15:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-14 ]
@@ -1122,6 +1134,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-16:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-15 ]
@@ -1181,7 +1194,7 @@ jobs:
         - name: "http4s/http4s-fabric"
         - name: "http4s/http4s-prometheus-metrics"
         - name: "http4s/http4s-servlet"
-        - name: "imaxmelnyk/openai-scala"
+        - name: "ij-plugins/ijp-scala-console"
         - name: "jap-company/fields"
         - name: "jilen/play-circe"
         - name: "jodersky/scala-argparse"
@@ -1193,19 +1206,18 @@ jobs:
         - name: "kordyjan/pytanie"
         - name: "kory33/s2mc-test"
         - name: "koterpillar/refinery"
+        - name: "lambdaworks/scountries"
         - name: "lancewalton/treelog"
         - name: "lhns/remote-io"
         - name: "m2-oss/calypso"
         - name: "marcinzh/enterprise"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
         - name: "mrdimosthenis/scala-synapses"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-circe"
         - name: "nau/scalus"
-        - name: "neotypes/neotypes"
         - name: "ollls/zio-tls-http"
         - name: "openmole/gridscale"
         - name: "openmole/mgo"
@@ -1213,15 +1225,16 @@ jobs:
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "phaller/spores3"
         - name: "pityka/nspl"
+        - name: "pjfanning/jackson-module-enumeratum"
         - name: "plokhotnyuk/jsoniter-scala"
         - name: "polystat/odin"
         - name: "profunktor/fs2-rabbit"
         - name: "profunktor/neutron"
-        - name: "pureconfig/pureconfig"
         - name: "raquo/waypoint"
         - name: "reactific/riddl"
         - name: "reactivecore/rc-circe-json-schema"
         - name: "rolang/dumbo"
+        - name: "rustedbones/pekko-http-metrics"
         - name: "sageserpent-open/americium"
         - name: "scala-cli/scala-cli-signing"
         - name: "scala/toolkit"
@@ -1272,6 +1285,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-17:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-16 ]
@@ -1285,9 +1299,6 @@ jobs:
         - name: "andimiller/decline-completion"
         - name: "circe/circe"
         - name: "dacr/code-examples-manager"
-        - name: "erikerlandson/coulomb"
-        - name: "etspaceman/scalacheck-faker"
-        - name: "geirolz/toolkit"
         - name: "indoorvivants/subatomic"
         - name: "jchapuis/fs2-kafka-mock"
         - name: "optics-dev/monocle"
@@ -1309,6 +1320,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-18:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-17 ]
@@ -1319,7 +1331,6 @@ jobs:
         include:
         - name: "ahjohannessen/sec"
         - name: "armanbilge/circe-scala-yaml"
-        - name: "avokka/avokka"
         - name: "circe/circe-config"
         - name: "circe/circe-fs2"
         - name: "circe/circe-optics"
@@ -1327,7 +1338,6 @@ jobs:
         - name: "eventstore/eventstore.akka.persistence"
         - name: "filosganga/jsonpath"
         - name: "gemini-hlsw/crystal"
-        - name: "gemini-hlsw/lucuma-core"
         - name: "gnieh/fs2-data"
         - name: "gnieh/geo-scala"
         - name: "hnaderi/lepus"
@@ -1364,6 +1374,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-19:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-18 ]
@@ -1392,7 +1403,6 @@ jobs:
         - name: "eikek/calev"
         - name: "fgrutsch/emergence"
         - name: "gemini-hlsw/clue"
-        - name: "gemini-hlsw/lucuma-odb"
         - name: "hamnis/jwk"
         - name: "http4s/blaze"
         - name: "http4s/http4s-fs2-data"
@@ -1419,12 +1429,10 @@ jobs:
         - name: "pjfanning/pekko-http-json"
         - name: "sksamuel/elastic4s"
         - name: "softwaremill/sttp-apispec"
-        - name: "theiterators/kebs"
         - name: "typelevel/feral"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/skunk"
         - name: "typelevel/toolkit"
-        - name: "vlovgr/ciris"
         - name: "xebia-functional/karat-scalacheck"
         - name: "zio/zio-schema"
     steps:
@@ -1441,6 +1449,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-20:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-19 ]
@@ -1451,18 +1460,14 @@ jobs:
         include:
         - name: "47degrees/memeid"
         - name: "47degrees/sbt-energymonitor"
-        - name: "7mind/izumi"
         - name: "andreamarcolin/oidc4s"
         - name: "apache/incubator-pekko-connectors"
         - name: "apimorphism/telegramium"
         - name: "atedeg/mdm"
         - name: "augustjune/canoe"
-        - name: "avast/scala-server-toolkit"
         - name: "cornerman/sloth"
         - name: "danslapman/morphling"
         - name: "davenverse/rediculous"
-        - name: "etspaceman/kinesis4cats"
-        - name: "gemini-hlsw/lucuma-sso"
         - name: "hamnis/jsonschema"
         - name: "hnaderi/edomata"
         - name: "http4s/http4s-netty"
@@ -1475,7 +1480,6 @@ jobs:
         - name: "lambdaworks/zio-elasticsearch"
         - name: "paoloboni/binance-scala-client"
         - name: "pme123/camundala"
-        - name: "polystat/polystat-cli"
         - name: "profunktor/http4s-jwt-auth"
         - name: "scalabin-no/http4s-directives"
         - name: "scalacenter/course-management-tools"
@@ -1483,7 +1487,6 @@ jobs:
         - name: "trace4cats/trace4cats-datadog"
         - name: "travisbrown/dhallj"
         - name: "typelevel/grackle"
-        - name: "valdemargr/gql"
         - name: "virtuslab/inkuire"
         - name: "zio/zio-http"
         - name: "zio/zio-metrics-legacy"
@@ -1501,6 +1504,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-21:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-20 ]
@@ -1532,6 +1536,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-22:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-21 ]
@@ -1557,6 +1562,7 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
   stage-23:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-22 ]
@@ -1567,6 +1573,7 @@ jobs:
         include:
         - name: "kitlangton/neotype"
         - name: "liewhite/swopen"
+        - name: "lloydmeta/enumeratum"
         - name: "vigoo/desert"
     steps:
       - name: "Git Checkout"
@@ -1582,3 +1589,114 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
+  stage-24:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-23 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "imaxmelnyk/openai-scala"
+        - name: "medeia/medeia"
+        - name: "neotypes/neotypes"
+        - name: "pureconfig/pureconfig"
+        - name: "theiterators/kebs"
+        - name: "valdemargr/gql"
+        - name: "vlovgr/ciris"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
+  stage-25:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-24 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "7mind/izumi"
+        - name: "avast/scala-server-toolkit"
+        - name: "avokka/avokka"
+        - name: "erikerlandson/coulomb"
+        - name: "etspaceman/kinesis4cats"
+        - name: "etspaceman/scalacheck-faker"
+        - name: "geirolz/toolkit"
+        - name: "polystat/polystat-cli"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
+  stage-26:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-25 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "gemini-hlsw/lucuma-core"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
+  stage-27:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-26 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "gemini-hlsw/lucuma-odb"
+        - name: "gemini-hlsw/lucuma-sso"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          generate-badge: true
