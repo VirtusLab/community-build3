@@ -29,6 +29,10 @@ inputs:
   workflow-name:
     description: "Name of the calling workflow, used to resolve build URL. Leave empty to use default (execute-build-plan / {{github.job}} (<project-name>))"
     default: ""
+  generate-badge:
+    description: "Should the custom Github badge with the result of build be generated"
+    default: false
+
 runs:
   using: "composite"
   steps:
@@ -142,7 +146,14 @@ runs:
       id: check-status
       shell: bash
       if: steps.check-history.outputs.can-skip-build != 'true'
-      run: echo "status=$(cat build-status.txt)" >> $GITHUB_OUTPUT
+      run: |
+        status=$(cat build-status.txt)
+        echo "status=${status}" >> $GITHUB_OUTPUT
+        if [[ "$status" == "success" ]]; then
+          echo "badgeColor=4CBB17" >> $GITHUB_OUTPUT
+        else 
+          echo "badgeColor=ED2939" >> $GITHUB_OUTPUT
+        fi
 
     - name: Get current job URL
       id: job-info
@@ -215,6 +226,25 @@ runs:
           if [ $? != 0 ]; then 
             echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
           fi
+
+    - uses: tibdex/github-app-token@v1
+      id: generate-token
+      if: steps.check-history.outputs.can-skip-build != 'true' && inputs.generate-badge == 'true'
+      with:
+        app_id: 303718
+        private_key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+
+    - name: Generate badge
+      shell: bash
+      if: steps.check-history.outputs.can-skip-build != 'true' && inputs.generate-badge == 'true'
+      uses: RubbaBoy/BYOB@v1.3.0
+      with:
+        name: ${{ inputs.project-name }}
+        label: 'Open Community Build status:'
+        icon: https://raw.githubusercontent.com/lampepfl/dotty/main/docs/_assets/images/logo.svg
+        status: ${{ inputs.scala-version }}
+        color: ${{ steps.check-status.outputs.badgeColor }}
+        github_token: ${{ steps.generate-token.outputs.token }}
 
     - name: Check results
       shell: bash
