@@ -238,7 +238,6 @@ runs:
         private_key: ${{ inputs.github-token-key }}
 
     - name: Generate badge
-      shell: bash
       if: steps.check-history.outputs.can-skip-build != 'true' && inputs.generate-badge == 'true'
       uses: RubbaBoy/BYOB@v1.3.0
       with:
