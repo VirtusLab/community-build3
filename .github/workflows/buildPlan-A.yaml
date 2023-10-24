@@ -94,6 +94,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -194,6 +195,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-1 ]
@@ -250,6 +252,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-3:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-2 ]
@@ -482,6 +485,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-4:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-3 ]
@@ -584,6 +588,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-5:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-4 ]
@@ -694,6 +699,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-6:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-5 ]
@@ -747,6 +753,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-7:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-6 ]
@@ -781,6 +788,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-8:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-7 ]
@@ -853,6 +861,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-9:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-8 ]
@@ -889,6 +898,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-10:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-9 ]
@@ -953,6 +963,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-11:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-10 ]
@@ -989,6 +1000,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-12:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-11 ]
@@ -1023,6 +1035,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-13:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-12 ]
@@ -1079,6 +1092,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-14:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-13 ]
@@ -1111,6 +1125,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-15:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-14 ]
@@ -1135,6 +1150,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-16:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-15 ]
@@ -1286,6 +1302,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-17:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-16 ]
@@ -1321,6 +1338,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-18:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-17 ]
@@ -1375,6 +1393,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-19:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-18 ]
@@ -1450,6 +1469,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-20:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-19 ]
@@ -1505,6 +1525,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-21:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-20 ]
@@ -1537,6 +1558,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-22:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-21 ]
@@ -1563,6 +1585,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-23:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-22 ]
@@ -1590,6 +1613,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-24:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-23 ]
@@ -1620,6 +1644,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-25:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-24 ]
@@ -1651,6 +1676,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-26:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-25 ]
@@ -1675,6 +1701,7 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
   stage-27:
     runs-on: ubuntu-22.04
     needs: [ setup-build, stage-26 ]
@@ -1700,3 +1727,4 @@ jobs:
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           generate-badge: true
+          github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}

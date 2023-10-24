@@ -32,6 +32,9 @@ inputs:
   generate-badge:
     description: "Should the custom Github badge with the result of build be generated"
     default: false
+  github-token-key:
+    description: "Github token key allowing to publish badges"
+    required: false
 
 runs:
   using: "composite"
@@ -232,7 +235,7 @@ runs:
       if: steps.check-history.outputs.can-skip-build != 'true' && inputs.generate-badge == 'true'
       with:
         app_id: 303718
-        private_key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
+        private_key: ${{ inputs.github-token-key }}
 
     - name: Generate badge
       shell: bash

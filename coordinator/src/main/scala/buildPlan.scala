@@ -508,6 +508,7 @@ def createGithubActionJob(
           println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")
           println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
           println("    generate-badge: true")
+          println("    github-token-key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}")
         }
       }
     }
