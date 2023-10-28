@@ -22,7 +22,7 @@ jobs:
       - name: Install scala-cli
         uses: coursier/setup-action@v1
         with:
-          apps: scala-cli
+          apps: scala-cli:1.0.4
 
       - name: Find last versions
         id: detect
@@ -57,7 +57,7 @@ jobs:
       - name: Install coursier
         uses: coursier/setup-action@v1
         with:
-          apps: scala-cli
+          apps: scala-cli:1.0.4
 
       - name: Cache last successfull version
         uses: actions/cache@v3
