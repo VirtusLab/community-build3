@@ -76,8 +76,8 @@
   "47degrees/github4s":{
     "project":"47degrees/github4s",
     "repoUrl":"https://github.com/47degrees/github4s.git",
-    "revision":"v0.32.0",
-    "version":"0.32.0",
+    "revision":"v0.32.1",
+    "version":"0.32.1",
     "targets":"com.47deg%github4s",
     "config":{
       "projects":{
@@ -277,8 +277,8 @@
   "7mind/izumi":{
     "project":"7mind/izumi",
     "repoUrl":"https://github.com/7mind/izumi.git",
-    "revision":"v1.1.0",
-    "version":"1.1.0",
+    "revision":"v1.2.0",
+    "version":"1.2.0",
     "targets":"io.7mind.izumi%distage-framework io.7mind.izumi%idealingua-v1-runtime-rpc-csharp io.7mind.izumi%distage-extension-plugins io.7mind.izumi%distage-testkit-core io.7mind.izumi%idealingua-v1-runtime-rpc-typescript io.7mind.izumi%fundamentals-functional io.7mind.izumi%fundamentals-platform io.7mind.izumi%distage-framework-docker io.7mind.izumi%distage-framework-api io.7mind.izumi%fundamentals-collections io.7mind.izumi%logstage-core io.7mind.izumi%distage-core-proxy-bytebuddy io.7mind.izumi%idealingua-v1-test-defs io.7mind.izumi%distage-extension-config io.7mind.izumi%fundamentals-reflection io.7mind.izumi%fundamentals-literals io.7mind.izumi%fundamentals-language io.7mind.izumi%distage-extension-logstage io.7mind.izumi%distage-core-api io.7mind.izumi%idealingua-v1-runtime-rpc-http4s io.7mind.izumi%fundamentals-bio io.7mind.izumi%idealingua-v1-runtime-rpc-scala io.7mind.izumi%logstage-adapter-slf4j io.7mind.izumi%logstage-rendering-circe io.7mind.izumi%fundamentals-json-circe io.7mind.izumi%idealingua-v1-runtime-rpc-go io.7mind.izumi%fundamentals-orphans io.7mind.izumi%distage-testkit-scalatest io.7mind.izumi%idealingua-v1-model io.7mind.izumi%distage-core io.7mind.izumi%logstage-sink-slf4j",
     "config":{
       "projects":{
@@ -1402,8 +1402,8 @@
   "alexarchambault/case-app":{
     "project":"alexarchambault/case-app",
     "repoUrl":"https://github.com/alexarchambault/case-app.git",
-    "revision":"v2.1.0-M25",
-    "version":"2.1.0-M25",
+    "revision":"v2.1.0-M26",
+    "version":"2.1.0-M26",
     "targets":"com.github.alexarchambault%case-app-annotations com.github.alexarchambault%case-app-cats-effect-2 com.github.alexarchambault%case-app com.github.alexarchambault%case-app-cats com.github.alexarchambault%case-app-util",
     "config":{
       "projects":{
@@ -1434,7 +1434,7 @@
       "sourcePatches":[
         {
           "path":"project/Settings.scala",
-          "pattern":"def scala3   = \"3.2.2\"",
+          "pattern":"def scala3   = \"3.3.1\"",
           "replaceWith":"def scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -2220,6 +2220,47 @@
       ]
     }
   },
+  "apache/incubator-pekko-projection":{
+    "project":"apache/incubator-pekko-projection",
+    "repoUrl":"https://github.com/apache/incubator-pekko-projection.git",
+    "revision":"v1.0.0-RC1",
+    "version":"1.0.0",
+    "targets":"org.apache.pekko%pekko-projection-core org.apache.pekko%pekko-projection-jdbc org.apache.pekko%pekko-projection-cassandra org.apache.pekko%pekko-projection-testkit org.apache.pekko%pekko-projection-kafka org.apache.pekko%pekko-projection-eventsourced org.apache.pekko%pekko-projection-durable-state",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"project/Dependencies.scala",
+          "pattern":"val Scala3 = \"3.3.1\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "aparo/zio-json-extra":{
     "project":"aparo/zio-json-extra",
     "repoUrl":"https://github.com/aparo/zio-json-extra.git",
@@ -2664,7 +2705,7 @@
     "project":"armanbilge/gcp4s",
     "repoUrl":"https://github.com/armanbilge/gcp4s.git",
     "revision":"",
-    "version":"0.1-8d9cb99",
+    "version":"0.1-2ac68bb",
     "targets":"com.armanbilge%gcp4s com.armanbilge%gcp4s-bigquery com.armanbilge%gcp4s-trace",
     "config":{
       "projects":{
@@ -2695,7 +2736,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.0\"",
+          "pattern":"val Scala3 = \"3.3.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -3904,8 +3945,8 @@
   "azhur/kafka-serde-scala":{
     "project":"azhur/kafka-serde-scala",
     "repoUrl":"https://github.com/azhur/kafka-serde-scala.git",
-    "revision":"v0.8.1",
-    "version":"0.8.1",
+    "revision":"v0.8.2",
+    "version":"0.8.2",
     "targets":"io.github.azhur%kafka-serde-upickle io.github.azhur%kafka-serde-zio-json io.github.azhur%kafka-serde-scalapb io.github.azhur%kafka-serde-json4s io.github.azhur%kafka-serde-jsoniter-scala io.github.azhur%kafka-serde-circe",
     "config":{
       "projects":{
@@ -3989,8 +4030,8 @@
   "banno/cosmos4s":{
     "project":"banno/cosmos4s",
     "repoUrl":"https://github.com/banno/cosmos4s.git",
-    "revision":"v1.0.0-RC7",
-    "version":"1.0.0-RC7",
+    "revision":"v1.0.0-RC8",
+    "version":"1.0.0-RC8",
     "targets":"com.banno%cosmos4s",
     "config":{
       "projects":{
@@ -4002,7 +4043,7 @@
         }
       },
       "java":{
-        "version":"8"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -4021,7 +4062,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.0\"",
+          "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -6169,8 +6210,8 @@
   "codacy/codacy-plugins-api":{
     "project":"codacy/codacy-plugins-api",
     "repoUrl":"https://github.com/codacy/codacy-plugins-api.git",
-    "revision":"7.2.2",
-    "version":"7.2.2",
+    "revision":"8.0.0",
+    "version":"8.0.0",
     "targets":"com.codacy%codacy-plugins-api",
     "config":{
       "projects":{
@@ -8817,7 +8858,7 @@
     "project":"davenverse/googleapis-http4s",
     "repoUrl":"https://github.com/davenverse/googleapis-http4s.git",
     "revision":"",
-    "version":"1.107.9+0.0.6",
+    "version":"3.25.0+0.0.6",
     "targets":"",
     "config":{
       "projects":{
@@ -9949,8 +9990,8 @@
   "disneystreaming/smithy4s":{
     "project":"disneystreaming/smithy4s",
     "repoUrl":"https://github.com/disneystreaming/smithy4s.git",
-    "revision":"v0.18.2",
-    "version":"0.18.2",
+    "revision":"v0.18.3",
+    "version":"0.18.3",
     "targets":"com.disneystreaming.smithy4s%smithy4s-cats com.disneystreaming.smithy4s%smithy4s-json com.disneystreaming.smithy4s%smithy4s-dynamic com.disneystreaming.smithy4s%smithy4s-tests com.disneystreaming.smithy4s%smithy4s-core com.disneystreaming.smithy4s%smithy4s-compliance-tests com.disneystreaming.smithy4s%smithy4s-http4s-swagger com.disneystreaming.smithy4s%smithy4s-http4s-kernel com.disneystreaming.smithy4s%smithy4s-decline com.disneystreaming.smithy4s%smithy4s-aws-http4s com.disneystreaming.smithy4s%smithy4s-fs2 com.disneystreaming.smithy4s%smithy4s-http4s com.disneystreaming.smithy4s%smithy4s-aws-kernel com.disneystreaming.smithy4s%smithy4s-xml",
     "config":{
       "projects":{
@@ -10463,8 +10504,8 @@
   "dvgica/periodic":{
     "project":"dvgica/periodic",
     "repoUrl":"https://github.com/dvgica/periodic.git",
-    "revision":"v0.5.0",
-    "version":"0.5.0",
+    "revision":"v0.6.0",
+    "version":"0.6.0",
     "targets":"ca.dvgi%periodic-core ca.dvgi%periodic-pekko-stream",
     "config":{
       "projects":{
@@ -12702,6 +12743,43 @@
       ]
     }
   },
+  "flyway/flyway-play":{
+    "project":"flyway/flyway-play",
+    "repoUrl":"https://github.com/flyway/flyway-play.git",
+    "revision":"9.0.0",
+    "version":"9.0.0",
+    "targets":"org.flywaydb%flyway-play",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "fmonniot/scala3mock":{
     "project":"fmonniot/scala3mock",
     "repoUrl":"https://github.com/fmonniot/scala3mock.git",
@@ -13340,7 +13418,7 @@
   "gchudnov/mindthegap":{
     "project":"gchudnov/mindthegap",
     "repoUrl":"https://github.com/gchudnov/mindthegap.git",
-    "revision":"",
+    "revision":"v1.0.0",
     "version":"1.0.0",
     "targets":"com.github.gchudnov%mtg",
     "config":{
@@ -13451,8 +13529,8 @@
   "geirolz/cats-xml":{
     "project":"geirolz/cats-xml",
     "repoUrl":"https://github.com/geirolz/cats-xml.git",
-    "revision":"v0.0.13",
-    "version":"0.0.13",
+    "revision":"v0.0.14",
+    "version":"0.0.14",
     "targets":"com.github.geirolz%cats-xml-standard com.github.geirolz%cats-xml-effect com.github.geirolz%cats-xml-internal-utils com.github.geirolz%cats-xml-core com.github.geirolz%cats-xml-generic com.github.geirolz%cats-xml-xpath",
     "config":{
       "projects":{
@@ -13694,8 +13772,8 @@
   "gemini-hlsw/clue":{
     "project":"gemini-hlsw/clue",
     "repoUrl":"https://github.com/gemini-hlsw/clue.git",
-    "revision":"v0.33.0",
-    "version":"0.33.0",
+    "revision":"v0.34.0",
+    "version":"0.34.0",
     "targets":"edu.gemini%clue-core edu.gemini%clue-http4s edu.gemini%clue-model",
     "config":{
       "projects":{
@@ -13735,8 +13813,8 @@
   "gemini-hlsw/crystal":{
     "project":"gemini-hlsw/crystal",
     "repoUrl":"https://github.com/gemini-hlsw/crystal.git",
-    "revision":"v0.35.0",
-    "version":"0.35.0",
+    "revision":"v0.35.1",
+    "version":"0.35.1",
     "targets":"edu.gemini%crystal",
     "config":{
       "projects":{
@@ -13994,8 +14072,8 @@
   "gemini-hlsw/lucuma-odb":{
     "project":"gemini-hlsw/lucuma-odb",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-odb.git",
-    "revision":"v0.6.1",
-    "version":"0.6.1",
+    "revision":"v0.7.0",
+    "version":"0.7.0",
     "targets":"edu.gemini%lucuma-odb edu.gemini%lucuma-odb-schema",
     "config":{
       "projects":{
@@ -14179,8 +14257,8 @@
   "getkyo/kyo":{
     "project":"getkyo/kyo",
     "repoUrl":"https://github.com/getkyo/kyo.git",
-    "revision":"v0.6.4",
-    "version":"0.6.4",
+    "revision":"v0.6.6",
+    "version":"0.6.6",
     "targets":"io.getkyo%kyo-core io.getkyo%kyo-chatgpt io.getkyo%kyo-bench io.getkyo%kyo-direct io.getkyo%kyo-core-opt io.getkyo%readme io.getkyo%kyo-stats-otel io.getkyo%kyo-sttp io.getkyo%kyo-tapir",
     "config":{
       "projects":{
@@ -15092,8 +15170,8 @@
   "guardian/mobile-apps-api-models":{
     "project":"guardian/mobile-apps-api-models",
     "repoUrl":"https://github.com/guardian/mobile-apps-api-models.git",
-    "revision":"v0.0.25",
-    "version":"0.0.25",
+    "revision":"v0.0.27",
+    "version":"0.0.27",
     "targets":"com.gu%mobile-apps-api-models-v0",
     "config":{
       "projects":{
@@ -17952,8 +18030,8 @@
   "indoorvivants/sn-vcpkg":{
     "project":"indoorvivants/sn-vcpkg",
     "repoUrl":"https://github.com/indoorvivants/sn-vcpkg.git",
-    "revision":"v0.0.15",
-    "version":"0.0.15",
+    "revision":"v0.0.16",
+    "version":"0.0.16",
     "targets":"com.indoorvivants.vcpkg%sn-vcpkg com.indoorvivants.vcpkg%vcpkg-core",
     "config":{
       "projects":{
@@ -17984,7 +18062,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.2.2\"",
+          "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -19933,8 +20011,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.135",
-    "version":"2.0.135",
+    "revision":"v2.0.142",
+    "version":"2.0.142",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -20331,12 +20409,86 @@
       ]
     }
   },
+  "julianpeeters/avrohugger":{
+    "project":"julianpeeters/avrohugger",
+    "repoUrl":"https://github.com/julianpeeters/avrohugger.git",
+    "revision":"v2.8.0",
+    "version":"2.8.0",
+    "targets":"com.julianpeeters%avrohugger-core com.julianpeeters%avrohugger com.julianpeeters%avrohugger-filesorter com.julianpeeters%avrohugger-tools",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "julianpeeters/dc10":{
     "project":"julianpeeters/dc10",
     "repoUrl":"https://github.com/julianpeeters/dc10.git",
     "revision":"v0.3.0",
     "version":"0.3.0",
     "targets":"com.julianpeeters%dc10 com.julianpeeters%dc10-core com.julianpeeters%dc10-io",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "julianpeeters/dc10-cats":{
+    "project":"julianpeeters/dc10-cats",
+    "repoUrl":"https://github.com/julianpeeters/dc10-cats.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"com.julianpeeters%dc10-cats",
     "config":{
       "projects":{
         "exclude":[
@@ -20408,8 +20560,8 @@
   "julianpeeters/dc10-scala":{
     "project":"julianpeeters/dc10-scala",
     "repoUrl":"https://github.com/julianpeeters/dc10-scala.git",
-    "revision":"v0.3.0",
-    "version":"0.3.0",
+    "revision":"v0.4.0",
+    "version":"0.4.0",
     "targets":"com.julianpeeters%dc10-scala",
     "config":{
       "projects":{
@@ -20802,8 +20954,8 @@
   "kalin-rudnicki/harness":{
     "project":"kalin-rudnicki/harness",
     "repoUrl":"https://github.com/kalin-rudnicki/harness.git",
-    "revision":"2.2.1",
-    "version":"2.2.1",
+    "revision":"2.2.2",
+    "version":"2.2.2",
     "targets":"io.github.kalin-rudnicki%harness-http-server io.github.kalin-rudnicki%harness-archive-client io.github.kalin-rudnicki%harness-zio-test io.github.kalin-rudnicki%harness-http-client io.github.kalin-rudnicki%harness-cli io.github.kalin-rudnicki%harness-xml io.github.kalin-rudnicki%harness-test io.github.kalin-rudnicki%harness-csv io.github.kalin-rudnicki%harness-archive-model io.github.kalin-rudnicki%harness-web io.github.kalin-rudnicki%harness-zio io.github.kalin-rudnicki%harness-core io.github.kalin-rudnicki%harness-sql io.github.kalin-rudnicki%harness-http-server-test",
     "config":{
       "projects":{
@@ -21836,8 +21988,8 @@
   "krrrr38/protoquill-finagle-mysql":{
     "project":"krrrr38/protoquill-finagle-mysql",
     "repoUrl":"https://github.com/krrrr38/protoquill-finagle-mysql.git",
-    "revision":"v0.0.1",
-    "version":"0.0.1",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
     "targets":"com.krrrr38%protoquill-finagle-mysql",
     "config":{
       "projects":{
@@ -21868,7 +22020,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version = \"3.2.2\"",
+          "pattern":"val scala3Version = \"3.3.1\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -23481,6 +23633,13 @@
     "version":"0.1.1",
     "targets":"com.beachape%ltsv-logger"
   },
+  "lloydmeta/play-csv":{
+    "project":"lloydmeta/play-csv",
+    "repoUrl":"https://github.com/lloydmeta/play-csv.git",
+    "revision":"1.7",
+    "version":"1.7",
+    "targets":"com.beachape%play-csv"
+  },
   "log4s/log4s":{
     "project":"log4s/log4s",
     "repoUrl":"https://github.com/log4s/log4s.git",
@@ -23491,9 +23650,9 @@
   "logging4s/logging4s":{
     "project":"logging4s/logging4s",
     "repoUrl":"https://github.com/logging4s/logging4s.git",
-    "revision":"v0.2.2",
-    "version":"0.2.2",
-    "targets":"org.logging4s%logging4s-zio org.logging4s%logging4s-ce-2 org.logging4s%logging4s-json4s org.logging4s%logging4s-core org.logging4s%logging4s-jsoniter org.logging4s%logging4s-circe org.logging4s%logging4s-spray-json org.logging4s%logging4s-cats-core org.logging4s%logging4s-ce-3 org.logging4s%logging4s-argonaut org.logging4s%logging4s-play-json",
+    "revision":"v0.2.3",
+    "version":"0.2.3",
+    "targets":"org.logging4s%logging4s-zio org.logging4s%logging4s-ce-2 org.logging4s%logging4s-json4s org.logging4s%logging4s-core org.logging4s%logging4s-jsoniter org.logging4s%logging4s-circe org.logging4s%logging4s-cats-core org.logging4s%logging4s-ce-3 org.logging4s%logging4s-argonaut org.logging4s%logging4s-play-json",
     "config":{
       "projects":{
         "exclude":[
@@ -23747,8 +23906,8 @@
   "losizm/scamper":{
     "project":"losizm/scamper",
     "repoUrl":"https://github.com/losizm/scamper.git",
-    "revision":"v38.0.0",
-    "version":"38.0.0",
+    "revision":"v40.0.0",
+    "version":"40.0.0",
     "targets":"com.github.losizm%scamper",
     "config":{
       "projects":{
@@ -24132,8 +24291,8 @@
   "malliina/sbt-utils":{
     "project":"malliina/sbt-utils",
     "repoUrl":"https://github.com/malliina/sbt-utils.git",
-    "revision":"v1.6.28",
-    "version":"1.6.28",
+    "revision":"v1.6.29",
+    "version":"1.6.29",
     "targets":"com.malliina%common-build",
     "config":{
       "projects":{
@@ -24805,8 +24964,8 @@
   "mixql/mixql-core":{
     "project":"mixql/mixql-core",
     "repoUrl":"https://github.com/mixql/mixql-core.git",
-    "revision":"v0.9.0",
-    "version":"0.9.0",
+    "revision":"v0.9.1",
+    "version":"0.9.1",
     "targets":"org.mixql%mixql-core",
     "config":{
       "projects":{
@@ -24888,7 +25047,7 @@
     "project":"mixql/mixql-engine-stub",
     "repoUrl":"https://github.com/mixql/mixql-engine-stub.git",
     "revision":"",
-    "version":"0.9.0",
+    "version":"0.9.1.1",
     "targets":"org.mixql%mixql-engine-stub org.mixql%mixql-engine-sqlite org.mixql%mixql-engine-sqlite-local org.mixql%mixql-engine-stub-local"
   },
   "mixql/mixql-protobuf":{
@@ -26657,8 +26816,8 @@
   "nulab/play2-oauth2-provider":{
     "project":"nulab/play2-oauth2-provider",
     "repoUrl":"https://github.com/nulab/play2-oauth2-provider.git",
-    "revision":"1.6.0",
-    "version":"1.6.0",
+    "revision":"2.0.0",
+    "version":"2.0.0",
     "targets":"com.nulab-inc%play2-oauth2-provider"
   },
   "nulab/scala-oauth2-provider":{
@@ -26904,8 +27063,8 @@
   "ollls/zio-quartz-h2":{
     "project":"ollls/zio-quartz-h2",
     "repoUrl":"https://github.com/ollls/zio-quartz-h2.git",
-    "revision":"v0.5.5",
-    "version":"0.5.5",
+    "revision":"v0.5.6",
+    "version":"0.5.6",
     "targets":"io.github.ollls%zio-quartz-h2"
   },
   "ollls/zio-tls-http":{
@@ -26962,9 +27121,9 @@
   "openmole/gridscale":{
     "project":"openmole/gridscale",
     "repoUrl":"https://github.com/openmole/gridscale.git",
-    "revision":"v2.49",
-    "version":"2.49",
-    "targets":"org.openmole.gridscale%oar org.openmole.gridscale%slurmexample org.openmole.gridscale%sshexample org.openmole.gridscale%webdav org.openmole.gridscale%local org.openmole.gridscale%ipfsexample org.openmole.gridscale%egidiracexample org.openmole.gridscale%sge org.openmole.gridscale%pbsexample org.openmole.gridscale%httpexample org.openmole.gridscale%oarexample org.openmole.gridscale%gridscale org.openmole.gridscale%slurm org.openmole.gridscale%condor org.openmole.gridscale%http org.openmole.gridscale%egiwebdavexample org.openmole.gridscale%sgeexample org.openmole.gridscale%ssh org.openmole.gridscale%ipfs org.openmole.gridscale%pbs org.openmole.gridscale%localexample org.openmole.gridscale%effect org.openmole.gridscale%cluster org.openmole.gridscale%egicreamexample org.openmole.gridscale%condorexample org.openmole.gridscale%egi org.openmole.gridscale%dirac"
+    "revision":"v2.50",
+    "version":"2.50",
+    "targets":"org.openmole.gridscale%webdav org.openmole.gridscale%local org.openmole.gridscale%ipfsexample org.openmole.gridscale%gridscale org.openmole.gridscale%qarnot org.openmole.gridscale%http org.openmole.gridscale%example-egi-cream org.openmole.gridscale%oar org.openmole.gridscale%example-ssh org.openmole.gridscale%example-egi-webdav org.openmole.gridscale%ssh org.openmole.gridscale%ipfs org.openmole.gridscale%pbs org.openmole.gridscale%example-local org.openmole.gridscale%effect org.openmole.gridscale%example-qarnot org.openmole.gridscale%example-oar org.openmole.gridscale%sge org.openmole.gridscale%example-slurm org.openmole.gridscale%cluster org.openmole.gridscale%example-http org.openmole.gridscale%example-sge org.openmole.gridscale%slurm org.openmole.gridscale%example-pbs org.openmole.gridscale%example-egi-dirac org.openmole.gridscale%condor org.openmole.gridscale%example-condor org.openmole.gridscale%egi org.openmole.gridscale%dirac"
   },
   "openmole/mgo":{
     "project":"openmole/mgo",
@@ -27475,9 +27634,9 @@
   "ovotech/meters4s":{
     "project":"ovotech/meters4s",
     "repoUrl":"https://github.com/ovotech/meters4s.git",
-    "revision":"v1.3.2",
-    "version":"1.3.2",
-    "targets":"com.ovoenergy%meters4s com.ovoenergy%meters4s-datadog com.ovoenergy%meters4s-prometheus com.ovoenergy%meters4s-statsd",
+    "revision":"v2.0.0",
+    "version":"2.0.0",
+    "targets":"com.ovoenergy%meters4s-statsd com.ovoenergy%meters4s-datadog com.ovoenergy%meters4s-http4s com.ovoenergy%meters4s-prometheus com.ovoenergy%meters4s",
     "config":{
       "projects":{
         "exclude":[
@@ -28940,8 +29099,8 @@
   "playframework/play-doc":{
     "project":"playframework/play-doc",
     "repoUrl":"https://github.com/playframework/play-doc.git",
-    "revision":"3.0.0",
-    "version":"3.0.0",
+    "revision":"3.0.1",
+    "version":"3.0.1",
     "targets":"org.playframework%play-doc"
   },
   "playframework/play-ebean":{
@@ -29111,8 +29270,8 @@
   "playframework/play-slick":{
     "project":"playframework/play-slick",
     "repoUrl":"https://github.com/playframework/play-slick.git",
-    "revision":"6.0.0-M1",
-    "version":"6.0.0-M1",
+    "revision":"6.0.0-M2",
+    "version":"6.0.0-M2",
     "targets":"org.playframework%play-slick org.playframework%play-slick-evolutions"
   },
   "playframework/play-ws":{
@@ -29255,8 +29414,8 @@
   "plokhotnyuk/jsoniter-scala":{
     "project":"plokhotnyuk/jsoniter-scala",
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.24.3",
-    "version":"2.24.3",
+    "revision":"v2.24.4",
+    "version":"2.24.4",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros"
   },
   "plokhotnyuk/rtree2d":{
@@ -30437,9 +30596,9 @@
   "rallyhealth/weepickle":{
     "project":"rallyhealth/weepickle",
     "repoUrl":"https://github.com/rallyhealth/weepickle.git",
-    "revision":"v1.8.0",
-    "version":"1.8.0",
-    "targets":"com.rallyhealth%weejson-play210-v1 com.rallyhealth%weeyaml-v1 com.rallyhealth%weejson-jackson-v1 com.rallyhealth%weejson-json4s-v1 com.rallyhealth%weepickle-implicits-v1 com.rallyhealth%weepickle-core-v1 com.rallyhealth%weejson-upickle-v1 com.rallyhealth%weexml-v1 com.rallyhealth%weejson-v1 com.rallyhealth%weejson-circe-v1 com.rallyhealth%weepickle-v1 com.rallyhealth%weejson-argonaut-v1 com.rallyhealth%weepack-v1",
+    "revision":"v1.9.1",
+    "version":"1.9.1",
+    "targets":"com.rallyhealth%weejson-play210-v1 com.rallyhealth%weeyaml-v1 com.rallyhealth%weejson-jackson-v1 com.rallyhealth%weejson-play30-v1 com.rallyhealth%weejson-json4s-v1 com.rallyhealth%weepickle-implicits-v1 com.rallyhealth%weepickle-core-v1 com.rallyhealth%weejson-upickle-v1 com.rallyhealth%weexml-v1 com.rallyhealth%weejson-v1 com.rallyhealth%weejson-circe-v1 com.rallyhealth%weepickle-v1 com.rallyhealth%weejson-argonaut-v1 com.rallyhealth%weepack-v1",
     "config":{
       "projects":{
         "exclude":[
@@ -30469,7 +30628,7 @@
       "sourcePatches":[
         {
           "path":"project/WeePicklePlugin.scala",
-          "pattern":"val scala3 = \"3.1.0\"",
+          "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -30642,9 +30801,9 @@
   "reactific/riddl":{
     "project":"reactific/riddl",
     "repoUrl":"https://github.com/reactific/riddl.git",
-    "revision":"0.27.1",
-    "version":"0.27.1",
-    "targets":"com.reactific%riddl-stats com.reactific%riddl-passes com.reactific%riddlc com.reactific%riddl-prettify com.reactific%riddl-language com.reactific%riddl-hugo com.reactific%riddl-commands com.reactific%riddl-utils com.reactific%riddl-testkit",
+    "revision":"0.27.4",
+    "version":"0.27.4",
+    "targets":"com.reactific%riddl-stats com.reactific%riddl-passes com.reactific%riddl-prettify com.reactific%riddl-language com.reactific%riddl-hugo com.reactific%riddl-commands com.reactific%riddl-utils com.reactific%riddl-testkit com.reactific%riddl-diagrams com.reactific%riddlc",
     "config":{
       "projects":{
         "exclude":[
@@ -31464,6 +31623,47 @@
       ]
     }
   },
+  "rustedbones/pekko-http-avro":{
+    "project":"rustedbones/pekko-http-avro",
+    "repoUrl":"https://github.com/rustedbones/pekko-http-avro.git",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
+    "targets":"fr.davit%pekko-http-avro",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3       = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "rustedbones/pekko-http-metrics":{
     "project":"rustedbones/pekko-http-metrics",
     "repoUrl":"https://github.com/rustedbones/pekko-http-metrics.git",
@@ -31500,6 +31700,88 @@
         {
           "path":"build.sbt",
           "pattern":"val scala3       = \"3.3.0\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "rustedbones/pekko-http-scalapb":{
+    "project":"rustedbones/pekko-http-scalapb",
+    "repoUrl":"https://github.com/rustedbones/pekko-http-scalapb.git",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
+    "targets":"fr.davit%pekko-http-scalapb fr.davit%pekko-http-scalapb-binary fr.davit%pekko-http-scalapb-json4s",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3       = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "rustedbones/pekko-http-thrift":{
+    "project":"rustedbones/pekko-http-thrift",
+    "repoUrl":"https://github.com/rustedbones/pekko-http-thrift.git",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
+    "targets":"fr.davit%pekko-http-thrift",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3       = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -31734,8 +32016,8 @@
   "sake92/sharaf":{
     "project":"sake92/sharaf",
     "repoUrl":"https://github.com/sake92/sharaf.git",
-    "revision":"0.0.11",
-    "version":"0.0.11",
+    "revision":"0.0.12",
+    "version":"0.0.12",
     "targets":"ba.sake%sharaf ba.sake%formson ba.sake%querson ba.sake%validson",
     "config":{
       "projects":{
@@ -31771,8 +32053,8 @@
   "sake92/squery":{
     "project":"sake92/squery",
     "repoUrl":"https://github.com/sake92/squery.git",
-    "revision":"0.0.6",
-    "version":"0.0.6",
+    "revision":"0.0.8",
+    "version":"0.0.8",
     "targets":"ba.sake%squery",
     "config":{
       "projects":{
@@ -31784,7 +32066,7 @@
         }
       },
       "java":{
-        "version":"11"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -33496,8 +33778,8 @@
   "scalacenter/tasty-mima":{
     "project":"scalacenter/tasty-mima",
     "repoUrl":"https://github.com/scalacenter/tasty-mima.git",
-    "revision":"v0.4.0",
-    "version":"0.4.0",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
     "targets":"ch.epfl.scala%tasty-mima",
     "config":{
       "projects":{
@@ -33533,8 +33815,8 @@
   "scalacenter/tasty-query":{
     "project":"scalacenter/tasty-query",
     "repoUrl":"https://github.com/scalacenter/tasty-query.git",
-    "revision":"v0.10.4",
-    "version":"0.10.4",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
     "targets":"ch.epfl.scala%tasty-query",
     "config":{
       "projects":{
@@ -33607,8 +33889,8 @@
   "scalalandio/chimney":{
     "project":"scalalandio/chimney",
     "repoUrl":"https://github.com/scalalandio/chimney.git",
-    "revision":"0.8.0",
-    "version":"0.8.0",
+    "revision":"0.8.1",
+    "version":"0.8.1",
     "targets":"io.scalaland%chimney-protobufs io.scalaland%chimney-cats io.scalaland%chimney io.scalaland%chimney-java-collections io.scalaland%chimney-macro-commons",
     "config":{
       "projects":{
@@ -36193,8 +36475,8 @@
   "shiftleftsecurity/js2cpg":{
     "project":"shiftleftsecurity/js2cpg",
     "repoUrl":"https://github.com/shiftleftsecurity/js2cpg.git",
-    "revision":"v0.2.242",
-    "version":"0.2.242",
+    "revision":"v0.2.243",
+    "version":"0.2.243",
     "targets":"io.shiftleft%js2cpg",
     "config":{
       "projects":{
@@ -37524,8 +37806,8 @@
   "softwaremill/tapir":{
     "project":"softwaremill/tapir",
     "repoUrl":"https://github.com/softwaremill/tapir.git",
-    "revision":"v1.8.3",
-    "version":"1.8.3",
+    "revision":"v1.8.5",
+    "version":"1.8.5",
     "targets":"com.softwaremill.sttp.tapir%tapir-http4s-server-zio1 com.softwaremill.sttp.tapir%tapir-sttp-client com.softwaremill.sttp.tapir%tapir-redoc com.softwaremill.sttp.tapir%tapir-json-circe com.softwaremill.sttp.tapir%tapir-jsoniter-scala com.softwaremill.sttp.tapir%tapir-swagger-ui-bundle com.softwaremill.sttp.tapir%tapir-redoc-bundle com.softwaremill.sttp.tapir%tapir-aws-cdk com.softwaremill.sttp.tapir%tapir-cats com.softwaremill.sttp.tapir%tapir-http4s-client com.softwaremill.sttp.tapir%tapir-refined com.softwaremill.sttp.tapir%tapir-play-server com.softwaremill.sttp.tapir%tapir-aws-lambda-core com.softwaremill.sttp.tapir%tapir-jdkhttp-server com.softwaremill.sttp.tapir%tapir-json-pickler com.softwaremill.sttp.tapir%tapir-aws-sam com.softwaremill.sttp.tapir%tapir-armeria-server-zio com.softwaremill.sttp.tapir%tapir-pekko-grpc-server com.softwaremill.sttp.tapir%tapir-asyncapi-docs com.softwaremill.sttp.tapir%tapir-vertx-server-cats com.softwaremill.sttp.tapir%tapir-swagger-ui com.softwaremill.sttp.tapir%tapir-aws-lambda-zio com.softwaremill.sttp.tapir%tapir-json-play com.softwaremill.sttp.tapir%tapir-json-zio1 com.softwaremill.sttp.tapir%tapir-json-upickle com.softwaremill.sttp.tapir%tapir-netty-server com.softwaremill.sttp.tapir%tapir-armeria-server-zio1 com.softwaremill.sttp.tapir%tapir-server com.softwaremill.sttp.tapir%tapir-vertx-server com.softwaremill.sttp.tapir%tapir-http4s-server com.softwaremill.sttp.tapir%tapir-datadog-metrics com.softwaremill.sttp.tapir%tapir-zio1-http-server com.softwaremill.sttp.tapir%tapir-armeria-server-cats com.softwaremill.sttp.tapir%tapir-netty-server-cats com.softwaremill.sttp.tapir%tapir-zio-prelude com.softwaremill.sttp.tapir%tapir-aws-lambda com.softwaremill.sttp.tapir%tapir-zio1 com.softwaremill.sttp.tapir%tapir-json-spray com.softwaremill.sttp.tapir%tapir-files com.softwaremill.sttp.tapir%tapir-vertx-server-zio com.softwaremill.sttp.tapir%tapir-zio-metrics com.softwaremill.sttp.tapir%tapir-core com.softwaremill.sttp.tapir%tapir-zio com.softwaremill.sttp.tapir%tapir-play-client com.softwaremill.sttp.tapir%tapir-http4s-server-zio com.softwaremill.sttp.tapir%tapir-armeria-server com.softwaremill.sttp.tapir%tapir-pekko-http-server com.softwaremill.sttp.tapir%tapir-prometheus-metrics com.softwaremill.sttp.tapir%tapir-zio-http-server com.softwaremill.sttp.tapir%tapir-iron com.softwaremill.sttp.tapir%tapir-enumeratum com.softwaremill.sttp.tapir%tapir-opentelemetry-metrics com.softwaremill.sttp.tapir%tapir-cats-effect com.softwaremill.sttp.tapir%tapir-server-tests com.softwaremill.sttp.tapir%tapir-vertx-server-zio1 com.softwaremill.sttp.tapir%tapir-openapi-docs com.softwaremill.sttp.tapir%tapir-apispec-docs com.softwaremill.sttp.tapir%tapir-netty-server-zio com.softwaremill.sttp.tapir%tapir-testing com.softwaremill.sttp.tapir%tapir-monix-newtype com.softwaremill.sttp.tapir%tapir-sttp-stub-server com.softwaremill.sttp.tapir%tapir-json-zio com.softwaremill.sttp.tapir%tapir-tests com.softwaremill.sttp.tapir%tapir-sttp-client-ws-zio1 com.softwaremill.sttp.tapir%tapir-client",
     "config":{
       "projects":{
@@ -41897,8 +42179,8 @@
   "twitter/util":{
     "project":"twitter/util",
     "repoUrl":"https://github.com/twitter/util.git",
-    "revision":"util-22.12.0",
-    "version":"22.12.0",
+    "revision":"util-23.11.0",
+    "version":"23.11.0",
     "targets":"com.twitter%util-cache com.twitter%util-app com.twitter%util-app-lifecycle com.twitter%util-jvm com.twitter%util-slf4j-jul-bridge com.twitter%util-logging com.twitter%util-zk-test com.twitter%util-hashing com.twitter%util-routing com.twitter%util-core com.twitter%util-slf4j-api com.twitter%util-stats com.twitter%util-cache-guava com.twitter%util-thrift com.twitter%util-codec com.twitter%util-registry com.twitter%util-lint com.twitter%util-security",
     "config":{
       "projects":{
@@ -42047,8 +42329,8 @@
   "typelevel/catapult":{
     "project":"typelevel/catapult",
     "repoUrl":"https://github.com/typelevel/catapult.git",
-    "revision":"v0.4.1",
-    "version":"0.4.1",
+    "revision":"v0.4.3",
+    "version":"0.4.3",
     "targets":"org.typelevel%catapult org.typelevel%catapult-testkit",
     "config":{
       "projects":{
@@ -45415,8 +45697,8 @@
   "wvlet/airframe":{
     "project":"wvlet/airframe",
     "repoUrl":"https://github.com/wvlet/airframe.git",
-    "revision":"v23.10.0",
-    "version":"23.10.0",
+    "revision":"v23.11.1",
+    "version":"23.11.1",
     "targets":"org.wvlet.airframe%airframe-http-recorder org.wvlet.airframe%airframe-config org.wvlet.airframe%airframe-jdbc org.wvlet.airframe%airframe-parquet org.wvlet.airframe%airframe-http org.wvlet.airframe%airframe-control org.wvlet.airframe%airframe-ulid org.wvlet.airframe%airframe-canvas org.wvlet.airframe%airframe-http-okhttp org.wvlet.airframe%airframe-http-grpc org.wvlet.airframe%airframe-codec org.wvlet.airframe%airframe-di-macros org.wvlet.airframe%airframe-http-netty org.wvlet.airframe%airframe-metrics org.wvlet.airframe%airframe-http-codegen org.wvlet.airframe%airframe-rx-html org.wvlet.airframe%airframe-jmx org.wvlet.airframe%airframe-log org.wvlet.airframe%airframe-json org.wvlet.airframe%airspec org.wvlet.airframe%airframe-sql org.wvlet.airframe%airframe-launcher org.wvlet.airframe%airframe-msgpack org.wvlet.airframe%airframe org.wvlet.airframe%airframe-rx org.wvlet.airframe%airframe-surface org.wvlet.airframe%airframe-fluentd",
     "config":{
       "projects":{
@@ -46811,8 +47093,8 @@
   "zio/zio-aws":{
     "project":"zio/zio-aws",
     "repoUrl":"https://github.com/zio/zio-aws.git",
-    "revision":"v6.20.162.1",
-    "version":"6.20.162.1",
+    "revision":"v6.20.162.2",
+    "version":"6.20.162.2",
     "targets":"dev.zio%zio-aws-keyspaces dev.zio%zio-aws-networkmanager dev.zio%zio-aws-codegurureviewer dev.zio%zio-aws-dynamodbstreams dev.zio%zio-aws-iam dev.zio%zio-aws-ssmincidents dev.zio%zio-aws-servicecatalogappregistry dev.zio%zio-aws-marketplacecatalog dev.zio%zio-aws-migrationhubconfig dev.zio%zio-aws-snowball dev.zio%zio-aws-worklink dev.zio%zio-aws-dynamodb dev.zio%zio-aws-sso dev.zio%zio-aws-licensemanagerlinuxsubscriptions dev.zio%zio-aws-wafv2 dev.zio%zio-aws-panorama dev.zio%zio-aws-detective dev.zio%zio-aws-mobile dev.zio%zio-aws-codeartifact dev.zio%zio-aws-marketplacemetering dev.zio%zio-aws-migrationhubrefactorspaces dev.zio%zio-aws-proton dev.zio%zio-aws-lakeformation dev.zio%zio-aws-dlm dev.zio%zio-aws-emrcontainers dev.zio%zio-aws-sagemakeredge dev.zio%zio-aws-akka-http dev.zio%zio-aws-databasemigration dev.zio%zio-aws-groundstation dev.zio%zio-aws-cloudtrail dev.zio%zio-aws-backupstorage dev.zio%zio-aws-costexplorer dev.zio%zio-aws-personalize dev.zio%zio-aws-codebuild dev.zio%zio-aws-healthlake dev.zio%zio-aws-lambda dev.zio%zio-aws-securityhub dev.zio%zio-aws-batch dev.zio%zio-aws-redshiftdata dev.zio%zio-aws-macie2 dev.zio%zio-aws-lexmodelsv2 dev.zio%zio-aws-wisdom dev.zio%zio-aws-rbin dev.zio%zio-aws-route53recoveryreadiness dev.zio%zio-aws-iot1clickdevices dev.zio%zio-aws-ecs dev.zio%zio-aws-cloudwatch dev.zio%zio-aws-rum dev.zio%zio-aws-mediatailor dev.zio%zio-aws-docdb dev.zio%zio-aws-iotfleethub dev.zio%zio-aws-elasticloadbalancingv2 dev.zio%zio-aws-cloudwatchlogs dev.zio%zio-aws-pinpoint dev.zio%zio-aws-omics dev.zio%zio-aws-schemas dev.zio%zio-aws-appconfig dev.zio%zio-aws-machinelearning dev.zio%zio-aws-codepipeline dev.zio%zio-aws-auditmanager dev.zio%zio-aws-redshiftserverless dev.zio%zio-aws-opsworks dev.zio%zio-aws-identitystore dev.zio%zio-aws-mwaa dev.zio%zio-aws-m2 dev.zio%zio-aws-xray dev.zio%zio-aws-location dev.zio%zio-aws-securitylake dev.zio%zio-aws-serverlessapplicationrepository dev.zio%zio-aws-ec2instanceconnect dev.zio%zio-aws-datasync dev.zio%zio-aws-route53 dev.zio%zio-aws-licensemanagerusersubscriptions dev.zio%zio-aws-cloudsearch dev.zio%zio-aws-robomaker dev.zio%zio-aws-inspector dev.zio%zio-aws-resourceexplorer2 dev.zio%zio-aws-imagebuilder dev.zio%zio-aws-wafregional dev.zio%zio-aws-connectparticipant dev.zio%zio-aws-workdocs dev.zio%zio-aws-shield dev.zio%zio-aws-rolesanywhere dev.zio%zio-aws-account dev.zio%zio-aws-guardduty dev.zio%zio-aws-fis dev.zio%zio-aws-workspaces dev.zio%zio-aws-pricing dev.zio%zio-aws-secretsmanager dev.zio%zio-aws-kafka dev.zio%zio-aws-kinesis dev.zio%zio-aws-dax dev.zio%zio-aws-kendra dev.zio%zio-aws-mq dev.zio%zio-aws-s3control dev.zio%zio-aws-workmail dev.zio%zio-aws-signer dev.zio%zio-aws-route53recoverycluster dev.zio%zio-aws-s3outposts dev.zio%zio-aws-codestarnotifications dev.zio%zio-aws-frauddetector dev.zio%zio-aws-comprehendmedical dev.zio%zio-aws-route53resolver dev.zio%zio-aws-appsync dev.zio%zio-aws-codeguruprofiler dev.zio%zio-aws-eventbridge dev.zio%zio-aws-supportapp dev.zio%zio-aws-sagemakergeospatial dev.zio%zio-aws-simspaceweaver dev.zio%zio-aws-gamelift dev.zio%zio-aws-transcribestreaming dev.zio%zio-aws-cognitoidentityprovider dev.zio%zio-aws-migrationhub dev.zio%zio-aws-iottwinmaker dev.zio%zio-aws-pinpointsmsvoice dev.zio%zio-aws-sts dev.zio%zio-aws-computeoptimizer dev.zio%zio-aws-kafkaconnect dev.zio%zio-aws-iotsitewise dev.zio%zio-aws-snowdevicemanagement dev.zio%zio-aws-sagemakermetrics dev.zio%zio-aws-ioteventsdata dev.zio%zio-aws-networkfirewall dev.zio%zio-aws-dataexchange dev.zio%zio-aws-sagemakera2iruntime dev.zio%zio-aws-kinesisanalyticsv2 dev.zio%zio-aws-cloudfront dev.zio%zio-aws-http4s dev.zio%zio-aws-evidently dev.zio%zio-aws-migrationhuborchestrator dev.zio%zio-aws-core dev.zio%zio-aws-lookoutequipment dev.zio%zio-aws-mediapackagevod dev.zio%zio-aws-servicequotas dev.zio%zio-aws-mturk dev.zio%zio-aws-nimble dev.zio%zio-aws-cognitoidentity dev.zio%zio-aws-honeycode dev.zio%zio-aws-databrew dev.zio%zio-aws-connect dev.zio%zio-aws-acm dev.zio%zio-aws-ec2 dev.zio%zio-aws-route53domains dev.zio%zio-aws-wellarchitected dev.zio%zio-aws-personalizeevents dev.zio%zio-aws-rds dev.zio%zio-aws-ecr dev.zio%zio-aws-autoscaling dev.zio%zio-aws-customerprofiles dev.zio%zio-aws-ssooidc dev.zio%zio-aws-elastictranscoder dev.zio%zio-aws-amplify dev.zio%zio-aws-greengrass dev.zio%zio-aws-kinesisvideosignaling dev.zio%zio-aws-billingconductor dev.zio%zio-aws-neptune dev.zio%zio-aws-codestarconnections dev.zio%zio-aws-chimesdkvoice dev.zio%zio-aws-pinpointemail dev.zio%zio-aws-resiliencehub dev.zio%zio-aws-resourcegroupstaggingapi dev.zio%zio-aws-kinesisvideomedia dev.zio%zio-aws-outposts dev.zio%zio-aws-polly dev.zio%zio-aws-timestreamwrite dev.zio%zio-aws-opsworkscm dev.zio%zio-aws-rdsdata dev.zio%zio-aws-amplifyuibuilder dev.zio%zio-aws-elasticache dev.zio%zio-aws-accessanalyzer dev.zio%zio-aws-chimesdkmediapipelines dev.zio%zio-aws-ssm dev.zio%zio-aws-qldb dev.zio%zio-aws-qldbsession dev.zio%zio-aws-waf dev.zio%zio-aws-pipes dev.zio%zio-aws-kinesisvideoarchivedmedia dev.zio%zio-aws-ses dev.zio%zio-aws-efs dev.zio%zio-aws-cloudformation dev.zio%zio-aws-ebs dev.zio%zio-aws-opensearchserverless dev.zio%zio-aws-applicationdiscovery dev.zio%zio-aws-personalizeruntime dev.zio%zio-aws-medialive dev.zio%zio-aws-devopsguru dev.zio%zio-aws-fms dev.zio%zio-aws-athena dev.zio%zio-aws-iotanalytics dev.zio%zio-aws-appconfigdata dev.zio%zio-aws-opensearch dev.zio%zio-aws-alexaforbusiness dev.zio%zio-aws-rekognition dev.zio%zio-aws-ecrpublic dev.zio%zio-aws-pinpointsmsvoicev2 dev.zio%zio-aws-firehose dev.zio%zio-aws-organizations dev.zio%zio-aws-grafana dev.zio%zio-aws-transfer dev.zio%zio-aws-controltower dev.zio%zio-aws-clouddirectory dev.zio%zio-aws-iotthingsgraph dev.zio%zio-aws-drs dev.zio%zio-aws-apigateway dev.zio%zio-aws-codestar dev.zio%zio-aws-codecatalyst dev.zio%zio-aws-route53recoverycontrolconfig dev.zio%zio-aws-appmesh dev.zio%zio-aws-oam dev.zio%zio-aws-devicefarm dev.zio%zio-aws-sesv2 dev.zio%zio-aws-iotsecuretunneling dev.zio%zio-aws-ssmsap dev.zio%zio-aws-managedblockchain dev.zio%zio-aws-savingsplans dev.zio%zio-aws-marketplacecommerceanalytics dev.zio%zio-aws-backup dev.zio%zio-aws-amplifybackend dev.zio%zio-aws-cloudhsm dev.zio%zio-aws-memorydb dev.zio%zio-aws-apigatewayv2 dev.zio%zio-aws-forecast dev.zio%zio-aws-servicecatalog dev.zio%zio-aws-emr dev.zio%zio-aws-connectcontactlens dev.zio%zio-aws-applicationinsights dev.zio%zio-aws-mediastoredata dev.zio%zio-aws-connectcampaigns dev.zio%zio-aws-forecastquery dev.zio%zio-aws-iot dev.zio%zio-aws-inspector2 dev.zio%zio-aws-lightsail dev.zio%zio-aws-kms dev.zio%zio-aws-sns dev.zio%zio-aws-pi dev.zio%zio-aws-cloudwatchevents dev.zio%zio-aws-resourcegroups dev.zio%zio-aws-quicksight dev.zio%zio-aws-codecommit dev.zio%zio-aws-chimesdkidentity dev.zio%zio-aws-iotdataplane dev.zio%zio-aws-costandusagereport dev.zio%zio-aws-cognitosync dev.zio%zio-aws-redshift dev.zio%zio-aws-applicationcostprofiler dev.zio%zio-aws-workspacesweb dev.zio%zio-aws-iotjobsdataplane dev.zio%zio-aws-mediastore dev.zio%zio-aws-finspacedata dev.zio%zio-aws-mgn dev.zio%zio-aws-elasticbeanstalk dev.zio%zio-aws-ivschat dev.zio%zio-aws-comprehend dev.zio%zio-aws-textract dev.zio%zio-aws-applicationautoscaling dev.zio%zio-aws-synthetics dev.zio%zio-aws-emrserverless dev.zio%zio-aws-iotevents dev.zio%zio-aws-elasticsearch dev.zio%zio-aws-docdbelastic dev.zio%zio-aws-ssmcontacts dev.zio%zio-aws-greengrassv2 dev.zio%zio-aws-netty dev.zio%zio-aws-support dev.zio%zio-aws-iot1clickprojects dev.zio%zio-aws-sqs dev.zio%zio-aws-lookoutmetrics dev.zio%zio-aws-voiceid dev.zio%zio-aws-timestreamquery dev.zio%zio-aws-migrationhubstrategy dev.zio%zio-aws-chimesdkmeetings dev.zio%zio-aws-iotdeviceadvisor dev.zio%zio-aws-translate dev.zio%zio-aws-glacier dev.zio%zio-aws-budgets dev.zio%zio-aws-storagegateway dev.zio%zio-aws-ram dev.zio%zio-aws-apigatewaymanagementapi dev.zio%zio-aws-acmpca dev.zio%zio-aws-connectcases dev.zio%zio-aws-elasticinference dev.zio%zio-aws-elasticloadbalancing dev.zio%zio-aws-macie dev.zio%zio-aws-glue dev.zio%zio-aws-iotroborunner dev.zio%zio-aws-lexruntimev2 dev.zio%zio-aws-mediaconnect dev.zio%zio-aws-cloudsearchdomain dev.zio%zio-aws-kinesisvideowebrtcstorage dev.zio%zio-aws-appintegrations dev.zio%zio-aws-workmailmessageflow dev.zio%zio-aws-apprunner dev.zio%zio-aws-sagemakerruntime dev.zio%zio-aws-sagemaker dev.zio%zio-aws-health dev.zio%zio-aws-backupgateway dev.zio%zio-aws-chime dev.zio%zio-aws-mediaconvert dev.zio%zio-aws-directory dev.zio%zio-aws-cloudhsmv2 dev.zio%zio-aws-arczonalshift dev.zio%zio-aws-sagemakerfeaturestoreruntime dev.zio%zio-aws-marketplaceentitlement dev.zio%zio-aws-servicediscovery dev.zio%zio-aws-autoscalingplans dev.zio%zio-aws-kinesisvideo dev.zio%zio-aws-codedeploy dev.zio%zio-aws-config dev.zio%zio-aws-datapipeline dev.zio%zio-aws-directconnect dev.zio%zio-aws-privatenetworks dev.zio%zio-aws-appflow dev.zio%zio-aws-sms dev.zio%zio-aws-ssoadmin dev.zio%zio-aws-mediapackage dev.zio%zio-aws-gamesparks dev.zio%zio-aws-s3 dev.zio%zio-aws-eks dev.zio%zio-aws-swf dev.zio%zio-aws-lookoutvision dev.zio%zio-aws-amp dev.zio%zio-aws-iotwireless dev.zio%zio-aws-finspace dev.zio%zio-aws-iotfleetwise dev.zio%zio-aws-lexmodelbuilding dev.zio%zio-aws-ivs dev.zio%zio-aws-appstream dev.zio%zio-aws-lexruntime dev.zio%zio-aws-globalaccelerator dev.zio%zio-aws-chimesdkmessaging dev.zio%zio-aws-licensemanager dev.zio%zio-aws-transcribe dev.zio%zio-aws-braket dev.zio%zio-aws-sfn dev.zio%zio-aws-cloud9 dev.zio%zio-aws-cloudcontrol dev.zio%zio-aws-scheduler dev.zio%zio-aws-fsx dev.zio%zio-aws-kinesisanalytics",
     "config":{
       "projects":{
