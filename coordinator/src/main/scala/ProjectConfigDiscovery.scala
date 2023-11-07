@@ -22,15 +22,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
             .orElse(Some(ProjectBuildConfig.empty))
             .map { c =>
               if c.java.version.nonEmpty then c
-              else
-                c.copy(java =
-                  c.java.copy(version = discoverJavaVersion(projectDir))
-                )
+              else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
             }
             .map { c =>
-              c.copy(sourcePatches =
-                c.sourcePatches ::: discoverSourcePatches(projectDir)
-              )
+              c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
             }
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
@@ -147,16 +142,14 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         tryReadLines(path)
           .map(_.trim)
           .flatMap {
-            case MatrixEntry(key, valuesList)
-                if isJavaVersionMatrixEntry(key) =>
+            case MatrixEntry(key, valuesList) if isJavaVersionMatrixEntry(key) =>
               valuesList.split(",").map(_.trim)
             case JavaVersion(value) => Option(value)
             case _                  => Nil
           }
           .flatMap {
             case JavaVersionNumber(version) => Option(version)
-            case JavaVersionDistroVer(distro, version)
-                if !distro.contains("graal") =>
+            case JavaVersionDistroVer(distro, version) if !distro.contains("graal") =>
               version
                 .stripPrefix("1.")
                 .split('.')
@@ -243,13 +236,12 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     def scala3VersionDefs =
       commonBuildFiles(projectDir).flatMap { file =>
         import Scala3VersionDef.Replecement
-        tryReadLines(file).collect {
-          case Scala3VersionDef(toMatch, replecement) =>
-            SourcePatch(
-              path = file.relativeTo(projectDir).toString,
-              pattern = toMatch,
-              replaceWith = replecement
-            )
+        tryReadLines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
+          SourcePatch(
+            path = file.relativeTo(projectDir).toString,
+            pattern = toMatch,
+            replaceWith = replecement
+          )
         }
       }
     end scala3VersionDefs

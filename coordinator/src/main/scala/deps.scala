@@ -197,8 +197,7 @@ def loadMavenInfo(scalaBinaryVersion: String)(
     .map(LoadedProject(projectModules.project, version, _))
 
   /** @param scalaBinaryVersion
-    *   Scala binary version name (major.minor) or `3` for scala 3 - following
-    *   scaladex's convention
+    *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
     */
 def loadDepenenecyGraph(
     scalaBinaryVersion: String,
@@ -211,8 +210,7 @@ def loadDepenenecyGraph(
 ): AsyncResponse[DependencyGraph] =
   val patterns = filterPatterns.map(_.r)
   def loadProject(p: Project): AsyncResponse[CandidateProject] =
-    if customProjects.contains(p) then
-      Future.successful(CandidateProject.BuildAll(p))
+    if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
     else
       cachedAsync { (p: Project) =>
         loadScaladexProject(scalaBinaryVersion, releaseCutOffDate)(p)
@@ -260,8 +258,7 @@ def loadDepenenecyGraph(
                       Option(result)
                     }
                     .recover {
-                      case ex: org.jsoup.HttpStatusException
-                          if ex.getStatusCode() == 404 =>
+                      case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
                         System.err.println(
                           s"Missing Maven info: ${ex.getUrl()}"
                         )
