@@ -36,19 +36,18 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
     configsPath: os.Path,
     varargs: String*
 ) = {
-  val releaseCutOffDate = varargs.collectFirst {
-    case s"--release-cutoff=${date}" =>
-      Try(LocalDate.parse(date)).fold[Option[LocalDate]](
-        ex =>
-          System.err.println(
-            s"Failed to parse cutoff date: `$date` - ${ex.getMessage()}"
-          )
-          None
-        ,
-        parsed =>
-          println(s"Would apply release cutoff date: $parsed")
-          Some(parsed)
-      )
+  val releaseCutOffDate = varargs.collectFirst { case s"--release-cutoff=${date}" =>
+    Try(LocalDate.parse(date)).fold[Option[LocalDate]](
+      ex =>
+        System.err.println(
+          s"Failed to parse cutoff date: `$date` - ${ex.getMessage()}"
+        )
+        None
+      ,
+      parsed =>
+        println(s"Would apply release cutoff date: $parsed")
+        Some(parsed)
+    )
   }.flatten
   given confFiles: ConfigFiles = ConfigFiles(configsPath)
   // Most of the time is spend in IO, though we can use higher parallelism
@@ -305,8 +304,7 @@ def makeDependenciesBasedBuildPlan(
         .lines()
         .headOption
       _ = os.remove.all(repoDir) // best-effort, it's tmp dir anyway
-    yield 
-      lastCommit.trim()
+    yield lastCommit.trim()
 
   Future
     .traverse(projectsDeps.toList) { (project, deps) =>
@@ -316,13 +314,21 @@ def makeDependenciesBasedBuildPlan(
           getRevision(project.p)
             .orElse(
               findTag(repoUrl, project.v)
-                .tapEach(v => println(s"Would use tag: $v for ${project.p.coordinates} @ ${project.v}"))
+                .tapEach(v =>
+                  println(
+                    s"Would use tag: $v for ${project.p.coordinates} @ ${project.v}"
+                  )
+                )
                 .headOption
                 .map(Git.Revision.Tag(_))
             )
             .orElse(
               findCutOffCommit(project.p, repoUrl, cutOffDate)
-                .tapEach(v => println(s"Would use commit: $v for ${project.p.coordinates} @ ${project.v}"))
+                .tapEach(v =>
+                  println(
+                    s"Would use commit: $v for ${project.p.coordinates} @ ${project.v}"
+                  )
+                )
                 .headOption
                 .map(Git.Revision.Commit(_))
             )

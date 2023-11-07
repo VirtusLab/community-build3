@@ -19,8 +19,7 @@ sealed case class Project(org: String, name: String):
     case _: StarredProject => Project(org, name)
     case _                 => this
 
-class StarredProject(org: String, name: String)(val stars: Int)
-    extends Project(org, name) {
+class StarredProject(org: String, name: String)(val stars: Int) extends Project(org, name) {
   override def serialize = s"$org;$name;$stars"
 }
 
@@ -91,18 +90,15 @@ enum TestingMode derives EnumConfigReader:
 
 // Community projects configs
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
-case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil)
-    derives ConfigReader
+case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
 case class MillConfig(options: List[String] = Nil) derives ConfigReader
-case class ProjectOverrides(tests: Option[TestingMode] = None)
-    derives ConfigReader
+case class ProjectOverrides(tests: Option[TestingMode] = None) derives ConfigReader
 case class ProjectsConfig(
     exclude: List[String] = Nil,
     overrides: Map[String, ProjectOverrides] = Map.empty
 ) derives ConfigReader
 // Describes a simple textual replecement performed on path (relative Unix-style path to the file
-case class SourcePatch(path: String, pattern: String, replaceWith: String)
-    derives ConfigReader
+case class SourcePatch(path: String, pattern: String, replaceWith: String) derives ConfigReader
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
     java: JavaConfig = JavaConfig(),
