@@ -22,19 +22,23 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
 
 $scriptDir/checkout.sh "$repoUrl" "$rev" repo
+buildToolFile="build-tool.txt"
 
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
+  echo "mill" > $buildToolFile
   $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$version" "$projectConfig"
   $scriptDir/mill/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
 
 elif [ -f "repo/build.sbt" ]; then
   echo "sbt project found: ${isSbtProject}"
+  echo "sbt" > $buildToolFile
   $scriptDir/sbt/prepare-project.sh "$project" repo "$enforcedSbtVersion" "$scalaVersion" "$projectConfig"
   $scriptDir/sbt/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
 else
   echo "Not found sbt or mill build files, assuming scala-cli project"
   ls -l repo/
+  echo "scala-cli" > $buildToolFile
   scala-cli clean $scriptDir/scala-cli/
   scala-cli clean repo
   scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl"

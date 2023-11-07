@@ -43,6 +43,10 @@ runs:
         ConfigFile=".github/workflows/buildConfig.json"
         DefaultJDK=11
         javaVersion=$(jq -r ".\"${{ inputs.project-name }}\".config.java.version // ${DefaultJDK}" $ConfigFile)
+        if [[ $javaVersion -ge 21 && ! "$scalaVersion" = 3.3.* ]]; then
+          echo "Force Java 17, Java 21 is only supported since 3.3.x"
+          javaVersion=17
+        fi
         echo "java-version=$javaVersion" >> $GITHUB_ENV
         echo "JavaVersion set to $javaVersion"
 
@@ -119,6 +123,7 @@ runs:
           touch build-logs.txt  build-summary.txt
           # Assume failure unless overwritten by a successful build
           echo 'failure' > build-status.txt 
+          echo 'unknown' > build-tool.txt
 
           /build/build-revision.sh \
             "$(config .project)" \
@@ -137,6 +142,7 @@ runs:
           mv build-logs.txt /opencb/
           mv build-status.txt /opencb/
           mv build-summary.txt /opencb/
+          mv build-tool.txt /opencb/
 
     - name: Check status
       id: check-status
@@ -211,7 +217,8 @@ runs:
             "$(config .version)" \
             "${{ inputs.scala-version }}" \
             "${{ github.run_id }}" \
-            "${{ steps.job-info.outputs.build-url }}"
+            "${{ steps.job-info.outputs.build-url }}" \
+            "$(cat build-tool.txt)"
           if [ $? != 0 ]; then 
             echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
           fi
