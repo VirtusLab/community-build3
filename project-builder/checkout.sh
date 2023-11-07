@@ -20,4 +20,4 @@ if [ -n "$rev" ]; then
   branch="-b $rev"
 fi
 git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch || 
-  ( git clone --quiet --recurse-submodules "$repo" "$repoDir" && cd $repoDir && git checkout $rev )
+  ( git clone --quiet --recurse-submodules "$repo" "$repoDir" && cd $repoDir && git fetch --shallow-since=2021-05-13 && git fetch --tags && git checkout $rev )
