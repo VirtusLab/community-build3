@@ -10,9 +10,9 @@ cd $scriptDir/../cli
 testNamespace=scala3-community-build-test
 cliRunCmd="run scb-cli.scala --jvm=11 --java-prop communitybuild.version=test --java-prop communitybuild.forced-java-version=11 --java-prop communitybuild.local.dir=$scriptDir/..  -- "
 commonOpts="--namespace=$testNamespace --noRedirectLogs"
-sbtProject="typelevel/shapeless-3 --revision=v3.1.0"
-millProject="com-lihaoyi/os-lib --revision=0.8.1" 
-scalaVersion=3.1.1
+sbtProject="typelevel/shapeless-3 --revision=v3.3.0"
+millProject="com-lihaoyi/os-lib --revision=0.9.2" 
+scalaVersion=3.3.0
 
 #echo "Test sbt custom build in minikube"
 #scala-cli $cliRunCmd run $sbtProject $scalaVersion $commonOpts 
