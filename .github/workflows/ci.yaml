@@ -37,15 +37,7 @@ jobs:
 
       - uses: coursier/setup-action@v1
         with:
-          apps: scala sbt mill:0.10.10
-
-      - name: Install scala-cli
-        run: |
-          curl -s --compressed "https://virtuslab.github.io/scala-cli-packages/KEY.gpg" | sudo apt-key add -
-          sudo curl -s --compressed -o /etc/apt/sources.list.d/scala_cli_packages.list "https://virtuslab.github.io/scala-cli-packages/debian/scala_cli_packages.list"
-          sudo apt-get update && \
-            sudo apt-get install scala-cli && \
-            scala-cli --version
+          apps: scala sbt mill:0.10.10 scala-cli:1.0.4
 
       - name: Start minikube
         run: minikube start
