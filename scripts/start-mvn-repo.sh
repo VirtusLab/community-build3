@@ -10,7 +10,6 @@ $scriptDir/generate-secrets.sh
 
 scbk create secret generic mvn-repo-keystore --from-file=$scriptDir/../secrets/mvn-repo.p12 || echo "secret mvn-repo-keystore already exists"
 scbk create secret generic mvn-repo-passwords --from-literal=keystore-password="$MVN_REPO_KEYSTORE_PASSWORD"  || echo "secret mvn-repo-passwords already exists"
-scbk create cm mvn-repo-cert --from-file=$scriptDir/../secrets/mvn-repo.crt || echo "config-map mvn-repo-cert already exists" 
 scbk apply -f $scriptDir/../k8s/mvn-repo-data.yaml
 
 mvnRepoYaml=$scriptDir/../k8s/mvn-repo.yaml

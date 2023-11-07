@@ -9,6 +9,16 @@ spec:
     count: 1
     config:
       node.store.allow_mmap: false
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 15Gi
+        storageClassName: default
 ---
 apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana

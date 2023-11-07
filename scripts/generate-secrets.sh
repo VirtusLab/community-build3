@@ -16,5 +16,5 @@ cd $secretsDir
 
 for hostAddr in mvn-repo; do
   openssl req -newkey rsa:2048 -nodes -batch -subj "/CN=$hostAddr" -keyout $hostAddr.key -x509 -days 365 -out $hostAddr.crt
-  openssl pkcs12 -export -out $hostAddr.p12 -inkey $hostAddr.key -in $hostAddr.crt -name $hostAddr -password "pass:$MVN_REPO_KEYSTORE_PASSWORD"
+  openssl pkcs12 -export -out $hostAddr.p12 -inkey $hostAddr.key -in $hostAddr.crt -name $hostAddr -password "pass:$MVN_REPO_KEYSTORE_PASSWORD" -certpbe PBE-SHA1-3DES -keypbe PBE-SHA1-3DES -macalg sha1
 done
