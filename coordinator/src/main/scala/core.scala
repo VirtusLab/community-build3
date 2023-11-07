@@ -19,7 +19,8 @@ sealed case class Project(org: String, name: String):
     case _: StarredProject => Project(org, name)
     case _                 => this
 
-class StarredProject(org: String, name: String)(val stars: Int) extends Project(org, name) {
+class StarredProject(org: String, name: String)(val stars: Int)
+    extends Project(org, name) {
   override def serialize = s"$org;$name;$stars"
 }
 
@@ -38,7 +39,12 @@ case class ProjectVersion(p: Project, v: String) {
   def showName = p.show
 }
 
-case class MvnMapping(name: String, version: String, mvn: String, deps: Seq[String]):
+case class MvnMapping(
+    name: String,
+    version: String,
+    mvn: String,
+    deps: Seq[String]
+):
   def show = (Seq(name, version, mvn) ++ deps).mkString(",")
 
 object MvnMapping:
@@ -85,15 +91,18 @@ enum TestingMode derives EnumConfigReader:
 
 // Community projects configs
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
-case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
+case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil)
+    derives ConfigReader
 case class MillConfig(options: List[String] = Nil) derives ConfigReader
-case class ProjectOverrides(tests: Option[TestingMode] = None) derives ConfigReader
+case class ProjectOverrides(tests: Option[TestingMode] = None)
+    derives ConfigReader
 case class ProjectsConfig(
     exclude: List[String] = Nil,
     overrides: Map[String, ProjectOverrides] = Map.empty
 ) derives ConfigReader
 // Describes a simple textual replecement performed on path (relative Unix-style path to the file
-case class SourcePatch(path: String, pattern: String, replaceWith: String) derives ConfigReader
+case class SourcePatch(path: String, pattern: String, replaceWith: String)
+    derives ConfigReader
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
     java: JavaConfig = JavaConfig(),
@@ -108,13 +117,19 @@ object ProjectBuildConfig {
   val empty = ProjectBuildConfig()
 }
 
-case class SemVersion(major: Int, minor: Int, patch: Int, milestone: Option[String])
+case class SemVersion(
+    major: Int,
+    minor: Int,
+    patch: Int,
+    milestone: Option[String]
+)
 given Conversion[String, SemVersion] = version =>
   // There are multiple projects that don't follow standarnd naming convention, especially in snpashots
   // becouse of that it needs to be more flexible, e.g to handle: x.y-z-<hash>, x.y, x.y-milestone
   val parts = version.split('.').flatMap(_.split('-')).filter(_.nonEmpty)
   val versionNums = parts.take(3).takeWhile(_.forall(_.isDigit))
-  def versionPart(idx: Int) = versionNums.lift(idx).flatMap(_.toIntOption).getOrElse(0)
+  def versionPart(idx: Int) =
+    versionNums.lift(idx).flatMap(_.toIntOption).getOrElse(0)
   val milestone = Some(parts.drop(versionNums.size))
     .filter(_.nonEmpty)
     .map(_.mkString("-"))

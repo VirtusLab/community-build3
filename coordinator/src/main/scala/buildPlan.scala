@@ -14,6 +14,8 @@ import os.write
 import scala.collection.mutable
 import scala.collection.SortedMap
 import os.CommandResult
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ConfigFiles(path: os.Path) {
   val projectsConfig: os.Path = path / "projects-config.conf"
@@ -31,14 +33,30 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
     maxProjectsInConfig: Int,
     maxProjectsInBuildPlan: Int,
     requiredProjects: Seq[Project],
-    configsPath: os.Path
+    configsPath: os.Path,
+    varargs: String*
 ) = {
+  val releaseCutOffDate = varargs.collectFirst {
+    case s"--release-cutoff=${date}" =>
+      Try(LocalDate.parse(date)).fold[Option[LocalDate]](
+        ex =>
+          System.err.println(
+            s"Failed to parse cutoff date: `$date` - ${ex.getMessage()}"
+          )
+          None
+        ,
+        parsed =>
+          println(s"Would apply release cutoff date: $parsed")
+          Some(parsed)
+      )
+  }.flatten
   given confFiles: ConfigFiles = ConfigFiles(configsPath)
   // Most of the time is spend in IO, though we can use higher parallelism
   val threadPool = new ForkJoinPool(
     Runtime.getRuntime().availableProcessors() * 4
   )
-  val customProjects = readNormalized(confFiles.customProjects).map(Project.load)
+  val customProjects =
+    readNormalized(confFiles.customProjects).map(Project.load)
   given ExecutionContext = ExecutionContext.fromExecutor(threadPool)
 
   val task = for {
@@ -48,15 +66,22 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       maxProjectsCount = Option(maxProjectsInConfig).filter(_ >= 0),
       requiredProjects = requiredProjects,
       customProjects = customProjects,
-      filterPatterns = loadFilters
+      filterPatterns = loadFilters,
+      releaseCutOffDate = releaseCutOffDate
     )
-    _ = println(s"Loaded dependency graph: ${dependencyGraph.projects.size} projects")
-    fullBuildPlan <- makeDependenciesBasedBuildPlan(dependencyGraph)
+    _ = println(
+      s"Loaded dependency graph: ${dependencyGraph.projects.size} projects"
+    )
+    fullBuildPlan <- makeDependenciesBasedBuildPlan(
+      dependencyGraph,
+      releaseCutOffDate
+    )
     _ = println("Generated build plan")
   } yield {
     // Build config
     if !ForReproducer then {
-      val configMap = SortedMap.from(fullBuildPlan.map(p => p.project.coordinates -> p))
+      val configMap =
+        SortedMap.from(fullBuildPlan.map(p => p.project.coordinates -> p))
       os.write.over(
         workflowsDir / "buildConfig.json",
         toJson(configMap, pretty = true),
@@ -110,7 +135,10 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
 }
 
 case class SplittedBuildPlan(projects: Array[ProjectBuildDef], index: Int = 0)
-def splitBuildPlan(buildPlan: Array[ProjectBuildDef], limit: Int): List[SplittedBuildPlan] = {
+def splitBuildPlan(
+    buildPlan: Array[ProjectBuildDef],
+    limit: Int
+): List[SplittedBuildPlan] = {
   // Sort ascending by ammount of starts, required projects have highest priority
   buildPlan
     .sortBy {
@@ -210,7 +238,10 @@ def buildPlanCommons(depGraph: DependencyGraph) =
 
   (topLevelData, fullInfo, projectsDeps)
 
-def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
+def makeDependenciesBasedBuildPlan(
+    depGraph: DependencyGraph,
+    cutOffDate: Option[LocalDate]
+)(using
     confFiles: ConfigFiles
 ): AsyncResponse[Array[ProjectBuildDef]] =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
@@ -220,7 +251,9 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =
-    if !os.exists(confFiles.replacedProjects) || os.isDir(confFiles.replacedProjects)
+    if !os.exists(confFiles.replacedProjects) || os.isDir(
+        confFiles.replacedProjects
+      )
     then Map.empty
     else
       readNormalized(confFiles.replacedProjects).map {
@@ -236,16 +269,63 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
 
   def getRevision(project: Project) =
     val originalCoords = (project.org, project.name)
-    replacements.get(originalCoords).map(_._2).flatten
+    replacements
+      .get(originalCoords)
+      .map(_._2)
+      .flatten
+      .map(Git.Revision.Tag(_))
 
   val projects = projectsDeps.keys.map(_.p).toList
+
+  def findCutOffCommit(
+      project: Project,
+      repoUrl: String,
+      cutOffDate: Option[LocalDate]
+  ): Option[String] =
+    for
+      cutOffDate <- cutOffDate
+      repoDir <- Git.checkout(
+        repoUrl,
+        project.name,
+        revision = None,
+        depth = Some(1)
+      )
+      _ = Git.unshallowSinceDottyRelease(repoDir)
+      lastCommit <- os
+        .proc(
+          "git",
+          "--no-pager",
+          "log",
+          s"--before=${cutOffDate.format(DateTimeFormatter.ISO_DATE)}",
+          "--pretty=format:%H",
+          "--max-count=1"
+        )
+        .call(cwd = repoDir, check = false, timeout = 5.minutes.toMillis)
+        .out
+        .lines()
+        .headOption
+      _ = os.remove.all(repoDir) // best-effort, it's tmp dir anyway
+    yield 
+      lastCommit.trim()
 
   Future
     .traverse(projectsDeps.toList) { (project, deps) =>
       Future {
         val repoUrl = projectRepoUrl(project.p)
-        val tag =
-          getRevision(project.p).orElse(findTag(repoUrl, project.v))
+        val revision: Option[Git.Revision] =
+          getRevision(project.p)
+            .orElse(
+              findTag(repoUrl, project.v)
+                .tapEach(v => println(s"Would use tag: $v for ${project.p.coordinates} @ ${project.v}"))
+                .headOption
+                .map(Git.Revision.Tag(_))
+            )
+            .orElse(
+              findCutOffCommit(project.p, repoUrl, cutOffDate)
+                .tapEach(v => println(s"Would use commit: $v for ${project.p.coordinates} @ ${project.v}"))
+                .headOption
+                .map(Git.Revision.Commit(_))
+            )
         val self = project.p
         val dependencies = deps
           .map(_.p)
@@ -259,7 +339,7 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
           project = project.p,
           dependencies = dependencies.toArray,
           repoUrl = repoUrl,
-          revision = tag.getOrElse(""),
+          revision = revision.map(_.stringValue).getOrElse(""),
           version = project.v,
           targets = fullInfo(project.p).targets
             .map {
@@ -267,20 +347,25 @@ def makeDependenciesBasedBuildPlan(depGraph: DependencyGraph)(using
               case t                   => stripScala3Suffix(t.id.asMvnStr)
             }
             .mkString(" "),
-          config = configDiscovery(project, repoUrl, tag)
+          config = configDiscovery(project, repoUrl, revision)
         )
       }
     }
     .map(_.filter(_.project != DottyProject).toArray)
 
-private def loadFilters(using confFiles: ConfigFiles): Seq[String] = readNormalized(
-  confFiles.filteredProjects
-)
-private def loadLongBuildingProjects()(using confFiles: ConfigFiles): Seq[Project] =
+private def loadFilters(using confFiles: ConfigFiles): Seq[String] =
+  readNormalized(
+    confFiles.filteredProjects
+  )
+private def loadLongBuildingProjects()(using
+    confFiles: ConfigFiles
+): Seq[Project] =
   readNormalized(confFiles.slowProjects).flatMap {
     case s"$org/$repo" => Some(Project(org, repo))
     case malformed =>
-      System.err.println(s"Malformed project long building project name: $malformed ")
+      System.err.println(
+        s"Malformed project long building project name: $malformed "
+      )
       None
   }
 
@@ -321,7 +406,9 @@ def splitIntoStages(
       }
       if currentStage.isEmpty then {
         def hasCyclicDependencies(p: ProjectBuildDef) =
-          p.dependencies.exists(deps.get(_).fold(false)(_.dependencies.contains(p.project)))
+          p.dependencies.exists(
+            deps.get(_).fold(false)(_.dependencies.contains(p.project))
+          )
         val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
         if cyclicDeps.nonEmpty then {
           currentStage ++= cyclicDeps
@@ -329,7 +416,7 @@ def splitIntoStages(
           cyclicDeps.foreach(v =>
             println(
               s"Mitigated cyclic dependency in  ${v.project} -> ${v.dependencies.toList
-                .filterNot(done.contains)}"
+                  .filterNot(done.contains)}"
             )
           )
         } else {
@@ -338,7 +425,8 @@ def splitIntoStages(
             .toSeq
             .sortBy { (depsCount, _) => depsCount }
             .head
-          def showCurrent = tieBreakers.map(_.project.coordinates).mkString(", ")
+          def showCurrent =
+            tieBreakers.map(_.project.coordinates).mkString(", ")
           System.err.println(
             s"Not found projects without already resolved dependencies, using [${tieBreakers.size}] projects with minimal dependency size=$minDeps : ${showCurrent}"
           )
@@ -499,8 +587,12 @@ def createGithubActionJob(
           })
           println("  with:")
           println("    project-name: ${{ matrix.name }}")
-          println("    extra-scalac-options: ${{ inputs.extra-scalac-options }}")
-          println("    disabled-scalac-options: ${{ inputs.disabled-scalac-options }}")
+          println(
+            "    extra-scalac-options: ${{ inputs.extra-scalac-options }}"
+          )
+          println(
+            "    disabled-scalac-options: ${{ inputs.disabled-scalac-options }}"
+          )
           println(s"    scala-version: $${{ $setupOutputs.scala-version }}")
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
           println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")

@@ -4,7 +4,7 @@ import java.nio.file._
 import scala.sys.process._
 import scala.concurrent.*
 import scala.concurrent.duration.*
-import java.time.OffsetDateTime
+import java.time.{OffsetDateTime, LocalDate}
 import java.util.concurrent.TimeUnit.SECONDS
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -33,7 +33,9 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
       val texts = e.select("h4").get(0).text().split("/")
       val stars = e.select(".stats [title=Stars]").asScala.map(_.text)
       Option.unless(texts.isEmpty || stars.isEmpty) {
-        StarredProject(texts.head, texts.drop(1).mkString("/"))(stars.head.toInt)
+        StarredProject(texts.head, texts.drop(1).mkString("/"))(
+          stars.head.toInt
+        )
       }
     }
   LazyList
@@ -50,7 +52,10 @@ enum CandidateProject:
   case BuildSelected(project: Project, mvs: Seq[ModuleInVersion])
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
-def loadScaladexProject(scalaBinaryVersion: String)(
+def loadScaladexProject(
+    scalaBinaryVersion: String,
+    releaseCutOffDate: Option[LocalDate]
+)(
     project: Project
 ): AsyncResponse[ProjectModules] =
   import util.*
@@ -82,6 +87,10 @@ def loadScaladexProject(scalaBinaryVersion: String)(
                   // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
                   // Previous approach with sorting SemVersion was not stable and could lead to runtime erros (due to not transitive order of elements)
                   val versions = response.items
+                    .filter(v =>
+                      releaseCutOffDate
+                        .forall(_.isAfter(v.releaseDate.toLocalDate()))
+                    )
                     .tapEach(v => releaseDates += v.version -> v.releaseDate)
                     .map(_.version)
                   artifact -> versions
@@ -90,7 +99,9 @@ def loadScaladexProject(scalaBinaryVersion: String)(
             .map(_.toMap)
           orderedVersions = projectSummary.versions
             .flatMap(v => releaseDates.get(v).map(VersionRelease(v, _)))
-            .sortBy(_.releaseDate)(using summon[Ordering[OffsetDateTime]].reverse)
+            .sortBy(_.releaseDate)(using
+              summon[Ordering[OffsetDateTime]].reverse
+            )
             .map(_.version)
         yield for version <- orderedVersions
         yield ModuleInVersion(
@@ -186,7 +197,8 @@ def loadMavenInfo(scalaBinaryVersion: String)(
     .map(LoadedProject(projectModules.project, version, _))
 
   /** @param scalaBinaryVersion
-    *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
+    *   Scala binary version name (major.minor) or `3` for scala 3 - following
+    *   scaladex's convention
     */
 def loadDepenenecyGraph(
     scalaBinaryVersion: String,
@@ -194,16 +206,20 @@ def loadDepenenecyGraph(
     maxProjectsCount: Option[Int] = None,
     requiredProjects: Seq[Project] = Nil,
     customProjects: Seq[Project] = Nil,
-    filterPatterns: Seq[String] = Nil
+    filterPatterns: Seq[String] = Nil,
+    releaseCutOffDate: Option[LocalDate] = None
 ): AsyncResponse[DependencyGraph] =
   val patterns = filterPatterns.map(_.r)
   def loadProject(p: Project): AsyncResponse[CandidateProject] =
-    if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
+    if customProjects.contains(p) then
+      Future.successful(CandidateProject.BuildAll(p))
     else
       cachedAsync { (p: Project) =>
-        loadScaladexProject(scalaBinaryVersion)(p)
+        loadScaladexProject(scalaBinaryVersion, releaseCutOffDate)(p)
           .map(projectModulesFilter(patterns))
-      }(p).map { case ProjectModules(project, mvs) => CandidateProject.BuildSelected(project, mvs) }
+      }(p).map { case ProjectModules(project, mvs) =>
+        CandidateProject.BuildSelected(project, mvs)
+      }
 
   val required = LazyList
     .from(requiredProjects)
@@ -231,7 +247,9 @@ def loadDepenenecyGraph(
           mvnInfo <-
             project match
               case CandidateProject.BuildAll(project) =>
-                Future.successful(Some(LoadedProject(project, "HEAD", Seq(Target.BuildAll))))
+                Future.successful(
+                  Some(LoadedProject(project, "HEAD", Seq(Target.BuildAll)))
+                )
               case candidate @ CandidateProject.BuildSelected(project, mvs) =>
                 if mvs.isEmpty
                 then Future.successful(None)
@@ -242,8 +260,11 @@ def loadDepenenecyGraph(
                       Option(result)
                     }
                     .recover {
-                      case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
-                        System.err.println(s"Missing Maven info: ${ex.getUrl()}")
+                      case ex: org.jsoup.HttpStatusException
+                          if ex.getStatusCode() == 404 =>
+                        System.err.println(
+                          s"Missing Maven info: ${ex.getUrl()}"
+                        )
                         None
                     }
         yield mvnInfo
@@ -253,7 +274,9 @@ def loadDepenenecyGraph(
   load(
     required #::: optional(
       from = 0,
-      limit = maxProjectsCount.map(_ - requiredProjects.length - customProjects.length).map(_ max 0)
+      limit = maxProjectsCount
+        .map(_ - requiredProjects.length - customProjects.length)
+        .map(_ max 0)
     )
   ).flatMap { loaded =>
     val available = loaded.flatten
@@ -264,8 +287,11 @@ def loadDepenenecyGraph(
       else {
         val continueFrom = loaded.size - required.size
         // Load '10 < 1/2n < 50' more projects then number of remaining slots to filter out possibly empty entries
-        val toLoad = remainingSlots + (remainingSlots * 0.5).toInt.max(10).min(50)
-        println(s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects")
+        val toLoad =
+          remainingSlots + (remainingSlots * 0.5).toInt.max(10).min(50)
+        println(
+          s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects"
+        )
         load(optional(from = continueFrom, limit = Some(remainingSlots)))
           .map(available ++ _.flatten.take(remainingSlots))
       }

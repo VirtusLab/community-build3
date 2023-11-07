@@ -9,11 +9,12 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
   def apply(
       project: ProjectVersion,
       repoUrl: String,
-      tagOrRevision: Option[String]
+      revision: Option[Git.Revision]
   ): Option[ProjectBuildConfig] = {
     val name = project.showName
 
-    checkout(repoUrl, name, tagOrRevision)
+    Git
+      .checkout(repoUrl, name, revision, depth = Some(1))
       .flatMap { projectDir =>
         try {
           readProjectConfig(projectDir, repoUrl)
@@ -21,10 +22,15 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
             .orElse(Some(ProjectBuildConfig.empty))
             .map { c =>
               if c.java.version.nonEmpty then c
-              else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
+              else
+                c.copy(java =
+                  c.java.copy(version = discoverJavaVersion(projectDir))
+                )
             }
             .map { c =>
-              c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
+              c.copy(sourcePatches =
+                c.sourcePatches ::: discoverSourcePatches(projectDir)
+              )
             }
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
@@ -35,46 +41,6 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
             None
         } finally os.remove.all(projectDir)
       }
-  }
-
-  private def checkout(
-      repoUrl: String,
-      projectName: String,
-      tagOrRevision: Option[String]
-  ): Option[os.Path] = {
-    @tailrec def retry[T](
-        retries: Int,
-        backoffSeconds: Int = 1
-    ): Option[os.Path] = {
-      val projectDir = os.temp.dir(prefix = s"repo-$projectName")
-      val proc = os
-        .proc(
-          "git",
-          "clone",
-          repoUrl,
-          projectDir,
-          "--quiet",
-          tagOrRevision.map("--branch=" + _).toList,
-          "--depth=1"
-        )
-        .call(stderr = os.Pipe, check = false)
-
-      if proc.exitCode == 0 then Some(projectDir)
-      else if retries > 0 then
-        Console.err.println(
-          s"Failed to checkout $repoUrl at revision ${tagOrRevision}, backoff ${backoffSeconds}s"
-        )
-        proc.err.lines().foreach(Console.err.println)
-        Thread.sleep(backoffSeconds * 1000)
-        retry(retries - 1, (backoffSeconds * 2).min(60))
-      else
-        Console.err.println(
-          s"Failed to checkout $repoUrl at revision ${tagOrRevision}:"
-        )
-        proc.err.lines().foreach(Console.err.println)
-        None
-    }
-    retry(retries = 10)
   }
 
   private def githubWorkflows(projectDir: os.Path) = {
@@ -167,7 +133,8 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     // release is used by oracle-actions/setup-java@v1
     val JavaVersion = raw"(?:java-version|jdk|jvm|release):\s*(.*)".r
     val JavaVersionNumber = raw"$OptQuote(\d+)$OptQuote".r
-    val JavaVersionDistroVer = raw"$OptQuote(\w+)[@:]([\d\.]*[\w\-\_\.]*)$OptQuote".r
+    val JavaVersionDistroVer =
+      raw"$OptQuote(\w+)[@:]([\d\.]*[\w\-\_\.]*)$OptQuote".r
     val MatrixEntry = raw"(\w+):\s*\[(.*)\]".r
     // We can only supported this versions
     val allowedVersions = Seq(8, 11, 17, 21)
@@ -180,14 +147,16 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         tryReadLines(path)
           .map(_.trim)
           .flatMap {
-            case MatrixEntry(key, valuesList) if isJavaVersionMatrixEntry(key) =>
+            case MatrixEntry(key, valuesList)
+                if isJavaVersionMatrixEntry(key) =>
               valuesList.split(",").map(_.trim)
             case JavaVersion(value) => Option(value)
             case _                  => Nil
           }
           .flatMap {
             case JavaVersionNumber(version) => Option(version)
-            case JavaVersionDistroVer(distro, version) if !distro.contains("graal") =>
+            case JavaVersionDistroVer(distro, version)
+                if !distro.contains("graal") =>
               version
                 .stripPrefix("1.")
                 .split('.')
@@ -214,7 +183,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
         "scala3Version", // https://github.com/47degrees/fetch/blob/c4732a827816c58ce84013e9580120bdc3f64bc6/build.sbt#L10
         "Scala_3", // https://github.dev/kubukoz/sup/blob/644848c03173c726f19a40e6dd439b6905d42967/build.sbt#L10-L11
         "scala_3",
-        "`Scala-3`", 
+        "`Scala-3`",
         "`scala-3`" // https://github.com/rolang/dumbo/blob/7cc7f22ee45632b45bb1092418a3498ede8226da/build.sbt#L3
       )
       val Scala3VersionNamesAlt = matchEnclosed(
@@ -274,12 +243,13 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
     def scala3VersionDefs =
       commonBuildFiles(projectDir).flatMap { file =>
         import Scala3VersionDef.Replecement
-        tryReadLines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
-          SourcePatch(
-            path = file.relativeTo(projectDir).toString,
-            pattern = toMatch,
-            replaceWith = replecement
-          )
+        tryReadLines(file).collect {
+          case Scala3VersionDef(toMatch, replecement) =>
+            SourcePatch(
+              path = file.relativeTo(projectDir).toString,
+              pattern = toMatch,
+              replaceWith = replecement
+            )
         }
       }
     end scala3VersionDefs
