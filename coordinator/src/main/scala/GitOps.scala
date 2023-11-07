@@ -90,7 +90,7 @@ object Git {
           )
         if (proc.exitCode != 0)
           System.err.println(
-            s"Failed to checkout $repoUrl, revision $revision: " + proc.out
+            s"Failed to checkout revision $revision: " + proc.out
               .lines()
               .mkString
           )
