@@ -5,8 +5,14 @@ import scala.concurrent.*
 object Scaladex {
   case class Pagination(current: Int, pageCount: Int, totalSize: Int)
   // releaseDate is always UTC zoned
-  case class ArtifactMetadata(version: String, releaseDate: java.time.OffsetDateTime)
-  case class ArtifactMetadataResponse(pagination: Pagination, items: List[ArtifactMetadata])
+  case class ArtifactMetadata(
+      version: String,
+      releaseDate: java.time.OffsetDateTime
+  )
+  case class ArtifactMetadataResponse(
+      pagination: Pagination,
+      items: List[ArtifactMetadata]
+  )
   case class ProjectSummary(
       groupId: String,
       artifacts: List[String], // List of artifacts with suffixes
@@ -20,20 +26,21 @@ object Scaladex {
       groupId: String,
       artifactId: String
   ): AsyncResponse[ArtifactMetadataResponse] = {
-    def tryFetch(backoffSeconds: Int): AsyncResponse[ArtifactMetadataResponse] = Future {
-      val response = requests.get(
-        url = s"$ScaladexUrl/api/artifacts/$groupId/$artifactId"
-      )
-      fromJson[ArtifactMetadataResponse](response.text())
-    }.recoverWith {
-      case err: org.jsoup.HttpStatusException
-          if err.getStatusCode == 503 && !Thread.interrupted() =>
-        Console.err.println(
-          s"Failed to fetch artifact metadata, Scaladex unavailable, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
+    def tryFetch(backoffSeconds: Int): AsyncResponse[ArtifactMetadataResponse] =
+      Future {
+        val response = requests.get(
+          url = s"$ScaladexUrl/api/artifacts/$groupId/$artifactId"
         )
-        SECONDS.sleep(backoffSeconds)
-        tryFetch((backoffSeconds * 2).min(60))
-    }
+        fromJson[ArtifactMetadataResponse](response.text())
+      }.recoverWith {
+        case err: org.jsoup.HttpStatusException
+            if err.getStatusCode == 503 && !Thread.interrupted() =>
+          Console.err.println(
+            s"Failed to fetch artifact metadata, Scaladex unavailable, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
+          )
+          SECONDS.sleep(backoffSeconds)
+          tryFetch((backoffSeconds * 2).min(60))
+      }
     tryFetch(1)
   }
 

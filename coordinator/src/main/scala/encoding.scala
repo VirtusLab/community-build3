@@ -16,8 +16,9 @@ object ProjectBuildDefSerializer
 
 class ProjectSerializer
     extends CustomSerializer[Project](format => {
-      def deserialize: PartialFunction[JValue, Project] = { case JString(stringValue) =>
-        Project.load(stringValue)
+      def deserialize: PartialFunction[JValue, Project] = {
+        case JString(stringValue) =>
+          Project.load(stringValue)
       }
       def serialize: PartialFunction[Any, JValue] = { case p: Project =>
         JString(p.coordinates)
@@ -55,8 +56,9 @@ def fromJson[T: Manifest](json: String): T = Serialization.read(json)
 // Custom serializer in org.json4s.ext does not handle 2022-04-29T03:39:03Z
 class UTCOffsetDateTimeSerializer
     extends CustomSerializer[OffsetDateTime](format => {
-      def deserialize: PartialFunction[JValue, OffsetDateTime] = { case JString(value) =>
-        OffsetDateTime.parse(value)
+      def deserialize: PartialFunction[JValue, OffsetDateTime] = {
+        case JString(value) =>
+          OffsetDateTime.parse(value)
       }
       def serialize: PartialFunction[Any, JValue] = { case v: OffsetDateTime =>
         JString(v.toString())
