@@ -800,7 +800,42 @@
     "repoUrl":"https://github.com/akka/akka.git",
     "revision":"v2.8.4",
     "version":"2.8.4",
-    "targets":"com.typesafe.akka%akka-multi-node-testkit com.typesafe.akka%akka-bom com.typesafe.akka%akka-coordination com.typesafe.akka%akka-persistence-tck com.typesafe.akka%akka-actor com.typesafe.akka%akka-cluster-sharding-typed com.typesafe.akka%akka-cluster com.typesafe.akka%akka-protobuf-v3 com.typesafe.akka%akka-distributed-data com.typesafe.akka%akka-stream com.typesafe.akka%akka-pki com.typesafe.akka%akka-stream-typed com.typesafe.akka%akka-persistence com.typesafe.akka%akka-cluster-sharding com.typesafe.akka%akka-cluster-metrics com.typesafe.akka%akka-discovery com.typesafe.akka%akka-actor-typed com.typesafe.akka%akka-persistence-query com.typesafe.akka%akka-slf4j com.typesafe.akka%akka-persistence-typed com.typesafe.akka%akka-remote com.typesafe.akka%akka-persistence-testkit com.typesafe.akka%akka-cluster-typed com.typesafe.akka%akka-actor-testkit-typed com.typesafe.akka%akka-testkit com.typesafe.akka%akka-serialization-jackson com.typesafe.akka%akka-stream-testkit com.typesafe.akka%akka-cluster-tools"
+    "targets":"com.typesafe.akka%akka-multi-node-testkit com.typesafe.akka%akka-bom com.typesafe.akka%akka-coordination com.typesafe.akka%akka-persistence-tck com.typesafe.akka%akka-actor com.typesafe.akka%akka-cluster-sharding-typed com.typesafe.akka%akka-cluster com.typesafe.akka%akka-protobuf-v3 com.typesafe.akka%akka-distributed-data com.typesafe.akka%akka-stream com.typesafe.akka%akka-pki com.typesafe.akka%akka-stream-typed com.typesafe.akka%akka-persistence com.typesafe.akka%akka-cluster-sharding com.typesafe.akka%akka-cluster-metrics com.typesafe.akka%akka-discovery com.typesafe.akka%akka-actor-typed com.typesafe.akka%akka-persistence-query com.typesafe.akka%akka-slf4j com.typesafe.akka%akka-persistence-typed com.typesafe.akka%akka-remote com.typesafe.akka%akka-persistence-testkit com.typesafe.akka%akka-cluster-typed com.typesafe.akka%akka-actor-testkit-typed com.typesafe.akka%akka-testkit com.typesafe.akka%akka-serialization-jackson com.typesafe.akka%akka-stream-testkit com.typesafe.akka%akka-cluster-tools",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          "set every targetSystemJdk := true",
+          "disableFatalWarnings"
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "sourcePatches":[
+        {
+          "path":"project/Dependencies.scala",
+          "pattern":"val scala3Version = \"3.2.2\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
   },
   "akka/akka-diagnostics":{
     "project":"akka/akka-diagnostics",
@@ -1824,7 +1859,41 @@
     "repoUrl":"https://github.com/apache/incubator-pekko.git",
     "revision":"v1.0.1",
     "version":"1.0.1",
-    "targets":"org.apache.pekko%pekko-stream-typed org.apache.pekko%pekko-persistence org.apache.pekko%pekko-slf4j org.apache.pekko%pekko-actor org.apache.pekko%pekko-cluster-sharding-typed org.apache.pekko%pekko-persistence-query org.apache.pekko%pekko-cluster-tools org.apache.pekko%pekko-actor-typed org.apache.pekko%pekko-actor-testkit-typed org.apache.pekko%pekko-stream-testkit org.apache.pekko%pekko-persistence-testkit org.apache.pekko%pekko-bom org.apache.pekko%pekko-protobuf-v3 org.apache.pekko%pekko-persistence-typed org.apache.pekko%pekko-serialization-jackson org.apache.pekko%pekko-remote org.apache.pekko%pekko-persistence-tck org.apache.pekko%pekko-testkit org.apache.pekko%pekko-discovery org.apache.pekko%pekko-cluster-metrics org.apache.pekko%pekko-stream org.apache.pekko%pekko-osgi org.apache.pekko%pekko-coordination org.apache.pekko%pekko-distributed-data org.apache.pekko%pekko-cluster-sharding org.apache.pekko%pekko-multi-node-testkit org.apache.pekko%pekko-protobuf org.apache.pekko%pekko-cluster-typed org.apache.pekko%pekko-pki org.apache.pekko%pekko-cluster"
+    "targets":"org.apache.pekko%pekko-stream-typed org.apache.pekko%pekko-persistence org.apache.pekko%pekko-slf4j org.apache.pekko%pekko-actor org.apache.pekko%pekko-cluster-sharding-typed org.apache.pekko%pekko-persistence-query org.apache.pekko%pekko-cluster-tools org.apache.pekko%pekko-actor-typed org.apache.pekko%pekko-actor-testkit-typed org.apache.pekko%pekko-stream-testkit org.apache.pekko%pekko-persistence-testkit org.apache.pekko%pekko-bom org.apache.pekko%pekko-protobuf-v3 org.apache.pekko%pekko-persistence-typed org.apache.pekko%pekko-serialization-jackson org.apache.pekko%pekko-remote org.apache.pekko%pekko-persistence-tck org.apache.pekko%pekko-testkit org.apache.pekko%pekko-discovery org.apache.pekko%pekko-cluster-metrics org.apache.pekko%pekko-stream org.apache.pekko%pekko-osgi org.apache.pekko%pekko-coordination org.apache.pekko%pekko-distributed-data org.apache.pekko%pekko-cluster-sharding org.apache.pekko%pekko-multi-node-testkit org.apache.pekko%pekko-protobuf org.apache.pekko%pekko-cluster-typed org.apache.pekko%pekko-pki org.apache.pekko%pekko-cluster",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "sourcePatches":[
+        {
+          "path":"project/Dependencies.scala",
+          "pattern":"val scala3Version = \"3.3.0\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
   },
   "apache/incubator-pekko-connectors":{
     "project":"apache/incubator-pekko-connectors",
