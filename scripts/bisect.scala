@@ -9,7 +9,7 @@ import java.nio.file.attribute.PosixFilePermissions
 import java.nio.charset.StandardCharsets
 import java.nio.file._
 
-val communityBuildVersion = "v0.2.7"
+val communityBuildVersion = "v0.2.8"
 
 @main def run(args: String*): Unit =
   val config = scopt.OParser
