@@ -30,39 +30,16 @@ import TaskEvaluator.EvalResult
 import serialization.OptionPickler.read
 
 import scala.reflect.ClassTag
-import scalalib._
-import scalalib.api.CompilationResult
+import mill.{scalalib, api, T, Module, Task, Agg}
+import mill.scalalib.api.CompilationResult
 import mill.eval._
-import mill.define.{Cross => DefCross, _}
-import mill.define.Segment._
+import mill.define.{Cross => DefCross, NamedTask, Segment}
+import mill.testrunner.TestResult
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
 
-private object compat {
-  // In Mill 0.10.x series mill.scalalib.TestRunner was moved to mill.testrunner
-  // We cannot enforce 0.10.x series, becouse multiple builds use EOL ammonite-ops, which are absent in 0.10.x
-  val MillTestRunner = {
-    import CompatDef._ // introduces alternative testrunner from ComaptDef
-    {
-      import mill._ // in 0.10.x replaces CompatDef.testrunner with mill.testrunnner
-      import testrunner._ // Adds TestRunner to the scope from either scope
-      {
-        import mill.scalalib._ // In 0.9.x replaces CompatDef.testruner.TestRunner with mill.scalalib.TestRunner
-        TestRunner
-      }
-    }
-  }
-
-  object CompatDef {
-    object testrunner {
-      object TestRunner
-    }
-  }
-}
-import compat.{MillTestRunner => TestRunner}
-
-trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
+trait CommunityBuildCoursierModule extends scalalib.CoursierModule { self: scalalib.JavaModule =>
   protected val mavenRepoUrl: Option[String] = sys.props
     .get("communitybuild.maven.url")
     .map(_.stripSuffix("/"))
@@ -73,9 +50,10 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   }
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
-  override def zincWorker: ZincWorkerModule = CommunityBuildZincWorker
-  object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
-    override def repositoriesTask() = T.task {
+  override def zincWorker: mill.define.ModuleRef[scalalib.ZincWorkerModule] =
+    mill.define.ModuleRef(CommunityBuildZincWorker)
+  object CommunityBuildZincWorker extends scalalib.ZincWorkerModule with scalalib.CoursierModule {
+    override def repositoriesTask = T.task {
       mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
     }
   }
@@ -83,7 +61,9 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
 // Left for compliance with legacy versions
-trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {}
+trait CommunityBuildPublishModule
+    extends scalalib.PublishModule
+    with CommunityBuildCoursierModule {}
 
 /** Replace all Scala in crossVersion with `buildScalaVersion` if its matching `buildScalaVersion`
   * binary version
@@ -91,33 +71,37 @@ trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCours
   *   sequence of cross versions, in the form of either `String` or `Product` of Strings (based on
   *   the mill api)
   */
-def mapCrossVersions(
+def mapCrossVersions[T](
     buildScalaVersion: String,
-    crossVersions: Seq[Any]
-): Seq[Any] = {
+    crossVersions: T*
+)(implicit dummy: DummyImplicit): Seq[T] = mapCrossVersions(buildScalaVersion, crossVersions.toSeq)
+
+def mapCrossVersions[T](
+    buildScalaVersion: String,
+    crossVersions: Seq[T]
+): Seq[T] = {
   implicit val ctx = ExtractorsCtx(buildScalaVersion)
-  for {
-    // Map products to lists (List[_] <: Product ) for stable pattern matching
+  // Map products to lists (List[_] <: Product ) for stable pattern matching
+  val res = for {
     crossEntry <- crossVersions
     cross = crossEntry match {
       case product: Product => product.productIterator.toList
       case other            => other
     }
     mappedCrossVersion = cross match {
-      case MatchesScalaBinaryVersion() => buildScalaVersion
-      case List(MatchesScalaBinaryVersion(), crossVersion) =>
-        (buildScalaVersion, crossVersion)
-      case List(crossVersion, MatchesScalaBinaryVersion()) =>
-        (crossVersion, buildScalaVersion)
-      case _ => crossEntry
+      case MatchesScalaBinaryVersion()                     => buildScalaVersion
+      case List(MatchesScalaBinaryVersion(), crossVersion) => (buildScalaVersion, crossVersion)
+      case List(crossVersion, MatchesScalaBinaryVersion()) => (crossVersion, buildScalaVersion)
+      case _                                               => crossEntry
     }
-    version <- Seq(crossEntry, mappedCrossVersion).distinct
+    version <- Seq(mappedCrossVersion).distinct
   } yield {
     if (version != crossEntry) {
       println(s"Use cross-version $version instead of $crossEntry")
     }
     version
   }
+  res.toSeq.asInstanceOf[Seq[T]]
 }
 
 case class ModuleInfo(org: String, name: String, module: Module) {
@@ -130,7 +114,7 @@ case class Ctx(
     log: mill.api.Logger
 ) {
   lazy val publishVersion = sys.props.get("communitybuild.version").filterNot(_.isEmpty)
-  lazy val cross = Cross(scalaVersion :: Nil)
+  lazy val cross = Segment.Cross(scalaVersion :: Nil)
 }
 
 class MillTaskEvaluator()(implicit ctx: Ctx) extends TaskEvaluator[NamedTask] {
@@ -140,14 +124,14 @@ class MillTaskEvaluator()(implicit ctx: Ctx) extends TaskEvaluator[NamedTask] {
     val result = tryEval(task)
     val tookMillis = (System.currentTimeMillis() - evalStart).toInt
     result match {
-      case Result.Success(v) =>
+      case api.Result.Success(v) =>
         ctx.log.info(s"Successfully evaluated $task")
         EvalResult.Value(v, evalTime = tookMillis)
-      case failure: Result.Failing[_] =>
+      case failure: api.Result.Failing[_] =>
         ctx.log.error(s"Failed to evaluated $task: ${failure}")
         val reason = failure match {
-          case Result.Exception(throwable, _) => throwable
-          case Result.Failure(msg, value) =>
+          case api.Result.Exception(throwable, _) => throwable
+          case api.Result.Failure(msg, value) =>
             EvaluationFailure(msg + value.fold("")(" - with value: " + _))
         }
         EvalResult.Failure(reason :: Nil, evalTime = tookMillis)
@@ -172,14 +156,16 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
   println(s"Parsed config: ${config}")
   val filteredTargets = filterTargets(targets, config.projects.exclude.map(_.r))
   val mappings = checkedModuleMappings(filteredTargets.toSet)
-  val topLevelModules = mappings.collect {
+  val topLevelModules = 
+    if(targets.contains("*%*")) mappings.map(_._2).toSet.filter(_.org.nonEmpty) // exclude non-published modules
+    else mappings.collect {
     case (target, info) if filteredTargets.contains(target) => info
   }.toSet
   val moduleDeps: Map[Module, Seq[ModuleInfo]] =
-    ctx.root.millInternal.modules.collect { case module: PublishModule =>
+    ctx.root.millInternal.modules.collect { case module: scalalib.PublishModule =>
       val mapped = for {
         module <- module.moduleDeps
-        Result.Success((_, mapped)) <- toMappingInfo(module).asSuccess
+        api.Result.Success((_, mapped)) <- toMappingInfo(module).asSuccess
       } yield mapped
       module -> mapped
     }.toMap
@@ -194,7 +180,10 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     }
 
   val projectsBuildResults = for {
-    ModuleInfo(org, name, module: ScalaModule) <- flatten(topLevelModules, topLevelModules).toList
+    ModuleInfo(org, name, module: scalalib.ScalaModule) <- flatten(
+      topLevelModules,
+      topLevelModules
+    ).toList
   } yield {
     ctx.log.info(s"Starting build for $name")
     val evaluator = new MillTaskEvaluator()
@@ -226,7 +215,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
         ctx.log.info(s"Multiple test modules defined in $module, using $first")
         Some(first)
     }
-    def test[T](selector: TestModule => NamedTask[T]): Option[NamedTask[T]] =
+    def test[T](selector: scalalib.TestModule => NamedTask[T]): Option[NamedTask[T]] =
       testModule.map(selector)
 
     val compileResult = eval(module.compile)
@@ -236,20 +225,20 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
         evalWhen(testingMode != TestingMode.Disabled, compileResult)(_)
       }
     val testsExecuteResults =
-      test(_.test()).fold[EvalResult[Seq[TestRunner.Result]]](EvalResult.skipped) {
+      test(_.test()).fold[EvalResult[Seq[TestResult]]](EvalResult.skipped) {
         evalWhen(testingMode == TestingMode.Full, testsCompileResult)(_).map(_._2)
       }
     val publishResult = module match {
       case module: CommunityBuildPublishModule =>
         ctx.publishVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { publishVersion =>
           tryEval(module.publishVersion) match {
-            case Result.Success(`publishVersion`) =>
+            case api.Result.Success(`publishVersion`) =>
               PublishResult(
                 evalAsDependencyOf(compileResult, docResult)(
                   module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
                 )
               )
-            case Result.Success(version: String) =>
+            case api.Result.Success(version: String) =>
               PublishResult(
                 Status.Failed,
                 failureContext =
@@ -317,7 +306,7 @@ private def collectCompileResults(evalResult: EvalResult[CompilationResult]): Co
   )
 }
 
-private def collectTestResults(evalResult: EvalResult[Seq[TestRunner.Result]]): TestsResult = {
+private def collectTestResults(evalResult: EvalResult[Seq[TestResult]]): TestsResult = {
   import sbt.testing.Status
   val empty = TestsResult(
     status = evalResult.toStatus,
@@ -346,13 +335,15 @@ private def collectTestResults(evalResult: EvalResult[Seq[TestRunner.Result]]): 
   }
 }
 
-private def toMappingInfo(module: JavaModule)(implicit ctx: Ctx): Result[(String, ModuleInfo)] = {
+private def toMappingInfo(
+    module: scalalib.JavaModule
+)(implicit ctx: Ctx): api.Result[(String, ModuleInfo)] = {
   for {
     org <- module match {
-      case m: PublishModule => tryEval(m.pomSettings).map(_.organization)
-      case _                =>
+      case m: scalalib.PublishModule => tryEval(m.pomSettings).map(_.organization)
+      case _                         =>
         // it's not a published module, we don't need to care about it as it's not going to be enlisted in targets
-        Result.Success("")
+        api.Result.Success("")
     }
     name <- tryEval(module.artifactName)
     info = ModuleInfo(org, name, module)
@@ -374,7 +365,7 @@ def moduleMappings(implicit ctx: Ctx): ModuleMappings = {
 
         S(mapping @ (targetName, ModuleInfo(_, _, module))) <- toMappingInfo(module).asSuccess
       } yield mapping
-    case _ =>
+    case other =>
       // We're only intrested in Scala modules
       None
   }.toMap
@@ -384,7 +375,7 @@ private def checkedModuleMappings(
     targetStrings: Set[String]
 )(implicit ctx: Ctx): ModuleMappings = {
   val mappings = moduleMappings(ctx)
-  val unmatched = targetStrings.diff(mappings.keySet)
+  val unmatched = targetStrings.diff(mappings.keySet).diff(Set("*%*"))
   if (unmatched.nonEmpty) {
     sys.error(
       s"Failed to resolve mappings for targets: ${unmatched.mkString(", ")}"
@@ -394,11 +385,14 @@ private def checkedModuleMappings(
 }
 
 // Evaluation of mill targets/commands
-private def tryEval[T](task: NamedTask[T])(implicit ctx: Ctx): Result[T] = {
+private def tryEval[T](task: NamedTask[T])(implicit ctx: Ctx): api.Result[T] = {
   val evalState = ctx.evaluator.evaluate(Agg(task))
-  val failure = evalState.failing.values.flatten.toSeq.headOption
+  val failure = evalState.failing.values().flatten.toSeq.headOption
   def result = evalState.rawValues.head
-  failure.getOrElse(result).asInstanceOf[Result[T]]
+  failure.getOrElse(result).map{
+    case mill.api.Val(value) => value.asInstanceOf[T]
+    case value => value.asInstanceOf[T]
+  }
 }
 
 // Extractors

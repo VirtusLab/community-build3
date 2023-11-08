@@ -6,14 +6,16 @@ object MillCrossOverride {
     abstract class ModuleType
   }
 
-  sealed abstract class MillCommunityBuildCross[T](cases: Any*)(version: String)
+  object MillCommunityBuild{
+    def mapCrossVersions[T](scalaBuildVersion: String, crossVersions: T*): Seq[T] = ???
+  }
   val versions = List()
 
   import mill._
 
-  object module extends MillCommunityBuildCross[ModuleType]((Seq("2.13.8", "3.0.0") ++ Option("3.1.0")): _*)("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
-  object module2 extends MillCommunityBuildCross[ModuleType]((Seq("2.13.8", "3.0.0") ++ Option("3.1.0")): _*)("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
-  val module3 = new MillCommunityBuildCross[mill.ModuleType]("2.13.8", "3.1.0")("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD"){}
-  object module4 extends MillCommunityBuildCross[ModuleType](versions:_*)("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD")
+  object module extends Cross[ModuleType](MillCommunityBuild.mapCrossVersions("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD", (Seq("2.13.8", "3.0.0") ++ Option("3.1.0")): _*))
+  object module2 extends _root_.fix.MillCrossOverride.mill.Cross[ModuleType](MillCommunityBuild.mapCrossVersions("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD", "2.13.8", "3.0.0", "3.1.0"))
+  val module3 = new mill.Cross[mill.ModuleType](MillCommunityBuild.mapCrossVersions("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD", "2.13.8", "3.1.0")){}
+  object module4 extends Cross[ModuleType](MillCommunityBuild.mapCrossVersions("3.1.2-RC2-bin-cb00abcdef123456789-COMMUNITY-BUILD", versions:_*))
 
 }
