@@ -756,42 +756,7 @@
     "repoUrl":"https://github.com/akka/akka.git",
     "revision":"v2.8.2",
     "version":"2.8.2",
-    "targets":"com.typesafe.akka%akka-multi-node-testkit com.typesafe.akka%akka-bom com.typesafe.akka%akka-coordination com.typesafe.akka%akka-persistence-tck com.typesafe.akka%akka-actor com.typesafe.akka%akka-cluster-sharding-typed com.typesafe.akka%akka-cluster com.typesafe.akka%akka-protobuf-v3 com.typesafe.akka%akka-distributed-data com.typesafe.akka%akka-stream com.typesafe.akka%akka-pki com.typesafe.akka%akka-stream-typed com.typesafe.akka%akka-persistence com.typesafe.akka%akka-cluster-sharding com.typesafe.akka%akka-cluster-metrics com.typesafe.akka%akka-discovery com.typesafe.akka%akka-actor-typed com.typesafe.akka%akka-persistence-query com.typesafe.akka%akka-slf4j com.typesafe.akka%akka-persistence-typed com.typesafe.akka%akka-remote com.typesafe.akka%akka-persistence-testkit com.typesafe.akka%akka-cluster-typed com.typesafe.akka%akka-actor-testkit-typed com.typesafe.akka%akka-testkit com.typesafe.akka%akka-serialization-jackson com.typesafe.akka%akka-stream-testkit com.typesafe.akka%akka-cluster-tools",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          "set every targetSystemJdk := true",
-          "disableFatalWarnings"
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"compile-only",
-      "sourcePatches":[
-        {
-          "path":"project/Dependencies.scala",
-          "pattern":"val scala3Version = \"3.2.2\"",
-          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
+    "targets":"com.typesafe.akka%akka-multi-node-testkit com.typesafe.akka%akka-bom com.typesafe.akka%akka-coordination com.typesafe.akka%akka-persistence-tck com.typesafe.akka%akka-actor com.typesafe.akka%akka-cluster-sharding-typed com.typesafe.akka%akka-cluster com.typesafe.akka%akka-protobuf-v3 com.typesafe.akka%akka-distributed-data com.typesafe.akka%akka-stream com.typesafe.akka%akka-pki com.typesafe.akka%akka-stream-typed com.typesafe.akka%akka-persistence com.typesafe.akka%akka-cluster-sharding com.typesafe.akka%akka-cluster-metrics com.typesafe.akka%akka-discovery com.typesafe.akka%akka-actor-typed com.typesafe.akka%akka-persistence-query com.typesafe.akka%akka-slf4j com.typesafe.akka%akka-persistence-typed com.typesafe.akka%akka-remote com.typesafe.akka%akka-persistence-testkit com.typesafe.akka%akka-cluster-typed com.typesafe.akka%akka-actor-testkit-typed com.typesafe.akka%akka-testkit com.typesafe.akka%akka-serialization-jackson com.typesafe.akka%akka-stream-testkit com.typesafe.akka%akka-cluster-tools"
   },
   "akka/akka-diagnostics":{
     "project":"akka/akka-diagnostics",
@@ -2021,7 +1986,7 @@
   "armanbilge/feral":{
     "project":"armanbilge/feral",
     "repoUrl":"https://github.com/armanbilge/feral.git",
-    "revision":"1fcb47a4cc0b59d931b19ec2048b0061e9130618",
+    "revision":"4f88adf5deaa240fe65361e227da690c620e3ee1",
     "version":"0.0-a75a626",
     "targets":"com.armanbilge%feral-lambda-cloudformation-custom-resource com.armanbilge%feral-lambda com.armanbilge%feral-core com.armanbilge%feral-lambda-events com.armanbilge%feral-lambda-natchez com.armanbilge%feral-lambda-api-gateway-proxy-http4s",
     "config":{
@@ -19247,7 +19212,7 @@
   "lichess-org/lila":{
     "project":"lichess-org/lila",
     "repoUrl":"https://github.com/lichess-org/lila.git",
-    "revision":"b89249267ee7f34b4bbc2601382b19bf262edb3d",
+    "revision":"bd30265b343ad01b8a9fd8af33b06322379b81c2",
     "version":"HEAD",
     "targets":"*%*",
     "config":{
@@ -20471,7 +20436,7 @@
   "massimosiani/skunk":{
     "project":"massimosiani/skunk",
     "repoUrl":"https://github.com/massimosiani/skunk.git",
-    "revision":"cbc701015b93281c7b8f7da57541987d6c097cf2",
+    "revision":"ee4d58ff4ca332d2f2bdb62c1ea180acea74846e",
     "version":"0.3.2",
     "targets":"io.github.massimosiani%refined io.github.massimosiani%skunk-circe io.github.massimosiani%skunk-core",
     "config":{
@@ -20501,11 +20466,7 @@
       },
       "tests":"full",
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val `scala-3`  = \"3.2.2\"",
-          "replaceWith":"val `scala-3` = \"<SCALA_VERSION>\""
-        }
+        
       ]
     }
   },
@@ -29246,7 +29207,7 @@
   "scalax/simple":{
     "project":"scalax/simple",
     "repoUrl":"https://github.com/scalax/simple.git",
-    "revision":"71d4dcf35ab930f7d5e86e690773fdf33609ae71",
+    "revision":"da637e1236e57de84961c63cbf332e29f1dc7148",
     "version":"0.0.1-RC1",
     "targets":"net.scalax.simple%simple-adt net.scalax.simple%simple-ghdmzsk net.scalax.simple%simple-adt-core net.scalax.simple%simple-adt-implemention"
   },
