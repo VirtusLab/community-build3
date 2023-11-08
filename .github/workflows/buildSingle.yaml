@@ -61,6 +61,7 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           project-name: ${{ inputs.project-name }}
+          custom-build-id: ${{ inputs.build-name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
