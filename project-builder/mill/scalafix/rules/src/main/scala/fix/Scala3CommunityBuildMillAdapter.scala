@@ -68,15 +68,18 @@ class Scala3CommunityBuildMillAdapter(
     }
     val patch = doc.tree.collect {
       case init @ Init(
-            Type.Apply(name @ WithTypeName("Cross"), List(tpeParam)),
+            Type.Apply(WithTypeName("Cross"), List(tpeParam)),
             _,
-            List(args)
+            Seq(args)
           ) =>
         List(
-          Patch.replaceTree(name, Replacment.CommunityBuildCross),
+          Patch.addLeft(
+            args.head,
+            s"MillCommunityBuild.mapCrossVersions(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)}, "
+          ),
           Patch.addRight(
-            init,
-            s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)})"
+            args.last,
+            ")"
           )
         ).asPatch
 
@@ -124,13 +127,12 @@ class Scala3CommunityBuildMillAdapter(
           Replacment.PublishVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
         )
 
-    }.asPatch
+     }.asPatch
 
     headerInject + patch
   }
 
   object Replacment {
-    val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule =
       "MillCommunityBuild.CommunityBuildPublishModule"
     val CommunityBuildCoursierModule =
@@ -154,19 +156,10 @@ class Scala3CommunityBuildMillAdapter(
     val MillCommunityBuildInject = """
     |import $file.MillCommunityBuild
     |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: mill.eval.Evaluator, scalaVersion: String, configJson: String, targets: String*) = T.command {
-    |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, T.log)
+    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: scala.Predef.String*) = _root_.mill.T.command {
+    |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
     |  MillCommunityBuild.runBuild(configJson, targets)
     |}
-    |
-    |// Replaces mill.define.Cross allowing to use map used cross versions
-    |class MillCommunityBuildCross[T: _root_.scala.reflect.ClassTag]
-    |  (cases: _root_.scala.Any*)
-    |  (buildScalaVersion: _root_.java.lang.String)
-    |  (implicit ci:  _root_.mill.define.Cross.Factory[T], ctx: _root_.mill.define.Ctx) 
-    |  extends _root_.mill.define.Cross[T](
-    |      MillCommunityBuild.mapCrossVersions(buildScalaVersion, cases): _*
-    |    )
     |// End of code injects
     |""".stripMargin
 
