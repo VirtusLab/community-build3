@@ -45,6 +45,7 @@ jobs:
     uses: ./.github/workflows/buildPlan-B.yaml
     with:
       published-scala-version: ${{ needs.detect-version.outputs.last-nightly-version }}
+      custom-build-id: "scheduled_${{ needs.detect-version.outputs.last-nightly-version }}"
     secrets: inherit
 
   create-raport:
