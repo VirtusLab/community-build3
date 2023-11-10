@@ -17,6 +17,8 @@ Based on all of these we create a build plan enlisting projects which we should 
 ## Executing community build
 Execution of the community build is handled by the GitHub Actions CI using dedicated jobs. Due to the limitations of the GitHub actions a single job can handle up to 1000 community projects, to test more projects we split them into multiple jobs with with a suffix in the form of single subsequent alphabet character. Based on the popularity of projects expressed in ammount of GitHub stars first 1000 projects are included in community build A, next 1000 projects in build B, etc. 
 
+** The execution of the workflow jobs requires explicit access**, these can be granted by the VirtusLab compiler team. If you don't have access to running GitHub Actions with the jobs listed below contact @WojciechMazur
+
 ### Scheduled 
 [Scheduled Build A](https://github.com/VirtusLab/community-build3/actions/workflows/buildExecuteScheduledWeekly-A.yaml)
 
