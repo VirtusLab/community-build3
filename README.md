@@ -2,7 +2,10 @@
 
 It's a project dedicated to testing new versions of the compiler against the existing Scala 3 ecosystem. 
 
----
+You can read more about its goals and initial implementation in these articles:
+- https://virtuslab.com/blog/prevent-scala3-compiler-regressions-community-build/
+- https://virtuslab.com/blog/how-to-be-a-part-of-scalas-open-community-build/
+
 
 ## Including projects in the Open Community Build
 
