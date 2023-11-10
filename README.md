@@ -1,332 +1,62 @@
-# Scala 3 community build
+# Scala 3 Open Community Build
 
-## General architecture
+It's a project dedicated to test new versions of the compiler against the existing Scala 3 ecosystem. 
 
-Everything in run inside k8s.
-The entire build is coordinated by jenkins, which dynamically spawns workers to do the following tasks:
-* compute the build plan
-* build scala compiler
-* build scala community projects in proper order so that all the dependencies of a project are built before the project itself
-(there is a limit of how many projects can be built within some reasonable time
-and using only the resources we have for this purpose)
+## Including projects in Open Community Build
 
-The artifacts of the compiler and the community projects are published to and pulled from a custom maven repository.
-If a required artifact is not found here (e.g. java dependencies, scala dependencies which did not get into the build plan) normal resolvers of a particular project are used.
-The repository is virtually divided into subrepositories for each run of the entire community build
-so artifacts from different runs are not mixed with each other.
+The Open Community Build consists of automated gathering information about available Scala 3 projects, using the information avaiable from Scaladex and Maven repositories. Every project listed in Scaladex would be included in the candidates for the builds. The not yet published libraries or non-library open-source projects can be added to [custom projects list](
+https://github.com/VirtusLab/community-build3/blob/master/coordinator/configs/custom-projects.txt) using the GitHub coordinates.
 
-Elasticsearch with Kibana are used for aggregating and visualising build results.
+Some of the projects might be filtered-out if they're non compliant, eg. they have build issues, require special environment or don't compile with any recent version of Scala for long time (are unmaintained). Such projects are [listed in dedicated file](
+https://github.com/VirtusLab/community-build3/blob/master/coordinator/configs/filtered-projects.txt) The project might be removed from this list and reintroduced to the weekly builds when it becomes compliant again, which in most cases involves fixing build issues.
 
-## Limitations
+Each project might define it's config (HOCON) describing how should we handle it, eg. which JDK version to use, to exclude some legacy modules, add some sbt options, or disable compilation/running tests if they're buggy/flaky. It can be defined in projects top-level file using file named ``scala3-community-build.conf` or in our [internal config](https://github.com/VirtusLab/community-build3/blob/master/coordinator/configs/projects-config.conf)
 
-Currently only sbt projects are supported.
+Based on all of these we create a build plan enlisting projects which we should run, and their final config used when compiling them. We do this each automatically every Friday few hours before running the weekly build.
 
-## System components and repository structure
+## Executing community build
+Execution of the community build is handled by the GitHub Actions CI using dedicated jobs. Due to the limitations of the GitHub actions a single job can handle up to 1000 community projects, to test more projects we split them into multiple jobs with with a suffix in the form of single subsequent alphabet character. Based on the popularity of projects expressed in ammount of GitHub stars first 1000 projects are included in community build A, next 1000 projects in build B, etc. 
 
-### scripts
+### Scheduled 
+[Scheduled Build A](https://github.com/VirtusLab/community-build3/actions/workflows/buildExecuteScheduledWeekly-A.yaml)
 
-Scripts useful for local development as well as for deployment to production.
+The Open Community Build is executed weekly at friday night using the latest available nightly version. The results of the builds can be found in https://virtuslab.github.io/community-build3/
 
-### mvn-repo
+### On demand builds
+[Custom Build A](https://github.com/VirtusLab/community-build3/actions/workflows/buildExecuteCustom-A.yaml)
 
-A Spring application working as a custom Maven repository based on [spring-maven-repository](https://github.com/Stiuil06/spring-maven-repository).
+The compiler team might be intrested in executing on demand builds with a configured version of Scala to use. For that we can use a dedicated CI workflow run taking a set of arguments:
+    * Custom name of the job (Optional) - a custom string allowing to identified results of the job, would be also used as a buildId when persisting the results in the database. 
+    * Published Scala version to use (Optional) - if non empty the value would be used to determinate an already published version to use, otherwise if left empty, the compiler would be build using the next 2 options.
+    * GitHub repository for compiler (defaults to `lampepfl/dotty`) - when building the compiler this repository would be used to provider the compiler sources
+    * GitHub repository branch (defaults to `main`) - when building the compiler this value would point to the branch in the repository provided in the previous setting, that should be used to build the compiler in the
+    * List of scalacOptions to include (Optional) - comma delimiated list of Scala compiler options to apply for all projects that would be build (best effort, applies only to sbt and scala-cli currently)
+    * List of scalacOptions to exclude (Optional) - comma delimiated list of Scala compiler options to remove for all projects that would be build (best effort, applies only to sbt currently)
+    * Should we create and publish raport (default `false`) - a special option used when running community build for release versions of compiler. Is set to true it would generate a raport and publish it on https://virtuslab.github.io/community-build3/
 
-### kibana
+For the full coverage it's recommended to execute all available builds, e.g. `Custom Build A`, `Custom Build B`, etc, by manually starting dedicated sibling workflow jobs using the same arguments. 
 
-Elasticsearch with Kibana for gathering statistics from builds.
-This component is optional and the rest of the system should properly even if kibana dosn't get started.
+When running the build it is also possible to specify the branch containing the projects configuration. In most cases it should be left with default value equal to `master`. It can be overriden to branch containg special kind of config, eg. `historic-config/release-3.x.x-cutoff` which uses the versions of the build projects at the day of release Scala version with versin `3.x.x`. Can be used to run old versions of projects, which with their latest versions might be using binary-incompatbile versions of TASTy. 
 
-### jenkins
+### On demand single-project builds
+[Custom Project Build](https://github.com/VirtusLab/community-build3/actions/workflows/buildSingle.yaml)
 
-A jenkins instance set up with [Jenkins Operator](https://jenkinsci.github.io/kubernetes-operator/).
+Can be used to run the build for a single project using the GitHub coordinates in the format `<organization>/<repository>`, e.g. `VirtusLab/scala-cli`. It accepts the same set of additional options as `On demand builds` described above.
 
-It coordinates running the builds of the compiler and community projects and provides a UI for inspecting the results of builds.
+### Bisect builds
+[Bisect build](https://github.com/VirtusLab/community-build3/actions/workflows/buildBisect.yaml)
 
-### builder-base
+A workflow dedicated to running a bisect job on a given project, using the published versions of Scala compiler to find 2 last good and first failing nightly release of Scala compiler introducing regression. Based on these the commit based bisect is executed, which builds the compiler for every commit between these 2 releases and used them to find commit introducing regression. Accept most of settings defined for `On demand single-project builds` and the specific ones:
+    * List of project targets to builds - can be used to build only 1 sub-project which is failing, otherwise it would build all projects
+    * Specific version of project to bisect against - if left empty the latest version (defined in the config) would be used
+    * The first version of Scala versions range to test against - to limit minimal version of Scala accepted by project. The project should be able to build using this version of Scala
+    * The last version of Scala versions range to test against - the maximal version of Scala, to limit the ammount of tested version. 
 
-It provides a common docker image with scala and sbt with predownloaded and cached dependencies used as a base for othe images (coordinator, compiler-builder and project-builder).
+### Comparing results of 2 build
+[Compare builds](https://github.com/VirtusLab/community-build3/actions/workflows/compare.yaml)
+A workflow dedicated to compare results of 2 historical builds. It would query the database for results of the historical builds and would try to compare them. Accepts following options:
+    * Reference version of Scala
+    * Version of Scala to compare against 
+    * Optional version of reference build id - the buildId is defined when running the custom builds or assigned using the default value
+    * Optional version of build id to compare against - the buildId is defined when running the custom builds or assigned using the default value
 
-### coordinator
-
-A scala application responsible for computing the plan of a build using data from Maven Central and Scaladex.
-
-### compiler-builder
-
-It builds and publishes the compiler.
-
-### project-builder
-
-It builds and publishes a community project.
-
-All projects are built in a fresh container for full isolation.
-
-### sample-repos
-
-For tests only.
-
-It contains some simple scala projects whose builds can be run quickly.
-The projects are served by a git daemon and can be easily cloned from other pods.
-
-## Local development
-
-### Prerequisites
-
-The steps below assume you have kubectl and minikube installed on your machine.
-Because of a bug breaking DNS in Alpine Linux you might need to use a specific version of minikube (doesn't work with 1.22.0 or 1.21.0, works with 1.19.0).
-Running the entire build with full infrastructure
-(maven repository, jenkins master, jenkins workers, elasticsearch with kibana)
-requires quite a lot of resources, which need to be declared while starting minikube
-(tested successfully with 18GB of memory and 4 CPU cores on Mac; using hyperkit because the default driver caused problems).
-
-```shell
-minikube start --driver=hyperkit --memory=18432 --cpus=4
-```
-
-### Preparing docker images
-
-Set the environment variables to publish docker images to minikube instead of docker directly
-
-```shell
-eval $(minikube -p minikube docker-env)
-```
-
-Most likely you'll need to build the base image only once (it doesn't get modified too often but building it takes quite a lot of time), e.g.:
-
-```shell
-scripts/build-builder-base.sh version
-```
-
-Build all the remaining images
-
-```shell
-scripts/build-quick.sh version
-```
-
-or (re)build each image separately e.g.
-
-```shell
-scripts/build-mvn-repo.sh version
-```
-
-### Deploying and debugging in k8s
-
-The entire build infrastructure in k8s is defined inside two namespaces - one for jenkins operator and the other for everything else. Running
-
-```shell
-source scripts/use-minikube.sh
-```
-
-will prepare your current shell session to work with these k8s resources. 
-Among others this will set up `scbk` and `scbok` commands (standing for `Scala Communit Build K8S` and `Scala Communit Build Operator K8S` respectively)
-working just as `kubectl` with the proper namespaces and context set. This setup is also necessary for most other scripts to run.
-
-There are a couple of utility scripts to manage the lificycles of particular pieces of the infrastructure
-
-```shell
-scripts/start-XXX.sh
-scripts/stop-XXX.sh
-scripts/clean-XXX.sh
-```
-
-To set up everything from scratch you can run
-
-```shell
-# Ask the Jenkins Operator team to get credentials for local development
-echo "Enter CB_LICENSE_CLIENT:"
-read -s CB_LICENSE_CLIENT && export CB_LICENSE_CLIENT
-echo "Enter CB_LICENSE_KEY:"
-read -s CB_LICENSE_KEY && export CB_LICENSE_KEY
-
-# Uncomment the line below only for local development 
-# scripts/prepare-local-deployment.sh
-
-scripts/start-deployment.sh
-```
-
-`scripts/prepare-local-deployment.sh` should only be used when running locally since in production the existing Jenkins operator should be used.
-
-To be able to access the resources through your browser or send requests to them manually
-you'll need to forward their ports using `scripts/forward-XXX.sh` scripts.
-Each script needs to be run in a separate console and stopping the script will stop forwarding.
-If a pod gets restarted the corresponding forwarding script needs to be stopped and started again.
-
-Some resources might require credentials to be accessed via the UI.
-Run `scripts/show-XXX-credentials.sh` to get them.
-
-Useful k8s commands:
-
-```shell
-scbk get pods
-scbk describe pod $POD_NAME
-scbk logs $POD_NAME
-scbk exec -it $POD_NAME -- sh
-docker image ls | grep virtuslab/scala-community-build | awk '{print $1":"$2}' | xargs docker save -o /tmp/community-build-images.tar
-docker image load -i /tmp/community-build-images.tar
-docker image ls | grep virtuslab/scala-community-build | awk '{print $1":"$2}' | xargs docker image rm
-scbk get pods --no-headers | grep daily- | awk '{print $1}' | xargs kubectl delete pod -n scala3-community-build
-scbk run -i --tty project-builder-sbt-test --image=virtuslab/scala-community-build-project-builder image-pull-policy=Never -- sh
-```
-
-### mvn-repo
-
-UI URL: https://localhost:8081/maven2
-
-Your browser might complain because of missing certificates for https. For `curl` you can add the `-k` flag as a workaround.
-
-You can manage the published artifacts by logging into the repository pod with
-
-```shell
-scbk exec -it svc/mvn-repo -- bash
-```
-
-and modifying the content of `upload-dir` folder.
-
-### kibana
-
-Kibana UI URL: https://localhost:5601
-
-(your browser might complain about the page not being secure - proceed anyway)
-
-You can load Kibana settings with `scripts/configure-kibana.sh`
-
-If you want to create an index pattern for `community-build` manually, navigate to `(Burger menu in the left upper corner) -> Stack Management -> Index Patterns -> Create index pattern` (you won't be able to create an index manually unless there are already some data for it).
-
-Elasticsearch and Kibana currently don't use persistent storage so every restart will clean all the data.
-
-### jenkins
-
-UI URL: http://localhost:8080
-
-Before you start a new jenkins instance you need to start jenkins operator first.
-
-Jenkins requires `mvn-repo` (and optionally `kibana`) to be up and running to successfully execute the entire build flow.
-
-To trigger a new run of the community build, start the `runBuild` job with proper parameters.
-
-If jenkins doesn't get set up properly or keeps crashing and restarting
-you can try to debug that by looking at the logs of the operator pod.
-
-A know issue is that jenkins itself might not start if it decides that you should update some of the plugins.
-You should then bump the versions in the yaml config.
-
-For easier development of shared jenkins libraries you can use `scripts/push-jenkins-lib.sh`
-to upload the locally modified files without having to restart jenkins.
-
-### Building a community project locally
-
-Assuming you have the maven repo running in k8s, you could try to build a locally cloned project using the already published dependencies.
-This would however require installing the SSL certificate for `mvn-repo` locally.
-
-```shell
-# Verify support for project's build tool and inject the plugin file(s). This needs to be run only once per cloned repo. ENFORCED_SBT_VERSION may be set to an empty string 
-project-builder/prepare-project.sh $PROJECT_PATH $ENFORCED_SBT_VERSION
-
-# Build the project using the build script or directly with sbt
-project-builder/build.sh $PROJECT_PATH $SCALA_VERSION $PROJECT_VERSION "$TARGETS" $MVN_REPO_URL
-# e.g.
-# project-builder/build.sh tmp/shapeless '3.0.1-RC1-bin-COMMUNITY-SNAPSHOT' '3.0.0-M4' 'org.typelevel%shapeless3-deriving org.typelevel%shapeless3-data org.typelevel%shapeless3-test org.typelevel%shapeless3-typeable' 'http://localhost:8081/maven2/2021-06-02_2'
-```
-
-Warning: you might run into problems if you manually rebuild only some of the artifacts using a different version of JDK that the one used for building the rest.
-
-### Running simple test demo
-
-This will only build and publish the latest scala compiler and a single community project.
-This doesn't use jenkins or elasticsearch.
-
-Assuming you have started minikube (you might set less resources than for the full build),
-built the docker images as described above and started the maven repository run
-
-```shell
-scripts/test-build.sh
-```
-
-## Deployment to Azure
-
-Log in to Azure and get the credentials
-
-```shell
-az login
-az account set --subscription "Azure Sponsorship"
-az aks get-credentials --resource-group osj-scala-euw-prod-rg --name osj-scala-euw-prod-aks-cluster
-```
-
-Set environment variables and the context for kubectl
-
-```shell
-source scripts/use-azure.sh
-```
-
-**WARNING!!!**
-From now on you should be very careful about which context you're using for performing k8s operations. If you're not sure which one you're currently using just run
-
-```shell
-scripts/show-env.sh
-```
-
-To get back to minikube's local context run
-
-```shell
-source scripts/use-minikube.sh
-```
-
-Now you should be able to use `scbk`, `scbok` and all scripts from `./scripts` directory just as for local development and deployment.
-Just remember a few things:
-* Make sure the previous deployment has been properly cleared before a new one is started.
-* The credentials will be different to the ones used for local development.
-* **Do not run `prepare-local-deployment.sh`** because this might overwrite the existing Jenkins operator, which is configured to work properly on the cluster.
-* `CB_LICENSE_CLIENT` and `CB_LICENSE_KEY` don't have to be set as they're required only for setting up a new Jenkins operator
-
-After a successful deployment to Azure Jenkins UI should be available at:
-
-https://scala3.westeurope.cloudapp.azure.com/
-
-You should be able to log in via GitHub assuming your account is authorized to do that.
-
-## Build coordinator (outdated)
-
-It contains few main classes:
-
-
-- `runDeps` will build a list of project (with over 20 stars for `3.0.0-RC3`) as well as its targets and dependencies (based on mvn central and scaladex). Results are cached in `data` directory
-- `printBuildPlan` will run `runDeps` and will create build plan. It assumes that all deps follow semver and will not add and dependencies for non-latest version of each dependencies
-- `runBuildPlan` will create build plan (in the same way how `printBuildPlan` does it) and build all locally. Each project in given version has its dedicated directory in `ws` dir where will have `repo` with git repository, `logs.txt` with logs and `res.txt`with results. Sbt command that will be run are printed to stdout. It will run build against `3.0.0-RC3-bin-SNAPSHOT` so to test latest version of compiler one needs to downgrade `baseVersion` in `project/Build.scala` in dotty repo.
-- `resultSummary` will just gather results (it will not run buidld plan)
-
-## Docker development tips (outdated)
-
-### Debug app in container
-To debug an application in a container, you need to set JAVA_TOOL_OPTIONS env variable (in container) and expose pointed in it port. How you do this, depends on your work environment.
-
-#### by Dockerfile
-(Note that it doesnt map a port to your host)
-```dockerfile
-ENV JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:5005,server=y,suspend=n
-EXPOSE 5005
-```
-
-#### by docker run
-
-Add `-p 5005:5005` to expose and map port 5005 to your host machine.  
-Add `--env JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=0.0.0.0:5005,server=y,suspend=n` flag to setup debug listening.
-
-### Debug app IDE setup
-This configuration is dedicated to VScode with Metals.  
-`launch.json`
-```json
-{
-  "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "scala",
-            "name": "Attach to docker",
-            "request": "attach",
-            "hostName": "localhost",
-            "port": 5005,
-            "buildTarget": "root"
-        }
-    ]
-}
-```
-hostName - `localhost` if debug port is mapped to host, else IP address of container.
-port - port on which JVM listen for debug - the same like in `JAVA_TOOL_OPTIONS` env variable
