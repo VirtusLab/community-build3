@@ -46,7 +46,7 @@ runs:
         ConfigFile=".github/workflows/buildConfig.json"
         DefaultJDK=11
         javaVersion=$(jq -r ".\"${{ inputs.project-name }}\".config.java.version // ${DefaultJDK}" $ConfigFile)
-        if [[ $javaVersion -ge 21 && ! "$scalaVersion" = 3.3.* ]]; then
+        if [[ $javaVersion -ge 21 && ! "$scalaVersion" = 3.[0-2].* ]]; then
           echo "Force Java 17, Java 21 is only supported since 3.3.x"
           javaVersion=17
         fi
