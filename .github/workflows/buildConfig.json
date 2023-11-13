@@ -321,6 +321,43 @@
       ]
     }
   },
+  "7mind/sick":{
+    "project":"7mind/sick",
+    "repoUrl":"https://github.com/7mind/sick.git",
+    "revision":"v0.1.6",
+    "version":"0.1.6",
+    "targets":"io.7mind.izumi%json-sick",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "aaronp/args4c":{
     "project":"aaronp/args4c",
     "repoUrl":"https://github.com/aaronp/args4c.git",
@@ -2023,7 +2060,7 @@
     "config":{
       "projects":{
         "exclude":[
-          
+          "org.apache.pekko%pekko-grpc-codegen"
         ],
         "overrides":{
           
@@ -11417,8 +11454,8 @@
   "embeddedkafka/embedded-kafka-schema-registry":{
     "project":"embeddedkafka/embedded-kafka-schema-registry",
     "repoUrl":"https://github.com/embeddedkafka/embedded-kafka-schema-registry.git",
-    "revision":"v7.5.1",
-    "version":"7.5.1",
+    "revision":"v7.5.2",
+    "version":"7.5.2",
     "targets":"io.github.embeddedkafka%embedded-kafka-schema-registry io.github.embeddedkafka%embedded-kafka-schema-registry-streams",
     "config":{
       "projects":{
@@ -22089,8 +22126,8 @@
   "kordyjan/pytanie":{
     "project":"kordyjan/pytanie",
     "repoUrl":"https://github.com/kordyjan/pytanie.git",
-    "revision":"0.1.6",
-    "version":"0.1.6",
+    "revision":"0.1.7",
+    "version":"0.1.7",
     "targets":"pro.kordyjan%pytanie"
   },
   "kordyjan/typelogger":{
@@ -25708,9 +25745,9 @@
   "mpollmeier/scala-repl-pp":{
     "project":"mpollmeier/scala-repl-pp",
     "repoUrl":"https://github.com/mpollmeier/scala-repl-pp.git",
-    "revision":"v0.0.42",
-    "version":"0.0.42",
-    "targets":"com.michaelpollmeier%scala-repl-pp-server com.michaelpollmeier%scala-repl-pp-all com.michaelpollmeier%scala-repl-pp",
+    "revision":"v0.1.76",
+    "version":"0.1.76",
+    "targets":"com.michaelpollmeier%scala-repl-pp-shaded-libs com.michaelpollmeier%scala-repl-pp-server com.michaelpollmeier%scala-repl-pp",
     "config":{
       "projects":{
         "exclude":[
@@ -25721,7 +25758,7 @@
         }
       },
       "java":{
-        "version":"11"
+        "version":"21"
       },
       "sbt":{
         "commands":[
@@ -25942,6 +25979,47 @@
           "path":"build.sbt",
           "pattern":"def Scala3 = \"3.1.0\"",
           "replaceWith":"def Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "msgpack4z/msgpack4z-native":{
+    "project":"msgpack4z/msgpack4z-native",
+    "repoUrl":"https://github.com/msgpack4z/msgpack4z-native.git",
+    "revision":"v0.3.9",
+    "version":"0.3.9",
+    "targets":"com.github.xuwei-k%msgpack4z-native",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.2.2\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }
@@ -29223,6 +29301,43 @@
       ]
     }
   },
+  "pjfanning/scala3-reflection":{
+    "project":"pjfanning/scala3-reflection",
+    "repoUrl":"https://github.com/pjfanning/scala3-reflection.git",
+    "revision":"v1.3.1",
+    "version":"1.3.1",
+    "targets":"com.github.pjfanning%scala3-reflection",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "pjfanning/scala3-sample-classes":{
     "project":"pjfanning/scala3-sample-classes",
     "repoUrl":"https://github.com/pjfanning/scala3-sample-classes.git",
@@ -31027,8 +31142,8 @@
   "reactific/riddl":{
     "project":"reactific/riddl",
     "repoUrl":"https://github.com/reactific/riddl.git",
-    "revision":"0.27.4",
-    "version":"0.27.4",
+    "revision":"0.27.5",
+    "version":"0.27.5",
     "targets":"com.reactific%riddl-stats com.reactific%riddl-passes com.reactific%riddl-prettify com.reactific%riddl-language com.reactific%riddl-hugo com.reactific%riddl-commands com.reactific%riddl-utils com.reactific%riddl-testkit com.reactific%riddl-diagrams com.reactific%riddlc",
     "config":{
       "projects":{
