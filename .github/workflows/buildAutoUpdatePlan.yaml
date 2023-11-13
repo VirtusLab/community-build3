@@ -15,7 +15,7 @@ on:
 jobs:
   build-plan:
     runs-on: ubuntu-22.04
-    if: github.repository == 'VirtusLab/community-build3' && contains(github.ref, 'master')
+    if: github.repository == 'VirtusLab/community-build3'
     steps:
       - name: Git Checkout
         uses: actions/checkout@v3
