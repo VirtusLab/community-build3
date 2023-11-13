@@ -4116,6 +4116,47 @@
     "version":"0.6.0",
     "targets":"io.github.barnardb%tinyplate"
   },
+  "bcarter97/id-generator":{
+    "project":"bcarter97/id-generator",
+    "repoUrl":"https://github.com/bcarter97/id-generator.git",
+    "revision":"v0.5.1",
+    "version":"0.5.1",
+    "targets":"io.github.bcarter97%id-generator",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3                 = \"3.1.2\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "beangle/db":{
     "project":"beangle/db",
     "repoUrl":"https://github.com/beangle/db.git",
@@ -15171,6 +15212,13 @@
       ]
     }
   },
+  "guardian/etag-caching":{
+    "project":"guardian/etag-caching",
+    "repoUrl":"https://github.com/guardian/etag-caching.git",
+    "revision":"v1.0.7",
+    "version":"1.0.7",
+    "targets":"com.gu.etag-caching%aws-s3-base com.gu.etag-caching%aws-s3-sdk-v2 com.gu.etag-caching%core"
+  },
   "guardian/fastly-api-client":{
     "project":"guardian/fastly-api-client",
     "repoUrl":"https://github.com/guardian/fastly-api-client.git",
@@ -17854,6 +17902,47 @@
         {
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.1.3\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "indoorvivants/mdoc-d2":{
+    "project":"indoorvivants/mdoc-d2",
+    "repoUrl":"https://github.com/indoorvivants/mdoc-d2.git",
+    "revision":"v0.0.1",
+    "version":"0.0.1",
+    "targets":"com.indoorvivants%mdoc-d2",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.2.2\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -26736,6 +26825,47 @@
       ]
     }
   },
+  "note/dhallj-magnolia":{
+    "project":"note/dhallj-magnolia",
+    "repoUrl":"https://github.com/note/dhallj-magnolia.git",
+    "revision":"v0.1.3",
+    "version":"0.1.3",
+    "targets":"pl.msitko%dhallj-magnolia",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.2.2\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "note/mini-refined":{
     "project":"note/mini-refined",
     "repoUrl":"https://github.com/note/mini-refined.git",
@@ -29524,8 +29654,8 @@
   "pme123/camundala":{
     "project":"pme123/camundala",
     "repoUrl":"https://github.com/pme123/camundala.git",
-    "revision":"v1.22.3",
-    "version":"1.22.3",
+    "revision":"v1.22.4",
+    "version":"1.22.4",
     "targets":"io.github.pme123%camundala-bpmn io.github.pme123%camundala-worker io.github.pme123%camundala-camunda7-worker io.github.pme123%camundala-camunda io.github.pme123%camundala-api io.github.pme123%camundala-domain io.github.pme123%camundala-dmn io.github.pme123%camundala-simulation io.github.pme123%camundala-helper",
     "config":{
       "projects":{
@@ -31755,6 +31885,47 @@
         {
           "path":"build.sbt",
           "pattern":"val scala3       = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "rustedbones/pekko-http-metrics":{
+    "project":"rustedbones/pekko-http-metrics",
+    "repoUrl":"https://github.com/rustedbones/pekko-http-metrics.git",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
+    "targets":"fr.davit%pekko-http-metrics-prometheus fr.davit%pekko-http-metrics-core fr.davit%pekko-http-metrics-datadog fr.davit%pekko-http-metrics-dropwizard fr.davit%pekko-http-metrics-dropwizard-v5 fr.davit%pekko-http-metrics-graphite",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3       = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
