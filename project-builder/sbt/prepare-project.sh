@@ -47,7 +47,7 @@ if [[ "$sbtMajor" -lt 1 ]] ||
   echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.5.5"
   if [ -n "$enforcedSbtVersion" ]; then
     echo "Enforcing usage of sbt in version ${enforcedSbtVersion}"
-    sed -i -E "s/(sbt.version=).*/\1${enforcedSbtVersion}/" "${buildPropsFile}"
+    sed -i -E "s/(sbt.version\s*=\s*).*/\1${enforcedSbtVersion}/" "${buildPropsFile}"
   else
     exit 1
   fi
