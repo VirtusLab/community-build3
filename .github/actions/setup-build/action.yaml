@@ -38,7 +38,7 @@ runs:
           baseVersion=$(cat project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print $4 }') 
           # `SNAPSHOT` substring is required to treat compiler as experimental
           # All compilers build from branch are treated experimental
-          scalaVersion="${baseVersion}-SNAPSHOT-bin-${commitHash}"
+          scalaVersion="${baseVersion}-bin-${commitHash}-SNAPSHOT"
         fi
 
         baseMavenRepo="https://scala3.westeurope.cloudapp.azure.com/maven2"
