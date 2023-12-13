@@ -202,6 +202,7 @@ jobs:
         - name: "outr/lucene4s"
         - name: "outr/perfolation"
         - name: "outr/reactify"
+        - name: "pac4j/play-pac4j"
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pathikrit/better-files"
         - name: "petitviolet/scala-operator"
@@ -452,7 +453,6 @@ jobs:
         - name: "eed3si9n/scalaxb"
         - name: "enragedginger/akka-quartz-scheduler"
         - name: "enriquerodbe/borsh4s"
-        - name: "fmonniot/scala3mock"
         - name: "folone/poi.scala"
         - name: "frugalmechanic/fm-flatfile"
         - name: "gchudnov/swearwolf"
@@ -496,7 +496,6 @@ jobs:
         - name: "playframework/play-doc"
         - name: "playframework/play-file-watch"
         - name: "playframework/play-json"
-        - name: "playframework/play-silhouette"
         - name: "polynote/uzhttp"
         - name: "polyvariant/colorize-scala"
         - name: "poslegm/munit-zio"
@@ -506,7 +505,6 @@ jobs:
         - name: "rescala-lang/rescala"
         - name: "ruippeixotog/akka-testkit-specs2"
         - name: "ruippeixotog/scala-scraper"
-        - name: "sake92/tupson"
         - name: "samueleresca/pekko-quartz-scheduler"
         - name: "scala-native/scala-native-cli"
         - name: "scalacenter/tasty-query"
@@ -521,6 +519,7 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sirthias/spliff"
         - name: "sqids/sqids-scala"
+        - name: "stryker-mutator/weapon-regex"
         - name: "testcontainers/testcontainers-scala"
         - name: "tharwaninitin/cron4zio"
         - name: "thoughtworksinc/tryt.scala"
@@ -735,6 +734,7 @@ jobs:
         - name: "nulab/play2-oauth2-provider"
         - name: "playframework/play-ebean"
         - name: "playframework/play-mailer"
+        - name: "playframework/play-silhouette"
         - name: "playframework/play-slick"
         - name: "sagifogel/proptics"
         - name: "scalanlp/breeze"
@@ -817,6 +817,7 @@ jobs:
         - name: "dwickern/sbt-swagger-play"
         - name: "evolution-gaming/random"
         - name: "evolution-gaming/scache"
+        - name: "fmonniot/scala3mock"
         - name: "geirolz/cats-xml"
         - name: "geirolz/fly4s"
         - name: "gonzih/cats-nats"
@@ -911,6 +912,7 @@ jobs:
         - name: "armanbilge/schrodinger"
         - name: "armanbilge/van-cats"
         - name: "creativescala/doodle"
+        - name: "d2a4u/meteor"
         - name: "davenverse/catscript"
         - name: "davenverse/process"
         - name: "disneystreaming/weaver-test"
@@ -1059,7 +1061,6 @@ jobs:
         - name: "sangria-graphql/sangria-relay"
         - name: "sangria-graphql/sangria-slowlog"
         - name: "scalamolecule/molecule"
-        - name: "stryker-mutator/weapon-regex"
         - name: "svroonland/rezilience"
         - name: "zio/zio-constraintless"
         - name: "zio/zio-ftp"
@@ -1247,7 +1248,6 @@ jobs:
         - name: "reactivecore/rc-circe-json-schema"
         - name: "rolang/dumbo"
         - name: "sageserpent-open/americium"
-        - name: "sake92/sharaf"
         - name: "scala-cli/scala-cli-signing"
         - name: "scala/toolkit"
         - name: "scalapb-json/scalapb-argonaut"
@@ -1365,7 +1365,6 @@ jobs:
         - name: "logging4s/logging4s"
         - name: "ocadotechnology/sttp-oauth2"
         - name: "pityka/saddle"
-        - name: "quafadas/dedav4s"
         - name: "rallyhealth/weepickle"
         - name: "sangria-graphql/sangria-circe"
         - name: "snowplow/snowplow-scala-analytics-sdk"
@@ -1549,6 +1548,30 @@ jobs:
         - name: "tinkoff/muffin"
         - name: "zio/zio-metrics-connectors"
         - name: "zio/zio-openai"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v3
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        timeout-minutes: 60
+        with:
+          project-name: ${{ matrix.name }}
+          custom-build-id: ${{ inputs.custom-build-id }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+  stage-22:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build, stage-21 ]
+    continue-on-error: true
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        include:
+        - name: "sake92/sharaf"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v3
