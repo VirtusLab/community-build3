@@ -57,21 +57,33 @@ lazy val esClient = {
 }
 
 lazy val NightlyReleases = {
-  val re = raw"(?<=title=$")(.+-bin-\d{8}-\w{7}-NIGHTLY)(?=/$")".r
-  val html = Source.fromURL(
-    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/"
+  val regex = raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r
+  val xml = io.Source.fromURL(
+    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml"
   )
-  re.findAllIn(html.mkString).toVector
+  regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toVector
 }
 
 lazy val StableScalaVersions = {
-  val re = raw"(?<=title=$")(\d+\.\d+\.\d+(-RC\d+)?)(?=/$")".r
-  val html = Source.fromURL(
-    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/"
+  val regex = raw"<version>(\d+\.\d+\.\d+(-RC\d+)?)</version>".r
+  val xml = io.Source.fromURL(
+    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml"
   )
-  re.findAllIn(html.mkString).toVector
+  regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toVector
 }
-lazy val PreviousScalaReleases = (StableScalaVersions ++ NightlyReleases).sorted
+object ScalaVersionOrdering extends Ordering[String] {
+  object StableVersion {
+    def unapply(v: String): Option[String] =
+      if !v.contains('-') && v.split('.').size == 3 then Some(v) else None
+  }
+  override def compare(x: String, y: String): Int = (x, y) match {
+    case (StableVersion(stable), other) if other.startsWith(stable) => 1
+    case (other, StableVersion(stable)) if other.startsWith(stable) => -1
+    case _                                                          => Ordering.String.compare(x, y)
+  }
+}
+lazy val PreviousScalaReleases =
+  (StableScalaVersions ++ NightlyReleases).sorted(using ScalaVersionOrdering)
 
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(opts: String*) = try {

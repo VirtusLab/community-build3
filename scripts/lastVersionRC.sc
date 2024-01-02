@@ -1,5 +1,7 @@
 #!/usr/bin/env -S scala-cli shebang
-val regex = raw"""(?<=title=")(3\.\d+\.\d+-RC\d+)(?=/")""".r
-val html = io.Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/")
-val last = regex.findAllIn(html.mkString).toList.last
+val regex = raw"<version>(3\.\d+\.\d+-RC\d+)</version>".r
+val xml = io.Source.fromURL(
+  "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml"
+)
+val last = regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toList.last
 println(last)
