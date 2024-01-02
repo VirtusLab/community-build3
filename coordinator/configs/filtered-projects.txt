@@ -106,28 +106,19 @@ scala-js:scala-js-macrotask-executor:.*
 
 ## Does not compile
 lorandszakacs:sprout:0.0.[0-5]
-rssh:scala-gopher:.*
 wangzaixiang:wjson:.*
 
 ## Outdated version, needs new release
 caspercommunityio:casper-scala-sdk:1.[0-2].[0-1]
-kevin-lee:maven2sbt:.*
 sciss:serial:.*
 
-# https://github.com/lampepfl/dotty/issues/15656
-jcouyang:meow:0.4.1[0-3]
 
 # Syntax changes issues (dangling comma)
 es-meta:esmeta:0.[0-1].*
 
-## 3.2.x
-#https://github.com/lampepfl/dotty/issues/15668
-kevin-lee:extras:0.*
 
 ## 3.3.x
 dmytromitin:dotty-patched:.*
-gzoller:scala-reflection:.*
-rmgk:slips:.*
 
 # var overrides
 caspercommunityio:casper-scala-sdk:*
@@ -176,9 +167,6 @@ sciss:fscape-next:.*
 ## override opaque type
 tabdulradi:mazboot:.*
 
-# Requires JDK incubator/preview features (mill)
-markehammons:slinc:.*
-
 # Requires cmake
 pdal:java:.*
 
@@ -209,39 +197,6 @@ virtuslab:besom:.*
 # Maven projects (unsupprted)
 apache:logging-log4j-scala:.*
 
-# mill 0.11.x projects (unsupprted yet)
-bot4s:zmatrix:.*
-carlosedp:riscvassembler:.*
-carlosedp:zio-channel:.*
-com-lihaoyi:mainargs:.*
-com-lihaoyi:os-lib:.*
-com-lihaoyi:upickle:.*
-coursier:dependency:.*
-disneystreaming:alloy:.*
-jodersky:applib:.*
-jodersky:cronic:.*
-katrix:typed-json:.*
-molarmanful:sclin:.*
-otavia-projects:otavia:.*
-sake92:sharaf:.*
-sake92:squery:.*
-sake92:tupson:.*
-scala-interop:slinc:.*
-swaldman:conveniences:.*
-swaldman:cryptoutil:.*
-swaldman:fossilphant:.*
-swaldman:mailutil:.*
-swaldman:mchange-sysadmin-scala:.*
-swaldman:unstatic:.*
-virtuslab:scala-cli:.*
-windymelt:happy-birthday:.*
-windymelt:qw.scala:.*
-windymelt:rss2discord:.*
-xebia-functional:munit-compiler-toolkit:.*
-yakivy:poppet:.*
-yoohaemin:decrel:.*
-ysthakur:sline:.*
-
 # Double build tool definition sbt + Mill/MBuild
 logicovercode:app-core:.*
 
@@ -263,8 +218,11 @@ nickburkard:aws-cdk-scala:.*
 caspercommunityio:casper-scala-sdk:.*
 
 # Moved to new repository
-# tinkoff -> leviysoft
+## tinkoff -> leviysoft
 tinkoff:oolong:.*
+## markehammons -> scala-interop
+markehammons:slinc:.*
+
 
 # Needs compiler plugin
 ## sh.almond:scala-kernel-api
