@@ -1260,7 +1260,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         projectDir,
         replaceExisting = true
       )
-      os.copy.into(
+      os.copy(
         millBuilder / "compat" / "0.11.sc",
         projectDir / "MillVersionCompat.sc",
         replaceExisting = true
