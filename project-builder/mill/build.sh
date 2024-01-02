@@ -52,8 +52,7 @@ function tryBuild() {
   $mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
 }
 
-rm ../build-summary.txt && touch ../build-summary.txt
-cat ../build-summary.txt
+
 # Retry only if previous build failed to start
 export MILL_VERSION=$millVersion
 tryBuild mill || ([[ -f ./mill && ! -s ../build-summary.txt ]] && tryBuild ./mill)
