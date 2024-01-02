@@ -52,4 +52,5 @@ function tryBuild() {
   $mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
 }
 
-tryBuild mill || ([[ -f ./mill ]] && tryBuild ./mill)
+# Retry only if previous build failed to start
+tryBuild mill || ([[ -f ./mill && ! -s ../build-summary.txt ]] && tryBuild ./mill)

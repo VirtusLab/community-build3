@@ -1,9 +1,22 @@
+import $file.MillVersionCompat, MillVersionCompat.compat.{
+  CoursierModule,
+  JavaModule,
+  PublishModule,
+  ScalaModule,
+  TestModule,
+  TestResult,
+  ZincWorkerModule,
+  Task,
+  Val,
+  toZincWorker
+}
 import $file.CommunityBuildCore, CommunityBuildCore.Scala3CommunityBuild.{
   TestingMode => _,
   ProjectBuildConfig => _,
   ProjectOverrides => _,
   _
 }
+import scala.reflect.ClassTag
 import CommunityBuildCore.Scala3CommunityBuild.Utils._
 // Make sure that following classes are in sync with the ones defined in CommunityBuildcore,
 //  upickle has problems with classess imported from other file when creating readers
@@ -30,16 +43,15 @@ import TaskEvaluator.EvalResult
 import serialization.OptionPickler.read
 
 import scala.reflect.ClassTag
-import mill.{scalalib, api, T, Module, Task, Agg}
+import mill.{api, T, Module, Agg}
 import mill.scalalib.api.CompilationResult
 import mill.eval._
 import mill.define.{Cross => DefCross, NamedTask, Segment}
-import mill.testrunner.TestResult
 import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
 
-trait CommunityBuildCoursierModule extends scalalib.CoursierModule { self: scalalib.JavaModule =>
+trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   protected val mavenRepoUrl: Option[String] = sys.props
     .get("communitybuild.maven.url")
     .map(_.stripSuffix("/"))
@@ -50,9 +62,8 @@ trait CommunityBuildCoursierModule extends scalalib.CoursierModule { self: scala
   }
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
-  override def zincWorker: mill.define.ModuleRef[scalalib.ZincWorkerModule] =
-    mill.define.ModuleRef(CommunityBuildZincWorker)
-  object CommunityBuildZincWorker extends scalalib.ZincWorkerModule with scalalib.CoursierModule {
+  override def zincWorker = toZincWorker(CommunityBuildZincWorker)
+  object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
     override def repositoriesTask = T.task {
       mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
     }
@@ -61,9 +72,7 @@ trait CommunityBuildCoursierModule extends scalalib.CoursierModule { self: scala
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
 // Left for compliance with legacy versions
-trait CommunityBuildPublishModule
-    extends scalalib.PublishModule
-    with CommunityBuildCoursierModule {}
+trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {}
 
 /** Replace all Scala in crossVersion with `buildScalaVersion` if its matching `buildScalaVersion`
   * binary version
@@ -82,26 +91,25 @@ def mapCrossVersions[T](
 ): Seq[T] = {
   implicit val ctx = ExtractorsCtx(buildScalaVersion)
   // Map products to lists (List[_] <: Product ) for stable pattern matching
-  val res = for {
+  for {
     crossEntry <- crossVersions
     cross = crossEntry match {
       case product: Product => product.productIterator.toList
       case other            => other
     }
-    mappedCrossVersion = cross match {
+    mappedCross = cross match {
       case MatchesScalaBinaryVersion()                     => buildScalaVersion
       case List(MatchesScalaBinaryVersion(), crossVersion) => (buildScalaVersion, crossVersion)
       case List(crossVersion, MatchesScalaBinaryVersion()) => (crossVersion, buildScalaVersion)
       case _                                               => crossEntry
     }
-    version <- Seq(mappedCrossVersion).distinct
+    version <- Seq(mappedCross, crossEntry).distinct
   } yield {
     if (version != crossEntry) {
-      println(s"Use cross-version $version instead of $crossEntry")
+      println(s"Use cross-version $mappedCross instead of $crossEntry")
     }
-    version
+    version.asInstanceOf[T]
   }
-  res.toSeq.asInstanceOf[Seq[T]]
 }
 
 case class ModuleInfo(org: String, name: String, module: Module) {
@@ -156,13 +164,15 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
   println(s"Parsed config: ${config}")
   val filteredTargets = filterTargets(targets, config.projects.exclude.map(_.r))
   val mappings = checkedModuleMappings(filteredTargets.toSet)
-  val topLevelModules = 
-    if(targets.contains("*%*")) mappings.map(_._2).toSet.filter(_.org.nonEmpty) // exclude non-published modules
-    else mappings.collect {
-    case (target, info) if filteredTargets.contains(target) => info
-  }.toSet
+  val topLevelModules =
+    if (targets.contains("*%*"))
+      mappings.map(_._2).toSet.filter(_.org.nonEmpty) // exclude non-published modules
+    else
+      mappings.collect {
+        case (target, info) if filteredTargets.contains(target) => info
+      }.toSet
   val moduleDeps: Map[Module, Seq[ModuleInfo]] =
-    ctx.root.millInternal.modules.collect { case module: scalalib.PublishModule =>
+    ctx.root.millInternal.modules.collect { case module: PublishModule =>
       val mapped = for {
         module <- module.moduleDeps
         api.Result.Success((_, mapped)) <- toMappingInfo(module).asSuccess
@@ -180,7 +190,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     }
 
   val projectsBuildResults = for {
-    ModuleInfo(org, name, module: scalalib.ScalaModule) <- flatten(
+    ModuleInfo(org, name, module: ScalaModule) <- flatten(
       topLevelModules,
       topLevelModules
     ).toList
@@ -206,7 +216,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     val testingMode = overrides.flatMap(_.tests).getOrElse(config.tests)
 
     val testModule = module.millInternal.modules.toList
-      .collect { case module: mill.scalalib.TestModule => module } match {
+      .collect { case module: TestModule => module } match {
       case Nil =>
         ctx.log.info(s"No test module defined in $module")
         None
@@ -215,7 +225,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
         ctx.log.info(s"Multiple test modules defined in $module, using $first")
         Some(first)
     }
-    def test[T](selector: scalalib.TestModule => NamedTask[T]): Option[NamedTask[T]] =
+    def test[T](selector: TestModule => NamedTask[T]): Option[NamedTask[T]] =
       testModule.map(selector)
 
     val compileResult = eval(module.compile)
@@ -336,12 +346,12 @@ private def collectTestResults(evalResult: EvalResult[Seq[TestResult]]): TestsRe
 }
 
 private def toMappingInfo(
-    module: scalalib.JavaModule
+    module: JavaModule
 )(implicit ctx: Ctx): api.Result[(String, ModuleInfo)] = {
   for {
     org <- module match {
-      case m: scalalib.PublishModule => tryEval(m.pomSettings).map(_.organization)
-      case _                         =>
+      case m: PublishModule => tryEval(m.pomSettings).map(_.organization)
+      case _                =>
         // it's not a published module, we don't need to care about it as it's not going to be enlisted in targets
         api.Result.Success("")
     }
@@ -354,7 +364,7 @@ type ModuleMappings = Map[String, ModuleInfo]
 def moduleMappings(implicit ctx: Ctx): ModuleMappings = {
   import mill.api.Result.{Success => S}
   ctx.root.millInternal.modules.flatMap {
-    case module: mill.scalalib.ScalaModule =>
+    case module: ScalaModule =>
       // Result does not have withFilter method, wrap it into the Option to allow for-comprehension
       for {
         S(scalaVersion) <- tryEval(module.scalaVersion).asSuccess
@@ -389,9 +399,9 @@ private def tryEval[T](task: NamedTask[T])(implicit ctx: Ctx): api.Result[T] = {
   val evalState = ctx.evaluator.evaluate(Agg(task))
   val failure = evalState.failing.values().flatten.toSeq.headOption
   def result = evalState.rawValues.head
-  failure.getOrElse(result).map{
-    case mill.api.Val(value) => value.asInstanceOf[T]
-    case value => value.asInstanceOf[T]
+  failure.getOrElse(result).map {
+    case Val(value) => value.asInstanceOf[T]
+    case value      => value.asInstanceOf[T]
   }
 }
 

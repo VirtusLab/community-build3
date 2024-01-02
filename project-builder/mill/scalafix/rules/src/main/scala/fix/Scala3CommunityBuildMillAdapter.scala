@@ -6,7 +6,8 @@ import metaconfig._
 
 case class Scala3CommunityBuildMillAdapterConfig(
     targetScalaVersion: Option[String] = None,
-    targetPublishVersion: Option[String] = None
+    targetPublishVersion: Option[String] = None,
+    millBinaryVersion: Option[String] = None
 )
 object Scala3CommunityBuildMillAdapterConfig {
   def default = Scala3CommunityBuildMillAdapterConfig()
@@ -34,7 +35,9 @@ class Scala3CommunityBuildMillAdapter(
         this.config
           .copy(
             targetScalaVersion = propOrDefault("communitybuild.scala", _.targetScalaVersion),
-            targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion)
+            targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion),
+            millBinaryVersion =
+              propOrDefault("communitybuild.millBinaryVersion", _.millBinaryVersion)
           )
       }
       .map(new Scala3CommunityBuildMillAdapter(_))
@@ -52,11 +55,12 @@ class Scala3CommunityBuildMillAdapter(
   )
 
   val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
+  val useLegacyMillCross = config.millBinaryVersion.exists(_ == "0.10")
 
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
       if (sys.props.contains("communitybuild.noInjects")) Patch.empty
-      else Patch.addLeft(doc.tree, Replacment.MillCommunityBuildInject)
+      else Patch.addLeft(doc.tree, Replacment.injects)
     }
     def shouldWrapInTarget(body: Term, tpe: Option[Type]) = {
       val isLiteral = body.isInstanceOf[Lit.String]
@@ -68,20 +72,26 @@ class Scala3CommunityBuildMillAdapter(
     }
     val patch = doc.tree.collect {
       case init @ Init(
-            Type.Apply(WithTypeName("Cross"), List(tpeParam)),
+            Type.Apply(name @ WithTypeName("Cross"), List(tpeParam)),
             _,
             Seq(args)
           ) =>
-        List(
-          Patch.addLeft(
-            args.head,
-            s"MillCommunityBuild.mapCrossVersions(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)}, "
-          ),
-          Patch.addRight(
-            args.last,
-            ")"
-          )
-        ).asPatch
+        if (useLegacyMillCross)
+          List(
+            Patch.replaceTree(name, Replacment.CommunityBuildCross),
+            Patch.addRight(
+              init,
+              s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)})"
+            )
+          ).asPatch
+        else
+          List(
+            Patch.addLeft(
+              args.head,
+              s"MillCommunityBuild.mapCrossVersions(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)}, "
+            ),
+            Patch.addRight(args.last, ")")
+          ).asPatch
 
       case template @ Template(_, traits, _, _)
           if anyTreeOfTypeName(
@@ -127,12 +137,13 @@ class Scala3CommunityBuildMillAdapter(
           Replacment.PublishVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
         )
 
-     }.asPatch
+    }.asPatch
 
     headerInject + patch
   }
 
   object Replacment {
+    val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule =
       "MillCommunityBuild.CommunityBuildPublishModule"
     val CommunityBuildCoursierModule =
@@ -153,15 +164,31 @@ class Scala3CommunityBuildMillAdapter(
       val stripQutoes = v.stripPrefix(quote).stripSuffix(quote)
       quote + stripQutoes + quote
     }
+
     val MillCommunityBuildInject = """
     |import $file.MillCommunityBuild
     |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: scala.Predef.String*) = _root_.mill.T.command {
+    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
     |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
     |  MillCommunityBuild.runBuild(configJson, targets)
     |}
-    |// End of code injects
     |""".stripMargin
+    val MillCommunityBuildCrossInject = """
+    |// Replaces mill.define.Cross allowing to use map used cross versions
+    |class MillCommunityBuildCross[T: _root_.scala.reflect.ClassTag]
+    |  (cases: _root_.scala.Any*)
+    |  (buildScalaVersion: _root_.java.lang.String)
+    |  (implicit ci:  _root_.mill.define.Cross.Factory[T], ctx: _root_.mill.define.Ctx) 
+    |  extends _root_.mill.define.Cross[T](
+    |      MillCommunityBuild.mapCrossVersions(buildScalaVersion, cases): _*
+    |    )
+    |""".stripMargin
+
+    val injects = List(
+      Some(MillCommunityBuildInject),
+      if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
+      Some("// End of OpenCB code injects\n")
+    ).flatten.mkString("\n")
 
   }
 

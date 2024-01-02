@@ -2,7 +2,7 @@
 set -e
 
 if [ $# -ne 11 ]; then
-  echo "Wrong number of script arguments"
+  echo "Wrong number of script arguments, got $# expected 11"
   exit 1
 fi
 
