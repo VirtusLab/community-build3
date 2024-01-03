@@ -125,8 +125,11 @@ class Scala3CommunityBuildMillAdapter(
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), tpe, body) =>
         val (beforeNode, afterNode) = body match {
-          case scala.meta.Term.Apply(Term.Name("T"), (block: scala.meta.Term.Block) :: Nil) =>
-            (block.stats.head, block.stats.last)
+          case scala.meta.Term.Apply(Term.Name("T") | Term.Select(_, Term.Name("T")), arg :: Nil) =>
+            arg match {
+              case block: scala.meta.Term.Block => (block.stats.head, block.stats.last)
+              case arg                          => (arg, arg)
+            }
           case tree => (tree, tree)
         }
         List(

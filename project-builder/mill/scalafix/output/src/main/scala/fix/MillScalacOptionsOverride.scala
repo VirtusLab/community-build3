@@ -20,6 +20,11 @@ object MillScalacOptionsOverride {
   object module2 {
     def scalacOptions: Seq[String] = MillCommunityBuild.mapScalacOptions{ Seq("-Xprint:typer") }
   }
+  
+  object module3 {
+    def scalacOptions = mill.T(MillCommunityBuild.mapScalacOptions{ module2.scalacOptions })
+  }
+  
   class moduleDef {
     def scalacOptions: T[Seq[String]] = MillCommunityBuild.mapScalacOptions{ {
       val opt1 = "-release:11"
