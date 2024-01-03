@@ -332,5 +332,31 @@ object Scala3CommunityBuild {
         }
       }
     }
+
+    def mapScalacOptions(
+        current: Seq[String],
+        append: Seq[String],
+        remove: Seq[String]
+    ): Seq[String] = {
+      val matching = remove.filter { _.startsWith("MATCH:") }.map(_.stripPrefix("MATCH:"))
+      val filters = (append ++ remove).distinct.map { setting =>
+        Seq[String => String](
+          setting => if (setting.startsWith("--")) setting.tail else setting,
+          setting => {
+            setting.indexOf(':') match {
+              case -1 => setting
+              case n  => setting.substring(0, n)
+            }
+          }
+        ).reduce(_.andThen(_))
+          .apply(setting)
+      }
+      current
+        .filterNot { s =>
+          filters.exists(_.contains(s)) || matching.exists(_.matches(s))
+        } ++ append.distinct
+
+    }
+
   }
 }

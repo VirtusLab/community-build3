@@ -24,6 +24,25 @@ export OPENCB_SCRIPT_DIR=$scriptDir
 $scriptDir/checkout.sh "$repoUrl" "$rev" repo
 buildToolFile="build-tool.txt"
 
+scalaBinaryVersion=`echo $scalaVersion | cut -d . -f 1,2`
+scalaBinaryVersionMajor=`echo $scalaVersion | cut -d . -f 1`
+scalaBinaryVersionMinor=`echo $scalaVersion | cut -d . -f 2`
+echo "Scala binary version found: $scalaBinaryVersion"
+
+commonAppendScalacOptions="-source:$scalaBinaryVersion-migration,-Wconf:msg=can be rewritten automatically under -rewrite -source $scalaBinaryVersion-migration:s"
+commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
+echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
+echo "Append: $commonAppendScalacOptions"
+echo "Remove: $commonRemoveScalacOptions"
+
+if [ -z $extraScalacOptions ];then extraScalacOptions="$commonAppendScalacOptions"
+else  extraScalacOptions="$extraScalacOptions,$commonAppendScalacOptions"
+fi
+
+if [ -z $disabledScalacOption ];then disabledScalacOption="$commonRemoveScalacOptions"
+else disabledScalacOption="$disabledScalacOption,$commonRemoveScalacOptions"; 
+fi
+
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
   echo "mill" > $buildToolFile

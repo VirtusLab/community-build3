@@ -58,8 +58,8 @@ logFile=build.log
 
 shouldRetry=false
 forceScalaVersion=false
-enableMigrationMode=false
-sourceVersionToUseForMigration=""
+appendScalacOptions="${extraScalacOptions}"
+removeScalacOptions="${disabledScalacOption}"
 
 function runSbt() {
   # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
@@ -69,20 +69,13 @@ function runSbt() {
     echo "Would force Scala version $scalaVersion"
     setScalaVersionCmd="++$scalaVersion!"
   fi
-  enableMigrationModeCmd=""
-  if [[ "$enableMigrationMode" == "true" ]]; then
-    echo "Would enable migration mode $scalaVersion"
-    enableMigrationModeCmd="enableMigrationMode"
-  fi
   tq='"""'
   sbt ${sbtSettings[@]} \
     "setCrossScalaVersions $scalaVersion" \
     "$setScalaVersionCmd -v" \
-    "removeScalacOptions -deprecation -feature -Xfatal-warnings -Werror ${disabledScalacOption}" \
-    "appendScalacOptions ${extraScalacOptions}" \
+    "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
     "set every credentials := Nil" \
     "$setVersionCmd" \
-    "$enableMigrationModeCmd $sourceVersionToUseForMigration" \
     "$customCommands" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
@@ -102,23 +95,10 @@ function checkLogsForRetry() {
       shouldRetry=true
     fi
   fi
-
-  if [ "$enableMigrationMode" = false ]; then
-    if grep -P --max-count=1 'can be rewritten automatically under -rewrite -source ([\w\.]+-migration)' "$logFile"; then
-      # Don't pass file to grep or it will deadlock in pipes :<
-      # List all possible patches
-      # Take last workd (.*-migration)
-      # Sort by number of occurences and pick the most common one
-      # Spliting it into multiple lines caused errors
-      sourceVersionToUseForMigration=$(cat $logFile | grep -oP 'can be rewritten automatically under -rewrite -source ([\w\.]+-migration)' | awk '{print $NF}' | sort | uniq -c | sort -nr | cut -c9- | head -n 1)
-      enableMigrationMode=true
-      shouldRetry=true
-    fi
-  fi
 }
 
 retry=0
-maxRetries=2 # 1 retry for each: missing mappings (force scala version) and source migration
+maxRetries=1 # 1 retry for each: missing mappings (force scala version)
 
 function retryBuild() {
   while [[ $retry -lt $maxRetries ]]; do

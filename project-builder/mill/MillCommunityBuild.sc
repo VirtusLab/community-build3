@@ -126,25 +126,14 @@ private object ScalacOptionsSettings {
       .getOrElse(Nil)
   val append = parse("communitybuild.appendScalacOptions")
   val remove = parse("communitybuild.removeScalacOptions")
-  val filters = (append ++ remove).distinct.map { setting =>
-    Seq[String => String](
-      setting => if (setting.startsWith("--")) setting.tail else setting,
-      setting => {
-        setting.indexOf(':') match {
-          case -1 => setting
-          case n  => setting.substring(0, n + 1) //
-        }
-      }
-    ).reduce(_.andThen(_))
-      .apply(setting)
-  }
 }
 
-def mapScalacOptions(current: Seq[String]): Seq[String] = {
-  current
-    .filterNot(s => ScalacOptionsSettings.filters.exists(_.contains(s)))
-    .appendedAll(ScalacOptionsSettings.append)
-}
+def mapScalacOptions(current: Seq[String]): Seq[String] =
+  CommunityBuildCore.Scala3CommunityBuild.Utils.mapScalacOptions(
+    current = current,
+    append = ScalacOptionsSettings.append,
+    remove = ScalacOptionsSettings.remove
+  )
 
 case class ModuleInfo(org: String, name: String, module: Module) {
   val targetName = s"$org%$name"

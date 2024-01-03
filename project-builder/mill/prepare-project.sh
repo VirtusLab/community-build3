@@ -27,14 +27,13 @@ millVersion=
 if [[ -f .mill-version ]];then
   millVersion=`cat .mill-version`
   echo "Found explicit mill version $millVersion"
-el
 else
   echo "No .mill-version file found, detecting compatible mill version"
   if [[ -f ./mill ]];then
     millVersion=`./mill -v resolve _ | grep "[Mm]ill.*version" | grep -E -o "(\d+\.?){3}"`
   else 
     for v in $MILL_0_11 $MILL_0_10 $MILL_0_9; do
-      if ${scriptDir}/millw --mill-version $v $RESOLVE; then
+      if ${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null; then
         millVersion=$v
         break
       fi

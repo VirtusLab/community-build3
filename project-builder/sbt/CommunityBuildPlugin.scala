@@ -127,38 +127,6 @@ object CommunityBuildPlugin extends AutoPlugin {
       (_: Scope, currentSettings: Seq[String]) => currentSettings.filterNot(flags.contains)
     }
 
-  /** Helper command used to filter scalacOptions and set source migration flags
-    */
-  val enableMigrationMode = keyTransformCommand("enableMigrationMode", Keys.scalacOptions) {
-    (args, extracted) =>
-      val argSourceVersion = args.headOption.filter(_.nonEmpty)
-      def resolveSourceVersion(scalaVersion: String) =
-        CrossVersion.partialVersion(scalaVersion).collect {
-          case (3, 0) => "3.0-migration"
-          case (3, 1) => "3.0-migration"
-          case (3, 2) => "3.2-migration"
-          case (3, _) => "future-migration"
-        }
-
-      (scope: Scope, currentSettings: Seq[String]) => {
-        val scalaVersion = extracted.get(scope / Keys.scalaVersion)
-        if (!scalaVersion.startsWith("3.")) currentSettings
-        else
-          argSourceVersion
-            .orElse(resolveSourceVersion(scalaVersion))
-            .fold(currentSettings) { sourceVersion =>
-              val newEntries = Seq(s"-source:$sourceVersion")
-              println(s"Setting migration mode ${newEntries.mkString(" ")} in ${scope}")
-              // -Xfatal-warnings or -Wconf:any:e are don't allow to perform -source update
-              val filteredSettings =
-                Seq("-rewrite", "-source", "-migration", "-Xfatal-warnings")
-              currentSettings.filterNot { setting =>
-                filteredSettings.exists(setting.contains(_)) ||
-                setting.matches(".*-Wconf.*any:e")
-              } ++ newEntries
-            }
-      }
-  }
 
   /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
@@ -208,14 +176,17 @@ object CommunityBuildPlugin extends AutoPlugin {
         }
     }
 
-  val appendScalacOptions = keyTransformCommand("appendScalacOptions", Keys.scalacOptions) {
+  val mapScalacOptions = keyTransformCommand("mapScalacOptions", Keys.scalacOptions) {
     (args, _) => (_: Scope, currentScalacOptions: Seq[String]) =>
-      currentScalacOptions ++ args.filterNot(currentScalacOptions.contains)  
-  }
+      val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
+      val append = safeArgs.lift(0).getOrElse(Nil)
+      val remove = safeArgs.lift(1).getOrElse(Nil)
+      Scala3CommunityBuild.Utils.mapScalacOptions(
+        current = currentScalacOptions,
+        append = append,
+        remove = remove
+      )
 
-  val removeScalacOptions = keyTransformCommand("removeScalacOptions", Keys.scalacOptions) {
-    (args, _) => (_: Scope, currentScalacOptions: Seq[String]) =>
-      currentScalacOptions.filterNot(args.contains)
   }
 
   import sbt.librarymanagement.InclExclRule
@@ -243,12 +214,10 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
 
   val commands = Seq(
-    enableMigrationMode,
     disableFatalWarnings,
     setPublishVersion,
     setCrossScalaVersions,
-    appendScalacOptions,
-    removeScalacOptions,
+    mapScalacOptions,
     excludeLibraryDependency,
     removeScalacOptionsStartingWith
   )
@@ -503,6 +472,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           case EvalResult.Value(settings, _) => settings
           case _                             => Nil
         }
+        println(s"Compile scalacOptions: ${scalacOptions}")
         val compileResult = eval(Compile / compile)
 
         val shouldBuildDocs = eval(Compile / doc / skip) match {
