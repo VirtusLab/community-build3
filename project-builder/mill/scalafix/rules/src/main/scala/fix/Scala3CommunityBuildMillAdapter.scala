@@ -7,7 +7,9 @@ import metaconfig._
 case class Scala3CommunityBuildMillAdapterConfig(
     targetScalaVersion: Option[String] = None,
     targetPublishVersion: Option[String] = None,
-    millBinaryVersion: Option[String] = None
+    millBinaryVersion: Option[String] = None,
+    appendScalacOptions: Option[String] = None,
+    removeScalacOptions: Option[String] = None
 )
 object Scala3CommunityBuildMillAdapterConfig {
   def default = Scala3CommunityBuildMillAdapterConfig()
@@ -27,7 +29,7 @@ class Scala3CommunityBuildMillAdapter(
         def propOrDefault(
             prop: String,
             default: Scala3CommunityBuildMillAdapterConfig => Option[String]
-        ) = sys.props
+        ): Option[String] = sys.props
           .get(prop)
           .filter(_.nonEmpty)
           .orElse(default(this.config))
@@ -36,8 +38,18 @@ class Scala3CommunityBuildMillAdapter(
           .copy(
             targetScalaVersion = propOrDefault("communitybuild.scala", _.targetScalaVersion),
             targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion),
-            millBinaryVersion =
-              propOrDefault("communitybuild.millBinaryVersion", _.millBinaryVersion)
+            millBinaryVersion = propOrDefault(
+              "communitybuild.millBinaryVersion",
+              _.millBinaryVersion
+            ),
+            appendScalacOptions = propOrDefault(
+              "communitybuild.appendScalacOptions",
+              _.appendScalacOptions
+            ),
+            removeScalacOptions = propOrDefault(
+              "communitybuild.removeScalacOptions",
+              _.removeScalacOptions
+            )
           )
       }
       .map(new Scala3CommunityBuildMillAdapter(_))
@@ -120,6 +132,30 @@ class Scala3CommunityBuildMillAdapter(
           case id if id.split('.').exists(scala3Identifiers.contains) => replace(isLiteral = false)
           case _                                                      => Patch.empty
         }
+
+      case tree @ ValOrDefDef(Term.Name("scalacOptions"), tpe, body) =>
+        val (beforeNode, afterNode) = body match {
+          case tree: scala.meta.Term.Block => (tree.stats.head, tree.stats.last)
+          case scala.meta.Term.Apply(Term.Name("T"), (block: scala.meta.Term.Block) :: Nil) =>
+            (block.stats.head, block.stats.last)
+          case tree => (tree, tree)
+        }
+        def quoted(v: String) = s"\"" + v + "\""
+        def showSeq(seq: Option[String]) = seq
+          .map(
+            _.split(",")
+              .filter(_.nonEmpty)
+              .map(v => "\"" + v + "\"")
+              .toList
+          )
+          .getOrElse(Nil)
+          .mkString("Seq(", ",", ")")
+        val addOptions = showSeq(config.appendScalacOptions)
+        val removeOptions = showSeq(config.removeScalacOptions)
+        List(
+          Patch.addLeft(beforeNode, "{ "),
+          Patch.addRight(afterNode, s" }.diff($removeOptions).diff($addOptions).appendedAll($addOptions).distinct")
+        ).asPatch
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {
