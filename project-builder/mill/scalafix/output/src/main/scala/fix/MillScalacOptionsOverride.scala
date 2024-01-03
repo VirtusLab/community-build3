@@ -1,7 +1,10 @@
 package fix
 
 object MillScalacOptionsOverride {
-  def scalacOptions = { List.empty[String] }.diff(Seq("R1","R2")).diff(Seq("A1","A2")).appendedAll(Seq("A1","A2")).distinct
+  object MillCommunityBuild{
+    def mapScalacOptions(current: Seq[String]): Seq[String] = ???
+  }
+  def scalacOptions = MillCommunityBuild.mapScalacOptions{ List.empty[String] }
   object mill{
     import scala.language.implicitConversions
     trait T[U]
@@ -12,23 +15,23 @@ object MillScalacOptionsOverride {
   import mill._
 
   object module {
-    val scalacOptions = { Nil }.diff(Seq("R1","R2")).diff(Seq("A1","A2")).appendedAll(Seq("A1","A2")).distinct
+    val scalacOptions = MillCommunityBuild.mapScalacOptions{ Nil }
   }
   object module2 {
-    def scalacOptions: Seq[String] = { Seq("-Xprint:typer") }.diff(Seq("R1","R2")).diff(Seq("A1","A2")).appendedAll(Seq("A1","A2")).distinct
+    def scalacOptions: Seq[String] = MillCommunityBuild.mapScalacOptions{ Seq("-Xprint:typer") }
   }
   class moduleDef {
-    def scalacOptions: T[Seq[String]] = {
-      { val opt1 = "-release:11"
-      Seq(opt1) }.diff(Seq("R1","R2")).diff(Seq("A1","A2")).appendedAll(Seq("A1","A2")).distinct
-    }
+    def scalacOptions: T[Seq[String]] = MillCommunityBuild.mapScalacOptions{ {
+      val opt1 = "-release:11"
+      Seq(opt1)
+    } }
   }
   class moduleDef2 extends moduleDef {
-    override val scalacOptions: T[Seq[String]] = { MillScalacOptionsOverride.scalacOptions }.diff(Seq("R1","R2")).diff(Seq("A1","A2")).appendedAll(Seq("A1","A2")).distinct
+    override val scalacOptions: T[Seq[String]] = MillCommunityBuild.mapScalacOptions{ MillScalacOptionsOverride.scalacOptions }
   }
   object moduleDef3 extends moduleDef {
     override def scalacOptions = T {
-      { super.scalacOptions ++ Nil }.diff(Seq("R1","R2")).diff(Seq("A1","A2")).appendedAll(Seq("A1","A2")).distinct
+      MillCommunityBuild.mapScalacOptions{ super.scalacOptions ++ Nil }
     }
   }
  

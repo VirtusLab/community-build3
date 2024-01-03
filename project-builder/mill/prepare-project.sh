@@ -2,8 +2,8 @@
 
 set -e
 
-if [ $# -ne 7 ]; then
-  echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <publish_version> <extra-scalacOption> <disabled-scalacOptions>, got $#: $@"
+if [ $# -ne 5 ]; then
+  echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <publish_version>, got $#: $@"
   exit 1
 fi
 
@@ -12,8 +12,6 @@ repoDir="$2" # e.g. /tmp/shapeless
 scalaVersion="$3" # e.g. 3.1.2-RC1
 publishVersion="$4" # version of the project
 projectConfig="$5" 
-extraScalacOptions="$6"
-disabledScalacOption="$7"
 
 export OPENCB_PROJECT_DIR=$repoDir
 
@@ -106,8 +104,6 @@ cp build.sc build.scala \
     --settings.Scala3CommunityBuildMillAdapter.targetScalaVersion "$scalaVersion" \
     --settings.Scala3CommunityBuildMillAdapter.targetPublishVersion "$publishVersion" \
     --settings.Scala3CommunityBuildMillAdapter.millBinaryVersion "$millBinaryVersion" \
-    --settings.Scala3CommunityBuildMillAdapter.appendScalacOptions "$extraScalacOptions" \
-    --settings.Scala3CommunityBuildMillAdapter.removeScalacOptions "$disabledScalacOption" \
     --scala-version 3.1.0 > build.sc \
   && rm build.scala 
 

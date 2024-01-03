@@ -4,6 +4,9 @@ rule = Scala3CommunityBuildMillAdapter
 package fix
 
 object MillScalacOptionsOverride {
+  object MillCommunityBuild{
+    def mapScalacOptions(current: Seq[String]): Seq[String] = ???
+  }
   def scalacOptions = List.empty[String]
   object mill{
     import scala.language.implicitConversions

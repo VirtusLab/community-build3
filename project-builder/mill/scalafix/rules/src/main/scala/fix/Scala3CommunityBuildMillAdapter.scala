@@ -7,9 +7,7 @@ import metaconfig._
 case class Scala3CommunityBuildMillAdapterConfig(
     targetScalaVersion: Option[String] = None,
     targetPublishVersion: Option[String] = None,
-    millBinaryVersion: Option[String] = None,
-    appendScalacOptions: Option[String] = None,
-    removeScalacOptions: Option[String] = None
+    millBinaryVersion: Option[String] = None
 )
 object Scala3CommunityBuildMillAdapterConfig {
   def default = Scala3CommunityBuildMillAdapterConfig()
@@ -41,14 +39,6 @@ class Scala3CommunityBuildMillAdapter(
             millBinaryVersion = propOrDefault(
               "communitybuild.millBinaryVersion",
               _.millBinaryVersion
-            ),
-            appendScalacOptions = propOrDefault(
-              "communitybuild.appendScalacOptions",
-              _.appendScalacOptions
-            ),
-            removeScalacOptions = propOrDefault(
-              "communitybuild.removeScalacOptions",
-              _.removeScalacOptions
             )
           )
       }
@@ -135,26 +125,13 @@ class Scala3CommunityBuildMillAdapter(
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), tpe, body) =>
         val (beforeNode, afterNode) = body match {
-          case tree: scala.meta.Term.Block => (tree.stats.head, tree.stats.last)
           case scala.meta.Term.Apply(Term.Name("T"), (block: scala.meta.Term.Block) :: Nil) =>
             (block.stats.head, block.stats.last)
           case tree => (tree, tree)
         }
-        def quoted(v: String) = s"\"" + v + "\""
-        def showSeq(seq: Option[String]) = seq
-          .map(
-            _.split(",")
-              .filter(_.nonEmpty)
-              .map(v => "\"" + v + "\"")
-              .toList
-          )
-          .getOrElse(Nil)
-          .mkString("Seq(", ",", ")")
-        val addOptions = showSeq(config.appendScalacOptions)
-        val removeOptions = showSeq(config.removeScalacOptions)
         List(
-          Patch.addLeft(beforeNode, "{ "),
-          Patch.addRight(afterNode, s" }.diff($removeOptions).diff($addOptions).appendedAll($addOptions).distinct")
+          Patch.addLeft(beforeNode, "MillCommunityBuild.mapScalacOptions{ "),
+          Patch.addRight(afterNode, s" }")
         ).asPatch
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
@@ -216,7 +193,7 @@ class Scala3CommunityBuildMillAdapter(
     |  (buildScalaVersion: _root_.java.lang.String)
     |  (implicit ci:  _root_.mill.define.Cross.Factory[T], ctx: _root_.mill.define.Ctx) 
     |  extends _root_.mill.define.Cross[T](
-    |      MillCommunityBuild.mapCrossVersions(buildScalaVersion, cases): _*
+    |      MillCommunityBuild.mapCrossVersionsAny(buildScalaVersion, cases): _*
     |    )
     |""".stripMargin
 

@@ -85,6 +85,12 @@ def mapCrossVersions[T](
     crossVersions: T*
 )(implicit dummy: DummyImplicit): Seq[T] = mapCrossVersions(buildScalaVersion, crossVersions.toSeq)
 
+// Variant of map cross versions used by legacy Mill versions <= 0.10.x
+def mapCrossVersionsAny(
+    buildScalaVersion: String,
+    crossVersions: Seq[Any]
+): Seq[Any] = mapCrossVersions(buildScalaVersion, crossVersions)
+
 def mapCrossVersions[T](
     buildScalaVersion: String,
     crossVersions: Seq[T]
@@ -110,6 +116,34 @@ def mapCrossVersions[T](
     }
     version.asInstanceOf[T]
   }
+}
+
+private object ScalacOptionsSettings {
+  private def parse(propName: String): List[String] =
+    sys.props
+      .get(propName)
+      .map(_.split(',').filter(_.nonEmpty).toList)
+      .getOrElse(Nil)
+  val append = parse("communitybuild.appendScalacOptions")
+  val remove = parse("communitybuild.removeScalacOptions")
+  val filters = (append ++ remove).distinct.map { setting =>
+    Seq[String => String](
+      setting => if (setting.startsWith("--")) setting.tail else setting,
+      setting => {
+        setting.indexOf(':') match {
+          case -1 => setting
+          case n  => setting.substring(0, n + 1) //
+        }
+      }
+    ).reduce(_.andThen(_))
+      .apply(setting)
+  }
+}
+
+def mapScalacOptions(current: Seq[String]): Seq[String] = {
+  current
+    .filterNot(s => ScalacOptionsSettings.filters.exists(_.contains(s)))
+    .appendedAll(ScalacOptionsSettings.append)
 }
 
 case class ModuleInfo(org: String, name: String, module: Module) {

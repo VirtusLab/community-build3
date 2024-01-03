@@ -27,8 +27,8 @@ buildToolFile="build-tool.txt"
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
   echo "mill" > $buildToolFile
-  $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$version" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
-  $scriptDir/mill/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig"
+  $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$version" "$projectConfig" 
+  $scriptDir/mill/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
 
 elif [ -f "repo/build.sbt" ]; then
   echo "sbt project found: ${isSbtProject}"
