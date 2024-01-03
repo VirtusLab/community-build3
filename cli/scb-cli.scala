@@ -1161,7 +1161,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           s"++$effectiveScalaVersion$versionSwitchSuffix -v",
           "set every credentials := Nil",
           "moduleMappings",
-          "removeScalacOptions -deprecation -feature -Xfatal-warnings -Werror",
+          "mapScalacOptions \"\" \"-deprecation,-feature,-Xfatal-warnings,-Werror\"",
           sbtConfig.commands,
           s"runBuild $effectiveScalaVersion $tq$effectiveConfig$tq ${project.effectiveTargets.mkString(" ")}"
         ).call(
