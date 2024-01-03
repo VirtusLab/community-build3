@@ -107,7 +107,7 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
-        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.2.8"
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-v0.3.0"
         options: -v ${{ github.workspace }}:/opencb/ -v ${{ github.workspace }}/github_key:/root/.ssh/github_key:ro
         run: |
           # Setup ssh required for downloading submodules
