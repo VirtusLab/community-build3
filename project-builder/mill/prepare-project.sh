@@ -30,7 +30,7 @@ if [[ -f .mill-version ]];then
 else
   echo "No .mill-version file found, detecting compatible mill version"
   if [[ -f ./mill ]];then
-    millVersion=`./mill -v resolve _ | grep "[Mm]ill.*version" | grep -E -o "(\d+\.?){3}"`
+    millVersion=`./mill -v $RESOLVE | grep "[Mm]ill.*version" | grep -E -o "(\d+\.?){3}"`
   else 
     for v in $MILL_0_11 $MILL_0_10 $MILL_0_9; do
       if ${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null; then
