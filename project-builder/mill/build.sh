@@ -44,7 +44,7 @@ millSettings=(
 function tryBuild() {
   mill=$1
   echo "Try build using $mill"
-  $mill ${millSettings[@]} runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+  $mill "${millSettings[@]}" runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
 }
 
 
