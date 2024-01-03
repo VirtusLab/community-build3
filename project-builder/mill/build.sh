@@ -25,6 +25,8 @@ echo Disting version $version for ${#targets[@]} targets: ${targets[@]}
 echo Project projectConfig: $projectConfig
 echo '##################################'
 
+scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 cd $repoDir
 
 millSettings=(
@@ -46,6 +48,6 @@ function tryBuild() {
 }
 
 
-# Retry only if previous build failed to start
-export MILL_VERSION=$millVersion
-tryBuild mill || ([[ -f ./mill && ! -s ../build-summary.txt ]] && tryBuild ./mill)
+if [[ -f .mill ]]; then tryBuild .mill
+else tryBuild "${scriptDir}/millw --mill-version $(cat .mill-version)"
+fi

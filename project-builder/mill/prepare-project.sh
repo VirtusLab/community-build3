@@ -19,6 +19,7 @@ scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 MILL_0_11=0.11.6
 MILL_0_10=0.10.12
+MILL_0_9=0.9.12
 RESOLVE="resolve _"
 
 cd $repoDir
@@ -26,36 +27,35 @@ millVersion=
 if [[ -f .mill-version ]];then
   millVersion=`cat .mill-version`
   echo "Found explicit mill version $millVersion"
-else 
-  if cs launch com.lihaoyi::mill-runner:$MILL_0_11 -M mill.runner.MillMain -- $RESOLVE; then
-    millVersion=$MILL_0_11
-  elif cs launch com.lihaoyi::mill-main:$MILL_0_10 -M mill.MillMain -- $RESOLVE; then
-    millVersion=$MILL_0_10
-  else
-    # Way slower, but sometimes passes
-    echo "Failed to resolve correct mill version using coursier, fallback to millw"
-    curl https://raw.githubusercontent.com/lefou/millw/main/millw -o millw
-    chmod +x ./millw
-    for v in $MILL_0_11 $MILL_0_10; do
-      if millw --mill-version $MILL_0_11 $RESOLVE; then
+el
+else
+  echo "No .mill-version file found, detecting compatible mill version"
+  if [[ -f ./mill ]];then
+    millVersion=`./mill -v resolve _ | grep "[Mm]ill.*version" | grep -E -o "(\d+\.?){3}"`
+  else 
+    for v in $MILL_0_11 $MILL_0_10 $MILL_0_9; do
+      if ${scriptDir}/millw --mill-version $v $RESOLVE; then
         millVersion=$v
-        break 0
+        break
       fi
     done 
-    if [[ -z "$millVersion" ]];then
-      echo "Failed to resolve correct mill version, abort"
-      exit 1
-    else
-      # Force found version in build
-      echo $millVersion > .mill-version
-    fi
-  fi # detect version fallback with millw
+  fi
+  if [[ -z "$millVersion" ]];then
+    echo "Failed to resolve correct mill version, abort"
+    exit 1
+  else
+    # Force found version in build
+    echo $millVersion > .mill-version
+  fi
 fi # detect version
 
 millBinaryVersion=`echo $millVersion | cut -d . -f 1,2`
 echo "Detected mill version=$millVersion, binary version: $millBinaryVersion"
+millBinaryVersionMajor=`echo $millVersion | cut -d . -f 1`
+millBinaryVersionMinor=`echo $millVersion | cut -d . -f 2`
+# 0.9 is the minimal verified supported version
 # 0.12 does not exit yet
-if [[ "$millBinaryVersion" == "0.9" ||  "$millBinaryVersion" == "0.12" ]]; then 
+if [[ "$millBinaryVersionMajor" -ne "0" || ( "$millBinaryVersionMinor" -lt "9" || "$millBinaryVersionMinor" -gt "11" ) ]]; then 
   echo "Unsupported mill version"
   exit 1
 fi
