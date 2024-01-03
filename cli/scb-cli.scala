@@ -1285,7 +1285,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
           if config.redirectLogs then os.PathAppendRedirect(logsFile)
           else os.Inherit
         os.proc(
-          if useLocal then projectDir / "mill" else "mill",
+          if useLocal then projectDir / "mill" else projectBuilderDir / "mill" / "millw",
           "--no-server",
           millScalaSetting,
           commands
