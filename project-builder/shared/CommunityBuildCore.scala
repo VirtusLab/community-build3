@@ -339,7 +339,7 @@ object Scala3CommunityBuild {
         remove: Seq[String]
     ): Seq[String] = {
       val matchPatterns = remove.filter { _.startsWith("MATCH:") }.map(_.stripPrefix("MATCH:"))
-      val filters = (append ++ remove).distinct.map { setting =>
+      val normalizedExcludeFragments = (append ++ remove).distinct.map { setting =>
         Seq[String => String](
           setting => if (setting.startsWith("--")) setting.tail else setting,
           setting => {
@@ -351,9 +351,15 @@ object Scala3CommunityBuild {
         ).reduce(_.andThen(_))
           .apply(setting)
       }
+      val SourceVersionPattern = raw"(3\.\d+|future)(-migration)?".r
+      // backward compatible version with Scala 2.12 (sbt)
+      def isSourceVersion(s: String) = SourceVersionPattern.findFirstIn(s).isDefined
       current
         .filterNot { s =>
-          filters.exists(_.contains(s)) || matchPatterns.exists(s.matches(_))
+          normalizedExcludeFragments.exists(_.contains(s)) || 
+            matchPatterns.exists(s.matches(_) || 
+            isSourceVersion(s)
+          )
         } ++ append.distinct
 
     }
