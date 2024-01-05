@@ -338,7 +338,7 @@ object Scala3CommunityBuild {
         append: Seq[String],
         remove: Seq[String]
     ): Seq[String] = {
-      val matching = remove.filter { _.startsWith("MATCH:") }.map(_.stripPrefix("MATCH:"))
+      val matchPatterns = remove.filter { _.startsWith("MATCH:") }.map(_.stripPrefix("MATCH:"))
       val filters = (append ++ remove).distinct.map { setting =>
         Seq[String => String](
           setting => if (setting.startsWith("--")) setting.tail else setting,
@@ -353,7 +353,7 @@ object Scala3CommunityBuild {
       }
       current
         .filterNot { s =>
-          filters.exists(_.contains(s)) || matching.exists(_.matches(s))
+          filters.exists(_.contains(s)) || matchPatterns.exists(s.matches(_))
         } ++ append.distinct
 
     }
