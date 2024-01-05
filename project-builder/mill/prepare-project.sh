@@ -30,17 +30,23 @@ if [[ -f .mill-version ]];then
 else
   echo "No .mill-version file found, detecting compatible mill version"
   if [[ -f ./mill ]];then
-    millVersion=`./mill -v $RESOLVE | grep "[Mm]ill.*version" | grep -E -o "(\d+\.?){3}"`
-  else 
+    echo "Found mill runner script, trying to resolve version"
+    millVersion=`./mill -v $RESOLVE | grep "Bill.*version" | grep -E -o "(\d+\.?){3}" || echo ""`
+  fi
+  if [[ "$millVersion" == "" ]]; then
+    echo "Trying one of predefiend mill versions"
     for v in $MILL_0_11 $MILL_0_10 $MILL_0_9; do
-      if ${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null; then
+      if `${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null`; then
+        echo "Successfully applied build using mill $v"
         millVersion=$v
         break
+      else 
+        echo "Failed to apply build using mill $v"
       fi
     done 
   fi
   if [[ -z "$millVersion" ]];then
-    echo "Failed to resolve correct mill version, abort"
+    echo "Failed to resolve compatible mill version, abort"
     exit 1
   else
     # Force found version in build
@@ -75,8 +81,8 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
 
   set -x
   # Cannot determinate did sed script was applied, so perform two ops each time
-  sed -i "s/$pattern/$replaceWith/" "$repoDir/$path" || true
-  sed -i -E "s/$pattern/$replaceWith/" "$repoDir/$path" || true
+  sed -i "s/$pattern/$replaceWith/" "$path" || true
+  sed -i -E "s/$pattern/$replaceWith/" "$path" || true
   set +x
 done
 

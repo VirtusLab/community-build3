@@ -57,7 +57,13 @@ class Scala3CommunityBuildMillAdapter(
   )
 
   val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
-  val useLegacyMillCross = config.millBinaryVersion.exists(_ == "0.10")
+  val useLegacyMillCross =
+    config.millBinaryVersion.exists(_.split('.').toList match {
+      case "0" :: minor :: _ =>
+        try minor.toInt <= 10
+        catch { case ex: Throwable => false }
+      case _ => false
+    })
 
   override def fix(implicit doc: SyntacticDocument): Patch = {
     val headerInject = {
@@ -123,19 +129,8 @@ class Scala3CommunityBuildMillAdapter(
           case _                                                      => Patch.empty
         }
 
-      case tree @ ValOrDefDef(Term.Name("scalacOptions"), tpe, body) =>
-        val (beforeNode, afterNode) = body match {
-          case scala.meta.Term.Apply(Term.Name("T") | Term.Select(_, Term.Name("T")), arg :: Nil) =>
-            arg match {
-              case block: scala.meta.Term.Block => (block.stats.head, block.stats.last)
-              case arg                          => (arg, arg)
-            }
-          case tree => (tree, tree)
-        }
-        List(
-          Patch.addLeft(beforeNode, "MillCommunityBuild.mapScalacOptions{ "),
-          Patch.addRight(afterNode, s" }")
-        ).asPatch
+      case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
+        Patch.addRight(body, ".mapScalacOptions()")
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {
@@ -199,12 +194,27 @@ class Scala3CommunityBuildMillAdapter(
     |      MillCommunityBuild.mapCrossVersionsAny(buildScalaVersion, cases): _*
     |    )
     |""".stripMargin
+    val MapScalacOptionsOps = """
+    |
+    |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
+    |  def mapScalacOptions() = MillCommunityBuild.mapScalacOptions(asSeq)
+    |}
+    |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
+    |  def mapScalacOptions() = asTarget.map(MillCommunityBuild.mapScalacOptions(_))
+    |}
+    |
+    |""".stripMargin
 
-    val injects = List(
-      Some(MillCommunityBuildInject),
-      if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
-      Some("// End of OpenCB code injects\n")
-    ).flatten.mkString("\n")
+    val injects = {
+      List(
+        MillCommunityBuildInject,
+        MapScalacOptionsOps
+      ) ++
+        Seq(
+          if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None
+        ).flatten ++
+        Seq("// End of OpenCB code injects\n")
+    }.mkString("\n")
 
   }
 
