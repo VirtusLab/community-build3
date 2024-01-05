@@ -177,18 +177,61 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
 
   val mapScalacOptions = keyTransformCommand("mapScalacOptions", Keys.scalacOptions) {
-    (args, _) => (_: Scope, currentScalacOptions: Seq[String]) =>
+    (args, extracted) => (scope: Scope, currentScalacOptions: Seq[String]) =>
+      val scalaVersion = extracted.get(scope / Keys.scalaVersion)
+      val name = extracted.get(scope / Keys.name)
       val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
       val append = safeArgs.lift(0).getOrElse(Nil)
+      // Make sure to not modify Scala 2 project scalacOptions
+      // these can compiled as transitive dependency of custom startup task
+      val filteredAppend =
+        if (scalaVersion.startsWith("3.")) append
+        else
+          append.filterNot{opt =>
+            val isScala3Exclusive = scala3ExclusiveFlags.exists(opt.startsWith(_))
+            if(isScala3Exclusive)
+              println(s"Exclude Scala3 specific scalacOption in Scala ${scalaVersion} module $name")
+            isScala3Exclusive
+          }
       val remove = safeArgs.lift(1).getOrElse(Nil)
       Scala3CommunityBuild.Utils.mapScalacOptions(
         current = currentScalacOptions,
-        append = append,
+        append = filteredAppend,
         remove = remove
       )
+    }
 
-  }
-
+  // format: off
+  val scala3ExclusiveFlags = Seq(
+    "-source", "-rewrite", "-from-tasty", "-new-syntax", "-old-syntax", "-indent", "-no-indent",
+    "-print-tasty", "-print-lines", "-uniqid", "-semanticdb-text", "-semanticdb-target",
+    "-coverage-out", "-explain-types", "-scalajs",
+    "-Vprofile" ,"-Vprofile-details" ,"-Vprofile-sorted-by", "-Vrepl-max-print-characters", "-Vrepl-max-print-elements",
+    "-Wimplausible-patterns",
+    "-Xcheck-macros", "-Xignore-scala2-macros", "-Ximplicit-search-limit",
+    "-Ximport-suggestion-timeout", "-Xmax-inlined-trees", "-Xmax-inlines",
+    "-Xprint-diff", "-Xprint-diff-del", "-Xprint-inline", "-Xprint-suspension",
+    "-Xrepl-disable-display", "-Xsemanticdb",
+    "-Xtarget", "-Xunchecked-java-output-version",
+    "-Xverify-signatures", "-Xwiki-syntax",
+    "-Ycc-debug", "-Ycc-log", "-Ycc-new", "-Ycc-print-setup",
+    "-Ycheck-all-patmat", "-Ycheck-constraint-deps", "-Ycheck-mods", "-Ycheck-reentrant",
+    "-Ycompile-scala2-library", "-Ycook-comments", "-Ycook-docs",
+    "-Ydebug-error", "-Ydebug-flags", "-Ydebug-macros", "-Ydebug-missing-refs", "-Ydebug-names", "-Ydebug-pos", "-Ydebug-trace", "-Ydebug-tree-with-id", "-Ydebug-unpickling",
+    "-Ydetailed-stats", "-Ydrop-comments", "-Ydrop-docs", "-Ydump-sbt-inc",
+    "-Yexplain-lowlevel", "-Yexplicit-nulls",
+    "-Yforce-inline-while-typing", "-Yforce-sbt-phases", "-Yforce-sbt-phases.", "-Yfrom-tasty-ignore-list",
+    "-Yinstrument", "-Yinstrument-defs",
+    "-Ykind-projector", "-Ylegacy-lazy-vals",
+    "-Yno-decode-stacktraces", "-Yno-deep-subtypes", "-Yno-double-bindings", "-Yno-enrich-error-messages", "-Yno-experimental",
+    "-Yno-kind-polymorphism", "-Yno-patmat-opt",
+    "-Youtput-only-tasty", "-Yplain-printer",
+    "-Yprint-debug", "-Yprint-debug-owners", "-Yprint-level", "-Yprint-pos", "-Yprint-pos-syms", "-Yprint-syms", "-Yprint-tasty",
+    "-Yread-docs", "-Yrecheck-test", "-Yrequire-targetName", "-Yretain-trees",
+    "-Ysafe-init", "-Ysafe-init-global", "-Yscala2-unpickler", "-Ysemanticdb", "-Yshow-print-errors",
+    "-Yshow-suppressed-errors", "-Yshow-tree-ids", "-Yshow-var-bounds", "-Ytest-pickler"  
+ )
+  // format: on
   import sbt.librarymanagement.InclExclRule
   val excludeLibraryDependency =
     keyTransformCommand("excludeLibraryDependency", Keys.allExcludeDependencies) {
