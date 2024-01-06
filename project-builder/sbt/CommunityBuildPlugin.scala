@@ -179,7 +179,6 @@ object CommunityBuildPlugin extends AutoPlugin {
   val mapScalacOptions = keyTransformCommand("mapScalacOptions", Keys.scalacOptions) {
     (args, extracted) => (scope: Scope, currentScalacOptions: Seq[String]) =>
       val scalaVersion = extracted.get(scope / Keys.scalaVersion)
-      val name = extracted.get(scope / Keys.name)
       val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
       val append = safeArgs.lift(0).getOrElse(Nil)
       // Make sure to not modify Scala 2 project scalacOptions
@@ -190,7 +189,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           append.filterNot{opt =>
             val isScala3Exclusive = scala3ExclusiveFlags.exists(opt.startsWith(_))
             if(isScala3Exclusive)
-              println(s"Exclude Scala3 specific scalacOption in Scala ${scalaVersion} module $name")
+              println(s"Exclude Scala3 specific scalacOption in Scala ${scalaVersion} module $scope")
             isScala3Exclusive
           }
       val remove = safeArgs.lift(1).getOrElse(Nil)
