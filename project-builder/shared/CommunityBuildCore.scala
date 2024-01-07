@@ -333,35 +333,49 @@ object Scala3CommunityBuild {
       }
     }
 
+    private val multiStringSettings = Seq(
+      "-scalajs-mapSourceURI", "-language",
+      "-Wconf","-Xmacro-settings","-Yimports","-Yfrom-tasty-ignore-list"
+    )
+
     def mapScalacOptions(
         current: Seq[String],
         append: Seq[String],
         remove: Seq[String]
     ): Seq[String] = {
-      val matchPatterns = remove.filter { _.startsWith("MATCH:") }.map(_.stripPrefix("MATCH:"))
-      val normalizedExcludeFragments = (append ++ remove).distinct.map { setting =>
+      val (removeMatchSettings, removeSettings) = remove.partition { _.startsWith("MATCH:") }
+      val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
+      val normalizedExcludePatterns = (append ++ removeSettings).distinct.map { setting =>
         Seq[String => String](
           setting => if (setting.startsWith("--")) setting.tail else setting,
           setting => {
             setting.indexOf(':') match {
               case -1 => setting
-              case n  => setting.substring(0, n)
+              case n  =>
+                 val name = setting.substring(0, n)
+                 def pattern =  s"$name(:.*)?"
+                 if(multiStringSettings.contains(name)) setting // use original full setting
+                 else pattern
             }
-          }
+          },
+          setting => raw"^-?$setting"
         ).reduce(_.andThen(_))
           .apply(setting)
       }
-      val SourceVersionPattern = raw"(3\.\d+|future)(-migration)?".r
-      // backward compatible version with Scala 2.12 (sbt)
-      def isSourceVersion(s: String) = SourceVersionPattern.findFirstIn(s).isDefined
+      val SourceVersionPattern = raw"^(3\.\d+|future)(-migration)?$$".r
       current
         .filterNot { s =>
-          normalizedExcludeFragments.exists(_.contains(s)) || 
-            matchPatterns.exists(s.matches(_) || 
-            isSourceVersion(s)
-          )
+          def isMatching(reason: String, found: Option[String]): Boolean = found match {
+            case Some(matched) => 
+              // if(!append.contains(s)) // debug only
+              //   println(s"Filter out '$s', $reason '$matched'")
+              true
+            case _ => false
+          }
+          isMatching("matches setting pattern", normalizedExcludePatterns.find(s.matches(_))) || 
+            isMatching("matches regex", matchPatterns.find(s.matches(_))) || 
+            isMatching("is source version",SourceVersionPattern.findFirstIn(s.trim()))          
         } ++ append.distinct
-
     }
 
   }
