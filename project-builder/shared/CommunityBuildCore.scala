@@ -338,6 +338,10 @@ object Scala3CommunityBuild {
       "-Wconf","-Xmacro-settings","-Yimports","-Yfrom-tasty-ignore-list"
     )
 
+    object logOnce extends Function[String, Unit]{
+      val logged = collection.mutable.Set.empty[String]
+      override def apply(v :String): Unit = if(logged.add(v)) println(s"OpenCB::$v")
+    }
     def mapScalacOptions(
         current: Seq[String],
         append: Seq[String],
@@ -346,11 +350,11 @@ object Scala3CommunityBuild {
       val (removeMatchSettings, removeSettings) = remove.partition { _.startsWith("MATCH:") }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
       
+      def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
+      val definedSourceVersion = current.find(isSourceVersion)
       val appendSettings = {
-        def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
-        val definedSourceVersion = current.find(isSourceVersion)
         def check(setting: String, expr: Boolean, reason: => String) = {
-          if(expr) println(s"Would not apply setting `$setting`: $reason")
+          if(expr) logOnce(s"Would not apply setting `$setting`: $reason")
           expr
         }
         append.filterNot{  setting => 
@@ -379,14 +383,14 @@ object Scala3CommunityBuild {
         .filterNot { s =>
           def isMatching(reason: String, found: Option[String]): Boolean = found match {
             case Some(matched) => 
-              // if(!appendSettings.contains(s)) // debug only
-              //   println(s"Filter out '$s', $reason '$matched'")
+              if(!appendSettings.contains(s))
+                logOnce(s"Filter out '$s', $reason '$matched'")
               true
             case _ => false
           }
           isMatching("matches setting pattern", normalizedExcludePatterns.find(s.matches(_))) || 
             isMatching("matches regex", matchPatterns.find(s.matches(_))) || 
-            isMatching("is source version",SourceVersionPattern.findFirstIn(s.trim()))     
+            definedSourceVersion.isEmpty && isMatching("is dangling source version",SourceVersionPattern.findFirstIn(s.trim()))     
         } ++ appendSettings.distinct
     }
 

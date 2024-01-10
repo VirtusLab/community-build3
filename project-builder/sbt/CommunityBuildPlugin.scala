@@ -113,7 +113,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           .filter(_.matches(targetVersion, currentVersion))
           .flatMap(_.apply(targetVersion))
           .map { version =>
-            println(
+            logOnce(
               s"Setting version ${version.render} for ${scope} based on dual versioning ${dualVersioning}"
             )
             version.render
@@ -141,7 +141,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
           val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
           def updateVersion(fromVersion: String) = {
-            println(
+            logOnce(
               s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
             )
             scalaVersion
@@ -168,7 +168,7 @@ object CommunityBuildPlugin extends AutoPlugin {
             case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
             case _ => // if version is not a part of cross version allow only current version
               val allowedCrossVersions = mapVersions(currentScalaWithPartial)
-              println(
+              logOnce(
                 s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
               )
               allowedCrossVersions
@@ -186,10 +186,10 @@ object CommunityBuildPlugin extends AutoPlugin {
       val filteredAppend =
         if (scalaVersion.startsWith("3.")) append
         else
-          append.filterNot{opt =>
+          append.filterNot { opt =>
             val isScala3Exclusive = scala3ExclusiveFlags.exists(opt.startsWith(_))
-            if(isScala3Exclusive)
-              println(s"Exclude Scala3 specific scalacOption in Scala ${scalaVersion} module $scope")
+            if (isScala3Exclusive)
+              logOnce(s"Exclude Scala3 specific scalacOption in Scala ${scalaVersion} module $scope")
             isScala3Exclusive
           }
       val remove = safeArgs.lift(1).getOrElse(Nil)
@@ -198,7 +198,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         append = filteredAppend,
         remove = remove
       )
-    }
+  }
 
   // format: off
   val scala3ExclusiveFlags = Seq(
@@ -274,16 +274,22 @@ object CommunityBuildPlugin extends AutoPlugin {
       val r = sbt.Project.relation(extracted.structure, true)
       val allDefs = r._1s.toSeq
       val projectScopes = allDefs.filter(_.key == task.key).map(_.scope).distinct
-      val globalScopes = Seq(Scope.Global, Scope.ThisScope)
-      val scopes: Seq[Scope] = (projectScopes ++ globalScopes).distinct
-      val redefined = task match {
-        case setting: SettingKey[T] =>
-          scopes.map(scope => (scope / setting) ~= (v => withArgs(scope, v)))
-        case task: TaskKey[T] =>
-          scopes.map(scope => (scope / task) ~= (v => withArgs(scope, v)))
+      val globalScopes = Seq(Scope.Global)
+      def reapply(scopes: Seq[Scope]): State = {
+        val redefined = task match {
+          case setting: SettingKey[T] =>
+            scopes.map(scope => (scope / setting) ~= (v => withArgs(scope, v)))
+          case task: TaskKey[T] =>
+            scopes.map(scope => (scope / task) ~= (v => withArgs(scope, v)))
+        }
+        val session = extracted.session.appendRaw(redefined)
+        BuiltinCommands.reapply(session, structure, state)
       }
-      val session = extracted.session.appendRaw(redefined)
-      BuiltinCommands.reapply(session, structure, state)
+      try reapply(globalScopes ++ projectScopes)
+      catch {case ex: Throwable =>
+        logOnce(s"Failed to reapply settings in $name: ${ex.getMessage}, retry without global scopes")
+        reapply(projectScopes)
+      }
     }
 
     type ProjectBasedSettingMapping[T] = (Seq[String], Extracted) => (ProjectRef, T) => T
