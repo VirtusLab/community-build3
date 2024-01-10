@@ -29,15 +29,7 @@ scalaBinaryVersionMajor=`echo $scalaVersion | cut -d . -f 1`
 scalaBinaryVersionMinor=`echo $scalaVersion | cut -d . -f 2`
 echo "Scala binary version found: $scalaBinaryVersion"
 
-sourceVersion=`echo $projectConfig | jq -r '.sourceVersion // ""'`
-if [[ -z "$sourceVersion" ]]; then
-  sourceVersion="$scalaBinaryVersion-migration"
-  echo "Implicitly using source version $sourceVersion"
-else 
-  echo "Using configured source version: $sourceVersion"
-fi
-
-commonAppendScalacOptions="-source:$sourceVersion,-Wconf:msg=can be rewritten automatically under:s"
+commonAppendScalacOptions="-source:$scalaBinaryVersion-migration,-Wconf:msg=can be rewritten automatically under -rewrite -source $scalaBinaryVersion-migration:s"
 commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
 echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
 echo "Append: $commonAppendScalacOptions"
