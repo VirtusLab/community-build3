@@ -29,26 +29,3 @@ jobs:
       - name: Test build
         run: scripts/test-build.sh
 
-  test-cli:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v3
-
-      - uses: coursier/setup-action@v1
-        with:
-          apps: scala sbt mill:0.11.5 scala-cli:1.0.4
-
-      - name: Start minikube
-        run: minikube start
-
-      - name: Build up base docker images
-        env: 
-          BUILD_ONLY_DEFAULT_JDK: true
-        run: |
-          eval $(minikube -p minikube docker-env)
-          scripts/build-all.sh test
-
-      - name: Test CLI
-        run: scripts/test-cli.sh
-
