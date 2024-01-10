@@ -84,7 +84,7 @@ object Scala3CommunityBuild {
         sourceVersion.map(v => s""""sourceVersion": "$v"""")
       ).flatten
       val optionalsString =
-        if (optionals.isEmpty) ""
+      if (optionals.isEmpty) ""
         else optionals.mkString(", ", ", ", "")
       s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}$optionalsString}"""
     }
@@ -346,15 +346,15 @@ object Scala3CommunityBuild {
       val (removeMatchSettings, removeSettings) = remove.partition { _.startsWith("MATCH:") }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
       
-      val appendSettings ={
+      val appendSettings = {
         def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
         val definedSourceVersion = current.find(isSourceVersion)
-        def check(expr: Boolean, reason: => String) = {
-          if(expr) println(s"Would not apply setting: $reason")
+        def check(setting: String, expr: Boolean, reason: => String) = {
+          if(expr) println(s"Would not apply setting `$setting`: $reason")
           expr
         }
         append.filterNot{  setting => 
-          check(hasDefinedSourceVersion && isSourceVersion(setting), s"Project has predefined source version: ${definedSourceVersion.get}")
+          check(setting, definedSourceVersion.nonEmpty && isSourceVersion(setting), s"Project has predefined source version: ${definedSourceVersion.get}")
         }
       }
       val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
@@ -379,7 +379,7 @@ object Scala3CommunityBuild {
         .filterNot { s =>
           def isMatching(reason: String, found: Option[String]): Boolean = found match {
             case Some(matched) => 
-              // if(!append.contains(s)) // debug only
+              // if(!appendSettings.contains(s)) // debug only
               //   println(s"Filter out '$s', $reason '$matched'")
               true
             case _ => false
@@ -387,7 +387,7 @@ object Scala3CommunityBuild {
           isMatching("matches setting pattern", normalizedExcludePatterns.find(s.matches(_))) || 
             isMatching("matches regex", matchPatterns.find(s.matches(_))) || 
             isMatching("is source version",SourceVersionPattern.findFirstIn(s.trim()))     
-        } ++ append.distinct
+        } ++ appendSettings.distinct
     }
 
   }
