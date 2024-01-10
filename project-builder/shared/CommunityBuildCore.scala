@@ -345,7 +345,19 @@ object Scala3CommunityBuild {
     ): Seq[String] = {
       val (removeMatchSettings, removeSettings) = remove.partition { _.startsWith("MATCH:") }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
-      val normalizedExcludePatterns = (append ++ removeSettings).distinct.map { setting =>
+      
+      val appendSettings ={
+        def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
+        val definedSourceVersion = current.find(isSourceVersion)
+        def check(expr: Boolean, reason: => String) = {
+          if(expr) println(s"Would not apply setting: $reason")
+          expr
+        }
+        append.filterNot{  setting => 
+          check(hasDefinedSourceVersion && isSourceVersion(setting), s"Project has predefined source version: ${definedSourceVersion.get}")
+        }
+      }
+      val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
         Seq[String => String](
           setting => if (setting.startsWith("--")) setting.tail else setting,
           setting => {
@@ -374,7 +386,7 @@ object Scala3CommunityBuild {
           }
           isMatching("matches setting pattern", normalizedExcludePatterns.find(s.matches(_))) || 
             isMatching("matches regex", matchPatterns.find(s.matches(_))) || 
-            isMatching("is source version",SourceVersionPattern.findFirstIn(s.trim()))          
+            isMatching("is source version",SourceVersionPattern.findFirstIn(s.trim()))     
         } ++ append.distinct
     }
 
