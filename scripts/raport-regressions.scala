@@ -20,7 +20,10 @@ import scala.concurrent.duration.*
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
 
-import Printer.{println, *}
+val printer: Printer = 
+  if sys.env.contains("FOR_HTML") then Printer.HTMLCompatPrinter 
+  else Printer.StandardPrinter
+import printer.{println, *}
 
 given ExecutionContext = ExecutionContext.global
 
@@ -266,7 +269,7 @@ def listFailedProjects(
           val name = label.padTo(8, " ").mkString
           val ver = projectVersions(project)
           println(
-            s"$color$name${RESET} failure in ${BOLD}${Printer
+            s"$color$name${RESET} failure in ${BOLD}${printer
               .projectUrlString(project.name, ver, buildURL)}$LINE_BREAK"
           )
         val compilerFailure = summary.compilerFailure
@@ -533,3 +536,59 @@ def isVersionNewerThen(version: String, reference: String) =
 end isVersionNewerThen
 def isVersionNewerOrEqualThen(version: String, reference: String) =
   version == reference || isVersionNewerThen(version, reference)
+
+
+sealed trait Printer{
+  import scala.Console
+  def RED: String
+  def YELLOW: String
+  def MAGENTA: String
+  def RESET :String
+  def BOLD :String
+  def LINE_BREAK : String
+
+  def println(text: String): Unit
+  def printLine(): Unit
+  def log(text: String): Unit
+  def showUrl(url: String, text: String): String
+  
+  final def projectUrlString(projectName: String, version: String, buildUrl: String): String = {
+    val projectVerString = if version.isEmpty then projectName else s"$projectName @ $version"
+    if buildUrl.isEmpty then projectVerString
+    else showUrl(buildUrl, projectVerString)
+  }
+}
+
+object Printer{
+  object StandardPrinter extends Printer{
+    import scala.Console
+    override val RED = Console.RED
+    override val YELLOW = Console.YELLOW
+    override val MAGENTA = Console.MAGENTA
+    override val RESET = Console.RESET
+    override val BOLD = Console.BOLD
+    override val LINE_BREAK = ""
+
+    override def println(text: String): Unit = Predef.println(text)
+    override def log(text: String) = Predef.println(text)
+    override def printLine() = println("-" * 20)
+    override def showUrl(url: String, text: String): String = 
+      s"$text - $url"
+  }
+
+
+  object HTMLCompatPrinter extends Printer{
+    override val RED = """<span style="color:red">"""
+    override val YELLOW = """<span style="color:yellow">"""
+    override val MAGENTA = """<span style="color:magenta">"""
+    override val RESET = """</span>"""
+    override val BOLD = """<span style="font-weight:bold">"""
+    override val LINE_BREAK = "<br>"
+
+    override def println(text: String): Unit = Predef.println(s"$text")
+    override def log(text: String) = System.err.println(s"$text")
+    override def printLine() = println("<hr>")
+    override def showUrl(url: String, text: String): String= 
+      s"""<a href="$url">$text</a>"""
+  }
+}

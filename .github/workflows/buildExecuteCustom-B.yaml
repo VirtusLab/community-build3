@@ -65,9 +65,10 @@ jobs:
           lastRC="$(./scripts/lastVersionRC.sc)"
           lastStable=$(./scripts/lastVersionStable.sc)
 
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion > raport-full.md
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
+          FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > rendered.raport-full.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
       - name: Upload raports
         uses: actions/upload-artifact@v3
@@ -87,6 +88,6 @@ jobs:
         uses: ./.github/actions/push-raport-to-gh-pages
         with:
           artifact-name: build-raports
-          file-to-pick: raport-full.md
+          file-to-pick: rendered.raport-full.md
           build-title: ${{ needs.execute-build-plan.outputs.used-scala-version }}
           token: ${{ steps.generate-token.outputs.token }}
