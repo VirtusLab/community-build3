@@ -2,9 +2,15 @@ package fix
 
 object MillScalacOptionsOverride {
   object MillCommunityBuild{
-    def mapScalacOptions(current: Seq[String]): Seq[String] = ???
+    implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
+      def mapScalacOptions(): Seq[String] = ???
+    }
+    implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.T[Seq[String]]){
+      def mapScalacOptions(): mill.T[Seq[String]] = ???
+    }
   }
-  def scalacOptions = MillCommunityBuild.mapScalacOptions{ List.empty[String] }
+  import MillCommunityBuild._
+  def scalacOptions = List.empty[String].mapScalacOptions()
   object mill{
     import scala.language.implicitConversions
     trait T[U]
@@ -15,29 +21,29 @@ object MillScalacOptionsOverride {
   import mill._
 
   object module {
-    val scalacOptions = MillCommunityBuild.mapScalacOptions{ Nil }
+    val scalacOptions = Nil.mapScalacOptions()
   }
   object module2 {
-    def scalacOptions: Seq[String] = MillCommunityBuild.mapScalacOptions{ Seq("-Xprint:typer") }
+    def scalacOptions: Seq[String] = Seq("-Xprint:typer").mapScalacOptions()
   }
   
   object module3 {
-    def scalacOptions = mill.T(MillCommunityBuild.mapScalacOptions{ module2.scalacOptions })
+    def scalacOptions = mill.T(module2.scalacOptions).mapScalacOptions()
   }
   
   class moduleDef {
-    def scalacOptions: T[Seq[String]] = MillCommunityBuild.mapScalacOptions{ {
+    def scalacOptions: T[Seq[String]] = {
       val opt1 = "-release:11"
       Seq(opt1)
-    } }
+    }.mapScalacOptions()
   }
   class moduleDef2 extends moduleDef {
-    override val scalacOptions: T[Seq[String]] = MillCommunityBuild.mapScalacOptions{ MillScalacOptionsOverride.scalacOptions }
+    override val scalacOptions: T[Seq[String]] = MillScalacOptionsOverride.scalacOptions.mapScalacOptions()
   }
   object moduleDef3 extends moduleDef {
     override def scalacOptions = T {
-      MillCommunityBuild.mapScalacOptions{ super.scalacOptions ++ Nil }
-    }
+      super.scalacOptions ++ Nil
+    }.mapScalacOptions()
   }
  
 }
