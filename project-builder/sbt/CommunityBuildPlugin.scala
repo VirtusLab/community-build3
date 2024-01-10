@@ -181,22 +181,29 @@ object CommunityBuildPlugin extends AutoPlugin {
       val scalaVersion = extracted.get(scope / Keys.scalaVersion)
       val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
       val append = safeArgs.lift(0).getOrElse(Nil)
+      lazy val (appendScala3Exclusive, appendScala3Inclusive) = append.partition { opt =>
+        scala3ExclusiveFlags.exists(opt.startsWith(_))    
+      }
       // Make sure to not modify Scala 2 project scalacOptions
       // these can compiled as transitive dependency of custom startup task
       val filteredAppend =
         if (scalaVersion.startsWith("3.")) append
-        else
-          append.filterNot { opt =>
-            val isScala3Exclusive = scala3ExclusiveFlags.exists(opt.startsWith(_))
-            if (isScala3Exclusive)
-              logOnce(s"Exclude Scala3 specific scalacOption in Scala ${scalaVersion} module $scope")
-            isScala3Exclusive
+        else {
+          appendScala3Exclusive.foreach{ setting =>
+            logOnce(s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope")
           }
+          append.diff(appendScala3Exclusive) ++ appendScala3Inclusive
+        }
+        
       val remove = safeArgs.lift(1).getOrElse(Nil)
+      val filteredRemove =  
+        if (scalaVersion.startsWith("3.")) remove
+        else remove ++ appendScala3Exclusive
+
       Scala3CommunityBuild.Utils.mapScalacOptions(
         current = currentScalacOptions,
         append = filteredAppend,
-        remove = remove
+        remove = filteredRemove
       )
   }
 
