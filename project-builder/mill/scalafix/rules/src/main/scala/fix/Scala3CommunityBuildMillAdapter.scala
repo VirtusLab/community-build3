@@ -130,7 +130,7 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        Patch.addRight(body, ".mapScalacOptions()")
+        Patch.addAround(body,"{ ", " }.mapScalacOptions()")
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {

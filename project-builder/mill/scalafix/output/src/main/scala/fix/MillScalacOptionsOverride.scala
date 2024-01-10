@@ -10,7 +10,7 @@ object MillScalacOptionsOverride {
     }
   }
   import MillCommunityBuild._
-  def scalacOptions = List.empty[String].mapScalacOptions()
+  def scalacOptions = { List.empty[String] }.mapScalacOptions()
   object mill{
     import scala.language.implicitConversions
     trait T[U]
@@ -21,29 +21,29 @@ object MillScalacOptionsOverride {
   import mill._
 
   object module {
-    val scalacOptions = Nil.mapScalacOptions()
+    val scalacOptions = { Nil }.mapScalacOptions()
   }
   object module2 {
-    def scalacOptions: Seq[String] = Seq("-Xprint:typer").mapScalacOptions()
+    def scalacOptions: Seq[String] = { Seq("-Xprint:typer") }.mapScalacOptions()
   }
   
   object module3 {
-    def scalacOptions = mill.T(module2.scalacOptions).mapScalacOptions()
+    def scalacOptions = { mill.T(module2.scalacOptions) }.mapScalacOptions()
   }
   
   class moduleDef {
-    def scalacOptions: T[Seq[String]] = {
+    def scalacOptions: T[Seq[String]] = { {
       val opt1 = "-release:11"
       Seq(opt1)
-    }.mapScalacOptions()
+    } }.mapScalacOptions()
   }
   class moduleDef2 extends moduleDef {
-    override val scalacOptions: T[Seq[String]] = MillScalacOptionsOverride.scalacOptions.mapScalacOptions()
+    override val scalacOptions: T[Seq[String]] = { MillScalacOptionsOverride.scalacOptions }.mapScalacOptions()
   }
   object moduleDef3 extends moduleDef {
-    override def scalacOptions = T {
+    override def scalacOptions = { T {
       super.scalacOptions ++ Nil
-    }.mapScalacOptions()
+    } }.mapScalacOptions()
   }
  
 }
