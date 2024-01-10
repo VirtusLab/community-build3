@@ -29,7 +29,7 @@ scalaBinaryVersionMajor=`echo $scalaVersion | cut -d . -f 1`
 scalaBinaryVersionMinor=`echo $scalaVersion | cut -d . -f 2`
 echo "Scala binary version found: $scalaBinaryVersion"
 
-commonAppendScalacOptions="-source:$scalaBinaryVersion-migration,-Wconf:msg=can be rewritten automatically under -rewrite -source $scalaBinaryVersion-migration:s"
+commonAppendScalacOptions="-source:$scalaBinaryVersion-migration,-Wconf:msg=can be rewritten automatically under:s"
 commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
 echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
 echo "Append: $commonAppendScalacOptions"

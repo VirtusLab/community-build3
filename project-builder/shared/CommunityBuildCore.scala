@@ -351,15 +351,29 @@ object Scala3CommunityBuild {
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
       
       def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
-      val definedSourceVersion = current.find(isSourceVersion)
+      val SourceVersionPattern = raw"^((3\.\d+|future)(-migration)?)$$".r
+      val definedSourceSetting = current.find(isSourceVersion)
+      lazy val definedSourceVersion: Option[String] = 
+        definedSourceSetting.flatMap(_.split(":").drop(1).headOption) // -source:version
+        .orElse(current.find(SourceVersionPattern.findFirstIn(_).isDefined)) // -source version
+        .flatMap(SourceVersionPattern.findFirstMatchIn(_))
+        .flatMap(m => Option(m.group(1)))
+      val forceFutureMigrationVersion = definedSourceVersion.contains("future")
+
       val appendSettings = {
-        def check(setting: String, expr: Boolean, reason: => String) = {
+        def excludeIf(setting: String, expr: Boolean, reason: => String) = {
           if(expr) logOnce(s"Would not apply setting `$setting`: $reason")
           expr
         }
+        val forcedAppendSettings: Seq[String] = Seq( 
+          if(forceFutureMigrationVersion) Some("-source:future-migration") else None
+        ).flatten
         append.filterNot{  setting => 
-          check(setting, definedSourceVersion.nonEmpty && isSourceVersion(setting), s"Project has predefined source version: ${definedSourceVersion.get}")
-        }
+          excludeIf(setting, 
+            isSourceVersion(setting) && (definedSourceSetting.nonEmpty || forceFutureMigrationVersion),
+            s"Project has predefined source version: ${definedSourceSetting.get}"
+          )
+        } ++ forcedAppendSettings
       }
       val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
         Seq[String => String](
@@ -378,7 +392,6 @@ object Scala3CommunityBuild {
         ).reduce(_.andThen(_))
           .apply(setting)
       }
-      val SourceVersionPattern = raw"^(3\.\d+|future)(-migration)?$$".r
       current
         .filterNot { s =>
           def isMatching(reason: String, found: Option[String]): Boolean = found match {
