@@ -273,7 +273,9 @@ object CommunityBuildPlugin extends AutoPlugin {
       val withArgs = mapping(args, extracted)
       val r = sbt.Project.relation(extracted.structure, true)
       val allDefs = r._1s.toSeq
-      val scopes = allDefs.filter(_.key == task.key).map(_.scope).distinct
+      val projectScopes = allDefs.filter(_.key == task.key).map(_.scope).distinct
+      val globalScopes = Seq(Scope.Global, Scope.ThisScope)
+      val scopes: Seq[Scope] = (projectScopes ++ globalScopes).distinct
       val redefined = task match {
         case setting: SettingKey[T] =>
           scopes.map(scope => (scope / setting) ~= (v => withArgs(scope, v)))
