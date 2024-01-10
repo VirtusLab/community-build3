@@ -105,7 +105,6 @@ case class ProjectBuildConfig(
     sbt: SbtConfig = SbtConfig(),
     mill: MillConfig = MillConfig(),
     tests: TestingMode = TestingMode.Full,
-    sourceVersion: Option[String] = None,
     // We should use Option[Int] here, but json4s fails to resolve signature https://github.com/json4s/json4s/issues/1035
     sourcePatches: List[SourcePatch] = Nil
 ) derives ConfigReader
