@@ -75,15 +75,17 @@ jobs:
           lastRC="$(./scripts/lastVersionRC.sc)"
           lastStable=$(./scripts/lastVersionStable.sc)
 
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion > raport-full.md
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
+          FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > rendered.raport-full.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
           lastWeeklyVersionFile=./last-successfull-weekly-version
           if [[ -f "$lastWeeklyVersionFile" ]]; then
             lastWeeklyVersion=$(cat $lastWeeklyVersionFile)
-            echo "Comparing with last foundly weekly version: ${lastWeeklyVersion}"
-            scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md
+            echo "Comparing with last found weekly version: ${lastWeeklyVersion}"
+            scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md
+            scala-cli scripts/compareVersions.scala -- $scalaVersion $lastWeeklyVersion > raport-cmp-$lastWeeklyVersion.md
           else 
             echo "Not found previous weekly build version."
           fi
@@ -105,6 +107,6 @@ jobs:
         uses: ./.github/actions/push-raport-to-gh-pages
         with:
           artifact-name: build-raports
-          file-to-pick: raport-full.md
+          file-to-pick: rendered.raport-full.md
           build-title: ${{ needs.execute-build-plan.outputs.used-scala-version }}
           token: ${{ steps.generate-token.outputs.token }}

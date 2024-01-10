@@ -45,7 +45,7 @@ jobs:
           ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
           ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
         run: |
-          scala-cli scripts/raport-regressions.scala scripts/console_printer.scala -- \
+          scala-cli scripts/raport-regressions.scala -- \
             ${{ inputs.scala-version }} \
             --compareWith=${{ inputs.compare-with-scala-version }} \
             --buildId=${{ inputs.build-id }} \
@@ -58,7 +58,7 @@ jobs:
           ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
         run: |
           scalaVersion=${{ inputs.scala-version }}
-          scala-cli scripts/raport-regressions.scala scripts/md_printer.scala -- $scalaVersion > raport-full.md
+          FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.md
 
       - name: Upload raports
         uses: actions/upload-artifact@v3
