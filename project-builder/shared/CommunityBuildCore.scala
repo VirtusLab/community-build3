@@ -349,32 +349,40 @@ object Scala3CommunityBuild {
     ): Seq[String] = {
       val (removeMatchSettings, removeSettings) = remove.partition { _.startsWith("MATCH:") }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
+
+      val (required, standardAppendSettings) = append.partition(_.startsWith("REQUIRE:"))
+      val requiredAppendSettings = required.map(_.stripPrefix("REQUIRE:"))
       
       def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
+      def resolveSourceVersion(v: String): Option[String] = v.split(":").drop(1).headOption
       val SourceVersionPattern = raw"^((3\.\d+|future)(-migration)?)$$".r
       val definedSourceSetting = current.find(isSourceVersion)
       lazy val definedSourceVersion: Option[String] = 
-        definedSourceSetting.flatMap(_.split(":").drop(1).headOption) // -source:version
+        definedSourceSetting.flatMap(resolveSourceVersion) // -source:version
         .orElse(current.find(SourceVersionPattern.findFirstIn(_).isDefined)) // -source version
         .flatMap(SourceVersionPattern.findFirstMatchIn(_))
         .flatMap(m => Option(m.group(1)))
-      val forceFutureMigrationVersion = definedSourceVersion.contains("future")
+      lazy val requiredSourceVersion = requiredAppendSettings.find(isSourceVersion).flatMap(resolveSourceVersion)
+      val forceSourceVersion = definedSourceVersion.contains("future") || requiredSourceVersion.isDefined
 
       val appendSettings = {
         def excludeIf(setting: String, expr: Boolean, reason: => String) = {
           if(expr) logOnce(s"Would not apply setting `$setting`: $reason")
           expr
         }
+ 
         val forcedAppendSettings: Seq[String] = Seq( 
-          if(forceFutureMigrationVersion) Some("-source:future-migration") else None
+          if(forceSourceVersion) Some(s"-source:${requiredSourceVersion.getOrElse("future-migration")}") else None
         ).flatten
-        append.filterNot{  setting => 
+        
+        standardAppendSettings.filterNot{  setting => 
           excludeIf(setting, 
-            isSourceVersion(setting) && (definedSourceSetting.nonEmpty || forceFutureMigrationVersion),
+            isSourceVersion(setting) && (definedSourceSetting.nonEmpty || forceSourceVersion),
             s"Project has predefined source version: ${definedSourceSetting.get}"
           )
         } ++ forcedAppendSettings
       }
+
       val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
         Seq[String => String](
           setting => if (setting.startsWith("--")) setting.tail else setting,
