@@ -515,8 +515,8 @@
   "ahjohannessen/sec":{
     "project":"ahjohannessen/sec",
     "repoUrl":"https://github.com/ahjohannessen/sec.git",
-    "revision":"v0.40.2",
-    "version":"0.40.2",
+    "revision":"v0.40.3",
+    "version":"0.40.3",
     "targets":"io.github.ahjohannessen%sec-core io.github.ahjohannessen%sec-fs2 io.github.ahjohannessen%sec-fs2-client io.github.ahjohannessen%sec-tsc",
     "config":{
       "projects":{
@@ -5190,6 +5190,47 @@
       ]
     }
   },
+  "buildo/retro":{
+    "project":"buildo/retro",
+    "repoUrl":"https://github.com/buildo/retro.git",
+    "revision":"metarpheus-v1.0.0",
+    "version":"1.0.0",
+    "targets":"io.buildo%toctoc-core io.buildo%toctoc-ldap",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.0.0\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "cake-lier/tuples-space-client":{
     "project":"cake-lier/tuples-space-client",
     "repoUrl":"https://github.com/cake-lier/tuples-space-client.git",
@@ -6266,8 +6307,8 @@
   "clulab/processors":{
     "project":"clulab/processors",
     "repoUrl":"https://github.com/clulab/processors.git",
-    "revision":"v8.5.3",
-    "version":"8.5.3",
+    "revision":"v8.5.4",
+    "version":"8.5.4",
     "targets":"org.clulab%processors-corenlp org.clulab%processors-main org.clulab%processors-openie",
     "config":{
       "projects":{
@@ -6849,8 +6890,8 @@
   "com-lihaoyi/upickle":{
     "project":"com-lihaoyi/upickle",
     "repoUrl":"https://github.com/com-lihaoyi/upickle.git",
-    "revision":"3.1.3",
-    "version":"3.1.3",
+    "revision":"3.1.4",
+    "version":"3.1.4",
     "targets":"com.lihaoyi%ujson com.lihaoyi%ujson-circe com.lihaoyi%upickle com.lihaoyi%upickle-core com.lihaoyi%upack com.lihaoyi%ujson-json4s com.lihaoyi%upickle-implicits",
     "config":{
       "projects":{
@@ -9096,8 +9137,8 @@
     "project":"davenverse/googleapis-http4s",
     "repoUrl":"https://github.com/davenverse/googleapis-http4s.git",
     "revision":"",
-    "version":"1.32.0+0.0.6",
-    "targets":"io.chrisdavenport%http4s-grpc-google-cloud-datastream-v1",
+    "version":"0.36.0+0.0.6",
+    "targets":"io.chrisdavenport%http4s-grpc-google-cloud-bigquerymigration-v2",
     "config":{
       "projects":{
         "exclude":[
@@ -14822,8 +14863,8 @@
   "gemini-hlsw/lucuma-core":{
     "project":"gemini-hlsw/lucuma-core",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-core.git",
-    "revision":"v0.91.0",
-    "version":"0.91.0",
+    "revision":"v0.91.1",
+    "version":"0.91.1",
     "targets":"edu.gemini%lucuma-core edu.gemini%lucuma-core-testkit",
     "config":{
       "projects":{
@@ -15657,6 +15698,47 @@
       ]
     }
   },
+  "gnp/zio-data-streams":{
+    "project":"gnp/zio-data-streams",
+    "repoUrl":"https://github.com/gnp/zio-data-streams.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"com.gregorpurdy%zio-data-streams",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3                 = \"3.2.2\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "gochaorg/json4s3":{
     "project":"gochaorg/json4s3",
     "repoUrl":"https://github.com/gochaorg/json4s3.git",
@@ -16061,8 +16143,8 @@
   "guardian/etag-caching":{
     "project":"guardian/etag-caching",
     "repoUrl":"https://github.com/guardian/etag-caching.git",
-    "revision":"v2.0.17",
-    "version":"2.0.17",
+    "revision":"v2.0.19",
+    "version":"2.0.19",
     "targets":"com.gu.etag-caching%aws-s3-base com.gu.etag-caching%aws-s3-sdk-v2 com.gu.etag-caching%core"
   },
   "guardian/fastly-api-client":{
@@ -17020,8 +17102,8 @@
   "herminiogg/shexml":{
     "project":"herminiogg/shexml",
     "repoUrl":"https://github.com/herminiogg/shexml.git",
-    "revision":"v0.4.0",
-    "version":"0.4.0",
+    "revision":"v0.4.1",
+    "version":"0.4.1",
     "targets":"com.herminiogarcia%shexml",
     "config":{
       "projects":{
@@ -19739,8 +19821,8 @@
   "j-mie6/parsley":{
     "project":"j-mie6/parsley",
     "repoUrl":"https://github.com/j-mie6/parsley.git",
-    "revision":"v4.5.0",
-    "version":"4.5.0",
+    "revision":"v5.0.0-M1",
+    "version":"5.0.0-M1",
     "targets":"com.github.j-mie6%parsley com.github.j-mie6%parsley-debug",
     "config":{
       "projects":{
@@ -19981,8 +20063,8 @@
   "j5ik2o/event-store-adapter-scala":{
     "project":"j5ik2o/event-store-adapter-scala",
     "repoUrl":"https://github.com/j5ik2o/event-store-adapter-scala.git",
-    "revision":"v1.0.83",
-    "version":"1.0.83",
+    "revision":"v1.0.84",
+    "version":"1.0.84",
     "targets":"com.github.j5ik2o%event-store-adapter-scala",
     "config":{
       "projects":{
@@ -21378,8 +21460,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.219",
-    "version":"2.0.219",
+    "revision":"v2.0.220",
+    "version":"2.0.220",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%swiftsrc2cpg io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%csharpsrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -22897,6 +22979,43 @@
       ]
     }
   },
+  "kasiamarek/tyre-scala":{
+    "project":"kasiamarek/tyre-scala",
+    "repoUrl":"https://github.com/kasiamarek/tyre-scala.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"net.marek%tyre-scala",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "katrix/minejson":{
     "project":"katrix/minejson",
     "repoUrl":"https://github.com/katrix/minejson.git",
@@ -23252,9 +23371,9 @@
   "kevin-lee/effectie":{
     "project":"kevin-lee/effectie",
     "repoUrl":"https://github.com/kevin-lee/effectie.git",
-    "revision":"v2.0.0-beta13",
-    "version":"2.0.0-beta13",
-    "targets":"io.kevinlee%effectie-syntax io.kevinlee%effectie-cats-effect2 io.kevinlee%effectie-test4cats io.kevinlee%effectie-cats-effect3 io.kevinlee%effectie-cats io.kevinlee%effectie-monix3 io.kevinlee%effectie-core",
+    "revision":"v2.0.0-beta14",
+    "version":"2.0.0-beta14",
+    "targets":"io.kevinlee%effectie-syntax io.kevinlee%effectie-time-cats-effect2 io.kevinlee%effectie-cats-effect2 io.kevinlee%effectie-time io.kevinlee%effectie-time-cats-effect3 io.kevinlee%effectie-test4cats io.kevinlee%effectie-cats-effect3 io.kevinlee%effectie-cats io.kevinlee%effectie-monix3 io.kevinlee%effectie-core",
     "config":{
       "projects":{
         "exclude":[
@@ -25218,6 +25337,43 @@
       ]
     }
   },
+  "lhns/nifi-scala":{
+    "project":"lhns/nifi-scala",
+    "repoUrl":"https://github.com/lhns/nifi-scala.git",
+    "revision":"0.3.2",
+    "version":"0.3.2",
+    "targets":"de.lhns%nifi-scala",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "lhns/remote-io":{
     "project":"lhns/remote-io",
     "repoUrl":"https://github.com/lhns/remote-io.git",
@@ -25894,8 +26050,8 @@
   "logging4s/logging4s":{
     "project":"logging4s/logging4s",
     "repoUrl":"https://github.com/logging4s/logging4s.git",
-    "revision":"v0.2.5",
-    "version":"0.2.5",
+    "revision":"v0.2.6",
+    "version":"0.2.6",
     "targets":"org.logging4s%logging4s-zio org.logging4s%logging4s-ce-2 org.logging4s%logging4s-json4s org.logging4s%logging4s-core org.logging4s%logging4s-jsoniter org.logging4s%logging4s-circe org.logging4s%logging4s-spray-json org.logging4s%logging4s-cats-core org.logging4s%logging4s-ce-3 org.logging4s%logging4s-argonaut org.logging4s%logging4s-play-json",
     "config":{
       "projects":{
@@ -30159,8 +30315,8 @@
   "outr/spice":{
     "project":"outr/spice",
     "repoUrl":"https://github.com/outr/spice.git",
-    "revision":"0.4.1",
-    "version":"0.4.1",
+    "revision":"0.5.0",
+    "version":"0.5.0",
     "targets":"com.outr%spice-server-undertow com.outr%spice-core com.outr%spice-client com.outr%spice-client-jvm com.outr%spice com.outr%spice-delta com.outr%spice-client-okhttp com.outr%spice-server com.outr%spice-openapi",
     "config":{
       "projects":{
@@ -32235,8 +32391,8 @@
   "plokhotnyuk/jsoniter-scala":{
     "project":"plokhotnyuk/jsoniter-scala",
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.27.1",
-    "version":"2.27.1",
+    "revision":"v2.27.2",
+    "version":"2.27.2",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros"
   },
   "plokhotnyuk/rtree2d":{
@@ -45918,9 +46074,9 @@
   "typelevel/feral":{
     "project":"typelevel/feral",
     "repoUrl":"https://github.com/typelevel/feral.git",
-    "revision":"v0.3.0-M3",
-    "version":"0.3.0-M3",
-    "targets":"org.typelevel%feral-lambda-cloudformation-custom-resource org.typelevel%feral-lambda org.typelevel%feral-core org.typelevel%feral-docs org.typelevel%feral-lambda-http4s",
+    "revision":"v0.3.0-RC1",
+    "version":"0.3.0-RC1",
+    "targets":"org.typelevel%feral-lambda-cloudformation-custom-resource org.typelevel%feral-lambda org.typelevel%feral-docs org.typelevel%feral-lambda-http4s",
     "config":{
       "projects":{
         "exclude":[
