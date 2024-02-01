@@ -3,8 +3,8 @@ set -e
 
 # Simple script to run projects locally based on the current projects config
 
-if [ $# -ne 1 ]; then
-  echo "Wrong number of script arguments, got $# expected 1"
+if [ $# -lt 1 ]; then
+  echo "Wrong number of script arguments, got $# expected at least 1 <projectName> <scalaVersion?>"
   exit 1
 fi
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
@@ -42,6 +42,6 @@ $scriptDir/../project-builder/build-revision.sh \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \
   "$extraLibraryDependencies" \
-   2>&1 | tee build-logs.txt
+  2>&1 | tee build-logs.txt
 
 cat build-status.txt

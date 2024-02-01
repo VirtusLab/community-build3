@@ -6,6 +6,32 @@ if [ $# -ne 12 ]; then
   exit 1
 fi
 
+function isBinVersionGreaterThen() {
+    version1=$1
+    version2=$2
+
+    if [[ $version1 == $version2 ]]; then
+        return 1
+    fi
+
+    IFS='.' read -ra v1 <<< "$version1"
+    IFS='.' read -ra v2 <<< "$version2"
+
+    # Compare major version
+    if [[ ${v1[0]} -lt ${v2[0]} ]]; then
+        return 1
+    elif [[ ${v1[0]} -gt ${v2[0]} ]]; then
+        return 0
+    fi
+
+    # Major versions are equal, compare minor version
+    if [[ ${v1[1]} -lt ${v2[1]} ]]; then
+        return 1
+    elif [[ ${v1[1]} -gt ${v2[1]} ]]; then
+        return 0
+    fi
+}
+
 project="$1"
 repoUrl="$2"            # e.g. 'https://github.com/Stiuil06/deploySbt.git'
 rev="$3"                # e.g. '1.0.2'
@@ -32,13 +58,23 @@ echo "Scala binary version found: $scalaBinaryVersion"
 
 sourceVersion=`echo $projectConfig | jq -r '.sourceVersion // ""'`
 sourceVersionSetting=""
-if [[ -z "$sourceVersion" ]]; then
+
+if [[ "$sourceVersion" =~ ^([0-9]+\.[0-9]+)(-migration)?$ ]]; then
+  versionPart="${BASH_REMATCH[1]}"
+  if isBinVersionGreaterThen "$versionPart" "$scalaBinaryVersion" ; then
+    sourceVersionSetting="-source:$scalaBinaryVersion"
+    echo "Explicit source version is great then used Scala version, it would be ignored"
+  else 
+    echo "Using configured source version: $sourceVersion"
+    sourceVersionSetting="REQUIRE:-source:$sourceVersion"
+  fi
+else 
+  echo "Configured version `$sourceVersion` is invalid, it would be ignored"
+fi
+if [[ -z "$sourceVersionSetting" ]]; then
   sourceVersion="$scalaBinaryVersion-migration"
   sourceVersionSetting="-source:$sourceVersion"
   echo "Implicitly using source version $sourceVersion"
-else 
-  echo "Using configured source version: $sourceVersion"
-  sourceVersionSetting="REQUIRE:-source:$sourceVersion"
 fi
 
 commonAppendScalacOptions="$sourceVersionSetting,-Wconf:msg=can be rewritten automatically under:s"
