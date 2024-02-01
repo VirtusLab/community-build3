@@ -9,7 +9,7 @@ import java.nio.file.attribute.PosixFilePermissions
 import java.nio.charset.StandardCharsets
 import java.nio.file._
 
-val communityBuildVersion = "v0.3.3"
+val communityBuildVersion = "v0.3.4"
 
 @main def run(args: String*): Unit =
   val config = scopt.OParser
@@ -156,6 +156,7 @@ object ValidationScript:
       then ""
       else """* { "tests": "compile-only"} """
     val revision = projectRevision.getOrElse("$(config .revision)")
+    val extraLibraryDependencies = ""
     raw"""
     |#!/usr/bin/env bash
     |set -e
@@ -188,7 +189,8 @@ object ValidationScript:
     |  '1.6.2' \
     |  "$$(config .config '$configPatch' // $${DefaultConfig} '$configPatch')" \
     |  "$extraScalacOptions" \
-    |  "$disabledScalacOption"
+    |  "$disabledScalacOption" \
+    |  "$extraLibraryDependencies"
     |
     |grep -q "success" build-status.txt;
     |exit $$?

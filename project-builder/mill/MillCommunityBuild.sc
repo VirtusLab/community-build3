@@ -112,7 +112,7 @@ def mapCrossVersions[T](
     version <- Seq(mappedCross, crossEntry).distinct
   } yield {
     if (version != crossEntry) {
-      println(s"Use cross-version $mappedCross instead of $crossEntry")
+      logOnce(s"Use cross-version $mappedCross instead of $crossEntry")
     }
     version.asInstanceOf[T]
   }

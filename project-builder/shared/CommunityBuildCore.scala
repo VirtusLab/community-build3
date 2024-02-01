@@ -414,6 +414,23 @@ object Scala3CommunityBuild {
             definedSourceVersion.isEmpty && isMatching("is dangling source version",SourceVersionPattern.findFirstIn(s.trim()))     
         } ++ appendSettings.distinct
     }
-
+    
+    case class LibraryDependency(organization: String, artifact: String, version: String)
+    final val ExtraLibraryDependenciesProp = "communitybuild.project.dependencies.add"
+    lazy val extraLibraryDependencies: Seq[LibraryDependency] =      sys.props
+        .getOrElse(ExtraLibraryDependenciesProp, "")
+        .split(';')
+        .filter(_.nonEmpty)
+        .map(dep => dep.trim().split(':'))
+        .flatMap {
+          case Array(org, artifact, version) => 
+            val dep = LibraryDependency(org, artifact, version)
+            logOnce(s"Would include extra dependency: org=$org, artifact=$artifact, version=$version")
+            Some(dep)
+          case segments =>
+            logOnce(s"Invalid dependency format, segments=${segments.toList}")
+            None
+        }
   }
+  
 }

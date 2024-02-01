@@ -16,6 +16,7 @@ if [[ -z $scalaVersion ]]; then
 fi
 extraScalacOptions=""
 disabledScalacOptions=""
+extraLibraryDependencies=""
 
 echo "projectName: $projectName"
 echo "scalaVersion: $scalaVersion"
@@ -39,6 +40,8 @@ $scriptDir/../project-builder/build-revision.sh \
   '1.6.2' \
   "$(config .config // ${DefaultConfig})" \
   "$extraScalacOptions" \
-  "$disabledScalacOptions" 2>&1 | tee build-logs.txt
+  "$disabledScalacOptions" \
+  "$extraLibraryDependencies" \
+   2>&1 | tee build-logs.txt
 
 cat build-status.txt

@@ -85,11 +85,18 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
     .getOrElse(Nil)
 
-  override def projectSettings =
-    Seq(
-      // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
-      crossScalaVersions := (thisProjectRef / crossScalaVersions).value
-    ) ++ mvnRepoPublishSettings
+  override def projectSettings = Seq(
+    // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
+    crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
+    libraryDependencies ++= extraLibraryDependencies((thisProjectRef / scalaVersion).value)
+  ) ++ mvnRepoPublishSettings
+
+  private def extraLibraryDependencies(scalaVersion: String) =
+    if (!scalaVersion.startsWith("3.")) Nil
+    else
+      Utils.extraLibraryDependencies.map { case Utils.LibraryDependency(org, artifact, version) =>
+        org % artifact % version
+      }
 
   private def stripScala3Suffix(s: String) = s match {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s

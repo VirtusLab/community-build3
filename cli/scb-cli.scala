@@ -31,7 +31,7 @@ class FailedProjectException(msg: String)
     with NoStackTrace
 
 val communityBuildVersion =
-  sys.props.getOrElse("communitybuild.version", "v0.3.3")
+  sys.props.getOrElse("communitybuild.version", "v0.3.4")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl =
   s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
@@ -767,7 +767,8 @@ object MinikubeReproducer:
                   params.enforcedSbtVersion.getOrElse("1.6.2"),
                   params.config.getOrElse("{}"),
                   /* extra-scalac-options    = */ "",
-                  /* disabled-scalac-options = */ ""
+                  /* disabled-scalac-options = */ "",
+                  /* extra-library-deps = */ ""
                 )
               )
             ),
