@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-if [ $# -ne 12 ]; then
-  echo "Wrong number of script arguments, got $# expected 12"
+if [ $# -ne 11 ]; then
+  echo "Wrong number of script arguments, got $# expected 11"
   exit 1
 fi
 
@@ -39,11 +39,10 @@ scalaVersion="$4"       # e.g. 3.0.0-RC3
 version="$5"            # e.g. '1.0.2-communityBuild'
 targets="$6"            # e.g. com.example%greeter
 mvnRepoUrl="$7"         # e.g. https://mvn-repo/maven2/2021-05-23_1
-enforcedSbtVersion="$8" # e.g. '1.5.5' or empty ''
-projectConfig="$9"
-extraScalacOptions="${10}" # e.g '' or "-Wunused:all -Ylightweight-lazy-vals"
-disabledScalacOption="${11}"
-extraLibraryDeps="${12}" # format org:artifact:version, eg. org.scala-lang:scala2-library-tasty_3:3.4.0-RC1
+projectConfig="$8"
+extraScalacOptions="${9}" # e.g '' or "-Wunused:all -Ylightweight-lazy-vals"
+disabledScalacOption="${10}"
+extraLibraryDeps="${11}" # format org:artifact:version, eg. org.scala-lang:scala2-library-tasty_3:3.4.0-RC1
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
@@ -106,7 +105,7 @@ if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
 elif [ -f "repo/build.sbt" ]; then
   echo "sbt project found: ${isSbtProject}"
   echo "sbt" > $buildToolFile
-  $scriptDir/sbt/prepare-project.sh "$project" repo "$enforcedSbtVersion" "$scalaVersion" "$projectConfig"
+  $scriptDir/sbt/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
   $scriptDir/sbt/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption" "$extraLibraryDeps"
 else
   echo "Not found sbt or mill build files, assuming scala-cli project"

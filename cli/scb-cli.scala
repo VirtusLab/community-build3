@@ -31,7 +31,7 @@ class FailedProjectException(msg: String)
     with NoStackTrace
 
 val communityBuildVersion =
-  sys.props.getOrElse("communitybuild.version", "v0.3.4")
+  sys.props.getOrElse("communitybuild.version", "v0.3.5")
 private val CBRepoName = "VirtusLab/community-build3"
 val projectBuilderUrl =
   s"https://raw.githubusercontent.com/$CBRepoName/master/project-builder"
@@ -279,7 +279,6 @@ object BuildInfo:
         version = plan.version.filter(_.nonEmpty),
         scalaVersion = scalaVersion,
         jdkVersion = jdkVersion,
-        enforcedSbtVersion = None,
         mavenRepositoryUrl =
           s"https://mvn-repo:8081/maven2/custom-${scalaVersion}",
         buildTargets = plan.targets.split(' ').toList,
@@ -349,7 +348,6 @@ case class BuildParameters(
     version: Option[String],
     scalaVersion: String,
     jdkVersion: Option[String],
-    enforcedSbtVersion: Option[String],
     mavenRepositoryUrl: String,
     buildTargets: List[String],
     upstreamProjects: List[String]
@@ -764,7 +762,6 @@ object MinikubeReproducer:
                   else params.version.getOrElse(""),
                   project.effectiveTargets.mkString(" "),
                   params.mavenRepositoryUrl,
-                  params.enforcedSbtVersion.getOrElse("1.6.2"),
                   params.config.getOrElse("{}"),
                   /* extra-scalac-options    = */ "",
                   /* disabled-scalac-options = */ "",
@@ -1111,7 +1108,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     val belowMinimalSbtVersion =
       currentSbtVersion.forall {
         _.split('.').take(3).map(_.takeWhile(_.isDigit).toInt) match {
-          case Array(1, minor, patch) => minor < 5 || (minor == 5 && patch < 5)
+          case Array(1, minor, patch) => minor < 9 || (minor == 9 && patch < 0)
           case _                      => false
         }
       }
@@ -1119,16 +1116,11 @@ class LocalReproducer(using config: Config, build: BuildInfo):
     override def prepareBuild(): Unit =
       val sbtProjectDir = sbtBuildProperties / os.up
       if !os.exists(sbtProjectDir) then os.makeDir(sbtProjectDir)
-      project.params.enforcedSbtVersion match {
-        case Some(version) =>
-          os.write.over(sbtBuildProperties, s"sbt.version=$version")
-        case _ =>
-          if belowMinimalSbtVersion then
-            println(
-              s"Overwritting sbt version $currentSbtVersion with minimal supported version $minSbtVersion"
-            )
-            os.write.over(sbtBuildProperties, s"sbt.version=$minSbtVersion")
-      }
+      if belowMinimalSbtVersion then
+        println(
+          s"Overwritting sbt version $currentSbtVersion with minimal supported version $minSbtVersion"
+        )
+        os.write.over(sbtBuildProperties, s"sbt.version=$minSbtVersion")
       os.copy.into(
         projectBuilderDir / "sbt" / CBPluginFile,
         projectDir / "project",

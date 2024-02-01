@@ -37,7 +37,6 @@ $scriptDir/../project-builder/build-revision.sh \
   "$(config .version)" \
   "$(config .targets)" \
   "" \
-  '1.9.0' \
   "$(config .config // ${DefaultConfig})" \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \

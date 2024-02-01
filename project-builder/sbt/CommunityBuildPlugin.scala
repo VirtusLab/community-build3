@@ -94,8 +94,10 @@ object CommunityBuildPlugin extends AutoPlugin {
   private def extraLibraryDependencies(scalaVersion: String) =
     if (!scalaVersion.startsWith("3.")) Nil
     else
-      Utils.extraLibraryDependencies.map { case Utils.LibraryDependency(org, artifact, version) =>
-        org % artifact % version
+      Utils.extraLibraryDependencies(scalaVersion).map { 
+        case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
+          if(scalaCrossVersion) org %% artifact % version
+          else org % artifact % version
       }
 
   private def stripScala3Suffix(s: String) = s match {

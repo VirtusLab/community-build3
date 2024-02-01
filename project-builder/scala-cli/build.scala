@@ -127,8 +127,10 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
   }
 
   def eval[T](task: CliCommand[T]): EvalResult[T] = {
-    val extraLibraryDependencies = Utils.extraLibraryDependencies.map{
-      case Utils.LibraryDependency(org, artifact, version) => s"--dependency=$org:$artifact:$version"
+    val extraLibraryDependencies = Utils.extraLibraryDependencies(scalaVersion).map{
+      case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) => 
+        if(scalaCrossVersion) s"--dependency=$org::$artifact:$version"
+        else s"--dependency=$org:$artifact:$version"
     }
     val evalStart = System.currentTimeMillis()
     val proc = os

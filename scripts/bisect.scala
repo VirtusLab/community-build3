@@ -9,7 +9,7 @@ import java.nio.file.attribute.PosixFilePermissions
 import java.nio.charset.StandardCharsets
 import java.nio.file._
 
-val communityBuildVersion = "v0.3.4"
+val communityBuildVersion = "v0.3.5"
 
 @main def run(args: String*): Unit =
   val config = scopt.OParser
@@ -186,7 +186,6 @@ object ValidationScript:
     |  "" \
     |  "${targets.getOrElse("$(config .targets)")}" \
     |  "https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/" \
-    |  '1.9.0' \
     |  "$$(config .config '$configPatch' // $${DefaultConfig} '$configPatch')" \
     |  "$extraScalacOptions" \
     |  "$disabledScalacOption" \
