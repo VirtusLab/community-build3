@@ -21,11 +21,15 @@ on:
         default: "main"
       extra-scalac-options:
         type: string
-        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`"
+        description: "List of scalacOptions which should be used when building projects. Multiple entires should be seperated by a single comma character `,`. (Best effort)"
         default: ""
       disabled-scalac-options:
         type: string
-        description: "List of scalacOptions which should be filtered out when building projects."
+        description: "List of scalacOptions which should be filtered out when building projects. (Best effort)"
+        default: ""
+      extra-library-dependencies:
+        type: string
+        description: "List of library dependencies which should be injected when building projects, in format org:artifact:version, cross versions are not supported. Multiple entires should be seperated by a single semicolon character `;`. (Best effort)"
         default: ""
       push-to-gh-pages:
         type: boolean
@@ -41,6 +45,7 @@ jobs:
       repository-branch: ${{ inputs.repository-branch }}
       extra-scalac-options: ${{ inputs.extra-scalac-options }}
       disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+      extra-library-dependencies: ${{ inputs.extra-library-dependencies }}
       custom-build-id: ${{ inputs.build-name }}
     secrets: inherit
 
