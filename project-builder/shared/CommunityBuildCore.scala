@@ -415,21 +415,35 @@ object Scala3CommunityBuild {
         } ++ appendSettings.distinct
     }
     
-    case class LibraryDependency(organization: String, artifact: String, version: String)
+    case class LibraryDependency(organization: String, artifact: String, version: String, crossScalaVersion: Boolean){
+      override def toString(): String = {
+        val crossVersion = if(crossScalaVersion) "%%" else "%"
+        s"$organization $crossVersion $artifact % $version"
+      }
+    }
+   
+    private def escapeScalaVersion(scalaVersion: String)(str: String): String = str.replace("<SCALA_VERSION>", scalaVersion)
     final val ExtraLibraryDependenciesProp = "communitybuild.project.dependencies.add"
-    lazy val extraLibraryDependencies: Seq[LibraryDependency] =      sys.props
+    def extraLibraryDependencies(scalaVersion: String): Seq[LibraryDependency] =      sys.props
         .getOrElse(ExtraLibraryDependenciesProp, "")
         .split(';')
+        .map(escapeScalaVersion(scalaVersion)(_))
         .filter(_.nonEmpty)
         .map(dep => dep.trim().split(':'))
         .flatMap {
+          // org::artifact:version
+          case Array(org, "", artifact, version) =>
+            Some(LibraryDependency(org, artifact, version, crossScalaVersion = true))
+          // org:artifact:version
           case Array(org, artifact, version) => 
-            val dep = LibraryDependency(org, artifact, version)
-            logOnce(s"Would include extra dependency: org=$org, artifact=$artifact, version=$version")
-            Some(dep)
+            Some(LibraryDependency(org, artifact, version, crossScalaVersion = false))
+          // other
           case segments =>
             logOnce(s"Invalid dependency format, segments=${segments.toList}")
             None
+        }.map{ dep => 
+          logOnce(s"Would include extra dependency: $dep")
+          dep
         }
   }
   
