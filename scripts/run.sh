@@ -16,7 +16,7 @@ if [[ -z $scalaVersion ]]; then
 fi
 extraScalacOptions=""
 disabledScalacOptions=""
-extraLibraryDependencies="org.scala-lang:scala2-library-tasty_3:3.4.1-RC1"
+extraLibraryDependencies=""
 
 echo "projectName: $projectName"
 echo "scalaVersion: $scalaVersion"
