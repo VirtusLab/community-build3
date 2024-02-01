@@ -13,8 +13,13 @@ import os.CommandResult
     repositoryDir: String,
     scalaVersion: String,
     configJson: String,
-    mavenRepoURL: String
+    mavenRepoURL: String,
+    extraLibraryDependenciesString: String
 ): Unit = {
+  // For compatibility with other build tools s use logic from CBCore
+  // Set system property if missing
+  sys.props.getOrElseUpdate(Utils.ExtraLibraryDependenciesProp, extraLibraryDependenciesString)
+  println(System.getProperty(Utils.ExtraLibraryDependenciesProp))
   println(s"Build config: ${configJson}")
   val config =
     if (configJson.isEmpty()) ProjectBuildConfig()
@@ -102,7 +107,9 @@ import os.CommandResult
 case class CliCommand[T](
     command: Seq[String],
     errHandler: (CommandResult, EvalResult.Failure) => EvalResult[T]
-)
+){
+  override def toString(): String = s"${command.mkString(" ")}"
+}
 def cmd(args: String*) = CliCommand[Unit](args, (_, failure) => failure)
 class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL: Option[String])
     extends TaskEvaluator[CliCommand] {
@@ -120,6 +127,9 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
   }
 
   def eval[T](task: CliCommand[T]): EvalResult[T] = {
+    val extraLibraryDependencies = Utils.extraLibraryDependencies.map{
+      case Utils.LibraryDependency(org, artifact, version) => s"--dependency=$org:$artifact:$version"
+    }
     val evalStart = System.currentTimeMillis()
     val proc = os
       .proc(
@@ -130,9 +140,10 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
         s"--server=false",
         s"--scala-version=${scalaVersion}",
         "--scalac-option=-J-Xss10M",
-        "--scalac-option=-J-Xmx=7G",
-        "--scalac-option=-J-Xms=4G",
-        mavenRepoURL.map(s"--repository=" + _).getOrElse("")
+        "--scalac-option=-J-Xmx7G",
+        "--scalac-option=-J-Xms4G",
+        mavenRepoURL.map(s"--repository=" + _).toList,
+        extraLibraryDependencies
       )
       .call(check = false, stderr = os.Pipe)
     val result = proc.exitCode
@@ -140,10 +151,10 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
     def nullT = null.asInstanceOf[T]
     result match {
       case 0 =>
-        println(s"Successfully evaluated $task")
+        println(s"Successfully evaluated: $task")
         EvalResult.Value(nullT, evalTime = tookMillis)
       case exitCode =>
-        println(s"Failed to evaluated $task: exitCode ${exitCode}")
+        println(s"Failed to evaluated: $task, exitCode ${exitCode}")
         proc.err.lines().foreach(System.err.println)
         val failure = EvalResult.Failure(
           EvaluationFailure(proc.err.toString()) :: Nil,
