@@ -28,7 +28,7 @@ on:
         default: ""
       extra-library-dependencies:
         type: string
-        description: "List of library dependencies which should be injected when building projects, in format org:artifact:version, cross versions are not supported. Multiple entires should be seperated by a single semicolon character `;`. (Best effort)"
+        description: "List of library dependencies which should be injected when building projects, in format org:artifact:version, or org::artifact:version for Scala cross version. Multiple entires should be seperated by a single semicolon character `;`. (Best effort)"
         default: ""
       custom-build-id:
         type: string
