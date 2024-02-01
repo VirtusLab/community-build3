@@ -416,8 +416,9 @@ object Scala3CommunityBuild {
     }
     
     case class LibraryDependency(organization: String, artifact: String, version: String)
+    final val ExtraLibraryDependenciesProp = "communitybuild.project.dependencies.add"
     lazy val extraLibraryDependencies: Seq[LibraryDependency] =      sys.props
-        .getOrElse("communitybuild.project.dependencies.add", "")
+        .getOrElse(ExtraLibraryDependenciesProp, "")
         .split(';')
         .filter(_.nonEmpty)
         .map(dep => dep.trim().split(':'))

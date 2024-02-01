@@ -15,6 +15,7 @@ export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$6"
 extraScalacOptions="$7"
 disabledScalacOption="$8"
+extraLibraryDeps="$9"
 
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
@@ -48,7 +49,8 @@ fi
 sbtSettings=(
   --batch
   --verbose
-  -Dcommunitybuild.version="$version"
+  "-Dcommunitybuild.version=$version"
+  "-Dcommunitybuild.project.dependencies.add=$extraLibraryDeps"
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )

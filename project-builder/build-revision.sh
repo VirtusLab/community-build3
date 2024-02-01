@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-if [ $# -ne 11 ]; then
-  echo "Wrong number of script arguments, got $# expected 11"
+if [ $# -ne 12 ]; then
+  echo "Wrong number of script arguments, got $# expected 12"
   exit 1
 fi
 
@@ -17,6 +17,7 @@ enforcedSbtVersion="$8" # e.g. '1.5.5' or empty ''
 projectConfig="$9"
 extraScalacOptions="${10}" # e.g '' or "-Wunused:all -Ylightweight-lazy-vals"
 disabledScalacOption="${11}"
+extraLibraryDeps="${12}" # format org:artifact:version, eg. org.scala-lang:scala2-library-tasty_3:3.4.0-RC1
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
@@ -54,6 +55,12 @@ if [ -z $disabledScalacOption ];then disabledScalacOption="$commonRemoveScalacOp
 else disabledScalacOption="$disabledScalacOption,$commonRemoveScalacOptions"; 
 fi
 
+if [[ ! -z $extraLibraryDeps ]]; then
+  echo "Would try to append extra library dependencies (best-effort, sbt/scala-cli only): ${extraLibraryDeps}"
+fi
+
+echo ""
+echo "----"
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
   echo "mill" > $buildToolFile
@@ -64,12 +71,12 @@ elif [ -f "repo/build.sbt" ]; then
   echo "sbt project found: ${isSbtProject}"
   echo "sbt" > $buildToolFile
   $scriptDir/sbt/prepare-project.sh "$project" repo "$enforcedSbtVersion" "$scalaVersion" "$projectConfig"
-  $scriptDir/sbt/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
+  $scriptDir/sbt/build.sh repo "$scalaVersion" "$version" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption" "$extraLibraryDeps"
 else
   echo "Not found sbt or mill build files, assuming scala-cli project"
   ls -l repo/
   echo "scala-cli" > $buildToolFile
   scala-cli clean $scriptDir/scala-cli/
   scala-cli clean repo
-  scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl"
+  scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps"
 fi

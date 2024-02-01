@@ -767,7 +767,8 @@ object MinikubeReproducer:
                   params.enforcedSbtVersion.getOrElse("1.6.2"),
                   params.config.getOrElse("{}"),
                   /* extra-scalac-options    = */ "",
-                  /* disabled-scalac-options = */ ""
+                  /* disabled-scalac-options = */ "",
+                  /* extra-library-deps = */ ""
                 )
               )
             ),

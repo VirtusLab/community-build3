@@ -156,6 +156,7 @@ object ValidationScript:
       then ""
       else """* { "tests": "compile-only"} """
     val revision = projectRevision.getOrElse("$(config .revision)")
+    val extraLibraryDependencies = ""
     raw"""
     |#!/usr/bin/env bash
     |set -e
@@ -188,7 +189,8 @@ object ValidationScript:
     |  '1.6.2' \
     |  "$$(config .config '$configPatch' // $${DefaultConfig} '$configPatch')" \
     |  "$extraScalacOptions" \
-    |  "$disabledScalacOption"
+    |  "$disabledScalacOption" \
+    |  "$extraLibraryDependencies"
     |
     |grep -q "success" build-status.txt;
     |exit $$?

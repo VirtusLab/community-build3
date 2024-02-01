@@ -139,7 +139,9 @@ runs:
             '1.6.2' \
             "$(config .config // ${DefaultConfig})" \
             "${{ inputs.extra-scalac-options }}" \
-            "${{ inputs.disabled-scalac-options }}" 2>&1 | tee build-logs.txt
+            "${{ inputs.disabled-scalac-options }}" \
+            "${{ inputs.extra-library-dependencies }}" \
+            2>&1 | tee build-logs.txt
 
           # Store results
           mv build-logs.txt /opencb/
