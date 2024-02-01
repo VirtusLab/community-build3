@@ -42,12 +42,12 @@ sbtMinor=${sbtSemVerParts[1]}
 sbtPatch=${sbtSemVerParts[2]}
 
 if [[ "$sbtMajor" -lt 1 ]] ||
-  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -lt 5 ]]) ||
-  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -eq 5 ]] && [[ "$sbtPatch" -lt 5 ]]); then
-  echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.5.5"
+  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -lt 9 ]]) ||
+  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -eq 9 ]] && [[ "$sbtPatch" -lt 0 ]]); then
+  echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.9.0"
   if [ -n "$enforcedSbtVersion" ]; then
     echo "Enforcing usage of sbt in version ${enforcedSbtVersion}"
-    sed -i -E "s/(sbt.version\s*=\s*).*/\1${enforcedSbtVersion}/" "${buildPropsFile}"
+    sed -i -E "s/(sbt.version\s*=\s*).*/\1${enforcedSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$enforcedSbtVersion" > "${buildPropsFile}"
   else
     exit 1
   fi
