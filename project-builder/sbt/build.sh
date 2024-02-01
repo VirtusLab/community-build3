@@ -2,8 +2,8 @@
 set -e
 set -o pipefail
 
-if [ $# -ne 8 ]; then
-  echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <project_config?>, got $#: $@"
+if [ $# -ne 9 ]; then
+  echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <project_config?> <extraScalacOpts?> <removeScalacOpts?> <extraDeps?>, got $#: $@"
   exit 1
 fi
 
