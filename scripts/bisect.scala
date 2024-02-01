@@ -186,7 +186,6 @@ object ValidationScript:
     |  "" \
     |  "${targets.getOrElse("$(config .targets)")}" \
     |  "https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/" \
-    |  '1.9.0' \
     |  "$$(config .config '$configPatch' // $${DefaultConfig} '$configPatch')" \
     |  "$extraScalacOptions" \
     |  "$disabledScalacOption" \

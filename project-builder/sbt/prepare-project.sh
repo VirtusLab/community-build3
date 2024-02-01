@@ -2,25 +2,25 @@
 
 set -e
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 4 ]; then
   echo "Wrong number of script arguments"
   exit 1
 fi
 
 projectName="$1"
 repoDir="$2"            # e.g. /tmp/shapeless
-enforcedSbtVersion="$3" # e.g. '1.5.5' or empty ''
-scalaVersion="$4"
-projectConfig="$5"
+scalaVersion="$3"
+projectConfig="$4"
 
 export OPENCB_PROJECT_DIR=$repoDir
 
 # Check if using a sbt with a supported version
+MinSbtVersion="1.9.0"
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
   mkdir ${repoDir}/project || true
-  echo "sbt.version=${enforcedSbtVersion}" >$buildPropsFile
+  echo "sbt.version=${MinSbtVersion}" >$buildPropsFile
 fi
 
 sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version | awk -F= '{ print $2 }')
@@ -45,12 +45,8 @@ if [[ "$sbtMajor" -lt 1 ]] ||
   ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -lt 9 ]]) ||
   ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -eq 9 ]] && [[ "$sbtPatch" -lt 0 ]]); then
   echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.9.0"
-  if [ -n "$enforcedSbtVersion" ]; then
-    echo "Enforcing usage of sbt in version ${enforcedSbtVersion}"
-    sed -i -E "s/(sbt.version\s*=\s*).*/\1${enforcedSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$enforcedSbtVersion" > "${buildPropsFile}"
-  else
-    exit 1
-  fi
+  echo "Enforcing usage of sbt in version ${MinSbtVersion}"
+  sed -i -E "s/(sbt.version\s*=\s*).*/\1${MinSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$MinSbtVersion" > "${buildPropsFile}"
 fi
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
