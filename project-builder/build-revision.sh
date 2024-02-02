@@ -96,6 +96,7 @@ fi
 
 echo ""
 echo "----"
+echo "started" > build-status.txt 
 if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
   echo "Mill project found: ${isMillProject}"
   echo "mill" > $buildToolFile
