@@ -99,7 +99,7 @@ fi
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs
-adaptedFiles=(build.sc )
+adaptedFiles=($PWD/build.sc )
 if [[ -d ./project ]]; then
   adaptedFiles+=(`find ./project -type f -name "*.sc"`)
 fi
