@@ -18,7 +18,7 @@ export OPENCB_PROJECT_DIR=$repoDir
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 MILL_0_11=0.11.6
-MILL_0_10=0.10.12
+MILL_0_10=0.10.15
 MILL_0_9=0.9.12
 RESOLVE="resolve _"
 
