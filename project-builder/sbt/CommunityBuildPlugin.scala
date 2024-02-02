@@ -89,13 +89,16 @@ object CommunityBuildPlugin extends AutoPlugin {
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
     // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
-    libraryDependencies ++= extraLibraryDependencies(sys.props.getOrElse("communitybuild.scala", (thisProjectRef / scalaVersion).value))
+    libraryDependencies ++= extraLibraryDependencies(
+        buildScalaVersion = sys.props.get("communitybuild.scala").filter(_.nonEmpty),
+        projectScalaVersion= (thisProjectRef / scalaVersion).value
+      )
   ) ++ mvnRepoPublishSettings
 
-  private def extraLibraryDependencies(scalaVersion: String) =
-    if (!scalaVersion.startsWith("3.")) Nil
+  private def extraLibraryDependencies(buildScalaVersion: Option[String], projectScalaVersion: String ) =
+    if (!projectScalaVersion.startsWith("3.")) Nil
     else
-      Utils.extraLibraryDependencies(scalaVersion).map { 
+      Utils.extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion)).map { 
         case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
           if(scalaCrossVersion) org %% artifact % version
           else org % artifact % version
