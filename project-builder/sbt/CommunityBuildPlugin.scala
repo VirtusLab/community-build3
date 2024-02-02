@@ -74,18 +74,14 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   import complete.DefaultParsers._
 
-  def mvnRepoPublishSettings = sys.env
+  lazy val customMavenRepoRepository = sys.env
     .get("CB_MVN_REPO_URL")
     .filter(_.nonEmpty)
     .map("Community Build Repo".at(_))
-    .map { ourResolver =>
-      Seq(
-        externalResolvers := ourResolver +: externalResolvers.value
-      )
-    }
-    .getOrElse(Nil)
-
+    .toSeq
+   
   override def projectSettings = Seq(
+    externalResolvers := customMavenRepoRepository ++ externalResolvers.value,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
     // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
@@ -93,7 +89,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         buildScalaVersion = sys.props.get("communitybuild.scala").filter(_.nonEmpty),
         projectScalaVersion= (thisProjectRef / scalaVersion).value
       )
-  ) ++ mvnRepoPublishSettings
+  )
 
   private def extraLibraryDependencies(buildScalaVersion: Option[String], projectScalaVersion: String ) =
     if (!projectScalaVersion.startsWith("3.")) Nil
@@ -355,6 +351,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   }
 
   override def globalSettings = Seq(
+    resolvers ++= customMavenRepoRepository,
     moduleMappings := { // Store settings in file to capture its original scala versions
       val moduleIds = mkMappings.value
       IO.write(
