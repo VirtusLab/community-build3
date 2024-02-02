@@ -103,7 +103,7 @@ class Scala3CommunityBuildMillAdapter(
 
       case template @ Template(_, traits, _, _)
           if anyTreeOfTypeName(
-            has = Seq("ScalaModule", "JavaModule"),
+            has = coursierModuleSubtypes ++ testModuleSubtypes,
             butNot = Seq("PublishModule", "CoursierModule")
           )(traits) =>
         Patch.addRight(
@@ -130,7 +130,7 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        Patch.addAround(body,"{ ", " }.mapScalacOptions()")
+        Patch.addAround(body, "{ ", " }.mapScalacOptions(scalaVersion)")
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {
@@ -153,6 +153,29 @@ class Scala3CommunityBuildMillAdapter(
     headerInject + patch
   }
 
+  // format: off
+  val coursierModuleSubtypes = Seq(
+    "CrossModuleBase","CrossSbtModule","CrossSbtModuleTests","CrossScalaModule","CrossScalaVersionRanges",
+    "Giter8Module","Giter8Module",
+    "JavaModule","JavaModuleTests",
+    "MavenModule","MavenModuleTests",
+    "PlatformScalaModule","PublishModule",
+    "SbtModule","SbtModuleTests","SbtNativeModule","ScalaJSModule","ScalaJSTests","ScalaMetalsSupport","ScalaModule","ScalaNativeModule","ScalaNativeTests","ScalaTests","ScalafmtModule","ScalafmtModule","SemanticDbJavaModule",
+    "TestScalaJSModule","TestScalaNativeModule","Tests",
+    "UnidocModule",
+    "ZincWorkerModule"
+  )
+  val testModuleSubtypes = Seq(
+    "CrossSbtModuleTests",
+    "JavaModuleTests","Junit4","Junit5",
+    "MavenModuleTests","Munit",
+    "SbtModuleTests","ScalaJSTests","ScalaNativeTests","ScalaTest","ScalaTests","Specs2",
+    "TestNg","TestScalaJSModule","TestScalaNativeModule","Tests",
+    "Utest",
+    "Weaver",
+    "ZioTest",
+  )
+  // format: on
   object Replacment {
     val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule =
@@ -197,12 +220,22 @@ class Scala3CommunityBuildMillAdapter(
     val MapScalacOptionsOps = """
     |
     |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
-    |  def mapScalacOptions() = MillCommunityBuild.mapScalacOptions(asSeq)
-    |}
-    |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
-    |  def mapScalacOptions() = asTarget.map(MillCommunityBuild.mapScalacOptions(_))
+    |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = {
+    |      try scalaVersion.evaluate(ctx).asSuccess.map(_.value)
+    |      catch { _: Throwable => None }
+    |    }.map(MillCommunityBuild.mapScalacOptions(_, asSeq))
+    |     .getOrElse {
+    |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
+    |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
+    |     }
+    |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
     |}
     |
+    |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
+    |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
+    |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+    |  }
+    |}
     |""".stripMargin
 
     val injects = {

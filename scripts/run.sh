@@ -36,11 +36,14 @@ $scriptDir/../project-builder/build-revision.sh \
   "${scalaVersion}" \
   "$(config .version)" \
   "$(config .targets)" \
-  "" \
+  "https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion/" \
   "$(config .config // ${DefaultConfig})" \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \
   "$extraLibraryDependencies" \
   2>&1 | tee build-logs.txt
 
-cat build-status.txt
+echo "------"
+echo "$projectName status=`cat build-status.txt`"
+echo "-------"
+if [[ `cat build-status.txt` != "success" ]]; then exit 1; fi

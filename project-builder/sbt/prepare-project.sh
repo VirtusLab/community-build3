@@ -15,7 +15,12 @@ projectConfig="$4"
 export OPENCB_PROJECT_DIR=$repoDir
 
 # Check if using a sbt with a supported version
-MinSbtVersion="1.9.0"
+javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "11"')
+MinSbtVersion="1.6.2"
+if [[ "$javaVersion" -ge 21 ]]; then
+  MinSbtVersion="1.9.0"
+fi
+
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
   echo "'project/build.properties' is missing"
@@ -41,10 +46,15 @@ sbtMajor=${sbtSemVerParts[0]}
 sbtMinor=${sbtSemVerParts[1]}
 sbtPatch=${sbtSemVerParts[2]}
 
-if [[ "$sbtMajor" -lt 1 ]] ||
-  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -lt 9 ]]) ||
-  ([[ "$sbtMajor" -eq 1 ]] && [[ "$sbtMinor" -eq 9 ]] && [[ "$sbtPatch" -lt 0 ]]); then
-  echo "Sbt version $sbtVersion is not supported, minimal supported version is 1.9.0"
+minSbtSemVerParts=($(echo $(parseSemver "$MinSbtVersion")))
+minSbtMajor=${minSbtSemVerParts[0]}
+minSbtMinor=${minSbtSemVerParts[1]}
+minSbtPatch=${minSbtSemVerParts[2]}
+
+if [[ "$sbtMajor" -lt "$minSbtMajor" ]] ||
+  ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -lt "$minSbtMinor" ]]) ||
+  ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -eq "$minSbtMinor" ]] && [[ "$sbtPatch" -lt "$minSbtPatch" ]]); then
+  echo "Sbt version $sbtVersion is not supported, minimal supported version is $MinSbtVersion"
   echo "Enforcing usage of sbt in version ${MinSbtVersion}"
   sed -i -E "s/(sbt.version\s*=\s*).*/\1${MinSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$MinSbtVersion" > "${buildPropsFile}"
 fi

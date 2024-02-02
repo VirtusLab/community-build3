@@ -64,7 +64,6 @@ if [[ "$millBinaryVersionMajor" -ne "0" || ( "$millBinaryVersionMinor" -lt "9" |
   echo "Unsupported mill version"
   exit 1
 fi
-ln $scriptDir/compat/$millBinaryVersion.sc MillVersionCompat.sc
 
 # Base64 is used to mitigate spliting json by whitespaces
 for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
@@ -100,17 +99,31 @@ fi
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs
-cp build.sc build.scala \
-  && scalafix \
+adaptedFiles=($PWD/build.sc )
+if [[ -d ./project ]]; then
+  adaptedFiles+=(`find ./project -type f -name "*.sc"`)
+fi
+for scFile in "${adaptedFiles[@]}"; do 
+  echo "Apply scalafix rules to $scFile"
+  scalaFile="${scFile%.sc}.scala"
+  cp $scFile $scalaFile
+  scalafix \
     --rules file:${scriptDir}/scalafix/rules/src/main/scala/fix/Scala3CommunityBuildMillAdapter.scala \
-    --files build.scala \
+    --files $scalaFile \
     --stdout \
     --syntactic \
     --settings.Scala3CommunityBuildMillAdapter.targetScalaVersion "$scalaVersion" \
     --settings.Scala3CommunityBuildMillAdapter.targetPublishVersion "$publishVersion" \
     --settings.Scala3CommunityBuildMillAdapter.millBinaryVersion "$millBinaryVersion" \
-    --scala-version 3.1.0 > build.sc \
-  && rm build.scala 
+    --scala-version 3.1.0 > ${scFile}.adapted \
+    && mv ${scFile}.adapted $scFile \
+    || (echo "Failed to adapted $scFile, ignoring changes"; cat ${scFile}.adapted; rm -f ${scFile}.adapted) 
+  rm $scalaFile
+done
 
-ln -fs $scriptDir/../shared/CommunityBuildCore.scala CommunityBuildCore.sc
-ln -fs $scriptDir/MillCommunityBuild.sc MillCommunityBuild.sc
+for f in "${adaptedFiles[@]}"; do
+  dir="$(dirname $(realpath "$f"))"
+  ln -fs $scriptDir/../shared/CommunityBuildCore.scala ${dir}/CommunityBuildCore.sc
+  ln -fs $scriptDir/MillCommunityBuild.sc ${dir}/MillCommunityBuild.sc
+  ln -fs $scriptDir/compat/$millBinaryVersion.sc ${dir}/MillVersionCompat.sc
+done
