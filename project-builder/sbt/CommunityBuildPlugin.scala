@@ -94,8 +94,8 @@ object CommunityBuildPlugin extends AutoPlugin {
   private def extraLibraryDependencies(buildScalaVersion: Option[String], projectScalaVersion: String ) =
     if (!projectScalaVersion.startsWith("3.")) Nil
     else
-      Utils.extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion)).map { 
-        case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
+      Scala3CommunityBuild.Utils.extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion)).map { 
+        case Scala3CommunityBuild.Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
           if(scalaCrossVersion) org %% artifact % version
           else org % artifact % version
       }
