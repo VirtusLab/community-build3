@@ -222,7 +222,7 @@ class Scala3CommunityBuildMillAdapter(
     |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
     |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = {
     |      try scalaVersion.evaluate(ctx).asSuccess.map(_.value)
-    |      catch {ex: Throwable => None }
+    |      catch { _: Throwable => None }
     |    }.map(MillCommunityBuild.mapScalacOptions(_, asSeq))
     |     .getOrElse {
     |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")

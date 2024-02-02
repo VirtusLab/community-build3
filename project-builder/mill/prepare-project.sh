@@ -122,7 +122,7 @@ for scFile in "${adaptedFiles[@]}"; do
 done
 
 for f in "${adaptedFiles[@]}"; do
-  dir=`realpath $f/..`
+  dir="$(dirname $(realpath "$f"))"
   ln -fs $scriptDir/../shared/CommunityBuildCore.scala ${dir}/CommunityBuildCore.sc
   ln -fs $scriptDir/MillCommunityBuild.sc ${dir}/MillCommunityBuild.sc
   ln -fs $scriptDir/compat/$millBinaryVersion.sc ${dir}/MillVersionCompat.sc
