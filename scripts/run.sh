@@ -36,7 +36,7 @@ $scriptDir/../project-builder/build-revision.sh \
   "${scalaVersion}" \
   "$(config .version)" \
   "$(config .targets)" \
-  "" \
+  "https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion/" \
   "$(config .config // ${DefaultConfig})" \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \
