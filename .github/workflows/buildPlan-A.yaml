@@ -53,7 +53,7 @@ jobs:
       maven-repo-url: ${{ steps.setup.outputs.maven-repo-url }}
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Setup build"
         uses: ./.github/actions/setup-build
         id: setup
@@ -94,7 +94,7 @@ jobs:
         - name: "zio/zio-protoquill"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 360
@@ -271,7 +271,7 @@ jobs:
         - name: "zio/zio-morphir"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -396,7 +396,7 @@ jobs:
         - name: "zio/zio"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -530,7 +530,7 @@ jobs:
         - name: "zio/zio-test-intellij"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -597,7 +597,7 @@ jobs:
         - name: "zio/zio-s3"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -663,7 +663,7 @@ jobs:
         - name: "yakivy/dupin"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -706,7 +706,7 @@ jobs:
         - name: "y-yu/slick-bulk-insert"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -734,7 +734,7 @@ jobs:
         - name: "unibas-gravis/scalismo"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -775,7 +775,7 @@ jobs:
         - name: "zio/zio-config"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -894,7 +894,7 @@ jobs:
         - name: "zio/zio-telemetry"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -943,7 +943,7 @@ jobs:
         - name: "zio/zio-wasm"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1019,7 +1019,7 @@ jobs:
         - name: "zio/interop-cats"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1072,7 +1072,7 @@ jobs:
         - name: "zio/zio-connect"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1098,7 +1098,7 @@ jobs:
         - name: "guardian/play-googleauth"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1123,7 +1123,7 @@ jobs:
         - name: "dwickern/sbt-swagger-play"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1273,7 +1273,7 @@ jobs:
         - name: "zio/zio-redis"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1308,7 +1308,7 @@ jobs:
         - name: "virtuslab/scala-cli"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1365,7 +1365,7 @@ jobs:
         - name: "zio/zio-json"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1447,7 +1447,7 @@ jobs:
         - name: "zio/zio-schema"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1514,7 +1514,7 @@ jobs:
         - name: "zio/zio-metrics-legacy"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1550,7 +1550,7 @@ jobs:
         - name: "zio/zio-openai"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1575,7 +1575,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-sso"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60
@@ -1600,7 +1600,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-odb"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Build project"
         uses: ./.github/actions/build-project
         timeout-minutes: 60

@@ -47,12 +47,12 @@ jobs:
     timeout-minutes: 600
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: 
           path: opencb
 
       - name: "Git Checkout compiler"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository-url }}
           ref: main

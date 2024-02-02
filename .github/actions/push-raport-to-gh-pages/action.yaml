@@ -18,7 +18,7 @@ runs:
   using: "composite"
   steps:
     - name: Git Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - uses: actions/download-artifact@v3
       with:
@@ -30,7 +30,7 @@ runs:
       run: ./scripts/insert_post_front_matter.sh ~/${{ inputs.file-to-pick }} ${{ inputs.build-title }}
 
     - name: Git Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: gh-pages
         token: ${{ inputs.token }}
@@ -76,4 +76,4 @@ runs:
         git push origin gh-pages
 
     - name: Git Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
