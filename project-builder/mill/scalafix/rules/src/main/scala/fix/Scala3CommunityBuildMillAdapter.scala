@@ -103,7 +103,7 @@ class Scala3CommunityBuildMillAdapter(
 
       case template @ Template(_, traits, _, _)
           if anyTreeOfTypeName(
-            has = Seq("ScalaModule", "JavaModule"),
+            has = coursierModuleSubtypes ++ testModuleSubtypes,
             butNot = Seq("PublishModule", "CoursierModule")
           )(traits) =>
         Patch.addRight(
@@ -130,7 +130,7 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        Patch.addAround(body,"{ ", " }.mapScalacOptions(scalaVersion)")
+        Patch.addAround(body, "{ ", " }.mapScalacOptions(scalaVersion)")
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {
@@ -153,6 +153,29 @@ class Scala3CommunityBuildMillAdapter(
     headerInject + patch
   }
 
+  // format: off
+  val coursierModuleSubtypes = Seq(
+    "CrossModuleBase","CrossSbtModule","CrossSbtModuleTests","CrossScalaModule","CrossScalaVersionRanges",
+    "Giter8Module","Giter8Module",
+    "JavaModule","JavaModuleTests",
+    "MavenModule","MavenModuleTests",
+    "PlatformScalaModule","PublishModule",
+    "SbtModule","SbtModuleTests","SbtNativeModule","ScalaJSModule","ScalaJSTests","ScalaMetalsSupport","ScalaModule","ScalaNativeModule","ScalaNativeTests","ScalaTests","ScalafmtModule","ScalafmtModule","SemanticDbJavaModule",
+    "TestScalaJSModule","TestScalaNativeModule","Tests",
+    "UnidocModule",
+    "ZincWorkerModule"
+  )
+  val testModuleSubtypes = Seq(
+    "CrossSbtModuleTests",
+    "JavaModuleTests","Junit4","Junit5",
+    "MavenModuleTests","Munit",
+    "SbtModuleTests","ScalaJSTests","ScalaNativeTests","ScalaTest","ScalaTests","Specs2",
+    "TestNg","TestScalaJSModule","TestScalaNativeModule","Tests",
+    "Utest",
+    "Weaver",
+    "ZioTest",
+  )
+  // format: on
   object Replacment {
     val CommunityBuildCross = "MillCommunityBuildCross"
     val CommunityBuildPublishModule =
