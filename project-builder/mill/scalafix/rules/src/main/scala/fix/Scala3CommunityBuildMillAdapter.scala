@@ -221,8 +221,13 @@ class Scala3CommunityBuildMillAdapter(
     |
     |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
     |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = {
-    |    val sv = scalaVersion.evaluate(ctx).asSuccess.get.value
-    |    MillCommunityBuild.mapScalacOptions(sv, asSeq)
+    |    scalaVersion.evaluate(ctx).asSuccess.map(_.value)
+    |    .map{ scalaVersion => 
+    |      MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
+    |    }.getOrElse{
+    |      println("Failed to resolve scalaVersion, assume it's Scala 3 project")
+    |      MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
+    |    }
     |  }
     |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
     |}
