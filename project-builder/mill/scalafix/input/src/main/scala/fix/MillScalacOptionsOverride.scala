@@ -6,13 +6,14 @@ package fix
 object MillScalacOptionsOverride {
   object MillCommunityBuild{
     implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
-      def mapScalacOptions(): Seq[String] = ???
+      def mapScalacOptions(scalaVersion: String): Seq[String] = ???
     }
     implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.T[Seq[String]]){
-      def mapScalacOptions(): mill.T[Seq[String]] = ???
+      def mapScalacOptions(scalaVersion: String): mill.T[Seq[String]] = ???
     }
   }
   import MillCommunityBuild._
+  def scalaVersion: String = ???
   def scalacOptions = List.empty[String]
   object mill{
     import scala.language.implicitConversions

@@ -130,7 +130,7 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        Patch.addAround(body,"{ ", " }.mapScalacOptions()")
+        Patch.addAround(body,"{ ", " }.mapScalacOptions(scalaVersion)")
 
       case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {
@@ -197,12 +197,18 @@ class Scala3CommunityBuildMillAdapter(
     val MapScalacOptionsOps = """
     |
     |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
-    |  def mapScalacOptions() = MillCommunityBuild.mapScalacOptions(asSeq)
-    |}
-    |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
-    |  def mapScalacOptions() = asTarget.map(MillCommunityBuild.mapScalacOptions(_))
+    |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = {
+    |    val sv = scalaVersion.evaluate(ctx).asSuccess.get.value
+    |    MillCommunityBuild.mapScalacOptions(sv, asSeq)
+    |  }
+    |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
     |}
     |
+    |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
+    |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
+    |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+    |  }
+    |}
     |""".stripMargin
 
     val injects = {

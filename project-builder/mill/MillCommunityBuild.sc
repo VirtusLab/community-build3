@@ -51,8 +51,8 @@ import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
 
-trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
-  protected val mavenRepoUrl: Option[String] = sys.props
+trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
+  private val mavenRepoUrl: Option[String] = sys.props
     .get("communitybuild.maven.url")
     .map(_.stripSuffix("/"))
   private val mavenRepo = mavenRepoUrl.map(MavenRepository(_))
@@ -63,7 +63,7 @@ trait CommunityBuildCoursierModule extends CoursierModule { self: JavaModule =>
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
   override def zincWorker = toZincWorker(CommunityBuildZincWorker)
-  object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
+  private object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
     override def repositoriesTask = T.task {
       mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
     }
@@ -128,12 +128,12 @@ private object ScalacOptionsSettings {
   val remove = parse("communitybuild.removeScalacOptions")
 }
 
-def mapScalacOptions(current: Seq[String]): Seq[String] =
-  CommunityBuildCore.Scala3CommunityBuild.Utils.mapScalacOptions(
+def mapScalacOptions(scalaVersion: String, current: Seq[String]): Seq[String] = 
+  if(scalaVersion.startsWith("3.")) CommunityBuildCore.Scala3CommunityBuild.Utils.mapScalacOptions(
     current = current,
     append = ScalacOptionsSettings.append,
     remove = ScalacOptionsSettings.remove
-  )
+  ) else current
 
 case class ModuleInfo(org: String, name: String, module: Module) {
   val targetName = s"$org%$name"
@@ -218,7 +218,7 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
       topLevelModules
     ).toList
   } yield {
-    ctx.log.info(s"Starting build for $name")
+    ctx.log.info(s"\nStarting build for $name")
     val evaluator = new MillTaskEvaluator()
     import evaluator._
     val overrides = {
