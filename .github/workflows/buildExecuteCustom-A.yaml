@@ -71,7 +71,7 @@ jobs:
           lastStable=$(./scripts/lastVersionStable.sc)
 
           FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.rendered.md
-          scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion | tee raport-full.md
           scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
           scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 

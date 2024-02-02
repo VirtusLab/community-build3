@@ -76,7 +76,7 @@ jobs:
           lastStable=$(./scripts/lastVersionStable.sc)
 
           FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.rendered.md
-          scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.md
+          scala-cli scripts/raport-regressions.scala -- $scalaVersion | tee raport-full.md
           scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
           scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
@@ -85,7 +85,7 @@ jobs:
             lastWeeklyVersion=$(cat $lastWeeklyVersionFile)
             echo "Comparing with last found weekly version: ${lastWeeklyVersion}"
             scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastWeeklyVersion > raport-compare-$lastWeeklyVersion.md
-            scala-cli scripts/compareVersions.scala -- $scalaVersion $lastWeeklyVersion > raport-cmp-$lastWeeklyVersion.md
+            scala-cli scripts/compareVersions.scala -- $scalaVersion $lastWeeklyVersion | tee raport-cmp-$lastWeeklyVersion.md
           else 
             echo "Not found previous weekly build version."
           fi
