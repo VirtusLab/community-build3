@@ -50,6 +50,7 @@ sbtSettings=(
   --batch
   --verbose
   "-Dcommunitybuild.version=$version"
+  "-Dcommunitybuild.scala=$scalaVersion"
   "-Dcommunitybuild.project.dependencies.add=$extraLibraryDeps"
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")

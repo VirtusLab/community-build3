@@ -88,7 +88,8 @@ object CommunityBuildPlugin extends AutoPlugin {
   override def projectSettings = Seq(
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
-    libraryDependencies ++= extraLibraryDependencies((thisProjectRef / scalaVersion).value)
+    // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
+    libraryDependencies ++= extraLibraryDependencies(sys.props.getOrElse("communitybuild.scala", (thisProjectRef / scalaVersion).value))
   ) ++ mvnRepoPublishSettings
 
   private def extraLibraryDependencies(scalaVersion: String) =
