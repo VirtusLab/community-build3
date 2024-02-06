@@ -40,10 +40,9 @@ $scriptDir/../project-builder/build-revision.sh \
   "$(config .config // ${DefaultConfig})" \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \
-  "$extraLibraryDependencies" \
-  2>&1 | tee build-logs.txt
+  "$extraLibraryDependencies" 2>&1 | tee build-logs.txt
 
 echo "------"
-echo "$projectName status=`cat build-status.txt`"
+echo "$projectName status=$(cat build-status.txt)"
 echo "-------"
-if [[ `cat build-status.txt` != "success" ]]; then exit 1; fi
+if [[ $(cat build-status.txt) != "success" ]]; then; exit 1; fi
