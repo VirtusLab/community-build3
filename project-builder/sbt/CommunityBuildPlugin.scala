@@ -104,32 +104,6 @@ object CommunityBuildPlugin extends AutoPlugin {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s
   }
 
-  /** Helper command used to set correct version for publishing Defined due to a bug in sbt which
-    * does not allow for usage of `set every` with scoped keys We need to use this task instead of
-    * `set every Compile/version := ???`, becouse it would set given value also in Jmh/version or
-    * Jcstress/version scopes, leading build failures
-    */
-  val setPublishVersion =
-    keyTransformCommand("setPublishVersion", Keys.version) { (args, _) =>
-      val targetVersion = args.headOption
-        .filter(_.nonEmpty)
-        .orElse(sys.props.get("communitybuild.version"))
-        .getOrElse {
-          throw new RuntimeException("No explicit version found in setPublishVersion command")
-        }
-      (scope: Scope, currentVersion: String) =>
-        dualVersioning
-          .filter(_.matches(targetVersion, currentVersion))
-          .flatMap(_.apply(targetVersion))
-          .map { version =>
-            logOnce(
-              s"Setting version ${version.render} for ${scope} based on dual versioning ${dualVersioning}"
-            )
-            version.render
-          }
-          .getOrElse(targetVersion)
-    }
-
   val disableFatalWarnings =
     keyTransformCommand("disableFatalWarnings", Keys.scalacOptions) { (_, _) =>
       val flags = Seq("-Xfatal-warnings", "-Werror")
@@ -273,7 +247,6 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   val commands = Seq(
     disableFatalWarnings,
-    setPublishVersion,
     setCrossScalaVersions,
     mapScalacOptions,
     excludeLibraryDependency,

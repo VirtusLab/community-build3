@@ -40,16 +40,9 @@ cd $repoDir
 # GithHub actions workers have maximally 7GB of RAM
 memorySettings=("-J-Xmx7G" "-J-Xms4G" "-J-Xss8M")
 
-# Don't set version if not publishing
-setVersionCmd="setPublishVersion $version"
-if [[ -z $version ]]; then
-  setVersionCmd=""
-fi
-
 sbtSettings=(
   --batch
   --verbose
-  "-Dcommunitybuild.version=$version"
   "-Dcommunitybuild.scala=$scalaVersion"
   "-Dcommunitybuild.project.dependencies.add=$extraLibraryDeps"
   ${memorySettings[@]}
@@ -65,7 +58,6 @@ appendScalacOptions="${extraScalacOptions}"
 removeScalacOptions="${disabledScalacOption}"
 
 function runSbt() {
-  # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
   # set every ... might lead to restoring original version changed in setPublishVersion
   setScalaVersionCmd="++$scalaVersion"
   if [[ "$forceScalaVersion" == "true" ]]; then
@@ -78,7 +70,6 @@ function runSbt() {
     "$setScalaVersionCmd -v" \
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
     "set every credentials := Nil" \
-    "$setVersionCmd" \
     "$customCommands" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
