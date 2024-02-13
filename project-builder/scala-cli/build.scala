@@ -147,7 +147,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies
       )
-      .call(check = false, stderr = os.Pipe)
+      .call(check = false, stdout = os.Inherit, stderr = os.Inherit)
     val result = proc.exitCode
     val tookMillis = (System.currentTimeMillis() - evalStart).toInt
     def nullT = null.asInstanceOf[T]

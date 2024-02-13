@@ -34,7 +34,6 @@ $scriptDir/../project-builder/build-revision.sh \
   "$(config .repoUrl)" \
   "$(config .revision)" \
   "${scalaVersion}" \
-  "$(config .version)" \
   "$(config .targets)" \
   "https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion/" \
   "$(config .config // ${DefaultConfig})" \
@@ -45,4 +44,4 @@ $scriptDir/../project-builder/build-revision.sh \
 echo "------"
 echo "$projectName status=$(cat build-status.txt)"
 echo "-------"
-if [[ $(cat build-status.txt) != "success" ]]; then; exit 1; fi
+if [[ $(cat build-status.txt) != "success" ]]; then exit 1; fi

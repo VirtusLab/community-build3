@@ -316,13 +316,6 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
   }
 
-  lazy val ourVersion =
-    Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
-  lazy val dualVersioning = DualVersioningType.resolve
-  lazy val publishVersions = ourVersion.toList.map { version =>
-    version :: dualVersioning.flatMap(_.apply(version)).map(_.render).toList
-  }
-
   override def globalSettings = Seq(
     resolvers ++= customMavenRepoRepository,
     moduleMappings := { // Store settings in file to capture its original scala versions
@@ -531,23 +524,9 @@ object CommunityBuildPlugin extends AutoPlugin {
             Test / executeTests
           )
 
-        val publishResult = ourVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { version =>
-          val currentVersion = (r / Keys.version)
-            .get(s.data)
-            .getOrElse(sys.error(s"${r.project}/version not set"))
-          if (publishVersions.contains(currentVersion))
-            PublishResult(
-              Status.Failed,
-              failureContext = Some(
-                FailureContext.WrongVersion(expected = version, actual = currentVersion)
-              ),
-              tookMs = 0
-            )
-          else
-            PublishResult(
-              evalAsDependencyOf(compileResult)(Compile / publishLocal)
-            )
-        }
+        val publishResult =PublishResult(
+            evalAsDependencyOf(compileResult)(Compile / publishLocal)
+          )
 
         ModuleBuildResults(
           artifactName = projectName,
