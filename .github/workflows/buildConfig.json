@@ -76,8 +76,8 @@
   "47degrees/github4s":{
     "project":"47degrees/github4s",
     "repoUrl":"https://github.com/47degrees/github4s.git",
-    "revision":"v0.32.1",
-    "version":"0.32.1",
+    "revision":"v0.33.1",
+    "version":"0.33.1",
     "targets":"com.47deg%github4s",
     "config":{
       "projects":{
@@ -108,7 +108,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version    = \"3.2.2\"",
+          "pattern":"val scala3Version    = \"3.3.1\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -4866,6 +4866,13 @@
     "version":"1.1.0",
     "targets":"com.github.billzabob%fordeckmacia"
   },
+  "bishabosha/enhanced-string-interpolator":{
+    "project":"bishabosha/enhanced-string-interpolator",
+    "repoUrl":"https://github.com/bishabosha/enhanced-string-interpolator.git",
+    "revision":"v1.0.1",
+    "version":"1.0.1",
+    "targets":"io.github.bishabosha%enhanced-string-interpolator"
+  },
   "bishabosha/enum-extensions":{
     "project":"bishabosha/enum-extensions",
     "repoUrl":"https://github.com/bishabosha/enum-extensions.git",
@@ -5320,7 +5327,38 @@
     "repoUrl":"https://github.com/carlos-verdes/zio-arangodb.git",
     "revision":"v0.3.6",
     "version":"0.3.6",
-    "targets":"io.funkode%zio-arangodb io.funkode%arangodb-docker io.funkode%zio-arangodb-http io.funkode%zio-velocypack"
+    "targets":"io.funkode%zio-arangodb io.funkode%arangodb-docker io.funkode%zio-arangodb-http io.funkode%zio-velocypack",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourceVersion":"3.4-migration",
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "carlos-verdes/zio-resource":{
     "project":"carlos-verdes/zio-resource",
@@ -6902,6 +6940,47 @@
       ]
     }
   },
+  "com-lihaoyi/unroll":{
+    "project":"com-lihaoyi/unroll",
+    "repoUrl":"https://github.com/com-lihaoyi/unroll.git",
+    "revision":"0.1.10",
+    "version":"0.1.10",
+    "targets":"com.lihaoyi%unroll-annotation com.lihaoyi%unroll-plugin",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sc",
+          "pattern":"val scala3  = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "com-lihaoyi/upickle":{
     "project":"com-lihaoyi/upickle",
     "repoUrl":"https://github.com/com-lihaoyi/upickle.git",
@@ -6983,8 +7062,8 @@
   "comcast/ip4s":{
     "project":"comcast/ip4s",
     "repoUrl":"https://github.com/comcast/ip4s.git",
-    "revision":"v3.4.0",
-    "version":"3.4.0",
+    "revision":"v3.5.0",
+    "version":"3.5.0",
     "targets":"com.comcast%ip4s-core com.comcast%ip4s-test-kit",
     "config":{
       "projects":{
@@ -10135,9 +10214,9 @@
   "devsisters/shardcake":{
     "project":"devsisters/shardcake",
     "repoUrl":"https://github.com/devsisters/shardcake.git",
-    "revision":"v2.1.3",
-    "version":"2.1.3",
-    "targets":"com.devsisters%shardcake-serialization-kryo com.devsisters%shardcake-manager com.devsisters%shardcake-core com.devsisters%shardcake-entities com.devsisters%shardcake-storage-redis com.devsisters%shardcake-health-k8s com.devsisters%shardcake-protocol-grpc",
+    "revision":"v2.1.4",
+    "version":"2.1.4",
+    "targets":"com.devsisters%shardcake-serialization-kryo com.devsisters%shardcake-manager com.devsisters%shardcake-core com.devsisters%shardcake-entities com.devsisters%shardcake-storage-redis com.devsisters%shardcake-health-k8s com.devsisters%shardcake-storage-redisson com.devsisters%shardcake-protocol-grpc",
     "config":{
       "projects":{
         "exclude":[
@@ -10291,8 +10370,8 @@
   "dieproht/molly":{
     "project":"dieproht/molly",
     "repoUrl":"https://github.com/dieproht/molly.git",
-    "revision":"v0.3.2",
-    "version":"0.3.2",
+    "revision":"v0.3.3",
+    "version":"0.3.3",
     "targets":"io.github.dieproht%molly-core io.github.dieproht%molly-medeia",
     "config":{
       "projects":{
@@ -11792,8 +11871,8 @@
   "eikek/emil":{
     "project":"eikek/emil",
     "repoUrl":"https://github.com/eikek/emil.git",
-    "revision":"v0.16.1",
-    "version":"0.16.1",
+    "revision":"v0.17.0",
+    "version":"0.17.0",
     "targets":"com.github.eikek%emil-common com.github.eikek%emil-javamail com.github.eikek%emil-jsoup com.github.eikek%emil-tnef com.github.eikek%emil-doobie com.github.eikek%emil-markdown",
     "config":{
       "projects":{
@@ -13604,7 +13683,7 @@
   "flink-extended/flink-scala-api":{
     "project":"flink-extended/flink-scala-api",
     "repoUrl":"https://github.com/flink-extended/flink-scala-api.git",
-    "revision":"v1.16.1.3",
+    "revision":"master",
     "version":"1.16.1.3",
     "targets":"org.flinkextended%flink-scala-api",
     "config":{
@@ -13617,7 +13696,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"11"
       },
       "sbt":{
         "commands":[
@@ -14337,8 +14416,8 @@
   "gaelrenoux/tranzactio":{
     "project":"gaelrenoux/tranzactio",
     "repoUrl":"https://github.com/gaelrenoux/tranzactio.git",
-    "revision":"v5.0.1",
-    "version":"5.0.1",
+    "revision":"v5.1.0",
+    "version":"5.1.0",
     "targets":"io.github.gaelrenoux%tranzactio-anorm io.github.gaelrenoux%tranzactio-core io.github.gaelrenoux%tranzactio-doobie",
     "config":{
       "projects":{
@@ -14369,7 +14448,212 @@
       "sourcePatches":[
         {
           "path":"project/BuildHelper.scala",
-          "pattern":"val scala3 = \"3.3.0\"",
+          "pattern":"val scala3 = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "galliaproject/gallia-avro":{
+    "project":"galliaproject/gallia-avro",
+    "repoUrl":"https://github.com/galliaproject/gallia-avro.git",
+    "revision":"v0.6.1",
+    "version":"0.6.1",
+    "targets":"io.github.galliaproject%gallia-avro",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"project/GalliaCommonSettings.scala",
+          "pattern":"val scala3   = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "galliaproject/gallia-core":{
+    "project":"galliaproject/gallia-core",
+    "repoUrl":"https://github.com/galliaproject/gallia-core.git",
+    "revision":"v0.6.1",
+    "version":"0.6.1",
+    "targets":"io.github.galliaproject%gallia-core io.github.galliaproject%gallia-core-root io.github.galliaproject%gallia-reflect",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"project/GalliaCommonSettings.scala",
+          "pattern":"val scala3   = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "galliaproject/gallia-mongodb":{
+    "project":"galliaproject/gallia-mongodb",
+    "repoUrl":"https://github.com/galliaproject/gallia-mongodb.git",
+    "revision":"v0.6.1",
+    "version":"0.6.1",
+    "targets":"io.github.galliaproject%gallia-mongodb",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"project/GalliaCommonSettings.scala",
+          "pattern":"val scala3   = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "galliaproject/gallia-parquet":{
+    "project":"galliaproject/gallia-parquet",
+    "repoUrl":"https://github.com/galliaproject/gallia-parquet.git",
+    "revision":"v0.6.1",
+    "version":"0.6.1",
+    "targets":"io.github.galliaproject%gallia-parquet",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"project/GalliaCommonSettings.scala",
+          "pattern":"val scala3   = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "galliaproject/gallia-spark":{
+    "project":"galliaproject/gallia-spark",
+    "repoUrl":"https://github.com/galliaproject/gallia-spark.git",
+    "revision":"v0.6.1",
+    "version":"0.6.1",
+    "targets":"io.github.galliaproject%gallia-spark",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"project/GalliaCommonSettings.scala",
+          "pattern":"val scala3   = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -14641,8 +14925,8 @@
   "geirolz/fluent-copy":{
     "project":"geirolz/fluent-copy",
     "repoUrl":"https://github.com/geirolz/fluent-copy.git",
-    "revision":"v0.0.1",
-    "version":"0.0.1",
+    "revision":"v0.0.2",
+    "version":"0.0.2",
     "targets":"com.github.geirolz%fluent-copy",
     "config":{
       "projects":{
@@ -14678,9 +14962,9 @@
   "geirolz/fly4s":{
     "project":"geirolz/fly4s",
     "repoUrl":"https://github.com/geirolz/fly4s.git",
-    "revision":"v1.0.0",
-    "version":"1.0.0",
-    "targets":"com.github.geirolz%fly4s com.github.geirolz%fly4s-core",
+    "revision":"v1.0.1",
+    "version":"1.0.1",
+    "targets":"com.github.geirolz%fly4s",
     "config":{
       "projects":{
         "exclude":[
@@ -14752,8 +15036,8 @@
   "geirolz/secret":{
     "project":"geirolz/secret",
     "repoUrl":"https://github.com/geirolz/secret.git",
-    "revision":"v0.0.4",
-    "version":"0.0.4",
+    "revision":"v0.0.5",
+    "version":"0.0.5",
     "targets":"com.github.geirolz%secret com.github.geirolz%secret-effect com.github.geirolz%secret-pureconfig com.github.geirolz%secret-typesafe-config com.github.geirolz%secret-ciris",
     "config":{
       "projects":{
@@ -14789,8 +15073,8 @@
   "geirolz/toolkit":{
     "project":"geirolz/toolkit",
     "repoUrl":"https://github.com/geirolz/toolkit.git",
-    "revision":"v0.0.11",
-    "version":"0.0.11",
+    "revision":"v0.0.12",
+    "version":"0.0.12",
     "targets":"com.github.geirolz%toolkit-testing com.github.geirolz%toolkit-config com.github.geirolz%toolkit-log4cats com.github.geirolz%toolkit-odin com.github.geirolz%toolkit-pureconfig com.github.geirolz%toolkit com.github.geirolz%toolkit-fly4s",
     "config":{
       "projects":{
@@ -16493,8 +16777,8 @@
   "guardian/redirect-resolver":{
     "project":"guardian/redirect-resolver",
     "repoUrl":"https://github.com/guardian/redirect-resolver.git",
-    "revision":"v0.0.3",
-    "version":"0.0.3",
+    "revision":"v0.0.13",
+    "version":"0.0.13",
     "targets":"com.gu%redirect-resolver"
   },
   "guidoschmidt17/zio-pgcopy":{
@@ -16971,7 +17255,7 @@
   "haifengl/smile":{
     "project":"haifengl/smile",
     "repoUrl":"https://github.com/haifengl/smile.git",
-    "revision":"v3.0.2",
+    "revision":"master",
     "version":"3.0.2",
     "targets":"com.github.haifengl%smile-scala com.github.haifengl%smile-json",
     "config":{
@@ -17001,7 +17285,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.3.0\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
       ]
     }
   },
@@ -18365,8 +18653,8 @@
   "http4s/http4s-netty":{
     "project":"http4s/http4s-netty",
     "repoUrl":"https://github.com/http4s/http4s-netty.git",
-    "revision":"v0.5.12",
-    "version":"0.5.12",
+    "revision":"v0.5.13",
+    "version":"0.5.13",
     "targets":"org.http4s%http4s-netty-client org.http4s%http4s-netty-core org.http4s%http4s-netty-server",
     "config":{
       "projects":{
@@ -19476,6 +19764,47 @@
       ]
     }
   },
+  "indoorvivants/snapshot-testing":{
+    "project":"indoorvivants/snapshot-testing",
+    "repoUrl":"https://github.com/indoorvivants/snapshot-testing.git",
+    "revision":"v0.0.5",
+    "version":"0.0.5",
+    "targets":"com.indoorvivants.snapshots%snapshots-buildtime com.indoorvivants.snapshots%snapshots-runtime",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3        = \"3.3.1\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "indoorvivants/subatomic":{
     "project":"indoorvivants/subatomic",
     "repoUrl":"https://github.com/indoorvivants/subatomic.git",
@@ -20280,8 +20609,8 @@
   "j5ik2o/event-store-adapter-scala":{
     "project":"j5ik2o/event-store-adapter-scala",
     "repoUrl":"https://github.com/j5ik2o/event-store-adapter-scala.git",
-    "revision":"v1.0.105",
-    "version":"1.0.105",
+    "revision":"v1.0.108",
+    "version":"1.0.108",
     "targets":"com.github.j5ik2o%event-store-adapter-scala",
     "config":{
       "projects":{
@@ -21113,13 +21442,6 @@
       ]
     }
   },
-  "jcouyang/meow":{
-    "project":"jcouyang/meow",
-    "repoUrl":"https://github.com/jcouyang/meow.git",
-    "revision":"v0.4.14",
-    "version":"0.4.14",
-    "targets":"us.oyanglul%meow"
-  },
   "jczuchnowski/zio-pulsar":{
     "project":"jczuchnowski/zio-pulsar",
     "repoUrl":"https://github.com/jczuchnowski/zio-pulsar.git",
@@ -21677,8 +21999,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v2.0.253",
-    "version":"2.0.253",
+    "revision":"v2.0.258",
+    "version":"2.0.258",
     "targets":"io.joern%querydb io.joern%c2cpg io.joern%ghidra2cpg io.joern%joern-cli io.joern%swiftsrc2cpg io.joern%jimple2cpg io.joern%semanticcpg io.joern%jssrc2cpg io.joern%rubysrc2cpg io.joern%php2cpg io.joern%gosrc2cpg io.joern%csharpsrc2cpg io.joern%console io.joern%kotlin2cpg io.joern%x2cpg io.joern%pysrc2cpg io.joern%dataflowengineoss io.joern%macros io.joern%javasrc2cpg",
     "config":{
       "projects":{
@@ -22959,13 +23281,6 @@
       ]
     }
   },
-  "kamon-io/kamon-http4s":{
-    "project":"kamon-io/kamon-http4s",
-    "repoUrl":"https://github.com/kamon-io/kamon-http4s.git",
-    "revision":"v2.6.1",
-    "version":"2.6.1",
-    "targets":"io.kamon%kamon-http4s-0.23 io.kamon%kamon-http4s-1.0"
-  },
   "karadzhov/scala-iso-country":{
     "project":"karadzhov/scala-iso-country",
     "repoUrl":"https://github.com/karadzhov/scala-iso-country.git",
@@ -23121,6 +23436,61 @@
         
       ]
     }
+  },
+  "karimagnusson/kuzminki-ec":{
+    "project":"karimagnusson/kuzminki-ec",
+    "repoUrl":"https://github.com/karimagnusson/kuzminki-ec.git",
+    "revision":"",
+    "version":"0.9.5-RC2",
+    "targets":"io.github.karimagnusson%kuzminki-ec",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "karimagnusson/kuzminki-ec-stream":{
+    "project":"karimagnusson/kuzminki-ec-stream",
+    "repoUrl":"https://github.com/karimagnusson/kuzminki-ec-stream.git",
+    "revision":"",
+    "version":"0.9.1",
+    "targets":"io.github.karimagnusson%kuzminki-ec-akka io.github.karimagnusson%kuzminki-ec-pekko"
+  },
+  "karimagnusson/kuzminki-play":{
+    "project":"karimagnusson/kuzminki-play",
+    "repoUrl":"https://github.com/karimagnusson/kuzminki-play.git",
+    "revision":"",
+    "version":"0.9.3",
+    "targets":"io.github.karimagnusson%kuzminki-akka-play io.github.karimagnusson%kuzminki-pekko-play"
   },
   "karimagnusson/kuzminki-zio":{
     "project":"karimagnusson/kuzminki-zio",
@@ -23958,9 +24328,9 @@
   "kijuky/enumeratum-scalikejdbc":{
     "project":"kijuky/enumeratum-scalikejdbc",
     "repoUrl":"https://github.com/kijuky/enumeratum-scalikejdbc.git",
-    "revision":"v1.7.3.0",
-    "version":"1.7.3.0",
-    "targets":"io.github.kijuky%enumeratum-scalikejdbc4",
+    "revision":"v1.7.3.2",
+    "version":"1.7.3.2",
+    "targets":"io.github.kijuky%enumeratum-scalikejdbc4 io.github.kijuky%enumeratum-scalikejdbc42",
     "config":{
       "projects":{
         "exclude":[
@@ -24069,8 +24439,8 @@
   "kirill5k/mongo4cats":{
     "project":"kirill5k/mongo4cats",
     "repoUrl":"https://github.com/kirill5k/mongo4cats.git",
-    "revision":"v0.7.1",
-    "version":"0.7.1",
+    "revision":"v0.7.2",
+    "version":"0.7.2",
     "targets":"io.github.kirill5k%mongo4cats-zio io.github.kirill5k%mongo4cats-kernel io.github.kirill5k%mongo4cats-zio-json io.github.kirill5k%mongo4cats-embedded io.github.kirill5k%mongo4cats-circe io.github.kirill5k%mongo4cats-zio-embedded io.github.kirill5k%mongo4cats-core",
     "config":{
       "projects":{
@@ -25073,8 +25443,8 @@
   "laserdisc-io/tamer":{
     "project":"laserdisc-io/tamer",
     "repoUrl":"https://github.com/laserdisc-io/tamer.git",
-    "revision":"v0.20.2",
-    "version":"0.20.2",
+    "revision":"v0.21.0",
+    "version":"0.21.0",
     "targets":"io.laserdisc%tamer-rest io.laserdisc%tamer-s3 io.laserdisc%tamer-db io.laserdisc%tamer-oci-objectstorage io.laserdisc%tamer-core",
     "config":{
       "projects":{
@@ -26349,8 +26719,8 @@
   "logging4s/logging4s":{
     "project":"logging4s/logging4s",
     "repoUrl":"https://github.com/logging4s/logging4s.git",
-    "revision":"v0.2.8",
-    "version":"0.2.8",
+    "revision":"v0.2.9",
+    "version":"0.2.9",
     "targets":"org.logging4s%logging4s-zio org.logging4s%logging4s-ce-2 org.logging4s%logging4s-json4s org.logging4s%logging4s-core org.logging4s%logging4s-jsoniter org.logging4s%logging4s-circe org.logging4s%logging4s-spray-json org.logging4s%logging4s-cats-core org.logging4s%logging4s-ce-3 org.logging4s%logging4s-argonaut org.logging4s%logging4s-play-json",
     "config":{
       "projects":{
@@ -27164,9 +27534,40 @@
   "martinhh/scalacheck-derived":{
     "project":"martinhh/scalacheck-derived",
     "repoUrl":"https://github.com/martinhh/scalacheck-derived.git",
-    "revision":"v0.4.2",
+    "revision":"main",
     "version":"0.4.2",
-    "targets":"io.github.martinhh%scalacheck-derived"
+    "targets":"io.github.martinhh%scalacheck-derived",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourceVersion":"3.3",
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "massimosiani/monix-newtypes-cats":{
     "project":"massimosiani/monix-newtypes-cats",
@@ -27776,8 +28177,8 @@
   "mjakubowski84/parquet4s":{
     "project":"mjakubowski84/parquet4s",
     "repoUrl":"https://github.com/mjakubowski84/parquet4s.git",
-    "revision":"v2.16.0",
-    "version":"2.16.0",
+    "revision":"v2.16.1",
+    "version":"2.16.1",
     "targets":"com.github.mjakubowski84%parquet4s-pekko com.github.mjakubowski84%parquet4s-akka com.github.mjakubowski84%parquet4s-scalapb com.github.mjakubowski84%parquet4s-core com.github.mjakubowski84%parquet4s-fs2",
     "config":{
       "projects":{
@@ -29313,8 +29714,8 @@
   "neotypes/neotypes":{
     "project":"neotypes/neotypes",
     "repoUrl":"https://github.com/neotypes/neotypes.git",
-    "revision":"v1.0.0-M3",
-    "version":"1.0.0-M3",
+    "revision":"v1.0.0",
+    "version":"1.0.0",
     "targets":"io.github.neotypes%neotypes-cats-effect io.github.neotypes%neotypes-cats-data io.github.neotypes%neotypes-fs2-stream io.github.neotypes%neotypes-zio io.github.neotypes%neotypes-generic io.github.neotypes%neotypes-monix-stream io.github.neotypes%neotypes-refined io.github.neotypes%neotypes-zio-stream io.github.neotypes%neotypes-akka-stream io.github.neotypes%neotypes-monix io.github.neotypes%neotypes-core io.github.neotypes%neotypes-enumeratum",
     "config":{
       "projects":{
@@ -29606,8 +30007,8 @@
   "nrkno/bigquery-scala":{
     "project":"nrkno/bigquery-scala",
     "repoUrl":"https://github.com/nrkno/bigquery-scala.git",
-    "revision":"v0.15.1",
-    "version":"0.15.1",
+    "revision":"v0.16.0",
+    "version":"0.16.0",
     "targets":"no.nrk.bigquery%bigquery-codegen no.nrk.bigquery%bigquery-testing no.nrk.bigquery%bigquery-transfer-client no.nrk.bigquery%bigquery-zetasql no.nrk.bigquery%bigquery-core no.nrk.bigquery%bigquery-prometheus",
     "config":{
       "projects":{
@@ -30167,6 +30568,13 @@
         
       ]
     }
+  },
+  "openmole/byte-pack":{
+    "project":"openmole/byte-pack",
+    "repoUrl":"https://github.com/openmole/byte-pack.git",
+    "revision":"v0.1",
+    "version":"0.1",
+    "targets":"org.openmole%byte-pack"
   },
   "openmole/container":{
     "project":"openmole/container",
@@ -31070,6 +31478,43 @@
       ]
     }
   },
+  "paulbutcher/scalamock":{
+    "project":"paulbutcher/scalamock",
+    "repoUrl":"https://github.com/paulbutcher/scalamock.git",
+    "revision":"6.0.0-M1",
+    "version":"6.0.0-M1",
+    "targets":"org.scalamock%scalamock",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "pbyrne84/scala-case-class-prettification":{
     "project":"pbyrne84/scala-case-class-prettification",
     "repoUrl":"https://github.com/pbyrne84/scala-case-class-prettification.git",
@@ -31672,8 +32117,8 @@
   "pityka/saddle":{
     "project":"pityka/saddle",
     "repoUrl":"https://github.com/pityka/saddle.git",
-    "revision":"v4.0.0-M9",
-    "version":"4.0.0-M9",
+    "revision":"v4.0.0-M11",
+    "version":"4.0.0-M11",
     "targets":"io.github.pityka%saddle-jsoniter io.github.pityka%saddle-ops-inlined io.github.pityka%saddle-core io.github.pityka%saddle-linalg io.github.pityka%saddle-time io.github.pityka%saddle-circe io.github.pityka%saddle-binary io.github.pityka%saddle-ops-inlined-macroimpl io.github.pityka%saddle-spire-prng io.github.pityka%saddle-io io.github.pityka%saddle-stats",
     "config":{
       "projects":{
@@ -32053,8 +32498,8 @@
   "pjfanning/pekko-libraries-bom":{
     "project":"pjfanning/pekko-libraries-bom",
     "repoUrl":"https://github.com/pjfanning/pekko-libraries-bom.git",
-    "revision":"pekko1.0-2024.1.1",
-    "version":"2024.1.1",
+    "revision":"pekko1.0-2024.2.0",
+    "version":"2024.2.0",
     "targets":"com.github.pjfanning%pekko1.0-libraries-bom"
   },
   "pjfanning/pekko-mock-scheduler":{
@@ -32786,8 +33231,8 @@
   "plokhotnyuk/jsoniter-scala":{
     "project":"plokhotnyuk/jsoniter-scala",
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.28.1",
-    "version":"2.28.1",
+    "revision":"v2.28.2",
+    "version":"2.28.2",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros"
   },
   "plokhotnyuk/rtree2d":{
@@ -33058,7 +33503,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "excludeLibraryDependency org.polyvariant:better-tostring_{scalaVersion}"
         ],
         "options":[
           
@@ -33361,6 +33806,13 @@
         
       ]
     }
+  },
+  "potencia/formats":{
+    "project":"potencia/formats",
+    "repoUrl":"https://github.com/potencia/formats.git",
+    "revision":"1.0.0",
+    "version":"1.0.0",
+    "targets":"com.potenciasoftware%formats"
   },
   "ppurang/abctemplates":{
     "project":"ppurang/abctemplates",
@@ -35522,8 +35974,8 @@
   "sageserpent-open/kineticmerge":{
     "project":"sageserpent-open/kineticmerge",
     "repoUrl":"https://github.com/sageserpent-open/kineticmerge.git",
-    "revision":"v0.2.2",
-    "version":"0.2.2",
+    "revision":"v0.2.3",
+    "version":"0.2.3",
     "targets":"com.sageserpent%kinetic-merge",
     "config":{
       "projects":{
@@ -35602,7 +36054,7 @@
     "repoUrl":"https://github.com/sake92/hepek.git",
     "revision":"v0.26.0",
     "version":"0.26.0",
-    "targets":"ba.sake%hepek-http4s ba.sake%hepek-components ba.sake%hepek-zio ba.sake%hepek",
+    "targets":"ba.sake%hepek-http4s ba.sake%hepek-play-3_0 ba.sake%hepek-play-2_9 ba.sake%hepek-components ba.sake%hepek-zio ba.sake%hepek",
     "config":{
       "projects":{
         "exclude":[
@@ -36989,8 +37441,8 @@
   "scala-tsi/scala-tsi":{
     "project":"scala-tsi/scala-tsi",
     "repoUrl":"https://github.com/scala-tsi/scala-tsi.git",
-    "revision":"0.8.2",
-    "version":"0.8.2",
+    "revision":"0.8.3",
+    "version":"0.8.3",
     "targets":"com.scalatsi%scala-tsi",
     "config":{
       "projects":{
@@ -37021,7 +37473,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3   = \"3.2.2\"",
+          "pattern":"val scala3   = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -37351,9 +37803,9 @@
   "scalacenter/scala-debug-adapter":{
     "project":"scalacenter/scala-debug-adapter",
     "repoUrl":"https://github.com/scalacenter/scala-debug-adapter.git",
-    "revision":"v3.1.6",
-    "version":"3.1.6",
-    "targets":"ch.epfl.scala%scala-debug-step-filter",
+    "revision":"v4.0.0",
+    "version":"4.0.0",
+    "targets":"ch.epfl.scala%scala-debug-decoder",
     "config":{
       "projects":{
         "exclude":[
@@ -37364,7 +37816,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"21"
       },
       "sbt":{
         "commands":[
@@ -39889,8 +40341,8 @@
   "shiftleftsecurity/overflowdb":{
     "project":"shiftleftsecurity/overflowdb",
     "repoUrl":"https://github.com/shiftleftsecurity/overflowdb.git",
-    "revision":"v1.186",
-    "version":"1.186",
+    "revision":"v1.187",
+    "version":"1.187",
     "targets":"io.shiftleft%overflowdb-core io.shiftleft%overflowdb-formats io.shiftleft%overflowdb-traversal",
     "config":{
       "projects":{
@@ -41896,8 +42348,8 @@
   "swagger-akka-http/swagger-pekko-http":{
     "project":"swagger-akka-http/swagger-pekko-http",
     "repoUrl":"https://github.com/swagger-akka-http/swagger-pekko-http.git",
-    "revision":"v2.12.1",
-    "version":"2.12.1",
+    "revision":"v2.12.2",
+    "version":"2.12.2",
     "targets":"com.github.swagger-akka-http%swagger-pekko-http",
     "config":{
       "projects":{
@@ -42035,8 +42487,8 @@
   "swaldman/feedletter":{
     "project":"swaldman/feedletter",
     "repoUrl":"https://github.com/swaldman/feedletter.git",
-    "revision":"v0.0.8",
-    "version":"0.0.8",
+    "revision":"v0.0.9",
+    "version":"0.0.9",
     "targets":"com.mchange%feedletter"
   },
   "swaldman/fossilphant":{
@@ -45008,8 +45460,8 @@
   "trace4cats/trace4cats":{
     "project":"trace4cats/trace4cats",
     "repoUrl":"https://github.com/trace4cats/trace4cats.git",
-    "revision":"v0.14.6",
-    "version":"0.14.6",
+    "revision":"v0.14.7",
+    "version":"0.14.7",
     "targets":"io.janstenpickle%trace4cats-tail-sampling io.janstenpickle%trace4cats-iolocal io.janstenpickle%trace4cats-context-utils io.janstenpickle%trace4cats-kernel io.janstenpickle%trace4cats-meta io.janstenpickle%trace4cats-core io.janstenpickle%trace4cats-fs2 io.janstenpickle%trace4cats-testkit io.janstenpickle%trace4cats-context-utils-laws",
     "config":{
       "projects":{
@@ -45041,7 +45493,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3 = \"3.3.0\"",
+          "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -50694,6 +51146,11 @@
       "sourcePatches":[
         {
           "path":"project/BuildHelper.scala",
+          "pattern":"case Some((3, 3))",
+          "replaceWith":"case Some((3, _))"
+        },
+        {
+          "path":"project/BuildHelper.scala",
           "pattern":"val Scala3   = \"3.3.0\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
@@ -50941,8 +51398,8 @@
   "zio/zio-aws":{
     "project":"zio/zio-aws",
     "repoUrl":"https://github.com/zio/zio-aws.git",
-    "revision":"v7.21.15.5",
-    "version":"7.21.15.5",
+    "revision":"v7.21.15.7",
+    "version":"7.21.15.7",
     "targets":"dev.zio%zio-aws-keyspaces dev.zio%zio-aws-networkmanager dev.zio%zio-aws-codegurureviewer dev.zio%zio-aws-dynamodbstreams dev.zio%zio-aws-iam dev.zio%zio-aws-ssmincidents dev.zio%zio-aws-servicecatalogappregistry dev.zio%zio-aws-marketplacecatalog dev.zio%zio-aws-migrationhubconfig dev.zio%zio-aws-snowball dev.zio%zio-aws-worklink dev.zio%zio-aws-sso dev.zio%zio-aws-licensemanagerlinuxsubscriptions dev.zio%zio-aws-wafv2 dev.zio%zio-aws-panorama dev.zio%zio-aws-internetmonitor dev.zio%zio-aws-dynamodb dev.zio%zio-aws-mobile dev.zio%zio-aws-codeartifact dev.zio%zio-aws-migrationhubrefactorspaces dev.zio%zio-aws-kendraranking dev.zio%zio-aws-cloudtraildata dev.zio%zio-aws-detective dev.zio%zio-aws-marketplacemetering dev.zio%zio-aws-verifiedpermissions dev.zio%zio-aws-proton dev.zio%zio-aws-lakeformation dev.zio%zio-aws-entityresolution dev.zio%zio-aws-dlm dev.zio%zio-aws-sagemakeredge dev.zio%zio-aws-akka-http dev.zio%zio-aws-databasemigration dev.zio%zio-aws-tnb dev.zio%zio-aws-groundstation dev.zio%zio-aws-cloudtrail dev.zio%zio-aws-emrcontainers dev.zio%zio-aws-medicalimaging dev.zio%zio-aws-backupstorage dev.zio%zio-aws-costexplorer dev.zio%zio-aws-personalize dev.zio%zio-aws-codebuild dev.zio%zio-aws-healthlake dev.zio%zio-aws-lambda dev.zio%zio-aws-securityhub dev.zio%zio-aws-batch dev.zio%zio-aws-redshiftdata dev.zio%zio-aws-macie2 dev.zio%zio-aws-lexmodelsv2 dev.zio%zio-aws-wisdom dev.zio%zio-aws-rbin dev.zio%zio-aws-route53recoveryreadiness dev.zio%zio-aws-iot1clickdevices dev.zio%zio-aws-ecs dev.zio%zio-aws-cloudwatch dev.zio%zio-aws-rum dev.zio%zio-aws-mediatailor dev.zio%zio-aws-docdb dev.zio%zio-aws-iotfleethub dev.zio%zio-aws-elasticloadbalancingv2 dev.zio%zio-aws-cloudwatchlogs dev.zio%zio-aws-pinpoint dev.zio%zio-aws-omics dev.zio%zio-aws-schemas dev.zio%zio-aws-appconfig dev.zio%zio-aws-machinelearning dev.zio%zio-aws-codepipeline dev.zio%zio-aws-auditmanager dev.zio%zio-aws-redshiftserverless dev.zio%zio-aws-opsworks dev.zio%zio-aws-identitystore dev.zio%zio-aws-mwaa dev.zio%zio-aws-m2 dev.zio%zio-aws-xray dev.zio%zio-aws-location dev.zio%zio-aws-securitylake dev.zio%zio-aws-serverlessapplicationrepository dev.zio%zio-aws-ec2instanceconnect dev.zio%zio-aws-datasync dev.zio%zio-aws-route53 dev.zio%zio-aws-licensemanagerusersubscriptions dev.zio%zio-aws-cloudsearch dev.zio%zio-aws-robomaker dev.zio%zio-aws-inspector dev.zio%zio-aws-resourceexplorer2 dev.zio%zio-aws-imagebuilder dev.zio%zio-aws-wafregional dev.zio%zio-aws-connectparticipant dev.zio%zio-aws-workdocs dev.zio%zio-aws-shield dev.zio%zio-aws-rolesanywhere dev.zio%zio-aws-account dev.zio%zio-aws-guardduty dev.zio%zio-aws-fis dev.zio%zio-aws-workspaces dev.zio%zio-aws-pricing dev.zio%zio-aws-secretsmanager dev.zio%zio-aws-kafka dev.zio%zio-aws-kinesis dev.zio%zio-aws-dax dev.zio%zio-aws-kendra dev.zio%zio-aws-mq dev.zio%zio-aws-s3control dev.zio%zio-aws-workmail dev.zio%zio-aws-signer dev.zio%zio-aws-route53recoverycluster dev.zio%zio-aws-s3outposts dev.zio%zio-aws-codestarnotifications dev.zio%zio-aws-frauddetector dev.zio%zio-aws-comprehendmedical dev.zio%zio-aws-route53resolver dev.zio%zio-aws-appsync dev.zio%zio-aws-codeguruprofiler dev.zio%zio-aws-eventbridge dev.zio%zio-aws-supportapp dev.zio%zio-aws-sagemakergeospatial dev.zio%zio-aws-simspaceweaver dev.zio%zio-aws-gamelift dev.zio%zio-aws-transcribestreaming dev.zio%zio-aws-cognitoidentityprovider dev.zio%zio-aws-migrationhub dev.zio%zio-aws-iottwinmaker dev.zio%zio-aws-pinpointsmsvoice dev.zio%zio-aws-sts dev.zio%zio-aws-mediapackagev2 dev.zio%zio-aws-computeoptimizer dev.zio%zio-aws-ivsrealtime dev.zio%zio-aws-kafkaconnect dev.zio%zio-aws-iotsitewise dev.zio%zio-aws-snowdevicemanagement dev.zio%zio-aws-sagemakermetrics dev.zio%zio-aws-ioteventsdata dev.zio%zio-aws-networkfirewall dev.zio%zio-aws-dataexchange dev.zio%zio-aws-sagemakera2iruntime dev.zio%zio-aws-kinesisanalyticsv2 dev.zio%zio-aws-cloudfront dev.zio%zio-aws-http4s dev.zio%zio-aws-evidently dev.zio%zio-aws-migrationhuborchestrator dev.zio%zio-aws-core dev.zio%zio-aws-lookoutequipment dev.zio%zio-aws-mediapackagevod dev.zio%zio-aws-servicequotas dev.zio%zio-aws-mturk dev.zio%zio-aws-nimble dev.zio%zio-aws-datazone dev.zio%zio-aws-cognitoidentity dev.zio%zio-aws-honeycode dev.zio%zio-aws-databrew dev.zio%zio-aws-connect dev.zio%zio-aws-acm dev.zio%zio-aws-ec2 dev.zio%zio-aws-route53domains dev.zio%zio-aws-wellarchitected dev.zio%zio-aws-personalizeevents dev.zio%zio-aws-rds dev.zio%zio-aws-ecr dev.zio%zio-aws-autoscaling dev.zio%zio-aws-customerprofiles dev.zio%zio-aws-ssooidc dev.zio%zio-aws-elastictranscoder dev.zio%zio-aws-amplify dev.zio%zio-aws-greengrass dev.zio%zio-aws-kinesisvideosignaling dev.zio%zio-aws-billingconductor dev.zio%zio-aws-neptune dev.zio%zio-aws-codestarconnections dev.zio%zio-aws-chimesdkvoice dev.zio%zio-aws-pinpointemail dev.zio%zio-aws-resiliencehub dev.zio%zio-aws-resourcegroupstaggingapi dev.zio%zio-aws-kinesisvideomedia dev.zio%zio-aws-outposts dev.zio%zio-aws-polly dev.zio%zio-aws-timestreamwrite dev.zio%zio-aws-opsworkscm dev.zio%zio-aws-rdsdata dev.zio%zio-aws-codegurusecurity dev.zio%zio-aws-amplifyuibuilder dev.zio%zio-aws-elasticache dev.zio%zio-aws-accessanalyzer dev.zio%zio-aws-chimesdkmediapipelines dev.zio%zio-aws-ssm dev.zio%zio-aws-qldb dev.zio%zio-aws-qldbsession dev.zio%zio-aws-waf dev.zio%zio-aws-pipes dev.zio%zio-aws-kinesisvideoarchivedmedia dev.zio%zio-aws-ses dev.zio%zio-aws-efs dev.zio%zio-aws-cloudformation dev.zio%zio-aws-ebs dev.zio%zio-aws-opensearchserverless dev.zio%zio-aws-applicationdiscovery dev.zio%zio-aws-personalizeruntime dev.zio%zio-aws-appfabric dev.zio%zio-aws-medialive dev.zio%zio-aws-devopsguru dev.zio%zio-aws-fms dev.zio%zio-aws-athena dev.zio%zio-aws-iotanalytics dev.zio%zio-aws-appconfigdata dev.zio%zio-aws-opensearch dev.zio%zio-aws-alexaforbusiness dev.zio%zio-aws-rekognition dev.zio%zio-aws-ecrpublic dev.zio%zio-aws-pinpointsmsvoicev2 dev.zio%zio-aws-firehose dev.zio%zio-aws-organizations dev.zio%zio-aws-grafana dev.zio%zio-aws-transfer dev.zio%zio-aws-controltower dev.zio%zio-aws-clouddirectory dev.zio%zio-aws-iotthingsgraph dev.zio%zio-aws-drs dev.zio%zio-aws-apigateway dev.zio%zio-aws-codestar dev.zio%zio-aws-codecatalyst dev.zio%zio-aws-route53recoverycontrolconfig dev.zio%zio-aws-appmesh dev.zio%zio-aws-oam dev.zio%zio-aws-devicefarm dev.zio%zio-aws-sesv2 dev.zio%zio-aws-iotsecuretunneling dev.zio%zio-aws-ssmsap dev.zio%zio-aws-managedblockchain dev.zio%zio-aws-savingsplans dev.zio%zio-aws-marketplacecommerceanalytics dev.zio%zio-aws-backup dev.zio%zio-aws-amplifybackend dev.zio%zio-aws-cloudhsm dev.zio%zio-aws-memorydb dev.zio%zio-aws-apigatewayv2 dev.zio%zio-aws-forecast dev.zio%zio-aws-servicecatalog dev.zio%zio-aws-emr dev.zio%zio-aws-connectcontactlens dev.zio%zio-aws-applicationinsights dev.zio%zio-aws-connectcampaigns dev.zio%zio-aws-forecastquery dev.zio%zio-aws-iot dev.zio%zio-aws-inspector2 dev.zio%zio-aws-lightsail dev.zio%zio-aws-kms dev.zio%zio-aws-sns dev.zio%zio-aws-pi dev.zio%zio-aws-paymentcryptography dev.zio%zio-aws-mediastoredata dev.zio%zio-aws-cleanrooms dev.zio%zio-aws-osis dev.zio%zio-aws-cloudwatchevents dev.zio%zio-aws-resourcegroups dev.zio%zio-aws-pcaconnectorad dev.zio%zio-aws-quicksight dev.zio%zio-aws-codecommit dev.zio%zio-aws-bedrockruntime dev.zio%zio-aws-chimesdkidentity dev.zio%zio-aws-iotdataplane dev.zio%zio-aws-costandusagereport dev.zio%zio-aws-cognitosync dev.zio%zio-aws-redshift dev.zio%zio-aws-applicationcostprofiler dev.zio%zio-aws-workspacesweb dev.zio%zio-aws-iotjobsdataplane dev.zio%zio-aws-mediastore dev.zio%zio-aws-finspacedata dev.zio%zio-aws-mgn dev.zio%zio-aws-elasticbeanstalk dev.zio%zio-aws-ivschat dev.zio%zio-aws-comprehend dev.zio%zio-aws-textract dev.zio%zio-aws-applicationautoscaling dev.zio%zio-aws-synthetics dev.zio%zio-aws-emrserverless dev.zio%zio-aws-iotevents dev.zio%zio-aws-elasticsearch dev.zio%zio-aws-docdbelastic dev.zio%zio-aws-ssmcontacts dev.zio%zio-aws-greengrassv2 dev.zio%zio-aws-vpclattice dev.zio%zio-aws-netty dev.zio%zio-aws-support dev.zio%zio-aws-iot1clickprojects dev.zio%zio-aws-sqs dev.zio%zio-aws-lookoutmetrics dev.zio%zio-aws-voiceid dev.zio%zio-aws-timestreamquery dev.zio%zio-aws-migrationhubstrategy dev.zio%zio-aws-chimesdkmeetings dev.zio%zio-aws-iotdeviceadvisor dev.zio%zio-aws-translate dev.zio%zio-aws-glacier dev.zio%zio-aws-budgets dev.zio%zio-aws-storagegateway dev.zio%zio-aws-ram dev.zio%zio-aws-apigatewaymanagementapi dev.zio%zio-aws-acmpca dev.zio%zio-aws-connectcases dev.zio%zio-aws-elasticinference dev.zio%zio-aws-elasticloadbalancing dev.zio%zio-aws-macie dev.zio%zio-aws-glue dev.zio%zio-aws-iotroborunner dev.zio%zio-aws-launchwizard dev.zio%zio-aws-lexruntimev2 dev.zio%zio-aws-mediaconnect dev.zio%zio-aws-cloudsearchdomain dev.zio%zio-aws-kinesisvideowebrtcstorage dev.zio%zio-aws-appintegrations dev.zio%zio-aws-workmailmessageflow dev.zio%zio-aws-apprunner dev.zio%zio-aws-sagemakerruntime dev.zio%zio-aws-sagemaker dev.zio%zio-aws-health dev.zio%zio-aws-backupgateway dev.zio%zio-aws-chime dev.zio%zio-aws-mediaconvert dev.zio%zio-aws-directory dev.zio%zio-aws-cloudhsmv2 dev.zio%zio-aws-arczonalshift dev.zio%zio-aws-sagemakerfeaturestoreruntime dev.zio%zio-aws-neptunedata dev.zio%zio-aws-marketplaceentitlement dev.zio%zio-aws-servicediscovery dev.zio%zio-aws-autoscalingplans dev.zio%zio-aws-kinesisvideo dev.zio%zio-aws-codedeploy dev.zio%zio-aws-config dev.zio%zio-aws-datapipeline dev.zio%zio-aws-directconnect dev.zio%zio-aws-privatenetworks dev.zio%zio-aws-appflow dev.zio%zio-aws-sms dev.zio%zio-aws-ssoadmin dev.zio%zio-aws-mediapackage dev.zio%zio-aws-s3 dev.zio%zio-aws-eks dev.zio%zio-aws-swf dev.zio%zio-aws-lookoutvision dev.zio%zio-aws-amp dev.zio%zio-aws-paymentcryptographydata dev.zio%zio-aws-iotwireless dev.zio%zio-aws-finspace dev.zio%zio-aws-iotfleetwise dev.zio%zio-aws-lexmodelbuilding dev.zio%zio-aws-ivs dev.zio%zio-aws-appstream dev.zio%zio-aws-lexruntime dev.zio%zio-aws-globalaccelerator dev.zio%zio-aws-chimesdkmessaging dev.zio%zio-aws-licensemanager dev.zio%zio-aws-transcribe dev.zio%zio-aws-managedblockchainquery dev.zio%zio-aws-braket dev.zio%zio-aws-sfn dev.zio%zio-aws-cloud9 dev.zio%zio-aws-bedrock dev.zio%zio-aws-cloudcontrol dev.zio%zio-aws-scheduler dev.zio%zio-aws-fsx dev.zio%zio-aws-kinesisanalytics",
     "config":{
       "projects":{
@@ -52149,7 +52606,7 @@
   "zio/zio-redis":{
     "project":"zio/zio-redis",
     "repoUrl":"https://github.com/zio/zio-redis.git",
-    "revision":"v0.2.0",
+    "revision":"master",
     "version":"0.2.0",
     "targets":"dev.zio%zio-redis dev.zio%zio-redis-embedded",
     "config":{
@@ -52179,11 +52636,7 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        {
-          "path":"project/BuildHelper.scala",
-          "pattern":"val Scala3   = versions(\"3\")",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
+        
       ]
     }
   },
