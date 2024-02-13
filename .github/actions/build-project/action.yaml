@@ -80,7 +80,7 @@ runs:
                 "must": [
                   { "term": { "projectName": "'$projectName'" } },
                   { "term": { "scalaVersion": "'"$scalaVersion"'" } },
-                  { "term": { "version": "'"$version"'" } }
+                  { "term": { "version": "'"$projectVersion"'" } }
                 ]
               }
             }
@@ -136,7 +136,6 @@ runs:
             "$(config .repoUrl)" \
             "$(config .revision)" \
             "${{ inputs.scala-version }}" \
-            "$(config .version)" \
             "$(config .targets)" \
             "${{ inputs.maven-repo-url }}" \
             "$(config .config // ${DefaultConfig})" \

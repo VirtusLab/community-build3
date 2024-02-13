@@ -104,32 +104,6 @@ object CommunityBuildPlugin extends AutoPlugin {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s
   }
 
-  /** Helper command used to set correct version for publishing Defined due to a bug in sbt which
-    * does not allow for usage of `set every` with scoped keys We need to use this task instead of
-    * `set every Compile/version := ???`, becouse it would set given value also in Jmh/version or
-    * Jcstress/version scopes, leading build failures
-    */
-  val setPublishVersion =
-    keyTransformCommand("setPublishVersion", Keys.version) { (args, _) =>
-      val targetVersion = args.headOption
-        .filter(_.nonEmpty)
-        .orElse(sys.props.get("communitybuild.version"))
-        .getOrElse {
-          throw new RuntimeException("No explicit version found in setPublishVersion command")
-        }
-      (scope: Scope, currentVersion: String) =>
-        dualVersioning
-          .filter(_.matches(targetVersion, currentVersion))
-          .flatMap(_.apply(targetVersion))
-          .map { version =>
-            logOnce(
-              s"Setting version ${version.render} for ${scope} based on dual versioning ${dualVersioning}"
-            )
-            version.render
-          }
-          .getOrElse(targetVersion)
-    }
-
   val disableFatalWarnings =
     keyTransformCommand("disableFatalWarnings", Keys.scalacOptions) { (_, _) =>
       val flags = Seq("-Xfatal-warnings", "-Werror")
@@ -273,7 +247,6 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   val commands = Seq(
     disableFatalWarnings,
-    setPublishVersion,
     setCrossScalaVersions,
     mapScalacOptions,
     excludeLibraryDependency,
@@ -341,13 +314,6 @@ object CommunityBuildPlugin extends AutoPlugin {
       val mappingKey = s"${current.organization}%${stripScala3Suffix(name)}"
       mappingKey -> r
     }
-  }
-
-  lazy val ourVersion =
-    Option(sys.props("communitybuild.version")).filter(_.nonEmpty)
-  lazy val dualVersioning = DualVersioningType.resolve
-  lazy val publishVersions = ourVersion.toList.map { version =>
-    version :: dualVersioning.flatMap(_.apply(version)).map(_.render).toList
   }
 
   override def globalSettings = Seq(
@@ -558,23 +524,9 @@ object CommunityBuildPlugin extends AutoPlugin {
             Test / executeTests
           )
 
-        val publishResult = ourVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { version =>
-          val currentVersion = (r / Keys.version)
-            .get(s.data)
-            .getOrElse(sys.error(s"${r.project}/version not set"))
-          if (publishVersions.contains(currentVersion))
-            PublishResult(
-              Status.Failed,
-              failureContext = Some(
-                FailureContext.WrongVersion(expected = version, actual = currentVersion)
-              ),
-              tookMs = 0
-            )
-          else
-            PublishResult(
-              evalAsDependencyOf(compileResult)(Compile / publishLocal)
-            )
-        }
+        val publishResult =PublishResult(
+            evalAsDependencyOf(compileResult)(Compile / publishLocal)
+          )
 
         ModuleBuildResults(
           artifactName = projectName,

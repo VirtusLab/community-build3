@@ -2,16 +2,15 @@
 
 set -e
 
-if [ $# -ne 5 ]; then
-  echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <publish_version>, got $#: $@"
+if [ $# -ne 4 ]; then
+  echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <project_config>, got $#: $@"
   exit 1
 fi
 
 projectName="$1"
 repoDir="$2" # e.g. /tmp/shapeless
 scalaVersion="$3" # e.g. 3.1.2-RC1
-publishVersion="$4" # version of the project
-projectConfig="$5" 
+projectConfig="$4" 
 
 export OPENCB_PROJECT_DIR=$repoDir
 
@@ -31,7 +30,7 @@ else
   echo "No .mill-version file found, detecting compatible mill version"
   if [[ -f ./mill ]];then
     echo "Found mill runner script, trying to resolve version"
-    millVersion=`./mill -v $RESOLVE | grep "Bill.*version" | grep -E -o "(\d+\.?){3}" || echo ""`
+    millVersion=`./mill -v $RESOLVE | grep "Mill.*version" | grep -E -o "(\d+\.?){3}" || echo ""`
   fi
   if [[ "$millVersion" == "" ]]; then
     echo "Trying one of predefiend mill versions"
@@ -113,7 +112,6 @@ for scFile in "${adaptedFiles[@]}"; do
     --stdout \
     --syntactic \
     --settings.Scala3CommunityBuildMillAdapter.targetScalaVersion "$scalaVersion" \
-    --settings.Scala3CommunityBuildMillAdapter.targetPublishVersion "$publishVersion" \
     --settings.Scala3CommunityBuildMillAdapter.millBinaryVersion "$millBinaryVersion" \
     --scala-version 3.1.0 > ${scFile}.adapted \
     && mv ${scFile}.adapted $scFile \

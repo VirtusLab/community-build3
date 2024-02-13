@@ -2,20 +2,19 @@
 set -e
 set -o pipefail
 
-if [ $# -ne 9 ]; then
-  echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <version> <targets> <maven_repo> <project_config?> <extraScalacOpts?> <removeScalacOpts?> <extraDeps?>, got $#: $@"
+if [ $# -ne 8 ]; then
+  echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <targets> <maven_repo> <project_config?> <extraScalacOpts?> <removeScalacOpts?> <extraDeps?>, got $#: $@"
   exit 1
 fi
 
 repoDir="$1"                # e.g. /tmp/shapeless
 scalaVersion="$2"           # e.g. 3.0.1-RC1-bin-COMMUNITY-SNAPSHOT
-version="$3"                # e.g. 1.0.2-communityBuild
-targets=($4)                # e.g. "com.example%foo com.example%bar"
-export CB_MVN_REPO_URL="$5" # e.g. https://mvn-repo/maven2/2021-05-23_1
-projectConfig="$6"
-extraScalacOptions="$7"
-disabledScalacOption="$8"
-extraLibraryDeps="$9"
+targets=($3)                # e.g. "com.example%foo com.example%bar"
+export CB_MVN_REPO_URL="$4" # e.g. https://mvn-repo/maven2/2021-05-23_1
+projectConfig="$5"
+extraScalacOptions="$6"
+disabledScalacOption="$7"
+extraLibraryDeps="$8"
 
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
@@ -23,7 +22,7 @@ fi
 
 echo '##################################'
 echo Scala version: $scalaVersion
-echo Disting version $version for ${#targets[@]} targets: ${targets[@]}
+echo Targets: ${targets[@]}
 echo Project projectConfig: $projectConfig
 echo '##################################'
 
@@ -40,16 +39,9 @@ cd $repoDir
 # GithHub actions workers have maximally 7GB of RAM
 memorySettings=("-J-Xmx7G" "-J-Xms4G" "-J-Xss8M")
 
-# Don't set version if not publishing
-setVersionCmd="setPublishVersion $version"
-if [[ -z $version ]]; then
-  setVersionCmd=""
-fi
-
 sbtSettings=(
   --batch
   --verbose
-  "-Dcommunitybuild.version=$version"
   "-Dcommunitybuild.scala=$scalaVersion"
   "-Dcommunitybuild.project.dependencies.add=$extraLibraryDeps"
   ${memorySettings[@]}
@@ -65,8 +57,6 @@ appendScalacOptions="${extraScalacOptions}"
 removeScalacOptions="${disabledScalacOption}"
 
 function runSbt() {
-  # Use `setPublishVersion` instead of `every version`, as it might overrte Jmh/Jcstress versions
-  # set every ... might lead to restoring original version changed in setPublishVersion
   setScalaVersionCmd="++$scalaVersion"
   if [[ "$forceScalaVersion" == "true" ]]; then
     echo "Would force Scala version $scalaVersion"
@@ -78,7 +68,6 @@ function runSbt() {
     "$setScalaVersionCmd -v" \
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
     "set every credentials := Nil" \
-    "$setVersionCmd" \
     "$customCommands" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile

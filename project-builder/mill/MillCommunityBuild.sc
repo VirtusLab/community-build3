@@ -144,7 +144,6 @@ case class Ctx(
     evaluator: Evaluator,
     log: mill.api.Logger
 ) {
-  lazy val publishVersion = sys.props.get("communitybuild.version").filterNot(_.isEmpty)
   lazy val cross = Segment.Cross(scalaVersion :: Nil)
 }
 
@@ -263,30 +262,12 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
       }
     val publishResult = module match {
       case module: CommunityBuildPublishModule =>
-        ctx.publishVersion.fold(PublishResult(Status.Skipped, tookMs = 0)) { publishVersion =>
-          tryEval(module.publishVersion) match {
-            case api.Result.Success(`publishVersion`) =>
-              PublishResult(
-                evalAsDependencyOf(compileResult, docResult)(
-                  module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
-                )
-              )
-            case api.Result.Success(version: String) =>
-              PublishResult(
-                Status.Failed,
-                failureContext =
-                  Some(FailureContext.WrongVersion(expected = publishVersion, actual = version)),
-                tookMs = 0
-              )
-            case _ =>
-              PublishResult(
-                Status.Failed,
-                failureContext =
-                  Some(FailureContext.BuildError(List("Failed to resolve 'publishVersion'"))),
-                tookMs = 0
-              )
-          }
-        }
+        PublishResult(
+          evalAsDependencyOf(compileResult, docResult)(
+            module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
+          )
+        )
+  
       case _ =>
         ctx.log.error(s"Module $module is not a publish module, skipping publishing")
         PublishResult(Status.Skipped, tookMs = 0)

@@ -6,7 +6,6 @@ import metaconfig._
 
 case class Scala3CommunityBuildMillAdapterConfig(
     targetScalaVersion: Option[String] = None,
-    targetPublishVersion: Option[String] = None,
     millBinaryVersion: Option[String] = None
 )
 object Scala3CommunityBuildMillAdapterConfig {
@@ -35,7 +34,6 @@ class Scala3CommunityBuildMillAdapter(
         this.config
           .copy(
             targetScalaVersion = propOrDefault("communitybuild.scala", _.targetScalaVersion),
-            targetPublishVersion = propOrDefault("communitybuild.version", _.targetPublishVersion),
             millBinaryVersion = propOrDefault(
               "communitybuild.millBinaryVersion",
               _.millBinaryVersion
@@ -141,13 +139,6 @@ class Scala3CommunityBuildMillAdapter(
             )
           case _ => Patch.empty
         }
-
-      case ValOrDefDef(Term.Name("publishVersion"), tpe, body) =>
-        Patch.replaceTree(
-          body,
-          Replacment.PublishVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
-        )
-
     }.asPatch
 
     headerInject + patch
@@ -187,10 +178,6 @@ class Scala3CommunityBuildMillAdapter(
         .map(quoted(_))
         .map(v => if (asTarget) s"mill.T($v)" else v)
         .getOrElse(default)
-    def PublishVersion(default: => String, asTarget: Boolean = true) = config.targetPublishVersion
-      .map(quoted(_))
-      .map(v => if (asTarget) s"mill.T($v)" else v)
-      .getOrElse(default)
 
     private def quoted(v: String): String = {
       // Make sure that literal is quoted

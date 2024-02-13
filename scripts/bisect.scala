@@ -183,7 +183,6 @@ object ValidationScript:
     |  "$$(config .repoUrl)" \
     |  "$revision" \
     |  "$${scalaVersion}" \
-    |  "" \
     |  "${targets.getOrElse("$(config .targets)")}" \
     |  "https://scala3.westeurope.cloudapp.azure.com/maven2/bisect/" \
     |  "$$(config .config '$configPatch' // $${DefaultConfig} '$configPatch')" \
