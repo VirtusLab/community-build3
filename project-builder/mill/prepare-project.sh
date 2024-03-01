@@ -79,8 +79,9 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
 
   set -x
   # Cannot determinate did sed script was applied, so perform two ops each time
-  sed -i "s/$pattern/$replaceWith/" "$path" || true
-  sed -i -E "s/$pattern/$replaceWith/" "$path" || true
+  # Don't use in-place option for easier cross-platform compat (macos vs unix)
+  (sed "s/$pattern/$replaceWith/" "$path" > $path.tmp && mv $path.tmp $path ) || true
+  (sed -E "s/$pattern/$replaceWith/" "$path" > $path.tmp && mv $path.tmp $path ) || true
   set +x
 done
 
