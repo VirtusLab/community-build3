@@ -76,8 +76,8 @@
   "47degrees/github4s":{
     "project":"47degrees/github4s",
     "repoUrl":"https://github.com/47degrees/github4s.git",
-    "revision":"v0.33.1",
-    "version":"0.33.1",
+    "revision":"v0.33.2",
+    "version":"0.33.2",
     "targets":"com.47deg%github4s",
     "config":{
       "projects":{
@@ -108,7 +108,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version    = \"3.3.1\"",
+          "pattern":"val scala3Version    = \"3.3.3\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -5782,8 +5782,18 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "sourcePatches":[
+        {
+          "path":"openai-client/build.sbt",
+          "pattern":"playWsVersion.value",
+          "replaceWith":"\"2.2.0\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"akka-actor-testkit-typed_2.13",
+          "replaceWith":"akka-actor-testkit-typed_3"
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.2.2\"",
@@ -10465,13 +10475,6 @@
         
       ]
     }
-  },
-  "dicklieber/wa9nnn-util":{
-    "project":"dicklieber/wa9nnn-util",
-    "repoUrl":"https://github.com/dicklieber/wa9nnn-util.git",
-    "revision":"",
-    "version":"3.0.0.8",
-    "targets":"com.wa9nnn%wa9nnnutil"
   },
   "dieproht/matr":{
     "project":"dieproht/matr",
@@ -21920,7 +21923,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"build.sc",
+          "pattern":"case \"3.[0-9]+.[0-9]+\"",
+          "replaceWith":"case \"<SCALA_VERSION>\""
+        }
       ]
     }
   },
@@ -23747,20 +23754,6 @@
       ]
     }
   },
-  "karimagnusson/kuzminki-ec-stream":{
-    "project":"karimagnusson/kuzminki-ec-stream",
-    "repoUrl":"https://github.com/karimagnusson/kuzminki-ec-stream.git",
-    "revision":"0.9.1",
-    "version":"0.9.1",
-    "targets":"io.github.karimagnusson%kuzminki-ec-akka io.github.karimagnusson%kuzminki-ec-pekko"
-  },
-  "karimagnusson/kuzminki-play":{
-    "project":"karimagnusson/kuzminki-play",
-    "repoUrl":"https://github.com/karimagnusson/kuzminki-play.git",
-    "revision":"",
-    "version":"0.9.3",
-    "targets":"io.github.karimagnusson%kuzminki-akka-play io.github.karimagnusson%kuzminki-pekko-play"
-  },
   "karimagnusson/kuzminki-zio":{
     "project":"karimagnusson/kuzminki-zio",
     "repoUrl":"https://github.com/karimagnusson/kuzminki-zio.git",
@@ -24823,8 +24816,8 @@
   "kitlangton/neotype":{
     "project":"kitlangton/neotype",
     "repoUrl":"https://github.com/kitlangton/neotype.git",
-    "revision":"v0.1.7",
-    "version":"0.1.7",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
     "targets":"io.github.kitlangton%neotype-zio-json io.github.kitlangton%neotype-zio-config io.github.kitlangton%neotype-zio-schema io.github.kitlangton%neotype-circe io.github.kitlangton%neotype-tapir io.github.kitlangton%neotype-zio-test io.github.kitlangton%neotype io.github.kitlangton%neotype-zio io.github.kitlangton%neotype-zio-quill",
     "config":{
       "projects":{
@@ -31813,7 +31806,11 @@
       },
       "tests":"full",
       "sourcePatches":[
-        
+        {
+          "path":"jvm/src/test/scala/com.paulbutcher.test/mock/JavaMocksTest.scala",
+          "pattern":"m.simplePolymorphicMethod _",
+          "replaceWith":"m.simplePolymorphicMethod[Int] _"
+        }
       ]
     }
   },
@@ -33533,8 +33530,8 @@
   "plokhotnyuk/jsoniter-scala":{
     "project":"plokhotnyuk/jsoniter-scala",
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.28.2",
-    "version":"2.28.2",
+    "revision":"v2.28.3",
+    "version":"2.28.3",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros"
   },
   "plokhotnyuk/rtree2d":{
@@ -50376,8 +50373,8 @@
   "wvlet/airframe":{
     "project":"wvlet/airframe",
     "repoUrl":"https://github.com/wvlet/airframe.git",
-    "revision":"v24.2.3",
-    "version":"24.2.3",
+    "revision":"v24.3.0",
+    "version":"24.3.0",
     "targets":"org.wvlet.airframe%airframe-http-recorder org.wvlet.airframe%airframe-config org.wvlet.airframe%airframe-jdbc org.wvlet.airframe%airframe-parquet org.wvlet.airframe%airframe-http org.wvlet.airframe%airframe-control org.wvlet.airframe%airframe-ulid org.wvlet.airframe%airframe-canvas org.wvlet.airframe%airframe-http-okhttp org.wvlet.airframe%airframe-http-grpc org.wvlet.airframe%airframe-codec org.wvlet.airframe%airframe-di-macros org.wvlet.airframe%airframe-http-netty org.wvlet.airframe%airframe-metrics org.wvlet.airframe%airframe-http-codegen org.wvlet.airframe%airframe-rx-html org.wvlet.airframe%airframe-jmx org.wvlet.airframe%airframe-log org.wvlet.airframe%airframe-json org.wvlet.airframe%airspec org.wvlet.airframe%airframe-sql org.wvlet.airframe%airframe-launcher org.wvlet.airframe%airframe-msgpack org.wvlet.airframe%airframe org.wvlet.airframe%airframe-rx org.wvlet.airframe%airframe-surface org.wvlet.airframe%airframe-fluentd",
     "config":{
       "projects":{
