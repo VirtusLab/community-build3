@@ -47873,8 +47873,8 @@
   "typelevel/kittens":{
     "project":"typelevel/kittens",
     "repoUrl":"https://github.com/typelevel/kittens.git",
-    "revision":"v3.2.0",
-    "version":"3.2.0",
+    "revision":"v3.3.0",
+    "version":"3.3.0",
     "targets":"org.typelevel%kittens",
     "config":{
       "projects":{
@@ -47890,7 +47890,6 @@
       },
       "sbt":{
         "commands":[
-          "set core.jvm/Test/unmanagedSources/excludeFilter ~= { _ || \"EmptySuite.scala\" || \"PureSuite.scala\" }"
         ],
         "options":[
           
@@ -47905,12 +47904,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"ThisBuild \\/ scalaOutputVersion :=.*",
-          "replaceWith":""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.1\"",
+          "pattern":"val scala3 = \"3.3.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
