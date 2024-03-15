@@ -3,7 +3,7 @@
 //> using dep "org.jsoup:jsoup:1.17.2"
 //> using dep "org.json4s::json4s-native:4.0.7"
 //> using dep "org.json4s::json4s-ext:4.0.7"
-//> using dep "com.github.pureconfig::pureconfig-core:0.17.4"
+//> using dep "com.github.pureconfig::pureconfig-core:0.17.6"
 //> using dep "com.lihaoyi::os-lib:0.9.3"
 //> using dep "com.lihaoyi::requests:0.8.0"
 
