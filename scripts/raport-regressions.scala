@@ -1,6 +1,6 @@
 //> using scala "3"
-//> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.6.0"
-//> using dep "org.slf4j:slf4j-simple:2.0.7"
+//> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.11.5"
+//> using dep "org.slf4j:slf4j-simple:2.0.12"
 
 import com.sksamuel.elastic4s
 import elastic4s.*
@@ -290,7 +290,7 @@ def listFailedProjects(
                 buildURL = buildURL
               ),
               timestamp = timestamp,
-              logProject = lazyLogProject _
+              logProject = lazyLogProject
             )
           }
       }
