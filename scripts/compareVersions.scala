@@ -1,6 +1,6 @@
 //> using scala "3"
-//> using lib "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.10.0"
-//> using lib "org.slf4j:slf4j-simple:2.0.9"
+//> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.10.0"
+//> using dep "org.slf4j:slf4j-simple:2.0.9"
 //> using options -Wunused:all -deprecation
 
 import com.sksamuel.elastic4s

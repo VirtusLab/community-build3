@@ -1,12 +1,12 @@
 #!/usr/bin/env -S scala-cli shebang
 //> using scala "3.2"
-//> using lib "org.json4s::json4s-native:4.0.6"
-//> using lib "com.lihaoyi::requests:0.8.0"
-//> using lib "com.lihaoyi::os-lib:0.9.1"
-//> using lib "io.get-coursier:coursier_2.13:2.1.3"
-//> using lib "com.goyeau::kubernetes-client:0.9.0"
-//> using lib "org.slf4j:slf4j-simple:2.0.7"
-//> using lib "com.github.scopt::scopt:4.1.0"
+//> using dep "org.json4s::json4s-native:4.0.6"
+//> using dep "com.lihaoyi::requests:0.8.0"
+//> using dep "com.lihaoyi::os-lib:0.9.1"
+//> using dep "io.get-coursier:coursier_2.13:2.1.3"
+//> using dep "com.goyeau::kubernetes-client:0.9.0"
+//> using dep "org.slf4j:slf4j-simple:2.0.7"
+//> using dep "com.github.scopt::scopt:4.1.0"
 
 import org.json4s.*
 import org.json4s.native.JsonMethods.*

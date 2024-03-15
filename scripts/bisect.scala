@@ -1,5 +1,5 @@
 // Based on https://github.com/lampepfl/dotty/blob/main/project/scripts/bisect.scala
-//> using lib "com.github.scopt::scopt:4.1.0"
+//> using dep "com.github.scopt::scopt:4.1.0"
 //> using scala 3.3
 
 import sys.process._
