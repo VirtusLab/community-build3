@@ -211,7 +211,7 @@ def stripScala3Suffix(s: String) = s match {
   case WithExtractedScala3Suffix(prefix, _) => prefix
 }
 
-object DottyProject extends StarredProject("lampepfl", "dotty")(0)
+object DottyProject extends StarredProject("scala", "scala3")(0)
 def buildPlanCommons(depGraph: DependencyGraph) =
   val data = depGraph.projects
   val topLevelData = data
@@ -519,7 +519,7 @@ def createGithubActionJob(
     |      repository-url:
     |        type: string
     |        description: "GitHub repository URL for compiler to build, ignored when published-scala-version is defined"
-    |        default: "lampepfl/dotty"
+    |        default: "scala/scala3"
     |      repository-branch:
     |        type: string
     |        description: "GitHub repository branch for compiler to build, ignored when published-scala-version is defined"

@@ -793,7 +793,7 @@ object MinikubeReproducer:
               builderContainer(
                 imageName = "compiler-builder:",
                 args = Seq(
-                  "https://github.com/lampepfl/dotty.git",
+                  "https://github.com/scala/scala3.git",
                   "main",
                   build.scalaVersion,
                   build.mavenRepositoryUrl
@@ -999,7 +999,7 @@ class LocalReproducer(using config: Config, build: BuildInfo):
         case _                          => None
       }
       val projectDir =
-        gitCheckout("https://github.com/lampepfl/dotty.git", revision)(
+        gitCheckout("https://github.com/scala/scala3.git", revision)(
           os.temp.dir()
         )
 

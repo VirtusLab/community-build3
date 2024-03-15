@@ -1,4 +1,4 @@
-// Based on https://github.com/lampepfl/dotty/blob/main/project/scripts/bisect.scala
+// Based on https://github.com/scala/scala3/blob/main/project/scripts/bisect.scala
 //> using dep "com.github.scopt::scopt:4.1.0"
 //> using scala 3.3
 
