@@ -48,7 +48,7 @@ The Open Community Build is executed weekly on Friday night using the latest ava
 The compiler team might be interested in executing on-demand builds with a configured version of Scala to use. For that we can use a dedicated CI workflow run taking a set of arguments:
 - **Custom name of the job** (Optional) - a custom string allowing identification results of the job, would be also used as a buildId when persisting the results in the database. 
 - **Published Scala version to use** (Optional) - if non-empty the value would be used to determine an already published version to use, otherwise if left empty, the compiler would be built using the next 2 options.
-- **GitHub repository for compiler** (defaults to `lampepfl/dotty`) - when building the compiler this repository would be used to provide the compiler sources
+- **GitHub repository for compiler** (defaults to `scala/scala3`) - when building the compiler this repository would be used to provide the compiler sources
 - **GitHub repository branch** (defaults to `main`) - when building the compiler this value would point to the branch in the repository provided in the previous setting, that should be used to build the compiler in the
 - **List of scalacOptions to include** (Optional) - a comma-delimited list of Scala compiler options to apply for all projects that would be built (best effort, applies only to sbt and scala-cli currently)
 - **List of scalacOptions to exclude** (Optional) - a comma-delimited list of Scala compiler options to remove for all projects that would be built (best effort, applies only to sbt currently)
