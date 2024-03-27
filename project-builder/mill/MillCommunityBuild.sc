@@ -391,9 +391,9 @@ private def checkedModuleMappings(
   val mappings = moduleMappings(ctx)
   val unmatched = targetStrings.diff(mappings.keySet).diff(Set("*%*"))
   if (unmatched.nonEmpty) {
-    sys.error(
-      s"Failed to resolve mappings for targets: ${unmatched.mkString(", ")}"
-    )
+    val msg = s"Failed to resolve mappings for ${unexpected.size}:${targetStrings.size} targets: ${unmatched.mkString(", ")}"
+    if(unexpected.size == targetStrings.size) sys.error(msg)
+    else System.err.println(msg)
   }
   mappings
 }
