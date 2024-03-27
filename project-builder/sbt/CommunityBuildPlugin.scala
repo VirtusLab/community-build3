@@ -440,7 +440,7 @@ object CommunityBuildPlugin extends AutoPlugin {
                 }
             }
             .orElse {
-              println(s"""Module mapping missing:
+              System.err.println(s"""Module mapping missing:
                 |  id: $id
                 |  testedIds: $testedFullIds
                 |  scalaVersionSuffix: $scalaVersionSuffix
@@ -454,9 +454,9 @@ object CommunityBuildPlugin extends AutoPlugin {
             }
 
         if (idsWithMissingMappings.nonEmpty) {
-          throw new Exception(
-            s"Module mapping missing for: ${idsWithMissingMappings.toSeq.mkString(", ")}"
-          )
+          val msg = s"Failed to resolve mappings for ${idsWithMissingMappings.size}:${filteredIds.size} targets: ${idsWithMissingMappings.toSeq.mkString(", ")}"
+          if(idsWithMissingMappings.size >= filteredIds.size) sys.error(msg)
+          else System.err.println(msg)
         }
         mappedProjects.flatten.toSet
       }
