@@ -1,5 +1,5 @@
-//> using toolkit latest
-//> using scala 3
+//> using toolkit 0.2.1
+//> using scala 3.3
 //> using file ../shared/CommunityBuildCore.scala
 
 import Scala3CommunityBuild.*
@@ -146,7 +146,9 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies
       )
-      .call(check = false, stdout = os.Inherit, stderr = os.Pipe)
+      .call(check = false, stdout = os.Inherit, stderr = os.Pipe, env = Map(
+        "COURSIER_REPOSITORIES" -> s"central|sonatype:releases|sonatype:snapshots|sonatype-s01:snapshots|snapshots|${mavenRepoURL.getOrElse("")}"
+      ))
     val result = proc.exitCode
     val tookMillis = (System.currentTimeMillis() - evalStart).toInt
     def nullT = null.asInstanceOf[T]
