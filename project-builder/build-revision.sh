@@ -111,6 +111,8 @@ else
   echo "Not found sbt or mill build files, assuming scala-cli project"
   ls -l repo/
   echo "scala-cli" > $buildToolFile
+  scala-cli bloop exit
+  export COURSIER_REPOSITORIES="central|sonatype:releases|$mvnRepoUrl"
   scala-cli clean $scriptDir/scala-cli/
   scala-cli clean repo
   scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps"
