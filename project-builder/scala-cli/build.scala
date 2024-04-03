@@ -107,7 +107,7 @@ import os.CommandResult
 case class CliCommand[T](
     command: Seq[String],
     errHandler: (CommandResult, EvalResult.Failure) => EvalResult[T]
-){
+) {
   override def toString(): String = s"${command.mkString(" ")}"
 }
 def cmd(args: String*) = CliCommand[Unit](args, (_, failure) => failure)
@@ -127,9 +127,9 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
   }
 
   def eval[T](task: CliCommand[T]): EvalResult[T] = {
-    val extraLibraryDependencies = Utils.extraLibraryDependencies(scalaVersion).map{
-      case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) => 
-        if(scalaCrossVersion) s"--dependency=$org::$artifact:$version"
+    val extraLibraryDependencies = Utils.extraLibraryDependencies(scalaVersion).map {
+      case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
+        if (scalaCrossVersion) s"--dependency=$org::$artifact:$version"
         else s"--dependency=$org:$artifact:$version"
     }
     val evalStart = System.currentTimeMillis()
@@ -146,9 +146,14 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies
       )
-      .call(check = false, stdout = os.Inherit, stderr = os.Pipe, env = Map(
-        "COURSIER_REPOSITORIES" -> s"central|sonatype:releases|sonatype:snapshots|sonatype-s01:snapshots|snapshots|${mavenRepoURL.getOrElse("")}"
-      ))
+      .call(
+        check = false,
+        stdout = os.Inherit,
+        stderr = os.Pipe,
+        env = Map(
+          "COURSIER_REPOSITORIES" -> s"central|sonatype:releases|${mavenRepoURL.getOrElse("")}"
+        )
+      )
     val result = proc.exitCode
     val tookMillis = (System.currentTimeMillis() - evalStart).toInt
     def nullT = null.asInstanceOf[T]
