@@ -27,6 +27,9 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
             .map { c =>
               c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
             }
+            .map { c => 
+              c.copy(sbt = c.sbt.copy(commands = c.sbt.commands ++ Seq("set ThisBuild/usePipelining := true")))
+            }
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
           case ex: Throwable =>
