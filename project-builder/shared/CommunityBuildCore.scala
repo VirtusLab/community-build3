@@ -84,7 +84,7 @@ object Scala3CommunityBuild {
         sourceVersion.map(v => s""""sourceVersion": "$v"""")
       ).flatten
       val optionalsString =
-      if (optionals.isEmpty) ""
+        if (optionals.isEmpty) ""
         else optionals.mkString(", ", ", ", "")
       s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}$optionalsString}"""
     }
@@ -334,20 +334,37 @@ object Scala3CommunityBuild {
     }
 
     private val multiStringSettings = Seq(
-      "-scalajs-mapSourceURI", "-language",
-      "-Wconf","-Xmacro-settings","-Yimports","-Yfrom-tasty-ignore-list"
+      "-scalajs-mapSourceURI",
+      "-language",
+      "-Wconf",
+      "-Xmacro-settings",
+      "-Yimports",
+      "-Yfrom-tasty-ignore-list"
     )
 
-    object logOnce extends Function[String, Unit]{
+    object logOnce extends Function[String, Unit] {
       val logged = collection.mutable.Set.empty[String]
-      override def apply(v :String): Unit = if(logged.add(v)) println(s"OpenCB::$v")
+      override def apply(v: String): Unit = if (logged.add(v)) println(s"OpenCB::$v")
     }
+    // Invalid scalac options but not checked before 3.5.0-RC
+    val invalidLanguageOptions = 0.until(5).map(v => s"3.$v") ++ Seq(
+      "_",
+      "experimental",
+      "future",
+      "scala3",
+      "Scala3",
+      "scala2",
+      "Scala2",
+      "scala2Compat",
+      "Scala2Compat"
+    )
+    val ignoredScalacOptions = invalidLanguageOptions.map(v => s"-language:$v")
     def mapScalacOptions(
         current: Seq[String],
         append: Seq[String],
         remove: Seq[String]
     ): Seq[String] = {
-      val (removeMatchSettings, removeSettings) = remove.partition { _.startsWith("MATCH:") }
+      val (removeMatchSettings, removeSettings) = (remove ++ ignoredScalacOptions).partition { _.startsWith("MATCH:") }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
 
       val (required, standardAppendSettings) = append.partition(_.startsWith("REQUIRE:"))
@@ -401,6 +418,11 @@ object Scala3CommunityBuild {
           .apply(setting)
       }
       current
+        .flatMap {
+          case opt if opt.startsWith("-language:") =>
+            opt.stripPrefix("-language:").split(',').map(v => s"-language:$v")
+          case opt => List(opt)
+        }
         .filterNot { s =>
           def isMatching(reason: String, found: Option[String]): Boolean = found match {
             case Some(matched) => 
@@ -417,7 +439,7 @@ object Scala3CommunityBuild {
     
     case class LibraryDependency(organization: String, artifact: String, version: String, crossScalaVersion: Boolean){
       override def toString(): String = {
-        val crossVersion = if(crossScalaVersion) "%%" else "%"
+        val crossVersion = if (crossScalaVersion) "%%" else "%"
         s"$organization $crossVersion $artifact % $version"
       }
     }
