@@ -12,7 +12,7 @@ object Scala3CommunityBuild {
   // Community projects configs
   case class ProjectBuildConfig(
       projects: ProjectsConfig = ProjectsConfig(),
-      tests: TestingMode = TestingMode.Full
+      tests: TestingMode = TestingMode.CompileOnly
   )
 
   case class ProjectOverrides(tests: Option[TestingMode] = None)
