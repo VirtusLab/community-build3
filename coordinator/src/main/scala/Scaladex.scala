@@ -1,6 +1,7 @@
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.*
+import scala.concurrent.duration.*
 
 object Scaladex {
   case class Pagination(current: Int, pageCount: Int, totalSize: Int)
@@ -40,6 +41,12 @@ object Scaladex {
           )
           SECONDS.sleep(backoffSeconds)
           tryFetch((backoffSeconds * 2).min(60))
+        case _: requests.TimeoutException =>
+          Console.err.println(
+            s"Failed to fetch artifact metadata, Scaladex request timeout, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
+          )
+          SECONDS.sleep(backoffSeconds)
+          tryFetch((backoffSeconds * 2).min(60))
       }
     tryFetch(1)
   }
@@ -63,6 +70,10 @@ object Scaladex {
     Option.unless(response.contentLength.contains(0)) {
       fromJson[ProjectSummary](response.text())
     }
+  }.recoverWith{
+    case _: requests.TimeoutException => 
+      Thread.sleep(scala.util.Random.nextInt(10.seconds.toMillis.toInt))
+      projectSummary(organization, repository, scalaBinaryVersion)
   }
 
 }
