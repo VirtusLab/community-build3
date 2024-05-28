@@ -398,57 +398,11 @@ def splitIntoStages(
 ): StagedBuildPlan = {
   val deps = projects.map(v => (v.project, v)).toMap
   // GitHub Actions limits to 255 elements in matrix
-  val maxStageSize = 255
-  @scala.annotation.tailrec
-  def groupByDeps(
-      remaining: Set[ProjectBuildDef],
-      done: Set[Project],
-      acc: List[Set[ProjectBuildDef]]
-  ): List[Set[ProjectBuildDef]] = {
-    if remaining.isEmpty then acc.reverse
-    else
-      var (currentStage, newRemainings) = remaining.partition {
-        _.dependencies.filter(deps.contains).forall(done.contains)
-      }
-      if currentStage.isEmpty then {
-        def hasCyclicDependencies(p: ProjectBuildDef) =
-          p.dependencies.exists(
-            deps.get(_).fold(false)(_.dependencies.contains(p.project))
-          )
-        val cyclicDeps = newRemainings.filter(hasCyclicDependencies)
-        if cyclicDeps.nonEmpty then {
-          currentStage ++= cyclicDeps
-          newRemainings --= cyclicDeps
-          cyclicDeps.foreach(v =>
-            println(
-              s"Mitigated cyclic dependency in  ${v.project} -> ${v.dependencies.toList
-                .filterNot(done.contains)}"
-            )
-          )
-        } else {
-          val (minDeps, tieBreakers) = newRemainings
-            .groupBy(_.dependencies.count(!done.contains(_)))
-            .toSeq
-            .sortBy { (depsCount, _) => depsCount }
-            .head
-          def showCurrent =
-            tieBreakers.map(_.project.coordinates).mkString(", ")
-          System.err.println(
-            s"Not found projects without already resolved dependencies, using [${tieBreakers.size}] projects with minimal dependency size=$minDeps : ${showCurrent}"
-          )
-          currentStage ++= tieBreakers
-          newRemainings --= tieBreakers
-        }
-      }
-      val names = currentStage.map(_.project)
-      val currentStages = currentStage.grouped(maxStageSize).toList
-      groupByDeps(newRemainings, done ++ names, currentStages ::: acc)
-  }
-
-  val (longRunningDefs, toSplit) = projects.toSet
+  val MaxStageSize = 255
+    val (longRunningDefs, toSplit) = projects.toSet
     .partition(p => longBuildingProjects.contains(p.project))
   val longRunning = longRunningDefs.map(_.project)
-  val staged = groupByDeps(toSplit, done = longRunning, Nil)
+  val staged = toSplit.grouped(MaxStageSize).toList
 
   val all = longRunningDefs :: staged
   all.map(_.toList.sortBy(_.project))
