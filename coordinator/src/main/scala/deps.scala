@@ -30,12 +30,16 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
       )
       .get()
     d.select(".list-result .row").asScala.flatMap { e =>
-      val texts = e.select("h4").get(0).text().split("/")
-      val stars = e.select(".stats [title=Stars]").asScala.map(_.text)
-      Option.unless(texts.isEmpty || stars.isEmpty) {
-        StarredProject(texts.head, texts.drop(1).mkString("/"))(
-          stars.head.toInt
-        )
+      e.select("h4").get(0).text().takeWhile(!_.isWhitespace) match {
+        case s"${organization}/${repository}" =>
+          for 
+            ghStars <- e.select(".stats [title=Stars]")
+            .asScala
+            .headOption
+            .flatMap(_.text.toIntOption)
+          yield
+             StarredProject(organization, repository)(ghStars)
+        case _ => None
       }
     }
   LazyList
