@@ -43,6 +43,10 @@ on:
         required: true
       OPENCB_ELASTIC_PSWD:
         required: true
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 
 jobs:
   setup-build:
@@ -61,6 +65,8 @@ jobs:
           scala-version: ${{ inputs.published-scala-version }}
           repository-url: ${{ inputs.repository-url }}
           repository-branch: ${{ inputs.repository-branch }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   stage-0:
     runs-on: ubuntu-22.04
@@ -341,6 +347,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -620,6 +628,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -725,3 +735,5 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
