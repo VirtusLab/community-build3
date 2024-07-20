@@ -76,13 +76,7 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   echo "Path:        $path"
   echo "Pattern:     $pattern"
   echo "Replacement: $replaceWith"
-
-  set -x
-  # Cannot determinate did sed script was applied, so perform two ops each time
-  # Don't use in-place option for easier cross-platform compat (macos vs unix)
-  (sed "s/$pattern/$replaceWith/" "$path" > $path.tmp && mv $path.tmp $path ) || true
-  (sed -E "s/$pattern/$replaceWith/" "$path" > $path.tmp && mv $path.tmp $path ) || true
-  set +x
+  scala-cli run ${scriptDir}/../../scripts/searchAndReplace.scala -- "${repoDir}/${path}" "${pattern}" "${replaceWith}"
 done
 
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}.sh"
