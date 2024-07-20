@@ -28,6 +28,7 @@ function config () {
 }
 DefaultConfig="{}"
 
+scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \
