@@ -246,8 +246,6 @@ def makeDependenciesBasedBuildPlan(
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
   val configDiscovery = ProjectConfigDiscovery(confFiles.projectsConfig.toIO)
 
-  val dottyProjectName = "lampepfl_dotty"
-
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =
     if !os.exists(confFiles.replacedProjects) || os.isDir(

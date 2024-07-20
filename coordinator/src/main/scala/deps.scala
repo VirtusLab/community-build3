@@ -37,6 +37,7 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
             .asScala
             .headOption
             .flatMap(_.text.toIntOption)
+            .orElse(Some(-1))
           yield
              StarredProject(organization, repository)(ghStars)
         case _ => None
