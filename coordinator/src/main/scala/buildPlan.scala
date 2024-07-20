@@ -503,6 +503,10 @@ def createGithubActionJob(
     |        required: true
     |      OPENCB_ELASTIC_PSWD:
     |        required: true
+    |      DOCKERHUB_USERNAME:
+    |        required: true
+    |      DOCKERHUB_TOKEN:
+    |        required: true
     |
     |jobs:
     |  $setupId:
@@ -521,17 +525,17 @@ def createGithubActionJob(
     |          scala-version: $${{ inputs.published-scala-version }}
     |          repository-url: $${{ inputs.repository-url }}
     |          repository-branch: $${{ inputs.repository-branch }}
+    |          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+    |          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
     |""".stripMargin)
   plan.filter(_.nonEmpty).zipWithIndex.foreach { case (projects, idx) =>
     // stage 0 reserved for long running jobs, no other step depends on it
     def hasExtendentBuildTime = idx == 0
-    val prevStageId = Option.when(idx > 1) { stageId(idx - 1) }
-    val needs = (setupId :: prevStageId.toList).mkString(", ")
     indented {
       println(s"${stageId(idx)}:")
       indented {
         println("runs-on: ubuntu-22.04")
-        println(s"needs: [ $needs ]")
+        println(s"needs: [ $setupId ]")
         println("continue-on-error: true")
         println("timeout-minutes: 360") // 6h
         println("strategy:")
@@ -550,7 +554,7 @@ def createGithubActionJob(
           println("- name: \"Build project\"")
           println("  uses: ./.github/actions/build-project")
           println("  timeout-minutes: " + {
-            if hasExtendentBuildTime then 360 // 6h
+            if hasExtendentBuildTime then 120 // 6h
             else 60 // 1h
           })
           println("  with:")
