@@ -525,8 +525,8 @@ def createGithubActionJob(
     |          scala-version: $${{ inputs.published-scala-version }}
     |          repository-url: $${{ inputs.repository-url }}
     |          repository-branch: $${{ inputs.repository-branch }}
-    |          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-    |          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+    |          dockerhub-username: $${{ secrets.DOCKERHUB_USERNAME }}
+    |          dockerhub-token: $${{ secrets.DOCKERHUB_TOKEN }}
     |""".stripMargin)
   plan.filter(_.nonEmpty).zipWithIndex.foreach { case (projects, idx) =>
     // stage 0 reserved for long running jobs, no other step depends on it
