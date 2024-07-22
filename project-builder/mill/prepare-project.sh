@@ -76,7 +76,7 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   echo "Path:        $path"
   echo "Pattern:     $pattern"
   echo "Replacement: $replaceWith"
-  scala-cli run ${scriptDir}/../../scripts/searchAndReplace.scala -- "${repoDir}/${path}" "${pattern}" "${replaceWith}"
+  scala-cli run ${scriptDir}/../../scripts/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}"
 done
 
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}.sh"
