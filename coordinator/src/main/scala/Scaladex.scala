@@ -2,6 +2,7 @@ import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.*
 import scala.concurrent.duration.*
+import java.io.IOException
 
 object Scaladex {
   case class Pagination(current: Int, pageCount: Int, totalSize: Int)
@@ -44,6 +45,12 @@ object Scaladex {
         case _: requests.TimeoutException =>
           Console.err.println(
             s"Failed to fetch artifact metadata, Scaladex request timeout, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
+          )
+          SECONDS.sleep(backoffSeconds)
+          tryFetch((backoffSeconds * 2).min(60))
+        case e: requests.RequestsException if e.getMessage.contains("GOWAY") => 
+          Console.err.println(
+            s"Failed to fetch artifact metadata, Scaladex request terminated, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
           )
           SECONDS.sleep(backoffSeconds)
           tryFetch((backoffSeconds * 2).min(60))
