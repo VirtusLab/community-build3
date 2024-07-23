@@ -4,7 +4,7 @@
 //> using dep "org.json4s::json4s-native:4.0.7"
 //> using dep "org.json4s::json4s-ext:4.0.7"
 //> using dep "com.github.pureconfig::pureconfig-core:0.17.7"
-//> using dep "com.lihaoyi::os-lib:0.10.2"
-//> using dep "com.lihaoyi::requests:0.8.3"
+//> using dep "com.lihaoyi::os-lib:0.10.3"
+//> using dep "com.lihaoyi::requests:0.9.0"
 
 //> using resourceDir "../resources"
