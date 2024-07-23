@@ -21,7 +21,6 @@ class ConfigFiles(path: os.Path) {
   val projectsConfig: os.Path = path / "projects-config.conf"
   val filteredProjects: os.Path = path / "filtered-projects.txt"
   val replacedProjects: os.Path = path / "replaced-projects.txt"
-  val slowProjects: os.Path = path / "slow-projects.txt"
   val customProjects: os.Path = path / "custom-projects.txt"
 }
 
@@ -97,7 +96,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       .foreach { case SplittedBuildPlan(buildPlan, index) =>
         val buildPlanId: String = ('A' + index).toChar.toString
 
-        val staged = splitIntoStages(buildPlan, loadLongBuildingProjects())
+        val staged = splitIntoStages(buildPlan)
         val meta = BuildMeta(
           minStarsCount = minStarsCount,
           maxProjectsCount = buildPlanProjectsLimit.getOrElse(-1),
@@ -361,17 +360,6 @@ private def loadFilters(using confFiles: ConfigFiles): Seq[String] =
   readNormalized(
     confFiles.filteredProjects
   )
-private def loadLongBuildingProjects()(using
-    confFiles: ConfigFiles
-): Seq[Project] =
-  readNormalized(confFiles.slowProjects).flatMap {
-    case s"$org/$repo" => Some(Project(org, repo))
-    case malformed =>
-      System.err.println(
-        s"Malformed project long building project name: $malformed "
-      )
-      None
-  }
 
 def readNormalized(path: os.Path): Seq[String] =
   if !os.exists(path)
@@ -390,20 +378,13 @@ def readNormalized(path: os.Path): Seq[String] =
       .toSeq
 
 type StagedBuildPlan = List[List[ProjectBuildDef]]
-def splitIntoStages(
-    projects: Array[ProjectBuildDef],
-    longBuildingProjects: Seq[Project]
-): StagedBuildPlan = {
-  val deps = projects.map(v => (v.project, v)).toMap
+def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
   // GitHub Actions limits to 255 elements in matrix
   val MaxStageSize = 255
-    val (longRunningDefs, toSplit) = projects.toSet
-    .partition(p => longBuildingProjects.contains(p.project))
-  val longRunning = longRunningDefs.map(_.project)
-  val staged = toSplit.grouped(MaxStageSize).toList
-
-  val all = longRunningDefs :: staged
-  all.map(_.toList.sortBy(_.project))
+  projects.toList
+  .sortBy(_.project)
+  .grouped(MaxStageSize)
+  .toList
 }
 
 private given FromString[os.Path] = { str =>
