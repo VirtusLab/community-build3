@@ -14775,7 +14775,21 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"examples/src/main/scala/com/geirolz/example/app/AppMain.scala",
+          "pattern":".withLogger(Slf4jLogger.create[IO])",
+          "replaceWith":".withLogger(_ => Slf4jLogger.create[IO])"
+        },
+        {
+          "path":"examples/src/main/scala/com/geirolz/example/app/AppConfig.scala",
+          "pattern":"case class HttpServerConfig(port: Port, host: Hostname)",
+          "replaceWith":"import AppConfig.given\ncase class HttpServerConfig(port: Port, host: Hostname) derives Encoder"
+        },
+        {
+          "path":"examples/src/main/scala/com/geirolz/example/app/AppConfig.scala",
+          "pattern":"case class KafkaBrokerSetting(host: Hostname)",
+          "replaceWith":"case class KafkaBrokerSetting(host: Hostname) derives Encoder"
+        }
       ]
     }
   },
@@ -16860,11 +16874,11 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"21"
       },
       "sbt":{
         "commands":[
-          
+          "set scala/Test/unmanagedSources/excludeFilter ~= { _ || \"PlotSpec.scala\" } "
         ],
         "options":[
           
@@ -35889,8 +35903,13 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.5",
       "sourcePatches":[
-        
+        {
+          "path":"src/main/scala/com/sageserpent/kineticmerge/core/CodeMotionAnalysis.scala",
+          "pattern":"@tailrec",
+          "replaceWith":""
+        }
       ]
     }
   },
