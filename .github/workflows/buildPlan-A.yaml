@@ -83,6 +83,7 @@ jobs:
         - name: "47degrees/sbt-energymonitor"
         - name: "7mind/izumi"
         - name: "7mind/sbtgen"
+        - name: "aaronp/args4c"
         - name: "afsalthaj/constraintless"
         - name: "ahjohannessen/sec"
         - name: "ajozwik/pekko-smtp-server"
@@ -171,8 +172,6 @@ jobs:
         - name: "carueda/tscfg"
         - name: "cb372/cats-retry"
         - name: "cchantep/acolyte"
-        - name: "cequence-io/openai-scala-client"
-        - name: "cequence-io/pinecone-scala"
         - name: "changvvb/scala-protobuf-java"
         - name: "chatwork/scala-jwk"
         - name: "cheleb/laminar-form-derivation"
@@ -331,6 +330,7 @@ jobs:
         - name: "flyway/flyway-play"
         - name: "fmonniot/scala3mock"
         - name: "foldables-io/skunk-tables"
+        - name: "folone/poi.scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,7 +357,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "folone/poi.scala"
         - name: "fomkin/levsha"
         - name: "fommil/jzon"
         - name: "foundweekends/knockoff"
@@ -523,6 +522,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kamon-io/kamon"
+        - name: "karadzhov/scala-iso-language"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
         - name: "karimagnusson/kuzminki-zio"
@@ -806,6 +806,7 @@ jobs:
         - name: "sbt/sbinary"
         - name: "sbt/sbt-dynver"
         - name: "sbt/sbt-jni"
+        - name: "scala-cli/libdaemon-jvm"
         - name: "scala-cli/scala-cli-signing"
         - name: "scala-interop/slinc"
         - name: "scala-js/scala-js-stubs"
@@ -892,7 +893,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -919,6 +919,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -929,6 +930,7 @@ jobs:
         - name: "softwaremill/elasticmq"
         - name: "softwaremill/macwire"
         - name: "softwaremill/magnolia"
+        - name: "softwaremill/odelay"
         - name: "softwaremill/ox"
         - name: "softwaremill/quicklens"
         - name: "softwaremill/retry"
@@ -993,7 +995,6 @@ jobs:
         - name: "tofu-tf/glass"
         - name: "tofu-tf/tofu"
         - name: "tomasmikula/libretto"
-        - name: "tomasmikula/nutcracker"
         - name: "torrentdam/bittorrent"
         - name: "tototoshi/dbcache"
         - name: "tototoshi/nyanda"
@@ -1072,7 +1073,6 @@ jobs:
         - name: "user-signal/fs2-mqtt"
         - name: "vagmcs/optimus"
         - name: "valdemargr/catch-effect"
-        - name: "valdemargr/gql"
         - name: "valskalla/odin"
         - name: "victornguen/zio-av"
         - name: "vigoo/clipp"
@@ -1118,6 +1118,7 @@ jobs:
         - name: "zio/izumi-reflect"
         - name: "zio/zio"
         - name: "zio/zio-amqp"
+        - name: "zio/zio-bson"
         - name: "zio/zio-cache"
         - name: "zio/zio-cli"
         - name: "zio/zio-config"
@@ -1137,7 +1138,6 @@ jobs:
         - name: "zio/zio-mock"
         - name: "zio/zio-morphir"
         - name: "zio/zio-nio"
-        - name: "zio/zio-openai"
         - name: "zio/zio-optics"
         - name: "zio/zio-parser"
         - name: "zio/zio-prelude"
