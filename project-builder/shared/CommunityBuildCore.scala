@@ -154,9 +154,14 @@ object Scala3CommunityBuild {
   }
   object PublishResult {
     def apply(evalResult: TaskEvaluator.EvalResult[Unit]): PublishResult = {
+      val failureContext = evalResult.toBuildError
+      val status = failureContext match {
+        case Some(FailureContext.BuildError(reasons)) if reasons.exists(_.contains("java.util.NoSuchElementException")) => Status.Skipped
+        case _ => evalResult.toStatus
+      }
       PublishResult(
-        evalResult.toStatus,
-        failureContext = evalResult.toBuildError,
+        status,
+        failureContext = failureContext,
         tookMs = evalResult.evalTime
       )
     }
@@ -463,7 +468,7 @@ object Scala3CommunityBuild {
           case segments =>
             logOnce(s"Invalid dependency format, segments=${segments.toList}")
             None
-        }.map{ dep => 
+        }.toList.map{ dep => 
           logOnce(s"Would include extra dependency: $dep")
           dep
         }
