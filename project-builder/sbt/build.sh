@@ -70,7 +70,7 @@ function runSbt() {
     "set every credentials := Nil" \
     "$customCommands" \
     "moduleMappings" \
-    "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" | tee $logFile
+    "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" 2>&1 | tee $logFile
 }
 
 function checkLogsForRetry() {
@@ -95,7 +95,7 @@ maxRetries=1 # 1 retry for each: missing mappings (force scala version)
 function retryBuild() {
   while [[ $retry -lt $maxRetries ]]; do
     checkLogsForRetry
-    if [ "$shouldRetry" = true ]; then
+    if [[ "$shouldRetry" == "true" ]]; then
       retry+=1
       echo "Retrying build, retry $retry/$maxRetries, force Scala version:$forceScalaVersion, enable migration:$enableMigrationMode"
       runSbt && exit 0
