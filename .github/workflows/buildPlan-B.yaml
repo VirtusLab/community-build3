@@ -1,5 +1,5 @@
 
-# projects total:     607
+# projects total:     599
 # min stars count:    -1
 # max projects count: 1000
 
@@ -134,7 +134,6 @@ jobs:
         - name: "beangle/event"
         - name: "beangle/ids"
         - name: "beangle/notify"
-        - name: "beangle/spa"
         - name: "beangle/sqlplus"
         - name: "benoitlouy/indent"
         - name: "benoitlouy/tele"
@@ -168,7 +167,6 @@ jobs:
         - name: "codacy/codacy-plugins-api"
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
-        - name: "codedx/mapk"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/scala-cuid"
@@ -320,7 +318,6 @@ jobs:
         - name: "j5ik2o/pekko-kinesis"
         - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
-        - name: "jam01/json-schema"
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
@@ -331,6 +328,9 @@ jobs:
         - name: "jodersky/applib"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
+        - name: "jodersky/redicl"
+        - name: "jodersky/scalapb-ujson"
+        - name: "jodersky/ustats"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,9 +357,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "jodersky/redicl"
-        - name: "jodersky/scalapb-ujson"
-        - name: "jodersky/ustats"
         - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
@@ -388,9 +385,7 @@ jobs:
         - name: "kalin-rudnicki/slyce-zio"
         - name: "karadzhov/scala-iso-country"
         - name: "karazinscalausersgroup/mongo-literals"
-        - name: "karimagnusson/io-path"
         - name: "karimagnusson/kuzminki-ec"
-        - name: "karimagnusson/kuzminki-pekko"
         - name: "katrix/minejson"
         - name: "katrix/typed-json"
         - name: "keirlawson/ciris-aws-secretsmanager"
@@ -407,7 +402,6 @@ jobs:
         - name: "kordyjan/ogrodnik"
         - name: "kordyjan/typelogger"
         - name: "kostaskougios/functions-remote"
-        - name: "koterpillar/refinery"
         - name: "kovacshuni/circe-config"
         - name: "krrrr38/protoquill-finagle-mysql"
         - name: "kubukoz/drops"
@@ -416,7 +410,6 @@ jobs:
         - name: "lbialy/tailf"
         - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
-        - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
         - name: "lhns/http4s-errors"
         - name: "lhns/http4s-otel"
@@ -446,7 +439,6 @@ jobs:
         - name: "losizm/little-time"
         - name: "losizm/shampoo"
         - name: "losizm/t2"
-        - name: "lucidsoftware/twirl_compiler_cli"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
         - name: "malliina/sbt-utils"
@@ -612,6 +604,14 @@ jobs:
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
         - name: "snowplow/iglu-scala-core"
+        - name: "spilne/spilne"
+        - name: "ssanj/delight"
+        - name: "stringbean/text-utils"
+        - name: "swagger-akka-http/swagger-enumeratum-module"
+        - name: "swagger-akka-http/swagger-scala3-enum-module"
+        - name: "swaldman/audiofluidity-rss"
+        - name: "swaldman/conveniences"
+        - name: "swaldman/cryptoutil"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -638,14 +638,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "spilne/spilne"
-        - name: "ssanj/delight"
-        - name: "stringbean/text-utils"
-        - name: "swagger-akka-http/swagger-enumeratum-module"
-        - name: "swagger-akka-http/swagger-scala3-enum-module"
-        - name: "swaldman/audiofluidity-rss"
-        - name: "swaldman/conveniences"
-        - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
         - name: "swaldman/feedletter"
         - name: "swaldman/mailutil"

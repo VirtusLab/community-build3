@@ -127,6 +127,7 @@ jobs:
         - name: "armanbilge/calico"
         - name: "armanbilge/circe-scala-yaml"
         - name: "armanbilge/gcp4s"
+        - name: "armanbilge/oxidized"
         - name: "armanbilge/porcupine"
         - name: "armanbilge/scala-native-config-brew"
         - name: "armanbilge/schrodinger"
@@ -168,6 +169,7 @@ jobs:
         - name: "bpholt/java-time-literals"
         - name: "camunda-community-hub/camunda-dmn-tester"
         - name: "carlos-verdes/zio-arangodb"
+        - name: "carlosedp/riscvassembler"
         - name: "carlosedp/zio-channel"
         - name: "carueda/tscfg"
         - name: "cb372/cats-retry"
@@ -187,6 +189,7 @@ jobs:
         - name: "circe/circe-yaml"
         - name: "clevercloud/pulsar4s"
         - name: "clevercloud/warp10-scala-client"
+        - name: "codedx/mapk"
         - name: "codingwell/scala-guice"
         - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
@@ -328,9 +331,6 @@ jobs:
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "flyway/flyway-play"
-        - name: "fmonniot/scala3mock"
-        - name: "foldables-io/skunk-tables"
-        - name: "folone/poi.scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,6 +357,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fmonniot/scala3mock"
+        - name: "foldables-io/skunk-tables"
+        - name: "folone/poi.scala"
         - name: "fomkin/levsha"
         - name: "fommil/jzon"
         - name: "foundweekends/knockoff"
@@ -552,6 +555,7 @@ jobs:
         - name: "kordyjan/pytanie"
         - name: "kory33/s2mc-test"
         - name: "kostaskougios/terminal21-restapi"
+        - name: "koterpillar/refinery"
         - name: "kovstas/fs2-throttler"
         - name: "kubukoz/debug-utils"
         - name: "kubukoz/slick-effect"
@@ -608,10 +612,6 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
-        - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
-        - name: "mimoguz/layeredfonticon"
-        - name: "minosiants/pencil"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -638,6 +638,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/cfor"
+        - name: "metarank/ltrlib"
+        - name: "mimoguz/layeredfonticon"
+        - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
         - name: "mkurz/deadbolt-2-scala"
@@ -661,7 +665,6 @@ jobs:
         - name: "nafg/slick-migration-api"
         - name: "nafg/slick-migration-api-flyway"
         - name: "naoh87/lettucef"
-        - name: "nau/scalus"
         - name: "neandertech/langoustine"
         - name: "neandertech/smithy4s-deriving"
         - name: "nebula-contrib/testcontainers-nebula"
@@ -825,7 +828,6 @@ jobs:
         - name: "scala/scala-parser-combinators"
         - name: "scala/scala-swing"
         - name: "scala/scala-xml"
-        - name: "scala/toolkit"
         - name: "scalabin-no/http4s-directives"
         - name: "scalacenter/course-management-tools"
         - name: "scalacenter/scala-debug-adapter"
@@ -891,8 +893,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -919,6 +919,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -947,7 +949,6 @@ jobs:
         - name: "spotify/featran"
         - name: "sqids/sqids-scala"
         - name: "squeryl/squeryl"
-        - name: "sscarduzio/elasticsearch-readonlyrest-plugin"
         - name: "staeff777/scalaveusz"
         - name: "stephennancekivell/scalatest-json"
         - name: "stryker-mutator/stryker4s"
@@ -959,7 +960,6 @@ jobs:
         - name: "svroonland/zio-kinesis"
         - name: "swagger-akka-http/swagger-pekko-http"
         - name: "swagger-akka-http/swagger-scala-module"
-        - name: "swaldman/fossilphant"
         - name: "systemfw/dynosaur"
         - name: "systemfw/upperbound"
         - name: "t2v/holidays"
