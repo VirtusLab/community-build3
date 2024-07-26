@@ -11,9 +11,10 @@ given scala.util.CommandLineParser.FromString[Path] = Paths.get(_)
   val input = io.Source.fromFile(file.toFile()).mkString
   input
     .replace(textOrPattern, replacement)
-    .pipe: input =>
-      try textOrPattern.r.replaceAllIn(input, replacement)
-      catch case _: PatternSyntaxException => input  
+    .pipe: text =>
+      if text != input then text
+      else try textOrPattern.r.replaceAllIn(text, replacement)
+      catch case _: PatternSyntaxException => text  
     .pipe: output =>
       if input != output then 
         println(s"Successfully applied pattern '$textOrPattern' in $file")
