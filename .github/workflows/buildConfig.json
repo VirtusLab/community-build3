@@ -1452,7 +1452,7 @@
     "config":{
       "projects":{
         "exclude":[
-          "sh.almond%launcher"
+          "sh.almond%toree-hooks"
         ],
         "overrides":{
           
@@ -2747,7 +2747,7 @@
       },
       "sbt":{
         "commands":[
-          "set every excludeFilter ~= { _ || \"EndToEndSuite.scala\" }"
+          
         ],
         "options":[
           
@@ -2759,6 +2759,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "sourcePatches":[
         {
           "path":"build.sbt",
@@ -10291,7 +10292,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"build.sc",
+          "pattern":"\"3\" -> \"3.3.0\"",
+          "replaceWith":"\"3\" -> \"<SCALA_VERSION>\""
+        }
       ]
     }
   },
@@ -12555,8 +12560,7 @@
       },
       "sbt":{
         "commands":[
-          "set core.jvm/Test/unmanagedSources/excludeFilter ~= { _ || \"TimeoutSpec.scala\"  || \"ThrowablexSpec.scala\"}",
-          "set tests.jvm/Test/unmanagedSources/excludeFilter ~= { _ || \"FileMatchersSpec.scala\" || \"TerminationMatchersSpec.scala\"} "
+          
         ],
         "options":[
           
@@ -13506,7 +13510,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"mill-build/src/millbuild/CommonCrossScalaModule.scala",
+          "pattern":"\"-Xfatal-warnings\"",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -17067,7 +17075,7 @@
       },
       "sbt":{
         "commands":[
-          "set scalajack/Test/unmanagedSources/excludeFilter ~= { _ || \"AnyPrim.scala\" || \"Arrays.scala\" || \"AnyColl.scala\" }"
+          
         ],
         "options":[
           
@@ -21540,6 +21548,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
+        {
+          "path":"clam/src/clam/dispatch/Command.scala",
+          "pattern":"exit: Int => Nothing = sys.exit\n",
+          "replaceWith":"exit: Int => Nothing = sys.exit(_)\n"
+        },
         {
           "path":"build.sc",
           "pattern":"val scala3 = \"3.2.2\"",
@@ -29974,7 +29987,11 @@
       "tests":"compile-only",
       "sourceVersion":"3.4",
       "sourcePatches":[
-        
+        {
+          "path":"scalus-plugin/src/main/scala/scalus/Plugin.scala",
+          "pattern":"\\s*def init\\(options: List\\[String\\]\\): List\\[PluginPhase\\]",
+          "replaceWith":"    override def init(options: List[String]): List[PluginPhase]"
+        }
       ]
     }
   },
@@ -31152,8 +31169,13 @@
           
         ]
       },
-      "tests":"compile-only",
+      "tests":"disabled",
       "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild \\/.*sonatype[ \\S\\w]+",
+          "replaceWith":""
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.4.0\"",
@@ -32611,7 +32633,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"case \"3.\\d+.\\d+\" =>",
+          "replaceWith":"case v if v.startsWith(\"3\") =>"
+        }
       ]
     }
   },
@@ -34284,7 +34310,41 @@
     "repoUrl":"https://github.com/potencia/formats.git",
     "revision":"1.1.0",
     "version":"1.1.0",
-    "targets":"com.potenciasoftware%formats"
+    "targets":"com.potenciasoftware%formats",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "sourcePatches":[
+        {
+          "path":"build.sc",
+          "pattern":"case \"3\"\\s+=>\\s+\"3.\\d+.\\d+\"",
+          "replaceWith":"case \"3\" => \"<SCALA_VERSION>\""
+        }
+      ]
+    }
   },
   "ppurang/abctemplates":{
     "project":"ppurang/abctemplates",
@@ -35142,7 +35202,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"\"versions.json\",",
+          "replaceWith":"\"versions.json\""
+        }
       ]
     }
   },
@@ -37646,7 +37710,7 @@
   "scala-interop/slinc":{
     "project":"scala-interop/slinc",
     "repoUrl":"https://github.com/scala-interop/slinc.git",
-    "revision":"0.6.0",
+    "revision":"master",
     "version":"0.6.0",
     "targets":"fr.hammons%slinc-core fr.hammons%slinc-j17 fr.hammons%slinc-j19 fr.hammons%slinc-runtime",
     "config":{
@@ -37663,7 +37727,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "mapScalacOptions \"-experimental\" \"\" "
         ],
         "options":[
           
@@ -37675,6 +37739,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.3",
       "sourcePatches":[
         
       ]
@@ -41692,7 +41757,7 @@
           
         ],
         "options":[
-          "-J--enable-preview -J--add-modules=jdk.incubator.concurrent"
+          
         ]
       },
       "mill":{
@@ -41702,7 +41767,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
-        
+        {
+          "path":"plugin/src/main/scala/ox/plugin/RequireIO.scala",
+          "pattern":"def init(options: List[String]): List[PluginPhase]",
+          "replaceWith":"override def init(options: List[String]): List[PluginPhase]"
+        }
       ]
     }
   },
@@ -43829,7 +43898,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set api/Test/unmanagedSources/excludeFilter ~= { _ || \"ValueAttributeSpec.scala\" }"
         ],
         "options":[
           
@@ -50908,6 +50977,11 @@
       },
       "tests":"compile-only",
       "sourcePatches":[
+        {
+          "path":"build.sc",
+          "pattern":"override def scalacOptions = ",
+          "replaceWith":"override def scalacOptions = Seq(\"-experimental\") ++ "
+        },
         {
           "path":"build.sc",
           "pattern":"val scala3 = \"3.3.0\"",
