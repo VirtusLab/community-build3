@@ -88,7 +88,7 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-published.outputs.is-compiler-published == 'false'
       with:
-        image: "virtuslab/scala-community-build-compiler-builder:v0.3.13"
+        image: "virtuslab/scala-community-build-compiler-builder:v0.3.14"
         options: -v ${{ github.workspace }}/compiler:/compiler/
         run: |
           Version="${{ steps.calc-version.outputs.effective-scala-version }}"
