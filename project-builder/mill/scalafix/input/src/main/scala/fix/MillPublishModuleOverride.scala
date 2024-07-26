@@ -16,5 +16,4 @@ object MillPublishModuleOverride {
   import mill._
   object module extends PublishModule with Foo
   object module2 extends Foo with mill.PublishModule
-  val module3 = new PublishModule{}
 }

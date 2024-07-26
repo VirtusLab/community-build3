@@ -20,6 +20,7 @@ class Scala3CommunityBuildMillAdapter(
     config: Scala3CommunityBuildMillAdapterConfig
 ) extends SyntacticRule("Scala3CommunityBuildMillAdapter") {
   def this() = this(config = Scala3CommunityBuildMillAdapterConfig())
+  def noInjects = sys.props.contains("communitybuild.noInjects")
   override def withConfiguration(config: Configuration): Configured[Rule] = {
     config.conf
       .getOrElse("Scala3CommunityBuildMillAdapter") {
@@ -63,11 +64,8 @@ class Scala3CommunityBuildMillAdapter(
       case _ => false
     })
 
-  override def fix(implicit doc: SyntacticDocument): Patch = {
-    val headerInject = {
-      if (sys.props.contains("communitybuild.noInjects")) Patch.empty
-      else Patch.addLeft(doc.tree, Replacment.injects)
-    }
+  object Transform {
+
     def shouldWrapInTarget(body: Term, tpe: Option[Type]) = {
       val isLiteral = body.isInstanceOf[Lit.String]
       def hasTargetType = tpe match {
@@ -76,75 +74,246 @@ class Scala3CommunityBuildMillAdapter(
       }
       !isLiteral || hasTargetType
     }
-    val patch = doc.tree.collect {
-      case init @ Init(
-            Type.Apply(name @ WithTypeName("Cross"), List(tpeParam)),
-            _,
-            Seq(args)
-          ) =>
-        if (useLegacyMillCross)
-          List(
-            Patch.replaceTree(name, Replacment.CommunityBuildCross),
-            Patch.addRight(
-              init,
-              s"(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)})"
-            )
-          ).asPatch
-        else
-          List(
-            Patch.addLeft(
-              args.head,
-              s"MillCommunityBuild.mapCrossVersions(${Replacment.ScalaVersion("sys.error(\"targetScalaVersion not specified in scalafix\")", asTarget = false)}, "
-            ),
-            Patch.addRight(args.last, ")")
-          ).asPatch
 
-      case template @ Template(_, traits, _, _)
-          if anyTreeOfTypeName(
-            has = coursierModuleSubtypes ++ testModuleSubtypes,
-            butNot = Seq("PublishModule", "CoursierModule")
-          )(traits) =>
-        Patch.addRight(
-          traits.last,
-          s" with ${Replacment.CommunityBuildCoursierModule}"
+    def mapTraits(traits: List[Init]): List[Init] = {
+      var coursierModuleInjected = false
+      def traitOf(name: String) = Init(
+        Type.Select(Term.Name("MillCommunityBuild"), Type.Name(name)),
+        Name.Anonymous(),
+        Nil
+      )
+      // format: off
+      traits.map {
+          case Init(name @ WithTypeName("CoursierModule"), _, _) =>
+            coursierModuleInjected = true
+            traitOf("CommunityBuildCoursierModule")
+          case Init(name @ WithTypeName("PublishModule"), _, _) =>
+            coursierModuleInjected = true
+            traitOf("CommunityBuildPublishModule")
+          case init @ Init(tpe @ Type.Apply(name @ WithTypeName("Cross"), List(tpeParam)), _, Seq(args)) =>
+            def unconfigured = Term.Apply(
+              Term.Select(Term.Name("sys"), Term.Name("exit")),
+              List(Lit.String("targetScalaVersion not specified in scalafix config"))
+            )
+            if (useLegacyMillCross)
+              init.copy(
+                tpe = tpe.copy(tpe = Type.Name("MillCommunityBuildCross")),
+                argss = List(args, List(config.targetScalaVersion.map(Lit.String(_)).getOrElse(unconfigured)))
+              )
+            else {
+              init.copy(
+                argss = List(
+                  List(
+                    Term.Apply(
+                      Term.Select(Term.Name("MillCommunityBuild"), Term.Name("mapCrossVersions")),
+                      config.targetScalaVersion.map(Lit.String(_)).getOrElse(unconfigured) :: args
+                    )
+                  )
+                )
+              )
+            }
+          case init => init
+        } ++ {
+          if (!coursierModuleInjected && anyTreeOfTypeName(
+              has = coursierModuleSubtypes ++ testModuleSubtypes,
+              butNot = List("CoursierModule", "PublishModule")
+            )(traits)
+          ) Seq(traitOf("CommunityBuildCoursierModule"))
+          else Nil
+        }
+    }
+
+    def injectScalacOptionsMapping = Seq(
+      Defn.Def(Nil, Term.Name("scalacOptions"), Nil, Nil, None,
+        body = Term.Apply(
+          Term.Select(
+            Term.Apply(
+              Term.Select(Term.Super(Name.Anonymous(), Name.Anonymous()), Term.Name("scalacOptions")),
+              List()
+            ),
+            Term.Name("mapScalacOptions")
+          ),
+          List(Term.Name("scalaVersion"))
+        )
+      )
+    )
+
+    def injectRootModuleRunCommand =                  
+      // def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
+      //   implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
+      //   MillCommunityBuild.runBuild(configJson, targets)
+      // }""".stripMargin
+      Defn.Def(Nil, Term.Name("runCommunityBuild"), Nil, 
+      paramss = List(
+        List(
+          Term.Param(Nil, Term.Name("evaluator"),    Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("eval")), Type.Name("Evaluator"))), None),
+          Term.Param(Nil, Term.Name("scalaVersion"), Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
+          Term.Param(Nil, Term.Name("configJson"),   Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
+          Term.Param(Nil, Term.Name("targets"),      Some(Type.Repeated(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String")))), None),
+        )
+      ),
+      decltpe = None,
+      body =
+        Term.Apply(
+          Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("T")), Term.Name("command")),
+          List(
+            Term.Block(List(
+              Defn.Def(
+                List(Mod.Implicit()), Term.Name("ctx"), Nil, Nil, None, 
+                Term.Apply(
+                  Term.Select(Term.Name("MillCommunityBuild"), Term.Name("Ctx")),
+                  List(Term.This(Name.Anonymous()), Term.Name("scalaVersion"), Term.Name("evaluator"), Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("T")), Term.Name("log")))
+                )
+              ),
+              Term.Apply(
+                Term.Select(Term.Name("MillCommunityBuild"), Term.Name("runBuild")),
+                List(Term.Name("configJson"), Term.Name("targets"))
+              )
+          ))
+        )
+    )
+  )
+    // format: on
+
+    def transformDefn(defn: Tree): Tree = defn match {
+      case defn @ (_: Defn.Class | _: Defn.Trait | _: Defn.Object) =>
+        val template = defn match {
+          case defn: Defn.Class  => defn.templ
+          case defn: Defn.Trait  => defn.templ
+          case defn: Defn.Object => defn.templ
+        }
+        val Template(_, traits, _, stats) = template
+        val hasScalacOptions = stats.exists {
+          case ValOrDefDef(Term.Name("scalacOptions"), _, _) => true
+          case _                                             => false
+        }
+        val canHaveScalacOptions = anyTreeOfTypeName(has = ScalaModuleSubtypes)(traits)
+        val updatedTemplate = template.copy(
+          inits = mapTraits(traits),
+          stats = stats.map(transformDefn).collect { case stat: Stat => stat } ++ {
+            if (hasScalacOptions || !canHaveScalacOptions || noInjects) Nil
+            else injectScalacOptionsMapping
+          } ++ traits.collectFirst {
+            case Init(WithTypeName("RootModule"), _, _) if !noInjects => injectRootModuleRunCommand
+          }
         )
 
-      case Init(name @ WithTypeName("CoursierModule"), _, _) =>
-        Patch.replaceTree(name, Replacment.CommunityBuildCoursierModule)
-
-      case Init(name @ WithTypeName("PublishModule"), _, _) =>
-        Patch.replaceTree(name, Replacment.CommunityBuildPublishModule)
-
-      case ValOrDefDef(Term.Name("scalaVersion"), tpe, body) =>
-        def replace(isLiteral: Boolean) =
-          Patch.replaceTree(
-            body,
-            Replacment.ScalaVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
-          )
-        body.toString().trim() match {
-          case Scala3Literal()                                        => replace(isLiteral = true)
-          case id if id.split('.').exists(scala3Identifiers.contains) => replace(isLiteral = false)
-          case _                                                      => Patch.empty
+        transformed += defn
+        defn match {
+          case defn: Defn.Class  => defn.copy(templ = updatedTemplate)
+          case defn: Defn.Trait  => defn.copy(templ = updatedTemplate)
+          case defn: Defn.Object => defn.copy(templ = updatedTemplate)
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        Patch.addAround(body, "{ ", " }.mapScalacOptions(scalaVersion)")
+        val updatedBody =
+          Term.Apply(
+            Term.Select(body, Term.Name("mapScalacOptions")),
+            List(Term.Name("scalaVersion"))
+          )
+        tree match {
+          case defn: Defn.Val => defn.copy(rhs = updatedBody)
+          case defn: Defn.Def => defn.copy(body = updatedBody)
+        }
+      case tree @ ValOrDefDef(Term.Name("scalaVersion"), tpe, body) =>
+        def replacement = {
+          val updatedBody = config.targetScalaVersion
+            .map(Lit.String(_))
+            .map { v =>
+              if (shouldWrapInTarget(body, tpe))
+                Term.Apply(Term.Select(Term.Name("mill"), Term.Name("T")), List(v))
+              else v
+            }
+            .getOrElse(body)
+          tree match {
+            case defn: Defn.Val => defn.copy(rhs = updatedBody)
+            case defn: Defn.Def => defn.copy(body = updatedBody)
+          }
+        }
 
-      case ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
+        body.toString().trim() match {
+          case Scala3Literal()                                        => replacement
+          case id if id.split('.').exists(scala3Identifiers.contains) => replacement
+          case _                                                      => tree
+        }
+
+      case tree @ ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
         body.toString().trim() match {
           case Scala3Literal() =>
-            Patch.replaceTree(
-              body,
-              Replacment.ScalaVersion(body.toString, asTarget = shouldWrapInTarget(body, tpe))
-            )
-          case _ => Patch.empty
+            val updatedBody = config.targetScalaVersion
+              .map(Lit.String(_))
+              .map { v =>
+                if (shouldWrapInTarget(body, tpe))
+                  Term.Apply(Term.Select(Term.Name("mill"), Term.Name("T")), List(v))
+                else v
+              }
+              .getOrElse(body)
+            tree match {
+              case defn: Defn.Val => defn.copy(rhs = updatedBody)
+              case defn: Defn.Def => defn.copy(body = updatedBody)
+            }
+          case _ => tree
         }
+      case _ =>
+        defn
+    }
+  }
+
+  var transformed = collection.mutable.Set.empty[Tree]
+  override def fix(implicit doc: SyntacticDocument): Patch = {
+    val headerInject = {
+      if (noInjects) Patch.empty
+      else {
+        val lastSpecialImport = doc.tree.collect {
+          case tree: Import if Seq("$file", "$ivy").exists(tree.syntax.contains) => tree
+        }.lastOption
+        lastSpecialImport match {
+          case Some(lastImport) => Patch.addRight(lastImport, Replacment.injects)
+          case None             => Patch.addLeft(doc.tree, Replacment.injects)
+        }
+      }
+    }
+
+    val patch = doc.tree.collect { case defn @ (_: Defn.Class | _: Defn.Trait | _: Defn.Object) =>
+      lazy val maybeTransformed = Transform.transformDefn(defn)
+      if (transformed.contains(defn) || maybeTransformed == defn) Patch.empty
+      else
+        Patch.replaceTree(
+          defn,
+          maybeTransformed.syntax + {
+            if (sys.props.contains("communitybuild.noInjects")) ""
+            else "\n"
+          }
+        )
     }.asPatch
 
     headerInject + patch
   }
 
   // format: off
+  val ScalaModuleSubtypes = Seq(
+    /* mill.scalajslib. */ "ScalaJSModule",
+    /* mill.scalajslib.ScalaJSModule. */ "ScalaJSTests",
+    /* mill.scalajslib. */ "TestScalaJSModule",
+    /* mill.scalalib. */ "CrossModuleBase",
+    /* mill.scalalib. */ "CrossSbtModule",
+    /* mill.scalalib.CrossSbtModule. */ "Tests",
+    /* mill.scalalib. */ "CrossScalaModule",
+    /* mill.scalalib. */ "CrossScalaVersionRanges",
+    /* mill.scalalib. */ "PlatformScalaModule",
+    /* mill.scalalib. */ "SbtModule",
+    /* mill.scalalib. */ "ScalaModule",
+    /* mill.scalalib.ScalaModule. */ "ScalaTests",
+    /* mill.scalalib. */ "UnidocModule",
+    /* mill.scalanativelib. */ "SbtNativeModule",
+    /* mill.scalanativelib. */ "ScalaNativeModule",
+    /* mill.scalanativelib.ScalaNativeModule. */ "ScalaNativeTests",
+    /* mill.scalanativelib. */ "TestScalaNativeModule",
+    /* mill.scalajslib.ScalaJSModule. */ "Tests",
+    /* mill.scalalib.CrossSbtModule. */ "CrossSbtModuleTests",
+    /* mill.scalalib.SbtModule. */ "SbtModuleTests",
+    /* mill.scalalib.bsp. */ "ScalaMetalsSupport"
+  ).distinct
   val coursierModuleSubtypes = Seq(
     "CrossModuleBase","CrossSbtModule","CrossSbtModuleTests","CrossScalaModule","CrossScalaVersionRanges",
     "Giter8Module","Giter8Module",
@@ -159,20 +328,15 @@ class Scala3CommunityBuildMillAdapter(
   val testModuleSubtypes = Seq(
     "CrossSbtModuleTests",
     "JavaModuleTests","Junit4","Junit5",
-    "MavenModuleTests","Munit",
+    "MavenModuleTests",//"Munit",
     "SbtModuleTests","ScalaJSTests","ScalaNativeTests","ScalaTest","ScalaTests","Specs2",
     "TestNg","TestScalaJSModule","TestScalaNativeModule","Tests",
     "Utest",
     "Weaver",
-    "ZioTest",
+    // "ZioTest",
   )
   // format: on
   object Replacment {
-    val CommunityBuildCross = "MillCommunityBuildCross"
-    val CommunityBuildPublishModule =
-      "MillCommunityBuild.CommunityBuildPublishModule"
-    val CommunityBuildCoursierModule =
-      "MillCommunityBuild.CommunityBuildCoursierModule"
     def ScalaVersion(default: => String, asTarget: Boolean = true) =
       config.targetScalaVersion
         .map(quoted(_))
@@ -188,6 +352,7 @@ class Scala3CommunityBuildMillAdapter(
 
     val MillCommunityBuildInject = """
     |import $file.MillCommunityBuild
+    |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}
     |// Main entry point for community build
     |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
     |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
@@ -207,10 +372,10 @@ class Scala3CommunityBuildMillAdapter(
     val MapScalacOptionsOps = """
     |
     |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
-    |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = {
-    |      try scalaVersion.evaluate(ctx).asSuccess.map(_.value)
-    |      catch { _: Throwable => None }
-    |    }.map(MillCommunityBuild.mapScalacOptions(_, asSeq))
+    |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = 
+    |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).asSuccess.map(_.value) }
+    |     .toOption.flatten
+    |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
     |     .getOrElse {
     |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
     |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
@@ -220,6 +385,11 @@ class Scala3CommunityBuildMillAdapter(
     |
     |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
     |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
+    |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+    |  }
+    |}
+    |implicit class MillCommunityBuildTaskOps(asTarget: MillCompatTask[Seq[String]]){
+    |  def mapScalacOptions(scalaVersion: MillCompatTask[String]) = scalaVersion.zip(asTarget).map {
     |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
     |  }
     |}

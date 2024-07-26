@@ -1,3 +1,4 @@
+import $ivy.`com.lihaoyi::upickle:3.0.0`
 import $file.MillVersionCompat, MillVersionCompat.compat.{
   CoursierModule,
   JavaModule,
@@ -22,7 +23,7 @@ import CommunityBuildCore.Scala3CommunityBuild.Utils._
 //  upickle has problems with classess imported from other file when creating readers
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
-    tests: TestingMode = TestingMode.Full
+    tests: TestingMode = TestingMode.CompileOnly
 )
 
 case class ProjectOverrides(tests: Option[TestingMode] = None)
@@ -72,7 +73,7 @@ trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
 
 // Extension to publish module allowing to upload artifacts to custom maven repo
 // Left for compliance with legacy versions
-trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule {}
+trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule
 
 /** Replace all Scala in crossVersion with `buildScalaVersion` if its matching `buildScalaVersion`
   * binary version
@@ -97,7 +98,7 @@ def mapCrossVersions[T](
 ): Seq[T] = {
   implicit val ctx = ExtractorsCtx(buildScalaVersion)
   // Map products to lists (List[_] <: Product ) for stable pattern matching
-  for {
+  val resultCrossVersions = for {
     crossEntry <- crossVersions
     cross = crossEntry match {
       case product: Product => product.productIterator.toList
@@ -116,10 +117,11 @@ def mapCrossVersions[T](
     }
     version.asInstanceOf[T]
   }
+  resultCrossVersions.distinct
 }
 
 private object ScalacOptionsSettings {
-  private def parse(propName: String): List[String] =
+  private def parse(propName: String): List[String] = 
     sys.props
       .get(propName)
       .map(_.split(',').filter(_.nonEmpty).toList)
@@ -391,7 +393,7 @@ private def checkedModuleMappings(
   val mappings = moduleMappings(ctx)
   val unmatched = targetStrings.diff(mappings.keySet).diff(Set("*%*"))
   if (unmatched.nonEmpty) {
-    val msg = s"Failed to resolve mappings for ${unmatched.size}:${targetStrings.size} targets: ${unmatched.mkString(", ")}"
+    val msg = s"Failed to resolve mappings for ${unmatched.size}/${targetStrings.size} targets: ${unmatched.mkString(", ")}\n" + s"Found targets [${mappings.keySet.size}]: ${mappings.keySet.toSeq.sorted.mkString(", ")}"
     if(unmatched.size == targetStrings.size) sys.error(msg)
     else System.err.println(msg)
   }
