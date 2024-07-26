@@ -199,7 +199,7 @@ def listFailedProjects(
   log(
     s"Listing failed projects in compiled with Scala=${scalaVersion}, buildId=${buildId}"
   )
-  val Limit = 2000
+  val Limit = 10 * 1000
   val projectVersionsStatusAggregation =
     termsAgg("versions", "version")
       .order(TermsOrder("buildTimestamp", asc = false))
@@ -273,16 +273,20 @@ def listFailedProjects(
               .projectUrlString(project.name, ver, buildURL)}$LINE_BREAK"
           )
         val compilerFailure = summary.compilerFailure
+        val buildFailure = summary.isEmpty || fields.get("status").contains("started")
         if scalaVersion.exists(hasNewerPassingVersion(_, project, lastFailedVersion)) then
           None // ignore failure
         else
           def lazyLogProject() =
-            if summary.compilerFailure then logProject("COMPILER")(RED)
-            if summary.testsFailure then logProject("TEST")(YELLOW)
-            if summary.docFailure then logProject("DOC")(MAGENTA)
-            if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
+            if buildFailure then
+              logProject(s"BUILD${fields.get("buildTool").map(":" + _).getOrElse("")}")(RED)
+            else 
+              if summary.compilerFailure then logProject("COMPILER")(RED)
+              if summary.testsFailure then logProject("TEST")(YELLOW)
+              if summary.docFailure then logProject("DOC")(MAGENTA)
+              if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
           end lazyLogProject
-          Option.when(compilerFailure) {
+          Option.when(compilerFailure || buildFailure) {
             TimedFailure(
               project = FailedProject(
                 project,
@@ -309,16 +313,18 @@ def listFailedProjects(
       search(BuildSummariesIndex)
         .query(
           boolQuery()
+            .not(
+              termQuery("status", "success"),
+            )
             .must(
-              Seq(termQuery("status", "failure"))
-                ++ Seq(
+              Seq(
                   buildId.map(termQuery("buildId", _)),
                   scalaVersion.map(termQuery("scalaVersion", _))
                 ).flatten
             )
         )
         .size(Limit)
-        .sourceInclude("projectName", "summary", "buildURL", "timestamp")
+        .sourceInclude("projectName", "summary", "buildURL", "timestamp", "buildTool")
         .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
         .aggs(
           termsAgg("failedProjects", "projectName")
