@@ -41,7 +41,7 @@ runs:
         if [[ -z $scalaVersion ]]; then
           cd compiler
           git --no-pager log -1
-          commitHash=$(git rev-parse HEAD)
+          commitHash=$(git rev-parse --short=7 HEAD)
           baseVersion=$(cat project/Build.scala | grep 'val baseVersion =' | xargs | awk '{ print $4 }') 
           # `SNAPSHOT` substring is required to treat compiler as experimental
           # All compilers build from branch are treated experimental
