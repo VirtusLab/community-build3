@@ -22,6 +22,7 @@ class ConfigFiles(path: os.Path) {
   val filteredProjects: os.Path = path / "filtered-projects.txt"
   val replacedProjects: os.Path = path / "replaced-projects.txt"
   val customProjects: os.Path = path / "custom-projects.txt"
+  val requiredConfigs: os.Path = path / "require"
 }
 
 val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
@@ -243,7 +244,7 @@ def makeDependenciesBasedBuildPlan(
     confFiles: ConfigFiles
 ): AsyncResponse[Array[ProjectBuildDef]] =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
-  val configDiscovery = ProjectConfigDiscovery(confFiles.projectsConfig.toIO)
+  val configDiscovery = ProjectConfigDiscovery(confFiles.projectsConfig.toIO, confFiles.requiredConfigs)
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =

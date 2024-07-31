@@ -5,7 +5,15 @@ import java.io.FileNotFoundException
 import scala.util.Try
 import scala.annotation.tailrec
 
-class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
+class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredConfigsPath: os.Path) {
+  val projectSourceVersions: Map[Project, String] = {
+    for 
+      sourceVersionFile <- os.list(requiredConfigsPath / "source-version")
+      sourceVersion = sourceVersionFile.last
+      project <- os.read.lines(sourceVersionFile).filter(_.nonEmpty).map(Project.load(_))
+    yield project -> sourceVersion
+  }.toMap
+
   def apply(
       project: ProjectVersion,
       repoUrl: String,
@@ -26,6 +34,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File) {
             }
             .map { c =>
               c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
+            }
+            .map { c =>
+              if c.sourceVersion.isDefined then c
+              else c.copy(sourceVersion = projectSourceVersions.get(project.p))  
             }
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
