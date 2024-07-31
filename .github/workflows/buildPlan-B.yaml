@@ -1,5 +1,5 @@
 
-# projects total:     599
+# projects total:     595
 # min stars count:    -1
 # max projects count: 1000
 
@@ -112,7 +112,6 @@ jobs:
         - name: "appliedtopology/tda4j"
         - name: "ariskk/burner4s"
         - name: "armanbilge/feral"
-        - name: "armanbilge/fs2"
         - name: "armanbilge/ip4s"
         - name: "armanbilge/jawn-fs2"
         - name: "armanbilge/litter"
@@ -167,6 +166,7 @@ jobs:
         - name: "codacy/codacy-plugins-api"
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
+        - name: "codedx/mapk"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/scala-cuid"
@@ -233,7 +233,6 @@ jobs:
         - name: "fgrutsch/emergence"
         - name: "fiatjaf/nlog"
         - name: "firstbirdtech/emergence"
-        - name: "frawa/inline-files"
         - name: "frawa/typed-json"
         - name: "frugalmechanic/fm-html"
         - name: "frugalmechanic/fm-http"
@@ -331,6 +330,7 @@ jobs:
         - name: "jodersky/redicl"
         - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
+        - name: "johnhungerford/generic-schema"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,7 +357,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
         - name: "jphmrst/scala-automata"
@@ -402,6 +401,7 @@ jobs:
         - name: "kordyjan/ogrodnik"
         - name: "kordyjan/typelogger"
         - name: "kostaskougios/functions-remote"
+        - name: "koterpillar/refinery"
         - name: "kovacshuni/circe-config"
         - name: "krrrr38/protoquill-finagle-mysql"
         - name: "kubukoz/drops"
@@ -498,7 +498,6 @@ jobs:
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
-        - name: "permutive-engineering/functional-google-clients"
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
@@ -506,14 +505,12 @@ jobs:
         - name: "philemone/hobogrid"
         - name: "philippus/julius"
         - name: "phillhenry/dreadnought"
-        - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/selfpackage"
         - name: "pjfanning/acked-stream"
         - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
-        - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/pekko-http-session"
         - name: "pjfanning/pekko-libraries-bom"
         - name: "pjfanning/pekko-mock-scheduler"
@@ -586,7 +583,6 @@ jobs:
         - name: "sciss/linkernighantsp"
         - name: "sciss/log"
         - name: "sciss/lucrepi"
-        - name: "sciss/model"
         - name: "sciss/optional"
         - name: "sciss/scalacollider-dot"
         - name: "sciss/scalacollider-if"
@@ -612,6 +608,10 @@ jobs:
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/conveniences"
         - name: "swaldman/cryptoutil"
+        - name: "swaldman/failable"
+        - name: "swaldman/feedletter"
+        - name: "swaldman/mailutil"
+        - name: "swaldman/mchange-sysadmin-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -638,10 +638,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "swaldman/failable"
-        - name: "swaldman/feedletter"
-        - name: "swaldman/mailutil"
-        - name: "swaldman/mchange-sysadmin-scala"
         - name: "swaldman/mlog-scala"
         - name: "swaldman/texttable"
         - name: "swaldman/unify-rss"

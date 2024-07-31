@@ -184,12 +184,12 @@ jobs:
         - name: "circe/circe"
         - name: "circe/circe-config"
         - name: "circe/circe-fs2"
+        - name: "circe/circe-golden"
         - name: "circe/circe-jackson"
         - name: "circe/circe-optics"
         - name: "circe/circe-yaml"
         - name: "clevercloud/pulsar4s"
         - name: "clevercloud/warp10-scala-client"
-        - name: "codedx/mapk"
         - name: "codingwell/scala-guice"
         - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
@@ -555,7 +555,6 @@ jobs:
         - name: "kordyjan/pytanie"
         - name: "kory33/s2mc-test"
         - name: "kostaskougios/terminal21-restapi"
-        - name: "koterpillar/refinery"
         - name: "kovstas/fs2-throttler"
         - name: "kubukoz/debug-utils"
         - name: "kubukoz/slick-effect"
@@ -612,6 +611,7 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
+        - name: "metarank/cfor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -638,7 +638,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "mimoguz/layeredfonticon"
         - name: "minosiants/pencil"
@@ -893,6 +892,7 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -919,7 +919,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -950,6 +949,7 @@ jobs:
         - name: "sqids/sqids-scala"
         - name: "squeryl/squeryl"
         - name: "staeff777/scalaveusz"
+        - name: "stanch/zipper"
         - name: "stephennancekivell/scalatest-json"
         - name: "stryker-mutator/stryker4s"
         - name: "stryker-mutator/weapon-regex"
