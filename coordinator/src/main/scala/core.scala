@@ -106,7 +106,7 @@ case class ProjectBuildConfig(
     mill: MillConfig = MillConfig(),
     tests: TestingMode = TestingMode.CompileOnly,
     sourceVersion: Option[String] = None,
-    // We should use Option[Int] here, but json4s fails to resolve signature https://github.com/json4s/json4s/issues/1035
+    migrationVersions: List[String] = Nil,   
     sourcePatches: List[SourcePatch] = Nil
 ) derives ConfigReader
 
