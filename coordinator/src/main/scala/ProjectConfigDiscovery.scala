@@ -4,15 +4,40 @@ import pureconfig.error.*
 import java.io.FileNotFoundException
 import scala.util.Try
 import scala.annotation.tailrec
+import scala.util.chaining.*
 
 class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredConfigsPath: os.Path) {
-  val projectSourceVersions: Map[Project, String] = {
+  type Filename = String
+  def loadRequiredProjectsLists(dirPath: os.Path): Seq[(Project, Filename)] = 
     for 
-      sourceVersionFile <- os.list(requiredConfigsPath / "source-version")
-      sourceVersion = sourceVersionFile.last
-      project <- os.read.lines(sourceVersionFile).filter(_.nonEmpty).map(Project.load(_))
-    yield project -> sourceVersion
-  }.toMap
+      file <- os.list(dirPath)
+      fileName = file.last
+      project <- os.read.lines(file)
+        .map(_.trim)
+        .filter(_.nonEmpty)
+        .map(Project.load)
+    yield project -> fileName
+
+  lazy val projectSourceVersions: Map[Project, String] = 
+    loadRequiredProjectsLists(requiredConfigsPath / "source-version").toMap
+
+  lazy val projectMigrationVersions: Map[Project, List[String]] = loadRequiredProjectsLists(requiredConfigsPath / "migration")
+    .groupMap(_._1)(_._2)
+    .mapValues:
+      _.distinct
+      .map: version =>
+        version -> version.split("\\W").toList.map: v =>
+          v.toIntOption.getOrElse:
+            v.dropWhile(!_.isDigit).takeWhile(_.isDigit).toIntOption.getOrElse(0)
+      .pipe: versions => 
+        // Ordering of List[Int] matches the semantic versioning if the vector of versions is normalized (all vectors have the same length)
+        val longestSemVer = versions.map(_._2).map(_.length).max
+        if longestSemVer == 3 then versions.toMap
+        else versions.toMap.mapValues(_.padTo(longestSemVer, 0)).toMap
+      .pipe: normalizedVersions => 
+        val normalizedToVersionString = normalizedVersions.map((k,v) => (v, k))
+        normalizedVersions.map(_._2).toList.sorted.map(normalizedToVersionString(_))
+    .toMap
 
   def apply(
       project: ProjectVersion,
@@ -28,17 +53,17 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
           readProjectConfig(projectDir, repoUrl)
             .orElse(internalProjectConfigs(project.showName))
             .orElse(Some(ProjectBuildConfig.empty))
-            .map { c =>
+            .map: c =>
               if c.java.version.nonEmpty then c
               else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
-            }
-            .map { c =>
+            .map: c =>
               c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
-            }
-            .map { c =>
+            .map: c =>
               if c.sourceVersion.isDefined then c
               else c.copy(sourceVersion = projectSourceVersions.get(project.p))  
-            }
+            .map: c =>
+              if c.migrationVersions.nonEmpty then c
+              else c.copy(migrationVersions = projectMigrationVersions.getOrElse(project.p, Nil))
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
           case ex: Throwable =>

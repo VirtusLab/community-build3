@@ -400,7 +400,7 @@ object Scala3CommunityBuild {
         standardAppendSettings.filterNot{  setting => 
           excludeIf(setting, 
             isSourceVersion(setting) && (definedSourceSetting.nonEmpty || forceSourceVersion),
-            s"Project has predefined source version: ${definedSourceSetting.get}"
+            s"Project has predefined source version: ${definedSourceSetting.orElse(requiredSourceVersion)}"
           )
         } ++ forcedAppendSettings
       }

@@ -8,6 +8,7 @@ import java.time.{OffsetDateTime, LocalDate}
 import java.util.concurrent.TimeUnit.SECONDS
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import Scaladex.ScaladexUrl
 
 import scala.language.implicitConversions
 
@@ -26,7 +27,7 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
   def load(page: Int) =
     val d = Jsoup
       .connect(
-        s"https://index.scala-lang.org/search?${commonSearchParams}&page=$page"
+        s"$ScaladexUrl/search?${commonSearchParams}&page=$page"
       )
       .get()
     d.select(".list-result .row").asScala.flatMap { e =>
@@ -132,7 +133,7 @@ val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
   val url =
-    s"https://index.scala-lang.org/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
+    s"$ScaladexUrl/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
   val GradleDep(o, n, v) = gradle: @unchecked
