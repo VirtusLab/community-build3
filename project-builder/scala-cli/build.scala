@@ -3,18 +3,19 @@
 //> using file ../shared/CommunityBuildCore.scala
 
 import Scala3CommunityBuild.*
-import java.nio.file.Paths
+import scala.util.CommandLineParser.FromString
 
 import uPickleSerializers.OptionPickler.read
 import TaskEvaluator.EvalResult
 import os.CommandResult
 
 @main def buildScalaCliProject(
-    repositoryDir: String,
+    repositoryDir: os.Path,
     scalaVersion: String,
     configJson: String,
     mavenRepoURL: String,
-    extraLibraryDependenciesString: String
+    extraLibraryDependenciesString: String,
+    extraScalacOptions: String
 ): Unit = {
   // For compatibility with other build tools s use logic from CBCore
   // Set system property if missing
@@ -29,7 +30,11 @@ import os.CommandResult
   val evaluator = CliTaskEvaluator(
     scalaVersion = scalaVersion,
     repositoryDir = repositoryDir,
-    mavenRepoURL = Option(mavenRepoURL).filterNot(_.isEmpty)
+    mavenRepoURL = Option(mavenRepoURL).filterNot(_.isEmpty),
+    extraScalacOptions = extraScalacOptions.split(",").toList.map{
+      case s"REQUIRE:$opt" => opt
+      case opt => opt
+    }
   )
   import evaluator.{eval, evalAsDependencyOf, evalWhen}
 
@@ -63,7 +68,7 @@ import os.CommandResult
     artifactName = "",
     compile = collectCompileResults(compileResult),
     doc = DocsResult(
-      docResult.map(_ => Paths.get(repositoryDir, "scala-doc").toAbsolutePath().toFile())
+      docResult.map(_ => (repositoryDir / "scala-doc").toNIO.toFile)
     ),
     testsCompile = collectCompileResults(testsCompileResult),
     testsExecute = TestsResult(
@@ -111,7 +116,7 @@ case class CliCommand[T](
   override def toString(): String = s"${command.mkString(" ")}"
 }
 def cmd(args: String*) = CliCommand[Unit](args, (_, failure) => failure)
-class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL: Option[String])
+class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoURL: Option[String], extraScalacOptions: List[String])
     extends TaskEvaluator[CliCommand] {
   import TaskEvaluator.*
 
@@ -144,9 +149,11 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: String, mavenRepoURL
         "--scalac-option=-J-Xmx7G",
         "--scalac-option=-J-Xms4G",
         mavenRepoURL.map(s"--repository=" + _).toList,
-        extraLibraryDependencies
+        extraLibraryDependencies,
+        extraScalacOptions
       )
       .call(
+        cwd = repositoryDir,
         check = false,
         stdout = os.Inherit,
         stderr = os.Pipe
@@ -209,4 +216,9 @@ object uPickleSerializers {
   implicit lazy val ProjectOverridesR: Reader[ProjectOverrides] = macroR
   implicit lazy val ProjectsConfigR: Reader[ProjectsConfig] = macroR
   implicit lazy val ProjectBuildConfigR: Reader[ProjectBuildConfig] = macroR
+}
+
+private given FromString[os.Path] = { str =>
+  val nio = java.nio.file.Paths.get(str)
+  os.Path(nio.toAbsolutePath())
 }
