@@ -5,45 +5,52 @@ import scala.concurrent.duration.*
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate
+import sttp.client4.*
+import sttp.model.Uri
+import upickle.default.*
 
-object Scaladex {
-  final val ScaladexUrl = "https://index.scala-lang.org"
+object Scaladex:
+  final val ScaladexUrl = uri"https://index.scala-lang.org"
 
-  private def asyncGetWithRetry(url: String): AsyncResponse[requests.Response] = {
-    def tryGet(backoffSeconds: Int): AsyncResponse[requests.Response] =
-      Future { requests.get(url) }
-        .recoverWith {
-          case _: requests.TimeoutException =>
-            Console.err.println(
-              s"Failed to fetch artifact metadata, Scaladex request timeout, retry with backoff ${backoffSeconds}s for $url"
-            )
-            SECONDS.sleep(backoffSeconds)
-            tryGet((backoffSeconds * 2).min(60))
-          case e: requests.RequestsException if e.getMessage.contains("GOWAY") =>
-            Console.err.println(
-              s"Failed to fetch artifact metadata, Scaladex request terminated, retry with backoff ${backoffSeconds}s for $url"
-            )
-            SECONDS.sleep(backoffSeconds)
-            tryGet((backoffSeconds * 2).min(60))
-        }
+class Scaladex(using ExecutionContext):
+  import Scaladex.*
+
+  private val backend = DefaultSyncBackend(BackendOptions.Default.connectionTimeout(1.minute))
+
+  private inline def get[T: Reader](
+      uri: Uri
+  ): AsyncResponse[T] = {
+    def tryGet(backoffSeconds: Int): AsyncResponse[T] = Future {
+      quickRequest
+        .get(uri)
+        .mapResponse(read[T](_))
+        .send(backend)
+    }.map(_.body)
+      .recoverWith { case err: SttpClientException =>
+        Console.err.println(
+          s"Failed to fetch artifact metadata, ${err.cause}, retry with backoff ${backoffSeconds}s for $uri"
+        )
+        SECONDS.sleep(backoffSeconds)
+        tryGet((backoffSeconds * 2).min(60))
+      }
+
     tryGet(1)
   }
 
   def projects: AsyncResponse[Seq[Project]] = {
-    case class ProjectEntry(organization: String, repository: String)
-    asyncGetWithRetry(s"$ScaladexUrl/api/projects")
-      .map: response =>
-        fromJson[List[ProjectEntry]](response.text())
-          .map:
-            case ProjectEntry(organization, repository) =>
-              Project(organization, repository)
+    case class ProjectEntry(organization: String, repository: String) derives Reader
+    get[List[ProjectEntry]](uri"$ScaladexUrl/api/projects")
+      .map:
+        _.map:
+          case ProjectEntry(organization, repository) =>
+            Project(organization, repository)
   }
 
-  case class ProjectArtifact(groupId: String, artifactId: String, version: String)
+  case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
   def artifacts(project: Project): AsyncResponse[Seq[ProjectArtifact]] =
-    asyncGetWithRetry(s"$ScaladexUrl/api/projects/${project.org}/${project.name}/artifacts")
-      .map: response =>
-        fromJson[Seq[ProjectArtifact]](response.text())
+    get[Seq[ProjectArtifact]](
+      uri"$ScaladexUrl/api/projects/${project.org}/${project.name}/artifacts"
+    )
 
   case class Artifact(
       groupId: String,
@@ -55,15 +62,13 @@ object Scaladex {
       licenses: Seq[String],
       language: String,
       platform: String
-  ):
+  ) derives Reader:
     def releaseLocalData: LocalDate = LocalDate.from(Instant.ofEpochMilli(releaseDate))
 
   def artifact(artifact: ProjectArtifact): AsyncResponse[Artifact] =
-    asyncGetWithRetry(
-      s"$ScaladexUrl/api/artifacts/${artifact.groupId}/${artifact.artifactId}/${artifact.version}"
+    get[Artifact](
+      uri"$ScaladexUrl/api/artifacts/${artifact.groupId}/${artifact.artifactId}/${artifact.version}"
     )
-      .map: response =>
-        fromJson[Artifact](response.text())
 
   case class ProjectSummary(
       groupId: String,
@@ -71,4 +76,3 @@ object Scaladex {
       version: String, // latest known versions
       versions: List[String] // all published versions
   )
-}

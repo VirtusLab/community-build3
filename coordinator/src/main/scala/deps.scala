@@ -59,10 +59,10 @@ case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
 def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
-): AsyncResponse[ProjectModules] = {
+)(using scaladex: Scaladex): AsyncResponse[ProjectModules] = {
   import util.*
   for {
-    scala3JvmArtifacts <- Scaladex
+    scala3JvmArtifacts <- scaladex
       .artifacts(project)
       .map:
         _.filter:
@@ -74,7 +74,7 @@ def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     artifactsByVersion = scala3JvmArtifacts.groupBy(_.version)
     versionReleaseData <- Future
       .traverse(artifactsByVersion) { case (version, artifacts) =>
-        Scaladex
+        scaladex
           .artifact(artifacts.head)
           .filter: artifact =>
             releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
@@ -91,7 +91,7 @@ def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
         version = version,
         modules = artifactsByVersion(version).map(_.artifactId.stripSuffix("_3"))
       )
-   } yield ProjectModules(project, versionModules)
+  } yield ProjectModules(project, versionModules)
 }
 
 case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
@@ -155,6 +155,8 @@ def loadMavenInfo(scalaBinaryVersion: String)(
           case ex: SocketTimeoutException => backoff("socket timeout exception")
           case ex: HttpStatusException if ex.getStatusCode == 503 =>
             backoff("service unavailable")
+          case ex: java.net.ConnectException if ex.getMessage().contains("Operation timed out") =>
+            backoff(ex.getMessage())
           case ex: Exception =>
             Console.err.println(
               s"Failed to load maven info for $org/$name: ${ex}"
@@ -183,6 +185,7 @@ def loadDepenenecyGraph(
     filterPatterns: Seq[String] = Nil,
     releaseCutOffDate: Option[LocalDate] = None
 ): AsyncResponse[DependencyGraph] =
+  given Scaladex = Scaladex()
   val patterns = filterPatterns.map(_.r)
   def loadProject(p: Project): AsyncResponse[CandidateProject] =
     if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))

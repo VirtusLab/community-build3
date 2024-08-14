@@ -3,6 +3,7 @@ import org.json4s.native.Serialization
 import org.json4s.ext.EnumSerializer
 import java.time.OffsetDateTime
 
+given Serialization = org.json4s.native.Serialization
 given Formats =
   Serialization.formats(NoTypeHints) +
     TestingModeEnumSerializer() + ProjectBuildDefSerializer +

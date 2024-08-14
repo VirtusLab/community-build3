@@ -16,6 +16,7 @@ import scala.collection.SortedMap
 import os.CommandResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 
 class ConfigFiles(path: os.Path) {
   val projectsConfig: os.Path = path / "projects-config.conf"
@@ -51,8 +52,8 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
   }.flatten
   given confFiles: ConfigFiles = ConfigFiles(configsPath)
   // Most of the time is spend in IO, though we can use higher parallelism
-  val threadPool = new ForkJoinPool(
-    Runtime.getRuntime().availableProcessors() * 4
+  val threadPool = Executors.newFixedThreadPool(
+    Runtime.getRuntime().availableProcessors() * 2
   )
   val customProjects =
     readNormalized(confFiles.customProjects).map(Project.load)
