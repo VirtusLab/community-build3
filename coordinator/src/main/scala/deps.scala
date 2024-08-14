@@ -33,14 +33,13 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
     d.select(".list-result .row").asScala.flatMap { e =>
       e.select("h4").get(0).text().takeWhile(!_.isWhitespace) match {
         case s"${organization}/${repository}" =>
-          for 
-            ghStars <- e.select(".stats [title=Stars]")
-            .asScala
-            .headOption
-            .flatMap(_.text.toIntOption)
-            .orElse(Some(-1))
-          yield
-             StarredProject(organization, repository)(ghStars)
+          for ghStars <- e
+              .select(".stats [title=Stars]")
+              .asScala
+              .headOption
+              .flatMap(_.text.toIntOption)
+              .orElse(Some(-1))
+          yield StarredProject(organization, repository)(ghStars)
         case _ => None
       }
     }
@@ -58,72 +57,42 @@ enum CandidateProject:
   case BuildSelected(project: Project, mvs: Seq[ModuleInVersion])
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
-def loadScaladexProject(
-    scalaBinaryVersion: String,
-    releaseCutOffDate: Option[LocalDate]
-)(
+def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
-): AsyncResponse[ProjectModules] =
+): AsyncResponse[ProjectModules] = {
   import util.*
-  val binaryVersionSuffix = "_" + scalaBinaryVersion
-  Scaladex
-    .projectSummary(project.org, project.name, scalaBinaryVersion)
-    .flatMap {
-      case None =>
-        Console.err.println(
-          s"No project summary for ${project.org}/${project.name}"
-        )
-        Future.successful(Nil)
-      case Some(projectSummary) =>
-        val releaseDates = collection.mutable.Map.empty[String, OffsetDateTime]
-        case class VersionRelease(version: String, releaseDate: OffsetDateTime)
-        for
-          artifactsMetadata <- Future
-            .traverse(projectSummary.artifacts) { artifact =>
-              Scaladex
-                .artifactMetadata(
-                  groupId = projectSummary.groupId,
-                  artifactId = s"${artifact}_3"
-                )
-                .map { response =>
-                  if (response.pagination.pageCount != 1)
-                    Console.err.println(
-                      "Scaladex now implementes pagination! Ignoring artifact metadata from additional pages"
-                    )
-                  // Order versions based on their release date, it should be more stable in case of hash-based pre-releases
-                  // Previous approach with sorting SemVersion was not stable and could lead to runtime erros (due to not transitive order of elements)
-                  val versions = response.items
-                    .filter(v =>
-                      releaseCutOffDate
-                        .forall(_.isAfter(v.releaseDate.toLocalDate()))
-                    )
-                    .tapEach(v => releaseDates += v.version -> v.releaseDate)
-                    .map(_.version)
-                  artifact -> versions
-                }
-            }
-            .map(_.toMap)
-          orderedVersions = projectSummary.versions
-            .flatMap(v => releaseDates.get(v).map(VersionRelease(v, _)))
-            .sortBy(_.releaseDate)(using
-              summon[Ordering[OffsetDateTime]].reverse
-            )
-            .map(_.version)
-        yield for version <- orderedVersions
-        yield ModuleInVersion(
-          version,
-          modules = artifactsMetadata.collect {
-            case (module, versions) if versions.contains(version) => module
-          }.toSeq
-        )
-    }
-    .map { moduleVersions =>
-      val modules = moduleVersions
-        .filter(_.modules.nonEmpty)
-        .map(mvs => VersionedModules(mvs, mvs.version))
-        .map(_.modules)
-      ProjectModules(project, modules)
-    }
+  for {
+    scala3JvmArtifacts <- Scaladex
+      .artifacts(project)
+      .map:
+        _.filter:
+          _.artifactId match
+            case s"${_}_native${_}" => false
+            case s"${_}_sjs${_}"    => false
+            case s"${_}_3"          => true
+            case _                  => false
+    artifactsByVersion = scala3JvmArtifacts.groupBy(_.version)
+    versionReleaseData <- Future
+      .traverse(artifactsByVersion) { case (version, artifacts) =>
+        Scaladex
+          .artifact(artifacts.head)
+          .filter: artifact =>
+            releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
+          .map: artifact =>
+            (version, artifact.releaseDate)
+      }
+      .map(_.toMap)
+    orderedVersions = versionReleaseData.toSeq
+      .sortBy(-_._2) // releaseDate-epoch-mill descending
+      .map(_._1)
+    versionModules =
+      for version <- orderedVersions
+      yield ModuleInVersion(
+        version = version,
+        modules = artifactsByVersion(version).map(_.artifactId.stripSuffix("_3"))
+      )
+   } yield ProjectModules(project, versionModules)
+}
 
 case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
 case class ModuleVersion(name: String, version: String, p: Project)
@@ -219,7 +188,7 @@ def loadDepenenecyGraph(
     if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
     else
       cachedAsync { (p: Project) =>
-        loadScaladexProject(scalaBinaryVersion, releaseCutOffDate)(p)
+        loadScaladexProject(releaseCutOffDate)(p)
           .map(projectModulesFilter(patterns))
       }(p).map { case ProjectModules(project, mvs) =>
         CandidateProject.BuildSelected(project, mvs)
