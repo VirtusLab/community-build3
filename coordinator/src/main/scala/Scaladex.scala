@@ -3,84 +3,72 @@ import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import java.io.IOException
+import java.time.Instant
+import java.time.LocalDate
 
 object Scaladex {
-  case class Pagination(current: Int, pageCount: Int, totalSize: Int)
-  // releaseDate is always UTC zoned
-  case class ArtifactMetadata(
+  final val ScaladexUrl = "https://index.scala-lang.org"
+
+  private def asyncGetWithRetry(url: String): AsyncResponse[requests.Response] = {
+    def tryGet(backoffSeconds: Int): AsyncResponse[requests.Response] =
+      Future { requests.get(url) }
+        .recoverWith {
+          case _: requests.TimeoutException =>
+            Console.err.println(
+              s"Failed to fetch artifact metadata, Scaladex request timeout, retry with backoff ${backoffSeconds}s for $url"
+            )
+            SECONDS.sleep(backoffSeconds)
+            tryGet((backoffSeconds * 2).min(60))
+          case e: requests.RequestsException if e.getMessage.contains("GOWAY") =>
+            Console.err.println(
+              s"Failed to fetch artifact metadata, Scaladex request terminated, retry with backoff ${backoffSeconds}s for $url"
+            )
+            SECONDS.sleep(backoffSeconds)
+            tryGet((backoffSeconds * 2).min(60))
+        }
+    tryGet(1)
+  }
+
+  def projects: AsyncResponse[Seq[Project]] = {
+    case class ProjectEntry(organization: String, repository: String)
+    asyncGetWithRetry(s"$ScaladexUrl/api/projects")
+      .map: response =>
+        fromJson[List[ProjectEntry]](response.text())
+          .map:
+            case ProjectEntry(organization, repository) =>
+              Project(organization, repository)
+  }
+
+  case class ProjectArtifact(groupId: String, artifactId: String, version: String)
+  def artifacts(project: Project): AsyncResponse[Seq[ProjectArtifact]] =
+    asyncGetWithRetry(s"$ScaladexUrl/api/projects/${project.org}/${project.name}/artifacts")
+      .map: response =>
+        fromJson[Seq[ProjectArtifact]](response.text())
+
+  case class Artifact(
+      groupId: String,
+      artifactId: String,
       version: String,
-      releaseDate: java.time.OffsetDateTime
-  )
-  case class ArtifactMetadataResponse(
-      pagination: Pagination,
-      items: List[ArtifactMetadata]
-  )
+      artifactName: String,
+      project: String,
+      releaseDate: Long, // epoch-millis
+      licenses: Seq[String],
+      language: String,
+      platform: String
+  ):
+    def releaseLocalData: LocalDate = LocalDate.from(Instant.ofEpochMilli(releaseDate))
+
+  def artifact(artifact: ProjectArtifact): AsyncResponse[Artifact] =
+    asyncGetWithRetry(
+      s"$ScaladexUrl/api/artifacts/${artifact.groupId}/${artifact.artifactId}/${artifact.version}"
+    )
+      .map: response =>
+        fromJson[Artifact](response.text())
+
   case class ProjectSummary(
       groupId: String,
       artifacts: List[String], // List of artifacts with suffixes
       version: String, // latest known versions
       versions: List[String] // all published versions
   )
-
-  final val ScaladexUrl = "https://index.scala-lang.org"
-
-  def artifactMetadata(
-      groupId: String,
-      artifactId: String
-  ): AsyncResponse[ArtifactMetadataResponse] = {
-    def tryFetch(backoffSeconds: Int): AsyncResponse[ArtifactMetadataResponse] =
-      Future {
-        val response = requests.get(
-          url = s"$ScaladexUrl/api/artifacts/$groupId/$artifactId"
-        )
-        fromJson[ArtifactMetadataResponse](response.text())
-      }.recoverWith {
-        case err: org.jsoup.HttpStatusException
-            if err.getStatusCode == 503 && !Thread.interrupted() =>
-          Console.err.println(
-            s"Failed to fetch artifact metadata, Scaladex unavailable, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
-          )
-          SECONDS.sleep(backoffSeconds)
-          tryFetch((backoffSeconds * 2).min(60))
-        case _: requests.TimeoutException =>
-          Console.err.println(
-            s"Failed to fetch artifact metadata, Scaladex request timeout, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
-          )
-          SECONDS.sleep(backoffSeconds)
-          tryFetch((backoffSeconds * 2).min(60))
-        case e: requests.RequestsException if e.getMessage.contains("GOWAY") => 
-          Console.err.println(
-            s"Failed to fetch artifact metadata, Scaladex request terminated, retry with backoff ${backoffSeconds}s for $groupId:$artifactId"
-          )
-          SECONDS.sleep(backoffSeconds)
-          tryFetch((backoffSeconds * 2).min(60))
-      }
-    tryFetch(1)
-  }
-
-  def projectSummary(
-      organization: String,
-      repository: String,
-      scalaBinaryVersion: String
-  ): AsyncResponse[Option[ProjectSummary]] = Future {
-    val response = requests.get(
-      url = s"$ScaladexUrl/api/project",
-      params = Map(
-        "organization" -> organization,
-        "repository" -> repository,
-        "target" -> "JVM",
-        "scalaVersion" -> scalaBinaryVersion
-      )
-    )
-    // If output is empty it means that given project does not define JVM modules
-    // for given scala version
-    Option.unless(response.contentLength.contains(0)) {
-      fromJson[ProjectSummary](response.text())
-    }
-  }.recoverWith{
-    case _: requests.TimeoutException => 
-      Thread.sleep(scala.util.Random.nextInt(10.seconds.toMillis.toInt))
-      projectSummary(organization, repository, scalaBinaryVersion)
-  }
-
 }
