@@ -13,7 +13,6 @@ CACHE_FROM_TAG="$PREV_CB_VERSION"
 
 imageName=virtuslab/scala-community-build-mvn-repo
 
-docker pull $imageName:$CACHE_FROM_TAG || true
 docker build \
   -t "$imageName:$TAG_NAME" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
