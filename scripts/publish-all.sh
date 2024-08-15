@@ -30,7 +30,8 @@ for image in $BUILDER_BASE $PROJECT_BUILDER; do
 done
 
 # Single-JDK images
-for image in $MVN_REPO $COMPILER_BUILDER; do
+# $MVN_REPO is not build anymore
+for image in $COMPILER_BUILDER; do
   docker tag $image:$VERSION $image:latest
   for tag in $VERSION latest; do
     docker push $image:$tag
