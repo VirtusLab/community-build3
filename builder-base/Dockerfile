@@ -1,7 +1,5 @@
 FROM ubuntu:22.04
 
-ARG JDK_VERSION
-
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Zurich
@@ -17,6 +15,7 @@ RUN apt-get update && apt-get upgrade -y && \
     echo "sdkman_auto_answer=true" > $SDKMAN_DIR/etc/config && \
     echo "sdkman_auto_selfupdate=false" >> $SDKMAN_DIR/etc/config
 
+ARG JDK_VERSION
 # Source sdkman to make the sdk command available and install candidate
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java $JDK_VERSION && sdk install sbt 1.9.6" 
 # Add candidate path to $PATH environment variable
