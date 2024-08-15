@@ -83,7 +83,6 @@ jobs:
         - name: "47degrees/sbt-energymonitor"
         - name: "7mind/izumi"
         - name: "7mind/sbtgen"
-        - name: "aaronp/args4c"
         - name: "afsalthaj/constraintless"
         - name: "ahjohannessen/sec"
         - name: "ajozwik/pekko-smtp-server"
@@ -98,6 +97,7 @@ jobs:
         - name: "akka/alpakka"
         - name: "akka/alpakka-kafka"
         - name: "alejandrohdezma/http4s-munit"
+        - name: "algolia/algoliasearch-client-scala"
         - name: "alhuelamo/dbjobs"
         - name: "almond-sh/almond"
         - name: "alonsodomin/cron4s"
@@ -110,6 +110,7 @@ jobs:
         - name: "andyglow/typesafe-config-scala"
         - name: "andyglow/websocket-scala-client"
         - name: "ant8e/uuid4cats-effect"
+        - name: "antognini/type-safe-equality"
         - name: "apache/pekko"
         - name: "apache/pekko-connectors"
         - name: "apache/pekko-connectors-kafka"
@@ -167,6 +168,7 @@ jobs:
         - name: "blackdoor/jose"
         - name: "blemale/scaffeine"
         - name: "bpholt/java-time-literals"
+        - name: "business4s/decisions4s"
         - name: "camunda-community-hub/camunda-dmn-tester"
         - name: "carlos-verdes/zio-arangodb"
         - name: "carlosedp/riscvassembler"
@@ -329,8 +331,6 @@ jobs:
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
-        - name: "flxj/platdb"
-        - name: "flyway/flyway-play"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,6 +357,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "flxj/platdb"
+        - name: "flyway/flyway-play"
         - name: "fmonniot/scala3mock"
         - name: "foldables-io/skunk-tables"
         - name: "folone/poi.scala"
@@ -434,6 +436,7 @@ jobs:
         - name: "hnaderi/edomata"
         - name: "hnaderi/lepus"
         - name: "hnaderi/scala-k8s"
+        - name: "hnaderi/yaml4s"
         - name: "hseeberger/slf4s"
         - name: "http4s/blaze"
         - name: "http4s/http4s"
@@ -448,10 +451,9 @@ jobs:
         - name: "http4s/http4s-netty"
         - name: "http4s/http4s-otel4s-middleware"
         - name: "http4s/http4s-prometheus-metrics"
-        - name: "http4s/http4s-scala-xml"
-        - name: "http4s/http4s-scalatags"
         - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-session"
+        - name: "http4s/http4s-twirl"
         - name: "i10416/cssminifier"
         - name: "i10416/munkres"
         - name: "ichoran/kse3"
@@ -461,7 +463,6 @@ jobs:
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-toolkit"
         - name: "imaxmelnyk/openai-scala"
-        - name: "imrafaelmerino/json-scala-values"
         - name: "indoorvivants/decline-derive"
         - name: "indoorvivants/mdoc-effect"
         - name: "indoorvivants/sn-bindgen"
@@ -501,7 +502,6 @@ jobs:
         - name: "jd557/minart"
         - name: "jd557/spaeti"
         - name: "jelly-rdf/jelly-jvm"
-        - name: "jmcardon/tsec"
         - name: "joan38/kubernetes-client"
         - name: "jodersky/scala-argparse"
         - name: "jodersky/simplesql"
@@ -531,6 +531,7 @@ jobs:
         - name: "karimagnusson/kuzminki-zio"
         - name: "karimagnusson/kuzminki-zio-2"
         - name: "kasiamarek/tyre-scala"
+        - name: "katrix/dataprism"
         - name: "katrix/perspective"
         - name: "katrix/typenbt"
         - name: "kcrypt/scala-biginteger"
@@ -611,7 +612,6 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
-        - name: "metarank/cfor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -638,6 +638,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "mimoguz/layeredfonticon"
         - name: "minosiants/pencil"
@@ -707,6 +708,7 @@ jobs:
         - name: "ovotech/meters4s"
         - name: "ovotech/natchez-extras"
         - name: "pac4j/http4s-pac4j"
+        - name: "palanga/parana"
         - name: "palanga/zio-cassandra"
         - name: "paoloboni/binance-scala-client"
         - name: "paoloboni/spray-json-derived-codecs"
@@ -776,7 +778,6 @@ jobs:
         - name: "reactivecore/rc-circe-json-schema"
         - name: "rediscala/rediscala"
         - name: "regis-leray/fs2-ftp"
-        - name: "rescala-lang/rescala"
         - name: "rewards-network/combos"
         - name: "rewards-network/pure-aws"
         - name: "rlemaitre/pillars"
@@ -892,7 +893,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -919,6 +919,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -1013,7 +1014,6 @@ jobs:
         - name: "travisbrown/dhallj"
         - name: "travisbrown/iteratee"
         - name: "typebricks/pureconfig-toggleable"
-        - name: "typelevel/bobcats"
         - name: "typelevel/case-insensitive"
         - name: "typelevel/catapult"
         - name: "typelevel/cats"
