@@ -17,4 +17,5 @@ docker pull $imageName:$CACHE_FROM_TAG || true
 docker build \
   -t "$imageName:$TAG_NAME" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
+  --cache-from "$imageName:latest" \
   $scriptDir/../mvn-repo

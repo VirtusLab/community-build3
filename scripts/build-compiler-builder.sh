@@ -13,9 +13,9 @@ VERSION="$1"
 CACHE_FROM_TAG="$PREV_CB_VERSION"
 
 imageName=virtuslab/scala-community-build-compiler-builder
-docker pull $imageName:$CACHE_FROM_TAG || true
 
 docker build \
   -t "$imageName:$VERSION" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
+  --cache-from "$imageName:latest" \
   $scriptDir/../compiler-builder

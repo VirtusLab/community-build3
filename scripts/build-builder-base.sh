@@ -15,7 +15,6 @@ TAG_NAME=$(buildTag $VERSION $JDK_VERSION)
 CACHE_FROM_TAG=$(buildTag "$PREV_CB_VERSION" $JDK_VERSION)
 
 imageName=virtuslab/scala-community-build-builder-base
-docker pull $imageName:$CACHE_FROM_TAG || true
 
 jdkDistro=""
 case $JDK_VERSION in
@@ -45,4 +44,7 @@ docker build \
   --build-arg JDK_VERSION=${jdkDistro} \
   -t "$imageName:$TAG_NAME" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
+  --cache-from "$imageName:$(buildTag "$PREV_CB_VERSION" $JDK_VERSION)" \
+  --cache-from "$imageName:$(buildTag latest $JDK_VERSION)" \
+  --cache-from "$imageName:$(buildTag v0.3.13 $JDK_VERSION)" \
   $scriptDir/../builder-base
