@@ -29,13 +29,13 @@ class ConfigFiles(path: os.Path) {
 val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
 
 @main def storeDependenciesBasedBuildPlan(
-    scalaBinaryVersion: String,
-    minStarsCount: Int,
-    maxProjectsInConfig: Int,
-    maxProjectsInBuildPlan: Int,
-    requiredProjects: Seq[Project],
-    configsPath: os.Path,
-    varargs: String*
+  scalaBinaryVersion: String,
+  minStarsCount: Int,
+  maxProjectsInConfig: Int,
+  maxProjectsInBuildPlan: Int,
+  requiredProjects: Seq[Project],
+  configsPath: os.Path,
+  varargs: String*
 ) = {
   val releaseCutOffDate = varargs.collectFirst { case s"--release-cutoff=${date}" =>
     Try(LocalDate.parse(date)).fold[Option[LocalDate]](
@@ -126,18 +126,18 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
   try Await.result(task, 60.minute)
   catch {
     case ex: Throwable =>
-      println(s"Uncought exception: $ex")
       ex.printStackTrace()
-      threadPool.shutdownNow()
-      threadPool.awaitTermination(10, SECONDS)
-      throw ex
+      sys.error(s"Uncought exception: $ex")
+  } finally {
+    threadPool.shutdownNow()
+    threadPool.awaitTermination(10, SECONDS)
   }
 }
 
 case class SplittedBuildPlan(projects: Array[ProjectBuildDef], index: Int = 0)
 def splitBuildPlan(
-    buildPlan: Array[ProjectBuildDef],
-    limit: Int
+  buildPlan: Array[ProjectBuildDef],
+  limit: Int
 ): List[SplittedBuildPlan] = {
   // Sort ascending by ammount of starts, required projects have highest priority
   buildPlan
@@ -239,13 +239,12 @@ def buildPlanCommons(depGraph: DependencyGraph) =
   (topLevelData, fullInfo, projectsDeps)
 
 def makeDependenciesBasedBuildPlan(
-    depGraph: DependencyGraph,
-    cutOffDate: Option[LocalDate]
-)(using
-    confFiles: ConfigFiles
-): AsyncResponse[Array[ProjectBuildDef]] =
+  depGraph: DependencyGraph,
+  cutOffDate: Option[LocalDate]
+)(using confFiles: ConfigFiles): AsyncResponse[Array[ProjectBuildDef]] =
   val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
-  val configDiscovery = ProjectConfigDiscovery(confFiles.projectsConfig.toIO, confFiles.requiredConfigs)
+  val configDiscovery =
+    ProjectConfigDiscovery(confFiles.projectsConfig.toIO, confFiles.requiredConfigs)
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =
@@ -276,9 +275,9 @@ def makeDependenciesBasedBuildPlan(
   val projects = projectsDeps.keys.map(_.p).toList
 
   def findCutOffCommit(
-      project: Project,
-      repoUrl: String,
-      cutOffDate: Option[LocalDate]
+    project: Project,
+    repoUrl: String,
+    cutOffDate: Option[LocalDate]
   ): Option[String] =
     for
       cutOffDate <- cutOffDate
@@ -384,9 +383,9 @@ def splitIntoStages(projects: Array[ProjectBuildDef]): StagedBuildPlan = {
   // GitHub Actions limits to 255 elements in matrix
   val MaxStageSize = 255
   projects.toList
-  .sortBy(_.project)
-  .grouped(MaxStageSize)
-  .toList
+    .sortBy(_.project)
+    .grouped(MaxStageSize)
+    .toList
 }
 
 private given FromString[os.Path] = { str =>
@@ -411,13 +410,13 @@ lazy val workflowsDir: os.Path = {
 }
 
 case class BuildMeta(
-    minStarsCount: Int,
-    maxProjectsCount: Int,
-    totalProjects: Int
+  minStarsCount: Int,
+  maxProjectsCount: Int,
+  totalProjects: Int
 )
 def createGithubActionJob(
-    plan: List[List[ProjectBuildDef]],
-    meta: BuildMeta
+  plan: List[List[ProjectBuildDef]],
+  meta: BuildMeta
 ): String = {
   class Printer() {
     private val buffer = mutable.StringBuilder()
