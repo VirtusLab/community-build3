@@ -219,6 +219,7 @@ jobs:
         - name: "cquiroz/sbt-locales"
         - name: "cquiroz/scala-java-locales"
         - name: "cquiroz/scala-java-time"
+        - name: "creativescala/chartreuse"
         - name: "creativescala/doodle"
         - name: "creativescala/krop"
         - name: "crobox/clickhouse-scala-client"
@@ -330,7 +331,6 @@ jobs:
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
-        - name: "flink-extended/flink-scala-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,6 +357,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "flyway/flyway-play"
         - name: "fmonniot/scala3mock"
@@ -590,7 +591,6 @@ jobs:
         - name: "lloydmeta/ltsv-logger"
         - name: "log4s/log4s"
         - name: "logging4s/logging4s"
-        - name: "lolgab/snunit"
         - name: "lomigmegard/akka-http-cors"
         - name: "losizm/grapple"
         - name: "losizm/scamper"
