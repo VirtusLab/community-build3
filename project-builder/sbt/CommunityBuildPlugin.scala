@@ -523,8 +523,11 @@ object CommunityBuildPlugin extends AutoPlugin {
         }
         println(s"Compile scalacOptions: ${scalacOptions}")
         val compileResult = eval(Compile / compile) match {
-          case EvalResult.Failure(reasons, evalTime) if reasons.exists { case ex: AssertionError =>
-                ex.getMessage.contains("overlapping patches") && scalacOptions.contains("-rewrite")
+          case EvalResult.Failure(reasons, _) if reasons.exists {
+                case ex: AssertionError =>
+                  ex.getMessage.contains("overlapping patches") &&
+                  scalacOptions.contains("-rewrite")
+                case _ => false
               } =>
             eval(Compile / compile)
           case result => result
