@@ -354,7 +354,6 @@ def projectHistory(project: FailedProject) =
         .query {
           boolQuery()
             .must(
-              termsQuery("scalaVersion", PreviousScalaReleases),
               termsQuery(
                 "projectName",
                 project.project.searchName,
@@ -370,7 +369,7 @@ def projectHistory(project: FailedProject) =
           fieldSort("timestamp").desc()
         )
         .sourceInclude("scalaVersion", "version", "summary")
-        .size(100)
+        .size(10 * 1000)
     }
     .map(
       _.fold[Seq[ProjectHistoryEntry]](
@@ -394,6 +393,7 @@ def projectHistory(project: FailedProject) =
                 .compilerFailure
             )
           }
+          .filter(v => PreviousScalaReleases.contains(v.scalaVersion))
       )
     )
     .await(DefaultTimeout)
