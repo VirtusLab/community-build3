@@ -79,26 +79,36 @@ object CommunityBuildPlugin extends AutoPlugin {
     .filter(_.nonEmpty)
     .map("Community Build Repo".at(_))
     .toSeq
-   
+
   override def projectSettings = Seq(
     externalResolvers := customMavenRepoRepository ++ externalResolvers.value,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
     // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
     libraryDependencies ++= extraLibraryDependencies(
-        buildScalaVersion = sys.props.get("communitybuild.scala").filter(_.nonEmpty),
-        projectScalaVersion= (thisProjectRef / scalaVersion).value
-      )
+      buildScalaVersion = sys.props.get("communitybuild.scala").filter(_.nonEmpty),
+      projectScalaVersion = (thisProjectRef / scalaVersion).value
+    )
   )
 
-  private def extraLibraryDependencies(buildScalaVersion: Option[String], projectScalaVersion: String ) =
+  private def extraLibraryDependencies(
+      buildScalaVersion: Option[String],
+      projectScalaVersion: String
+  ) =
     if (!projectScalaVersion.startsWith("3.")) Nil
     else
-      Scala3CommunityBuild.Utils.extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion)).map { 
-        case Scala3CommunityBuild.Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
-          if(scalaCrossVersion) org %% artifact % version
-          else org % artifact % version
-      }
+      Scala3CommunityBuild.Utils
+        .extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion))
+        .map {
+          case Scala3CommunityBuild.Utils.LibraryDependency(
+                org,
+                artifact,
+                version,
+                scalaCrossVersion
+              ) =>
+            if (scalaCrossVersion) org %% artifact % version
+            else org % artifact % version
+        }
 
   private def stripScala3Suffix(s: String) = s match {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s
@@ -109,7 +119,6 @@ object CommunityBuildPlugin extends AutoPlugin {
       val flags = Seq("-Xfatal-warnings", "-Werror")
       (_: Scope, currentSettings: Seq[String]) => currentSettings.filterNot(flags.contains)
     }
-
 
   /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
@@ -165,21 +174,23 @@ object CommunityBuildPlugin extends AutoPlugin {
       val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
       val append = safeArgs.lift(0).getOrElse(Nil)
       lazy val (appendScala3Exclusive, appendScala3Inclusive) = append.partition { opt =>
-        scala3ExclusiveFlags.exists(opt.startsWith(_))    
+        scala3ExclusiveFlags.exists(opt.startsWith(_))
       }
       // Make sure to not modify Scala 2 project scalacOptions
       // these can compiled as transitive dependency of custom startup task
       val filteredAppend =
         if (scalaVersion.startsWith("3.")) append
         else {
-          appendScala3Exclusive.foreach{ setting =>
-            logOnce(s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope")
+          appendScala3Exclusive.foreach { setting =>
+            logOnce(
+              s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope"
+            )
           }
           append.diff(appendScala3Exclusive) ++ appendScala3Inclusive
         }
-        
+
       val remove = safeArgs.lift(1).getOrElse(Nil)
-      val filteredRemove =  
+      val filteredRemove =
         if (scalaVersion.startsWith("3.")) remove
         else remove ++ appendScala3Exclusive
 
@@ -275,9 +286,12 @@ object CommunityBuildPlugin extends AutoPlugin {
         BuiltinCommands.reapply(session, structure, state)
       }
       try reapply(globalScopes ++ projectScopes)
-      catch {case ex: Throwable =>
-        logOnce(s"Failed to reapply settings in $name: ${ex.getMessage}, retry without global scopes")
-        reapply(projectScopes)
+      catch {
+        case ex: Throwable =>
+          logOnce(
+            s"Failed to reapply settings in $name: ${ex.getMessage}, retry without global scopes"
+          )
+          reapply(projectScopes)
       }
     }
 
@@ -454,8 +468,10 @@ object CommunityBuildPlugin extends AutoPlugin {
             }
 
         if (idsWithMissingMappings.nonEmpty) {
-          val msg = s"Failed to resolve mappings for ${idsWithMissingMappings.size}:${filteredIds.size} targets: ${idsWithMissingMappings.toSeq.mkString(", ")}"
-          if(idsWithMissingMappings.size >= filteredIds.size) sys.error(msg)
+          val msg =
+            s"Failed to resolve mappings for ${idsWithMissingMappings.size}:${filteredIds.size} targets: ${idsWithMissingMappings.toSeq
+              .mkString(", ")}"
+          if (idsWithMissingMappings.size >= filteredIds.size) sys.error(msg)
           else System.err.println(msg)
         }
         mappedProjects.flatten.toSet
@@ -506,7 +522,13 @@ object CommunityBuildPlugin extends AutoPlugin {
           case _                             => Nil
         }
         println(s"Compile scalacOptions: ${scalacOptions}")
-        val compileResult = eval(Compile / compile)
+        val compileResult = eval(Compile / compile) match {
+          case EvalResult.Failure(reasons, evalTime) if reasons.exists { case ex: AssertionError =>
+                ex.getMessage.contains("overlapping patches") && scalacOptions.contains("-rewrite")
+              } =>
+            eval(Compile / compile)
+          case result => result
+        }
 
         val shouldBuildDocs = eval(Compile / doc / skip) match {
           case EvalResult.Value(skip, _) => !skip
@@ -524,9 +546,9 @@ object CommunityBuildPlugin extends AutoPlugin {
             Test / executeTests
           )
 
-        val publishResult =PublishResult(
-            evalAsDependencyOf(compileResult)(Compile / publishLocal)
-          )
+        val publishResult = PublishResult(
+          evalAsDependencyOf(compileResult)(Compile / publishLocal)
+        )
 
         ModuleBuildResults(
           artifactName = projectName,
