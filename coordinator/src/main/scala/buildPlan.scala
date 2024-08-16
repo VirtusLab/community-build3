@@ -350,6 +350,7 @@ def makeDependenciesBasedBuildPlan(
               case t @ Target.BuildAll => t.id.asMvnStr
               case t                   => stripScala3Suffix(t.id.asMvnStr)
             }
+            .sorted
             .mkString(" "),
           config = configDiscovery(project, repoUrl, revision)
         )
