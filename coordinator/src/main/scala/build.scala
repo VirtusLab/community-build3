@@ -1,4 +1,5 @@
 //> using scala "3.3"
+//> using jvm 17
 //> using dep "com.novocode:junit-interface:0.11"
 //> using dep "org.jsoup:jsoup:1.18.1"
 //> using dep "org.json4s::json4s-native:4.0.7"
