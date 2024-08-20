@@ -1,5 +1,5 @@
 
-# projects total:     593
+# projects total:     594
 # min stars count:    -1
 # max projects count: 1000
 
@@ -93,6 +93,7 @@ jobs:
         - name: "ajozwik/protoquill-generic"
         - name: "akiomik/seaw"
         - name: "akka/akka-diagnostics"
+        - name: "alejandrohdezma/alfred4s"
         - name: "alejandrohdezma/dummy"
         - name: "alejandrohdezma/sbt-mdoc-toc"
         - name: "alejandrohdezma/sbt-propagate"
@@ -330,7 +331,6 @@ jobs:
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
-        - name: "jqscala/jqscala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -357,6 +357,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jqscala/jqscala"
         - name: "julianpeeters/dc10"
         - name: "julianpeeters/dc10-cats-effect"
         - name: "julianpeeters/dc10-scala"
@@ -611,7 +612,6 @@ jobs:
         - name: "swaldman/mlog-scala"
         - name: "swaldman/texttable"
         - name: "swaldman/unify-rss"
-        - name: "swaldman/unstatic"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -638,6 +638,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/unstatic"
         - name: "swaldman/untemplate"
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
