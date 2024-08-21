@@ -79,6 +79,7 @@ jobs:
         - name: "47degrees/sbt-energymonitor"
         - name: "7mind/izumi"
         - name: "7mind/sbtgen"
+        - name: "aaronp/args4c"
         - name: "afsalthaj/constraintless"
         - name: "ahjohannessen/sec"
         - name: "ajozwik/pekko-smtp-server"
@@ -326,7 +327,6 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
-        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -343,8 +343,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          container-registry-username: ${{github.actor}}
-          container-registry-token: ${{secrets.GHCR_TOKEN}}
+          container-registry-username: ${{ github.actor }}
+          container-registry-token: ${{ secrets.GHCR_TOKEN }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -353,6 +353,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "flyway/flyway-play"
@@ -607,7 +608,6 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -624,8 +624,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          container-registry-username: ${{github.actor}}
-          container-registry-token: ${{secrets.GHCR_TOKEN}}
+          container-registry-username: ${{ github.actor }}
+          container-registry-token: ${{ secrets.GHCR_TOKEN }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -634,6 +634,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "mimoguz/layeredfonticon"
@@ -791,7 +792,6 @@ jobs:
         - name: "sake92/sharaf"
         - name: "sake92/squery"
         - name: "sake92/tupson"
-        - name: "samueleresca/pekko-quartz-scheduler"
         - name: "sangria-graphql/macro-visit"
         - name: "sangria-graphql/sangria"
         - name: "sangria-graphql/sangria-circe"
@@ -905,8 +905,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          container-registry-username: ${{github.actor}}
-          container-registry-token: ${{secrets.GHCR_TOKEN}}
+          container-registry-username: ${{ github.actor }}
+          container-registry-token: ${{ secrets.GHCR_TOKEN }}
   stage-3:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -1166,5 +1166,5 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          container-registry-username: ${{github.actor}}
-          container-registry-token: ${{secrets.GHCR_TOKEN}}
+          container-registry-username: ${{ github.actor }}
+          container-registry-token: ${{ secrets.GHCR_TOKEN }}
