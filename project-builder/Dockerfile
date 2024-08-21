@@ -1,5 +1,6 @@
 ARG BASE_IMAGE
 FROM $BASE_IMAGE
+LABEL org.opencontainers.image.source="https://github.com/VirtusLab/community-build3"
 RUN apt install -y jq
 ENV PATH="/root/.local/share/coursier/bin:${PATH}"
 RUN curl -fLo coursier https://github.com/coursier/launchers/raw/master/coursier && \

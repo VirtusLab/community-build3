@@ -1,4 +1,5 @@
 FROM gradle:jdk11-hotspot
+LABEL org.opencontainers.image.source="https://github.com/VirtusLab/community-build3"
 WORKDIR /mvn-repo
 COPY . /mvn-repo
 EXPOSE 8080
