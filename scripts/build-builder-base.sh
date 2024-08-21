@@ -44,7 +44,7 @@ docker build \
   --build-arg JDK_VERSION=${jdkDistro} \
   -t "$imageName:$TAG_NAME" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
-  --cache-from "$imageName:$(buildTag "$PREV_CB_VERSION" $JDK_VERSION)" \
+  --cache-from "$imageName:$(buildTag "$VERSION" $JDK_VERSION)" \
   --cache-from "$imageName:$(buildTag latest $JDK_VERSION)" \
   --cache-from "$imageName:$(buildTag v0.3.13 $JDK_VERSION)" \
   $scriptDir/../builder-base

@@ -18,5 +18,9 @@ imageName=virtuslab/scala-community-build-project-builder
 
 docker build \
   --build-arg BASE_IMAGE="virtuslab/scala-community-build-builder-base:$TAG_NAME" \
+  --cache-from "$imageName:$CACHE_FROM_TAG" \
+  --cache-from "$imageName:$(buildTag "$VERSION" $JDK_VERSION)" \
+  --cache-from "$imageName:$(buildTag latest $JDK_VERSION)" \
+  --cache-from "$imageName:$(buildTag v0.3.13 $JDK_VERSION)" \
   -t "$imageName:$TAG_NAME" \
   $scriptDir/../project-builder
