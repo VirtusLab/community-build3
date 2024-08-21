@@ -484,6 +484,8 @@ def createGithubActionJob(
     |        required: true
     |      OPENCB_ELASTIC_PSWD:
     |        required: true
+    |      GHCR_TOKEN:
+    |        required: true
     |
     |jobs:
     |  $setupId:
@@ -542,8 +544,8 @@ def createGithubActionJob(
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
           println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")
           println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
-          println("    dockerhub-username: $${{ github.actor }}")
-          println("    dockerhub-token: $${{ secrets.GITHUB_TOKEN }}")
+          println("    container-registry-username: $${{ github.actor }}")
+          println("    container-registry-token: $${{ secrets.GHCR_TOKEN }}")
         }
       }
     }
