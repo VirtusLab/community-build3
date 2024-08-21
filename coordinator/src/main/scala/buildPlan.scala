@@ -548,8 +548,8 @@ def createGithubActionJob(
           println(s"    maven-repo-url: $${{ $setupOutputs.maven-repo-url }}")
           println("    elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}")
           println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
-          println("    dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}")
-          println("    dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}")
+          println("    dockerhub-username: $${{ github.actor }}")
+          println("    dockerhub-token: $${{ secrets.GITHUB_TOKEN }}")
         }
       }
     }

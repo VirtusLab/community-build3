@@ -113,12 +113,12 @@ runs:
       run: |
         echo "${{ inputs.github-key }}" > ${{ github.workspace }}/github_key
 
-    # - name: Login to Container Registry
-    #   uses: docker/login-action@v3
-    #   with:
-    #     registry: ghcr.io
-    #     username: ${{ inputs.dockerhub-username }}
-    #     password: ${{ inputs.dockerhub-token }}
+    - name: Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ inputs.dockerhub-username }}
+        password: ${{ inputs.dockerhub-token }}
 
     - name: Build project
       uses: addnab/docker-run-action@v3
