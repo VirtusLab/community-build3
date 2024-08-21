@@ -9,13 +9,6 @@ inputs:
   repository-branch:
     description: "GitHub repository branch for compiler to build"
     required: true
-  # Infrastracture secrets
-  dockerhub-username:
-    description: "Docker Hub username"
-    required: true
-  dockerhub-token:
-    description: "Docker Hub password"
-    required: true
 outputs:
   scala-version:
     description: "Effective Scala version, input value of scala-version if using published version or version of builded compiler"
@@ -78,17 +71,11 @@ runs:
         echo "Can skip compiler build: ${isPublished}"
         echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ inputs.dockerhub-username }}
-        password: ${{ inputs.dockerhub-token }}
-
     - name: Build compiler
       uses: addnab/docker-run-action@v3
       if: steps.check-published.outputs.is-compiler-published == 'false'
       with:
-        image: "virtuslab/scala-community-build-compiler-builder:v0.3.15"
+        image: "virtuslab/scala-community-build-compiler-builder:latest"
         options: -v ${{ github.workspace }}/compiler:/compiler/
         run: |
           Version="${{ steps.calc-version.outputs.effective-scala-version }}"

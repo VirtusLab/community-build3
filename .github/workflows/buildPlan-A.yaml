@@ -43,10 +43,6 @@ on:
         required: true
       OPENCB_ELASTIC_PSWD:
         required: true
-      DOCKERHUB_USERNAME:
-        required: true
-      DOCKERHUB_TOKEN:
-        required: true
 
 jobs:
   setup-build:
@@ -65,8 +61,6 @@ jobs:
           scala-version: ${{ inputs.published-scala-version }}
           repository-url: ${{ inputs.repository-url }}
           repository-branch: ${{ inputs.repository-branch }}
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   stage-0:
     runs-on: ubuntu-22.04
