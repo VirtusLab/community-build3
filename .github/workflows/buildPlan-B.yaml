@@ -1,5 +1,5 @@
 
-# projects total:     594
+# projects total:     593
 # min stars count:    -1
 # max projects count: 1000
 
@@ -49,6 +49,7 @@ on:
         required: true
       GITHUB_TOKEN:
         required: true
+
 jobs:
   setup-build:
     runs-on: ubuntu-22.04
@@ -78,7 +79,6 @@ jobs:
       matrix:
         include:
         - name: "2m/yabai-scala"
-        - name: "aaronp/args4c"
         - name: "aaronp/code-template"
         - name: "aaronp/eie"
         - name: "aaronp/franz"
@@ -332,6 +332,7 @@ jobs:
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
+        - name: "jqscala/jqscala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -348,8 +349,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          dockerhub-username: ${{github.actor}}
-          dockerhub-token: ${{secrets.GITHUB_TOKEN}}
+          dockerhub-username: $${{ github.actor }}
+          dockerhub-token: $${{ secrets.GITHUB_TOKEN }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -358,7 +359,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "jqscala/jqscala"
         - name: "julianpeeters/dc10"
         - name: "julianpeeters/dc10-cats-effect"
         - name: "julianpeeters/dc10-scala"
@@ -613,6 +613,7 @@ jobs:
         - name: "swaldman/mlog-scala"
         - name: "swaldman/texttable"
         - name: "swaldman/unify-rss"
+        - name: "swaldman/unstatic"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -629,8 +630,8 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          dockerhub-username: ${{github.actor}}
-          dockerhub-token: ${{secrets.GITHUB_TOKEN}}
+          dockerhub-username: $${{ github.actor }}
+          dockerhub-token: $${{ secrets.GITHUB_TOKEN }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -639,7 +640,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "swaldman/unstatic"
         - name: "swaldman/untemplate"
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
@@ -739,5 +739,5 @@ jobs:
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          dockerhub-username: ${{github.actor}}
-          dockerhub-token: ${{secrets.GITHUB_TOKEN}}
+          dockerhub-username: $${{ github.actor }}
+          dockerhub-token: $${{ secrets.GITHUB_TOKEN }}
