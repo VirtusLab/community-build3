@@ -488,8 +488,6 @@ def createGithubActionJob(
     |        required: true
     |      DOCKERHUB_TOKEN:
     |        required: true
-    |      GITHUB_TOKEN:
-    |        required: true
     |
     |jobs:
     |  $setupId:
