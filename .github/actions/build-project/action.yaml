@@ -116,18 +116,14 @@ runs:
       run: |
         echo "${{ inputs.github-key }}" > ${{ github.workspace }}/github_key
 
-    - name: Login to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ inputs.container-registry }}
-        username: ${{ inputs.container-registry-username }}
-        password: ${{ inputs.container-registry-token }}
-
     - name: Build project
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
-        image: "${{ inputs.container-registry }}/virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
+        registry: ${{ inputs.container-registry }}
+        username: ${{ inputs.container-registry-username }}
+        password: ${{ inputs.container-registry-token }}
+        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
         options: -v ${{ github.workspace }}:/opencb/ -v ${{ github.workspace }}/github_key:/root/.ssh/github_key:ro
         run: |
           # Setup ssh required for downloading submodules
@@ -216,7 +212,10 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
-        image: "${{ inputs.container-registry }}/virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
+        registry: ${{ inputs.container-registry }}
+        username: ${{ inputs.container-registry-username }}
+        password: ${{ inputs.container-registry-token }}
+        image: "virtuslab/scala-community-build-project-builder:jdk17-latest"
         options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
