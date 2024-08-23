@@ -13,13 +13,13 @@ targets="$5"            # e.g. com.example%greeter
 mvnRepoUrl="$6"         # e.g. https://mvn-repo/maven2/2021-05-23_1
 projectConfig="$7"
 _extraScalacOptions="${8}" # e.g '' or "-Wunused:all -Ylightweight-lazy-vals"
-_disabledScalacOption="${9}"
+_disabledScalacOptions="${9}"
 extraLibraryDeps="${10}" # format org:artifact:version, eg. org.scala-lang:scala2-library-tasty_3:3.4.0-RC1
 
 # Mutable 
 scalaVersion=$_scalaVersion
 extraScalacOptions=$_extraScalacOptions
-disabledScalacOption=$_disabledScalacOption
+disabledScalacOptions=$_disabledScalacOptions
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
@@ -99,14 +99,15 @@ function setupScalacOptions(){
   commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
 
   extraScalacOptions="$_extraScalacOptions,$commonAppendScalacOptions"
+  disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
   if [[ $isMigrating == true ]]; then
     extraScalacOptions="-rewrite,$extraScalacOptions"
+    disabledScalacOptions="-indent,-no-indent,-new-syntax,$disabledScalacOptions"
   fi
 
-  disabledScalacOption="$_disabledScalacOption,$commonRemoveScalacOptions"; 
   echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
   echo "Append: $extraScalacOptions"
-  echo "Remove: $disabledScalacOption"
+  echo "Remove: $disabledScalacOptions"
 }
 
 ## Git utils
@@ -115,7 +116,7 @@ function createBuildPatch() {
   (cd repo && git diff > $BuildPatchFile) 
 }
 function revertBuildPatch() {
-  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1) 
+  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject || true) 
 }
 function commmitMigrationRewrite() {
   if [[ -z "$(cd repo && git status --untracked-files=no --porcelain)" ]]; then
@@ -146,7 +147,7 @@ function buildForScalaVersion(){
     echo "mill" > $buildToolFile
     $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
     createBuildPatch
-    $scriptDir/mill/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption"
+    $scriptDir/mill/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
     revertBuildPatch
   ## Sbt
   elif [ -f "repo/build.sbt" ]; then
@@ -154,7 +155,7 @@ function buildForScalaVersion(){
     echo "sbt" > $buildToolFile
     $scriptDir/sbt/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
     createBuildPatch
-    $scriptDir/sbt/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOption" "$extraLibraryDeps"
+    $scriptDir/sbt/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
     revertBuildPatch
   ## Scala-cli
   else
