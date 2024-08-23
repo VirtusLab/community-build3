@@ -151,6 +151,13 @@ case class Ctx(
 
 class MillTaskEvaluator()(implicit ctx: Ctx) extends TaskEvaluator[NamedTask] {
   import TaskEvaluator._
+  def mayRetry[T](task: NamedTask[T])(evaluate: NamedTask[T] => EvalResult[T]): EvalResult[T] = evaluate(task) match {
+      case EvalResult.Failure(reasons, _) if reasons.exists {
+          case ex: AssertionError => ex.getMessage.contains("overlapping patches")
+          case _ => false
+        } =>  evaluate(task)
+      case result => result
+    }
   def eval[T](task: NamedTask[T]): EvalResult[T] = {
     val evalStart = System.currentTimeMillis()
     val result = tryEval(task)
@@ -252,11 +259,15 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     def test[T](selector: TestModule => NamedTask[T]): Option[NamedTask[T]] =
       testModule.map(selector)
 
-    val compileResult = eval(module.compile)
-    val docResult = evalAsDependencyOf(compileResult)(module.docJar)
+    val compileResult = mayRetry(module.compile)(eval)
+    val docResult = mayRetry(module.docJar){
+      evalAsDependencyOf(compileResult)
+    }
     val testsCompileResult =
       test(_.compile).fold[EvalResult[CompilationResult]](EvalResult.skipped) {
-        evalWhen(testingMode != TestingMode.Disabled, compileResult)(_)
+        mayRetry(_){
+          evalWhen(testingMode != TestingMode.Disabled, compileResult)
+        }
       }
     val testsExecuteResults =
       test(_.test()).fold[EvalResult[Seq[TestResult]]](EvalResult.skipped) {

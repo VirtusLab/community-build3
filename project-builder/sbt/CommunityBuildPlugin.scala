@@ -522,26 +522,26 @@ object CommunityBuildPlugin extends AutoPlugin {
           case _                             => Nil
         }
         println(s"Compile scalacOptions: ${scalacOptions}")
-        val compileResult = eval(Compile / compile) match {
+        def mayRetry[T](task: TaskKey[T])(evaluate: TaskKey[T] => EvalResult[T]): EvalResult[T] =  evaluate(task) match {
           case EvalResult.Failure(reasons, _) if reasons.exists {
-                case ex: AssertionError =>
-                  ex.getMessage.contains("overlapping patches") &&
-                  scalacOptions.contains("-rewrite")
-                case _ => false
-              } =>
-            eval(Compile / compile)
+              case ex: AssertionError =>  ex.getMessage.contains("overlapping patches")
+              case _ => false
+            } =>  evaluate(task)
           case result => result
         }
+        val compileResult = mayRetry(Compile / compile)(eval)
 
         val shouldBuildDocs = eval(Compile / doc / skip) match {
           case EvalResult.Value(skip, _) => !skip
           case _                         => false
         }
-        val docsResult = evalWhen(shouldBuildDocs, compileResult)(Compile / doc)
+        val docsResult = mayRetry(Compile / doc){
+          evalWhen(shouldBuildDocs, compileResult)
+        } 
 
-        val testsCompileResult = evalWhen(testingMode != TestingMode.Disabled, compileResult)(
-          Test / compile
-        )
+        val testsCompileResult = mayRetry(Test / compile){
+          evalWhen(testingMode != TestingMode.Disabled, compileResult)
+        }
         // Introduced to fix publishing artifact locally in scala-debug-adapter
         lazy val testOptionsResult = eval(Test / testOptions)
         val testsExecuteResult =
