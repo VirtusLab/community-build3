@@ -1,5 +1,5 @@
 
-# projects total:     593
+# projects total:     596
 # min stars count:    -1
 # max projects count: 1000
 
@@ -73,6 +73,7 @@ jobs:
       matrix:
         include:
         - name: "2m/yabai-scala"
+        - name: "aaronp/args4c"
         - name: "aaronp/code-template"
         - name: "aaronp/eie"
         - name: "aaronp/franz"
@@ -309,6 +310,7 @@ jobs:
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
+        - name: "jchapuis/leases4s"
         - name: "jd557/rokrok"
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
@@ -325,8 +327,6 @@ jobs:
         - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
-        - name: "jqscala/jq-fs2"
-        - name: "jqscala/jqscala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -353,6 +353,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jqscala/jq-fs2"
+        - name: "jqscala/jqscala"
         - name: "julianpeeters/dc10"
         - name: "julianpeeters/dc10-cats-effect"
         - name: "julianpeeters/dc10-scala"
@@ -407,6 +409,7 @@ jobs:
         - name: "lhns/nifi-scala"
         - name: "lhns/remote-io"
         - name: "lhns/scala-commandline"
+        - name: "lhns/scala-common"
         - name: "lhns/scala-edifact"
         - name: "lhns/scala-trustmanager-utils"
         - name: "liewhite/common"
@@ -605,9 +608,6 @@ jobs:
         - name: "swaldman/mailutil"
         - name: "swaldman/mchange-sysadmin-scala"
         - name: "swaldman/mlog-scala"
-        - name: "swaldman/texttable"
-        - name: "swaldman/unify-rss"
-        - name: "swaldman/unstatic"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -634,6 +634,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/texttable"
+        - name: "swaldman/unify-rss"
+        - name: "swaldman/unstatic"
         - name: "swaldman/untemplate"
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"

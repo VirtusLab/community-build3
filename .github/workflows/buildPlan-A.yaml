@@ -79,7 +79,6 @@ jobs:
         - name: "47degrees/sbt-energymonitor"
         - name: "7mind/izumi"
         - name: "7mind/sbtgen"
-        - name: "aaronp/args4c"
         - name: "afsalthaj/constraintless"
         - name: "ahjohannessen/sec"
         - name: "ajozwik/pekko-smtp-server"
@@ -327,6 +326,7 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
+        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -353,7 +353,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "flyway/flyway-play"
@@ -608,6 +607,7 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -634,7 +634,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "mimoguz/layeredfonticon"
@@ -667,6 +666,7 @@ jobs:
         - name: "nebula-contrib/testcontainers-nebula"
         - name: "nebula-contrib/zio-nebula"
         - name: "neotypes/neotypes"
+        - name: "newrelic/newrelic-java-agent"
         - name: "noelwelsh/mads"
         - name: "nomadblacky/scalatest-otel-reporter"
         - name: "norbert-radyk/spoiwo"
