@@ -244,7 +244,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set `fundamentals-bio`/Test/unmanagedSources/excludeFilter ~= { _ || \"SyntaxTest.scala\" }"
         ],
         "options":[
           "-Dizumi.distage.plancheck.only-warn=true"
@@ -257,13 +257,38 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
           "path":"project/Deps.sc",
           "pattern":"val scala300 = ScalaVersion\\((.*)\\)",
           "replaceWith":"val scala300 = ScalaVersion(\"<SCALA_VERSION>\")"
+        },
+        {
+          "path":"distage/distage-core/src/test/scala/izumi/distage/impl/FunctoidTest.scala",
+          "pattern":"assertCompiles(\"Functoid.apply(defimplicitfn _)\")",
+          "replaceWith":"assertCompiles(\"Functoid.apply(defimplicitfn)\")"
+        },
+        {
+          "path":"distage/distage-core/src/test/scala/izumi/distage/impl/FunctoidTest.scala",
+          "pattern":"assertCompiles(\"Functoid.apply(defconfannfn _)\")",
+          "replaceWith":"assertCompiles(\"Functoid.apply(defconfannfn)\")"
+        },
+        {
+          "path":"distage/distage-core/src/test/scala/izumi/distage/impl/FunctoidTest.scala",
+          "pattern":"assertCompiles(\"Functoid.apply(defconfannfn2 _)\")",
+          "replaceWith":"assertCompiles(\"Functoid.apply(defconfannfn2)\")"
+        },
+        {
+          "path":"distage/distage-testkit-scalatest/src/main/scala-3/izumi/distage/testkit/scalatest/SpecWiring.scala",
+          "pattern":"Spec1[F]()(app.tagK, defaultModule)",
+          "replaceWith":"Spec1[F](using app.tagK, defaultModule)"
+        },
+        {
+          "path":"distage/distage-testkit-scalatest/src/test/scala/izumi/distage/testkit/distagesuite/integration/IntegrationTest1Test.scala",
+          "pattern":"Spec1[F0]()(f0Tag, implicitly)",
+          "replaceWith":"Spec1[F0](using f0Tag, implicitly)"
         }
       ]
     }
@@ -1623,7 +1648,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -2324,9 +2349,19 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"http-core/src/main/scala/org/apache/pekko/http/impl/engine/ws/WebSocket.scala",
+          "pattern":"case b: BypassEvent with MessagePart",
+          "replaceWith":"case b: (BypassEvent & MessagePart)"
+        },
+        {
+          "path":"http-core/src/main/scala/org/apache/pekko/http/scaladsl/model/HttpMessage.scala",
+          "pattern":"headers[T](ClassTag[T](headerClass)).asJava",
+          "replaceWith":"headers[T](using ClassTag[T](headerClass)).asJava"
+        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3Version = \"3.3.3\"",
@@ -2572,7 +2607,41 @@
     "repoUrl":"https://github.com/appliedtopology/tda4j.git",
     "revision":"v0.1.0-alpha",
     "version":"0.1.0-alpha",
-    "targets":"org.appliedtopology%tda4j"
+    "targets":"org.appliedtopology%tda4j",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "sourceVersion":"3.4",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "arainko/ducktape":{
     "project":"arainko/ducktape",
@@ -2648,7 +2717,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -2947,7 +3016,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -3973,7 +4042,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -4166,7 +4235,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -5399,7 +5468,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -5439,7 +5508,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -5731,8 +5800,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -6779,7 +6849,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -7243,7 +7313,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -7371,7 +7441,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -8573,7 +8643,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -10563,7 +10633,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -10767,7 +10837,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -12086,7 +12156,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -12126,7 +12196,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -12472,6 +12542,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -13042,7 +13113,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -13131,10 +13202,14 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"project/Versioning.scala",
+          "pattern":"val rawVersion = lastVersion(module, crossVersion, scalaBinaryVersion, scalaFullVersion)",
+          "replaceWith":"val rawVersion = lastVersion(module, crossVersion, scalaBinaryVersion, scalaFullVersion).stripSuffix(\"+n\")"
+        }
       ]
     }
   },
@@ -13341,8 +13416,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -14135,7 +14211,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -14393,8 +14469,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -14601,7 +14678,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -14691,8 +14768,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -14732,7 +14810,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -15506,6 +15584,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -15767,10 +15846,14 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"mtg/src/main/scala/com/github/gchudnov/mtg/Domain.scala",
+          "pattern":"Ordering[T]()(",
+          "replaceWith":"Ordering[T](using "
+        }
       ]
     }
   },
@@ -15891,7 +15974,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -19114,6 +19197,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -19155,7 +19239,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -19777,9 +19861,24 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"laws/src/main/scala/org/http4s/laws/discipline/EntityCodecTests.scala",
+          "pattern":"laws.entityCodecRoundTrip _",
+          "replaceWith":"laws.entityCodecRoundTrip"
+        },
+        {
+          "path":"laws/src/main/scala/org/http4s/laws/discipline/EntityEncoderTests.scala",
+          "pattern":"laws.accurateContentLengthIfDefined _",
+          "replaceWith":"laws.accurateContentLengthIfDefined"
+        },
+        {
+          "path":"tests/shared/src/test/scala/org/http4s/QueryParamCodecLaws.scala",
+          "pattern":".decode _",
+          "replaceWith":".decode"
+        },
         {
           "path":"project/Http4sPlugin.scala",
           "pattern":"val scala_3 = \"3.3.3\"",
@@ -21404,7 +21503,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -21495,7 +21594,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -21758,6 +21857,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -24697,7 +24797,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -25515,6 +25615,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -26378,8 +26479,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -29701,7 +29803,40 @@
     "repoUrl":"https://github.com/m2-oss/calypso.git",
     "revision":"v0.6.0",
     "version":"0.6.0",
-    "targets":"ru.m2%calypso-core ru.m2%calypso-refined ru.m2%calypso-scalapb ru.m2%calypso-testing"
+    "targets":"ru.m2%calypso-core ru.m2%calypso-refined ru.m2%calypso-scalapb ru.m2%calypso-testing",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "makiftutuncu/as":{
     "project":"makiftutuncu/as",
@@ -30081,7 +30216,40 @@
     "repoUrl":"https://github.com/martinhh/scalacheck-derived.git",
     "revision":"main",
     "version":"0.5.0",
-    "targets":"io.github.martinhh%scalacheck-derived"
+    "targets":"io.github.martinhh%scalacheck-derived",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "massimosiani/monix-newtypes-cats":{
     "project":"massimosiani/monix-newtypes-cats",
@@ -30921,7 +31089,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -31555,6 +31723,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
         
       ],
@@ -32079,7 +32248,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -32294,9 +32463,19 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"interop/pekko/src/test/scala/CountdownSpec.scala",
+          "pattern":"new Countdown[Future]()(",
+          "replaceWith":"new Countdown[Future](using "
+        },
+        {
+          "path":"interop/akka/src/test/scala/CountdownSpec.scala",
+          "pattern":"new Countdown[Future]()(",
+          "replaceWith":"new Countdown[Future](using "
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3Version    = \"3.3.1\"",
@@ -32337,8 +32516,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -33389,7 +33569,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -33617,7 +33797,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -34973,7 +35153,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -35060,10 +35240,24 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"saddle-core/src/main/scala/org/saddle/index/IndexIntRange.scala",
+          "pattern":".contains _)",
+          "replaceWith":".contains)"
+        },
+        {
+          "path":"saddle-core/src/main/scala/org/saddle/scalar/ScalarTag.scala",
+          "pattern":"new ScalarTagProduct[T]()(ev)",
+          "replaceWith":"new ScalarTagProduct[T](using ev)"
+        },
+        {
+          "path":"saddle-core/src/main/scala/org/saddle/scalar/ScalarTagBase.scala",
+          "pattern":"new LocatorAllAny[T]()(this)",
+          "replaceWith":"new LocatorAllAny[T](using this)"
+        }
       ]
     }
   },
@@ -36161,9 +36355,14 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"web/play-openid/src/main/scala/play/api/libs/openid/OpenIdClient.scala",
+          "pattern":"findUriWithType(response.xml) _",
+          "replaceWith":"findUriWithType(response.xml)"
+        },
         {
           "path":"project/Versions.scala",
           "pattern":"val scala3   = \"3.3.3\"",
@@ -39334,7 +39533,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -39782,7 +39981,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -40968,7 +41167,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -41266,10 +41465,14 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"modules/tests/src/main/scala/ch/epfl/scala/debugadapter/testfmk/DebugStepAssert.scala",
+          "pattern":"val assertion = if (ignore) assertIgnore(result.toString) _ else assertSuccess(result)(_)",
+          "replaceWith":"val assertion = if (ignore) assertIgnore(result.toString) else assertSuccess(result)"
+        }
       ]
     }
   },
@@ -41739,7 +41942,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -41778,8 +41981,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -41831,7 +42035,40 @@
     "repoUrl":"https://github.com/scalapb-json/scalapb-circe.git",
     "revision":"v0.16.0",
     "version":"0.16.0",
-    "targets":"io.github.scalapb-json%scalapb-circe io.github.scalapb-json%scalapb-circe-macros"
+    "targets":"io.github.scalapb-json%scalapb-circe io.github.scalapb-json%scalapb-circe-macros",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "scalapb-json/scalapb-json-common":{
     "project":"scalapb-json/scalapb-json-common",
@@ -41882,7 +42119,40 @@
     "repoUrl":"https://github.com/scalapb-json/scalapb-playjson.git",
     "revision":"v0.18.0",
     "version":"0.18.0",
-    "targets":"io.github.scalapb-json%scalapb-playjson io.github.scalapb-json%scalapb-playjson-macros"
+    "targets":"io.github.scalapb-json%scalapb-playjson io.github.scalapb-json%scalapb-playjson-macros",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "scalapb/common-protos":{
     "project":"scalapb/common-protos",
@@ -42098,7 +42368,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -42225,6 +42495,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -42358,7 +42629,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -42404,6 +42675,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -42764,7 +43036,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -44712,7 +44984,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -45143,6 +45415,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.5-migration",
       "migrationVersions":[
         
       ],
@@ -45883,7 +46156,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -46218,7 +46491,40 @@
     "repoUrl":"https://github.com/swaldman/failable.git",
     "revision":"v0.0.6",
     "version":"0.0.6",
-    "targets":"com.mchange%failable com.mchange%failable-logging"
+    "targets":"com.mchange%failable com.mchange%failable-logging",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "swaldman/feedletter":{
     "project":"swaldman/feedletter",
@@ -46651,8 +46957,9 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -48856,7 +49163,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -49574,6 +49881,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -50455,7 +50763,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -50916,7 +51224,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -50960,7 +51268,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -51420,7 +51728,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -51680,9 +51988,29 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"core/shared/src/main/scala/laika/ast/Cursor.scala",
+          "pattern":" RewritableContainer with Block ",
+          "replaceWith":" (RewritableContainer & Block) "
+        },
+        {
+          "path":"core/shared/src/main/scala/laika/internal/rewrite/TemplateFormatter.scala",
+          "pattern":" SpanContainer with Block ",
+          "replaceWith":" (SpanContainer & Block) "
+        },
+        {
+          "path":"core/shared/src/main/scala/laika/internal/rewrite/TemplateFormatter.scala",
+          "pattern":" SpanContainer with Span ",
+          "replaceWith":" (SpanContainer & Span) "
+        },
+        {
+          "path":"core/shared/src/test/scala/laika/internal/rst/std/StandardBlockDirectivesSpec.scala",
+          "pattern":" Hidden with Block ",
+          "replaceWith":" (Hidden & Block) "
+        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3    = \"3.3.3\"",
@@ -51764,7 +52092,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -51980,7 +52308,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -52064,7 +52392,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -52533,9 +52861,19 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"core/src/main/scala/spire/optional/vectorOrder.scala",
+          "pattern":"new ArrayVectorEq[A]()(ev",
+          "replaceWith":"new ArrayVectorEq[A](using ev"
+        },
+        {
+          "path":"core/src/main/scala/spire/optional/vectorOrder.scala",
+          "pattern":"new ArrayVectorOrder[A]()(ev",
+          "replaceWith":"new ArrayVectorOrder[A](using ev"
+        },
         {
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.1.2\"",
@@ -53399,7 +53737,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -53739,7 +54077,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -54150,7 +54488,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -54398,7 +54736,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -54490,7 +54828,41 @@
     "repoUrl":"https://github.com/xuwei-k/nobox.git",
     "revision":"v0.4.0",
     "version":"0.4.0",
-    "targets":"com.github.xuwei-k%nobox"
+    "targets":"com.github.xuwei-k%nobox",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "sourceVersion":"3.5-migration",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "xuwei-k/optparse-applicative":{
     "project":"xuwei-k/optparse-applicative",
@@ -55052,7 +55424,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -55543,7 +55915,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -55583,9 +55955,59 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"core/shared/src/main/scala/zio/ZIO.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"core/shared/src/main/scala/zio/ZIO.scala",
+          "pattern":"[R1 <: R with M]",
+          "replaceWith":"[R1 <: (R & M)]"
+        },
+        {
+          "path":"core/shared/src/main/scala/zio/ZIO.scala",
+          "pattern":"R1 <: R with Map[Key, Service]",
+          "replaceWith":"R1 <: (R & Map[Key, Service])"
+        },
+        {
+          "path":"streams/shared/src/main/scala/zio/stream/ZChannel.scala",
+          "pattern":"Env0 with Env1 <:< Env",
+          "replaceWith":"(Env0 & Env1) <:< Env"
+        },
+        {
+          "path":"streams/shared/src/main/scala/zio/stream/ZStream.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"managed/shared/src/main/scala/zio/managed/ZManaged.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"streams/shared/src/main/scala/zio/stream/ZSink.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"test/shared/src/main/scala/zio/test/Spec.scala",
+          "pattern":"TestEnvironment with R1 <:< R",
+          "replaceWith":"(TestEnvironment & R1) <:< R"
+        },
+        {
+          "path":"test/shared/src/main/scala/zio/test/Spec.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"test-sbt/jvm/src/test/scala/zio/test/sbt/TestingSupport.scala",
+          "pattern":") _\n",
+          "replaceWith":")\n"
+        },
         {
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = \"3.3.3\"",
@@ -56033,7 +56455,8 @@
     "config":{
       "projects":{
         "exclude":[
-          
+          "dev.zio%zio-http-testkit-shaded",
+          "dev.zio%zio-http-shaded"
         ],
         "overrides":{
           
@@ -56057,9 +56480,54 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"zio-http/shared/src/main/scala/zio/http/endpoint/openapi/OpenAPIGen.scala",
+          "pattern":"contentAsJsonSchema(codec, referenceType = referenceType) _",
+          "replaceWith":"contentAsJsonSchema(codec, referenceType = referenceType)"
+        },
+        {
+          "path":"zio-http/shared/src/main/scala/zio/http/endpoint/openapi/OpenAPIGen.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"zio-http/shared/src/main/scala/zio/http/WebSocketApp.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"zio-http/shared/src/main/scala-3/zio/http/HandlerVersionSpecific.scala",
+          "pattern":"Env0 with Ctx <:< Env",
+          "replaceWith":"(Env0 & Ctx) <:< Env"
+        },
+        {
+          "path":"zio-http/shared/src/main/scala-3/zio/http/RoutesCompanionVersionSpecific.scala",
+          "pattern":"Env0 with Ctx <:< Env",
+          "replaceWith":"(Env0 & Ctx) <:< Env"
+        },
+        {
+          "path":"zio-http/shared/src/main/scala/zio/http/Handler.scala",
+          "pattern":"R0 with R1 <:< R",
+          "replaceWith":"(R0 & R1) <:< R"
+        },
+        {
+          "path":"zio-http/jvm/src/test/scala/zio/http/endpoint/NotFoundSpec.scala",
+          "pattern":") _\n",
+          "replaceWith":")\n"
+        },
+        {
+          "path":"zio-http/jvm/src/test/scala/zio/http/endpoint/QueryParameterSpec.scala",
+          "pattern":") _\n",
+          "replaceWith":")\n"
+        },
+        {
+          "path":"zio-http/jvm/src/test/scala/zio/http/endpoint/RequestSpec.scala",
+          "pattern":") _\n",
+          "replaceWith":")\n"
+        },
         {
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3           = \"3.3.3\"",
@@ -56101,7 +56569,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -56619,9 +57087,14 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"core/shared/src/main/scala/zio/prelude/Equal.scala",
+          "pattern":"implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash {\n      // use an indirect instance, so that calling ThrowableHash infinitely doesn't cause stack overflow\n      new Hash[Throwable] {\n        def hash(a: Throwable): Int                                   = ThrowableHash.hash(a)\n        protected def checkEqual(l: Throwable, r: Throwable): Boolean = ThrowableHash.equal(l, r)\n      }\n    }",
+          "replaceWith":"implicit val hashOT: Hash[Option[Throwable]] = Hash.OptionHash(using {\n      // use an indirect instance, so that calling ThrowableHash infinitely doesn't cause stack overflow\n      new Hash[Throwable] {\n        def hash(a: Throwable): Int                                   = ThrowableHash.hash(a)\n        protected def checkEqual(l: Throwable, r: Throwable): Boolean = ThrowableHash.equal(l, r)\n      }\n    })"
+        },
         {
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = \"3.3.3\"",
