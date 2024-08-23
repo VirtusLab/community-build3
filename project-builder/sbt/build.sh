@@ -16,6 +16,8 @@ extraScalacOptions="$6"
 disabledScalacOption="$7"
 extraLibraryDeps="$8"
 
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
 fi
@@ -84,6 +86,13 @@ function checkLogsForRetry() {
     elif grep -q 'Module mapping missing:' "$logFile" && grep -q -e 'moduleIds: .*_2\.1[1-3]' "$logFile"; then
       # Incorrect mappings using Scala 2.13
       forceScalaVersion=true
+      shouldRetry=true
+    elif grep -q -E "Your tlBaseVersion (.*) is behind the latest tag (.*)" "$logFile"; then
+      # TypelevelVersioningPlugin workaround, might get broken after migration (commiting changes)
+      newTag=$(grep 'Your tlBaseVersion [0-9]\+\.[0-9]\+ is behind the latest tag' "$logFile" | sed -E 's/.*latest tag ([0-9]+\.[0-9]+).*/\1/' | head -n 1 )
+      for path in $(grep -R . -e 'tlBaseVersion := ' | awk 'BEGIN { FS = "[ :]+" } { print $1 }'); do
+        scala-cli run $scriptDir/../shared/searchAndReplace.scala -- "${path}" 'tlBaseVersion := [^,\n]+' "tlBaseVersion := \"$newTag\""
+      done
       shouldRetry=true
     fi
   fi
