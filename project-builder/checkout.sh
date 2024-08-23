@@ -14,7 +14,7 @@ echo '##################################'
 echo Clonning $repo into $repoDir using revision $rev
 echo '##################################'
 
-rm -rf "$repoDir"
+rm -rf "$repoDir" || (sleep 1 && rm -rf "$repoDir") || true
 branch=""
 if [ -n "$rev" ]; then
   branch="-b $rev"
