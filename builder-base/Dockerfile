@@ -11,7 +11,7 @@ ENV SDKMAN_DIR=/root/.sdkman
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y software-properties-common && \
     apt-get install -y curl ca-certificates zip unzip openssl findutils bash git ssh htop nano vim-tiny zile && \
-    (curl -fsSL https://deb.nodesource.com/setup_18.x | bash -) && apt-get install -y nodejs && \
+    (curl -fsSL https://deb.nodesource.com/setup_21.x | bash -) && apt-get install -y nodejs && \
     curl -s "https://get.sdkman.io" | bash && \
     echo "sdkman_auto_answer=true" > $SDKMAN_DIR/etc/config && \
     echo "sdkman_auto_selfupdate=false" >> $SDKMAN_DIR/etc/config
