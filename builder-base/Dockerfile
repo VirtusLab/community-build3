@@ -9,7 +9,7 @@ ENV TZ=Europe/Zurich
 # see https://sdkman.io/usage for configuration options
 ENV SDKMAN_DIR=/root/.sdkman
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y curl ca-certificates zip unzip openssl findutils bash git ssh htop nano vim-tiny zile && \
+    apt-get install -y curl ca-certificates findutils bash && \
     (curl -fsSL https://deb.nodesource.com/setup_21.x | bash -) && apt-get install -y nodejs && \
     curl -s "https://get.sdkman.io" | bash && \
     echo "sdkman_auto_answer=true" > $SDKMAN_DIR/etc/config && \
