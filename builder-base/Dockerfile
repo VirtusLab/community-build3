@@ -8,7 +8,10 @@ ENV TZ=Europe/Zurich
 # install requirements, install and configure sdkman
 # see https://sdkman.io/usage for configuration options
 ENV SDKMAN_DIR=/root/.sdkman
-RUN apt-get update && \
+RUN 
+    echo "nameserver 8.8.8.8" >> /etc/resolv.conf && \
+    echo "nameserver 8.8.4.4" >> /etc/resolv.conf && \
+    apt-get update && \
     apt-get install -y curl ca-certificates zip unzip openssl findutils git && \
     (curl -fsSL https://deb.nodesource.com/setup_21.x | bash -) && apt-get install -y nodejs && \
     curl -s "https://get.sdkman.io" | bash && \
