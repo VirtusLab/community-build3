@@ -718,7 +718,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         implicit val _unbuilder: Unbuilder[J] = unbuilder
         unbuilder.beginObject(v)
         val projects = readOrDefault("projects", ProjectsConfig())
-        val testsMode = readOrDefault[TestingMode, J]("tests", TestingMode.CompileOnly)
+        val testsMode = readOrDefault[TestingMode, J]("tests", TestingMode.Full)
         unbuilder.endObject()
         ProjectBuildConfig(projects, testsMode)
       }

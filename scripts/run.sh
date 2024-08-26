@@ -30,6 +30,7 @@ DefaultConfig="{}"
 
 scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
+# OPENCB_EXECUTE_TESTS=true \
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \
   "$(config .repoUrl)" \
