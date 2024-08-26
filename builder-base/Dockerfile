@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL org.opencontainers.image.source="https://github.com/VirtusLab/community-build3"
 
 ENV LANG=C.UTF-8

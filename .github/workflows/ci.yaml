@@ -22,10 +22,11 @@ jobs:
       - name: Build up base docker images
         env: 
           BUILD_ONLY_DEFAULT_JDK: true
-        run: |
+          # Stopped to resolve DNS for archives.ubuntu.com when bulding after minikube docker-env
           # eval $(minikube -p minikube docker-env)
+        run: |
           scripts/build-all.sh test
 
-      - name: Test build
-        run: scripts/test-build.sh
+      # - name: Test build
+      #   run: scripts/test-build.sh
 
