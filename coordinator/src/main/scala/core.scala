@@ -104,7 +104,7 @@ case class ProjectBuildConfig(
     java: JavaConfig = JavaConfig(),
     sbt: SbtConfig = SbtConfig(),
     mill: MillConfig = MillConfig(),
-    tests: TestingMode = TestingMode.CompileOnly,
+    tests: TestingMode = TestingMode.Full,
     sourceVersion: Option[String] = None,
     migrationVersions: List[String] = Nil,   
     sourcePatches: List[SourcePatch] = Nil

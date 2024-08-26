@@ -11,20 +11,25 @@ rev="$3"                # e.g. '1.0.2'
 _scalaVersion="$4"       # e.g. 3.0.0-RC3
 targets="$5"            # e.g. com.example%greeter
 mvnRepoUrl="$6"         # e.g. https://mvn-repo/maven2/2021-05-23_1
-projectConfig="$7"
+_projectConfig="$7"
 _extraScalacOptions="${8}" # e.g '' or "-Wunused:all -Ylightweight-lazy-vals"
 _disabledScalacOptions="${9}"
 extraLibraryDeps="${10}" # format org:artifact:version, eg. org.scala-lang:scala2-library-tasty_3:3.4.0-RC1
 
+_executeTests=${OPENCB_EXECUTE_TESTS:-false}
+
 # Mutable 
-scalaVersion=$_scalaVersion
-extraScalacOptions=$_extraScalacOptions
-disabledScalacOptions=$_disabledScalacOptions
+scalaVersion=${_scalaVersion}
+projectConfig=${_projectConfig}
+extraScalacOptions=${_extraScalacOptions}
+disabledScalacOptions=${_disabledScalacOptions}
+executeTests=${_executeTests}
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
 export OPENCB_SCRIPT_DIR=$scriptDir
 
-$scriptDir/checkout.sh "$repoUrl" "$rev" repo
+# $scriptDir/checkout.sh "$repoUrl" "$rev" repo
 buildToolFile="build-tool.txt"
 
 if [[ ! -z $extraLibraryDeps ]]; then
@@ -90,6 +95,17 @@ function detectSourceVersion() {
   fi
 }
 
+function setupProjectConfig() {
+  currentTests=$(echo "$_projectConfig" | jq '.tests // "compile-only"')
+  projectConfig=$(echo "$_projectConfig" | jq \
+    --argjson executeTests $executeTests \
+    --argjson currentTests $currentTests \
+    '.tests = if $executeTests then 
+        .tests 
+      else 
+        if $currentTests=="full" then "compile-only" else $currentTests end
+      end')
+}
 
 
 isMigrating=false
@@ -137,6 +153,7 @@ function buildForScalaVersion(){
   echo "Preparing build for $scalaVersion"
   detectSourceVersion
   setupScalacOptions
+  setupProjectConfig
 
   echo "----"
   echo "Starting build for $scalaVersion"
@@ -178,8 +195,10 @@ function buildForScalaVersion(){
 
 for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   isMigrating=true
+  executeTests=false
   echo "Migrating project using Scala $migrationScalaVersion"
   buildForScalaVersion $migrationScalaVersion
+  executeTests=${_executeTests}
   isMigrating=false
 done
 

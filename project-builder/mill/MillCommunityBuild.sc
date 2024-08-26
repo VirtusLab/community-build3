@@ -23,7 +23,7 @@ import CommunityBuildCore.Scala3CommunityBuild.Utils._
 //  upickle has problems with classess imported from other file when creating readers
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
-    tests: TestingMode = TestingMode.CompileOnly
+    tests: TestingMode = TestingMode.Full
 )
 
 case class ProjectOverrides(tests: Option[TestingMode] = None)

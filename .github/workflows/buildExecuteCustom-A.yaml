@@ -31,6 +31,10 @@ on:
         type: string
         description: "List of library dependencies which should be injected when building projects, in format org:artifact:version, or org::artifact:version for Scala cross version. Multiple entires should be seperated by a single semicolon character `;`. (Best effort)"
         default: ""
+      execute-tests:
+        type: boolean
+        description: "Should the workflow execute tests of the build projects (compile only by default)"
+        default: false
       push-to-gh-pages:
         type: boolean
         description: "Should the workflow push the generated raport to gh-pages branch"
@@ -46,6 +50,7 @@ jobs:
       extra-scalac-options: ${{ inputs.extra-scalac-options }}
       disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
       extra-library-dependencies: ${{ inputs.extra-library-dependencies }}
+      execute-tests: ${{ inputs.execute-tests }}
       custom-build-id: ${{ inputs.build-name }}
     secrets: inherit
 

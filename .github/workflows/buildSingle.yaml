@@ -30,6 +30,10 @@ on:
         type: string
         description: "List of scalacOptions which should be filtered out when building projects."
         default: ""
+      execute-tests:
+        type: boolean
+        description: "Should the workflow execute tests of the build projects (compile only by default)"
+        default: false
 jobs:
   setup-build:
     runs-on: ubuntu-22.04
@@ -64,6 +68,7 @@ jobs:
           custom-build-id: ${{ inputs.build-name }}
           extra-scalac-options: ${{ inputs.extra-scalac-options }}
           disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          execute-tests: ${{ inputs.execute-tests }}
           scala-version: ${{ needs.setup-build.outputs.scala-version }}
           maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
           elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
