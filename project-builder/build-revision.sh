@@ -29,7 +29,7 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 export OPENCB_SCRIPT_DIR=$scriptDir
 
-# $scriptDir/checkout.sh "$repoUrl" "$rev" repo
+$scriptDir/checkout.sh "$repoUrl" "$rev" repo
 buildToolFile="build-tool.txt"
 
 if [[ ! -z $extraLibraryDeps ]]; then
