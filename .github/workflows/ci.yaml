@@ -23,7 +23,7 @@ jobs:
         env: 
           BUILD_ONLY_DEFAULT_JDK: true
         run: |
-          eval $(minikube -p minikube docker-env)
+          # eval $(minikube -p minikube docker-env)
           scripts/build-all.sh test
 
       - name: Test build
