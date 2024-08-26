@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 LABEL org.opencontainers.image.source="https://github.com/VirtusLab/community-build3"
 
 ENV LANG=C.UTF-8
@@ -9,8 +9,7 @@ ENV TZ=Europe/Zurich
 # see https://sdkman.io/usage for configuration options
 ENV SDKMAN_DIR=/root/.sdkman
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    apt-get install -y curl ca-certificates zip unzip openssl findutils bash git ssh && \
+    apt-get install -y curl ca-certificates zip unzip openssl findutils git && \
     (curl -fsSL https://deb.nodesource.com/setup_21.x | bash -) && apt-get install -y nodejs && \
     curl -s "https://get.sdkman.io" | bash && \
     echo "sdkman_auto_answer=true" > $SDKMAN_DIR/etc/config && \
