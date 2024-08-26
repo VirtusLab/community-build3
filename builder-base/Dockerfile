@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:20.04
 LABEL org.opencontainers.image.source="https://github.com/VirtusLab/community-build3"
 
 ENV LANG=C.UTF-8
@@ -8,11 +8,10 @@ ENV TZ=Europe/Zurich
 # install requirements, install and configure sdkman
 # see https://sdkman.io/usage for configuration options
 ENV SDKMAN_DIR=/root/.sdkman
-RUN echo "nameserver 8.8.8.8" >> /etc/resolv.conf && \
-    echo "nameserver 8.8.4.4" >> /etc/resolv.conf && \
-    apt-get update && \
-    apt-get install -y curl ca-certificates zip unzip openssl findutils git && \
-    (curl -fsSL https://deb.nodesource.com/setup_21.x | bash -) && apt-get install -y nodejs && \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y software-properties-common && \
+    apt-get install -y curl ca-certificates zip unzip openssl findutils bash git ssh htop nano vim-tiny zile && \
+    (curl -fsSL https://deb.nodesource.com/setup_18.x | bash -) && apt-get install -y nodejs && \
     curl -s "https://get.sdkman.io" | bash && \
     echo "sdkman_auto_answer=true" > $SDKMAN_DIR/etc/config && \
     echo "sdkman_auto_selfupdate=false" >> $SDKMAN_DIR/etc/config
