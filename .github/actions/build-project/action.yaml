@@ -122,7 +122,7 @@ runs:
         username: ${{ inputs.container-registry-username }}
         password: ${{ inputs.container-registry-token }}
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
-        options: -v ${{ github.workspace }}:/opencb/ -v ${{ github.workspace }}/github_key:/root/.ssh/github_key:ro
+        options: -v ${{ github.workspace }}:/opencb/
         run: |
           # Setup ssh required for downloading submodules
           eval "$(ssh-agent -s)"
@@ -133,6 +133,7 @@ runs:
           chmod -R 400 ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+          cat ~/.ssh/config
 
           DefaultConfig='{}'
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
