@@ -133,7 +133,10 @@ runs:
           chmod -R 400 ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           printf "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-          cat ~/.ssh/config
+
+          # Git config for migration patches
+          git config --global user.email "scala3-community-build@virtuslab.com"
+          git config --global user.name "Scala 3 Open Community Build"
 
           DefaultConfig='{}'
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
