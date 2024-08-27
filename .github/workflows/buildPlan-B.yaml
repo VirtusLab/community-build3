@@ -1,5 +1,5 @@
 
-# projects total:     598
+# projects total:     602
 # min stars count:    -1
 # max projects count: 1000
 
@@ -189,10 +189,10 @@ jobs:
         - name: "dapperware/dappermongo"
         - name: "datastrophic-games/dice"
         - name: "davenverse/condemned"
+        - name: "davenverse/crossplatformioapp"
         - name: "davenverse/env"
         - name: "davenverse/epimetheus-community"
         - name: "davenverse/fiberlocal"
-        - name: "davenverse/http4s-log4cats-contextlog"
         - name: "davenverse/namecase"
         - name: "davenverse/natchez-local"
         - name: "davenverse/natchez-rediculous"
@@ -308,13 +308,13 @@ jobs:
         - name: "ivoah/vial"
         - name: "j-mie6/golden-scala"
         - name: "j5ik2o/event-store-adapter-scala"
+        - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
         - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
-        - name: "jchapuis/leases4s"
         - name: "jd557/rokrok"
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
@@ -447,6 +447,7 @@ jobs:
         - name: "marcinzh/yamlike"
         - name: "massimosiani/monix-newtypes-cats"
         - name: "mateuszkubuszok/dbg-schema"
+        - name: "mateuszkubuszok/explain-given"
         - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
         - name: "mdedetrich/scalacheck"
@@ -461,6 +462,7 @@ jobs:
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
+        - name: "msgpack4z/msgpack4z-jawn"
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
         - name: "nafg/cloud-logging-logback-scala"
@@ -539,12 +541,12 @@ jobs:
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
+        - name: "ranyitz/casing"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rmgk/slips"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
         - name: "rssh/shim--scala-async--dotty-cps-async"
-        - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/rate-limit-status"
         - name: "rtyley/sample-project-using-gha-scala-library-release-workflow"
         - name: "rtyley/scala-collection-plus"
@@ -568,6 +570,7 @@ jobs:
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
+        - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
         - name: "scala-tessella/ring-seq"
@@ -575,6 +578,7 @@ jobs:
         - name: "scalacenter/scala3-binary-decoder"
         - name: "scalalandio/mdc4s"
         - name: "scalameta/munit-scalacheck"
+        - name: "scalapb-json/scalapb-argonaut"
         - name: "scalatest/scalatestplus-easymock"
         - name: "scalatest/scalatestplus-jmock"
         - name: "scalax/slickless"
@@ -609,10 +613,6 @@ jobs:
         - name: "swagger-akka-http/swagger-scala3-enum-module"
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/conveniences"
-        - name: "swaldman/cryptoutil"
-        - name: "swaldman/failable"
-        - name: "swaldman/feedletter"
-        - name: "swaldman/mailutil"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -640,6 +640,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/cryptoutil"
+        - name: "swaldman/failable"
+        - name: "swaldman/feedletter"
+        - name: "swaldman/mailutil"
         - name: "swaldman/mchange-sysadmin-scala"
         - name: "swaldman/mlog-scala"
         - name: "swaldman/texttable"
