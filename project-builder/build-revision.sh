@@ -157,6 +157,7 @@ function buildForScalaVersion(){
 
   echo "----"
   echo "Starting build for $scalaVersion"
+  echo "Execute tests: ${executeTests}"
   echo "started" > build-status.txt 
   # Mill
   if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
