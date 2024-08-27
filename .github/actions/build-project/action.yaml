@@ -132,7 +132,7 @@ runs:
           touch ~/.ssh/known_hosts
           chmod -R 400 ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+          printf "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
           cat ~/.ssh/config
 
           DefaultConfig='{}'
