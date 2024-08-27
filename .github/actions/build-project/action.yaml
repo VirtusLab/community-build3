@@ -114,11 +114,6 @@ runs:
         echo "Can skip build: $canSkip"
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
 
-    - name: Prepare SSH keys
-      shell: bash
-      run: |
-        echo "${{ inputs.github-key }}" > ${{ github.workspace }}/github_key
-
     - name: Build project
       uses: addnab/docker-run-action@v3
       if: steps.check-history.outputs.can-skip-build != 'true'
@@ -131,9 +126,13 @@ runs:
         run: |
           # Setup ssh required for downloading submodules
           eval "$(ssh-agent -s)"
+          echo "${{ inputs.github-key }}" | tr -d '\r' | ssh-add -
           mkdir -p ~/.ssh
+          touch ~/.ssh/config
+          touch ~/.ssh/known_hosts
+          chmod -R 400 ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-add ~/.ssh/github_key
+          echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
 
           DefaultConfig='{}'
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
