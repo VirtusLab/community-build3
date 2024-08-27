@@ -147,7 +147,7 @@ runs:
           echo 'failure' > build-status.txt 
           echo 'unknown' > build-tool.txt
 
-          OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}" \ 
+          OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}" \
             /build/build-revision.sh \
             "$(config .project)" \
             "$(config .repoUrl)" \
