@@ -87,6 +87,8 @@ case class ProjectBuildDef(
 
 enum TestingMode derives EnumConfigReader:
   case Disabled, CompileOnly, Full
+object TestingMode:
+  def default = TestingMode.Full
 
 // Community projects configs
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
@@ -104,7 +106,7 @@ case class ProjectBuildConfig(
     java: JavaConfig = JavaConfig(),
     sbt: SbtConfig = SbtConfig(),
     mill: MillConfig = MillConfig(),
-    tests: TestingMode = TestingMode.Full,
+    tests: TestingMode = TestingMode.default,
     sourceVersion: Option[String] = None,
     migrationVersions: List[String] = Nil,   
     sourcePatches: List[SourcePatch] = Nil

@@ -39,6 +39,13 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         normalizedVersions.map(_._2).toList.sorted.map(normalizedToVersionString(_))
     .toMap
 
+  lazy val projectTestsConfig: Map[Project, TestingMode] = loadRequiredProjectsLists(requiredConfigsPath / "tests")
+    .map {
+      case (project, "compile-only") => project -> TestingMode.CompileOnly
+      case (project, "disabled") => project -> TestingMode.Disabled
+      case (project, "full") => project -> TestingMode.Full
+    }.toMap
+
   def apply(
       project: ProjectVersion,
       repoUrl: String,
@@ -64,6 +71,9 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
             .map: c =>
               if c.migrationVersions.nonEmpty then c
               else c.copy(migrationVersions = projectMigrationVersions.getOrElse(project.p, Nil))
+            .map: c =>
+              if c.tests != TestingMode.default then c
+              else projectTestsConfig.get(project.p).foldLeft(c){(c, value) => c.copy(tests = value)}
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
           case ex: Throwable =>
