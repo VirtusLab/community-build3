@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "finos/morphir"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
@@ -446,7 +445,6 @@ jobs:
         - name: "http4s/http4s"
         - name: "http4s/http4s-armeria"
         - name: "http4s/http4s-crypto"
-        - name: "http4s/http4s-fabric"
         - name: "http4s/http4s-finagle"
         - name: "http4s/http4s-fs2-data"
         - name: "http4s/http4s-grpc"
@@ -524,6 +522,7 @@ jobs:
         - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/oidc4s"
         - name: "jwt-scala/jwt-scala"
+        - name: "jypma/lazagna"
         - name: "kacperfkorban/guinep"
         - name: "kailuowang/mau"
         - name: "kaizen-solutions/trace4cats-zio-extras"
@@ -613,6 +612,7 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -640,7 +640,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "mimoguz/layeredfonticon"
@@ -791,6 +790,7 @@ jobs:
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "ruippeixotog/akka-testkit-specs2"
         - name: "ruippeixotog/scala-scraper"
+        - name: "rustedbones/pekko-http-metrics"
         - name: "rustedbones/taxonomy"
         - name: "sageserpent-open/americium"
         - name: "sageserpent-open/kineticmerge"
