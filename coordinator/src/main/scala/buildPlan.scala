@@ -511,14 +511,12 @@ def createGithubActionJob(
     |""".stripMargin)
   plan.filter(_.nonEmpty).zipWithIndex.foreach { case (projects, idx) =>
     // stage 0 reserved for long running jobs, no other step depends on it
-    def hasExtendentBuildTime = idx == 0
     indented {
       println(s"${stageId(idx)}:")
       indented {
         println("runs-on: ubuntu-22.04")
         println(s"needs: [ $setupId ]")
         println("continue-on-error: true")
-        println("timeout-minutes: 360") // 6h
         println("strategy:")
         indented {
           println("matrix:")
@@ -534,10 +532,6 @@ def createGithubActionJob(
           println("  uses: actions/checkout@v4")
           println("- name: \"Build project\"")
           println("  uses: ./.github/actions/build-project")
-          println("  timeout-minutes: " + {
-            if hasExtendentBuildTime then 120 // 6h
-            else 60 // 1h
-          })
           println("  with:")
           println("    project-name: ${{ matrix.name }}")
           println("    custom-build-id: ${{ inputs.custom-build-id }}")
