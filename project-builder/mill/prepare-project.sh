@@ -30,7 +30,12 @@ else
   echo "No .mill-version file found, detecting compatible mill version"
   if [[ -f ./mill ]];then
     echo "Found mill runner script, trying to resolve version"
-    millVersion=`./mill -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "(\d+\.?){3}" || echo ""`
+    ./mill -v $RESOLVE || true
+    millVersion=`./mill -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "([0-9]+\.[0-9]+\.[0-9]+)" || echo ""`
+    if [[ -z "$millVersion" ]]; then
+      # AI suggested workaround for non-portable grep
+      millVersion=`./mill -v $RESOLVE | awk '/Mill Build Tool version/ { for (i=1; i<=NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) print $i }' || echo ""`
+    fi
   fi
   if [[ "$millVersion" == "" ]]; then
     echo "Trying one of predefiend mill versions"
