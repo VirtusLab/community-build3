@@ -287,6 +287,7 @@ jobs:
         - name: "hsci-r/octavo-indexer"
         - name: "hshn/slick-codegen-patch"
         - name: "http4s/http4s-async-http-client"
+        - name: "http4s/http4s-fabric"
         - name: "http4s/http4s-play-json"
         - name: "hughsimpson/scalameter"
         - name: "ij-plugins/ijp-scala-console"
@@ -330,7 +331,6 @@ jobs:
         - name: "joohnnie/retry"
         - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
-        - name: "jphmrst/scalautils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
         - name: "jqscala/jqscala"
         - name: "julianpeeters/dc10"
@@ -373,7 +374,6 @@ jobs:
         - name: "jwojnowski/googlecloud4s"
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
-        - name: "jypma/lazagna"
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
@@ -406,6 +406,7 @@ jobs:
         - name: "kzmake/uuid7s"
         - name: "laserdisc-io/scanamo-circe"
         - name: "lbialy/tailf"
+        - name: "leviysoft/scala-kotlin-compat"
         - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-utils"
@@ -556,7 +557,6 @@ jobs:
         - name: "ruimo/graphics"
         - name: "ruimo/scoins"
         - name: "rustedbones/pekko-http-avro"
-        - name: "rustedbones/pekko-http-metrics"
         - name: "rustedbones/pekko-http-scalapb"
         - name: "rustedbones/pekko-http-thrift"
         - name: "rustedbones/scout"
