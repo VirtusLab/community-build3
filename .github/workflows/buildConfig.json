@@ -922,9 +922,10 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
+      "sourceVersion":"3.3",
       "migrationVersions":[
-        "3.4.2"
+        
       ],
       "sourcePatches":[
         {
@@ -1056,6 +1057,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
+        "3.4.2",
         "3.5.0"
       ],
       "sourcePatches":[
@@ -1063,6 +1065,16 @@
           "path":"akka-http-core/src/main/scala/akka/http/impl/engine/ws/WebSocket.scala",
           "pattern":"case b: BypassEvent with MessagePart",
           "replaceWith":"case b: (BypassEvent & MessagePart)"
+        },
+        {
+          "path":"akka-http-core/src/main/scala/akka/http/scaladsl/model/HttpMessage.scala",
+          "pattern":"headers[T](ClassTag[T](headerClass)).asJava",
+          "replaceWith":"headers[T](using ClassTag[T](headerClass)).asJava"
+        },
+        {
+          "path":"akka-http-core/src/main/scala/akka/http/scaladsl/model/HttpMessage.scala",
+          "pattern":"for (`Cookie`(cookies) <- headers",
+          "replaceWith":"for (case `Cookie`(cookies) <- headers"
         },
         {
           "path":"project/Dependencies.scala",
@@ -1191,7 +1203,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         
       ],
@@ -1604,8 +1616,8 @@
   "algolia/algoliasearch-client-scala":{
     "project":"algolia/algoliasearch-client-scala",
     "repoUrl":"https://github.com/algolia/algoliasearch-client-scala.git",
-    "revision":"2.2.0",
-    "version":"2.2.0",
+    "revision":"2.2.1",
+    "version":"2.2.1",
     "targets":"com.algolia%algoliasearch-scala",
     "config":{
       "projects":{
@@ -2179,9 +2191,10 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
+      "sourceVersion":"3.3",
       "migrationVersions":[
-        "3.4.2"
+        
       ],
       "sourcePatches":[
         {
@@ -2527,7 +2540,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         
       ],
@@ -4103,9 +4116,42 @@
   "autodeployai/pmml4s":{
     "project":"autodeployai/pmml4s",
     "repoUrl":"https://github.com/autodeployai/pmml4s.git",
-    "revision":"v1.0.1",
-    "version":"1.0.1",
-    "targets":"org.pmml4s%pmml4s"
+    "revision":"v1.0.2",
+    "version":"1.0.2",
+    "targets":"org.pmml4s%pmml4s",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "automorph-org/automorph":{
     "project":"automorph-org/automorph",
@@ -6524,7 +6570,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set tests.jvm/Test/unmanagedSources/excludeFilter ~= { _ || \"FromProductSuite.scala\" }"
         ],
         "options":[
           
@@ -6549,6 +6595,11 @@
           "path":"modules/core/shared/src/main/scala-3/io/circe/derivation/ConfiguredEncoder.scala",
           "pattern":"case ce: ConfiguredEncoder[?] with SumOrProduct",
           "replaceWith":"case ce: (ConfiguredEncoder[?] & SumOrProduct)"
+        },
+        {
+          "path":"project/Boilerplate.scala",
+          "pattern":"CodecTests[Cc$arity](Cc$arity.",
+          "replaceWith":"CodecTests[Cc$arity](using Cc$arity."
         }
       ]
     }
@@ -7564,8 +7615,8 @@
   "com-lihaoyi/scalasql":{
     "project":"com-lihaoyi/scalasql",
     "repoUrl":"https://github.com/com-lihaoyi/scalasql.git",
-    "revision":"0.1.7",
-    "version":"0.1.7",
+    "revision":"0.1.8",
+    "version":"0.1.8",
     "targets":"com.lihaoyi%scalasql com.lihaoyi%scalasql-core com.lihaoyi%scalasql-operations com.lihaoyi%scalasql-query",
     "config":{
       "projects":{
@@ -7637,7 +7688,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"scalatags/test/src/scalatags/TestUtil.scala",
+          "pattern":"for (Seq(a, b) <- x.grouped(2)) {",
+          "replaceWith":"for (case Seq(a, b) <- x.grouped(2)) {"
+        }
       ]
     }
   },
@@ -11133,8 +11188,8 @@
   "dfianthdl/dfhdl":{
     "project":"dfianthdl/dfhdl",
     "repoUrl":"https://github.com/dfianthdl/dfhdl.git",
-    "revision":"v0.7.0",
-    "version":"0.7.0",
+    "revision":"v0.7.1",
+    "version":"0.7.1",
     "targets":"io.github.dfianthdl%dfhdl io.github.dfianthdl%dfhdl-compiler-ir io.github.dfianthdl%dfhdl-compiler-stages io.github.dfianthdl%dfhdl-core io.github.dfianthdl%dfhdl-internals",
     "config":{
       "projects":{
@@ -12104,9 +12159,9 @@
   "dwolla/dwolla-otel-natchez":{
     "project":"dwolla/dwolla-otel-natchez",
     "repoUrl":"https://github.com/dwolla/dwolla-otel-natchez.git",
-    "revision":"v0.2.2",
-    "version":"0.2.2",
-    "targets":"com.dwolla%dwolla-otel-natchez",
+    "revision":"v0.2.3",
+    "version":"0.2.3",
+    "targets":"com.dwolla%dwolla-otel-natchez com.dwolla%otel-aws-xray-id-generator",
     "config":{
       "projects":{
         "exclude":[
@@ -12139,7 +12194,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.1\"",
+          "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -12232,9 +12287,9 @@
   "dwolla/http4s-consul-middleware":{
     "project":"dwolla/http4s-consul-middleware",
     "repoUrl":"https://github.com/dwolla/http4s-consul-middleware.git",
-    "revision":"v0.3.1",
-    "version":"0.3.1",
-    "targets":"com.dwolla%http4s-consul-middleware",
+    "revision":"v0.3.2",
+    "version":"0.3.2",
+    "targets":"com.dwolla%http4s-consul-middleware com.dwolla%smithy4s-consul-middleware",
     "config":{
       "projects":{
         "exclude":[
@@ -14798,13 +14853,6 @@
     "version":"3.2.0",
     "targets":"info.fingo%spata"
   },
-  "finos/morphir":{
-    "project":"finos/morphir",
-    "repoUrl":"https://github.com/finos/morphir.git",
-    "revision":"",
-    "version":"0.0.0-58-ae23ac",
-    "targets":"org.finos.morphir%morphir-cli org.finos.morphir%morphir-codemodel"
-  },
   "finos/morphir-jvm":{
     "project":"finos/morphir-jvm",
     "repoUrl":"https://github.com/finos/morphir-jvm.git",
@@ -16177,8 +16225,8 @@
   "geirolz/fly4s":{
     "project":"geirolz/fly4s",
     "repoUrl":"https://github.com/geirolz/fly4s.git",
-    "revision":"v0.1.1",
-    "version":"0.1.1",
+    "revision":"v1.0.8",
+    "version":"1.0.8",
     "targets":"com.github.geirolz%fly4s",
     "config":{
       "projects":{
@@ -16537,8 +16585,8 @@
   "gemini-hlsw/lucuma-catalog":{
     "project":"gemini-hlsw/lucuma-catalog",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-catalog.git",
-    "revision":"v0.47.5",
-    "version":"0.47.5",
+    "revision":"v0.48.0",
+    "version":"0.48.0",
     "targets":"edu.gemini%lucuma-ags edu.gemini%lucuma-catalog edu.gemini%lucuma-catalog-testkit",
     "config":{
       "projects":{
@@ -16737,8 +16785,8 @@
   "gemini-hlsw/lucuma-odb":{
     "project":"gemini-hlsw/lucuma-odb",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-odb.git",
-    "revision":"v0.12.0",
-    "version":"0.12.0",
+    "revision":"v0.12.1",
+    "version":"0.12.1",
     "targets":"edu.gemini%lucuma-odb edu.gemini%lucuma-odb-schema",
     "config":{
       "projects":{
@@ -16817,8 +16865,8 @@
   "gemini-hlsw/lucuma-schemas":{
     "project":"gemini-hlsw/lucuma-schemas",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-schemas.git",
-    "revision":"v0.96.0",
-    "version":"0.96.0",
+    "revision":"v0.97.0",
+    "version":"0.97.0",
     "targets":"edu.gemini%lucuma-schemas edu.gemini%lucuma-schemas-model edu.gemini%lucuma-schemas-testkit",
     "config":{
       "projects":{
@@ -23151,7 +23199,8 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
+      "sourceVersion":"3.5",
       "migrationVersions":[
         
       ],
@@ -23839,8 +23888,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.55",
-    "version":"4.0.55",
+    "revision":"v4.0.57",
+    "version":"4.0.57",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "config":{
       "projects":{
@@ -28434,6 +28483,46 @@
       ]
     }
   },
+  "leviysoft/scala-kotlin-compat":{
+    "project":"leviysoft/scala-kotlin-compat",
+    "repoUrl":"https://github.com/leviysoft/scala-kotlin-compat.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"io.github.leviysoft%scala-kotlin-compat",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "lhns/cats-effect-utils":{
     "project":"lhns/cats-effect-utils",
     "repoUrl":"https://github.com/lhns/cats-effect-utils.git",
@@ -32550,8 +32639,8 @@
   "nationalarchives/dr2-preservica-client":{
     "project":"nationalarchives/dr2-preservica-client",
     "repoUrl":"https://github.com/nationalarchives/dr2-preservica-client.git",
-    "revision":"v0.0.94",
-    "version":"0.0.94",
+    "revision":"v0.0.95",
+    "version":"0.0.95",
     "targets":"uk.gov.nationalarchives%preservica-client-fs2 uk.gov.nationalarchives%preservica-client-root",
     "config":{
       "projects":{
@@ -32585,7 +32674,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version = \"3.4.2\"",
+          "pattern":"val scala3Version = \"3.4.3\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -34746,6 +34835,21 @@
           "path":"shared/src/main/scala/org/scalamock/MockFactoryBase.scala",
           "pattern":"callLog foreach expectationContext.verify _",
           "replaceWith":"callLog.foreach(expectationContext.verify(_))"
+        },
+        {
+          "path":"shared/src/test/scala/com/paulbutcher/test/mock/MockTest.scala",
+          "pattern":"(m.oneParam _).expects(42)",
+          "replaceWith":"(m.oneParam).expects(42)"
+        },
+        {
+          "path":"shared/src/test/scala/com/paulbutcher/test/mock/MockNamingTest.scala",
+          "pattern":".oneParam _) shouldBe",
+          "replaceWith":".oneParam) shouldBe"
+        },
+        {
+          "path":"shared/src/test/scala/org/scalamock/test/scalatest/PathSpecTest.scala",
+          "pattern":"val mockFun = mockFunction[String, Unit](\"mockFun\")",
+          "replaceWith":"val mockFun = mockFunction[String, Unit](functionName(\"mockFun\"))"
         }
       ]
     }
@@ -36746,8 +36850,8 @@
   "pme123/camundala":{
     "project":"pme123/camundala",
     "repoUrl":"https://github.com/pme123/camundala.git",
-    "revision":"v1.30.9",
-    "version":"1.30.9",
+    "revision":"v1.30.10",
+    "version":"1.30.10",
     "targets":"io.github.pme123%camundala-api io.github.pme123%camundala-bpmn io.github.pme123%camundala-camunda io.github.pme123%camundala-camunda7-worker io.github.pme123%camundala-dmn io.github.pme123%camundala-domain io.github.pme123%camundala-helper io.github.pme123%camundala-simulation io.github.pme123%camundala-worker",
     "config":{
       "projects":{
@@ -42263,7 +42367,21 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"math/src/main/scala/breeze/math/VectorSpace.scala",
+          "pattern":"V <:< NumericOps[V] with QuasiTensor[I, S]",
+          "replaceWith":"V <:< (NumericOps[V] & QuasiTensor[I, S])"
+        },
+        {
+          "path":"math/src/main/scala/breeze/math/VectorSpace.scala",
+          "pattern":"V <:< NumericOps[V] with QuasiTensor[Int, S]",
+          "replaceWith":"V <:< (NumericOps[V] & QuasiTensor[Int, S])"
+        },
+        {
+          "path":"math/src/main/scala/breeze/math/VectorSpace.scala",
+          "pattern":"M <:< NumericOps[M] with QuasiTensor[(Int, Int), S]",
+          "replaceWith":"M <:< (NumericOps[M] & QuasiTensor[(Int, Int), S])"
+        }
       ]
     }
   },
@@ -44999,7 +45117,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         
       ],
@@ -45059,8 +45177,8 @@
   "slack-scala-client/slack-scala-client":{
     "project":"slack-scala-client/slack-scala-client",
     "repoUrl":"https://github.com/slack-scala-client/slack-scala-client.git",
-    "revision":"v1.0.0",
-    "version":"1.0.0",
+    "revision":"v1.0.1",
+    "version":"1.0.1",
     "targets":"com.github.slack-scala-client%slack-scala-client com.github.slack-scala-client%slack-scala-client-models",
     "config":{
       "projects":{
@@ -46577,8 +46695,8 @@
   "svroonland/rezilience":{
     "project":"svroonland/rezilience",
     "repoUrl":"https://github.com/svroonland/rezilience.git",
-    "revision":"v0.10.1",
-    "version":"0.10.1",
+    "revision":"v0.10.2",
+    "version":"0.10.2",
     "targets":"nl.vroste%rezilience nl.vroste%rezilience-config",
     "config":{
       "projects":{
@@ -47693,7 +47811,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         
       ],
@@ -49412,43 +49530,10 @@
   },
   "tofu-tf/cherry":{
     "project":"tofu-tf/cherry",
-    "repoUrl":"https://github.com/tofu-tf/cherry.git",
-    "revision":"v0.0.11",
+    "repoUrl":"https://github.com/WojciechMazur/cherry.git",
+    "revision":"fix/compilation-scala-3.4+",
     "version":"0.0.11",
-    "targets":"tf.tofu%cherry-adapt tf.tofu%cherry-fix tf.tofu%cherry-lamr tf.tofu%cherry-parse",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
+    "targets":"tf.tofu%cherry-adapt tf.tofu%cherry-fix tf.tofu%cherry-lamr tf.tofu%cherry-parse"
   },
   "tofu-tf/glass":{
     "project":"tofu-tf/glass",
@@ -51054,8 +51139,8 @@
       "sourcePatches":[
         {
           "path":"modules/cats/src/main/scala/org/dhallj/cats/LiftVisitor.scala",
-          "pattern":"sortFields",
-          "replaceWith":"_sortFields"
+          "pattern":" sortFields",
+          "replaceWith":" _sortFields"
         }
       ]
     }
@@ -51296,6 +51381,7 @@
         ]
       },
       "tests":"compile-only",
+      "sourceVersion":"3.4-migration",
       "migrationVersions":[
         
       ],
@@ -51974,7 +52060,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -52608,8 +52694,8 @@
   "typelevel/natchez":{
     "project":"typelevel/natchez",
     "repoUrl":"https://github.com/typelevel/natchez.git",
-    "revision":"v0.3.5",
-    "version":"0.3.5",
+    "revision":"v0.3.6",
+    "version":"0.3.6",
     "targets":"org.tpolecat%natchez-core org.tpolecat%natchez-datadog org.tpolecat%natchez-honeycomb org.tpolecat%natchez-jaeger org.tpolecat%natchez-lightstep org.tpolecat%natchez-lightstep-grpc org.tpolecat%natchez-lightstep-http org.tpolecat%natchez-log org.tpolecat%natchez-log-odin org.tpolecat%natchez-mock org.tpolecat%natchez-mtl org.tpolecat%natchez-noop org.tpolecat%natchez-opencensus org.tpolecat%natchez-opentelemetry org.tpolecat%natchez-opentracing org.tpolecat%natchez-testkit org.tpolecat%natchez-xray org.tpolecat%newrelic",
     "config":{
       "projects":{
@@ -56290,8 +56376,8 @@
   "zio/zio":{
     "project":"zio/zio",
     "repoUrl":"https://github.com/zio/zio.git",
-    "revision":"v2.1.8",
-    "version":"2.1.8",
+    "revision":"v2.1.9",
+    "version":"2.1.9",
     "targets":"dev.zio%zio dev.zio%zio-concurrent dev.zio%zio-internal-macros dev.zio%zio-macros dev.zio%zio-managed dev.zio%zio-stacktracer dev.zio%zio-streams dev.zio%zio-test dev.zio%zio-test-junit dev.zio%zio-test-magnolia dev.zio%zio-test-refined dev.zio%zio-test-sbt dev.zio%zio-test-scalacheck",
     "config":{
       "projects":{
@@ -56951,8 +57037,8 @@
   "zio/zio-json":{
     "project":"zio/zio-json",
     "repoUrl":"https://github.com/zio/zio-json.git",
-    "revision":"v0.7.2",
-    "version":"0.7.2",
+    "revision":"v0.7.3",
+    "version":"0.7.3",
     "targets":"dev.zio%zio-json dev.zio%zio-json-golden dev.zio%zio-json-interop-refined dev.zio%zio-json-yaml",
     "config":{
       "projects":{
@@ -57425,8 +57511,8 @@
   "zio/zio-prelude":{
     "project":"zio/zio-prelude",
     "repoUrl":"https://github.com/zio/zio-prelude.git",
-    "revision":"v1.0.0-RC29",
-    "version":"1.0.0-RC29",
+    "revision":"v1.0.0-RC30",
+    "version":"1.0.0-RC30",
     "targets":"dev.zio%zio-laws-laws dev.zio%zio-prelude dev.zio%zio-prelude-docs dev.zio%zio-prelude-experimental dev.zio%zio-prelude-experimental-laws dev.zio%zio-prelude-experimental-tests dev.zio%zio-prelude-macros dev.zio%zio-prelude-scala-parallel-collections",
     "config":{
       "projects":{
