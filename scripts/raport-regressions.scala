@@ -27,6 +27,8 @@ import printer.{println, *}
 
 given ExecutionContext = ExecutionContext.global
 
+val ShowTestFailures = false
+
 val BuildSummariesIndex = "project-build-summary"
 val DefaultTimeout = 5.minutes
 val ElasticsearchHost = "scala3.westeurope.cloudapp.azure.com"
@@ -286,7 +288,7 @@ def listFailedProjects(
               if summary.docFailure then logProject("DOC")(MAGENTA)
               if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
           end lazyLogProject
-          Option.when(compilerFailure || buildFailure) {
+          Option.when(compilerFailure || buildFailure || (ShowTestFailures && summary.testsFailure) ) {
             TimedFailure(
               project = FailedProject(
                 project,
