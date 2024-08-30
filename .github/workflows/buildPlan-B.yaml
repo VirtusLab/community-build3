@@ -1,5 +1,5 @@
 
-# projects total:     602
+# projects total:     604
 # min stars count:    -1
 # max projects count: 1000
 
@@ -154,6 +154,7 @@ jobs:
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
         - name: "christian-schlichtherle/circe-kafka"
+        - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
         - name: "clevercloud/testcontainers-scala-warp10"
         - name: "clockworkconsulting/csexp"
@@ -329,7 +330,6 @@ jobs:
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
         - name: "jphmrst/scala-automata"
-        - name: "jphmrst/scala-latex"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
         - name: "jqscala/jqscala"
@@ -511,6 +512,7 @@ jobs:
         - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
         - name: "pjfanning/jackson-module-scala-duration"
+        - name: "pjfanning/pekko-discovery-consul"
         - name: "pjfanning/pekko-http-session"
         - name: "pjfanning/pekko-libraries-bom"
         - name: "pjfanning/pekko-mock-scheduler"
@@ -608,8 +610,6 @@ jobs:
         - name: "stringbean/text-utils"
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
-        - name: "swaldman/audiofluidity-rss"
-        - name: "swaldman/conveniences"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/audiofluidity-rss"
+        - name: "swaldman/conveniences"
         - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
         - name: "swaldman/feedletter"
