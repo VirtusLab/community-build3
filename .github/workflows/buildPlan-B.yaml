@@ -1,5 +1,5 @@
 
-# projects total:     604
+# projects total:     605
 # min stars count:    -1
 # max projects count: 1000
 
@@ -209,6 +209,7 @@ jobs:
         - name: "dwolla/natchez-smithy4s"
         - name: "dwolla/natchez-tagless"
         - name: "eb2501/fluor-core"
+        - name: "eikek/binny"
         - name: "eikek/htmx4s"
         - name: "eltherion/http4s-timer"
         - name: "endpoints4s/play"
@@ -329,7 +330,6 @@ jobs:
         - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
-        - name: "jphmrst/scala-automata"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
@@ -479,7 +480,6 @@ jobs:
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
-        - name: "nmoncho/helenus3"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/http4s-spnego"
         - name: "nthportal/scala-platform"
@@ -493,6 +493,7 @@ jobs:
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
         - name: "pablf/teseo"
+        - name: "palanga/parana"
         - name: "palanga/picazio"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
@@ -609,7 +610,6 @@ jobs:
         - name: "ssanj/delight"
         - name: "stringbean/text-utils"
         - name: "swagger-akka-http/swagger-enumeratum-module"
-        - name: "swagger-akka-http/swagger-scala3-enum-module"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swagger-akka-http/swagger-scala3-enum-module"
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/conveniences"
         - name: "swaldman/cryptoutil"
