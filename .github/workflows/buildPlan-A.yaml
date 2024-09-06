@@ -97,6 +97,8 @@ jobs:
         - name: "akka/alpakka-kafka"
         - name: "alaz/scala-i18n"
         - name: "alejandrohdezma/http4s-munit"
+        - name: "alejandrohdezma/tapir-anyof"
+        - name: "alejandrohdezma/tapir-golden-openapi-munit"
         - name: "algolia/algoliasearch-client-scala"
         - name: "alhuelamo/dbjobs"
         - name: "almond-sh/almond"
@@ -163,7 +165,6 @@ jobs:
         - name: "bishabosha/enum-extensions"
         - name: "bishabosha/ops-mirror"
         - name: "bitlap/rolls"
-        - name: "bitlap/validation-scala"
         - name: "bkirwi/decline"
         - name: "blackdoor/jose"
         - name: "blemale/scaffeine"
@@ -329,7 +330,6 @@ jobs:
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
-        - name: "fingo/spata"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
@@ -609,7 +610,6 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "mimoguz/layeredfonticon"
@@ -889,7 +890,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
-        - name: "sirthias/borer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
@@ -999,7 +1000,6 @@ jobs:
         - name: "tototoshi/slick-joda-mapper"
         - name: "touk/influxdb-reporter"
         - name: "tpolecat/atto"
-        - name: "tpolecat/doobie"
         - name: "tpolecat/pool-party"
         - name: "tpolecat/sourcepos"
         - name: "tpolecat/typename"
@@ -1026,6 +1026,7 @@ jobs:
         - name: "typelevel/discipline-munit"
         - name: "typelevel/discipline-scalatest"
         - name: "typelevel/discipline-specs2"
+        - name: "typelevel/doobie"
         - name: "typelevel/fabric"
         - name: "typelevel/feral"
         - name: "typelevel/fs2"
@@ -1084,7 +1085,6 @@ jobs:
         - name: "vlovgr/ciris"
         - name: "vmunier/scalajs-scripts"
         - name: "webjars/webjars-play"
-        - name: "windymelt/rss2discord"
         - name: "wolfendale/scalacheck-gen-regexp"
         - name: "wvlet/airframe"
         - name: "xebia-functional/fetch"
