@@ -64,9 +64,9 @@ function isBinVersionGreaterThen() {
 
 sourceVersionSetting=""
 function detectSourceVersion() {
-  scalaBinaryVersion=`echo $scalaVersion | cut -d . -f 1,2`
-  scalaBinaryVersionMajor=`echo $scalaVersion | cut -d . -f 1`
-  scalaBinaryVersionMinor=`echo $scalaVersion | cut -d . -f 2`
+  local scalaBinaryVersion=`echo $scalaVersion | cut -d . -f 1,2`
+  local scalaBinaryVersionMajor=`echo $scalaVersion | cut -d . -f 1`
+  local scalaBinaryVersionMinor=`echo $scalaVersion | cut -d . -f 2`
   echo "Scala binary version found: $scalaBinaryVersion"
 
   sourceVersion=`echo $projectConfig | jq -r '.sourceVersion // ""'`
@@ -195,12 +195,18 @@ function buildForScalaVersion(){
 }
 
 for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
-  isMigrating=true
-  executeTests=false
-  echo "Migrating project using Scala $migrationScalaVersion"
-  buildForScalaVersion $migrationScalaVersion
-  executeTests=${_executeTests}
-  isMigrating=false
+  scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
+  migrationBinaryVersion=`echo $migrationScalaVersion | cut -d . -f 1,2`
+  if isBinVersionGreaterThen "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
+    echo "Skip migration using $migrationScalaVersion, binary version higher then target Scala version $scalaBinaryVersion"
+  else 
+    isMigrating=true
+    executeTests=false
+    echo "Migrating project using Scala $migrationScalaVersion"
+    buildForScalaVersion $migrationScalaVersion
+    executeTests=${_executeTests}
+    isMigrating=false
+  fi
 done
 
 buildForScalaVersion $_scalaVersion
