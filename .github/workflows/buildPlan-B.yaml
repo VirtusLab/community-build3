@@ -1,5 +1,5 @@
 
-# projects total:     605
+# projects total:     611
 # min stars count:    -1
 # max projects count: 1000
 
@@ -141,6 +141,7 @@ jobs:
         - name: "bilal-fazlani/rainbowcli"
         - name: "bilal-fazlani/scala-aql"
         - name: "bilal-fazlani/zio-mongo"
+        - name: "bitlap/validation-scala"
         - name: "bitlap/zio-pekko"
         - name: "bitmarck-service/base32check-scala"
         - name: "bitmarck-service/fs2-secon"
@@ -153,6 +154,7 @@ jobs:
         - name: "casehubdk/hxl"
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
+        - name: "cheleb/zio-laminar-tapir"
         - name: "christian-schlichtherle/circe-kafka"
         - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
@@ -262,6 +264,7 @@ jobs:
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
+        - name: "guardian/cross-platform-navigation"
         - name: "guardian/etag-caching"
         - name: "guardian/identity-test-users"
         - name: "guardian/mobile-apps-api-models"
@@ -327,9 +330,6 @@ jobs:
         - name: "jodersky/redicl"
         - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
-        - name: "johnhungerford/generic-schema"
-        - name: "johnhungerford/zikyo"
-        - name: "joohnnie/retry"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "johnhungerford/generic-schema"
+        - name: "johnhungerford/zikyo"
+        - name: "joohnnie/retry"
         - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
@@ -538,12 +541,14 @@ jobs:
         - name: "pureharm/pureharm-db-core-jdbc"
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
+        - name: "quafadas/dairect-democracy"
         - name: "quafadas/vecxt"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
         - name: "ranyitz/casing"
         - name: "rayrobdod/string-context-parser-combinator"
+        - name: "reactivecore/usql"
         - name: "rmgk/slips"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
@@ -605,11 +610,6 @@ jobs:
         - name: "sinaghaffari/monadicsimplifier"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
-        - name: "snowplow/iglu-scala-core"
-        - name: "spilne/spilne"
-        - name: "ssanj/delight"
-        - name: "stringbean/text-utils"
-        - name: "swagger-akka-http/swagger-enumeratum-module"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "snowplow/iglu-scala-core"
+        - name: "spilne/spilne"
+        - name: "ssanj/delight"
+        - name: "stringbean/text-utils"
+        - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/conveniences"
@@ -716,6 +721,7 @@ jobs:
         - name: "vlmiroshnikov/saga"
         - name: "windymelt/happy-birthday"
         - name: "windymelt/qw.scala"
+        - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
