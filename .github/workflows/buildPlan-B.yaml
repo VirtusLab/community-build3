@@ -1,5 +1,5 @@
 
-# projects total:     611
+# projects total:     612
 # min stars count:    -1
 # max projects count: 1000
 
@@ -109,6 +109,8 @@ jobs:
         - name: "aoiroaoino/nanolens"
         - name: "aparo/zio-json-extra"
         - name: "appliedtopology/tda4j"
+        - name: "argon-lang/async-util"
+        - name: "argon-lang/esexpr"
         - name: "ariskk/burner4s"
         - name: "armanbilge/feral"
         - name: "armanbilge/fs2"
@@ -328,8 +330,6 @@ jobs:
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
         - name: "jodersky/redicl"
-        - name: "jodersky/scalapb-ujson"
-        - name: "jodersky/ustats"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jodersky/scalapb-ujson"
+        - name: "jodersky/ustats"
         - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
@@ -441,6 +443,7 @@ jobs:
         - name: "losizm/little-time"
         - name: "losizm/shampoo"
         - name: "losizm/t2"
+        - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
         - name: "malliina/sbt-utils"
@@ -548,7 +551,6 @@ jobs:
         - name: "raistlintao/scalalogger"
         - name: "ranyitz/casing"
         - name: "rayrobdod/string-context-parser-combinator"
-        - name: "reactivecore/usql"
         - name: "rmgk/slips"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
@@ -607,9 +609,7 @@ jobs:
         - name: "shuwariafrica/version"
         - name: "sideeffffect/zio-doobie"
         - name: "simy4/coregex"
-        - name: "sinaghaffari/monadicsimplifier"
         - name: "sky-uk/fs2-kafka-topic-loader"
-        - name: "sky-uk/kafka-topic-loader"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sky-uk/kafka-topic-loader"
         - name: "snowplow/iglu-scala-core"
         - name: "spilne/spilne"
         - name: "ssanj/delight"
