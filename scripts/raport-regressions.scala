@@ -317,6 +317,8 @@ def listFailedProjects(
           boolQuery()
             .not(
               termQuery("status", "success"),
+              matchPhraseQuery("logs", "TASTy signature has wrong version"),
+              matchPhraseQuery("logs", "is not a valid choice for -source")
             )
             .must(
               Seq(

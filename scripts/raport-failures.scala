@@ -26,26 +26,29 @@ import scala.util.chaining.*
 given ExecutionContext = ExecutionContext.global
 
 import upickle.default.*
+import java.util.Locale
 
 final val LogsDir =  os.pwd / "logs"
 
 // val comparedScalaVersion = "3.5.0-RC6-bin-ef43053-SNAPSHOT" // 
-val comparedScalaVersion = "3.5.0-RC6"
+val comparedScalaVersion = "3.3.3"
 val onlyFailingProjects = false
 
-val showIgnoredLogLines = false
-val showNewErrors = false
-val showDiffErrors = false
-val listSameErrorsProjects = false
-val listNewErrorsProjects = false
-val listDiffErrorsProjects = false
+val showIgnoredLogLines     = false
+val showNewErrors           = false
+val showDiffErrors          = false
+val listSameErrorsProjects  = false
+val listNewErrorsProjects   = false
+val listDiffErrorsProjects  = false
 
-val parseWarnings = true
-val showNewWarnings = false
-val showDiffWarnings = false
+val parseWarnings           = true
+val showNewWarnings         = false
+val showDiffWarnings        = false
 val listSameWarningProjects = false
-val listNewWarningProjects = false
+val listNewWarningProjects  = false
 val listDiffWarningProjects = false
+// Maximal number of lines that the error with the same source/message might differ
+val warningMaxLinesDifference = Some(10)
 
 val BuildSummariesIndex = "project-build-summary"
 val DefaultTimeout = 5.minutes
@@ -64,7 +67,11 @@ final val IgnoredExceptionMessages = Set(
   "Compilation failed",
   "is broken, reading aborted with class dotty.tools.tasty.UnpickleException",
   "Not found: type",
-  "is not a member of"
+  "is not a member of",
+  // Project contains deps compiled with newer Scala compiler 
+  "TASTy signature has wrong version",
+  "Incompatible TASTy version",
+  "is not a valid choice for -source"
 )
 final val IgnoredTasks = Set(
   "compileIncremental",
@@ -89,16 +96,114 @@ def cached[T :Writer :Reader](key: String)(body: => T): T = {
     result 
 }
 def projectResultsKey(scalaVersion: String) = s"results-$scalaVersion-failedOnly=$onlyFailingProjects"
-def warningsFilter(warning: Warning): Boolean = true
+object warnings:
+  private def normalize(v: String) = v.toLowerCase(Locale.ROOT).replaceAll("\n", " ").trim()
+  case class Category(messageOrPattern: String, name: Option[String] = None):
+    def categoryName = name.getOrElse(messageOrPattern)
+    private val messageNormalized = normalize(messageOrPattern)
+    private val patternNormalized = s".*${messageNormalized}.*".r
+    private[warnings] def matches(message: String) = 
+      message.contains(messageNormalized) || patternNormalized.matches(message)
+  def matching(message: String) = 
+    val messageNormalized = warnings.normalize(message)
+    all
+    .find(_.matches(messageNormalized))
+    .orElse:
+      // println("\n" + messageNormalized + "\n")
+      None
+
+  lazy val all = List(
+    Category("New anonymous class definition will be duplicated at each inline site"),
+    Category("already has a member with the same name and compatible parameter types"),
+    Category("Missing symbol position"),
+    Category("cannot override .* in .*"),
+    Category("Suspicious top-level unqualified call to"),
+    Category("@nowarn annotation does not suppress any warnings"),
+    Category("Infinite recursive call"),
+    Category("Infinite loop in function body"),
+    Category("values cannot be volatile"),
+    Category("error overriding .* in .* of type .* no longer has compatible type"),
+    Category("class .* differs only in case from .*"),
+    Category("Ambiguous implicits .* in .* and .* in .* seem to be used to implement a local failure in order to negate an implicit search"),
+    Category("Reference to .* is ambiguous. It is both defined in .* and inherited subsequently in .*"),
+    Category("An inline given alias with a function value as right-hand side can significantly increase generated code size."),
+    Category("unreducible application of higher-kinded type .* to wildcard arguments"),
+    Category("This type test will never return a result since the scrutinee type .* does not contain any value"),
+    Category("The package name .* will be encoded on the classpath, and can lead to undefined behaviour"),
+    Category("should be an instance of Matchable"),
+    Category("error overriding value .* lazy value .* of type .* may not override a non-lazy value"),
+    Category("Could not emit switch for @switch annotated match"),
+    Category("is more specialized than the right hand side expression's type"),
+    Category("given is now a keyword"),
+    Category("Pattern binding uses refutable extractor"),
+    // patter matching
+    Category("match may not be exhaustive") ,
+    Category("Unreachable case"),
+    Category("cannot be checked at runtime because its type arguments can't be determined from"),
+    Category("cannot be checked at runtime because it refers to an abstract type member or type parameter"),
+    Category("cannot be checked at runtime because it's a local class"),
+    // deprecations
+    Category("is deprecated") ,Category("will be deprecated") ,Category("has been deprecated"),
+    Category("Non local returns are no longer supported"),
+    Category("The syntax `x: _*` is no longer supported for vararg splices"),
+    Category("`_*` can be used only for last argument of method application"),
+    Category("The syntax `<function> _` is no longer supported"),
+    Category("is not declared infix; it should not be used as infix operator"),
+    Category("method .* is eta-expanded even though .* does not have the @FunctionalInterface annotation"),
+    Category("must be called with () argument"),
+    Category("symbol literal '.* is no longer supported"),
+    Category("`extends` must be followed by at least one parent"),
+    Category("Invalid message filter"), // TODO should be warning kind
+    // linting
+    Category("unused "),
+    Category("Modifier .* is redundant for this definition"),
+    Category("Discarded non-Unit value of type"),
+    Category("unset local variable, consider using an immutable val instead"),
+    Category("A pure expression does nothing in statement position"),
+    Category("Line is indented too far to the "),
+    Category("A try without catch or finally"),
+    Category("Access non-initialized value "),
+    Category("Promoting the value to transitively initialized (Hot) failed due to the following problem:"),
+    Category("Unset local variable"),
+    // migration warningss
+    Category("Result of implicit search for .* will change"),
+    Category("Context bounds will map to context parameters"),
+    Category("According to new variance rules, this is no longer accepted; need to annotate with @uncheckedVariance"),
+    Category("The conversion .* will not be applied implicitly here in Scala 3 because only implicit methods and instances of Conversion class will continue to work as implicit views"),
+    Category("Type ascriptions after patterns other than:.* are no longer supported"),
+    Category(".* in package .* has changed semantics in version"),
+    Category("@SerialVersionUID does nothing on a trait"),
+    // project specific
+    Category("Found a problem with your DI wiring", Some("7mind/izumi specific")) ,
+    Category("Pathological intersection refinement result in lambda being reconstructed ", Some("7mind/izumi specific")),
+    Category("Cannot extract argument name from.*", Some("7mind/izumi specific")),
+    Category("Unable to parse query", Some("quill specific")),
+    Category("The non-inlined expression .* is forcing the query to become dynamic", Some("quill specific")),
+    Category("Questionable row-class found.* The field .* will be used in the .* instead of the field .*", Some("quill specific")),
+    Category("Query Was Static but a Dynamic Meta was found: .*.This has forced the query to become dynam", Some("quill specific")),
+    Category("Generic type .* is not supported as.* member of sealed family", Some("play specific")),
+    Category("cannot handle class .*: no case accessor", Some("anorm specific")),
+    Category("The entry .* must be defined in the enum companion", Some("enumeratun specific")),
+    Category("defaulting to foreach, can not optimise range expression", Some("metarank/ltrlib specific")),
+  )
+def warningsFilter(warning: Warning): Boolean = warning match {
+  case Warning.CompilationWarning(code, kind, sourceFile, line, column, message, source, explained) => 
+    true
+    && !message.isBlank() 
+    // && warnings.matching(message).isDefined
+  case _ => false
+}
 def resultsInclusionFilter(project: ProjectResults): Boolean = project.warnings.exists(warningsFilter)
 
 
 @main def raport(version: String) = try {
+  // val debugProject = ""
   os.remove.all(LogsDir)
   val currentVersionResults = cached(projectResultsKey(version)):
     queryProjectsResultsForScalaVersion(version, failedOnly = onlyFailingProjects)
   .filter(resultsInclusionFilter)
   .map(r => r.copy(warnings = r.warnings.filter(warningsFilter)))
+  // .filter(_.name == debugProject)
   printErrorStats(currentVersionResults.filter(_.isFailing), version)  
   printWarningStats(currentVersionResults, version) 
 
@@ -106,6 +211,8 @@ def resultsInclusionFilter(project: ProjectResults): Boolean = project.warnings.
     queryProjectsResultsForScalaVersion(comparedScalaVersion, failedOnly = onlyFailingProjects)
   .filter(resultsInclusionFilter)
   .map(r => r.copy(warnings = r.warnings.filter(warningsFilter)))
+  // .filter(_.name == debugProject)
+
   printErrorStats(previousVersionResults.filter(_.isFailing), comparedScalaVersion)
   printWarningStats(previousVersionResults, comparedScalaVersion)
 
@@ -119,7 +226,7 @@ object TASTyVersion:
   given Writer[TASTyVersion] = upickle.default.StringWriter
   given Reader[TASTyVersion] = upickle.default.StringReader
   def apply(major: Int, minor: Int, unstableRelease: Option[Int]): TASTyVersion = s"$major.$minor" + unstableRelease.map(_ => "-unstable").getOrElse("")
-case class ProjectResults(name: String, errors: List[Error], warnings: List[Warning], scalaVersion: String, buildURL: Option[String]) derives Writer, Reader:
+case class ProjectResults(name: String, scalaVersion: String,  errors: List[Error] = Nil, warnings: List[Warning] = Nil,buildURL: Option[String] = None) derives Writer, Reader:
   def isFailing = errors.nonEmpty
 
 enum Error derives Writer, Reader:
@@ -137,21 +244,39 @@ object Error:
     def sourcePosition = s"${self.sourceFile}:${self.line}:${self.column}"
 
 enum Warning derives Writer, Reader:
-  override def equals(that: Any): Boolean = this.match {
+  def isSameAs(that: Warning): Boolean = this.match {
       case self: CompilationWarning => that.match {
         case that: CompilationWarning =>
-          that.code == self.code && that.kind == self.kind && that.sourceFile == self.sourceFile && that.line == self.line && that.column == self.column 
-          && that.message.filter(_.isLetterOrDigit) == self.message.filter(_.isLetterOrDigit) 
-          && that.source.map(_.filter(_.isLetterOrDigit)) == self.source.map(_.filter(_.isLetterOrDigit))
-        case other => super.equals(other)
+          // that.code == self.code && that.kind == self.kind && 
+          that.sourceFile == self.sourceFile
+          && {
+            List(self.message, that.message)
+            .map: msg =>
+              msg.filter(_.isLetterOrDigit)  
+            .match {
+              case l :: r :: _ => 
+                l == r || 
+                (l.nonEmpty && r.nonEmpty && (l.contains(r) || r.contains(l))) ||
+                (l.isEmpty() && r.isEmpty())
+              case _ => ???
+            }
+          }
+          && warningMaxLinesDifference.match{
+            case Some(limit) =>  (that.line - self.line).abs <= limit
+            case None => that.line == self.line && that.column == self.column
+          }
+        case Warning.DeprecatedSetting(_) => this.equals(that)
       }
-      case _ => super.equals(that)
+      case _ => this.equals(that) 
     }
-    case CompilationWarning(code: Option[Int], kind: String, sourceFile: String, line: Int, column: Int, message: String, source: Option[String], explained: Option[String])
-    case DeprecatedSetting(setting: String)
+  case CompilationWarning(code: Option[Int], kind: String, sourceFile: String, line: Int, column: Int, message: String, source: Option[String], explained: Option[String])
+  case DeprecatedSetting(setting: String)
 object Warning:
   extension(self: CompilationWarning) 
     def sourcePosition = s"${self.sourceFile}:${self.line}:${self.column}"
+extension(self: Iterable[Warning]) 
+  def intersectWith(other: Iterable[Warning]) = self.filter(w => other.exists(_.isSameAs(w))).toSeq.distinct
+  def diffWith(other: Iterable[Warning]) = self.filter(w => other.forall(!_.isSameAs(w))).toSeq.distinct
 
 
 given Show[Error.CompilationError] = err => s"""Error${err.code.map("[" + _ + "]").getOrElse("")} ${err.kind}
@@ -217,6 +342,19 @@ def printWarningStats(projects: Iterable[ProjectResults], scalaVersion: String) 
     .foreach: (warnKind, count) =>
       println(s"  - ${warnKind}:\t$count")
   println("###############")
+  println("Warnings by message category:")
+  projects.toList
+    .flatMap(_.warnings)
+    .collect{case warn: Warning.CompilationWarning => warnings.matching(warn.message)}
+    .groupBy(_.map(_.categoryName))
+    .mapValues(_.size)
+    .pipe: results =>
+      (warnings.all.distinctBy(_.categoryName).map(Some(_)) :+ None).map: cat =>
+        val name = cat.map(_.categoryName)
+        val count = results.getOrElse(name, 0)
+        println(s"$count\t-\t${name.getOrElse("uncatagorized")}")
+  println("###############")
+
 }
 
 def printLine() = println("-" * 16)
@@ -317,16 +455,16 @@ def printErrorComparsionForVersions(currentResults: Set[ProjectResults], previou
 }
 
 def printWarningComparsionForVersions(currentResults: Set[ProjectResults], previousResults: Set[ProjectResults]) = {
-  val newFailures = currentResults.map(_.name).diff(previousResults.map(_.name))
-  println(s"New warnings in ${newFailures.size} projects")
-  newFailures.toSeq.sorted.zipWithIndex.foreach: (project, idx) => 
+  val projectsWithWarnings = currentResults.filter(_.warnings.nonEmpty).map(_.name)
+  println(s"Warnings found in ${projectsWithWarnings.size} projects")
+  projectsWithWarnings.toSeq.sorted.zipWithIndex.foreach: (project, idx) => 
     val result = currentResults.find(_.name == project)
     val url = result.flatMap(_.buildURL).map(": " + _).getOrElse("")
     val count = result.map(_.warnings.length).get
     println(s"$idx.\t$project - $count $url")
-  val allNewWarnings = currentResults.flatMap(_.warnings).diff(previousResults.flatMap(_.warnings))
+  val allNewWarnings = currentResults.flatMap(_.warnings).diffWith(previousResults.flatMap(_.warnings))
   printLine()
-  println(s"New warnings: ${allNewWarnings.size}")
+  println(s"All warnings: ${allNewWarnings.size}")
 
   val alreadyWarning = currentResults.map(_.name).intersect(previousResults.map(_.name))
   println(s"Projects previously warning: ${alreadyWarning.size}")
@@ -334,10 +472,15 @@ def printWarningComparsionForVersions(currentResults: Set[ProjectResults], previ
   case class ProjectComparsion(name: String,  previous: ProjectResults, current: ProjectResults, comparsion: Comparsion)
   case class WarningDiff(sourcePosition: Option[String], previous: Seq[Warning], current: Seq[Warning])
   case class Comparsion(sameWarnings: Seq[Warning], newWarnings: Seq[Warning], diffWarnings: Seq[WarningDiff])
-  val projectComparsion = alreadyWarning.map: project =>
+  val projectComparsion = projectsWithWarnings.map: project =>
     val current = currentResults.find(_.name == project).get
-    val prev = previousResults.find(_.name == project).get
-    val newWarnings = current.warnings.diff(prev.warnings).filter:
+    val prev = previousResults.find(_.name == project).getOrElse(ProjectResults(name = project, scalaVersion = comparedScalaVersion))
+    // println(s"previous: [${prev.warnings.size}]")
+    // prev.warnings.map(_.show).foreach(println)
+    // println(s"current: [${current.warnings.size}]")
+    // prev.warnings.map(_.show).foreach(println)
+
+    val newWarnings = current.warnings.diffWith(prev.warnings).filter:
         case err: Warning.CompilationWarning => !prev.warnings.exists:
           case prev: Warning.CompilationWarning  => err.sourcePosition == prev.sourcePosition 
           case _ => false
@@ -348,22 +491,22 @@ def printWarningComparsionForVersions(currentResults: Set[ProjectResults], previ
       previous = prev,
       current = current,
       Comparsion(
-        sameWarnings = current.warnings.intersect(prev.warnings).sortBy(_.ordinal),
+        sameWarnings = current.warnings.intersectWith(prev.warnings).sortBy(_.ordinal),
         newWarnings  = newWarnings,
-        diffWarnings = ((current.warnings.diff(prev.warnings) ++ prev.warnings.diff(current.warnings))).collect:
+        diffWarnings = ((current.warnings.diffWith(prev.warnings) ++ prev.warnings.diffWith(current.warnings))).collect:
             case err: Warning.CompilationWarning => err
           .groupBy(_.sourcePosition)
           .filter(_._2.size > 1)
           .toSeq
           .map: (sourcePosition, compilationWarnings) => 
             WarningDiff(sourcePosition = Some(sourcePosition),
-             current = current.warnings.intersect(compilationWarnings),
-             previous = prev.warnings.intersect(compilationWarnings)
+             current = current.warnings.intersectWith(compilationWarnings),
+             previous = prev.warnings.intersectWith(compilationWarnings)
             )
           .appended: 
             WarningDiff(sourcePosition = None, 
               current = otherWarnings(newWarnings),
-              previous = otherWarnings(prev.warnings).diff(otherWarnings(newWarnings))
+              previous = otherWarnings(prev.warnings).diffWith(otherWarnings(newWarnings))
             ) 
           .filter(diff => diff.previous.nonEmpty && diff.current.nonEmpty)
           .sortBy(_.sourcePosition)
@@ -371,11 +514,12 @@ def printWarningComparsionForVersions(currentResults: Set[ProjectResults], previ
   val (withSameWarnings, withDiffWarnings) = projectComparsion.partition: project => 
     project.comparsion.diffWarnings.isEmpty && project.comparsion.newWarnings.isEmpty
 
-  println(s"Projects with the same warnings: ${withSameWarnings.size}")
-  if listSameWarningProjects && withSameWarnings.nonEmpty then
-    withSameWarnings.toSeq.sortBy(_.name).zipWithIndex.foreach: (p, idx) =>
-      println(s"$idx: ${p.name}: ${p.current.errors.size} same warnings")
-    printLine()
+  // println(s"Projects with the same warnings: ${withSameWarnings.size}")
+  // withSameWarnings.foreach(_.current.warnings.foreach(println))
+  // if listSameWarningProjects && withSameWarnings.nonEmpty then
+  //   withSameWarnings.toSeq.sortBy(_.name).zipWithIndex.foreach: (p, idx) =>
+  //     println(s"$idx: ${p.name}: ${p.current.warnings.size} same warnings")
+  //   printLine()
 
   val diffWarningProjects = withDiffWarnings.filter(_.comparsion.diffWarnings.nonEmpty)
   println(s"Projects with different warnings: ${diffWarningProjects.size}")
@@ -393,7 +537,7 @@ def printWarningComparsionForVersions(currentResults: Set[ProjectResults], previ
   
   if showNewWarnings || showDiffWarnings then {
     withDiffWarnings.toSeq.sortBy(_.name).zipWithIndex.foreach{ (p, idx) =>    
-      println(s"$idx: ${p.name}: ${p.comparsion.diffWarnings.size} diff warnings, ${p.comparsion.newWarnings.size} new warnings")
+      println(s"$idx: ${p.name}: ${p.comparsion.diffWarnings.size} diff warnings, ${p.comparsion.newWarnings.size} new warnings, ${p.comparsion.sameWarnings.size} same warnings")
       if showNewWarnings && p.comparsion.newWarnings.nonEmpty then
         println(s"New warnings: ${p.comparsion.newWarnings.size}")
         p.comparsion.newWarnings.zipWithIndex.foreach: (err, idx) =>
@@ -425,12 +569,12 @@ def parseErrorLogs(logs: String): List[Error] = {
       case (acc, msg @ s"[error] ${_} [E${code}] ${kind}: ${sourceFile}:${line}:${tail}") =>
         val column = tail.takeWhile(_.isDigit)
         isParsingError = true
-        Error.CompilationError(code = Some(code.toInt), kind = kind, sourceFile = sourceFile, line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
+        Error.CompilationError(code = Some(code.toInt), kind = kind, sourceFile = normalizePaths(sourceFile), line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
 
       case (acc, msg @ s"[error] ${_} ${kind}: ${sourceFile}:${line}:${tail}") if sourceFile.endsWith(".scala")  =>
         val column = tail.takeWhile(_.isDigit)
         isParsingError = true
-        Error.CompilationError(code = None, kind = kind, sourceFile = sourceFile, line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
+        Error.CompilationError(code = None, kind = kind, sourceFile = normalizePaths(sourceFile), line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
 
       case (acc, s"[error] ## Exception when compiling ${_} sources ${_}") => 
         isParsingError = true
@@ -449,10 +593,10 @@ def parseErrorLogs(logs: String): List[Error] = {
       case (acc, s"[error]${_}sbt.librarymanagement.ResolveException: Error downloading ${dependency}") =>
         Error.MissingDependency(dependency) :: acc
 
-      case (acc, s"[error] ($module / $scope / $task) ${msg}") =>
+      case (acc, s"[error] ($module / $scope / $task) ${NormalizedMessage(msg)}") =>
         if IgnoredExceptions.exists(msg.contains) || IgnoredTasks.contains(task) then acc
         else Error.BuildTaskFailure(s"Task failed: ${module}/$scope/$task : $msg") :: acc
-      case (acc, s"[error] ($module / $task) ${msg}")  =>
+      case (acc, s"[error] ($module / $task) ${NormalizedMessage(msg)}")  =>
         if IgnoredExceptions.exists(msg.contains) || IgnoredTasks.contains(task) then acc
         else Error.BuildTaskFailure(s"Task failed: ${module}/$task : $msg") :: acc
  
@@ -461,10 +605,10 @@ def parseErrorLogs(logs: String): List[Error] = {
           case last: Error.CompilationError =>
             line match {
               case s"[error] ${sourceLine}|${source}" if sourceLine.trim().toIntOption.contains(last.line) =>
-                last.copy(source = Some(source)) :: tail
+                last.copy(source = Some(normalizePaths(source))) :: tail
               case s"[error] ${_}|Explanation (enabled by `-explain`)" | s"[error] Explanation" =>
                 last.copy(explained = Some("")) :: tail
-              case s"[error]${_}|${message}" if !message.isBlank() => 
+              case s"[error]${_}|${NormalizedMessage(message)}" => 
                 val updated = 
                   if message.trim().forall(_ == '^') then 
                     last.copy(source = last.source.map(_ + "\n" + message))
@@ -473,7 +617,7 @@ def parseErrorLogs(logs: String): List[Error] = {
                   else 
                     last.copy(message = last.message + "\n" + message) 
                 updated :: tail 
-              case s"[error] ${message}" if !message.isBlank() && last.explained.isDefined => 
+              case s"[error] ${NormalizedMessage(message)}" if last.explained.isDefined => 
                 val updated = last.copy(explained = last.explained.map(_ + message + "\n"))
                 updated :: tail 
               case msg =>
@@ -481,8 +625,8 @@ def parseErrorLogs(logs: String): List[Error] = {
                 acc
             }
           case last: Error.CompilationCrash => line match {
-            case s"[error] ${msg}" =>
-              last.copy(stacktrace = last.stacktrace :+ msg.trim()) :: tail
+            case s"[error] ${NormalizedMessage(msg)}" =>
+              last.copy(stacktrace = last.stacktrace :+ msg) :: tail
             case msg =>
               if showIgnoredLogLines then println(s"Ignored crash log: ${logLine}: ${msg}")
               acc
@@ -501,8 +645,8 @@ def parseErrorLogs(logs: String): List[Error] = {
                 acc
           }
           case last: Error.UnhandledException => line match {
-             case s"[error] ${msg}" => 
-              last.copy(stacktrace = last.stacktrace :+ msg.trim()) :: tail
+             case s"[error] ${NormalizedMessage(msg)}" => 
+              last.copy(stacktrace = last.stacktrace :+ msg) :: tail
             case _ => acc
           }
           case _: Error.MissingDependency => acc
@@ -510,7 +654,7 @@ def parseErrorLogs(logs: String): List[Error] = {
           case _: Error.Misconfigured => acc
         }
  
-      case (acc, s"[error] ${exception}") 
+      case (acc, s"[error] ${NormalizedMessage(exception)}") 
       if Seq("Exception", "Error", "Failure", "Failed").exists{ suffix =>
           exception.split(" ")
             .map(_.trim().filter(_.isLetterOrDigit))
@@ -542,6 +686,18 @@ def parseErrorLogs(logs: String): List[Error] = {
   .sortBy(_.ordinal)
 }
 
+def normalizePaths(msg: String): String = {
+  msg
+    .replaceAll("/build/repo/", "")
+    .replaceAll(raw"/scala-[\w+\d+\.\-]+/", "/SCALA_VERSION/")
+}
+
+object NormalizedMessage:
+  def unapply(msg: String): Option[String] = 
+    Option:
+      normalizePaths(msg)
+    .filterNot(_.trim().isBlank())
+
 def parseWarningLogs(logs: String): List[Warning] = {
   var logLine = 0
   var isParsingWarning = false
@@ -552,11 +708,11 @@ def parseWarningLogs(logs: String): List[Warning] = {
       case (acc, msg @ s"[warn] ${_} [E${code}] ${kind}: ${sourceFile}:${line}:${tail}") =>
         val column = tail.takeWhile(_.isDigit)
         isParsingWarning = true
-        Warning.CompilationWarning(code = Some(code.toInt), kind = kind, sourceFile = sourceFile, line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
-      case (acc, msg @ s"[warn] ${_} ${kind}: ${sourceFile}:${line}:${tail}") if sourceFile.endsWith(".scala")  =>
+        Warning.CompilationWarning(code = Some(code.toInt), kind = kind, sourceFile = normalizePaths(sourceFile), line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
+      case (acc, msg @ s"[warn] ${_} ${kind}: ${sourceFile}:${line}:${tail}") if sourceFile.endsWith(".scala") && line.toIntOption.isDefined  =>
         val column = tail.takeWhile(_.isDigit)
         isParsingWarning = true
-        Warning.CompilationWarning(code = None, kind = kind, sourceFile = sourceFile, line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
+        Warning.CompilationWarning(code = None, kind = kind, sourceFile = normalizePaths(sourceFile), line = line.toInt, column = column.toInt, message = "",source = None, explained = None) :: acc
 
       case (acc, s"[warn] Option ${usedOption} is deprecated${_}") =>
         Warning.DeprecatedSetting(usedOption) :: acc
@@ -566,10 +722,10 @@ def parseWarningLogs(logs: String): List[Warning] = {
           case last: Warning.CompilationWarning =>
             line match {
               case s"[warn] ${sourceLine}|${source}" if sourceLine.trim().toIntOption.contains(last.line) =>
-                last.copy(source = Some(source)) :: tail
+                last.copy(source = Some(normalizePaths(source))) :: tail
               case s"[warn] ${_}|Explanation (enabled by `-explain`)" | s"[error] Explanation" =>
                 last.copy(explained = Some("")) :: tail
-              case s"[warn]${_}|${message}" if !message.isBlank() => 
+              case s"[warn]${_}|${NormalizedMessage(message)}" => 
                 val updated = 
                   if message.trim().forall(_ == '^') then 
                     last.copy(source = last.source.map(_ + "\n" + message))
@@ -578,7 +734,7 @@ def parseWarningLogs(logs: String): List[Warning] = {
                   else 
                     last.copy(message = last.message + "\n" + message) 
                 updated :: tail 
-              case s"[warn] ${message}" if !message.isBlank() && last.explained.isDefined => 
+              case s"[warn] ${NormalizedMessage(message)}" if last.explained.isDefined => 
                 val updated = last.copy(explained = last.explained.map(_ + message + "\n"))
                 updated :: tail 
               case msg =>
@@ -641,7 +797,12 @@ def queryProjectsResultsForScalaVersion(scalaVersion: String, failedOnly: Boolea
             termsQuery("status", Seq("failure") ++ Option.when(!failedOnly)("success")),
             not(
               Option.when(failedOnly):
-                termsQuery("projectName", passingProjectsForScalaVersion(scalaVersion).toSeq)
+                termsQuery("projectName", passingProjectsForScalaVersion(scalaVersion).toSeq) 
+              ++ Seq(
+                matchPhraseQuery("logs", "TASTy signature has wrong version"),
+                matchPhraseQuery("logs", "Incompatible TASTy version"),
+                matchPhraseQuery("logs", "is not a valid choice for -source")
+              )
             )
           )
         .size(10 * 1000)
