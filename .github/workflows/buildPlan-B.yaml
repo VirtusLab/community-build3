@@ -93,6 +93,7 @@ jobs:
         - name: "akiomik/seaw"
         - name: "akka/akka-diagnostics"
         - name: "alejandrohdezma/alfred4s"
+        - name: "alejandrohdezma/circe-munit"
         - name: "alejandrohdezma/dummy"
         - name: "alejandrohdezma/sbt-mdoc-toc"
         - name: "alejandrohdezma/sbt-propagate"
@@ -109,8 +110,6 @@ jobs:
         - name: "aoiroaoino/nanolens"
         - name: "aparo/zio-json-extra"
         - name: "appliedtopology/tda4j"
-        - name: "argon-lang/async-util"
-        - name: "argon-lang/esexpr"
         - name: "ariskk/burner4s"
         - name: "armanbilge/feral"
         - name: "armanbilge/fs2"
@@ -330,6 +329,7 @@ jobs:
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
         - name: "jodersky/redicl"
+        - name: "jodersky/scalapb-ujson"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
         - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
@@ -610,6 +609,7 @@ jobs:
         - name: "sideeffffect/zio-doobie"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
+        - name: "sky-uk/kafka-topic-loader"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,10 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sky-uk/kafka-topic-loader"
         - name: "snowplow/iglu-scala-core"
         - name: "spilne/spilne"
         - name: "ssanj/delight"
+        - name: "staeff777/scalaveusz"
         - name: "stringbean/text-utils"
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
