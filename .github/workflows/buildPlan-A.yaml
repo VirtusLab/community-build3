@@ -107,7 +107,6 @@ jobs:
         - name: "altoo-ag/scala-kryo-serialization"
         - name: "analogweb/analogweb-scala"
         - name: "andimiller/decline-completion"
-        - name: "andyglow/scala-range"
         - name: "andyglow/scala-xml-diff"
         - name: "andyglow/typesafe-config-scala"
         - name: "andyglow/websocket-scala-client"
@@ -330,6 +329,7 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
+        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "flyway/flyway-play"
@@ -451,7 +450,6 @@ jobs:
         - name: "http4s/http4s-prometheus-metrics"
         - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-session"
-        - name: "http4s/http4s-twirl"
         - name: "i10416/cssminifier"
         - name: "i10416/munkres"
         - name: "ichoran/kse3"
@@ -577,6 +575,8 @@ jobs:
         - name: "lhns/fs2-compress"
         - name: "lhns/munit-tagless-final"
         - name: "lichess-org/lila"
+        - name: "lichess-org/lila-fishnet"
+        - name: "lichess-org/lila-search"
         - name: "lichess-org/lila-ws"
         - name: "lichess-org/playframework-lila"
         - name: "lichess-org/scalachess"
