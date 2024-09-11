@@ -1,5 +1,5 @@
 
-# projects total:     612
+# projects total:     614
 # min stars count:    -1
 # max projects count: 1000
 
@@ -107,6 +107,7 @@ jobs:
         - name: "andimiller/hedgehogs"
         - name: "andimiller/munit-cats-effect-styles"
         - name: "andreamarcolin/oidc4s"
+        - name: "andyglow/scala-range"
         - name: "aoiroaoino/nanolens"
         - name: "aparo/zio-json-extra"
         - name: "appliedtopology/tda4j"
@@ -294,6 +295,7 @@ jobs:
         - name: "http4s/http4s-async-http-client"
         - name: "http4s/http4s-fabric"
         - name: "http4s/http4s-play-json"
+        - name: "http4s/http4s-twirl"
         - name: "hughsimpson/scalameter"
         - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/detective"
@@ -328,8 +330,6 @@ jobs:
         - name: "jodersky/applib"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
-        - name: "jodersky/redicl"
-        - name: "jodersky/scalapb-ujson"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jodersky/redicl"
+        - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
         - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
@@ -608,8 +610,6 @@ jobs:
         - name: "shuwariafrica/version"
         - name: "sideeffffect/zio-doobie"
         - name: "simy4/coregex"
-        - name: "sky-uk/fs2-kafka-topic-loader"
-        - name: "sky-uk/kafka-topic-loader"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sky-uk/fs2-kafka-topic-loader"
+        - name: "sky-uk/kafka-topic-loader"
         - name: "snowplow/iglu-scala-core"
         - name: "spilne/spilne"
         - name: "ssanj/delight"
