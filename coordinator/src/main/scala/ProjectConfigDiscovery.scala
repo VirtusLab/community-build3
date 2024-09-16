@@ -44,6 +44,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
       case (project, "compile-only") => project -> TestingMode.CompileOnly
       case (project, "disabled") => project -> TestingMode.Disabled
       case (project, "full") => project -> TestingMode.Full
+      case _ => ??? // unreachable
     }.toMap
 
   def apply(
