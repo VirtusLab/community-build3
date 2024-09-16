@@ -25,6 +25,7 @@ echo Project projectConfig: $projectConfig
 echo '##################################'
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+projectDir=$PWD/$repoDir
 
 cd $repoDir
 
@@ -42,7 +43,7 @@ millSettings=(
 function tryBuild() {
   mill=$1
   echo "Try build using $mill"
-  $mill "${millSettings[@]}" runCommunityBuild "$scalaVersion" "${projectConfig}" "${targets[@]}"
+  $mill "${millSettings[@]}" runCommunityBuild --scalaVersion="$scalaVersion" --configJson="${projectConfig}" --projectDir=$projectDir "${targets[@]}"
 }
 
 

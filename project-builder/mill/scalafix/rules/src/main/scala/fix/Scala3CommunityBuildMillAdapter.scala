@@ -54,7 +54,7 @@ class Scala3CommunityBuildMillAdapter(
     "Scala_3",
     "scala_3",
     "scala",
-    "Scala"
+    // "Scala" - explicitly ignored
   )
 
   val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r

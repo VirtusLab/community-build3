@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 import Scala3CommunityBuild._
-import Scala3CommunityBuild.Utils._
+import Scala3CommunityBuild.Utils.{LibraryDependency, logOnce}
 import TaskEvaluator.EvalResult
 
 class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
@@ -94,13 +94,12 @@ object CommunityBuildPlugin extends AutoPlugin {
   private def extraLibraryDependencies(
       buildScalaVersion: Option[String],
       projectScalaVersion: String
-  ) =
+  ): Seq[ModuleID] =
     if (!projectScalaVersion.startsWith("3.")) Nil
     else
-      Scala3CommunityBuild.Utils
-        .extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion))
+      Utils.extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion))
         .map {
-          case Scala3CommunityBuild.Utils.LibraryDependency(
+          case LibraryDependency(
                 org,
                 artifact,
                 version,
@@ -194,7 +193,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         if (scalaVersion.startsWith("3.")) remove
         else remove ++ appendScala3Exclusive
 
-      Scala3CommunityBuild.Utils.mapScalacOptions(
+      Utils.mapScalacOptions(
         current = currentScalacOptions,
         append = filteredAppend,
         remove = filteredRemove
@@ -420,7 +419,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         case "*%*" :: _ => originalModuleIds.keys.toSeq
         case ids        => ids
       }
-      val filteredIds = filterTargets(idsToUse, config.projects.exclude.map(_.r))
+      val filteredIds = Utils.filterTargets(idsToUse, config.projects.exclude.map(_.r))
 
       println("Starting build...")
       // Find projects that matches maven
