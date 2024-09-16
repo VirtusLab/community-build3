@@ -52,7 +52,9 @@ class Scala3CommunityBuildMillAdapter(
     "Scala3Version",
     "scala3Version",
     "Scala_3",
-    "scala_3"
+    "scala_3",
+    "scala",
+    "Scala"
   )
 
   val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
@@ -354,9 +356,9 @@ class Scala3CommunityBuildMillAdapter(
     |import $file.MillCommunityBuild
     |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}
     |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
+    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
     |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
-    |  MillCommunityBuild.runBuild(configJson, targets)
+    |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
     |}
     |""".stripMargin
     val MillCommunityBuildCrossInject = """
