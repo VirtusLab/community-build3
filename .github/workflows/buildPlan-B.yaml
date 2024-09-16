@@ -1,5 +1,5 @@
 
-# projects total:     614
+# projects total:     618
 # min stars count:    -1
 # max projects count: 1000
 
@@ -99,7 +99,7 @@ jobs:
         - name: "alejandrohdezma/sbt-propagate"
         - name: "alexarchambault/class-path-inspector"
         - name: "alexarchambault/cli-test-util"
-        - name: "alexcardell/ff4s"
+        - name: "alexcardell/openfeature-scala"
         - name: "alexdupre/coinpayments-scala"
         - name: "alterationx10/opinionated-zio"
         - name: "altoo-ag/pekko-kryo-serialization"
@@ -232,6 +232,7 @@ jobs:
         - name: "fgrutsch/akka-persistence-mapdb"
         - name: "fgrutsch/emergence"
         - name: "fiatjaf/nlog"
+        - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "firstbirdtech/emergence"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
@@ -297,8 +298,10 @@ jobs:
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-twirl"
         - name: "hughsimpson/scalameter"
+        - name: "hughsimpson/scalamock"
         - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/detective"
+        - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
         - name: "indoorvivants/opaque-newtypes"
         - name: "indoorvivants/rendition"
@@ -327,9 +330,6 @@ jobs:
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
         - name: "jkugiya/ulid-scala"
-        - name: "jodersky/applib"
-        - name: "jodersky/cronic"
-        - name: "jodersky/identicon"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jodersky/applib"
+        - name: "jodersky/cronic"
+        - name: "jodersky/identicon"
         - name: "jodersky/redicl"
         - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
@@ -379,6 +382,7 @@ jobs:
         - name: "jwojnowski/googlecloud4s"
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
+        - name: "jypma/lazagna"
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
@@ -606,10 +610,6 @@ jobs:
         - name: "sh4869/semver-parser-scala"
         - name: "shawjef3/tryutils"
         - name: "shopstic/caliban"
-        - name: "shuwariafrica/doobie-util"
-        - name: "shuwariafrica/version"
-        - name: "sideeffffect/zio-doobie"
-        - name: "simy4/coregex"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "shuwariafrica/doobie-util"
+        - name: "shuwariafrica/version"
+        - name: "sideeffffect/zio-doobie"
+        - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
         - name: "snowplow/iglu-scala-core"
