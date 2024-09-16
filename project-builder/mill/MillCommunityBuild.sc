@@ -1,5 +1,6 @@
+package build
 import $ivy.`com.lihaoyi::upickle:3.0.0`
-import $file.MillVersionCompat, MillVersionCompat.compat.{
+import MillVersionCompat.compat.{
   CoursierModule,
   JavaModule,
   PublishModule,
@@ -11,7 +12,7 @@ import $file.MillVersionCompat, MillVersionCompat.compat.{
   Val,
   toZincWorker
 }
-import $file.CommunityBuildCore, CommunityBuildCore.Scala3CommunityBuild.{
+import CommunityBuildCore.Scala3CommunityBuild.{
   TestingMode => _,
   ProjectBuildConfig => _,
   ProjectOverrides => _,
@@ -188,8 +189,8 @@ class MillTaskEvaluator()(implicit ctx: Ctx) extends TaskEvaluator[NamedTask] {
 
 // Main entry point for Mill community build
 // Evaluate tasks until first failure and publish report
-def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
-
+def runBuild(configJson: String, projectDir: String, targets: Seq[String])(implicit ctx: Ctx) = {
+  val outputDir: os.Path = os.Path.expandUser(projectDir) / os.up
   println(s"Build config: ${configJson}")
   val config = read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
@@ -305,7 +306,6 @@ def runBuild(configJson: String, targets: Seq[String])(implicit ctx: Ctx) = {
     |************************"
     |""".stripMargin)
 
-  val outputDir = os.pwd / os.up
   os.write.over(outputDir / "build-summary.txt", buildSummary.toJson)
 
   val failedModules = projectsBuildResults
