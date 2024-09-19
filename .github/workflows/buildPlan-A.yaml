@@ -119,6 +119,7 @@ jobs:
         - name: "apache/pekko-http"
         - name: "apache/pekko-management"
         - name: "apache/pekko-persistence-cassandra"
+        - name: "apache/pekko-persistence-jdbc"
         - name: "apache/pekko-persistence-r2dbc"
         - name: "apache/pekko-projection"
         - name: "apimorphism/telegramium"
@@ -329,7 +330,6 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
-        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "flyway/flyway-play"
@@ -582,7 +583,6 @@ jobs:
         - name: "lightbend-labs/lightbend-emoji"
         - name: "lightbend-labs/mima"
         - name: "lightbend/ssl-config"
-        - name: "liquibase4s/liquibase4s"
         - name: "lloydmeta/enumeratum"
         - name: "lloydmeta/ltsv-logger"
         - name: "log4s/log4s"
@@ -1008,6 +1008,7 @@ jobs:
         - name: "trace4cats/trace4cats-sttp"
         - name: "travisbrown/dhallj"
         - name: "travisbrown/iteratee"
+        - name: "tschuchortdev/hkd4s"
         - name: "typebricks/pureconfig-toggleable"
         - name: "typelevel/case-insensitive"
         - name: "typelevel/catapult"
@@ -1114,7 +1115,6 @@ jobs:
         - name: "zio/izumi-reflect"
         - name: "zio/zio"
         - name: "zio/zio-amqp"
-        - name: "zio/zio-bson"
         - name: "zio/zio-cache"
         - name: "zio/zio-cli"
         - name: "zio/zio-config"
