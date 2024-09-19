@@ -43,7 +43,12 @@ millSettings=(
 function tryBuild() {
   mill=$1
   echo "Try build using $mill"
-  $mill "${millSettings[@]}" runCommunityBuild --scalaVersion="$scalaVersion" --configJson="${projectConfig}" --projectDir=$projectDir "${targets[@]}"
+  # mill 0.11- does not support arg=value inputs
+  $mill "${millSettings[@]}" runCommunityBuild \
+    --scalaVersion "$scalaVersion" \
+    --configJson "${projectConfig}" \
+    --projectDir $projectDir \
+    "${targets[@]}"
 }
 
 
