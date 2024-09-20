@@ -141,9 +141,9 @@ class Scala3CommunityBuildMillAdapter(
     )
 
     def injectRootModuleRunCommand =                  
-      // def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
+      // def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
       //   implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
-      //   MillCommunityBuild.runBuild(configJson, targets)
+      //   MillCommunityBuild.runBuild(configJson, projectDir, targets)
       // }""".stripMargin
       Defn.Def(Nil, Term.Name("runCommunityBuild"), Nil, 
       paramss = List(
@@ -151,6 +151,7 @@ class Scala3CommunityBuildMillAdapter(
           Term.Param(Nil, Term.Name("evaluator"),    Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("eval")), Type.Name("Evaluator"))), None),
           Term.Param(Nil, Term.Name("scalaVersion"), Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
           Term.Param(Nil, Term.Name("configJson"),   Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
+          Term.Param(Nil, Term.Name("projectDir"),   Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
           Term.Param(Nil, Term.Name("targets"),      Some(Type.Repeated(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String")))), None),
         )
       ),
@@ -169,7 +170,7 @@ class Scala3CommunityBuildMillAdapter(
               ),
               Term.Apply(
                 Term.Select(Term.Name("MillCommunityBuild"), Term.Name("runBuild")),
-                List(Term.Name("configJson"), Term.Name("targets"))
+                List(Term.Name("configJson"), Term.Name("projectDir"), Term.Name("targets"))
               )
           ))
         )
