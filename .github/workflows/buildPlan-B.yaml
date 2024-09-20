@@ -1,5 +1,5 @@
 
-# projects total:     618
+# projects total:     620
 # min stars count:    -1
 # max projects count: 1000
 
@@ -369,6 +369,7 @@ jobs:
         - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
         - name: "jqscala/jqscala"
+        - name: "juliano/randomuser-scala"
         - name: "julianpeeters/dc10"
         - name: "julianpeeters/dc10-cats-effect"
         - name: "julianpeeters/dc10-scala"
@@ -456,6 +457,7 @@ jobs:
         - name: "malliina/util-base"
         - name: "malyszaryczlowiek/kessenger-lib"
         - name: "marcinzh/beam"
+        - name: "marcinzh/spot"
         - name: "marcinzh/yamlike"
         - name: "massimosiani/monix-newtypes-cats"
         - name: "mateuszkubuszok/dbg-schema"
@@ -608,8 +610,6 @@ jobs:
         - name: "sdrafahl/codec"
         - name: "sean-ideabank/rudolf"
         - name: "sh4869/semver-parser-scala"
-        - name: "shawjef3/tryutils"
-        - name: "shopstic/caliban"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "shawjef3/tryutils"
+        - name: "shopstic/caliban"
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
         - name: "sideeffffect/zio-doobie"
