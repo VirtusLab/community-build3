@@ -43,8 +43,18 @@ else
     for v in $MILL_0_12 $MILL_0_11 $MILL_0_10 $MILL_0_9; do
       if `${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null`; then
         echo "Successfully applied build using mill $v"
-        millVersion=$v
-        break
+        buildScVersions=($MILL_0_11 $MILL_0_10 $MILL_0_9)
+        if [[ " ${buildScVersions[*]} " =~ " ${v} " && -f ./build.sc ]]; then
+          echo "Found build.sc file and matching Mill version" 
+          millVersion=$v
+          break
+        elif [[ -f ./build.mill ]]; then
+          echo "Found build.mill file"
+          millVersion=$v
+          break
+        else
+          echo "Able to resolve build, but not found matching build files"
+        fi
       else 
         echo "Failed to apply build using mill $v"
       fi
