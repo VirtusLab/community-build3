@@ -1,5 +1,5 @@
 
-# projects total:     621
+# projects total:     625
 # min stars count:    -1
 # max projects count: 1000
 
@@ -97,6 +97,7 @@ jobs:
         - name: "alejandrohdezma/dummy"
         - name: "alejandrohdezma/sbt-mdoc-toc"
         - name: "alejandrohdezma/sbt-propagate"
+        - name: "alejandrohdezma/string-box"
         - name: "alexarchambault/class-path-inspector"
         - name: "alexarchambault/cli-test-util"
         - name: "alexcardell/openfeature-scala"
@@ -212,6 +213,7 @@ jobs:
         - name: "dwolla/epimetheus-server"
         - name: "dwolla/natchez-smithy4s"
         - name: "dwolla/natchez-tagless"
+        - name: "dwolla/scala-secure-config"
         - name: "eb2501/fluor-core"
         - name: "eikek/binny"
         - name: "eikek/htmx4s"
@@ -256,6 +258,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-schemas"
+        - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "gnp/ident"
         - name: "gnp/zio-data-streams"
@@ -293,6 +296,7 @@ jobs:
         - name: "hnaderi/named-codec"
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
+        - name: "hnaderi/yaml4s"
         - name: "hsci-r/octavo-indexer"
         - name: "hshn/slick-codegen-patch"
         - name: "http4s/http4s-async-http-client"
@@ -326,10 +330,6 @@ jobs:
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
-        - name: "jd557/rokrok"
-        - name: "jkobejs/cron"
-        - name: "jkugiya/aws-v4-signer-scala"
-        - name: "jkugiya/ulid-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jd557/rokrok"
+        - name: "jkobejs/cron"
+        - name: "jkugiya/aws-v4-signer-scala"
+        - name: "jkugiya/ulid-scala"
         - name: "jodersky/applib"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
@@ -389,13 +393,11 @@ jobs:
         - name: "kalin-rudnicki/harness"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "karadzhov/scala-iso-country"
-        - name: "karadzhov/scala-iso-language"
         - name: "karazinscalausersgroup/mongo-literals"
         - name: "karimagnusson/kuzminki-ec"
         - name: "katrix/minejson"
         - name: "katrix/typed-json"
         - name: "keirlawson/ciris-aws-secretsmanager"
-        - name: "kelvindev15/pps-22-prolog-as-scaladsl"
         - name: "kevin-lee/just-sysprocess"
         - name: "kevin-lee/openai4s"
         - name: "kiberstender/fjwt"
@@ -450,6 +452,7 @@ jobs:
         - name: "losizm/little-time"
         - name: "losizm/shampoo"
         - name: "losizm/t2"
+        - name: "lowmelvin/mini-task"
         - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
@@ -471,6 +474,7 @@ jobs:
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
+        - name: "mobimeo/fs2-gtfs"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
         - name: "mrdimosthenis/glicko2"
@@ -502,7 +506,6 @@ jobs:
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
         - name: "outr/dd-scala"
-        - name: "outr/lightdb"
         - name: "outr/moduload"
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
@@ -607,9 +610,6 @@ jobs:
         - name: "sciss/scalacollider-dot"
         - name: "sciss/scalacollider-if"
         - name: "sciss/transform4s"
-        - name: "scoquelin/arugula"
-        - name: "sdrafahl/codec"
-        - name: "sean-ideabank/rudolf"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "scoquelin/arugula"
+        - name: "sdrafahl/codec"
+        - name: "sean-ideabank/rudolf"
+        - name: "sfxcode/sapphire-data"
         - name: "sh4869/semver-parser-scala"
         - name: "shawjef3/tryutils"
         - name: "shopstic/caliban"
