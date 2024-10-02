@@ -149,7 +149,6 @@ jobs:
         - name: "augustnagro/magnum"
         - name: "autodeployai/pmml4s"
         - name: "automorph-org/automorph"
-        - name: "avast/datadog4s"
         - name: "avast/scala-server-toolkit"
         - name: "avokka/avokka"
         - name: "azhur/kafka-serde-scala"
@@ -229,12 +228,15 @@ jobs:
         - name: "dacr/code-examples-manager"
         - name: "dacr/jassh"
         - name: "dacr/primes"
+        - name: "dacr/sotohp"
         - name: "dacr/zio-lmdb"
         - name: "dacr/zio-worksheet"
+        - name: "dacr/zwords"
         - name: "danslapman/morphling"
         - name: "darrenjw/scala-glm"
         - name: "darrenjw/scala-smfsb"
         - name: "data-tools/big-data-types"
+        - name: "datadog4s/datadog4s"
         - name: "davegurnell/unindent"
         - name: "davenverse/cats-effect-time"
         - name: "davenverse/cats-scalacheck"
@@ -328,8 +330,6 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
-        - name: "findify/flink-scala-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "findify/flink-adt"
+        - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
@@ -367,10 +369,6 @@ jobs:
         - name: "fommil/jzon"
         - name: "foundweekends/knockoff"
         - name: "foundweekends/pamflet"
-        - name: "frugalmechanic/fm-common"
-        - name: "frugalmechanic/fm-flatfile"
-        - name: "frugalmechanic/fm-serializer"
-        - name: "frugalmechanic/scala-optparse"
         - name: "fs2-blobstore/fs2-blobstore"
         - name: "fthomas/fs2-cron"
         - name: "fthomas/refined"
@@ -460,7 +458,6 @@ jobs:
         - name: "ij-plugins/ijp-toolkit"
         - name: "imaxmelnyk/openai-scala"
         - name: "indoorvivants/decline-derive"
-        - name: "indoorvivants/mdoc-effect"
         - name: "indoorvivants/sn-bindgen"
         - name: "indoorvivants/sn-vcpkg"
         - name: "indoorvivants/snapshot-testing"
@@ -534,7 +531,6 @@ jobs:
         - name: "kcrypt/scala-biginteger"
         - name: "kcrypt/scala-blake3"
         - name: "kcrypt/scala-sha"
-        - name: "keirlawson/fs2-progress"
         - name: "keirlawson/meters4s"
         - name: "kelvindev15/pps-22-prolog-as-scaladsl"
         - name: "kevin-lee/effectie"
@@ -610,6 +606,10 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
+        - name: "metarank/cfor"
+        - name: "metarank/ltrlib"
+        - name: "mimoguz/layeredfonticon"
+        - name: "minosiants/pencil"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,10 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
-        - name: "mimoguz/layeredfonticon"
-        - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
         - name: "mkurz/deadbolt-2-scala"
@@ -720,7 +716,6 @@ jobs:
         - name: "pityka/lamp"
         - name: "pityka/nspl"
         - name: "pityka/saddle"
-        - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala3-enum"
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/micrometer-pekko"
@@ -829,6 +824,7 @@ jobs:
         - name: "scalabin-no/http4s-directives"
         - name: "scalacenter/course-management-tools"
         - name: "scalacenter/scala-debug-adapter"
+        - name: "scalacenter/scalafix"
         - name: "scalacenter/simple-rockets-compiler"
         - name: "scalacenter/tasty-mima"
         - name: "scalacenter/tasty-query"
@@ -890,6 +886,10 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
+        - name: "sirthias/scala-ssh"
+        - name: "sirthias/spliff"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,10 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
-        - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
@@ -1002,6 +998,10 @@ jobs:
         - name: "tpolecat/pool-party"
         - name: "tpolecat/sourcepos"
         - name: "tpolecat/typename"
+        - name: "tpunder/fm-common"
+        - name: "tpunder/fm-flatfile"
+        - name: "tpunder/fm-serializer"
+        - name: "tpunder/scala-optparse"
         - name: "trace4cats/trace4cats"
         - name: "trace4cats/trace4cats-datadog"
         - name: "trace4cats/trace4cats-http4s"

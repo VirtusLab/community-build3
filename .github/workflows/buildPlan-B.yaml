@@ -1,5 +1,5 @@
 
-# projects total:     625
+# projects total:     630
 # min stars count:    -1
 # max projects count: 1000
 
@@ -238,11 +238,6 @@ jobs:
         - name: "firstbirdtech/emergence"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
-        - name: "frugalmechanic/fm-html"
-        - name: "frugalmechanic/fm-http"
-        - name: "frugalmechanic/fm-json"
-        - name: "frugalmechanic/fm-lazyseq"
-        - name: "frugalmechanic/fm-xml"
         - name: "funkode-io/web3-auth"
         - name: "galliaproject/gallia-avro"
         - name: "galliaproject/gallia-mongodb"
@@ -307,6 +302,7 @@ jobs:
         - name: "indoorvivants/detective"
         - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
+        - name: "indoorvivants/mdoc-effect"
         - name: "indoorvivants/opaque-newtypes"
         - name: "indoorvivants/rendition"
         - name: "indoorvivants/sn-demangler"
@@ -330,6 +326,10 @@ jobs:
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
+        - name: "jd557/rokrok"
+        - name: "jkobejs/cron"
+        - name: "jkugiya/aws-v4-signer-scala"
+        - name: "jkugiya/ulid-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,10 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "jd557/rokrok"
-        - name: "jkobejs/cron"
-        - name: "jkugiya/aws-v4-signer-scala"
-        - name: "jkugiya/ulid-scala"
         - name: "jodersky/applib"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
@@ -398,6 +394,7 @@ jobs:
         - name: "katrix/minejson"
         - name: "katrix/typed-json"
         - name: "keirlawson/ciris-aws-secretsmanager"
+        - name: "keirlawson/fs2-progress"
         - name: "kevin-lee/just-sysprocess"
         - name: "kevin-lee/openai4s"
         - name: "kiberstender/fjwt"
@@ -509,6 +506,7 @@ jobs:
         - name: "outr/moduload"
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
+        - name: "oyvindberg/ryddig"
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
@@ -529,6 +527,7 @@ jobs:
         - name: "pjfanning/acked-stream"
         - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
+        - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/pekko-discovery-consul"
         - name: "pjfanning/pekko-http-session"
@@ -556,6 +555,7 @@ jobs:
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
         - name: "quafadas/dairect-democracy"
+        - name: "quafadas/narr"
         - name: "quafadas/vecxt"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
@@ -705,6 +705,11 @@ jobs:
         - name: "torrentdam/bencode"
         - name: "tototoshi/play-reverse-router-extension"
         - name: "tpataky/duckling"
+        - name: "tpunder/fm-html"
+        - name: "tpunder/fm-http"
+        - name: "tpunder/fm-json"
+        - name: "tpunder/fm-lazyseq"
+        - name: "tpunder/fm-xml"
         - name: "trace4cats/trace4cats-avro"
         - name: "trace4cats/trace4cats-avro-kafka"
         - name: "trace4cats/trace4cats-cloudtrace"
