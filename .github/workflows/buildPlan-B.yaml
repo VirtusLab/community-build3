@@ -1,5 +1,5 @@
 
-# projects total:     630
+# projects total:     633
 # min stars count:    -1
 # max projects count: 1000
 
@@ -121,6 +121,7 @@ jobs:
         - name: "armanbilge/saslprep"
         - name: "armanbilge/stratus"
         - name: "ashwinbhaskar/sight-scala"
+        - name: "asragab/unstructured4s"
         - name: "assist-iot-sripas/scala-mqtt-wrapper"
         - name: "atedeg/scala-release"
         - name: "atry/futurebinding.scala"
@@ -329,7 +330,6 @@ jobs:
         - name: "jd557/rokrok"
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
-        - name: "jkugiya/ulid-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jkugiya/ulid-scala"
         - name: "jodersky/applib"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
@@ -503,6 +504,7 @@ jobs:
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
         - name: "outr/dd-scala"
+        - name: "outr/lightdb"
         - name: "outr/moduload"
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
@@ -608,8 +610,6 @@ jobs:
         - name: "sciss/model"
         - name: "sciss/optional"
         - name: "sciss/scalacollider-dot"
-        - name: "sciss/scalacollider-if"
-        - name: "sciss/transform4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sciss/scalacollider-if"
+        - name: "sciss/transform4s"
         - name: "scoquelin/arugula"
         - name: "sdrafahl/codec"
         - name: "sean-ideabank/rudolf"
@@ -652,6 +654,7 @@ jobs:
         - name: "spilne/spilne"
         - name: "ssanj/delight"
         - name: "staeff777/scalaveusz"
+        - name: "stratalab/strata-protobuf-specs"
         - name: "stringbean/text-utils"
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
