@@ -1,5 +1,5 @@
 
-# projects total:     633
+# projects total:     637
 # min stars count:    -1
 # max projects count: 1000
 
@@ -142,7 +142,6 @@ jobs:
         - name: "bilal-fazlani/csv-codec"
         - name: "bilal-fazlani/csv-schema"
         - name: "bilal-fazlani/jslt-parser"
-        - name: "bilal-fazlani/rainbowcli"
         - name: "bilal-fazlani/scala-aql"
         - name: "bilal-fazlani/zio-mongo"
         - name: "bitlap/validation-scala"
@@ -183,7 +182,7 @@ jobs:
         - name: "cric96/distributed-frp"
         - name: "cucumber/action-publish-sbt"
         - name: "d10xa/json-log-viewer"
-        - name: "dacr/drools-scripting"
+        - name: "dacr/counters"
         - name: "dacr/json2props"
         - name: "dacr/naturalsort"
         - name: "dacr/split"
@@ -318,7 +317,6 @@ jobs:
         - name: "ist-dsi/scala-nova-client"
         - name: "ist-dsi/scala-openstack-common-clients"
         - name: "ivoah/vial"
-        - name: "j-mie6/golden-scala"
         - name: "j5ik2o/event-store-adapter-scala"
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
@@ -330,6 +328,8 @@ jobs:
         - name: "jd557/rokrok"
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
+        - name: "jkugiya/ulid-scala"
+        - name: "jodersky/applib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,8 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "jkugiya/ulid-scala"
-        - name: "jodersky/applib"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
         - name: "jodersky/redicl"
@@ -400,7 +398,14 @@ jobs:
         - name: "kevin-lee/openai4s"
         - name: "kiberstender/fjwt"
         - name: "kierendavies/skunk-migrate"
+        - name: "kijuky/confluence-for-scala"
+        - name: "kijuky/diff-for-scala"
         - name: "kijuky/enumeratum-scalikejdbc"
+        - name: "kijuky/git-for-scala"
+        - name: "kijuky/gitlab-for-scala"
+        - name: "kijuky/jenkins-for-scala"
+        - name: "kijuky/jira-for-scala"
+        - name: "kijuky/slack-for-scala"
         - name: "killaitis/http4s-cloud-functions"
         - name: "kirill5k/common-scala"
         - name: "kitlangton/terminus"
@@ -450,7 +455,6 @@ jobs:
         - name: "losizm/little-time"
         - name: "losizm/shampoo"
         - name: "losizm/t2"
-        - name: "lowmelvin/mini-task"
         - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
@@ -504,11 +508,9 @@ jobs:
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
         - name: "outr/dd-scala"
-        - name: "outr/lightdb"
         - name: "outr/moduload"
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
-        - name: "oyvindberg/ryddig"
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
@@ -523,6 +525,7 @@ jobs:
         - name: "philippus/julius"
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
+        - name: "pidoveproject/scala-showdown-api"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/selfpackage"
@@ -607,9 +610,6 @@ jobs:
         - name: "sciss/linkernighantsp"
         - name: "sciss/log"
         - name: "sciss/lucrepi"
-        - name: "sciss/model"
-        - name: "sciss/optional"
-        - name: "sciss/scalacollider-dot"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,9 +635,13 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sciss/model"
+        - name: "sciss/optional"
+        - name: "sciss/scalacollider-dot"
         - name: "sciss/scalacollider-if"
         - name: "sciss/transform4s"
         - name: "scoquelin/arugula"
+        - name: "scullxbones/pekko-persistence-mongo"
         - name: "sdrafahl/codec"
         - name: "sean-ideabank/rudolf"
         - name: "sfxcode/sapphire-data"
