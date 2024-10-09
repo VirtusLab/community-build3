@@ -242,7 +242,6 @@ jobs:
         - name: "davenverse/catscript"
         - name: "davenverse/circuit"
         - name: "davenverse/circuit-http4s"
-        - name: "davenverse/clippette"
         - name: "davenverse/epimetheus"
         - name: "davenverse/epimetheus-http4s"
         - name: "davenverse/github"
@@ -330,6 +329,7 @@ jobs:
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
+        - name: "findify/flink-scala-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
@@ -516,7 +515,6 @@ jobs:
         - name: "kailuowang/mau"
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
-        - name: "kaizen-solutions/virgil-kyo"
         - name: "kamon-io/kamon"
         - name: "karadzhov/scala-iso-language"
         - name: "karelcemus/play-i18n"
@@ -610,6 +608,8 @@ jobs:
         - name: "mimoguz/layeredfonticon"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
+        - name: "mkroli/dns4s"
+        - name: "mkurz/deadbolt-2-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,8 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mkroli/dns4s"
-        - name: "mkurz/deadbolt-2-scala"
         - name: "molarmanful/sclin"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
@@ -644,7 +642,6 @@ jobs:
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
-        - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-circe"
         - name: "msgpack4z/msgpack4z-core"
         - name: "msgpack4z/msgpack4z-native"
@@ -686,7 +683,6 @@ jobs:
         - name: "otavia-projects/mill-rust-jni"
         - name: "otavia-projects/otavia"
         - name: "outr/hasher"
-        - name: "outr/lightdb"
         - name: "outr/lucene4s"
         - name: "outr/mailgun4s"
         - name: "outr/media4s"
@@ -755,6 +751,7 @@ jobs:
         - name: "purplekingdomgames/tyrian"
         - name: "purplekingdomgames/ultraviolet"
         - name: "quafadas/live-server-scala-cli-js"
+        - name: "quafadas/vecxt"
         - name: "rallyhealth/scalacheck-ops"
         - name: "rallyhealth/weepickle"
         - name: "ranyitz/brush"
@@ -800,9 +797,12 @@ jobs:
         - name: "sbt/contraband"
         - name: "sbt/io"
         - name: "sbt/sbinary"
+        - name: "sbt/sbt-assembly"
         - name: "sbt/sbt-dynver"
         - name: "sbt/sbt-jni"
+        - name: "sbt/sbt-nocomma"
         - name: "sbt/sbt-pgp"
+        - name: "sbt/sbt-vimquit"
         - name: "scala-cli/scala-cli-signing"
         - name: "scala-interop/slinc"
         - name: "scala-js/scala-js-stubs"
@@ -839,7 +839,6 @@ jobs:
         - name: "scalapb-json/scalapb-circe"
         - name: "scalapb-json/scalapb-json-common"
         - name: "scalapb-json/scalapb-playjson"
-        - name: "scalapb/common-protos"
         - name: "scalapb/protobuf-scala-runtime"
         - name: "scalapb/scalapb"
         - name: "scalapb/scalapb-grpcweb"
@@ -890,6 +889,7 @@ jobs:
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
+        - name: "sksamuel/avro4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
         - name: "snowplow/snowplow-scala-analytics-sdk"
@@ -1096,6 +1095,7 @@ jobs:
         - name: "xuwei-k/nobox"
         - name: "xuwei-k/optparse-applicative"
         - name: "xuwei-k/play2scalaz"
+        - name: "xuwei-k/sbt-class-diagram"
         - name: "xuwei-k/zeroapply"
         - name: "y-yu/slick-bulk-insert"
         - name: "yakivy/dupin"
