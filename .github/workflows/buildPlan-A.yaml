@@ -294,6 +294,7 @@ jobs:
         - name: "eed3si9n/expecty"
         - name: "eed3si9n/gigahorse"
         - name: "eed3si9n/ifdef"
+        - name: "eed3si9n/manifesto"
         - name: "eed3si9n/scalaxb"
         - name: "eed3si9n/sjson-new"
         - name: "eed3si9n/verify"
@@ -329,7 +330,6 @@ jobs:
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
-        - name: "findify/flink-scala-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
@@ -491,7 +492,6 @@ jobs:
         - name: "jczuchnowski/zio-pulsar"
         - name: "jd557/interim"
         - name: "jd557/minart"
-        - name: "jd557/spaeti"
         - name: "jelly-rdf/jelly-jvm"
         - name: "joan38/kubernetes-client"
         - name: "jodersky/scala-argparse"
@@ -586,7 +586,6 @@ jobs:
         - name: "losizm/grapple"
         - name: "losizm/scamper"
         - name: "lowmelvin/formify-scala"
-        - name: "lowmelvin/hammer-scala"
         - name: "lunduniversity/introprog-scalalib"
         - name: "m2-oss/calypso"
         - name: "makiftutuncu/e"
@@ -610,6 +609,7 @@ jobs:
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
         - name: "mkurz/deadbolt-2-scala"
+        - name: "molarmanful/sclin"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "molarmanful/sclin"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
@@ -655,7 +654,6 @@ jobs:
         - name: "naoh87/lettucef"
         - name: "neandertech/langoustine"
         - name: "neandertech/smithy4s-deriving"
-        - name: "nebula-contrib/testcontainers-nebula"
         - name: "nebula-contrib/zio-nebula"
         - name: "neotypes/neotypes"
         - name: "nmoncho/helenus3"
@@ -664,7 +662,6 @@ jobs:
         - name: "norbert-radyk/spoiwo"
         - name: "note/mini-refined"
         - name: "nremond/pbkdf2-scala"
-        - name: "nrkno/bigquery-scala"
         - name: "nryanov/consul4s"
         - name: "nscala-time/nscala-time"
         - name: "nthportal/spaghetti"
@@ -683,6 +680,7 @@ jobs:
         - name: "otavia-projects/mill-rust-jni"
         - name: "otavia-projects/otavia"
         - name: "outr/hasher"
+        - name: "outr/lightdb"
         - name: "outr/lucene4s"
         - name: "outr/mailgun4s"
         - name: "outr/media4s"
@@ -707,6 +705,7 @@ jobs:
         - name: "phaller/spores3"
         - name: "phenoscape/scowl"
         - name: "philippus/elastic4s"
+        - name: "pidoveproject/scala-showdown-api"
         - name: "pityka/lamp"
         - name: "pityka/nspl"
         - name: "pityka/saddle"
@@ -798,11 +797,12 @@ jobs:
         - name: "sbt/io"
         - name: "sbt/sbinary"
         - name: "sbt/sbt-assembly"
+        - name: "sbt/sbt-ci-release"
         - name: "sbt/sbt-dynver"
+        - name: "sbt/sbt-git"
         - name: "sbt/sbt-jni"
         - name: "sbt/sbt-nocomma"
         - name: "sbt/sbt-pgp"
-        - name: "sbt/sbt-vimquit"
         - name: "scala-cli/scala-cli-signing"
         - name: "scala-interop/slinc"
         - name: "scala-js/scala-js-stubs"
@@ -857,7 +857,6 @@ jobs:
         - name: "scalatest/scalatestplus-selenium"
         - name: "scalatra/scalamd"
         - name: "scalawilliam/xs4s"
-        - name: "scalax/simple"
         - name: "scalaz/scalaz"
         - name: "scalikejdbc/scalikejdbc"
         - name: "scalikejdbc/scalikejdbc-async"
@@ -890,6 +889,7 @@ jobs:
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
+        - name: "slack-scala-client/slack-scala-client"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
         - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "softwaremill/akka-http-session"
@@ -961,8 +960,8 @@ jobs:
         - name: "takapi327/ldbc"
         - name: "takezoe/scala-jdbc"
         - name: "takezoe/solr-scala-client"
-        - name: "tarao/collection-scala"
         - name: "tarao/record4s"
+        - name: "taymyr/play-repository-java"
         - name: "testcontainers/testcontainers-scala"
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/cron4zio"
@@ -1089,6 +1088,7 @@ jobs:
         - name: "wvlet/airframe"
         - name: "xebia-functional/fetch"
         - name: "xebia-functional/karat-scalacheck"
+        - name: "xerial/sbt-sonatype"
         - name: "xuwei-k/applybuilder"
         - name: "xuwei-k/httpz"
         - name: "xuwei-k/iarray"

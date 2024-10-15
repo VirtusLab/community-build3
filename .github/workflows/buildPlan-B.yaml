@@ -1,5 +1,5 @@
 
-# projects total:     646
+# projects total:     653
 # min stars count:    -1
 # max projects count: 1000
 
@@ -185,9 +185,13 @@ jobs:
         - name: "d10xa/json-log-viewer"
         - name: "dacr/counters"
         - name: "dacr/json2props"
+        - name: "dacr/lorem-ipsum-server-akkahttp"
         - name: "dacr/naturalsort"
+        - name: "dacr/primes-server-akkahttp"
         - name: "dacr/split"
+        - name: "dacr/spy"
         - name: "dacr/unittools"
+        - name: "dacr/web-echo"
         - name: "daenyth/cats-effect-guava"
         - name: "daghemberg/paut-program"
         - name: "daghemberg/problemutils"
@@ -312,8 +316,6 @@ jobs:
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
         - name: "ingarabr/http4s-cloud-functions"
-        - name: "io-github-nafg/bleep-plugins"
-        - name: "io-github-nafg/zio-tcn"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
         - name: "ist-dsi/scala-keystone-client"
@@ -328,8 +330,6 @@ jobs:
         - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
         - name: "jamesward/zio-mavencentral"
-        - name: "jandom-devel/scalafix"
-        - name: "janlisse/zio-jwt-validator"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "jandom-devel/scalafix"
+        - name: "janlisse/zio-jwt-validator"
         - name: "jd557/rokrok"
+        - name: "jd557/spaeti"
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
         - name: "jkugiya/ulid-scala"
@@ -461,6 +464,7 @@ jobs:
         - name: "losizm/little-time"
         - name: "losizm/shampoo"
         - name: "losizm/t2"
+        - name: "lowmelvin/hammer-scala"
         - name: "lowmelvin/mini-task"
         - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
@@ -505,18 +509,19 @@ jobs:
         - name: "nationalarchives/dr2-preservica-client"
         - name: "natural-transformation/avro4s"
         - name: "natural-transformation/korolev"
+        - name: "nebula-contrib/testcontainers-nebula"
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/http4s-spnego"
+        - name: "nrkno/bigquery-scala"
         - name: "nthportal/scala-platform"
         - name: "oheger/cloud-files"
         - name: "olegych/scaposer"
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
         - name: "outr/dd-scala"
-        - name: "outr/lightdb"
         - name: "outr/moduload"
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
@@ -534,7 +539,6 @@ jobs:
         - name: "philippus/julius"
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
-        - name: "pidoveproject/scala-showdown-api"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/selfpackage"
@@ -605,11 +609,7 @@ jobs:
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
         - name: "scala-tessella/ring-seq"
-        - name: "scalacenter/libdaemon-jvm"
-        - name: "scalacenter/scala3-binary-decoder"
-        - name: "scalalandio/mdc4s"
-        - name: "scalameta/munit-scalacheck"
-        - name: "scalapb-json/scalapb-argonaut"
+        - name: "scalacenter/bloop-config"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,9 +635,15 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "scalacenter/libdaemon-jvm"
+        - name: "scalacenter/scala3-binary-decoder"
+        - name: "scalalandio/mdc4s"
+        - name: "scalameta/munit-scalacheck"
+        - name: "scalapb-json/scalapb-argonaut"
         - name: "scalapb/common-protos"
         - name: "scalatest/scalatestplus-easymock"
         - name: "scalatest/scalatestplus-jmock"
+        - name: "scalax/simple"
         - name: "scalax/slickless"
         - name: "scf37/filewatch"
         - name: "sciss/asyncfile"
@@ -659,7 +665,7 @@ jobs:
         - name: "shopstic/caliban"
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
-        - name: "sideeffffect/zio-doobie"
+        - name: "sideeffffect/liquibase-doobie"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
@@ -696,6 +702,7 @@ jobs:
         - name: "taig/scala-linguist"
         - name: "taig/scala-pygments"
         - name: "taig/sql-ext"
+        - name: "tarao/collection-scala"
         - name: "tegonal/scala-commons"
         - name: "tersesystems/echopraxia-plusscala"
         - name: "tharwaninitin/cache4s"
