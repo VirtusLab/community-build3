@@ -132,7 +132,7 @@ function createBuildPatch() {
   (cd repo && git diff > $BuildPatchFile) 
 }
 function revertBuildPatch() {
-  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject || true) 
+  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject --allow-empty || true) 
 }
 function commmitMigrationRewrite() {
   if [[ -z "$(cd repo && git status --untracked-files=no --porcelain)" ]]; then
@@ -168,7 +168,8 @@ function buildForScalaVersion(){
     $scriptDir/mill/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
     revertBuildPatch
   ## Sbt
-  elif [ -f "repo/build.sbt" ]; then
+  ## Apparently built.sbt is a valid build file name. Accept any .sbt file
+  elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
     echo "sbt project found: ${isSbtProject}"
     echo "sbt" > $buildToolFile
     $scriptDir/sbt/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
