@@ -1,5 +1,5 @@
 
-# projects total:     653
+# projects total:     656
 # min stars count:    -1
 # max projects count: 1000
 
@@ -158,7 +158,6 @@ jobs:
         - name: "casehubdk/hxl"
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
-        - name: "cheleb/zio-laminar-tapir"
         - name: "christian-schlichtherle/circe-kafka"
         - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
@@ -330,6 +329,7 @@ jobs:
         - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
         - name: "jamesward/zio-mavencentral"
+        - name: "jandom-devel/scalafix"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
         - name: "jd557/rokrok"
         - name: "jd557/spaeti"
@@ -514,6 +513,7 @@ jobs:
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
         - name: "note/dhallj-magnolia"
+        - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
         - name: "nrkno/bigquery-scala"
         - name: "nthportal/scala-platform"
@@ -558,6 +558,7 @@ jobs:
         - name: "pjfanning/scala3-reflection"
         - name: "pjfanning/scala3-sample-classes"
         - name: "pjfanning/zio-metrics-micrometer"
+        - name: "plasmalaboratories/plasma-protobuf-specs"
         - name: "pmeheut/nscala-java-time"
         - name: "polyvariant/caliban-gitlab"
         - name: "polyvariant/respectfully"
@@ -592,10 +593,12 @@ jobs:
         - name: "ruimo/graphics"
         - name: "ruimo/scoins"
         - name: "rustedbones/pekko-http-avro"
+        - name: "rustedbones/pekko-http-metrics"
         - name: "rustedbones/pekko-http-scalapb"
         - name: "rustedbones/pekko-http-thrift"
         - name: "rustedbones/scout"
         - name: "sakulk/serval"
+        - name: "salesforce/kineticpulse"
         - name: "sangria-graphql/sangria-argonaut"
         - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-json4s-jackson"
@@ -607,9 +610,6 @@ jobs:
         - name: "saucam/shiva"
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
-        - name: "scala-cli/libdaemon-jvm"
-        - name: "scala-tessella/ring-seq"
-        - name: "scalacenter/bloop-config"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "scala-cli/libdaemon-jvm"
+        - name: "scala-tessella/ring-seq"
+        - name: "scalacenter/bloop-config"
         - name: "scalacenter/libdaemon-jvm"
         - name: "scalacenter/scala3-binary-decoder"
         - name: "scalalandio/mdc4s"
@@ -673,7 +676,6 @@ jobs:
         - name: "spilne/spilne"
         - name: "ssanj/delight"
         - name: "staeff777/scalaveusz"
-        - name: "stratalab/strata-protobuf-specs"
         - name: "stringbean/text-utils"
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
@@ -737,6 +739,7 @@ jobs:
         - name: "trace4cats/trace4cats-avro-kafka"
         - name: "trace4cats/trace4cats-cloudtrace"
         - name: "trace4cats/trace4cats-exporter-http"
+        - name: "trace4cats/trace4cats-http4s"
         - name: "trace4cats/trace4cats-jaeger"
         - name: "trace4cats/trace4cats-jaeger-integration-test"
         - name: "trace4cats/trace4cats-kafka"

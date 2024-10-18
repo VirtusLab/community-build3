@@ -178,6 +178,7 @@ jobs:
         - name: "changvvb/scala-protobuf-java"
         - name: "chatwork/scala-jwk"
         - name: "cheleb/laminar-form-derivation"
+        - name: "cheleb/zio-laminar-tapir"
         - name: "cheleb/zio-pravega"
         - name: "chrisnappin/play-recaptcha"
         - name: "chrisokasaki/hwtest"
@@ -329,7 +330,6 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
@@ -609,7 +610,6 @@ jobs:
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
         - name: "mkurz/deadbolt-2-scala"
-        - name: "molarmanful/sclin"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "molarmanful/sclin"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
@@ -775,7 +776,6 @@ jobs:
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "ruippeixotog/akka-testkit-specs2"
         - name: "ruippeixotog/scala-scraper"
-        - name: "rustedbones/pekko-http-metrics"
         - name: "rustedbones/taxonomy"
         - name: "sageserpent-open/americium"
         - name: "sageserpent-open/kineticmerge"
@@ -845,6 +845,7 @@ jobs:
         - name: "scalapb/scalapb-json4s"
         - name: "scalapb/scalapb-validate"
         - name: "scalapb/zio-grpc"
+        - name: "scalaprops/sbt-scalaprops"
         - name: "scalaprops/scalaprops"
         - name: "scalaprops/scalaprops-shapeless"
         - name: "scalapy/python-native-libs"
@@ -889,7 +890,6 @@ jobs:
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
-        - name: "slack-scala-client/slack-scala-client"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
         - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "softwaremill/akka-http-session"
@@ -1002,7 +1003,6 @@ jobs:
         - name: "tpunder/scala-optparse"
         - name: "trace4cats/trace4cats"
         - name: "trace4cats/trace4cats-datadog"
-        - name: "trace4cats/trace4cats-http4s"
         - name: "trace4cats/trace4cats-sttp"
         - name: "travisbrown/dhallj"
         - name: "travisbrown/iteratee"
