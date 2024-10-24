@@ -13,16 +13,34 @@ scalaVersion="$3" # e.g. 3.1.2-RC1
 projectConfig="$4" 
 
 export OPENCB_PROJECT_DIR=$repoDir
-
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-MILL_0_12="0.12.0-RC2"
+MILL_0_12="0.12.0"
 MILL_0_11=0.11.12
 MILL_0_10=0.10.15
 MILL_0_9=0.9.12
 RESOLVE="resolve _"
+MILL_BUILD_SCALA=build.mill.scala
+MILL_BUILD=build.mill
 
 cd $repoDir
+millBuildFile=
+for rootBuildFile in "$MILL_BUILD" "$MILL_BUILD_SCALA" "./build.sc"; do
+  if [[ -f $rootBuildFile ]]; then
+    millBuildFile=$rootBuildFile
+    if [[ $rootBuildFile == "$MILL_BUILD_SCALA" ]]; then
+      echo "Replace $MILL_BUILD_SCALA with $MILL_BUILD"
+      mv $MILL_BUILD_SCALA $MILL_BUILD
+      millBuildFile="$MILL_BUILD"
+    fi
+    break 1
+  fi
+done
+if [[ -z "$millBuildFile" ]]; then
+  echo "Not found a valid mill build root file"
+  exit 1
+fi
+
 millVersion=
 if [[ -f .mill-version ]];then
   millVersion=`cat .mill-version`
@@ -43,18 +61,7 @@ else
     for v in $MILL_0_12 $MILL_0_11 $MILL_0_10 $MILL_0_9; do
       if `${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null`; then
         echo "Successfully applied build using mill $v"
-        buildScVersions=($MILL_0_11 $MILL_0_10 $MILL_0_9)
-        if [[ " ${buildScVersions[*]} " =~ " ${v} " && -f ./build.sc ]]; then
-          echo "Found build.sc file and matching Mill version" 
-          millVersion=$v
-          break
-        elif [[ -f ./build.mill ]]; then
-          echo "Found build.mill file"
-          millVersion=$v
-          break
-        else
-          echo "Able to resolve build, but not found matching build files"
-        fi
+        millVersion=$v
       else 
         echo "Failed to apply build using mill $v"
       fi
@@ -109,17 +116,30 @@ fi
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs
-millBuildExt="mill"
-if [[ "$millBinaryVersionMajor" -eq "0" && "$millBinaryVersionMinor" -le "11" ]]; then 
-  millBuildExt=sc
+adaptedFiles=( $millBuildFile )
+millBuildDirectory=
+# if [[ -d "./mill-build" ]]; then
+#   millBuildDirectory="./mill-build"
+if [[ -d "./project" ]]; then
+   millBuildDirectory="./project"
 fi
-adaptedFiles=( $PWD/build.${millBuildExt} )
-if [[ -d ./project ]]; then
-  adaptedFiles+=(`find ./project -type f -name "*.$millBuildExt"`)
+if [[ -z "$millBuildDirectory" ]]; then
+  echo "No mill build directory found"
+else
+  for file in `find $millBuildDirectory -type f -name "*.mill.scala"`; do
+    echo "Strip .scala suffix from $file"
+    mv $file "${file%.scala}"
+  done
+  adaptedFiles+=(`find $millBuildDirectory -type f -name "*.mill"`)
+  adaptedFiles+=(`find $millBuildDirectory -type f -name "*.sc"`)
 fi
 for buildFile in "${adaptedFiles[@]}"; do 
+  isMainBuildFile=false
+  if [[ "$buildFile" == "$millBuildFile" ]]; then
+    isMainBuildFile=true
+  fi
   echo "Apply scalafix rules to $buildFile"
-  scalaFile="${buildFile%.$millBuildExt}.scala"
+  scalaFile="${buildFile}.scala"
   cp $buildFile $scalaFile
   scalafix \
     --rules file:${scriptDir}/scalafix/rules/src/main/scala/fix/Scala3CommunityBuildMillAdapter.scala \
@@ -128,12 +148,17 @@ for buildFile in "${adaptedFiles[@]}"; do
     --syntactic \
     --settings.Scala3CommunityBuildMillAdapter.targetScalaVersion "$scalaVersion" \
     --settings.Scala3CommunityBuildMillAdapter.millBinaryVersion "$millBinaryVersion" \
+    --settings.Scala3CommunityBuildMillAdapter.isMainBuildFile "$isMainBuildFile" \
     --scala-version 3.1.0 > ${buildFile}.adapted \
     && mv ${buildFile}.adapted $buildFile \
     || (echo "Failed to adapt $buildFile, ignoring changes"; cat ${buildFile}.adapted; rm -f ${buildFile}.adapted) 
   rm $scalaFile
 done
 
+millBuildExt="mill"
+if [[ "$millBinaryVersionMajor" -eq "0" && "$millBinaryVersionMinor" -le "11" ]]; then 
+  millBuildExt=sc
+fi
 for f in "${adaptedFiles[@]}"; do
   dir="$(dirname $(realpath "$f"))"
   cp $scriptDir/MillCommunityBuild.sc ${dir}/MillCommunityBuild.$millBuildExt
@@ -146,9 +171,9 @@ for f in "${adaptedFiles[@]}"; do
     # Compat for Mill 0.11+ sources
     cp $scriptDir/../shared/CommunityBuildCore.scala ${dir}/CommunityBuildCore.$millBuildExt
     for fileCopy in ${dir}/CommunityBuildCore.$millBuildExt ${dir}/MillCommunityBuild.$millBuildExt ${dir}/MillVersionCompat.$millBuildExt; do
-      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "package build\n" ""
-      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "import CommunityBuildCore." "import \$file.CommunityBuildCore, CommunityBuildCore."
-      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "import MillVersionCompat." "import \$file.MillVersionCompat, MillVersionCompat."
+      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "package build\n" "" 2> /dev/null
+      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "import CommunityBuildCore." "import \$file.CommunityBuildCore, CommunityBuildCore." 2> /dev/null
+      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "import MillVersionCompat." "import \$file.MillVersionCompat, MillVersionCompat." 2> /dev/null
     done
   fi
 

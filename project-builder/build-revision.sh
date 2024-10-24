@@ -85,7 +85,9 @@ function detectSourceVersion() {
       echo "Using configured source version: $sourceVersion"
       sourceVersionSetting="REQUIRE:-source:$sourceVersion"
     fi
-  else 
+  elif [[ -z "$sourceVersion" ]]; then 
+    echo "No configured source version" > /dev/null
+  else
     echo "Configured version `$sourceVersion` is invalid, it would be ignored"
   fi
   if [[ -z "$sourceVersionSetting" ]]; then
@@ -114,11 +116,14 @@ function setupScalacOptions(){
   commonAppendScalacOptions="$sourceVersionSetting,-Wconf:msg=can be rewritten automatically under:s"
   commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
 
-  extraScalacOptions="$_extraScalacOptions,$commonAppendScalacOptions"
+  extraScalacOptions="$commonAppendScalacOptions"
   disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
   if [[ $isMigrating == true ]]; then
     extraScalacOptions="-rewrite,$extraScalacOptions"
     disabledScalacOptions="-indent,-no-indent,-new-syntax,$disabledScalacOptions"
+  else 
+    # Apply extraScalacOptions passed as input only when compiling with target Scala version
+    extraScalacOptions="$_extraScalacOptions,$extraScalacOptions"
   fi
 
   echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
@@ -160,7 +165,8 @@ function buildForScalaVersion(){
   echo "Execute tests: ${executeTests}"
   echo "started" > build-status.txt 
   # Mill
-  if [ -f "repo/mill" ] || [ -f "repo/build.sc" ]; then
+  # We check either for mill boostrap script or one of valid root build files
+  if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala"] || [ -f "repo/build.sc"]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
     $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
