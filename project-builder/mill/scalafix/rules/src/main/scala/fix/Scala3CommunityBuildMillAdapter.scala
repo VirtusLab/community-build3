@@ -6,7 +6,8 @@ import metaconfig._
 
 case class Scala3CommunityBuildMillAdapterConfig(
     targetScalaVersion: Option[String] = None,
-    millBinaryVersion: Option[String] = None
+    millBinaryVersion: Option[String] = None,
+    isMainBuildFile: Option[Boolean] = None
 )
 object Scala3CommunityBuildMillAdapterConfig {
   def default = Scala3CommunityBuildMillAdapterConfig()
@@ -53,26 +54,36 @@ class Scala3CommunityBuildMillAdapter(
     "scala3Version",
     "Scala_3",
     "scala_3",
-    "scala",
+    "scala"
     // "Scala" - explicitly ignored
   )
 
   val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
-  val useLegacyMillCross =
-    config.millBinaryVersion.exists(_.split('.').toList match {
-      case "0" :: minor :: _ =>
-        try minor.toInt <= 10
-        catch { case ex: Throwable => false }
-      case _ => false
-    })
+  val millVersionSegments = config.millBinaryVersion.map(_.split('.').toList)
+  def toIntOption(value: String) =
+    try Some(value.toInt)
+    catch { case ex: Throwable => None }
+  val useLegacyMillCross = millVersionSegments.exists {
+    case "0" :: minor :: _ => toIntOption(minor).exists(_ < 11)
+    case _                 => false
+  }
+  val useLegacyTasks = millVersionSegments.exists {
+    case "0" :: minor :: _ => toIntOption(minor).exists(_ < 12)
+    case _                 => false
+  }
 
   object Transform {
+    val RootMill = Term.Select(Term.Name("_root_"), Term.Name("mill"))
+    val TaskType = Term.Select(RootMill, if (useLegacyTasks) Term.Name("T") else Term.Name("Task"))
+    // val TaskTerm =
+    val TaskCommandType =
+      Term.Select(TaskType, if (useLegacyTasks) Term.Name("command") else Term.Name("Command"))
 
     def shouldWrapInTarget(body: Term, tpe: Option[Type]) = {
       val isLiteral = body.isInstanceOf[Lit.String]
       def hasTargetType = tpe match {
-        case Some(Type.Apply(Type.Name("T"), _)) => true
-        case _                                   => false
+        case Some(Type.Apply(Type.Name("T" | "Task"), _)) => true
+        case _                                            => false
       }
       !isLiteral || hasTargetType
     }
@@ -158,7 +169,7 @@ class Scala3CommunityBuildMillAdapter(
       decltpe = None,
       body =
         Term.Apply(
-          Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("T")), Term.Name("command")),
+          TaskCommandType,
           List(
             Term.Block(List(
               Defn.Def(
@@ -197,7 +208,9 @@ class Scala3CommunityBuildMillAdapter(
             if (hasScalacOptions || !canHaveScalacOptions || noInjects) Nil
             else injectScalacOptionsMapping
           } ++ traits.collectFirst {
-            case Init(WithTypeName("RootModule"), _, _) if !noInjects => injectRootModuleRunCommand
+            case Init(WithTypeName("RootModule" | "MillBuildRootModule"), _, _)
+                if !noInjects && config.isMainBuildFile.forall(_ == true) =>
+              injectRootModuleRunCommand
           }
         )
 
@@ -267,12 +280,14 @@ class Scala3CommunityBuildMillAdapter(
     val headerInject = {
       if (noInjects) Patch.empty
       else {
-        val lastSpecialImport = doc.tree.collect {
+        val insertAfter = doc.tree.collect {
           case tree: Import if Seq("$file", "$ivy").exists(tree.syntax.contains) => tree
+          case pkg: Pkg                                                          => pkg
         }.lastOption
-        lastSpecialImport match {
-          case Some(lastImport) => Patch.addRight(lastImport, Replacment.injects)
-          case None             => Patch.addLeft(doc.tree, Replacment.injects)
+        insertAfter match {
+          case Some(Pkg(_, firstStat :: _)) => Patch.addLeft(firstStat, Replacment.injects)
+          case Some(insertAfter)            => Patch.addRight(insertAfter, Replacment.injects)
+          case None                         => Patch.addLeft(doc.tree, Replacment.injects)
         }
       }
     }
@@ -353,11 +368,10 @@ class Scala3CommunityBuildMillAdapter(
       quote + stripQutoes + quote
     }
 
-    val MillCommunityBuildInject = """
-    |import $file.MillCommunityBuild
-    |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}
+    val MillCommunityBuildInject = s"""
     |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
+    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = ${Transform.TaskCommandType
+      .toString()} {
     |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
     |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
     |}
@@ -399,13 +413,22 @@ class Scala3CommunityBuildMillAdapter(
     |""".stripMargin
 
     val injects = {
-      List(
-        MillCommunityBuildInject,
-        MapScalacOptionsOps
-      ) ++
-        Seq(
-          if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None
-        ).flatten ++
+      Seq(
+        Some(
+          if (useLegacyTasks) """
+            |import $file.MillCommunityBuild
+            |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}""".stripMargin
+          else
+            "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
+        ),
+        if (useLegacyTasks) None else Some("private object _OpenCommunityBuildOps {"),
+        if (useLegacyTasks && config.isMainBuildFile.forall(_ == true))
+          Some(MillCommunityBuildInject)
+        else None,
+        Some(MapScalacOptionsOps),
+        if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
+        if (useLegacyTasks) None else Some("}\nimport _OpenCommunityBuildOps._")
+      ).flatten ++
         Seq("// End of OpenCB code injects\n")
     }.mkString("\n")
 
