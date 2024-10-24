@@ -150,7 +150,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoUR
         "--scalac-option=-J-Xms4G",
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies,
-        extraScalacOptions
+        extraScalacOptions.map("--scala-option=" + _)
       )
       .call(
         cwd = repositoryDir,
