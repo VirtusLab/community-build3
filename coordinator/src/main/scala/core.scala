@@ -24,7 +24,6 @@ class StarredProject(organization: String, repository: String)(val stars: Int) e
 }
 
 object Project:
-  given Reader[Project] = macroR[Project]
   given Ordering[Project] = Ordering.by(_.show)
 
   def load(line: String) =

@@ -67,9 +67,10 @@ class Scaladex(using ExecutionContext):
   ) derives Reader:
     def releaseLocalData: LocalDate = LocalDate.from(releaseDate)
 
-  case class ScaladexProject()
+  case class ScaladexProject(organization: String, repository: String) derives Reader
   given Reader[java.time.OffsetDateTime] = summon[Reader[String]].map(java.time.OffsetDateTime.parse)
-
+  given Reader[Project] = summon[Reader[ScaladexProject]].map: p =>
+    Project(p.organization, p.repository)
   def artifact(artifact: ProjectArtifact): AsyncResponse[Artifact] =
     get[Artifact](
       uri"$ScaladexUrl/api/artifacts/${artifact.groupId}/${artifact.artifactId}/${artifact.version}"
