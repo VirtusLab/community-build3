@@ -202,7 +202,8 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   // format: off
   val scala3ExclusiveFlags = Seq(
-    "-source", "-rewrite", "-from-tasty", "-new-syntax", "-old-syntax", "-indent", "-no-indent",
+    "-source", "-rewrite", "-from-tasty", "-experimental",
+    "-new-syntax", "-old-syntax", "-indent", "-no-indent",
     "-print-tasty", "-print-lines", "-uniqid", "-semanticdb-text", "-semanticdb-target",
     "-coverage-out", "-explain-types", "-scalajs",
     "-Vprofile" ,"-Vprofile-details" ,"-Vprofile-sorted-by", "-Vrepl-max-print-characters", "-Vrepl-max-print-elements",
