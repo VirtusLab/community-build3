@@ -49,7 +49,7 @@ given CacheDriver[Project, ProjectModules] with
     ProjectModules(key, mvs)
 
   def dest(v: Project): Path =
-    dataPath.resolve("projectModules").resolve(v.org + "_" + v.name + ".csv")
+    dataPath.resolve("projectModules").resolve(v.organization + "_" + v.repository + ".csv")
 
 given CacheDriver[String, Seq[StarredProject]] with
   def write(v: Seq[StarredProject]): String =
@@ -79,5 +79,5 @@ given CacheDriver[ModuleVersion, Target] with
     Target(id, deps)
 
   def dest(v: ModuleVersion): Path =
-    val fn = Seq(v.p.org, v.p.name, v.name, v.version).mkString("", "_", ".csv")
+    val fn = Seq(v.p.organization, v.p.repository, v.name, v.version).mkString("", "_", ".csv")
     dataPath.resolve("targets").resolve(fn)

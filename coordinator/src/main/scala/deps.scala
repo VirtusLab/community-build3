@@ -83,7 +83,7 @@ def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
       }
       .map(_.toMap)
     orderedVersions = versionReleaseData.toSeq
-      .sortBy(-_._2) // releaseDate-epoch-mill descending
+      .sortBy(-_._2.toEpochSecond()) // releaseDate-epoch-mill descending
       .map(_._1)
     versionModules =
       for version <- orderedVersions
@@ -102,7 +102,7 @@ val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
   val url =
-    s"$ScaladexUrl/${p.org}/${p.name}/${name}/${version}?target=_$scalaBinaryVersion"
+    s"$ScaladexUrl/${p.organization}/${p.repository}/${name}/${version}?target=_$scalaBinaryVersion"
   val d = Jsoup.connect(url).get()
   val gradle = d.select("#copy-gradle").text()
   val GradleDep(o, n, v) = gradle: @unchecked
@@ -125,8 +125,8 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
 def loadMavenInfo(scalaBinaryVersion: String)(
     projectModules: CandidateProject.BuildSelected
 ): AsyncResponse[LoadedProject] =
-  import projectModules.project.{name, org}
-  val repoName = s"https://github.com/$org/$name.git"
+  import projectModules.project.{repository, organization}
+  val repoName = s"https://github.com/$organization/$repository.git"
   require(
     projectModules.mvs.nonEmpty,
     s"Empty modules list in ${projectModules.project}"
@@ -139,7 +139,7 @@ def loadMavenInfo(scalaBinaryVersion: String)(
     def tryFetch(backoffSeconds: Int): AsyncResponse[Option[Target]] = {
       inline def backoff(reason: => String) = {
         Console.err.println(
-          s"Failed to load maven info for $org/$name, reason: $reason: retry with backoff ${backoffSeconds}s"
+          s"Failed to load maven info for $organization/$repository, reason: $reason: retry with backoff ${backoffSeconds}s"
         )
         SECONDS.sleep(backoffSeconds)
         tryFetch((backoffSeconds * 2).min(60))
@@ -159,7 +159,7 @@ def loadMavenInfo(scalaBinaryVersion: String)(
             backoff(ex.getMessage())
           case ex: Exception =>
             Console.err.println(
-              s"Failed to load maven info for $org/$name: ${ex}"
+              s"Failed to load maven info for $organization/$repository: ${ex}"
             )
             Future.successful(None)
         }
@@ -219,7 +219,7 @@ def loadDepenenecyGraph(
       .traverse(candidates.zipWithIndex) { (getProject, idx) =>
         for
           project <- getProject
-          name = s"${project.project.org}/${project.project.name}"
+          name = s"${project.project.organization}/${project.project.repository}"
           mvnInfo <-
             project match
               case CandidateProject.BuildAll(project) =>
@@ -292,10 +292,10 @@ def projectModulesFilter(
         case mvs @ ModuleInVersion(version, modules)
             // Each entry is represented in form of `<organization>:<project/module>:<version>`
             // Filter out whole project for given version
-            if !matchPatternAndLog(s"${p.org}:${p.name}:$version") =>
+            if !matchPatternAndLog(s"${p.organization}:${p.repository}:$version") =>
           mvs.copy(modules = modules.filter { module =>
             // Filter out modules for given version
-            !matchPatternAndLog(s"${p.org}:$module:$version")
+            !matchPatternAndLog(s"${p.organization}:$module:$version")
           })
       }
       .filter(_.modules.nonEmpty)

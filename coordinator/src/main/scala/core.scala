@@ -7,23 +7,24 @@ import pureconfig.generic.derivation.EnumConfigReader
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import org.json4s.FieldSerializer
+import upickle.default.*
 
 type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
-sealed case class Project(org: String, name: String):
-  lazy val show = s"${org}_$name"
-  def coordinates = s"$org/$name"
-  def serialize: String = s"$org;$name"
+sealed case class Project(organization: String, repository: String):
+  lazy val show = s"${organization}_$repository"
+  def coordinates = s"$organization/$repository"
+  def serialize: String = s"$organization;$repository"
 
   def raw = this match
-    case _: StarredProject => Project(org, name)
+    case _: StarredProject => Project(organization, repository)
     case _                 => this
-
-class StarredProject(org: String, name: String)(val stars: Int) extends Project(org, name) {
-  override def serialize = s"$org;$name;$stars"
+class StarredProject(organization: String, repository: String)(val stars: Int) extends Project(organization, repository) {
+  override def serialize = s"$organization;$repository;$stars"
 }
 
 object Project:
+  given Reader[Project] = macroR[Project]
   given Ordering[Project] = Ordering.by(_.show)
 
   def load(line: String) =

@@ -8,6 +8,7 @@ import java.time.LocalDate
 import sttp.client4.*
 import sttp.model.Uri
 import upickle.default.*
+import scala.annotation.nowarn
 
 object Scaladex:
   final val ScaladexUrl = uri"https://index.scala-lang.org"
@@ -20,6 +21,7 @@ class Scaladex(using ExecutionContext):
   private inline def get[T: Reader](
       uri: Uri
   ): AsyncResponse[T] = {
+    @nowarn("msg=New anonymous class definition will be duplicated at each inline site")
     def tryGet(backoffSeconds: Int): AsyncResponse[T] = Future {
       quickRequest
         .get(uri)
@@ -49,21 +51,24 @@ class Scaladex(using ExecutionContext):
   case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
   def artifacts(project: Project): AsyncResponse[Seq[ProjectArtifact]] =
     get[Seq[ProjectArtifact]](
-      uri"$ScaladexUrl/api/projects/${project.org}/${project.name}/artifacts"
+      uri"$ScaladexUrl/api/projects/${project.organization}/${project.repository}/artifacts"
     )
 
   case class Artifact(
       groupId: String,
       artifactId: String,
       version: String,
-      artifactName: String,
-      project: String,
-      releaseDate: Long, // epoch-millis
+      name: String,
+      project: Project,
+      releaseDate: java.time.OffsetDateTime, // epoch-millis
       licenses: Seq[String],
       language: String,
       platform: String
   ) derives Reader:
-    def releaseLocalData: LocalDate = LocalDate.from(Instant.ofEpochMilli(releaseDate))
+    def releaseLocalData: LocalDate = LocalDate.from(releaseDate)
+
+  case class ScaladexProject()
+  given Reader[java.time.OffsetDateTime] = summon[Reader[String]].map(java.time.OffsetDateTime.parse)
 
   def artifact(artifact: ProjectArtifact): AsyncResponse[Artifact] =
     get[Artifact](

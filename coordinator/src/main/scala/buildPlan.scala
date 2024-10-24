@@ -259,13 +259,13 @@ def makeDependenciesBasedBuildPlan(
       }.toMap
 
   def projectRepoUrl(project: Project) =
-    val originalCoords = (project.org, project.name)
+    val originalCoords = (project.organization, project.repository)
     val (org, name) =
       replacements.get(originalCoords).map(_._1).getOrElse(originalCoords)
     s"https://github.com/${org}/${name}.git"
 
   def getRevision(project: Project) =
-    val originalCoords = (project.org, project.name)
+    val originalCoords = (project.organization, project.repository)
     replacements
       .get(originalCoords)
       .map(_._2)
@@ -283,7 +283,7 @@ def makeDependenciesBasedBuildPlan(
       cutOffDate <- cutOffDate
       repoDir <- Git.checkout(
         repoUrl,
-        project.name,
+        project.repository,
         revision = None,
         depth = Some(1)
       )
