@@ -51,7 +51,7 @@ class Scaladex(using ExecutionContext):
   case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
   def artifacts(project: Project): AsyncResponse[Seq[ProjectArtifact]] =
     get[Seq[ProjectArtifact]](
-      uri"$ScaladexUrl/api/projects/${project.organization}/${project.repository}/artifacts"
+      uri"$ScaladexUrl/api/projects/${project.organization}/${project.repository}/artifacts?stable-only=false"
     )
 
   case class Artifact(
