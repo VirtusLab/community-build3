@@ -40,7 +40,10 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
   private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
     val Limit = 10
     @scala.annotation.tailrec
-    def loop(incomplete: List[Incomplete], acc: List[Throwable]): List[Throwable] = {
+    def loop(
+        incomplete: List[Incomplete],
+        acc: List[Throwable]
+    ): List[Throwable] = {
       incomplete match {
         case Nil                     => acc
         case _ if acc.length > Limit => acc
@@ -97,7 +100,10 @@ object CommunityBuildPlugin extends AutoPlugin {
   ): Seq[ModuleID] =
     if (!projectScalaVersion.startsWith("3.")) Nil
     else
-      Scala3CommunityBuild.Utils.extraLibraryDependencies(buildScalaVersion.getOrElse(projectScalaVersion))
+      Scala3CommunityBuild.Utils
+        .extraLibraryDependencies(
+          buildScalaVersion.getOrElse(projectScalaVersion)
+        )
         .map {
           case LibraryDependency(
                 org,
@@ -123,82 +129,93 @@ object CommunityBuildPlugin extends AutoPlugin {
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
     */
   val setCrossScalaVersions =
-    projectBasedKeyTransformCommand("setCrossScalaVersions", Keys.crossScalaVersions) {
-      (args, extracted) =>
-        val scalaVersion = args.head
-        val partialVersion = CrossVersion.partialVersion(scalaVersion)
-        val targetsScala3 = partialVersion.exists(_._1 == 3)
+    projectBasedKeyTransformCommand(
+      "setCrossScalaVersions",
+      Keys.crossScalaVersions
+    ) { (args, extracted) =>
+      val scalaVersion = args.head
+      val partialVersion = CrossVersion.partialVersion(scalaVersion)
+      val targetsScala3 = partialVersion.exists(_._1 == 3)
 
-        (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
-          val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
-          def updateVersion(fromVersion: String) = {
-            logOnce(
-              s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
-            )
-            scalaVersion
-          }
-          def withCrossVersion(version: String) = (version -> CrossVersion.partialVersion(version))
-          val crossVersionsWithPartial = currentCrossVersions.map(withCrossVersion).toMap
-          val currentScalaWithPartial = Seq(currentScalaVersion).map(withCrossVersion).toMap
-          val partialCrossVersions = crossVersionsWithPartial.values.toSet
-          val allPartialVersions = crossVersionsWithPartial ++ currentScalaWithPartial
+      (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
+        val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
+        def updateVersion(fromVersion: String) = {
+          logOnce(
+            s"Changing crossVersion $fromVersion -> $scalaVersion in ${ref.project}/crossScalaVersions"
+          )
+          scalaVersion
+        }
+        def withCrossVersion(version: String) =
+          (version -> CrossVersion.partialVersion(version))
+        val crossVersionsWithPartial =
+          currentCrossVersions.map(withCrossVersion).toMap
+        val currentScalaWithPartial =
+          Seq(currentScalaVersion).map(withCrossVersion).toMap
+        val partialCrossVersions = crossVersionsWithPartial.values.toSet
+        val allPartialVersions =
+          crossVersionsWithPartial ++ currentScalaWithPartial
 
-          type PartialVersion = Option[(Long, Long)]
-          def mapVersions(versionsWithPartial: Map[String, PartialVersion]) = versionsWithPartial
+        type PartialVersion = Option[(Long, Long)]
+        def mapVersions(versionsWithPartial: Map[String, PartialVersion]) =
+          versionsWithPartial
             .map {
-              case (version, Some((3, _))) if targetsScala3 => updateVersion(version)
-              case (version, `partialVersion`)              => updateVersion(version)
-              case (version, _)                             => version // not changed
+              case (version, Some((3, _))) if targetsScala3 =>
+                updateVersion(version)
+              case (version, `partialVersion`) => updateVersion(version)
+              case (version, _)                => version // not changed
             }
             .toSeq
             .distinct
 
-          allPartialVersions(currentScalaVersion) match {
-            // Check currently used version of given project
-            // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
-            case pv if partialCrossVersions.contains(pv) => mapVersions(allPartialVersions)
-            case _ => // if version is not a part of cross version allow only current version
-              val allowedCrossVersions = mapVersions(currentScalaWithPartial)
-              logOnce(
-                s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
-              )
-              allowedCrossVersions
-          }
+        allPartialVersions(currentScalaVersion) match {
+          // Check currently used version of given project
+          // Some projects only set scalaVersion, while leaving crossScalaVersions default, eg. softwaremill/tapir in xxx3, xxx2_13 projects
+          case pv if partialCrossVersions.contains(pv) =>
+            mapVersions(allPartialVersions)
+          case _ => // if version is not a part of cross version allow only current version
+            val allowedCrossVersions = mapVersions(currentScalaWithPartial)
+            logOnce(
+              s"Limitting incorrect crossVersions $currentCrossVersions -> $allowedCrossVersions in ${ref.project}/crossScalaVersions"
+            )
+            allowedCrossVersions
         }
+      }
     }
 
-  val mapScalacOptions = keyTransformCommand("mapScalacOptions", Keys.scalacOptions) {
-    (args, extracted) => (scope: Scope, currentScalacOptions: Seq[String]) =>
-      val scalaVersion = extracted.get(scope / Keys.scalaVersion)
-      val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
-      val append = safeArgs.lift(0).getOrElse(Nil)
-      lazy val (appendScala3Exclusive, appendScala3Inclusive) = append.partition { opt =>
-        scala3ExclusiveFlags.exists(opt.startsWith(_))
-      }
-      // Make sure to not modify Scala 2 project scalacOptions
-      // these can compiled as transitive dependency of custom startup task
-      val filteredAppend =
-        if (scalaVersion.startsWith("3.")) append
-        else {
-          appendScala3Exclusive.foreach { setting =>
-            logOnce(
-              s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope"
-            )
+  val mapScalacOptions =
+    keyTransformCommand("mapScalacOptions", Keys.scalacOptions) {
+      (args, extracted) => (scope: Scope, currentScalacOptions: Seq[String]) =>
+        val scalaVersion = extracted.get(scope / Keys.scalaVersion)
+        val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
+        val append = safeArgs.lift(0).getOrElse(Nil)
+        lazy val (appendScala3Exclusive, appendScala3Inclusive) =
+          append.partition { opt =>
+            scala3ExclusiveFlags.exists(opt.startsWith(_))
           }
-          append.diff(appendScala3Exclusive) ++ appendScala3Inclusive
-        }
+        // Make sure to not modify Scala 2 project scalacOptions
+        // these can compiled as transitive dependency of custom startup task
+        val filteredAppend =
+          if (scalaVersion.startsWith("3.")) append
+          else {
+            appendScala3Exclusive.foreach { setting =>
+              logOnce(
+                s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope"
+              )
+            }
+            append.diff(appendScala3Exclusive) ++ appendScala3Inclusive
+          }
 
-      val remove = safeArgs.lift(1).getOrElse(Nil)
-      val filteredRemove =
-        if (scalaVersion.startsWith("3.")) remove
-        else remove ++ appendScala3Exclusive
+        val remove = safeArgs.lift(1).getOrElse(Nil)
+        val filteredRemove =
+          if (scalaVersion.startsWith("3.")) remove
+          else remove ++ appendScala3Exclusive
 
-      Scala3CommunityBuild.Utils.mapScalacOptions(
-        current = currentScalacOptions,
-        append = filteredAppend,
-        remove = filteredRemove
-      )
-  }
+        Scala3CommunityBuild.Utils.mapScalacOptions(
+          current = currentScalacOptions,
+          append = filteredAppend,
+          remove = filteredRemove
+        )
+    }
 
   // format: off
   val scala3ExclusiveFlags = Seq(
@@ -234,21 +251,25 @@ object CommunityBuildPlugin extends AutoPlugin {
   // format: on
   import sbt.librarymanagement.InclExclRule
   val excludeLibraryDependency =
-    keyTransformCommand("excludeLibraryDependency", Keys.allExcludeDependencies) {
-      (args, extracted) => (scope, currentExcludeDependencies: Seq[InclExclRule]) =>
-        val scalaVersion = extracted.get(scope / Keys.scalaVersion)
-        val newRules = args
-          .map(_.replace("{scalaVersion}", scalaVersion))
-          .map {
-            _.split(":").zipWithIndex.foldLeft(InclExclRule()) {
-              case (rule, (org, 0))      => rule.withOrganization(org)
-              case (rule, (name, 1))     => rule.withName(name)
-              case (rule, (artifact, 2)) => rule.withArtifact(artifact)
-              case (_, (unexpected, idx)) =>
-                sys.error(s"unexpected argument $unexpected at idx: $idx")
-            }
+    keyTransformCommand(
+      "excludeLibraryDependency",
+      Keys.allExcludeDependencies
+    ) { (args, extracted) => (scope, currentExcludeDependencies: Seq[InclExclRule]) =>
+      val scalaVersion = extracted.get(scope / Keys.scalaVersion)
+      val newRules = args
+        .map(_.replace("{scalaVersion}", scalaVersion))
+        .map {
+          _.split(":").zipWithIndex.foldLeft(InclExclRule()) {
+            case (rule, (org, 0))      => rule.withOrganization(org)
+            case (rule, (name, 1))     => rule.withName(name)
+            case (rule, (artifact, 2)) => rule.withArtifact(artifact)
+            case (_, (unexpected, idx)) =>
+              sys.error(s"unexpected argument $unexpected at idx: $idx")
           }
-        currentExcludeDependencies ++ newRules.filterNot(currentExcludeDependencies.contains)
+        }
+      currentExcludeDependencies ++ newRules.filterNot(
+        currentExcludeDependencies.contains
+      )
     }
   val removeScalacOptionsStartingWith =
     keyTransformCommand("removeScalacOptionsStartingWith", Keys.scalacOptions) {
@@ -265,7 +286,9 @@ object CommunityBuildPlugin extends AutoPlugin {
   )
 
   type SettingMapping[T] = (Seq[String], Extracted) => (Scope, T) => T
-  def keyTransformCommand[T](name: String, task: ScopedTaskable[T])(mapping: SettingMapping[T]) =
+  def keyTransformCommand[T](name: String, task: ScopedTaskable[T])(
+      mapping: SettingMapping[T]
+  ) =
     Command.args(name, "args") { case (state, args) =>
       println(s"Execute $name: ${args.mkString(" ")}")
       val extracted = sbt.Project.extract(state)
@@ -273,7 +296,8 @@ object CommunityBuildPlugin extends AutoPlugin {
       val withArgs = mapping(args, extracted)
       val r = sbt.Project.relation(extracted.structure, true)
       val allDefs = r._1s.toSeq
-      val projectScopes = allDefs.filter(_.key == task.key).map(_.scope).distinct
+      val projectScopes =
+        allDefs.filter(_.key == task.key).map(_.scope).distinct
       val globalScopes = Seq(Scope.Global)
       def reapply(scopes: Seq[Scope]): State = {
         val redefined = task match {
@@ -295,24 +319,25 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
     }
 
-    type ProjectBasedSettingMapping[T] = (Seq[String], Extracted) => (ProjectRef, T) => T
-    def projectBasedKeyTransformCommand[T](name: String, task: ScopedTaskable[T])(
-        mapping: ProjectBasedSettingMapping[T]
-    ) =
-      Command.args(name, "args") { case (state, args) =>
-        println(s"Execute $name: ${args.mkString(" ")}")
-        val extracted = sbt.Project.extract(state)
-        val withArgs = mapping(args, extracted)
-        val refs = extracted.structure.allProjectRefs
-        state.appendWithSession(
-          task match {
-            case setting: SettingKey[T] =>
-              refs.map(ref => (ref / setting) ~= (v => withArgs(ref, v)))
-            case task: TaskKey[T] =>
-              refs.map(ref => (ref / task) ~= (v => withArgs(ref, v)))
-          }
-        )
-      }
+  type ProjectBasedSettingMapping[T] =
+    (Seq[String], Extracted) => (ProjectRef, T) => T
+  def projectBasedKeyTransformCommand[T](name: String, task: ScopedTaskable[T])(
+      mapping: ProjectBasedSettingMapping[T]
+  ) =
+    Command.args(name, "args") { case (state, args) =>
+      println(s"Execute $name: ${args.mkString(" ")}")
+      val extracted = sbt.Project.extract(state)
+      val withArgs = mapping(args, extracted)
+      val refs = extracted.structure.allProjectRefs
+      state.appendWithSession(
+        task match {
+          case setting: SettingKey[T] =>
+            refs.map(ref => (ref / setting) ~= (v => withArgs(ref, v)))
+          case task: TaskKey[T] =>
+            refs.map(ref => (ref / task) ~= (v => withArgs(ref, v)))
+        }
+      )
+    }
 
   // Create mapping from org%artifact_name to project name
   val mkMappings = Def.task {
@@ -340,12 +365,15 @@ object CommunityBuildPlugin extends AutoPlugin {
       )
     },
     runBuild := {
-      val scalaVersionArg :: configJson :: ids = spaceDelimited("<arg>").parsed.toList
+      val scalaVersionArg :: configJson :: ids =
+        spaceDelimited("<arg>").parsed.toList
       println(s"Build config: ${configJson}")
       val config = {
         val parsed = Parser
           .parseFromString(configJson)
-          .flatMap(Converter.fromJson[ProjectBuildConfig](_)(ProjectBuildConfigFormat))
+          .flatMap(
+            Converter.fromJson[ProjectBuildConfig](_)(ProjectBuildConfigFormat)
+          )
         println(s"Parsed config: ${parsed}")
         parsed.getOrElse(ProjectBuildConfig())
       }
@@ -354,7 +382,8 @@ object CommunityBuildPlugin extends AutoPlugin {
       val extracted = sbt.Project.extract(cState)
       val s = extracted.structure
       val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
-      val scalaBinaryVersionUsed = CrossVersion.binaryScalaVersion(scalaVersionArg)
+      val scalaBinaryVersionUsed =
+        CrossVersion.binaryScalaVersion(scalaVersionArg)
       val scalaBinaryVersionSuffix = "_" + scalaBinaryVersionUsed
       val scalaVersionSuffix = "_" + scalaVersionArg
       val rootDirName = file(".").getCanonicalFile().getName()
@@ -376,7 +405,9 @@ object CommunityBuildPlugin extends AutoPlugin {
           }
         // Workaround for scalatest/circe which does not set crossScalaVersions correctly
         def matchesName =
-          scalaBinaryVersionUsed.startsWith("3") && projectRef.project.contains("Dotty")
+          scalaBinaryVersionUsed.startsWith("3") && projectRef.project.contains(
+            "Dotty"
+          )
         hasCrossVersionSet || matchesName
       }
 
@@ -420,17 +451,23 @@ object CommunityBuildPlugin extends AutoPlugin {
         case "*%*" :: _ => originalModuleIds.keys.toSeq
         case ids        => ids
       }
-      val filteredIds = Scala3CommunityBuild.Utils.filterTargets(idsToUse, config.projects.exclude.map(_.r))
+      val filteredIds = Scala3CommunityBuild.Utils
+        .filterTargets(idsToUse, config.projects.exclude.map(_.r))
 
       println("Starting build...")
       // Find projects that matches maven
       val topLevelProjects = {
         var haveUsedRootModule = false
-        val idsWithMissingMappings = scala.collection.mutable.ListBuffer.empty[String]
+        val idsWithMissingMappings =
+          scala.collection.mutable.ListBuffer.empty[String]
         val mappedProjects =
           for {
             id <- filteredIds
-            testedSuffixes = Seq("", scalaVersionSuffix, scalaBinaryVersionSuffix) ++
+            testedSuffixes = Seq(
+              "",
+              scalaVersionSuffix,
+              scalaBinaryVersionSuffix
+            ) ++
               Option("Dotty").filter(_ => scalaBinaryVersionUsed.startsWith("3"))
             testedFullIds = testedSuffixes.map(id + _)
             candidates = for (fullId <- testedFullIds)
@@ -440,7 +477,9 @@ object CommunityBuildPlugin extends AutoPlugin {
                 moduleIds.get(fullId),
                 simplifiedModuleIds.get(simplifiedModuleId(fullId)),
                 // Single, top level, unnamed project
-                refsByName.headOption.map(_._2).filter(_ => refsByName.size == 1)
+                refsByName.headOption
+                  .map(_._2)
+                  .filter(_ => refsByName.size == 1)
               ).flatten
           } yield candidates.flatten.headOption
             .orElse {
@@ -482,7 +521,10 @@ object CommunityBuildPlugin extends AutoPlugin {
       }.toMap
 
       @annotation.tailrec
-      def flatten(soFar: Set[ProjectRef], toCheck: Set[ProjectRef]): Set[ProjectRef] =
+      def flatten(
+          soFar: Set[ProjectRef],
+          toCheck: Set[ProjectRef]
+      ): Set[ProjectRef] =
         toCheck match {
           case e if e.isEmpty => soFar
           case pDeps =>
@@ -514,7 +556,8 @@ object CommunityBuildPlugin extends AutoPlugin {
               }
             }
         }
-        val testingMode = overrideSettings.flatMap(_.tests).getOrElse(config.tests)
+        val testingMode =
+          overrideSettings.flatMap(_.tests).getOrElse(config.tests)
 
         import evaluator._
         val scalacOptions = eval(Compile / Keys.scalacOptions) match {
@@ -522,11 +565,15 @@ object CommunityBuildPlugin extends AutoPlugin {
           case _                             => Nil
         }
         println(s"Compile scalacOptions: ${scalacOptions}")
-        def mayRetry[T](task: TaskKey[T])(evaluate: TaskKey[T] => EvalResult[T]): EvalResult[T] =  evaluate(task) match {
+        def mayRetry[T](task: TaskKey[T])(
+            evaluate: TaskKey[T] => EvalResult[T]
+        ): EvalResult[T] = evaluate(task) match {
           case EvalResult.Failure(reasons, _) if reasons.exists {
-              case ex: AssertionError =>  ex.getMessage.contains("overlapping patches")
-              case _ => false
-            } =>  evaluate(task)
+                case ex: AssertionError =>
+                  ex.getMessage.contains("overlapping patches")
+                case _ => false
+              } =>
+            evaluate(task)
           case result => result
         }
         val compileResult = mayRetry(Compile / compile)(eval)
@@ -535,17 +582,21 @@ object CommunityBuildPlugin extends AutoPlugin {
           case EvalResult.Value(skip, _) => !skip
           case _                         => false
         }
-        val docsResult = mayRetry(Compile / doc){
+        val docsResult = mayRetry(Compile / doc) {
           evalWhen(shouldBuildDocs, compileResult)
-        } 
+        }
 
-        val testsCompileResult = mayRetry(Test / compile){
+        val testsCompileResult = mayRetry(Test / compile) {
           evalWhen(testingMode != TestingMode.Disabled, compileResult)
         }
         // Introduced to fix publishing artifact locally in scala-debug-adapter
         lazy val testOptionsResult = eval(Test / testOptions)
         val testsExecuteResult =
-          evalWhen(testingMode == TestingMode.Full, testsCompileResult, testOptionsResult)(
+          evalWhen(
+            testingMode == TestingMode.Full,
+            testsCompileResult,
+            testOptionsResult
+          )(
             Test / executeTests
           )
 
@@ -558,17 +609,21 @@ object CommunityBuildPlugin extends AutoPlugin {
           compile = collectCompileResult(compileResult, scalacOptions),
           doc = DocsResult(docsResult),
           testsCompile = collectCompileResult(testsCompileResult, scalacOptions),
-          testsExecute = collectTestResults(testsExecuteResult),
+          testsExecute = collectTestResults(
+            testsExecuteResult,
+            eval(Test / definedTests),
+            eval(Test / loadedTestFrameworks)
+          ),
           publish = publishResult
         )
       }
 
       val buildSummary = BuildSummary(projectsBuildResults)
       println(s"""
-          |************************
-          |Build summary:
-          |${buildSummary.toJson}
-          |************************""".stripMargin)
+        |************************
+        |Build summary:
+        |${buildSummary.toJson}
+        |************************""".stripMargin)
       IO.write(file("..") / "build-summary.txt", buildSummary.toJson)
 
       val failedModules = projectsBuildResults
@@ -640,42 +695,89 @@ object CommunityBuildPlugin extends AutoPlugin {
           sourceVersion = sourceVersion
         )
 
-      case EvalResult.Skipped => CompileResult(Status.Skipped, warnings = 0, errors = 0, tookMs = 0)
+      case EvalResult.Skipped =>
+        CompileResult(Status.Skipped, warnings = 0, errors = 0, tookMs = 0)
     }
   }
 
-  def collectTestResults(evalResult: EvalResult[sbt.Tests.Output]): TestsResult = {
-    val empty = TestsResult(
+  def collectTestResults(
+      evalResult: EvalResult[sbt.Tests.Output],
+      definedTests: EvalResult[Seq[sbt.TestDefinition]],
+      loadedTestFrameworks: EvalResult[
+        Map[sbt.TestFramework, sbt.testing.Framework]
+      ]
+  ): TestsResult = {
+    val default = TestsResult(
       evalResult.toStatus,
       failureContext = evalResult.toBuildError,
-      passed = 0,
-      failed = 0,
-      ignored = 0,
-      skipped = 0,
+      overall = TestStats.empty,
+      byFramework = Map.empty,
       tookMs = evalResult.evalTime
     )
+
     evalResult match {
       case EvalResult.Value(value, _) =>
-        val initialState = empty.copy(status = value.overall match {
+        val status = value.overall match {
           case TestResult.Passed => Status.Ok
           case _                 => Status.Failed
-        })
-        value.events.values.foldLeft(initialState) { case (state, result) =>
-          state.copy(
-            passed = state.passed + result.passedCount,
-            failed = state.failed + result.failureCount + result.errorCount + result.canceledCount,
-            ignored = state.ignored + result.ignoredCount,
-            skipped = state.skipped + result.skippedCount
-          )
         }
-
-      case _ => empty
+        def sum(results: Iterable[SuiteResult]) =
+          results.foldLeft(TestStats.empty) { case (state, result) =>
+            state.copy(
+              passed = state.passed + result.passedCount,
+              failed =
+                state.failed + result.failureCount + result.errorCount + result.canceledCount,
+              ignored = state.ignored + result.ignoredCount,
+              skipped = state.skipped + result.skippedCount
+            )
+          }
+        val byFrameworkStats: Map[String, TestStats] =
+          (definedTests, loadedTestFrameworks) match {
+            case (
+                  EvalResult.Value(definedTests, _),
+                  EvalResult.Value(loadedTestFrameworks, _)
+                ) =>
+              val frameworkByFingerprint = loadedTestFrameworks.values.flatMap { framework =>
+                val name = framework.name()
+                framework.fingerprints().map(_ -> name)
+              }.toMap
+              val testFrameworks = definedTests.map { test =>
+                val framework = frameworkByFingerprint
+                  .get(test.fingerprint)
+                  .orElse {
+                    // In case if overwrites toString but not equals (see munit)
+                    frameworkByFingerprint.collectFirst {
+                      case (fingerprint, name)
+                          if test.fingerprint
+                            .toString() == fingerprint.toString =>
+                        name
+                    }
+                  }
+                  .getOrElse("unknown")
+                test.name -> framework
+              }.toMap
+              value.events
+                .groupBy { case (testName, _) =>
+                  testFrameworks.get(testName).getOrElse("unknown")
+                }
+                .map { case (frameworkName, results) =>
+                  frameworkName -> sum(results.values)
+                }
+            case _ => Map.empty
+          }
+        val overallStats = sum(value.events.values)
+        default.copy(
+          status = status,
+          overall = overallStats,
+          byFramework = byFrameworkStats
+        )
+      case _ => default
     }
   }
 
   // Serialization
   implicit object TestingModeEnumJsonFormat extends JsonFormat[TestingMode] {
-    def write[J](x: TestingMode, builder: Builder[J]): Unit = "full"
+    def write[J](x: TestingMode, builder: Builder[J]): Unit = ???
     def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): TestingMode =
       jsOpt.fold(deserializationError("Missing string")) { js =>
         unbuilder.readString(js) match {
@@ -705,7 +807,8 @@ object CommunityBuildPlugin extends AutoPlugin {
         implicit val _unbuilder: Unbuilder[J] = unbuilder
         unbuilder.beginObject(js)
         val excluded = readOrDefault("exclude", Array.empty[String])
-        val overrides = readOrDefault("overrides", Map.empty[String, ProjectOverrides])
+        val overrides =
+          readOrDefault("overrides", Map.empty[String, ProjectOverrides])
         unbuilder.endObject()
         ProjectsConfig(excluded.toList, overrides)
       }
@@ -713,7 +816,10 @@ object CommunityBuildPlugin extends AutoPlugin {
 
   implicit object ProjectBuildConfigFormat extends JsonFormat[ProjectBuildConfig] {
     def write[J](v: ProjectBuildConfig, builder: Builder[J]): Unit = ???
-    def read[J](optValue: Option[J], unbuilder: Unbuilder[J]): ProjectBuildConfig =
+    def read[J](
+        optValue: Option[J],
+        unbuilder: Unbuilder[J]
+    ): ProjectBuildConfig =
       optValue.fold(deserializationError("Empty object")) { v =>
         implicit val _unbuilder: Unbuilder[J] = unbuilder
         unbuilder.beginObject(v)

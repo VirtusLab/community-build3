@@ -133,17 +133,30 @@ object Scala3CommunityBuild {
       }
     }
   }
+  case class TestStats(passed: Int, failed: Int, ignored: Int, skipped: Int){
+    val total: Int = passed + failed + ignored + skipped
+    def toJson(inlined: Boolean = false) = {
+      val raw = s""""passed": ${passed}, "failed": ${failed}, "ignored": ${ignored}, "skipped": ${skipped}", "total": ${total}"""
+      if (inlined) raw
+      else s"{$raw}"
+    }
+  }
+  object TestStats{
+    val empty = TestStats(0, 0,0 ,0)
+  }
   case class TestsResult(
       status: Status,
       failureContext: Option[FailureContext] = None,
-      passed: Int,
-      failed: Int,
-      ignored: Int,
-      skipped: Int,
+      overall: TestStats,
+      byFramework: Map[String, TestStats],
       tookMs: Int
   ) extends StepResult {
-    def toJson =
-      s"""{$commonJsonFields, "passed": ${passed}, "failed": ${failed}, "ignored": ${ignored}, "skipped": ${skipped}}"""
+    def toJson = {
+      val byFrameworkJson = byFramework.toSeq.sortBy(_._1).map{
+        case (name, stats) => s"""{"framework": "$name", "stats": ${stats.toJson()}}"""
+      }.mkString("[", ",", "]")
+      s"""{$commonJsonFields, ${overall.toJson(inlined = true)}, "byFramework": ${byFrameworkJson}}"""
+    }
   }
   case class PublishResult(
       status: Status,
