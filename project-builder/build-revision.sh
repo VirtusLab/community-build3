@@ -166,7 +166,7 @@ function buildForScalaVersion(){
   echo "started" > build-status.txt 
   # Mill
   # We check either for mill boostrap script or one of valid root build files
-  if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala"] || [ -f "repo/build.sc"]; then
+  if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala" ] || [ -f "repo/build.sc" ]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
     $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"

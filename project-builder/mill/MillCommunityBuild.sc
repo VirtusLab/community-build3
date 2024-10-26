@@ -335,12 +335,9 @@ private def collectCompileResults(evalResult: EvalResult[CompilationResult]): Co
 
 private def collectTestResults(evalResult: EvalResult[Seq[TestResult]]): TestsResult = {
   import sbt.testing.Status
-  val empty = TestsResult(
+  val default = TestsResult(
     status = evalResult.toStatus,
-    passed = 0,
-    failed = 0,
-    ignored = 0,
-    skipped = 0,
+    overall = TestStats.empty,
     tookMs = evalResult.evalTime
   )
   evalResult match {
@@ -352,13 +349,15 @@ private def collectTestResults(evalResult: EvalResult[Seq[TestResult]]): TestsRe
 
       def countOf(selected: Status*) = selected.foldLeft(0)(_ + resultsStatus.getOrElse(_, 0))
 
-      empty.copy(
-        passed = countOf(Status.Success),
-        failed = countOf(Status.Error, Status.Failure, Status.Canceled),
-        ignored = countOf(Status.Ignored),
-        skipped = countOf(Status.Skipped)
+      default.copy(
+        overall = TestStats(
+          passed = countOf(Status.Success),
+          failed = countOf(Status.Error, Status.Failure, Status.Canceled),
+          ignored = countOf(Status.Ignored),
+          skipped = countOf(Status.Skipped)
+        )
       )
-    case _ => empty.copy(failureContext = evalResult.toBuildError)
+    case _ => default.copy(failureContext = evalResult.toBuildError)
   }
 }
 

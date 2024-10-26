@@ -74,10 +74,7 @@ import os.CommandResult
     testsExecute = TestsResult(
       status = testsExecuteResults.toStatus,
       failureContext = testsExecuteResults.toBuildError,
-      passed = 0,
-      failed = 0,
-      ignored = 0,
-      skipped = 0,
+      overall = TestStats.empty,
       tookMs = testsExecuteResults.evalTime
     ),
     publish = publishResult

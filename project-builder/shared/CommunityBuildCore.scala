@@ -136,7 +136,7 @@ object Scala3CommunityBuild {
   case class TestStats(passed: Int, failed: Int, ignored: Int, skipped: Int){
     val total: Int = passed + failed + ignored + skipped
     def toJson(inlined: Boolean = false) = {
-      val raw = s""""passed": ${passed}, "failed": ${failed}, "ignored": ${ignored}, "skipped": ${skipped}", "total": ${total}"""
+      val raw = s""""passed": ${passed}, "failed": ${failed}, "ignored": ${ignored}, "skipped": ${skipped}, "total": ${total}"""
       if (inlined) raw
       else s"{$raw}"
     }
@@ -146,10 +146,10 @@ object Scala3CommunityBuild {
   }
   case class TestsResult(
       status: Status,
+      tookMs: Int,
       failureContext: Option[FailureContext] = None,
-      overall: TestStats,
-      byFramework: Map[String, TestStats],
-      tookMs: Int
+      overall: TestStats = TestStats.empty,
+      byFramework: Map[String, TestStats] = Map.empty
   ) extends StepResult {
     def toJson = {
       val byFrameworkJson = byFramework.toSeq.sortBy(_._1).map{

@@ -710,8 +710,6 @@ object CommunityBuildPlugin extends AutoPlugin {
     val default = TestsResult(
       evalResult.toStatus,
       failureContext = evalResult.toBuildError,
-      overall = TestStats.empty,
-      byFramework = Map.empty,
       tookMs = evalResult.evalTime
     )
 
