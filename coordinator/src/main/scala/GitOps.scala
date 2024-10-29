@@ -31,6 +31,7 @@ object Git {
   ): Option[os.Path] = {
     val branchOpt = revision.flatMap {
       case Revision.Branch(name) => Some(s"--branch=$name")
+      case Revision.Tag(tag) => Some(s"--branch=$tag")
       case _                     => None
     }
     val depthOpt = depth.map(s"--depth=" + _)
@@ -78,8 +79,8 @@ object Git {
             sha
           case Revision.Tag(tag) =>
             fetchTags(projectDir)
-            s"tags/$tag"
-
+            tag
+        
         val proc = os
           .proc("git", "checkout", rev, "--quiet")
           .call(
