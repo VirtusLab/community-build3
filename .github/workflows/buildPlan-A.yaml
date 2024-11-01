@@ -269,6 +269,7 @@ jobs:
         - name: "dfianthdl/dfhdl"
         - name: "dieproht/matr"
         - name: "dieproht/molly"
+        - name: "dimitarg/weaver-test-extra"
         - name: "disneystreaming/alloy"
         - name: "disneystreaming/smithy-translate"
         - name: "disneystreaming/smithy4s"
@@ -329,7 +330,6 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
-        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
@@ -609,7 +610,6 @@ jobs:
         - name: "monix/monix"
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
-        - name: "mpollmeier/scala-repl-pp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mpollmeier/scala-repl-pp"
         - name: "msgpack4z/msgpack4z-circe"
         - name: "msgpack4z/msgpack4z-core"
         - name: "msgpack4z/msgpack4z-play"
@@ -730,7 +731,6 @@ jobs:
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/smithy4s-caliban"
         - name: "polyvariant/sttp-oauth2"
-        - name: "polyvariant/treesitter4s"
         - name: "poslegm/munit-zio"
         - name: "postgresql-async/postgresql-async"
         - name: "ppurang/asynch"

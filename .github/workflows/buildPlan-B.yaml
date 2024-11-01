@@ -1,5 +1,5 @@
 
-# projects total:     746
+# projects total:     748
 # min stars count:    -1
 # max projects count: 1000
 
@@ -382,6 +382,7 @@ jobs:
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
         - name: "ingarabr/http4s-cloud-functions"
+        - name: "io-github-nafg/zio-messaging"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
         - name: "ist-dsi/scala-keystone-client"
@@ -609,7 +610,6 @@ jobs:
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/pekko-discovery-consul"
-        - name: "pjfanning/pekko-http-session"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/pekko-http-session"
         - name: "pjfanning/pekko-libraries-bom"
         - name: "pjfanning/pekko-mock-scheduler"
         - name: "pjfanning/pekko-rabbitmq"
@@ -650,6 +651,7 @@ jobs:
         - name: "polyvariant/caliban-gitlab"
         - name: "polyvariant/respectfully"
         - name: "polyvariant/scodec-java-classfile"
+        - name: "polyvariant/treesitter4s"
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
