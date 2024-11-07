@@ -21,6 +21,6 @@ cd "$repoDir"
 PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 java -version
 sbt --batch \
-  \;'set every sonatypePublishToBundle := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
+  \;'set every publishTo := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
   \;'set every version := "'$scalaVersion'"' \
   \;"scala3-bootstrapped/publish"
