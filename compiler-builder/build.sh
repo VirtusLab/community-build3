@@ -17,9 +17,7 @@ echo '##################################'
 
 cd "$repoDir"
 
-sed -i -r 's/val baseVersion = ".*"/val baseVersion = "'$scalaVersion'"/' project/Build.scala 
-export RELEASEBUILD=yes
-
-sbt \
+sbt --batch \
   \;'set every sonatypePublishToBundle := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
+  \;'set every version := "'$scalaVersion'"' \
   \;"scala3-bootstrapped/publish"
