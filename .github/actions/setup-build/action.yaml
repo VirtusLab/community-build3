@@ -84,7 +84,7 @@ runs:
           echo "Maven repo at: ${{ steps.calc-version.outputs.effective-maven-url }}"
           echo '##################################'
 
-          cd ${{ github.workspace }}/compiler/
+          cd /compiler/
           PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 
           java -version
