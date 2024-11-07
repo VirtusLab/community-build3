@@ -17,9 +17,12 @@ echo '##################################'
 
 cd "$repoDir"
 
-export RELEASEBUILD=yes
+compilerVersion="$(sbt --error 'print scala3-compiler-bootstrapped/version')"
+if [[ "$scalaVerison" != "$compilerVersion"]]; then 
+  echo "Configured version $scalaVersion does not match compiler version $compilerVersion"
+  exit 1
+fi
 
 sbt --batch \
   \;'set every sonatypePublishToBundle := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
-  \;'set every version := "'$scalaVersion'"' \
   \;"scala3-bootstrapped/publish"
