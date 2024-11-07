@@ -13,8 +13,8 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 BUILDER_BASE=virtuslab/scala-community-build-builder-base
 PROJECT_BUILDER=virtuslab/scala-community-build-project-builder
-MVN_REPO=virtuslab/scala-community-build-mvn-repo
-COMPILER_BUILDER=virtuslab/scala-community-build-compiler-builder
+# MVN_REPO=virtuslab/scala-community-build-mvn-repo
+# COMPILER_BUILDER=virtuslab/scala-community-build-compiler-builder
 
 # JDK-specifc images
 for image in $BUILDER_BASE $PROJECT_BUILDER; do
@@ -31,9 +31,10 @@ done
 
 # Single-JDK images
 # $MVN_REPO is not build anymore
-for image in $COMPILER_BUILDER; do
-  docker tag $image:$VERSION $image:latest
-  for tag in $VERSION latest; do
-    docker push $image:$tag
-  done
-done
+# $COMPILER_BUILDER is used anymore
+# for image in $MVN_REPO $COMPILER_BUILDER; do
+#   docker tag $image:$VERSION $image:latest
+#   for tag in $VERSION latest; do
+#     docker push $image:$tag
+#   done
+# done

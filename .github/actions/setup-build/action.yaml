@@ -73,20 +73,22 @@ runs:
         echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT
 
     - name: Build compiler
+      uses: addnab/docker-run-action@v3
       if: steps.check-published.outputs.is-compiler-published == 'false'
-      shell: bash
-      run: |
-        echo '##################################'
-        echo "Release Scala in version: ${{ steps.calc-version.outputs.effective-scala-version }}"
-        echo "Maven repo at: ${{ steps.calc-version.outputs.effective-maven-url }}"
-        echo '##################################'
+      with:
+        image: "lampepfl/dotty:2024-10-18"
+        options: -v ${{ github.workspace }}/compiler:/compiler/
+        run: |
+          echo '##################################'
+          echo "Release Scala in version: ${{ steps.calc-version.outputs.effective-scala-version }}"
+          echo "Maven repo at: ${{ steps.calc-version.outputs.effective-maven-url }}"
+          echo '##################################'
 
-        cd ${{ github.workspace }}/compiler/
-        # PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+          cd ${{ github.workspace }}/compiler/
+          PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 
-        java -version
-        set -x
-        sbt 'eval java.util.Base64.getEncoder.encode("${{ steps.calc-version.outputs.effective-maven-url }}".getBytes("UTF-8")).toList'
-        sbt 'eval java.util.Base64.getEncoder.encode("${{ steps.calc-version.outputs.effective-scala-version }}".getBytes("UTF-8")).toList'
-
-        sbt 'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}") ;set every version := "${{ steps.calc-version.outputs.effective-scala-version }}" ;scala3-interfaces/publish ;scala3-bootstrapped/publish'
+          java -version
+          sbt \
+          'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
+          ';set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
+          ';scala3-bootstrapped/publish'
