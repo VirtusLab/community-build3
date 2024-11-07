@@ -76,10 +76,22 @@ runs:
       uses: addnab/docker-run-action@v3
       if: steps.check-published.outputs.is-compiler-published == 'false'
       with:
-        image: "virtuslab/scala-community-build-compiler-builder:latest"
+        image: "lampepfl/dotty:2024-10-18"
         options: -v ${{ github.workspace }}/compiler:/compiler/
         run: |
-          Version="${{ steps.calc-version.outputs.effective-scala-version }}"
-          CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
-          echo "Building Scala compiler, version ${Version}"
-          /build/build.sh /compiler "${Version}" "${CustomMavenRepo}"
+          echo '##################################'
+          echo "Release Scala in version: ${{ steps.calc-version.outputs.effective-scala-version }}"
+          echo "Maven repo at: ${{ steps.calc-version.outputs.effective-maven-url }}"
+          echo '##################################'
+
+          cd /compiler/
+          PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+
+          java -version
+          sbt \
+            'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
+            \;'set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
+            \;'show scala3-bootstrapped/publishTo' \
+            \;"scala3-interfaces/publish" \
+            \;"scala3-bootstrapped/publish"
+
