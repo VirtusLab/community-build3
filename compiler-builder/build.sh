@@ -23,6 +23,8 @@ if [[ "$scalaVersion" != "$compilerVersion" ]]; then
   exit 1
 fi
 
+PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
+java -version
 sbt --batch \
   \;'set every sonatypePublishToBundle := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
   \;"scala3-bootstrapped/publish"
