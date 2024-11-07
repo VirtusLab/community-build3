@@ -86,10 +86,4 @@ runs:
 
         java -version
         set -x
-        sbt \
-          'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
-          \;'show scala3-bootstrapped/publishTo' \
-          \;'set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
-          \;'show scala3-bootstrapped/version' \
-          \;"scala3-interfaces/publish" \
-          \;"scala3-bootstrapped/publish"
+        sbt 'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}") ;show scala3-bootstrapped/publishTo ;set every version := "${{ steps.calc-version.outputs.effective-scala-version }}" ;show scala3-bootstrapped/version ;scala3-interfaces/publish ;scala3-bootstrapped/publish'
