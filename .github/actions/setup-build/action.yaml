@@ -34,15 +34,13 @@ runs:
         if [[ -z $scalaVersion ]]; then
           cd compiler
           git --no-pager log -1
-          commitHash=$(git rev-parse --short=7 HEAD)
-          echo "$commitHash" | base64
-          commitDate=$(git show -s --format=%cd --date=format:"%Y%m%d" HEAD)
-          echo "$commitDate" | base64
-          baseVersion="$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | xargs | awk '{ print $5 }')"
-          echo "$baseVersion" | base64
+          commitHash=$(git rev-parse --short=7 HEAD | xargs)
+          commitDate=$(git show -s --format=%cd --date=format:"%Y%m%d" HEAD | xargs)
+          baseVersion=$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | awk '{ print $5 }' | xargs)
           # `SNAPSHOT` substring is required to treat compiler as experimental
           # All compilers build from branch are treated experimental
           scalaVersion="${baseVersion}-${commitDate}-${commitHash}-SNAPSHOT"
+          echo $scalaVersion | base64
         fi
 
         baseMavenRepo="https://scala3.westeurope.cloudapp.azure.com/maven2"
