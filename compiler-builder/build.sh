@@ -17,6 +17,8 @@ echo '##################################'
 
 cd "$repoDir"
 
+export RELEASEBUILD=yes
+
 sbt --batch \
   \;'set every sonatypePublishToBundle := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
   \;'set every version := "'$scalaVersion'"' \
