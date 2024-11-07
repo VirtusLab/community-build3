@@ -17,14 +17,10 @@ echo '##################################'
 
 cd "$repoDir"
 
-compilerVersion="$(sbt --error 'print scala3-compiler-bootstrapped/version' | grep "3." | tail -n 1 | xargs)"
-if [[ "$scalaVersion" != "$compilerVersion" ]]; then 
-  echo "Configured version $scalaVersion does not match compiler version $compilerVersion"
-  exit 1
-fi
 
 PATH="/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH"
 java -version
 sbt --batch \
   \;'set every sonatypePublishToBundle := Some("Community Build Repo" at sys.env("CB_MVN_REPO_URL"))'  \
+  \;'set every version := "'$scalaVersion'"' \
   \;"scala3-bootstrapped/publish"

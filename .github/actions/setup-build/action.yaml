@@ -31,19 +31,19 @@ runs:
       shell: bash
       run: |
         scalaVersion=${{ inputs.scala-version }}
-        baseMavenRepo="https://scala3.westeurope.cloudapp.azure.com/maven2"
-        buildMavenRepo="${baseMavenRepo}/${scalaVersion}"
         if [[ -z $scalaVersion ]]; then
           cd compiler
           git --no-pager log -1
           commitHash=$(git rev-parse --short=7 HEAD)
           commitDate=$(git show -s --format=%cd --date=format:"%Y%m%d" HEAD)
           baseVersion="$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | xargs | awk '{ print $5 }')"
-
-          buildMavenRepo="${baseMavenRepo}/${baseVersion}-${commitDate}-${commitHash}"
-          scalaVersion="$(sbt --error 'print scala3-compiler-bootstrapped/version' | grep "3." | tail -n 1 | xargs)"
+          # `SNAPSHOT` substring is required to treat compiler as experimental
+          # All compilers build from branch are treated experimental
+          scalaVersion="${baseVersion}-${commitDate}-${commitHash}-SNAPSHOT"
         fi
 
+        baseMavenRepo="https://scala3.westeurope.cloudapp.azure.com/maven2"
+        buildMavenRepo="${baseMavenRepo}/${scalaVersion}"
 
         echo "Effective Scala version for this build: $scalaVersion"
         echo "effective-scala-version=${scalaVersion}" >> $GITHUB_OUTPUT
