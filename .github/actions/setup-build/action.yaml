@@ -35,8 +35,11 @@ runs:
           cd compiler
           git --no-pager log -1
           commitHash=$(git rev-parse --short=7 HEAD)
+          echo "$commitHash" | base64
           commitDate=$(git show -s --format=%cd --date=format:"%Y%m%d" HEAD)
-          baseVersion="$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | xargs | awk '{ print $5 }' | tr -cd '[:print:]')"
+          echo "$commitDate" | base64
+          baseVersion="$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | xargs | awk '{ print $5 }')"
+          echo "$baseVersion" | base64
           # `SNAPSHOT` substring is required to treat compiler as experimental
           # All compilers build from branch are treated experimental
           scalaVersion="${baseVersion}-${commitDate}-${commitHash}-SNAPSHOT"
