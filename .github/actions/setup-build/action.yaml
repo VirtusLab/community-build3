@@ -86,4 +86,7 @@ runs:
 
         java -version
         set -x
-        sbt 'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}") ;show scala3-bootstrapped/publishTo ;set every version := "${{ steps.calc-version.outputs.effective-scala-version }}" ;show scala3-bootstrapped/version ;scala3-interfaces/publish ;scala3-bootstrapped/publish'
+        sbt 'eval java.util.Base64.getEncoder.encode("${{ steps.calc-version.outputs.effective-maven-url }}".getBytes("UTF-8")).toList'
+        sbt 'eval java.util.Base64.getEncoder.encode("${{ steps.calc-version.outputs.effective-scala-version }}".getBytes("UTF-8")).toList'
+
+        sbt 'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}") ;set every version := "${{ steps.calc-version.outputs.effective-scala-version }}" ;scala3-interfaces/publish ;scala3-bootstrapped/publish'
