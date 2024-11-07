@@ -17,7 +17,7 @@ echo '##################################'
 
 cd "$repoDir"
 
-compilerVersion="$(sbt --error 'print scala3-compiler-bootstrapped/version' | head -n 1 | xargs)"
+compilerVersion="$(sbt --error 'print scala3-compiler-bootstrapped/version' | grep "3." | tail -n 1 | xargs)"
 if [[ "$scalaVersion" != "$compilerVersion" ]]; then 
   echo "Configured version $scalaVersion does not match compiler version $compilerVersion"
   exit 1
