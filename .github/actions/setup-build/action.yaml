@@ -36,7 +36,7 @@ runs:
           git --no-pager log -1
           commitHash=$(git rev-parse --short=7 HEAD)
           commitDate=$(git show -s --format=%cd --date=format:"%Y%m%d" HEAD)
-          baseVersion="$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | xargs | awk '{ print $5 }')"
+          baseVersion="$(sbt 'eval Build.baseVersion' | grep 'ans: String =' | xargs | awk '{ print $5 }' | tr -cd '[:print:]')"
           # `SNAPSHOT` substring is required to treat compiler as experimental
           # All compilers build from branch are treated experimental
           scalaVersion="${baseVersion}-${commitDate}-${commitHash}-SNAPSHOT"
