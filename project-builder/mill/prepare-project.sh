@@ -155,26 +155,23 @@ for buildFile in "${adaptedFiles[@]}"; do
   rm $scalaFile
 done
 
-millBuildExt="mill"
-if [[ "$millBinaryVersionMajor" -eq "0" && "$millBinaryVersionMinor" -le "11" ]]; then 
-  millBuildExt=sc
-fi
 for f in "${adaptedFiles[@]}"; do
   dir="$(dirname $(realpath "$f"))"
-  cp $scriptDir/MillCommunityBuild.sc ${dir}/MillCommunityBuild.$millBuildExt
-  cp $scriptDir/compat/$millBinaryVersion.sc ${dir}/MillVersionCompat.$millBuildExt
+  extension="${f##*.}"
+  cp $scriptDir/MillCommunityBuild.sc ${dir}/MillCommunityBuild.$extension
+  cp $scriptDir/compat/$millBinaryVersion.sc ${dir}/MillVersionCompat.$extension
 
-  if [[ "$millBinaryVersionMajor" -gt "0" || "$millBinaryVersionMinor" -ge "12" ]]; then
-    # Compat for Mill 0.12+ sources
-    echo "package build" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${dir}/CommunityBuildCore.$millBuildExt
-  else  
+  if [[ "$extension" == "sc" ]]; then
     # Compat for Mill 0.11+ sources
-    cp $scriptDir/../shared/CommunityBuildCore.scala ${dir}/CommunityBuildCore.$millBuildExt
-    for fileCopy in ${dir}/CommunityBuildCore.$millBuildExt ${dir}/MillCommunityBuild.$millBuildExt ${dir}/MillVersionCompat.$millBuildExt; do
+    cp $scriptDir/../shared/CommunityBuildCore.scala ${dir}/CommunityBuildCore.$extension
+    for fileCopy in ${dir}/CommunityBuildCore.$extension ${dir}/MillCommunityBuild.$extension ${dir}/MillVersionCompat.sc; do
       scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "package build\n" "" 2> /dev/null
       scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "import CommunityBuildCore." "import \$file.CommunityBuildCore, CommunityBuildCore." 2> /dev/null
       scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "import MillVersionCompat." "import \$file.MillVersionCompat, MillVersionCompat." 2> /dev/null
     done
+  else
+    # Compat for Mill 0.12+ sources
+    echo "package build" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${dir}/CommunityBuildCore.$extension 
   fi
 
 done
