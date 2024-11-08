@@ -137,7 +137,12 @@ function createBuildPatch() {
   (cd repo && git diff > $BuildPatchFile) 
 }
 function revertBuildPatch() {
-  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject --allow-empty || true) 
+  # --alow-empty is might be missing in some git versions
+  maybeAllowEmpty=""
+  if git apply --help | grep 'allow-empty' > /dev/null ; then
+    maybeAllowEmpty="--allow-empty"
+  fi
+  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject $maybeAllowEmpty || true) 
 }
 function commmitMigrationRewrite() {
   if [[ -z "$(cd repo && git status --untracked-files=no --porcelain)" ]]; then
