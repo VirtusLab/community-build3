@@ -1,5 +1,5 @@
 
-# projects total:     749
+# projects total:     746
 # min stars count:    -1
 # max projects count: 1000
 
@@ -287,7 +287,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-odb"
-        - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "gnp/ident"
@@ -330,6 +329,7 @@ jobs:
         - name: "hnaderi/named-codec"
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
+        - name: "hnaderi/yaml4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "hnaderi/yaml4s"
         - name: "hsci-r/lucene-perfieldpostingsformatordtermvectorscodec"
         - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
@@ -382,7 +381,6 @@ jobs:
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
         - name: "ingarabr/http4s-cloud-functions"
-        - name: "io-github-nafg/zio-messaging"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
         - name: "ist-dsi/scala-keystone-client"
@@ -610,6 +608,8 @@ jobs:
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/pekko-discovery-consul"
+        - name: "pjfanning/pekko-http-session"
+        - name: "pjfanning/pekko-libraries-bom"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,8 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "pjfanning/pekko-http-session"
-        - name: "pjfanning/pekko-libraries-bom"
         - name: "pjfanning/pekko-mock-scheduler"
         - name: "pjfanning/pekko-rabbitmq"
         - name: "pjfanning/pekko-serialization-jackson215"
@@ -656,7 +654,6 @@ jobs:
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
-        - name: "ppurang/asynch"
         - name: "pschichtel/obd4s"
         - name: "psilicon/avro2s"
         - name: "pureharm/pureharm-aws"
