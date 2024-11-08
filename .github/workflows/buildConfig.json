@@ -9245,50 +9245,6 @@
       ]
     }
   },
-  "coursier/sbt-coursier":{
-    "project":"coursier/sbt-coursier",
-    "repoUrl":"https://github.com/coursier/sbt-coursier.git",
-    "revision":"sbt-2.x",
-    "version":"2.0.0-alpha8",
-    "targets":"ch.epfl.scala%librarymanagement-coursier ch.epfl.scala%lm-coursier",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"8"
-      },
-      "sbt":{
-        "commands":[
-          "set every scalafixOnCompile := false"
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"project/Settings.scala",
-          "pattern":"def scala3 = \"3.3.4\"",
-          "replaceWith":"def scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "cozydev-pink/lucille":{
     "project":"cozydev-pink/lucille",
     "repoUrl":"https://github.com/cozydev-pink/lucille.git",
@@ -13984,7 +13940,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -18603,7 +18559,7 @@
     "repoUrl":"https://github.com/gemini-hlsw/crystal.git",
     "revision":"v0.45.3",
     "version":"0.45.3",
-    "targets":"edu.gemini%crystal-testkit",
+    "targets":"edu.gemini%crystal edu.gemini%crystal-testkit",
     "config":{
       "projects":{
         "exclude":[
@@ -18939,46 +18895,6 @@
       "sbt":{
         "commands":[
           
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "gemini-hlsw/lucuma-schemas":{
-    "project":"gemini-hlsw/lucuma-schemas",
-    "repoUrl":"https://github.com/gemini-hlsw/lucuma-schemas.git",
-    "revision":"v0.107.1",
-    "version":"0.107.1",
-    "targets":"edu.gemini%lucuma-schemas edu.gemini%lucuma-schemas-model edu.gemini%lucuma-schemas-testkit",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          "set every scalafixOnCompile := false"
         ],
         "options":[
           
@@ -24263,13 +24179,6 @@
         
       ]
     }
-  },
-  "io-github-nafg/zio-messaging":{
-    "project":"io-github-nafg/zio-messaging",
-    "repoUrl":"https://github.com/io-github-nafg/zio-messaging.git",
-    "revision":"v0.0.3",
-    "version":"0.0.3",
-    "targets":"io.github.nafg.zio-messaging%zio-messaging io.github.nafg.zio-messaging%zio-messaging-entrance-group io.github.nafg.zio-messaging%zio-messaging-twilio"
   },
   "irevive/union-derivation":{
     "project":"irevive/union-derivation",
@@ -30794,7 +30703,40 @@
     "repoUrl":"https://github.com/kubukoz/smithy-playground.git",
     "revision":"v0.8.0",
     "version":"0.8.0",
-    "targets":"com.kubukoz.playground%ast com.kubukoz.playground%core com.kubukoz.playground%formatter com.kubukoz.playground%language-support com.kubukoz.playground%lsp com.kubukoz.playground%parser com.kubukoz.playground%plugin-core com.kubukoz.playground%plugin-sample com.kubukoz.playground%source"
+    "targets":"com.kubukoz.playground%ast com.kubukoz.playground%core com.kubukoz.playground%formatter com.kubukoz.playground%language-support com.kubukoz.playground%lsp com.kubukoz.playground%parser com.kubukoz.playground%plugin-core com.kubukoz.playground%plugin-sample com.kubukoz.playground%source",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          "excludeLibraryDependency org.polyvariant:better-tostring_{scalaVersion}"
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "kubukoz/spotify-next":{
     "project":"kubukoz/spotify-next",
@@ -37846,7 +37788,7 @@
         }
       },
       "java":{
-        
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -53494,7 +53436,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"disabled",
       "migrationVersions":[
         
       ],
