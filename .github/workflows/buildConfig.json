@@ -25906,50 +25906,6 @@
       ]
     }
   },
-  "jd557/minart":{
-    "project":"jd557/minart",
-    "repoUrl":"https://github.com/jd557/minart.git",
-    "revision":"v0.6.2",
-    "version":"0.6.2",
-    "targets":"eu.joaocosta%minart eu.joaocosta%minart-backend eu.joaocosta%minart-core eu.joaocosta%minart-image eu.joaocosta%minart-sound",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"core/shared/src/main/scala/eu/joaocosta/minart/graphics/SurfaceView.scala",
-          "pattern":"copy(cx = newCx, cy = newCy, newWidth, newHeight)",
-          "replaceWith":"copy(cx = newCx, cy = newCy, width = newWidth, height = newHeight)"
-        }
-      ]
-    }
-  },
   "jd557/rokrok":{
     "project":"jd557/rokrok",
     "repoUrl":"https://github.com/jd557/rokrok.git",
@@ -26486,8 +26442,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.140",
-    "version":"4.0.140",
+    "revision":"v4.0.141",
+    "version":"4.0.141",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "config":{
       "projects":{
@@ -30718,7 +30674,8 @@
       },
       "sbt":{
         "commands":[
-          "excludeLibraryDependency org.polyvariant:better-tostring_{scalaVersion}"
+          "excludeLibraryDependency org.polyvariant:better-tostring_{scalaVersion}",
+          "mapScalacOptions -experimental"
         ],
         "options":[
           
@@ -37775,8 +37732,8 @@
   "outr/lightdb":{
     "project":"outr/lightdb",
     "repoUrl":"https://github.com/outr/lightdb.git",
-    "revision":"0.14.5",
-    "version":"0.14.5",
+    "revision":"0.15.0",
+    "version":"0.15.0",
     "targets":"com.outr%lightdb com.outr%lightdb-all com.outr%lightdb-async com.outr%lightdb-core com.outr%lightdb-duckdb com.outr%lightdb-h2 com.outr%lightdb-halo com.outr%lightdb-lucene com.outr%lightdb-mapdb com.outr%lightdb-postgresql com.outr%lightdb-redis com.outr%lightdb-rocks com.outr%lightdb-sql com.outr%lightdb-sqlite",
     "config":{
       "projects":{
@@ -37810,7 +37767,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.5.1\"",
+          "pattern":"val scala3 = \"3.5.2\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -39115,6 +39072,46 @@
     "version":"0.0.1",
     "targets":""
   },
+  "philippus/between":{
+    "project":"philippus/between",
+    "repoUrl":"https://github.com/philippus/between.git",
+    "revision":"v0.6.0",
+    "version":"0.6.0",
+    "targets":"nl.gn0s1s%between",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "philippus/elastic4s":{
     "project":"philippus/elastic4s",
     "repoUrl":"https://github.com/philippus/elastic4s.git",
@@ -39161,6 +39158,126 @@
     "revision":"v1.2.0",
     "version":"1.2.0",
     "targets":"nl.gn0s1s%julius",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "philippus/osita":{
+    "project":"philippus/osita",
+    "repoUrl":"https://github.com/philippus/osita.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"nl.gn0s1s%osita",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "philippus/pureconfig-javanet":{
+    "project":"philippus/pureconfig-javanet",
+    "repoUrl":"https://github.com/philippus/pureconfig-javanet.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"nl.gn0s1s%pureconfig-javanet",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"8"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
+  "philippus/scala-isbn":{
+    "project":"philippus/scala-isbn",
+    "repoUrl":"https://github.com/philippus/scala-isbn.git",
+    "revision":"v1.1.0",
+    "version":"1.1.0",
+    "targets":"nl.gn0s1s%scala-isbn",
     "config":{
       "projects":{
         "exclude":[
@@ -40287,7 +40404,40 @@
     "repoUrl":"https://github.com/plasmalaboratories/plasma-sdk-scala.git",
     "revision":"v0.2.0",
     "version":"0.2.0",
-    "targets":"org.plasmalabs%crypto org.plasmalabs%plasma-sdk org.plasmalabs%quivr4s org.plasmalabs%service-kit"
+    "targets":"org.plasmalabs%crypto org.plasmalabs%plasma-sdk org.plasmalabs%quivr4s org.plasmalabs%service-kit",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          "excludeLibraryDependency com.olegpy:better-monadic-for_3"
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "playframework/anorm":{
     "project":"playframework/anorm",
@@ -40779,8 +40929,8 @@
   "plokhotnyuk/jsoniter-scala":{
     "project":"plokhotnyuk/jsoniter-scala",
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.31.2",
-    "version":"2.31.2",
+    "revision":"v2.31.3",
+    "version":"2.31.3",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros",
     "config":{
       "projects":{
