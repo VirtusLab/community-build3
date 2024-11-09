@@ -1,5 +1,5 @@
 
-# projects total:     746
+# projects total:     749
 # min stars count:    -1
 # max projects count: 1000
 
@@ -594,6 +594,9 @@ jobs:
         - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
         - name: "philippus/julius"
+        - name: "philippus/osita"
+        - name: "philippus/pureconfig-javanet"
+        - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
@@ -607,9 +610,6 @@ jobs:
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/micrometer-akka"
-        - name: "pjfanning/pekko-discovery-consul"
-        - name: "pjfanning/pekko-http-session"
-        - name: "pjfanning/pekko-libraries-bom"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/pekko-discovery-consul"
+        - name: "pjfanning/pekko-http-session"
+        - name: "pjfanning/pekko-libraries-bom"
         - name: "pjfanning/pekko-mock-scheduler"
         - name: "pjfanning/pekko-rabbitmq"
         - name: "pjfanning/pekko-serialization-jackson215"
