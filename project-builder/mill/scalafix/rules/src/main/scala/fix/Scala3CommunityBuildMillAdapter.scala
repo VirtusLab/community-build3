@@ -370,8 +370,7 @@ class Scala3CommunityBuildMillAdapter(
 
     val MillCommunityBuildInject = s"""
     |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = ${Transform.TaskCommandType
-      .toString()} {
+    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = ${Transform.TaskCommandType.toString()} {
     |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
     |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
     |}
@@ -422,12 +421,10 @@ class Scala3CommunityBuildMillAdapter(
             "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
         ),
         if (useLegacyTasks) None else Some("private object _OpenCommunityBuildOps {"),
-        if (useLegacyTasks && config.isMainBuildFile.forall(_ == true))
-          Some(MillCommunityBuildInject)
-        else None,
         Some(MapScalacOptionsOps),
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
-        if (useLegacyTasks) None else Some("}\nimport _OpenCommunityBuildOps._")
+        if (useLegacyTasks) None else Some("}\nimport _OpenCommunityBuildOps._"),
+        Some(MillCommunityBuildInject),
       ).flatten ++
         Seq("// End of OpenCB code injects\n")
     }.mkString("\n")
