@@ -102,6 +102,7 @@ jobs:
         - name: "alexarchambault/case-app"
         - name: "algolia/algoliasearch-client-scala"
         - name: "alhuelamo/dbjobs"
+        - name: "aliics/mouse"
         - name: "almond-sh/almond"
         - name: "alonsodomin/cron4s"
         - name: "altoo-ag/akka-kryo-serialization"
@@ -329,7 +330,6 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
-        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
@@ -609,7 +610,6 @@ jobs:
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
-        - name: "msgpack4z/msgpack4z-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "msgpack4z/msgpack4z-circe"
         - name: "msgpack4z/msgpack4z-core"
         - name: "msgpack4z/msgpack4z-play"
         - name: "mvv/sager"
@@ -732,7 +733,6 @@ jobs:
         - name: "polyvariant/sttp-oauth2"
         - name: "poslegm/munit-zio"
         - name: "postgresql-async/postgresql-async"
-        - name: "ppurang/asynch"
         - name: "profunktor/fs2-rabbit"
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"

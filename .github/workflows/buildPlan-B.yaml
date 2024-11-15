@@ -1,5 +1,5 @@
 
-# projects total:     749
+# projects total:     752
 # min stars count:    -1
 # max projects count: 1000
 
@@ -587,6 +587,7 @@ jobs:
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
+        - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
@@ -609,7 +610,6 @@ jobs:
         - name: "pjfanning/aws-spi-pekko-http"
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
-        - name: "pjfanning/micrometer-akka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/pekko-discovery-consul"
         - name: "pjfanning/pekko-http-session"
         - name: "pjfanning/pekko-libraries-bom"
@@ -657,6 +658,7 @@ jobs:
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
+        - name: "ppurang/asynch"
         - name: "pschichtel/obd4s"
         - name: "psilicon/avro2s"
         - name: "pureharm/pureharm-aws"
@@ -739,6 +741,7 @@ jobs:
         - name: "scullxbones/pekko-persistence-mongo"
         - name: "sdrafahl/codec"
         - name: "sean-ideabank/rudolf"
+        - name: "sfali/grpc-rest-gateway"
         - name: "sfxcode/pebble-scala"
         - name: "sfxcode/sapphire-data"
         - name: "sh4869/semver-parser-scala"
