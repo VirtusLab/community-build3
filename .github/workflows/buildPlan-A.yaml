@@ -275,6 +275,7 @@ jobs:
         - name: "disneystreaming/smithy4s"
         - name: "disneystreaming/weaver-test"
         - name: "dispatch/reboot"
+        - name: "dobrynya/zio-jms"
         - name: "donderom/llm4s"
         - name: "doriordan/skuber"
         - name: "dragonfly-ai/matrix"
@@ -329,7 +330,6 @@ jobs:
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
-        - name: "fingo/spata"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
@@ -374,7 +375,6 @@ jobs:
         - name: "gaelrenoux/tranzactio"
         - name: "galliaproject/gallia-core"
         - name: "gapt/gapt"
-        - name: "garlandus/augment"
         - name: "geirolz/advxml"
         - name: "geirolz/cats-xml"
         - name: "geirolz/erules"
@@ -544,7 +544,6 @@ jobs:
         - name: "kubukoz/slick-effect"
         - name: "kubukoz/smithy-playground"
         - name: "kubukoz/spotify-next"
-        - name: "kubukoz/sup"
         - name: "kuceramartin/tyqu"
         - name: "lambdaworks/scountries"
         - name: "lambdaworks/scurl-detector"
@@ -610,6 +609,7 @@ jobs:
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
+        - name: "msgpack4z/msgpack4z-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "msgpack4z/msgpack4z-circe"
         - name: "msgpack4z/msgpack4z-core"
         - name: "msgpack4z/msgpack4z-play"
         - name: "mvv/sager"
@@ -733,6 +732,7 @@ jobs:
         - name: "polyvariant/sttp-oauth2"
         - name: "poslegm/munit-zio"
         - name: "postgresql-async/postgresql-async"
+        - name: "ppurang/asynch"
         - name: "profunktor/fs2-rabbit"
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"
