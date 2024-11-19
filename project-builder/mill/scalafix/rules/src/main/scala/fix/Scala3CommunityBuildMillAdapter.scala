@@ -210,6 +210,7 @@ class Scala3CommunityBuildMillAdapter(
           } ++ traits.collectFirst {
             case Init(WithTypeName("RootModule" | "MillBuildRootModule"), _, _)
                 if !noInjects && config.isMainBuildFile.forall(_ == true) =>
+              injectsRunCommandInRootModule = true
               injectRootModuleRunCommand
           }
         )
@@ -276,18 +277,21 @@ class Scala3CommunityBuildMillAdapter(
   }
 
   var transformed = collection.mutable.Set.empty[Tree]
+  var injectsRunCommandInRootModule = false
   override def fix(implicit doc: SyntacticDocument): Patch = {
-    val headerInject = {
+    injectsRunCommandInRootModule = false
+    lazy val headerInject = {
       if (noInjects) Patch.empty
       else {
         val insertAfter = doc.tree.collect {
           case tree: Import if Seq("$file", "$ivy").exists(tree.syntax.contains) => tree
           case pkg: Pkg                                                          => pkg
         }.lastOption
+        val shouldInjectRunCommand = !injectsRunCommandInRootModule
         insertAfter match {
-          case Some(Pkg(_, firstStat :: _)) => Patch.addLeft(firstStat, Replacment.injects)
-          case Some(insertAfter)            => Patch.addRight(insertAfter, Replacment.injects)
-          case None                         => Patch.addLeft(doc.tree, Replacment.injects)
+          case Some(Pkg(_, firstStat :: _)) => Patch.addLeft(firstStat, Replacment.injects(shouldInjectRunCommand))
+          case Some(insertAfter)            => Patch.addRight(insertAfter, Replacment.injects(shouldInjectRunCommand))
+          case None                         => Patch.addLeft(doc.tree, Replacment.injects(shouldInjectRunCommand))
         }
       }
     }
@@ -411,7 +415,7 @@ class Scala3CommunityBuildMillAdapter(
     |}
     |""".stripMargin
 
-    val injects = {
+    def injects(injectRootModuleRunCommand: Boolean) = {
       Seq(
         Some(
           if (useLegacyTasks) """
@@ -424,7 +428,7 @@ class Scala3CommunityBuildMillAdapter(
         Some(MapScalacOptionsOps),
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
         if (useLegacyTasks) None else Some("}\nimport _OpenCommunityBuildOps._"),
-        Some(MillCommunityBuildInject),
+        if (injectRootModuleRunCommand) Some(MillCommunityBuildInject) else None,
       ).flatten ++
         Seq("// End of OpenCB code injects\n")
     }.mkString("\n")
