@@ -360,7 +360,6 @@ jobs:
         - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
-        - name: "flyway/flyway-play"
         - name: "fmonniot/scala3mock"
         - name: "foldables-io/skunk-tables"
         - name: "folone/poi.scala"
@@ -610,6 +609,7 @@ jobs:
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
         - name: "msgpack4z/msgpack4z-circe"
+        - name: "msgpack4z/msgpack4z-core"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "msgpack4z/msgpack4z-core"
         - name: "msgpack4z/msgpack4z-play"
         - name: "mvv/sager"
         - name: "nafg/css-dsl"
@@ -707,6 +706,7 @@ jobs:
         - name: "pjfanning/pekko-http-json"
         - name: "playframework/anorm"
         - name: "playframework/cachecontrol"
+        - name: "playframework/flyway-play"
         - name: "playframework/omnidoc"
         - name: "playframework/play-doc"
         - name: "playframework/play-ebean"
