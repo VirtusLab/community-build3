@@ -1,5 +1,5 @@
 
-# projects total:     750
+# projects total:     752
 # min stars count:    -1
 # max projects count: 1000
 
@@ -251,6 +251,7 @@ jobs:
         - name: "errors4s/errors4s-core-cats"
         - name: "errors4s/errors4s-core-scalacheck"
         - name: "errors4s/errors4s-http"
+        - name: "esamson/atbp"
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
@@ -329,7 +330,6 @@ jobs:
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
         - name: "hnaderi/yaml4s"
-        - name: "hsci-r/lucene-perfieldpostingsformatordtermvectorscodec"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hsci-r/lucene-perfieldpostingsformatordtermvectorscodec"
         - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
         - name: "hshn/slick-codegen-patch"
@@ -609,7 +610,6 @@ jobs:
         - name: "pjfanning/aws-spi-pekko-http"
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
-        - name: "pjfanning/micrometer-akka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/pekko-discovery-consul"
         - name: "pjfanning/pekko-http-session"
         - name: "pjfanning/pekko-libraries-bom"
@@ -674,6 +675,7 @@ jobs:
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
         - name: "ranyitz/casing"
+        - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "reactivemongo/reactivemongo-play-json"
         - name: "rmgk/slips"
