@@ -63,6 +63,11 @@ jobs:
       - uses: VirtusLab/scala-cli-setup@v1.0.1
         with:
           jvm: 8
+          
+      - name: Setup git config
+        run: |
+          git config --global user.name "Scala 3 Open Community Build"
+          git config --global user.email "scala3-community-build@virtuslab.com"
 
       - name: "Bisect project"
         shell: bash
