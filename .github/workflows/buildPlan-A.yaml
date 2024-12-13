@@ -243,7 +243,6 @@ jobs:
         - name: "davenverse/cats-scalacheck"
         - name: "davenverse/catscript"
         - name: "davenverse/circuit"
-        - name: "davenverse/circuit-http4s"
         - name: "davenverse/epimetheus"
         - name: "davenverse/epimetheus-http4s"
         - name: "davenverse/fuuid"
@@ -259,7 +258,6 @@ jobs:
         - name: "davenverse/rediculous"
         - name: "davenverse/rediculous-concurrent"
         - name: "davenverse/single-fibered"
-        - name: "davenverse/snickerdoodle"
         - name: "davenverse/tsec"
         - name: "davenverse/whale-tail"
         - name: "delimobil/cabbit"
@@ -320,6 +318,7 @@ jobs:
         - name: "eventstore/eventstore.jvm"
         - name: "evolution-gaming/derivation"
         - name: "evolution-gaming/scache"
+        - name: "fabiopinheiro/scala-did"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
@@ -330,6 +329,7 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
+        - name: "finos/morphir-jvm"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
@@ -406,6 +405,7 @@ jobs:
         - name: "grouzen/zio-apache-parquet"
         - name: "guardian/fastly-api-client"
         - name: "guardian/hmac-headers"
+        - name: "guardian/pan-domain-authentication"
         - name: "guardian/play-brotli-filter"
         - name: "guardian/play-googleauth"
         - name: "guardian/play-secret-rotation"
@@ -440,7 +440,6 @@ jobs:
         - name: "http4s/http4s-scalatags"
         - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-session"
-        - name: "i10416/cssminifier"
         - name: "i10416/munkres"
         - name: "ichoran/kse3"
         - name: "iheartradio/ficus"
@@ -463,7 +462,6 @@ jobs:
         - name: "j-mie6/parsley-cats"
         - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "j5ik2o/akka-persistence-s3"
-        - name: "j5ik2o/base64scala"
         - name: "j5ik2o/docker-controller-scala"
         - name: "janstenpickle/hotswap-ref"
         - name: "jap-company/fields"
@@ -582,7 +580,6 @@ jobs:
         - name: "lunduniversity/introprog-scalalib"
         - name: "m2-oss/calypso"
         - name: "makiftutuncu/e"
-        - name: "makiftutuncu/effect"
         - name: "makingthematrix/inject"
         - name: "makingthematrix/signals3"
         - name: "malliina/mobile-push"
@@ -610,6 +607,9 @@ jobs:
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
         - name: "msgpack4z/msgpack4z-circe"
+        - name: "msgpack4z/msgpack4z-core"
+        - name: "msgpack4z/msgpack4z-play"
+        - name: "mvv/sager"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,9 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "msgpack4z/msgpack4z-core"
-        - name: "msgpack4z/msgpack4z-play"
-        - name: "mvv/sager"
         - name: "nafg/css-dsl"
         - name: "nafg/simpleivr"
         - name: "nafg/slick-additions"
@@ -676,6 +673,7 @@ jobs:
         - name: "otavia-projects/mill-rust-jni"
         - name: "otavia-projects/otavia"
         - name: "outr/hasher"
+        - name: "outr/lightdb"
         - name: "outr/lucene4s"
         - name: "outr/mailgun4s"
         - name: "outr/media4s"
@@ -761,6 +759,7 @@ jobs:
         - name: "rescala-lang/rescala"
         - name: "rewards-network/combos"
         - name: "rewards-network/pure-aws"
+        - name: "rmgk/scitzen"
         - name: "rolang/dumbo"
         - name: "rssh/cps-async-connect"
         - name: "rssh/dotty-cps-async"
@@ -830,12 +829,13 @@ jobs:
         - name: "scalameta/metaconfig"
         - name: "scalameta/metals"
         - name: "scalameta/munit"
+        - name: "scalameta/scalameta"
         - name: "scalamolecule/molecule"
         - name: "scalanlp/breeze"
-        - name: "scalapatisserie/muffin"
         - name: "scalapb-json/scalapb-circe"
         - name: "scalapb-json/scalapb-playjson"
         - name: "scalapb/protobuf-scala-runtime"
+        - name: "scalapb/protoc-bridge"
         - name: "scalapb/scalapb"
         - name: "scalapb/scalapb-grpcweb"
         - name: "scalapb/scalapb-json4s"

@@ -1,5 +1,5 @@
 
-# projects total:     758
+# projects total:     767
 # min stars count:    -1
 # max projects count: 1000
 
@@ -210,6 +210,7 @@ jobs:
         - name: "damon-v79/cassandra-migration"
         - name: "dapperware/dappermongo"
         - name: "datastrophic-games/dice"
+        - name: "davenverse/circuit-http4s"
         - name: "davenverse/clippette"
         - name: "davenverse/condemned"
         - name: "davenverse/crossplatformioapp"
@@ -226,6 +227,7 @@ jobs:
         - name: "davenverse/natchez-rediculous"
         - name: "davenverse/os-detect"
         - name: "davenverse/publicsuffix"
+        - name: "davenverse/snickerdoodle"
         - name: "davidledwards/scalop"
         - name: "delimobil/fs2-hbase"
         - name: "dobrynya/zio-jms"
@@ -258,7 +260,6 @@ jobs:
         - name: "estrondo/sweet-mockito"
         - name: "eugene-sy/play-quartz"
         - name: "evolution-gaming/random"
-        - name: "fabiopinheiro/scala-did"
         - name: "faveoled/sous-title"
         - name: "fdietze/formidable"
         - name: "fehu/opentracing-scala"
@@ -308,6 +309,7 @@ jobs:
         - name: "guardian/identity-test-users"
         - name: "guardian/mobile-apps-api-models"
         - name: "guardian/pa-football-client"
+        - name: "guardian/panda-hmac"
         - name: "guardian/redirect-resolver"
         - name: "guidoschmidt17/zio-pgcopy"
         - name: "guizmaii-opensource/zio-aes"
@@ -328,8 +330,6 @@ jobs:
         - name: "hjfruit/scalikejdbc-helper"
         - name: "hjfruit/zio-pulsar"
         - name: "hnaderi/named-codec"
-        - name: "hnaderi/portainer-client"
-        - name: "hnaderi/scala-readpass"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,10 +355,13 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hnaderi/portainer-client"
+        - name: "hnaderi/scala-readpass"
         - name: "hnaderi/yaml4s"
         - name: "hsci-r/lucene-perfieldpostingsformatordtermvectorscodec"
         - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
+        - name: "hshn/crypto4s"
         - name: "hshn/slick-codegen-patch"
         - name: "http4s/hpack"
         - name: "http4s/http4s-async-http-client"
@@ -369,6 +372,7 @@ jobs:
         - name: "http4s/http4s-tomcat"
         - name: "http4s/http4s-twirl"
         - name: "hughsimpson/scalameter"
+        - name: "i10416/cssminifier"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/detective"
@@ -377,6 +381,7 @@ jobs:
         - name: "indoorvivants/mdoc-effect"
         - name: "indoorvivants/opaque-newtypes"
         - name: "indoorvivants/rendition"
+        - name: "indoorvivants/scala-uri"
         - name: "indoorvivants/sn-demangler"
         - name: "indoorvivants/subatomic"
         - name: "indoorvivants/yank"
@@ -391,6 +396,7 @@ jobs:
         - name: "itv/quartz4s"
         - name: "ivoah/vial"
         - name: "j-mie6/golden-scala"
+        - name: "j5ik2o/base64scala"
         - name: "j5ik2o/event-store-adapter-scala"
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
@@ -472,6 +478,7 @@ jobs:
         - name: "kovacshuni/circe-config"
         - name: "krrrr38/protoquill-finagle-mysql"
         - name: "kubukoz/drops"
+        - name: "kubukoz/dualshock4s"
         - name: "kzmake/uuid7s"
         - name: "laserdisc-io/scanamo-circe"
         - name: "laserdisc-io/slack4s"
@@ -517,6 +524,7 @@ jobs:
         - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
+        - name: "makiftutuncu/effect"
         - name: "malliina/sbt-utils"
         - name: "malliina/util-base"
         - name: "malyszaryczlowiek/kessenger-lib"
@@ -529,7 +537,6 @@ jobs:
         - name: "mateuszkubuszok/explain-given"
         - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
-        - name: "mbannour/mongoscala3codecs"
         - name: "mdedetrich/scalacheck"
         - name: "mercurievv/minuscles"
         - name: "mimoguz/layeredfonticon"
@@ -577,8 +584,8 @@ jobs:
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
         - name: "outr/dd-scala"
-        - name: "outr/lightdb"
         - name: "outr/moduload"
+        - name: "outr/rapid"
         - name: "outr/robobrowser"
         - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
@@ -603,13 +610,6 @@ jobs:
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
-        - name: "pityka/pairwisealignment"
-        - name: "pityka/relational3"
-        - name: "pityka/selfpackage"
-        - name: "pityka/tasks"
-        - name: "pjfanning/acked-stream"
-        - name: "pjfanning/akka-rabbitmq"
-        - name: "pjfanning/aws-spi-pekko-http"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,13 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pityka/pairwisealignment"
+        - name: "pityka/relational3"
+        - name: "pityka/selfpackage"
+        - name: "pityka/tasks"
+        - name: "pjfanning/acked-stream"
+        - name: "pjfanning/akka-rabbitmq"
+        - name: "pjfanning/aws-spi-pekko-http"
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/micrometer-akka"
@@ -684,6 +691,7 @@ jobs:
         - name: "rmgk/slips"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
+        - name: "rssh/scala-appcontext"
         - name: "rssh/shim--scala-async--dotty-cps-async"
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/rate-limit-status"
@@ -722,6 +730,7 @@ jobs:
         - name: "scalacenter/scala3-binary-decoder"
         - name: "scalalandio/mdc4s"
         - name: "scalameta/munit-scalacheck"
+        - name: "scalapatisserie/muffin"
         - name: "scalapb-json/scalapb-argonaut"
         - name: "scalapb-json/scalapb-json-common"
         - name: "scalapb/common-protos"
@@ -881,6 +890,31 @@ jobs:
         - name: "zhranklin/scala-tricks"
         - name: "zio/zio-bson"
         - name: "zio/zio-morphir"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        with:
+          project-name: ${{ matrix.name }}
+          custom-build-id: ${{ inputs.custom-build-id }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          extra-library-dependencies: ${{ inputs.extra-library-dependencies }}
+          execute-tests: ${{ inputs.execute-tests }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          container-registry-username: ${{ github.actor }}
+          container-registry-token: ${{ secrets.GHCR_TOKEN }}
+  stage-3:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build ]
+    continue-on-error: true
+    strategy:
+      matrix:
+        include:
         - name: "zio/zio-streams-compress"
         - name: "zygfryd/scala-zygf-jackshaft"
     steps:
