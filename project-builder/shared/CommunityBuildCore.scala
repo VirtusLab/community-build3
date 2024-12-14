@@ -12,7 +12,8 @@ object Scala3CommunityBuild {
   // Community projects configs
   case class ProjectBuildConfig(
       projects: ProjectsConfig = ProjectsConfig(),
-      tests: TestingMode = TestingMode.Full
+      tests: TestingMode = TestingMode.Full,
+      sourcePatches: Seq[SourcePatch] = Nil
   )
 
   case class ProjectOverrides(tests: Option[TestingMode] = None)
@@ -27,6 +28,12 @@ object Scala3CommunityBuild {
     case object CompileOnly extends TestingMode
     case object Full extends TestingMode
   }
+  
+  case class SourcePatch(
+    path: String,
+    pattern: String,
+    replaceWith: String
+  )
 
 // Output
   case class BuildSummary(results: Seq[ModuleBuildResults]) {

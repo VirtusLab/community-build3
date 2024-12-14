@@ -1,11 +1,14 @@
 //> using toolkit 0.2.1
 //> using scala 3.3
 //> using file ../shared/CommunityBuildCore.scala
+//> using file ../shared/searchAndReplace.scala
+//> using main-class buildScalaCliProject
 
 import Scala3CommunityBuild.*
 import scala.util.CommandLineParser.FromString
 
 import uPickleSerializers.OptionPickler.read
+import java.nio.file.Path
 import TaskEvaluator.EvalResult
 import os.CommandResult
 
@@ -26,6 +29,10 @@ import os.CommandResult
     if (configJson.isEmpty()) ProjectBuildConfig()
     else read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
+  
+  config.sourcePatches.foreach{ case SourcePatch(path, pattern, replaceWith) => 
+    searchAndReplace((repositoryDir / path).toNIO, pattern, replaceWith)  
+  }
 
   val evaluator = CliTaskEvaluator(
     scalaVersion = scalaVersion,
@@ -213,6 +220,7 @@ object uPickleSerializers {
   implicit lazy val ProjectOverridesR: Reader[ProjectOverrides] = macroR
   implicit lazy val ProjectsConfigR: Reader[ProjectsConfig] = macroR
   implicit lazy val ProjectBuildConfigR: Reader[ProjectBuildConfig] = macroR
+  implicit lazy val SourcePatchR: Reader[SourcePatch] = macroR
 }
 
 private given FromString[os.Path] = { str =>

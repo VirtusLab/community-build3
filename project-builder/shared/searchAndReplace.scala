@@ -5,7 +5,7 @@ import java.nio.file.Files
 
 import scala.util.chaining.*
 
-given scala.util.CommandLineParser.FromString[Path] = Paths.get(_)
+given pathFromString: scala.util.CommandLineParser.FromString[Path] = Paths.get(_)
 
 @main def searchAndReplace(file: Path, textOrPattern: String, replacement: String): Unit = 
   val input = io.Source.fromFile(file.toFile()).mkString
