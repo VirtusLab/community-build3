@@ -4913,6 +4913,11 @@
           "path":"src/test/scala/org/pmml4s/metadata/AttributeTest.scala",
           "pattern":"values=DataVal.from(Array(",
           "replaceWith":"values=DataVal.from(Array[Any]("
+        },
+        {
+          "path":"src/test/scala/org/pmml4s/transformations/MapValuesTest.scala",
+          "pattern":"Array(null)",
+          "replaceWith":"Array[Any](null)"
         }
       ]
     }
@@ -9613,8 +9618,8 @@
   "creativescala/doodle":{
     "project":"creativescala/doodle",
     "repoUrl":"https://github.com/creativescala/doodle.git",
-    "revision":"v0.26.0",
-    "version":"0.26.0",
+    "revision":"v0.27.0",
+    "version":"0.27.0",
     "targets":"org.creativescala%doodle org.creativescala%doodle-core org.creativescala%doodle-docs org.creativescala%doodle-examples org.creativescala%doodle-golden org.creativescala%doodle-image org.creativescala%doodle-interact org.creativescala%doodle-java2d org.creativescala%doodle-reactor org.creativescala%doodle-svg org.creativescala%doodle-turtle",
     "config":{
       "projects":{
@@ -9648,7 +9653,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.3\"",
+          "pattern":"val scala3 = \"3.3.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -13518,10 +13523,43 @@
   },
   "dragonfly-ai/narr":{
     "project":"dragonfly-ai/narr",
-    "repoUrl":"https://github.com/WojciechMazur/narr.git",
-    "revision":"fix/scala-3.5.0",
+    "repoUrl":"https://github.com/dragonfly-ai/narr.git",
+    "revision":"main",
     "version":"0.105",
-    "targets":"ai.dragonfly%narr"
+    "targets":"ai.dragonfly%narr",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"11"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "dragonfly-ai/slash":{
     "project":"dragonfly-ai/slash",
@@ -20288,8 +20326,8 @@
   "guardian/etag-caching":{
     "project":"guardian/etag-caching",
     "repoUrl":"https://github.com/guardian/etag-caching.git",
-    "revision":"v6.0.0-PREVIEW.add-convenience-for-fetching-s3-byte-arrays.2024-12-13T1224.a635ab54",
-    "version":"6.0.0-PREVIEW.add-convenience-for-fetching-s3-byte-arrays.2024-12-13T1224.a635ab54",
+    "revision":"v6.0.0",
+    "version":"6.0.0",
     "targets":"com.gu.etag-caching%aws-s3-base com.gu.etag-caching%aws-s3-sdk-v2 com.gu.etag-caching%core",
     "config":{
       "projects":{
@@ -20328,9 +20366,9 @@
   "guardian/facia-scala-client":{
     "project":"guardian/facia-scala-client",
     "repoUrl":"https://github.com/guardian/facia-scala-client.git",
-    "revision":"v13.1.1-PREVIEW.add-etag-caching-support.2024-12-13T1538.9cf190cd",
-    "version":"13.1.1-PREVIEW.add-etag-caching-support.2024-12-13T1538.9cf190cd",
-    "targets":"com.gu%facia-json-play29 com.gu%facia-json-play30"
+    "revision":"v13.1.1-PREVIEW.add-etag-caching-support.2024-12-13T1851.9f8c191c",
+    "version":"13.1.1-PREVIEW.add-etag-caching-support.2024-12-13T1851.9f8c191c",
+    "targets":"com.gu%facia-json-play29 com.gu%facia-json-play30 com.gu%fapiclient_core"
   },
   "guardian/fastly-api-client":{
     "project":"guardian/fastly-api-client",
@@ -20479,8 +20517,8 @@
   },
   "guardian/panda-hmac":{
     "project":"guardian/panda-hmac",
-    "repoUrl":"https://github.com/guardian/panda-hmac.git",
-    "revision":"",
+    "repoUrl":"https://github.com/guardian/pan-domain-authentication.git",
+    "revision":"v7.0.1-PREVIEW.support-scala-3-drop-scala-212-and-play-28.2024-12-10T1132.d7c7a35e",
     "version":"7.0.1-PREVIEW.support-scala-3-drop-scala-212-and-play-28.2024-12-10T1132.d7c7a35e",
     "targets":"com.gu%panda-hmac-play_2-9 com.gu%panda-hmac-play_3-0",
     "config":{
@@ -20493,7 +20531,7 @@
         }
       },
       "java":{
-        "version":"8"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -26687,8 +26725,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.183",
-    "version":"4.0.183",
+    "revision":"v4.0.184",
+    "version":"4.0.184",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "config":{
       "projects":{
@@ -30860,7 +30898,40 @@
     "repoUrl":"https://github.com/kubukoz/dualshock4s.git",
     "revision":"v0.2.0",
     "version":"0.2.0",
-    "targets":"com.kubukoz.dualshock4s%app"
+    "targets":"com.kubukoz.dualshock4s%app",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          "excludeLibraryDependency org.polyvariant:better-tostring_{scalaVersion}"
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "kubukoz/slick-effect":{
     "project":"kubukoz/slick-effect",
@@ -38169,8 +38240,8 @@
   "outr/rapid":{
     "project":"outr/rapid",
     "repoUrl":"https://github.com/outr/rapid.git",
-    "revision":"0.1.0",
-    "version":"0.1.0",
+    "revision":"0.2.1",
+    "version":"0.2.1",
     "targets":"com.outr%rapid com.outr%rapid-cats com.outr%rapid-core",
     "config":{
       "projects":{
@@ -38182,7 +38253,7 @@
         }
       },
       "java":{
-        
+        "version":"21"
       },
       "sbt":{
         "commands":[
@@ -38204,7 +38275,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.5.2\"",
+          "pattern":"val scala3 = \"3.3.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -43753,7 +43824,44 @@
     "repoUrl":"https://github.com/rmgk/scitzen.git",
     "revision":"v1.4",
     "version":"1.4",
-    "targets":"de.rmgk.scitzen%scitzen"
+    "targets":"de.rmgk.scitzen%scitzen",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"project.scala",
+          "pattern":"//> using option -java-output-version 23",
+          "replaceWith":"\n//> using option -java-output-version 23\n//> using jvm 23"
+        }
+      ]
+    }
   },
   "rmgk/slips":{
     "project":"rmgk/slips",
