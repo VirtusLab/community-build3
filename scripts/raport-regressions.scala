@@ -128,6 +128,7 @@ lazy val PreviousScalaReleases =
 
   printLine()
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
+    .ensuring(_.nonEmpty, s"No failed projects found for scalaVersion=$scalaVersion, buildId=${checkBuildId}")
   printLine()
 
   val reportedProjects =
@@ -144,6 +145,7 @@ lazy val PreviousScalaReleases =
         )
           .map(_.project)
           .toSet
+          .ensuring(_.nonEmpty, s"No failed proejcts found for $id")
       println(s"Excluding ${ignoredProjects.size} project failing in $id:$LINE_BREAK\n")
       ignoredProjects
         .map(_.name)
