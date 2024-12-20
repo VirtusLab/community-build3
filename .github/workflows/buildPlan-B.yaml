@@ -1,5 +1,5 @@
 
-# projects total:     767
+# projects total:     770
 # min stars count:    -1
 # max projects count: 1000
 
@@ -235,6 +235,7 @@ jobs:
         - name: "dragonfly-ai/democrossy"
         - name: "dragonfly-ai/mesh"
         - name: "durban/scalacheck"
+        - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
         - name: "dwolla/http4s-consul-middleware"
@@ -329,7 +330,6 @@ jobs:
         - name: "hireproof/screening"
         - name: "hjfruit/scalikejdbc-helper"
         - name: "hjfruit/zio-pulsar"
-        - name: "hnaderi/named-codec"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hnaderi/named-codec"
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
         - name: "hnaderi/yaml4s"
@@ -575,6 +576,8 @@ jobs:
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
+        - name: "novamage/rtw"
+        - name: "novamage/typed-map"
         - name: "nrkno/bigquery-scala"
         - name: "nthportal/scala-platform"
         - name: "nthportal/spaghetti"
@@ -607,9 +610,6 @@ jobs:
         - name: "philippus/osita"
         - name: "philippus/pureconfig-javanet"
         - name: "philippus/scala-isbn"
-        - name: "phillhenry/dreadnought"
-        - name: "philwalk/pallet"
-        - name: "pismute/classy-optics"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "phillhenry/dreadnought"
+        - name: "philwalk/pallet"
+        - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/relational3"
         - name: "pityka/selfpackage"
@@ -887,9 +890,6 @@ jobs:
         - name: "ysthakur/sline"
         - name: "yurikpanic/zio-postgres"
         - name: "yurique/embedded-files-macro"
-        - name: "zhranklin/scala-tricks"
-        - name: "zio/zio-bson"
-        - name: "zio/zio-morphir"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "zhranklin/scala-tricks"
+        - name: "zio/zio-bson"
+        - name: "zio/zio-morphir"
         - name: "zio/zio-streams-compress"
         - name: "zygfryd/scala-zygf-jackshaft"
     steps:
