@@ -1,5 +1,5 @@
 
-# projects total:     770
+# projects total:     775
 # min stars count:    -1
 # max projects count: 1000
 
@@ -191,6 +191,7 @@ jobs:
         - name: "cozydev-pink/textmogrify"
         - name: "creativescala/doodle-explore"
         - name: "creativescala/doodle-svg"
+        - name: "creativescala/terminus"
         - name: "cric96/distributed-frp"
         - name: "cucumber/action-publish-sbt"
         - name: "d10xa/json-log-viewer"
@@ -274,6 +275,7 @@ jobs:
         - name: "fommil/jzon"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
+        - name: "fthomas/status-page"
         - name: "funkode-io/web3-auth"
         - name: "galliaproject/gallia-avro"
         - name: "galliaproject/gallia-mongodb"
@@ -315,6 +317,7 @@ jobs:
         - name: "guidoschmidt17/zio-pgcopy"
         - name: "guizmaii-opensource/zio-aes"
         - name: "guntiso/mojoz"
+        - name: "guntiso/querease"
         - name: "guymers/ceesvee"
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
@@ -327,9 +330,6 @@ jobs:
         - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
         - name: "herminiogg/xmlschema2shex"
-        - name: "hireproof/screening"
-        - name: "hjfruit/scalikejdbc-helper"
-        - name: "hjfruit/zio-pulsar"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hireproof/screening"
+        - name: "hjfruit/scalikejdbc-helper"
+        - name: "hjfruit/zio-pulsar"
         - name: "hnaderi/named-codec"
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
@@ -551,6 +554,7 @@ jobs:
         - name: "mpollmeier/colordiff"
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
+        - name: "mrumkovskis/wabase"
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
@@ -596,6 +600,7 @@ jobs:
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
+        - name: "palanga/zio-cassandra"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
@@ -605,11 +610,6 @@ jobs:
         - name: "permutive-engineering/prometheus4cats-contrib"
         - name: "permutive-engineering/refreshable"
         - name: "petitviolet/scala-operator"
-        - name: "philemone/hobogrid"
-        - name: "philippus/julius"
-        - name: "philippus/osita"
-        - name: "philippus/pureconfig-javanet"
-        - name: "philippus/scala-isbn"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "philemone/hobogrid"
+        - name: "philippus/julius"
+        - name: "philippus/osita"
+        - name: "philippus/pureconfig-javanet"
+        - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
@@ -683,7 +688,6 @@ jobs:
         - name: "pureharm/pureharm-testkit"
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/narr"
-        - name: "quafadas/vecxt"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
@@ -711,6 +715,7 @@ jobs:
         - name: "rustedbones/pekko-http-thrift"
         - name: "rustedbones/scout"
         - name: "sadly-dubious-org/widely-used-util"
+        - name: "sake92/mill-local-vs-publish-repro"
         - name: "sakulk/serval"
         - name: "salesforce/kineticpulse"
         - name: "sangria-graphql/sangria-argonaut"
@@ -885,11 +890,6 @@ jobs:
         - name: "xuwei-k/test-times-reporter"
         - name: "xuwei-k/unused-proto"
         - name: "y-yu/slick-bulk-insert"
-        - name: "yacineall/json-schema-inferrer"
-        - name: "yrichika/scalahtml"
-        - name: "ysthakur/sline"
-        - name: "yurikpanic/zio-postgres"
-        - name: "yurique/embedded-files-macro"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "yacineall/json-schema-inferrer"
+        - name: "yrichika/scalahtml"
+        - name: "ysthakur/sline"
+        - name: "yurikpanic/zio-postgres"
+        - name: "yurique/embedded-files-macro"
         - name: "zhranklin/scala-tricks"
         - name: "zio/zio-bson"
         - name: "zio/zio-morphir"
