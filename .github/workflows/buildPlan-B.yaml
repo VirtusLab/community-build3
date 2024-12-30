@@ -1,5 +1,5 @@
 
-# projects total:     775
+# projects total:     776
 # min stars count:    -1
 # max projects count: 1000
 
@@ -883,13 +883,13 @@ jobs:
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
+        - name: "wiwiwa/ezscala"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"
         - name: "xuwei-k/scala3profile"
         - name: "xuwei-k/test-times-reporter"
         - name: "xuwei-k/unused-proto"
-        - name: "y-yu/slick-bulk-insert"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "y-yu/slick-bulk-insert"
         - name: "yacineall/json-schema-inferrer"
         - name: "yrichika/scalahtml"
         - name: "ysthakur/sline"
