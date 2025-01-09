@@ -1,5 +1,5 @@
 
-# projects total:     787
+# projects total:     788
 # min stars count:    -1
 # max projects count: 1000
 
@@ -180,6 +180,8 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
+        - name: "cognitedata/cognite-sdk-scala"
+        - name: "com-lihaoyi/mill-moduledefs"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -191,7 +193,6 @@ jobs:
         - name: "cozydev-pink/textmogrify"
         - name: "creativescala/doodle-explore"
         - name: "creativescala/doodle-svg"
-        - name: "creativescala/terminus"
         - name: "cric96/distributed-frp"
         - name: "cucumber/action-publish-sbt"
         - name: "d10xa/json-log-viewer"
@@ -269,7 +270,6 @@ jobs:
         - name: "fgrutsch/akka-persistence-mapdb"
         - name: "fgrutsch/emergence"
         - name: "fiatjaf/nlog"
-        - name: "fiatjaf/scoin"
         - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "firstbirdtech/emergence"
         - name: "fommil/jzon"
@@ -411,6 +411,7 @@ jobs:
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
+        - name: "jd557/qrgen"
         - name: "jd557/rokrok"
         - name: "jd557/spaeti"
         - name: "jkobejs/cron"
@@ -558,7 +559,6 @@ jobs:
         - name: "mpollmeier/colordiff"
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
-        - name: "mrumkovskis/wabase"
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
@@ -588,6 +588,7 @@ jobs:
         - name: "novamage/rtw"
         - name: "novamage/typed-map"
         - name: "nrkno/bigquery-scala"
+        - name: "nryanov/consul4s"
         - name: "nthportal/scala-platform"
         - name: "nthportal/spaghetti"
         - name: "oheger/cloud-files"
@@ -609,7 +610,6 @@ jobs:
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
-        - name: "permutive-engineering/common-types-gcp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "permutive-engineering/common-types-gcp"
         - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
@@ -672,8 +673,6 @@ jobs:
         - name: "pjfanning/scala3-reflection"
         - name: "pjfanning/scala3-sample-classes"
         - name: "pjfanning/zio-metrics-micrometer"
-        - name: "plasmalaboratories/plasma-protobuf-specs"
-        - name: "plasmalaboratories/plasma-sdk-scala"
         - name: "pmeheut/nscala-java-time"
         - name: "polystat/polystat-cli"
         - name: "polyvariant/caliban-gitlab"
@@ -781,6 +780,7 @@ jobs:
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
         - name: "sideeffffect/liquibase-doobie"
+        - name: "sideeffffect/zio-testcontainers"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
@@ -870,6 +870,7 @@ jobs:
         - name: "trace4cats/trace4cats-newrelic"
         - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-pubsub"
+        - name: "trace4cats/trace4cats-sttp"
         - name: "trace4cats/trace4cats-tail-sampling-extras"
         - name: "trace4cats/trace4cats-xray"
         - name: "trace4cats/trace4cats-zio"
@@ -889,7 +890,6 @@ jobs:
         - name: "vlmiroshnikov/authz"
         - name: "vlmiroshnikov/saga"
         - name: "wehkamp/cakemix"
-        - name: "windymelt/happy-birthday"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "windymelt/happy-birthday"
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
