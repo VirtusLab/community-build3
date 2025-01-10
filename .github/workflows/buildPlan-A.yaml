@@ -193,6 +193,7 @@ jobs:
         - name: "cjmx/cjmx"
         - name: "clevercloud/pulsar4s"
         - name: "codingwell/scala-guice"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
@@ -329,7 +330,6 @@ jobs:
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
-        - name: "firstbirdtech/backbone"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "fmonniot/scala3mock"
@@ -511,7 +512,6 @@ jobs:
         - name: "karimagnusson/kuzminki-zio-2"
         - name: "kasiamarek/tyre-scala"
         - name: "katrix/dataprism"
-        - name: "katrix/perspective"
         - name: "katrix/typenbt"
         - name: "kcrypt/scala-biginteger"
         - name: "kcrypt/scala-blake3"
@@ -602,7 +602,6 @@ jobs:
         - name: "monix/monix"
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
-        - name: "mpollmeier/scala-repl-pp"
         - name: "mrumkovskis/tresql"
         - name: "msgpack4z/msgpack4z-circe"
         - name: "msgpack4z/msgpack4z-core"
@@ -610,6 +609,7 @@ jobs:
         - name: "mvv/sager"
         - name: "nafg/css-dsl"
         - name: "nafg/simpleivr"
+        - name: "nafg/slick-additions"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "nafg/slick-additions"
         - name: "nafg/slick-migration-api"
         - name: "nafg/slick-migration-api-flyway"
         - name: "naoh87/lettucef"
@@ -651,6 +650,7 @@ jobs:
         - name: "note/mini-refined"
         - name: "nremond/pbkdf2-scala"
         - name: "nrinaudo/kantan.parsers"
+        - name: "nryanov/consul4s"
         - name: "nscala-time/nscala-time"
         - name: "nulab/play2-oauth2-provider"
         - name: "nulab/scala-oauth2-provider"
@@ -967,7 +967,6 @@ jobs:
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
         - name: "thatscalaguy/circe-jq"
-        - name: "thedrawingcoder-gamer/swing.io"
         - name: "theiterators/http4s-stir"
         - name: "theiterators/kebs"
         - name: "theiterators/sealed-monad"
@@ -998,6 +997,7 @@ jobs:
         - name: "tpunder/fm-serializer"
         - name: "tpunder/scala-optparse"
         - name: "trace4cats/trace4cats"
+        - name: "trace4cats/trace4cats-sttp"
         - name: "travisbrown/dhallj"
         - name: "travisbrown/iteratee"
         - name: "tschuchortdev/hkd4s"

@@ -1,5 +1,5 @@
 
-# projects total:     788
+# projects total:     785
 # min stars count:    -1
 # max projects count: 1000
 
@@ -180,7 +180,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
@@ -330,6 +329,7 @@ jobs:
         - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
+        - name: "herminiogg/xmlschema2shex"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "herminiogg/xmlschema2shex"
         - name: "hireproof/screening"
         - name: "hjfruit/scalikejdbc-helper"
         - name: "hjfruit/zio-pulsar"
@@ -588,7 +587,6 @@ jobs:
         - name: "novamage/rtw"
         - name: "novamage/typed-map"
         - name: "nrkno/bigquery-scala"
-        - name: "nryanov/consul4s"
         - name: "nthportal/scala-platform"
         - name: "nthportal/spaghetti"
         - name: "oheger/cloud-files"
@@ -610,6 +608,8 @@ jobs:
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
+        - name: "permutive-engineering/common-types-gcp"
+        - name: "permutive-engineering/doobie-pureconfig"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,8 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "permutive-engineering/common-types-gcp"
-        - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
@@ -870,7 +868,6 @@ jobs:
         - name: "trace4cats/trace4cats-newrelic"
         - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-pubsub"
-        - name: "trace4cats/trace4cats-sttp"
         - name: "trace4cats/trace4cats-tail-sampling-extras"
         - name: "trace4cats/trace4cats-xray"
         - name: "trace4cats/trace4cats-zio"
@@ -890,6 +887,9 @@ jobs:
         - name: "vlmiroshnikov/authz"
         - name: "vlmiroshnikov/saga"
         - name: "wehkamp/cakemix"
+        - name: "windymelt/happy-birthday"
+        - name: "windymelt/qw.scala"
+        - name: "windymelt/rss2discord"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,9 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "windymelt/happy-birthday"
-        - name: "windymelt/qw.scala"
-        - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
         - name: "xebia-functional/karat-scalacheck"
