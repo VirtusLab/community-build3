@@ -1,5 +1,5 @@
 
-# projects total:     785
+# projects total:     795
 # min stars count:    -1
 # max projects count: 1000
 
@@ -105,7 +105,6 @@ jobs:
         - name: "alexcardell/openfeature-scala"
         - name: "alexdupre/coinpayments-scala"
         - name: "alterationx10/opinionated-zio"
-        - name: "altoo-ag/pekko-kryo-serialization"
         - name: "andimiller/cats-parse-interpolator"
         - name: "andimiller/hedgehogs"
         - name: "andimiller/munit-cats-effect-styles"
@@ -180,6 +179,7 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
@@ -205,6 +205,7 @@ jobs:
         - name: "dacr/spy"
         - name: "dacr/unittools"
         - name: "dacr/web-echo"
+        - name: "dacr/zio-worksheet"
         - name: "daenyth/cats-effect-guava"
         - name: "daghemberg/paut-program"
         - name: "daghemberg/problemutils"
@@ -239,6 +240,7 @@ jobs:
         - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
+        - name: "dwolla/fs2-aws"
         - name: "dwolla/http4s-consul-middleware"
         - name: "dwolla/natchez-smithy4s"
         - name: "dwolla/natchez-tagless"
@@ -269,6 +271,7 @@ jobs:
         - name: "fgrutsch/akka-persistence-mapdb"
         - name: "fgrutsch/emergence"
         - name: "fiatjaf/nlog"
+        - name: "fiatjaf/scoin"
         - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "firstbirdtech/emergence"
         - name: "fommil/jzon"
@@ -323,13 +326,10 @@ jobs:
         - name: "gzoller/deploysample"
         - name: "gzoller/listzipper"
         - name: "h8io/borscht"
+        - name: "hamnis/dataclass-scalafix"
         - name: "hamnis/google-discovery-scala"
         - name: "hamnis/googleapis-discovery-http4s"
         - name: "hamnis/jsonschema"
-        - name: "hamnis/jwk"
-        - name: "herminiogg/dmaog"
-        - name: "herminiogg/label2thesaurus"
-        - name: "herminiogg/xmlschema2shex"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hamnis/jwk"
+        - name: "herminiogg/dmaog"
+        - name: "herminiogg/label2thesaurus"
+        - name: "herminiogg/xmlschema2shex"
         - name: "hireproof/screening"
         - name: "hjfruit/scalikejdbc-helper"
         - name: "hjfruit/zio-pulsar"
@@ -410,7 +414,6 @@ jobs:
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
-        - name: "jd557/qrgen"
         - name: "jd557/rokrok"
         - name: "jd557/spaeti"
         - name: "jkobejs/cron"
@@ -426,6 +429,7 @@ jobs:
         - name: "johnhungerford/generic-schema"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
+        - name: "jozic/scalax-collection"
         - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
@@ -487,6 +491,7 @@ jobs:
         - name: "kubukoz/drops"
         - name: "kubukoz/dualshock4s"
         - name: "kzmake/uuid7s"
+        - name: "lampepfl/steps"
         - name: "laserdisc-io/scanamo-circe"
         - name: "laserdisc-io/slack4s"
         - name: "laserdisc-io/zio-oci-objectstorage"
@@ -587,6 +592,7 @@ jobs:
         - name: "novamage/rtw"
         - name: "novamage/typed-map"
         - name: "nrkno/bigquery-scala"
+        - name: "nryanov/consul4s"
         - name: "nthportal/scala-platform"
         - name: "nthportal/spaghetti"
         - name: "oheger/cloud-files"
@@ -604,12 +610,6 @@ jobs:
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
-        - name: "palanga/zio-cassandra"
-        - name: "paoloboni/spray-json-derived-codecs"
-        - name: "pbyrne84/scala-case-class-prettification"
-        - name: "pbyrne84/scala-wiremock-api"
-        - name: "permutive-engineering/common-types-gcp"
-        - name: "permutive-engineering/doobie-pureconfig"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,12 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "palanga/zio-cassandra"
+        - name: "paoloboni/spray-json-derived-codecs"
+        - name: "pbyrne84/scala-case-class-prettification"
+        - name: "pbyrne84/scala-wiremock-api"
+        - name: "permutive-engineering/common-types-gcp"
+        - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
@@ -667,6 +673,7 @@ jobs:
         - name: "pjfanning/pekko-rabbitmq"
         - name: "pjfanning/pekko-serialization-jackson215"
         - name: "pjfanning/pekko-serialization-jackson216"
+        - name: "pjfanning/play-json"
         - name: "pjfanning/scala-faker"
         - name: "pjfanning/scala3-reflection"
         - name: "pjfanning/scala3-sample-classes"
@@ -701,6 +708,7 @@ jobs:
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "reactivemongo/reactivemongo-play-json"
         - name: "rmgk/slips"
+        - name: "rolang/google-rest-api-codegen"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
         - name: "rssh/scala-appcontext"
@@ -778,7 +786,6 @@ jobs:
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
         - name: "sideeffffect/liquibase-doobie"
-        - name: "sideeffffect/zio-testcontainers"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
@@ -846,6 +853,7 @@ jobs:
         - name: "toniogela/cross"
         - name: "torrentdam/bencode"
         - name: "totally-trustworthy-org/widely-used-util"
+        - name: "tototoshi/nyanda"
         - name: "tototoshi/play-reverse-router-extension"
         - name: "touk/influxdb-reporter"
         - name: "tpataky/duckling"
@@ -868,6 +876,7 @@ jobs:
         - name: "trace4cats/trace4cats-newrelic"
         - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-pubsub"
+        - name: "trace4cats/trace4cats-sttp"
         - name: "trace4cats/trace4cats-tail-sampling-extras"
         - name: "trace4cats/trace4cats-xray"
         - name: "trace4cats/trace4cats-zio"
@@ -881,15 +890,6 @@ jobs:
         - name: "varwise/prometheus-pekko-http"
         - name: "vasilmkd/discipline"
         - name: "vasilmkd/discipline-specs2"
-        - name: "virtuslab/java-class-name"
-        - name: "virtuslab/scala-cli-signing"
-        - name: "vlmiroshnikov/aero3"
-        - name: "vlmiroshnikov/authz"
-        - name: "vlmiroshnikov/saga"
-        - name: "wehkamp/cakemix"
-        - name: "windymelt/happy-birthday"
-        - name: "windymelt/qw.scala"
-        - name: "windymelt/rss2discord"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,15 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "virtuslab/java-class-name"
+        - name: "virtuslab/scala-cli-signing"
+        - name: "vlmiroshnikov/aero3"
+        - name: "vlmiroshnikov/authz"
+        - name: "vlmiroshnikov/saga"
+        - name: "wehkamp/cakemix"
+        - name: "windymelt/happy-birthday"
+        - name: "windymelt/qw.scala"
+        - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
         - name: "xebia-functional/karat-scalacheck"
@@ -931,6 +940,7 @@ jobs:
         - name: "yurikpanic/zio-postgres"
         - name: "yurique/embedded-files-macro"
         - name: "zhranklin/scala-tricks"
+        - name: "zio/interop-guava"
         - name: "zio/zio-bson"
         - name: "zio/zio-morphir"
         - name: "zio/zio-streams-compress"
