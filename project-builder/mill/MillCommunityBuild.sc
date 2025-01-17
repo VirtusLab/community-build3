@@ -93,7 +93,7 @@ def mapCrossVersionsAny(
     crossVersions: Seq[Any]
 ): Seq[Any] = mapCrossVersions(buildScalaVersion, crossVersions)
 
-private lazy val originalCrossScalaVersions = scala.collection.mutable.Set.empty[String]
+private lazy val originalCrossScalaVersions = scala.collection.mutable.Set.empty[String] ++ sys.env.get("OVERRIDEN_SCALA_VERSION").filterNot(_.isEmpty())
 
 def mapCrossVersions[T](
     buildScalaVersion: String,
@@ -108,12 +108,13 @@ def mapCrossVersions[T](
       case other            => other
     }
   // Register original Scala versions
-   _ = cross match {
-    case v @ IsScalaVersion()                     => originalCrossScalaVersions += v
-    case List(v @ IsScalaVersion(), crossVersion) => originalCrossScalaVersions += v
-    case List(crossVersion, v @ IsScalaVersion()) => originalCrossScalaVersions += v
-    case _ => ()
+   replacedVersion = cross match {
+    case v @ IsScalaVersion()                     => Some(v)
+    case List(v @ IsScalaVersion(), crossVersion) => Some(v)
+    case List(crossVersion, v @ IsScalaVersion()) => Some(v)
+    case _ => None
    }
+   _ = replacedVersion.filter(_ != buildScalaVersion).foreach(originalCrossScalaVersions += _)
    // Map scala versions matching specified Scal aversion
    mappedCross = cross match {
       case MatchesScalaBinaryVersion()                     => buildScalaVersion

@@ -211,7 +211,7 @@ export OVERRIDEN_SCALA_VERSION=$(echo "$projectConfig" | jq -r '
   .. | objects |
   select(has("pattern") and has("replaceWith") and (.replaceWith | contains("<SCALA_VERSION>"))) |
   .pattern |
-  capture("val [a-zA-Z0-9_]+ = \"(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\"") |
+  capture("val .* = \"(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\"")? |
   .version // empty
 ')
 
