@@ -28,11 +28,11 @@ object Scala3CommunityBuild {
     case object CompileOnly extends TestingMode
     case object Full extends TestingMode
   }
-  
+
   case class SourcePatch(
-    path: String,
-    pattern: String,
-    replaceWith: String
+      path: String,
+      pattern: String,
+      replaceWith: String
   )
 
 // Output
@@ -42,13 +42,24 @@ object Scala3CommunityBuild {
       .mkString("[", ",", "]")
   }
 
+  case class ModuleMetadata(
+      crossScalaVersions: Seq[String]
+  ) {
+    lazy val toJson = {
+      def quoted(v: String) = "\"" + v + "\""
+      s"""{
+      |  "crossScalaVersions": [${crossScalaVersions.map(quoted).mkString(", ")}]
+      |}""".mkString
+    }
+  }
   case class ModuleBuildResults(
       artifactName: String,
       compile: CompileResult,
       doc: DocsResult,
       testsCompile: CompileResult,
       testsExecute: TestsResult,
-      publish: PublishResult
+      publish: PublishResult,
+      metadata: ModuleMetadata
   ) {
     def hasFailedStep: Boolean = this.productIterator.exists {
       case result: StepResult => result.status == Status.Failed
@@ -61,7 +72,8 @@ object Scala3CommunityBuild {
        | "doc": ${doc.toJson},
        | "test-compile": ${testsCompile.toJson},
        | "test": ${testsExecute.toJson},
-       | "publish": ${publish.toJson}
+       | "publish": ${publish.toJson},
+       | "metadata": ${metadata.toJson}
        |}""".stripMargin
     }
   }
@@ -140,16 +152,17 @@ object Scala3CommunityBuild {
       }
     }
   }
-  case class TestStats(passed: Int, failed: Int, ignored: Int, skipped: Int){
+  case class TestStats(passed: Int, failed: Int, ignored: Int, skipped: Int) {
     val total: Int = passed + failed + ignored + skipped
     def toJson(inlined: Boolean = false) = {
-      val raw = s""""passed": ${passed}, "failed": ${failed}, "ignored": ${ignored}, "skipped": ${skipped}, "total": ${total}"""
+      val raw =
+        s""""passed": ${passed}, "failed": ${failed}, "ignored": ${ignored}, "skipped": ${skipped}, "total": ${total}"""
       if (inlined) raw
       else s"{$raw}"
     }
   }
-  object TestStats{
-    val empty = TestStats(0, 0,0 ,0)
+  object TestStats {
+    val empty = TestStats(0, 0, 0, 0)
   }
   case class TestsResult(
       status: Status,
@@ -159,10 +172,15 @@ object Scala3CommunityBuild {
       byFramework: Map[String, TestStats] = Map.empty
   ) extends StepResult {
     def toJson = {
-      val byFrameworkJson = byFramework.toSeq.sortBy(_._1).map{
-        case (name, stats) => s"""{"framework": "$name", "stats": ${stats.toJson()}}"""
-      }.mkString("[", ",", "]")
-      s"""{$commonJsonFields, ${overall.toJson(inlined = true)}, "byFramework": ${byFrameworkJson}}"""
+      val byFrameworkJson = byFramework.toSeq
+        .sortBy(_._1)
+        .map { case (name, stats) =>
+          s"""{"framework": "$name", "stats": ${stats.toJson()}}"""
+        }
+        .mkString("[", ",", "]")
+      s"""{$commonJsonFields, ${overall.toJson(inlined =
+        true
+      )}, "byFramework": ${byFrameworkJson}}"""
     }
   }
   case class PublishResult(
@@ -176,7 +194,9 @@ object Scala3CommunityBuild {
     def apply(evalResult: TaskEvaluator.EvalResult[Unit]): PublishResult = {
       val failureContext = evalResult.toBuildError
       val status = failureContext match {
-        case Some(FailureContext.BuildError(reasons)) if reasons.exists(_.contains("java.util.NoSuchElementException")) => Status.Skipped
+        case Some(FailureContext.BuildError(reasons))
+            if reasons.exists(_.contains("java.util.NoSuchElementException")) =>
+          Status.Skipped
         case _ => evalResult.toStatus
       }
       PublishResult(
@@ -389,36 +409,44 @@ object Scala3CommunityBuild {
         append: Seq[String],
         remove: Seq[String]
     ): Seq[String] = {
-      val (removeMatchSettings, removeSettings) = (remove ++ ignoredScalacOptions).partition { _.startsWith("MATCH:") }
+      val (removeMatchSettings, removeSettings) = (remove ++ ignoredScalacOptions).partition {
+        _.startsWith("MATCH:")
+      }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
 
       val (required, standardAppendSettings) = append.partition(_.startsWith("REQUIRE:"))
       val requiredAppendSettings = required.map(_.stripPrefix("REQUIRE:"))
-      
+
       def isSourceVersion(v: String) = v.matches(raw"^-?-source(:(future|(\d\.\d+))(-migration)?)?")
       def resolveSourceVersion(v: String): Option[String] = v.split(":").drop(1).headOption
       val SourceVersionPattern = raw"^((3\.\d+|future)(-migration)?)$$".r
       val definedSourceSetting = current.find(isSourceVersion)
-      lazy val definedSourceVersion: Option[String] = 
-        definedSourceSetting.flatMap(resolveSourceVersion) // -source:version
-        .orElse(current.find(SourceVersionPattern.findFirstIn(_).isDefined)) // -source version
-        .flatMap(SourceVersionPattern.findFirstMatchIn(_))
-        .flatMap(m => Option(m.group(1)))
-      lazy val requiredSourceVersion = requiredAppendSettings.find(isSourceVersion).flatMap(resolveSourceVersion)
-      val forceSourceVersion = definedSourceVersion.contains("future") || requiredSourceVersion.isDefined
+      lazy val definedSourceVersion: Option[String] =
+        definedSourceSetting
+          .flatMap(resolveSourceVersion) // -source:version
+          .orElse(current.find(SourceVersionPattern.findFirstIn(_).isDefined)) // -source version
+          .flatMap(SourceVersionPattern.findFirstMatchIn(_))
+          .flatMap(m => Option(m.group(1)))
+      lazy val requiredSourceVersion =
+        requiredAppendSettings.find(isSourceVersion).flatMap(resolveSourceVersion)
+      val forceSourceVersion =
+        definedSourceVersion.contains("future") || requiredSourceVersion.isDefined
 
       val appendSettings = {
         def excludeIf(setting: String, expr: Boolean, reason: => String) = {
-          if(expr) logOnce(s"Would not apply setting `$setting`: $reason")
+          if (expr) logOnce(s"Would not apply setting `$setting`: $reason")
           expr
         }
- 
-        val forcedAppendSettings: Seq[String] = Seq( 
-          if(forceSourceVersion) Some(s"-source:${requiredSourceVersion.getOrElse("future-migration")}") else None
+
+        val forcedAppendSettings: Seq[String] = Seq(
+          if (forceSourceVersion)
+            Some(s"-source:${requiredSourceVersion.getOrElse("future-migration")}")
+          else None
         ).flatten
-        
-        standardAppendSettings.filterNot{  setting => 
-          excludeIf(setting, 
+
+        standardAppendSettings.filterNot { setting =>
+          excludeIf(
+            setting,
             isSourceVersion(setting) && (definedSourceSetting.nonEmpty || forceSourceVersion),
             s"Project has predefined source version: ${definedSourceSetting.orElse(requiredSourceVersion)}"
           )
@@ -431,11 +459,11 @@ object Scala3CommunityBuild {
           setting => {
             setting.indexOf(':') match {
               case -1 => setting
-              case n  =>
-                 val name = setting.substring(0, n)
-                 def pattern =  s"$name(:.*)?"
-                 if(multiStringSettings.contains(name)) setting // use original full setting
-                 else pattern
+              case n =>
+                val name = setting.substring(0, n)
+                def pattern = s"$name(:.*)?"
+                if (multiStringSettings.contains(name)) setting // use original full setting
+                else pattern
             }
           },
           setting => raw"^-?$setting"
@@ -450,48 +478,59 @@ object Scala3CommunityBuild {
         }
         .filterNot { s =>
           def isMatching(reason: String, found: Option[String]): Boolean = found match {
-            case Some(matched) => 
-              if(!appendSettings.contains(s))
+            case Some(matched) =>
+              if (!appendSettings.contains(s))
                 logOnce(s"Filter out '$s', $reason '$matched'")
               true
             case _ => false
           }
-          isMatching("matches setting pattern", normalizedExcludePatterns.find(s.matches(_))) || 
-            isMatching("matches regex", matchPatterns.find(s.matches(_))) || 
-            definedSourceVersion.isEmpty && isMatching("is dangling source version",SourceVersionPattern.findFirstIn(s.trim()))     
+          isMatching("matches setting pattern", normalizedExcludePatterns.find(s.matches(_))) ||
+          isMatching("matches regex", matchPatterns.find(s.matches(_))) ||
+          definedSourceVersion.isEmpty && isMatching(
+            "is dangling source version",
+            SourceVersionPattern.findFirstIn(s.trim())
+          )
         } ++ appendSettings.distinct
     }
-    
-    case class LibraryDependency(organization: String, artifact: String, version: String, crossScalaVersion: Boolean){
+
+    case class LibraryDependency(
+        organization: String,
+        artifact: String,
+        version: String,
+        crossScalaVersion: Boolean
+    ) {
       override def toString(): String = {
         val crossVersion = if (crossScalaVersion) "%%" else "%"
         s"$organization $crossVersion $artifact % $version"
       }
     }
-   
-    private def escapeScalaVersion(scalaVersion: String)(str: String): String = str.replace("<SCALA_VERSION>", scalaVersion)
+
+    private def escapeScalaVersion(scalaVersion: String)(str: String): String =
+      str.replace("<SCALA_VERSION>", scalaVersion)
     final val ExtraLibraryDependenciesProp = "communitybuild.project.dependencies.add"
-    def extraLibraryDependencies(scalaVersion: String): Seq[LibraryDependency] =      sys.props
-        .getOrElse(ExtraLibraryDependenciesProp, "")
-        .split(';')
-        .map(escapeScalaVersion(scalaVersion)(_))
-        .filter(_.nonEmpty)
-        .map(dep => dep.trim().split(':'))
-        .flatMap {
-          // org::artifact:version
-          case Array(org, "", artifact, version) =>
-            Some(LibraryDependency(org, artifact, version, crossScalaVersion = true))
-          // org:artifact:version
-          case Array(org, artifact, version) => 
-            Some(LibraryDependency(org, artifact, version, crossScalaVersion = false))
-          // other
-          case segments =>
-            logOnce(s"Invalid dependency format, segments=${segments.toList}")
-            None
-        }.toList.map{ dep => 
-          logOnce(s"Would include extra dependency: $dep")
-          dep
-        }
+    def extraLibraryDependencies(scalaVersion: String): Seq[LibraryDependency] = sys.props
+      .getOrElse(ExtraLibraryDependenciesProp, "")
+      .split(';')
+      .map(escapeScalaVersion(scalaVersion)(_))
+      .filter(_.nonEmpty)
+      .map(dep => dep.trim().split(':'))
+      .flatMap {
+        // org::artifact:version
+        case Array(org, "", artifact, version) =>
+          Some(LibraryDependency(org, artifact, version, crossScalaVersion = true))
+        // org:artifact:version
+        case Array(org, artifact, version) =>
+          Some(LibraryDependency(org, artifact, version, crossScalaVersion = false))
+        // other
+        case segments =>
+          logOnce(s"Invalid dependency format, segments=${segments.toList}")
+          None
+      }
+      .toList
+      .map { dep =>
+        logOnce(s"Would include extra dependency: $dep")
+        dep
+      }
   }
-  
+
 }

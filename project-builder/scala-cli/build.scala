@@ -84,7 +84,10 @@ import os.CommandResult
       overall = TestStats.empty,
       tookMs = testsExecuteResults.evalTime
     ),
-    publish = publishResult
+    publish = publishResult,
+    metadata = ModuleMetadata(
+      crossScalaVersions = Nil // todo
+    )
   )
 
   val projectsBuildResults = projectResults :: Nil

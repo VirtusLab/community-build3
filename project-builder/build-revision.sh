@@ -206,6 +206,20 @@ function buildForScalaVersion(){
   fi
 }
 
+# Find original Scala version used by project, it would be used to calculate cross scala versions
+export OVERRIDEN_SCALA_VERSION=$(echo "$projectConfig" | jq -r '
+  .. | objects |
+  select(has("pattern") and has("replaceWith") and (.replaceWith | contains("<SCALA_VERSION>"))) |
+  .pattern |
+  capture("val [a-zA-Z0-9_]+ = \"(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\"") |
+  .version // empty
+')
+
+if [[ -n "$OVERRIDEN_SCALA_VERSION" ]]; then
+  echo "Would override fixed Scala version: $OVERRIDEN_SCALA_VERSION"
+fi
+
+
 for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
   migrationBinaryVersion=`echo $migrationScalaVersion | cut -d . -f 1,2`

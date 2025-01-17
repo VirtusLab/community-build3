@@ -93,6 +93,8 @@ def mapCrossVersionsAny(
     crossVersions: Seq[Any]
 ): Seq[Any] = mapCrossVersions(buildScalaVersion, crossVersions)
 
+private lazy val originalCrossScalaVersions = scala.collection.mutable.Set.empty[String]
+
 def mapCrossVersions[T](
     buildScalaVersion: String,
     crossVersions: Seq[T]
@@ -105,7 +107,15 @@ def mapCrossVersions[T](
       case product: Product => product.productIterator.toList
       case other            => other
     }
-    mappedCross = cross match {
+  // Register original Scala versions
+   _ = cross match {
+    case v @ IsScalaVersion()                     => originalCrossScalaVersions += v
+    case List(v @ IsScalaVersion(), crossVersion) => originalCrossScalaVersions += v
+    case List(crossVersion, v @ IsScalaVersion()) => originalCrossScalaVersions += v
+    case _ => ()
+   }
+   // Map scala versions matching specified Scal aversion
+   mappedCross = cross match {
       case MatchesScalaBinaryVersion()                     => buildScalaVersion
       case List(MatchesScalaBinaryVersion(), crossVersion) => (buildScalaVersion, crossVersion)
       case List(crossVersion, MatchesScalaBinaryVersion()) => (crossVersion, buildScalaVersion)
@@ -293,7 +303,10 @@ def runBuild(configJson: String, projectDir: String, targets: Seq[String])(impli
       doc = DocsResult(docResult.map(_.path.toIO)),
       testsCompile = collectCompileResults(testsCompileResult),
       testsExecute = collectTestResults(testsExecuteResults),
-      publish = publishResult
+      publish = publishResult,
+      metadata = ModuleMetadata(
+        crossScalaVersions = originalCrossScalaVersions.toSeq // Not project-specific
+      )
     )
   }
 
