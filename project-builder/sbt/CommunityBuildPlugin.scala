@@ -610,8 +610,12 @@ object CommunityBuildPlugin extends AutoPlugin {
             Test / executeTests
           )
 
+        val shouldPublish = eval(Compile / publish / skip) match {
+          case EvalResult.Value(skip, _) => !skip
+          case _                         => false
+        }
         val publishResult = PublishResult(
-          evalAsDependencyOf(compileResult)(Compile / publishLocal)
+          evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
         )
 
         ModuleBuildResults(
