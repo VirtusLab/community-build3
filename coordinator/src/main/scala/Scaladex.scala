@@ -28,12 +28,15 @@ class Scaladex(using ExecutionContext):
         .mapResponse(read[T](_))
         .send(backend)
     }.map(_.body)
-      .recoverWith { case err: SttpClientException =>
-        Console.err.println(
-          s"Failed to fetch artifact metadata, ${err.cause}, retry with backoff ${backoffSeconds}s for $uri"
-        )
-        SECONDS.sleep(backoffSeconds)
-        tryGet((backoffSeconds * 2).min(60))
+      .recoverWith { 
+        case err: SttpClientException =>
+          Console.err.println(s"Failed to fetch artifact metadata, ${err.cause}, retry with backoff ${backoffSeconds}s for $uri")
+          SECONDS.sleep(backoffSeconds)
+          tryGet((backoffSeconds * 2).min(60))
+        case err: ujson.ParseException => 
+          Console.err.println(s"Failed to parse artifact metadata, ${err}, retry with backoff ${backoffSeconds}s for $uri")
+          SECONDS.sleep(backoffSeconds)
+          tryGet((backoffSeconds * 2).min(60))
       }
 
     tryGet(1)
