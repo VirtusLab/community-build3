@@ -1,5 +1,5 @@
 
-# projects total:     795
+# projects total:     797
 # min stars count:    -1
 # max projects count: 1000
 
@@ -167,6 +167,7 @@ jobs:
         - name: "casehubdk/hxl"
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
+        - name: "cheleb/zio-pravega"
         - name: "christian-schlichtherle/circe-kafka"
         - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
@@ -179,7 +180,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
@@ -233,10 +233,12 @@ jobs:
         - name: "davidledwards/scalop"
         - name: "delimobil/fs2-hbase"
         - name: "dobrynya/zio-jms"
+        - name: "dotty-cps-async/shim--scala-async"
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
         - name: "dragonfly-ai/mesh"
         - name: "durban/scalacheck"
+        - name: "dvreeze/tqa"
         - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
@@ -328,8 +330,6 @@ jobs:
         - name: "h8io/borscht"
         - name: "hamnis/dataclass-scalafix"
         - name: "hamnis/google-discovery-scala"
-        - name: "hamnis/googleapis-discovery-http4s"
-        - name: "hamnis/jwk"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hamnis/googleapis-discovery-http4s"
+        - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
         - name: "herminiogg/xmlschema2shex"
@@ -574,6 +576,7 @@ jobs:
         - name: "nafg/scala-phonenumber"
         - name: "nafg/scheduler"
         - name: "nafg/simple-router"
+        - name: "naoh87/lettucef"
         - name: "narma/tranzactio"
         - name: "nationalarchives/da-metadata-schema"
         - name: "nationalarchives/dr2-dynamo-formatters"
@@ -607,9 +610,6 @@ jobs:
         - name: "outr/sendgrid4s"
         - name: "ovotech/meters4s"
         - name: "pablf/teseo"
-        - name: "palanga/parana"
-        - name: "palanga/picazio"
-        - name: "palanga/zio-cassandra"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "palanga/parana"
+        - name: "palanga/picazio"
+        - name: "palanga/zio-cassandra"
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
@@ -649,6 +652,7 @@ jobs:
         - name: "philippus/julius"
         - name: "philippus/osita"
         - name: "philippus/pureconfig-javanet"
+        - name: "philippus/sbt-banner"
         - name: "philippus/sbt-jackson-version-check"
         - name: "philippus/sbt-pekko-version-check"
         - name: "philippus/scala-isbn"
@@ -712,7 +716,6 @@ jobs:
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
         - name: "rssh/scala-appcontext"
-        - name: "rssh/shim--scala-async--dotty-cps-async"
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/rate-limit-status"
         - name: "rtyley/sample-project-using-gha-scala-library-release-workflow"
@@ -752,7 +755,6 @@ jobs:
         - name: "scalacenter/scala3-binary-decoder"
         - name: "scalalandio/mdc4s"
         - name: "scalameta/munit-scalacheck"
-        - name: "scalapatisserie/muffin"
         - name: "scalapb-json/scalapb-argonaut"
         - name: "scalapb-json/scalapb-json-common"
         - name: "scalapb/common-protos"
@@ -813,6 +815,7 @@ jobs:
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
         - name: "sweet-delights/delightful-typeclasses"
+        - name: "swissborg/pekko-persistence-postgres"
         - name: "t83714/elastic4s"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
@@ -887,9 +890,6 @@ jobs:
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
         - name: "varwise/prometheus-akka-http"
-        - name: "varwise/prometheus-pekko-http"
-        - name: "vasilmkd/discipline"
-        - name: "vasilmkd/discipline-specs2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "varwise/prometheus-pekko-http"
+        - name: "vasilmkd/discipline"
+        - name: "vasilmkd/discipline-specs2"
         - name: "virtuslab/java-class-name"
         - name: "virtuslab/scala-cli-signing"
         - name: "vlmiroshnikov/aero3"
@@ -940,9 +943,8 @@ jobs:
         - name: "yurikpanic/zio-postgres"
         - name: "yurique/embedded-files-macro"
         - name: "zhranklin/scala-tricks"
-        - name: "zio/interop-guava"
+        - name: "zio-archive/zio-morphir"
         - name: "zio/zio-bson"
-        - name: "zio/zio-morphir"
         - name: "zio/zio-streams-compress"
         - name: "zygfryd/scala-zygf-jackshaft"
     steps:
