@@ -14,23 +14,19 @@ import scala.language.implicitConversions
 
 // TODO scala3 should be more robust
 def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
-  val release = scalaBinaryVersion match {
-    case "3" => "3.x"
-    case v   => v
-  }
   val commonSearchParams = Map(
-    "languages" -> release,
-    "platforms" -> "jvm",
+    "language" -> scalaBinaryVersion,
+    "platform" -> "jvm",
     "sort" -> "stars",
     "q" -> "*"
   ).map(_ + "=" + _).mkString("&")
-  def load(page: Int) =
+  def load(page: Int): Seq[StarredProject] = try {
     val d = Jsoup
       .connect(
         s"$ScaladexUrl/search?${commonSearchParams}&page=$page"
       )
       .get()
-    d.select(".list-result .row").asScala.flatMap { e =>
+    val batch = d.select(".list-result .row").asScala.flatMap { e =>
       e.select("h4").get(0).text().takeWhile(!_.isWhitespace) match {
         case s"${organization}/${repository}" =>
           for ghStars <- e
@@ -42,9 +38,16 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
           yield StarredProject(organization, repository)(ghStars)
         case _ => None
       }
-    }
+    }.toSeq
+    println(page -> batch.size)
+    batch
+  } catch{case err: SocketTimeoutException => 
+    println(s"retry load projects, page=$page, err=$err")
+    load(page)
+  }
   LazyList
     .from(1) // page 0 and page 1 have the same content
+    .tapEach(println)
     .map(load)
     .takeWhile(_.nonEmpty)
     .flatten
@@ -271,7 +274,8 @@ def loadDepenenecyGraph(
           .map(available ++ _.flatten.take(remainingSlots))
       }
     }
-  }.map(DependencyGraph(scalaBinaryVersion, _))
+  }
+    .map(DependencyGraph(scalaBinaryVersion, _))
 
 def projectModulesFilter(
     filterPatterns: Seq[util.matching.Regex]
