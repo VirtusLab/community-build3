@@ -867,3 +867,58 @@ lazy val esClient = {
 given scala.util.CommandLineParser.FromString[os.Path] = path =>
   try os.Path(path)
   catch { case _: Exception => os.RelPath(path).resolveFrom(os.pwd) }
+
+  
+def showGivenSearchPreferenceStats(results: Set[ProjectResults]): Unit = {
+  enum Choice derives Writer:
+    case FirstAlternative
+    case SecondAlternative
+    case Ambigious
+  case class GivenSearchPreference(target: String, first: String, second: String, currentChoice: Choice, newChoice: Choice) derives Writer
+  case class PreferenceChangeOccournces(change: GivenSearchPreference, count: Int) derives Writer
+  case class ProjectPreferenceChanges(project: String, changes: Seq[PreferenceChangeOccournces], allWarningsCount: Int) derives Writer
+
+  results.map{ projectResults =>
+    projectResults.warnings.collect {
+      case warn: Warning.CompilationWarning if warn.message.contains("Given search preference for ") => 
+        warn.message.replaceAll(raw"\n\s*", "\n") + "\n" match {
+          case s"${_}Given search preference for ${target} between alternatives\n${first}\nand\n${second}\n${_} change${_}.${_}${_} choice ${_}: ${currentChoice}\nNew choice from Scala 3.7: ${newChoice}\n${_}" => 
+            def normalize(v: String): String = v.filterNot(_.isWhitespace).trim().match{
+              case s"($value)" => value
+              case value => value
+            }.match{
+              case s"evidence${_}:${tpe}" => tpe
+              case tpe => tpe
+            }
+
+            def choiceOf(v: String): Choice = v.trim() match {
+              case "the first alternative" => Choice.FirstAlternative
+              case "the second alternative" => Choice.SecondAlternative
+              case "none - it's ambiguous" => Choice.Ambigious
+            }
+            GivenSearchPreference(
+              target = normalize(target), 
+              first = normalize(first), 
+              second = normalize(second), 
+              currentChoice = choiceOf(currentChoice), 
+              newChoice = choiceOf(newChoice)
+            )
+        }
+    }
+    .groupBy(identity).mapValues(_.size)
+    .map(PreferenceChangeOccournces(_,_))
+    .toSeq.sortBy(_.change.target)
+    .pipe:
+      v => ProjectPreferenceChanges(projectResults.name, v, v.foldLeft(0){(acc, v) => acc + v.count})
+  }.toSeq.sortBy(-_.allWarningsCount)
+  .tap: changes => 
+    os.write.over(os.pwd / "given-preference-changes.json", write(changes, indent = 2))
+  .tap: changes => 
+    if changes.nonEmpty then
+      val maxLenght = changes.map(_.project).maxBy(_.length()).length()
+      def pad(v: Any, length: Int) = v.toString.padTo(length, ' ')
+      val shortStats = changes.zipWithIndex.map: (changes, idx) => 
+        s"${pad(idx, 2)}. ${pad(changes.project, maxLenght)} warnings: ${changes.allWarningsCount} unique: ${changes.changes.size}"
+      .mkString("\n")
+      os.write.over(os.pwd / "given-prefernece-changes.stats", shortStats)
+}
