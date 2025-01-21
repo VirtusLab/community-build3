@@ -295,7 +295,13 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         }
       }
     end scala3VersionDefs
-    scala3VersionDefs
+    scala3VersionDefs ++ Seq(
+      SourcePatch(
+        path = "**/*.scala",
+        pattern = "import cats.implicits.*",
+        replaceWith = "import cats.implicits.{*, given}"
+      )
+    )
   end discoverSourcePatches
 
   private def tryReadLines(file: os.Path): Seq[String] = {

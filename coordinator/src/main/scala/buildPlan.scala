@@ -356,7 +356,23 @@ def makeDependenciesBasedBuildPlan(
         )
       }
     }
-    .map(_.filter(_.project != DottyProject).toArray)
+    .map { defs =>
+      val deps = defs.map(d => d.project -> d.dependencies).toMap
+      defs
+        .filter(_.project != DottyProject)
+        .filter { p =>
+          def usesCats(p: Project): Boolean = {
+            try 
+              if (p.organization == "typelevel" && p.repository == "cats") true
+              else defs.find(_.project == p).exists(_.dependencies.exists(usesCats(_)))
+            catch {case err: Throwable => false }
+          }
+          usesCats(p.project) || p.dependencies.exists(usesCats)
+        }
+        // )
+        .tapEach(d => println(d.project -> d.dependencies.toList))
+        .toArray
+    }
 
 private def loadFilters(using confFiles: ConfigFiles): Seq[String] =
   readNormalized(
