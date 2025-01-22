@@ -14,9 +14,9 @@ scalaVersion=$2
 if [[ -z $scalaVersion ]]; then
   scalaVersion=`${scriptDir}/lastVersionNightly.sc`
 fi
-extraScalacOptions=""
+extraScalacOptions="REQUIRE:-source:3.7-migration"
 disabledScalacOptions=""
-extraLibraryDependencies=""
+extraLibraryDependencies="org.typelevel::cats-core:2.12.1-GIVENS-SNAPSHOT;org.typelevel::cats-laws:2.12.1-GIVENS-SNAPSHOT;org.typelevel::cats-effect:3.6.1-GIVENS-SNAPSHOT;org.typelevel::cats-effect-kernel:3.6.1-GIVENS-SNAPSHOT;org.typelevel::cats-effect-std:3.6.1-GIVENS-SNAPSHOT;"
 
 echo "projectName: $projectName"
 echo "scalaVersion: $scalaVersion"
@@ -28,16 +28,16 @@ function config () {
 }
 DefaultConfig="{}"
 
-scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
+# scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
-# OPENCB_EXECUTE_TESTS=true \
+OPENCB_EXECUTE_TESTS=true \
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \
   "$(config .repoUrl)" \
   "$(config .revision)" \
   "${scalaVersion}" \
   "$(config .targets)" \
-  "https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion/" \
+  "https://scala3.westeurope.cloudapp.azure.com/maven2/givens-tests/" \
   "$(config .config // ${DefaultConfig})" \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \
