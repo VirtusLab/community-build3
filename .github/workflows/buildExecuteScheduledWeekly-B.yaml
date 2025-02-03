@@ -92,7 +92,7 @@ jobs:
           echo "$scalaVersion" > $lastWeeklyVersionFile
 
       - name: Upload raports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-raports
           path: ${{ github.workspace }}/raport-*.md

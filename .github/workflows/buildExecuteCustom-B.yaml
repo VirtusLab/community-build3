@@ -81,7 +81,7 @@ jobs:
           scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
 
       - name: Upload raports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-raports
           path: ${{ github.workspace }}/raport-*.md

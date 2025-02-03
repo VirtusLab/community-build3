@@ -71,7 +71,7 @@ jobs:
           FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.md
 
       - name: Upload raports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ inputs.push-to-gh-pages && inputs.scala-version != '' }}
         with:
           name: build-raports
