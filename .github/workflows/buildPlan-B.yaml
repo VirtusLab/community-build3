@@ -1,5 +1,5 @@
 
-# projects total:     698
+# projects total:     706
 # min stars count:    -1
 # max projects count: 1000
 
@@ -163,6 +163,7 @@ jobs:
         - name: "christian-schlichtherle/circe-kafka"
         - name: "cjsmith-0141/fs2-pgp"
         - name: "clevercloud/testcontainers-scala-warp10"
+        - name: "clevercloud/warp10-scala-client"
         - name: "clockworkconsulting/csexp"
         - name: "clockworkconsulting/peregrin"
         - name: "clulab/fatdynet"
@@ -225,6 +226,7 @@ jobs:
         - name: "eb2501/fluor-core"
         - name: "eikek/binny"
         - name: "eikek/htmx4s"
+        - name: "eikek/soidc"
         - name: "eltherion/http4s-timer"
         - name: "endpoints4s/play"
         - name: "enriquerodbe/borsh4s"
@@ -246,6 +248,7 @@ jobs:
         - name: "fgrutsch/emergence"
         - name: "fiatjaf/nlog"
         - name: "firstbirdtech/akka-persistence-inmemory"
+        - name: "flextradeukltd/jfixture-scala"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
         - name: "funkode-io/web3-auth"
@@ -281,7 +284,9 @@ jobs:
         - name: "guardian/pa-football-client"
         - name: "guardian/redirect-resolver"
         - name: "guidoschmidt17/zio-pgcopy"
+        - name: "guizmaii-opensource/jwt-scala"
         - name: "guizmaii-opensource/zio-aes"
+        - name: "guizmaii-opensource/zio-spark"
         - name: "guntiso/mojoz"
         - name: "guntiso/querease"
         - name: "guymers/ceesvee"
@@ -325,11 +330,6 @@ jobs:
         - name: "ingarabr/sbt-firebase"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
-        - name: "ist-dsi/scala-keystone-client"
-        - name: "ist-dsi/scala-neutron-client"
-        - name: "ist-dsi/scala-nova-client"
-        - name: "ist-dsi/scala-openstack-common-clients"
-        - name: "ivoah/vial"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "ist-dsi/scala-keystone-client"
+        - name: "ist-dsi/scala-neutron-client"
+        - name: "ist-dsi/scala-nova-client"
+        - name: "ist-dsi/scala-openstack-common-clients"
+        - name: "ivoah/vial"
         - name: "j-mie6/golden-scala"
         - name: "j-mie6/parsley-debug-views"
         - name: "j5ik2o/event-store-adapter-scala"
@@ -400,7 +405,6 @@ jobs:
         - name: "jwojnowski/scuid"
         - name: "jypma/lazagna"
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
-        - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
         - name: "kalin-rudnicki/slyce-zio"
@@ -496,6 +500,7 @@ jobs:
         - name: "mattlangsenkamp/svgbounds"
         - name: "mdedetrich/scalacheck"
         - name: "mercurievv/minuscles"
+        - name: "mimoguz/layeredfonticon"
         - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
@@ -605,11 +610,6 @@ jobs:
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/narr"
         - name: "quincyjo/braid"
-        - name: "quincyjo/scala-json-path"
-        - name: "qwbarch/snowflake4s"
-        - name: "raistlintao/scalalogger"
-        - name: "ranyitz/casing"
-        - name: "raquo/buildkit"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "quincyjo/scala-json-path"
+        - name: "qwbarch/snowflake4s"
+        - name: "raistlintao/scalalogger"
+        - name: "ranyitz/casing"
+        - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rmgk/slips"
         - name: "rolang/google-rest-api-codegen"
@@ -672,6 +677,7 @@ jobs:
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
+        - name: "scala-cli/scala-cli-signing"
         - name: "scala-tessella/ring-seq"
         - name: "scalacenter/bloop-config"
         - name: "scalacenter/libdaemon-jvm"
@@ -768,6 +774,7 @@ jobs:
         - name: "torrentdam/bencode"
         - name: "tototoshi/play-reverse-router-extension"
         - name: "tpataky/duckling"
+        - name: "tpunder/fm-common"
         - name: "tpunder/fm-html"
         - name: "tpunder/fm-http"
         - name: "tpunder/fm-json"
@@ -791,6 +798,7 @@ jobs:
         - name: "trace4cats/trace4cats-zio"
         - name: "trace4cats/trace4cats-zipkin"
         - name: "typelevel/log4cats-natchez"
+        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/scalacheck-xml"
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
