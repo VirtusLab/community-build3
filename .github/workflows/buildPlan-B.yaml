@@ -1,5 +1,5 @@
 
-# projects total:     706
+# projects total:     707
 # min stars count:    -1
 # max projects count: 1000
 
@@ -556,6 +556,7 @@ jobs:
         - name: "palanga/picazio"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
+        - name: "percontmx/cfdi-java"
         - name: "permutive-engineering/common-types-gcp"
         - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
@@ -609,7 +610,6 @@ jobs:
         - name: "pureharm/pureharm-testkit"
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/narr"
-        - name: "quincyjo/braid"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "quincyjo/braid"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
