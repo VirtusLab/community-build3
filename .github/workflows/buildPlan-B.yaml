@@ -99,10 +99,12 @@ jobs:
         - name: "alejandrohdezma/sbt-propagate"
         - name: "alejandrohdezma/string-box"
         - name: "alejandrohdezma/tapir-anyof"
+        - name: "alejandrohdezma/tapir-golden-openapi-munit"
         - name: "alexarchambault/class-path-inspector"
         - name: "alexarchambault/cli-test-util"
         - name: "alexcardell/openfeature-scala"
         - name: "alexdupre/coinpayments-scala"
+        - name: "alexdupre/fedex-scala"
         - name: "alterationx10/opinionated-zio"
         - name: "andimiller/cats-parse-interpolator"
         - name: "andimiller/hedgehogs"
@@ -264,6 +266,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
+        - name: "gemini-hlsw/lucuma-odb"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "gnp/ident"
@@ -327,9 +330,6 @@ jobs:
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
         - name: "ingarabr/http4s-cloud-functions"
-        - name: "ingarabr/sbt-firebase"
-        - name: "ist-dsi/scala-cinder-client"
-        - name: "ist-dsi/scala-designate-client"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "ingarabr/sbt-firebase"
+        - name: "ist-dsi/scala-cinder-client"
+        - name: "ist-dsi/scala-designate-client"
         - name: "ist-dsi/scala-keystone-client"
         - name: "ist-dsi/scala-neutron-client"
         - name: "ist-dsi/scala-nova-client"
@@ -399,7 +402,6 @@ jobs:
         - name: "julianpeeters/schemabuilder4cats"
         - name: "julianpeeters/typename"
         - name: "julianpeeters/typesize"
-        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/googlecloud4s"
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
@@ -514,7 +516,6 @@ jobs:
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
-        - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
         - name: "nafg/cloud-logging-logback-scala"
@@ -538,7 +539,6 @@ jobs:
         - name: "novakov-alexey/http4s-spnego"
         - name: "novamage/rtw"
         - name: "novamage/typed-map"
-        - name: "nrkno/bigquery-scala"
         - name: "nthportal/scala-platform"
         - name: "nthportal/spaghetti"
         - name: "oheger/cloud-files"
@@ -556,7 +556,6 @@ jobs:
         - name: "palanga/picazio"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
-        - name: "percontmx/cfdi-java"
         - name: "permutive-engineering/common-types-gcp"
         - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
@@ -610,6 +609,7 @@ jobs:
         - name: "pureharm/pureharm-testkit"
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/narr"
+        - name: "quincyjo/braid"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,14 +635,12 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "quincyjo/braid"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
         - name: "ranyitz/casing"
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
-        - name: "rmgk/slips"
         - name: "rolang/google-rest-api-codegen"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
@@ -714,6 +712,7 @@ jobs:
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
         - name: "sideeffffect/liquibase-doobie"
+        - name: "simkoc/scala-argparse"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
@@ -762,6 +761,7 @@ jobs:
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
         - name: "timbertson/flogger"
+        - name: "tkrs/fluflu"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
         - name: "tlsomers/scala-suspendable"
