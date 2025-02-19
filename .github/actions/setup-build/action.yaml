@@ -83,10 +83,22 @@ runs:
           echo "Release Scala in version: ${{ steps.calc-version.outputs.effective-scala-version }}"
           echo "Maven repo at: ${{ steps.calc-version.outputs.effective-maven-url }}"
           echo '##################################'
+          
+          # Extract major and minor version numbers (first two segments)
+          major_minor=$(echo "${{ steps.calc-version.outputs.effective-maven-url }}" | grep -oE '^[0-9]+\.[0-9]+')
+          major=$(echo "$major_minor" | cut -d. -f1)
+          minor=$(echo "$major_minor" | cut -d. -f2)
+
+          # If building Scala 3.6 or earlier use Java 8
+          JDKVersion=17
+          if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -le 6 ]]); then
+            JDKVersion=8
+          fi
+
+          echo "Would try to use JDK ${JDKVersion} to build compiler"
+          PATH="/usr/lib/jvm/java-${JDKVersion}-openjdk-amd64/bin:$PATH"
 
           cd /compiler/
-          PATH="/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH"
-
           java -version
           sbt \
           'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
