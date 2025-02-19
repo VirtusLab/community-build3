@@ -123,6 +123,7 @@ runs:
         password: ${{ inputs.container-registry-token }}
         image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
         options: -v ${{ github.workspace }}:/opencb/
+        shell: bash
         run: |
           # Setup ssh required for downloading submodules
           eval "$(ssh-agent -s)"
@@ -224,6 +225,7 @@ runs:
         password: ${{ inputs.container-registry-token }}
         image: "virtuslab/scala-community-build-project-builder:jdk17-latest"
         options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
+        shell: bash
         run: |
           ConfigFile="/opencb/.github/workflows/buildConfig.json"
           config () { 
