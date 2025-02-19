@@ -9,7 +9,6 @@ import java.nio.file.attribute.PosixFilePermissions
 import java.nio.charset.StandardCharsets
 import java.nio.file._
 
-val communityBuildVersion = "0.3.20"
 
 @main def run(args: String*): Unit =
   val config = scopt.OParser
@@ -84,7 +83,7 @@ object Config {
     val builder = OParser.builder[Config]
     import builder.*
     OParser.sequence(
-      head("Scala 3 Open Community Build bisect", communityBuildVersion),
+      head("Scala 3 Open Community Build bisect"),
       opt[Unit]("dry-run")
         .action:
           (_, c) => c.copy(dryRun = true)
@@ -209,7 +208,7 @@ object ValidationScript:
       |docker run --rm \
       |  -v ${validationScript.getAbsolutePath()}:$validationScriptPath \
       |  -v ${openCBDir.getAbsolutePath()}:/opencb/ \
-      |  virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-$communityBuildVersion \
+      |  virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-latest \
       |  /bin/bash -c "$validationScriptPath $$scalaVersion"
     """.stripMargin)
   }
