@@ -1,5 +1,5 @@
 
-# projects total:     707
+# projects total:     710
 # min stars count:    -1
 # max projects count: 1000
 
@@ -409,6 +409,7 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -500,6 +501,7 @@ jobs:
         - name: "mateuszkubuszok/explain-given"
         - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
+        - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/scalacheck"
         - name: "mercurievv/minuscles"
         - name: "mimoguz/layeredfonticon"
@@ -608,8 +610,6 @@ jobs:
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
         - name: "quafadas/dairect-democracy"
-        - name: "quafadas/narr"
-        - name: "quincyjo/braid"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "quafadas/narr"
+        - name: "quincyjo/braid"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
         - name: "raistlintao/scalalogger"
@@ -661,6 +663,7 @@ jobs:
         - name: "rustedbones/scout"
         - name: "sadly-dubious-org/widely-used-util"
         - name: "sake92/mill-local-vs-publish-repro"
+        - name: "sake92/sbt-build-extract"
         - name: "sakulk/serval"
         - name: "salesforce/kineticpulse"
         - name: "sangria-graphql/sangria-argonaut"
