@@ -35,7 +35,7 @@ jobs:
 
       - name: Publish to ghcr.io
         run: |
-          for javaVersion in 8 11 17 21 ; do 
+          for javaVersion in 17 21 ; do 
             imageName=virtuslab/scala-community-build-project-builder:jdk${javaVersion}-latest
             docker tag $imageName ghcr.io/$imageName
             docker push ghcr.io/$imageName

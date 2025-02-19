@@ -21,6 +21,6 @@ docker build \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
   --cache-from "$imageName:$(buildTag "$VERSION" $JDK_VERSION)" \
   --cache-from "$imageName:$(buildTag latest $JDK_VERSION)" \
-  --cache-from "$imageName:$(buildTag v0.3.13 $JDK_VERSION)" \
+  --cache-from "$imageName:$(buildTag v0.4.0 $JDK_VERSION)" \
   -t "$imageName:$TAG_NAME" \
   $scriptDir/../project-builder

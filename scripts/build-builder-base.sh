@@ -18,14 +18,6 @@ imageName=virtuslab/scala-community-build-builder-base
 
 jdkDistro=""
 case $JDK_VERSION in
-"8")
-  jdkDistro="8.0.352-tem"
-  ;;
-
-"11")
-  jdkDistro="11.0.20-tem"
-  ;;
-
 "17")
   jdkDistro="17.0.8-tem "
   ;;
