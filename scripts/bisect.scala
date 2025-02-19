@@ -203,7 +203,7 @@ object ValidationScript:
       |set -e
       |scalaVersion=$$1
       |ConfigFile="${openCBDir.toPath().resolve(".github/workflows/buildConfig.json").toAbsolutePath()}"
-      |DefaultJDK=11
+      |DefaultJDK=17
       |javaVersion=$$(jq -r ".\"${projectName}\".config.java.version // $${DefaultJDK}" $$ConfigFile)
       |docker run --rm \
       |  -v ${validationScript.getAbsolutePath()}:$validationScriptPath \

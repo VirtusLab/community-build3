@@ -15,7 +15,7 @@ projectConfig="$4"
 export OPENCB_PROJECT_DIR=$repoDir
 
 # Check if using a sbt with a supported version
-javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "11"')
+javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
 MinSbtVersion="1.6.2"
 if [[ "$javaVersion" -ge 21 ]]; then
   MinSbtVersion="1.9.0"
