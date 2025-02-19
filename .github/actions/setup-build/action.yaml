@@ -78,6 +78,7 @@ runs:
       with:
         image: "lampepfl/dotty:2024-10-18"
         options: -v ${{ github.workspace }}/compiler:/compiler/
+        shell: bash
         run: |
           echo '##################################'
           echo "Release Scala in version: ${{ steps.calc-version.outputs.effective-scala-version }}"
