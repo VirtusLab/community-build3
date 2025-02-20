@@ -8975,50 +8975,6 @@
       ]
     }
   },
-  "coursier/coursier":{
-    "project":"coursier/coursier",
-    "repoUrl":"https://github.com/coursier/coursier.git",
-    "revision":"v2.1.25-M2",
-    "version":"2.1.25-M2",
-    "targets":"io.get-coursier%cli-tests io.get-coursier%coursier-cli io.get-coursier%coursier-launcher-native_0.4",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"21"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"project/deps.sc",
-          "pattern":"def scala3   = \"3.3.5\"",
-          "replaceWith":"def scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "coursier/dependency":{
     "project":"coursier/dependency",
     "repoUrl":"https://github.com/coursier/dependency.git",
@@ -50946,7 +50902,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"case Some((3, 3)) =>",
+          "replaceWith":"case Some((3, _)) =>"
+        }
       ]
     }
   },
