@@ -4174,6 +4174,11 @@
       ],
       "sourcePatches":[
         {
+          "path":".{sbtopts,jvmopts}",
+          "pattern":"(-J)?-XX:\\+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        },
+        {
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -20361,7 +20366,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"sys.error(\"Java 11 is required for this project",
+          "replaceWith":"println(\"Java 11 is required for this project"
+        }
       ]
     }
   },
@@ -20405,6 +20414,11 @@
           "path":"build.sbt",
           "pattern":"LocalProject(\"querease\")",
           "replaceWith":"ThisBuild"
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"sys.error(\"Java 11 is required for this project",
+          "replaceWith":"println(\"Java 11 is required for this project"
         },
         {
           "path":"src/QuereaseMetadata.scala",
@@ -21261,7 +21275,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:\\+(CMSClassUnloadingEnabled|UseConcMarkSweepGC)",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -23724,7 +23742,44 @@
     "repoUrl":"https://github.com/inkytonik/kiama.git",
     "revision":"v2.5.1",
     "version":"2.5.1",
-    "targets":"org.bitbucket.inkytonik.kiama%kiama org.bitbucket.inkytonik.kiama%kiama-extras"
+    "targets":"org.bitbucket.inkytonik.kiama%kiama org.bitbucket.inkytonik.kiama%kiama-extras",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":".sbtopts",
+          "pattern":"-J-XX:+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        }
+      ]
+    }
   },
   "inoio/solrs":{
     "project":"inoio/solrs",
@@ -26076,8 +26131,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.257",
-    "version":"4.0.257",
+    "revision":"v4.0.258",
+    "version":"4.0.258",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "config":{
       "projects":{
@@ -31683,9 +31738,9 @@
   "lhns/scala-common":{
     "project":"lhns/scala-common",
     "repoUrl":"https://github.com/lhns/scala-common.git",
-    "revision":"0.6.3",
-    "version":"0.6.3",
-    "targets":"de.lhns%scala-common-app de.lhns%scala-common-core de.lhns%scala-common-http de.lhns%scala-common-http-client de.lhns%scala-common-http-server de.lhns%scala-common-skunk",
+    "revision":"0.7.0",
+    "version":"0.7.0",
+    "targets":"de.lhns%scala-common-app de.lhns%scala-common-core de.lhns%scala-common-http de.lhns%scala-common-http-client de.lhns%scala-common-http-server de.lhns%scala-common-s3 de.lhns%scala-common-skunk",
     "config":{
       "projects":{
         "exclude":[
@@ -37150,7 +37205,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"src/main/scala/systems/opalia/commons/core/utility/rendering/Renderer.scala",
+          "pattern":"with CharSequence {",
+          "replaceWith":"with CharSequence {\n  override def isEmpty(): Boolean = super.isEmpty()"
+        }
       ]
     }
   },
@@ -45678,6 +45737,11 @@
           "path":"core/src/main/scala-3/plugins/CompilerPlugin.scala",
           "pattern":"def init(options: List[String]): List[PluginPhase]",
           "replaceWith":"override def init(options: List[String]): List[PluginPhase]"
+        },
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:+CMSClassUnloadingEnabled",
+          "replaceWith":""
         }
       ]
     }
@@ -46206,8 +46270,8 @@
   "scalacenter/scalafix":{
     "project":"scalacenter/scalafix",
     "repoUrl":"https://github.com/scalacenter/scalafix.git",
-    "revision":"v0.14.0",
-    "version":"0.14.0",
+    "revision":"v0.14.2",
+    "version":"0.14.2",
     "targets":"ch.epfl.scala%compat-metaconfig-macros",
     "config":{
       "projects":{
@@ -52609,8 +52673,8 @@
   "takapi327/ldbc":{
     "project":"takapi327/ldbc",
     "repoUrl":"https://github.com/takapi327/ldbc.git",
-    "revision":"v0.3.0-beta10",
-    "version":"0.3.0-beta10",
+    "revision":"v0.3.0-beta11",
+    "version":"0.3.0-beta11",
     "targets":"io.github.takapi327%jdbc-connector io.github.takapi327%ldbc-codegen io.github.takapi327%ldbc-connector io.github.takapi327%ldbc-core io.github.takapi327%ldbc-dsl io.github.takapi327%ldbc-hikari io.github.takapi327%ldbc-query-builder io.github.takapi327%ldbc-schema io.github.takapi327%ldbc-schemaspy io.github.takapi327%ldbc-sql io.github.takapi327%ldbc-statement",
     "config":{
       "projects":{
@@ -52654,7 +52718,7 @@
         },
         {
           "path":"project/Versions.scala",
-          "pattern":"val scala3  = \"3.3.4\"",
+          "pattern":"val scala3  = \"3.3.5\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -59013,7 +59077,54 @@
     "repoUrl":"https://github.com/vagmcs/scalatikz.git",
     "revision":"v0.5.2",
     "version":"0.5.2",
-    "targets":"com.github.vagmcs%scalatikz"
+    "targets":"com.github.vagmcs%scalatikz",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"project/plugins.sbt",
+          "pattern":"addSbtPlugin(\"ohnosequences\" % \"sbt-github-release\" %",
+          "replaceWith":"// addSbtPlugin(\"ohnosequences\" % \"sbt-github-release\" %"
+        },
+        {
+          "path":"project/ScalaTIKZBuild.scala",
+          "pattern":"import ohnosequences.sbt.GithubRelease.keys._",
+          "replaceWith":""
+        },
+        {
+          "path":"project/ScalaTIKZBuild.scala",
+          "pattern":"ghrelease.* := .*,\n",
+          "replaceWith":""
+        }
+      ]
+    }
   },
   "valdemargr/catch-effect":{
     "project":"valdemargr/catch-effect",
@@ -60066,7 +60177,44 @@
     "repoUrl":"https://github.com/wiringbits/wiringbits-webapp-utils.git",
     "revision":"v0.7.2",
     "version":"0.7.2",
-    "targets":"net.wiringbits%webapp-common"
+    "targets":"net.wiringbits%webapp-common",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":".sbtopts",
+          "pattern":"-J-XX:+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        }
+      ]
+    }
   },
   "wiwiwa/ezscala":{
     "project":"wiwiwa/ezscala",
@@ -61377,7 +61525,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -63366,8 +63518,8 @@
   "zio/zio-schema":{
     "project":"zio/zio-schema",
     "repoUrl":"https://github.com/zio/zio-schema.git",
-    "revision":"v1.6.2",
-    "version":"1.6.2",
+    "revision":"v1.6.3",
+    "version":"1.6.3",
     "targets":"dev.zio%zio-schema dev.zio%zio-schema-avro dev.zio%zio-schema-bson dev.zio%zio-schema-derivation dev.zio%zio-schema-docs dev.zio%zio-schema-json dev.zio%zio-schema-macros dev.zio%zio-schema-msg-pack dev.zio%zio-schema-optics dev.zio%zio-schema-protobuf dev.zio%zio-schema-thrift dev.zio%zio-schema-zio-test",
     "config":{
       "projects":{
