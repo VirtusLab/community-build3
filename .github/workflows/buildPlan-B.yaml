@@ -1,5 +1,5 @@
 
-# projects total:     709
+# projects total:     713
 # min stars count:    -1
 # max projects count: 1000
 
@@ -123,6 +123,7 @@ jobs:
         - name: "armanbilge/saslprep"
         - name: "armanbilge/stratus"
         - name: "armanbilge/van-cats"
+        - name: "arturaz/cats-effect-resource-shared-memoized"
         - name: "arturaz/yantl"
         - name: "ashwinbhaskar/sight-scala"
         - name: "asragab/unstructured4s"
@@ -317,6 +318,7 @@ jobs:
         - name: "http4s/http4s-fabric"
         - name: "http4s/http4s-jetty"
         - name: "http4s/http4s-play-json"
+        - name: "http4s/http4s-twirl"
         - name: "hughsimpson/scalameter"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
@@ -328,8 +330,6 @@ jobs:
         - name: "indoorvivants/sn-demangler"
         - name: "indoorvivants/subatomic"
         - name: "indoorvivants/yank"
-        - name: "ingarabr/gcs-lock"
-        - name: "ingarabr/http4s-cloud-functions"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "ingarabr/gcs-lock"
+        - name: "ingarabr/http4s-cloud-functions"
         - name: "ingarabr/sbt-firebase"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
@@ -390,7 +392,6 @@ jobs:
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
         - name: "jqscala/jq-fs2"
-        - name: "jqscala/jqscala"
         - name: "juliano/randomuser-scala"
         - name: "julianpeeters/dc10"
         - name: "julianpeeters/dc10-cats-effect"
@@ -609,7 +610,6 @@ jobs:
         - name: "pureharm/pureharm-db-core-jdbc"
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
-        - name: "quafadas/dairect-democracy"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "quafadas/dairect-democracy"
         - name: "quafadas/narr"
+        - name: "quafadas/spire_ad"
         - name: "quincyjo/braid"
         - name: "quincyjo/scala-json-path"
         - name: "qwbarch/snowflake4s"
@@ -741,6 +743,7 @@ jobs:
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
         - name: "sweet-delights/delightful-typeclasses"
+        - name: "t83714/elastic4s"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
         - name: "taig/enumeration-ext"
@@ -764,6 +767,7 @@ jobs:
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
         - name: "timbertson/flogger"
+        - name: "tkrs/fluflu"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
         - name: "tlsomers/scala-suspendable"
