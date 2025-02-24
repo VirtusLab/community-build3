@@ -554,6 +554,7 @@ jobs:
         - name: "outr/rapid"
         - name: "outr/robobrowser"
         - name: "outr/sendgrid4s"
+        - name: "ovotech/meters4s"
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
@@ -609,7 +610,6 @@ jobs:
         - name: "pureharm/pureharm-core"
         - name: "pureharm/pureharm-db-core-jdbc"
         - name: "pureharm/pureharm-effects-cats"
-        - name: "pureharm/pureharm-testkit"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pureharm/pureharm-testkit"
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/narr"
         - name: "quafadas/spire_ad"
@@ -743,7 +744,6 @@ jobs:
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
         - name: "sweet-delights/delightful-typeclasses"
-        - name: "t83714/elastic4s"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
         - name: "taig/enumeration-ext"

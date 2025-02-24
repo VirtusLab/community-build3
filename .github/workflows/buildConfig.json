@@ -3036,7 +3036,7 @@
     "project":"aparo/zio-json-extra",
     "repoUrl":"https://github.com/aparo/zio-json-extra.git",
     "revision":"",
-    "version":"0.6.2",
+    "version":"0.7.8",
     "targets":"io.megl%zio-json-diffson io.megl%zio-json-exception io.megl%zio-json-extra"
   },
   "apimorphism/telegramium":{
@@ -6807,7 +6807,44 @@
     "repoUrl":"https://github.com/cchantep/acolyte.git",
     "revision":"1.2.9",
     "version":"1.2.9",
-    "targets":"org.eu.acolyte%jdbc-scala org.eu.acolyte%play-jdbc org.eu.acolyte%play-reactive-mongo org.eu.acolyte%reactive-mongo"
+    "targets":"org.eu.acolyte%jdbc-scala org.eu.acolyte%play-jdbc org.eu.acolyte%play-reactive-mongo org.eu.acolyte%reactive-mongo",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        }
+      ]
+    }
   },
   "changvvb/scala-protobuf-java":{
     "project":"changvvb/scala-protobuf-java",
@@ -9697,8 +9734,8 @@
   "d10xa/json-log-viewer":{
     "project":"d10xa/json-log-viewer",
     "repoUrl":"https://github.com/d10xa/json-log-viewer.git",
-    "revision":"v0.3.8",
-    "version":"0.3.8",
+    "revision":"v0.3.9",
+    "version":"0.3.9",
     "targets":"ru.d10xa%json-log-viewer ru.d10xa%root",
     "config":{
       "projects":{
@@ -13084,8 +13121,8 @@
   "dragonfly-ai/slash":{
     "project":"dragonfly-ai/slash",
     "repoUrl":"https://github.com/dragonfly-ai/slash.git",
-    "revision":"v0.3.2",
-    "version":"0.3.2",
+    "revision":"v0.3.21",
+    "version":"0.3.21",
     "targets":"ai.dragonfly%slash",
     "config":{
       "projects":{
@@ -18663,8 +18700,8 @@
   "ghostdogpr/caliban":{
     "project":"ghostdogpr/caliban",
     "repoUrl":"https://github.com/ghostdogpr/caliban.git",
-    "revision":"v2.9.1",
-    "version":"2.9.1",
+    "revision":"v2.9.2",
+    "version":"2.9.2",
     "targets":"com.github.ghostdogpr%caliban com.github.ghostdogpr%caliban-cats com.github.ghostdogpr%caliban-client com.github.ghostdogpr%caliban-federation com.github.ghostdogpr%caliban-http4s com.github.ghostdogpr%caliban-macros com.github.ghostdogpr%caliban-monix com.github.ghostdogpr%caliban-pekko-http com.github.ghostdogpr%caliban-play com.github.ghostdogpr%caliban-quick com.github.ghostdogpr%caliban-reporting com.github.ghostdogpr%caliban-tapir com.github.ghostdogpr%caliban-tools com.github.ghostdogpr%caliban-tracing com.github.ghostdogpr%caliban-zio-http",
     "config":{
       "projects":{
@@ -18704,7 +18741,7 @@
         },
         {
           "path":"build.sbt",
-          "pattern":"val scala3   = \"3.3.4\"",
+          "pattern":"val scala3   = \"3.3.5\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -26167,8 +26204,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.260",
-    "version":"4.0.260",
+    "revision":"v4.0.263",
+    "version":"4.0.263",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "config":{
       "projects":{
@@ -28225,8 +28262,8 @@
   "karelcemus/play-redis":{
     "project":"karelcemus/play-redis",
     "repoUrl":"https://github.com/karelcemus/play-redis.git",
-    "revision":"5.0.0",
-    "version":"5.0.0",
+    "revision":"5.1.0",
+    "version":"5.1.0",
     "targets":"com.github.karelcemus%play-redis",
     "config":{
       "projects":{
@@ -33006,6 +33043,46 @@
       ]
     }
   },
+  "lucidsoftware/piezo":{
+    "project":"lucidsoftware/piezo",
+    "repoUrl":"https://github.com/lucidsoftware/piezo.git",
+    "revision":"3.0.0",
+    "version":"3.0.0",
+    "targets":"com.lucidchart%piezo com.lucidchart%piezo-admin com.lucidchart%piezo-worker",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "lunatech-labs/lunatech-play-googleopenconnect":{
     "project":"lunatech-labs/lunatech-play-googleopenconnect",
     "repoUrl":"https://github.com/lunatech-labs/lunatech-play-googleopenconnect.git",
@@ -33749,8 +33826,8 @@
   "mbannour/mongoscala3codec":{
     "project":"mbannour/mongoscala3codec",
     "repoUrl":"https://github.com/mbannour/mongoscala3codec.git",
-    "revision":"v.0.0.1",
-    "version":"0.0.1",
+    "revision":"v.0.0.2",
+    "version":"0.0.2",
     "targets":"io.github.mbannour%mongoscala3codec",
     "config":{
       "projects":{
@@ -33784,7 +33861,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version = \"3.5.2\"",
+          "pattern":"val scala3Version = \"3.6.3\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -34592,7 +34669,11 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -35838,8 +35919,8 @@
   "nationalarchives/da-metadata-schema":{
     "project":"nationalarchives/da-metadata-schema",
     "repoUrl":"https://github.com/nationalarchives/da-metadata-schema.git",
-    "revision":"v0.0.44",
-    "version":"0.0.44",
+    "revision":"v0.0.45",
+    "version":"0.0.45",
     "targets":"uk.gov.nationalarchives%da-metadata-schema"
   },
   "nationalarchives/dr2-dynamo-formatters":{
@@ -36341,7 +36422,8 @@
       },
       "sbt":{
         "commands":[
-          
+          "excludeLibraryDependency org.wartremover:wartremover_{scalaVersion}",
+          "removeScalacOptionsStartingWith -P:wartremover"
         ],
         "options":[
           
@@ -37299,8 +37381,8 @@
   "openmole/gridscale":{
     "project":"openmole/gridscale",
     "repoUrl":"https://github.com/openmole/gridscale.git",
-    "revision":"v2.54",
-    "version":"2.54",
+    "revision":"v2.57",
+    "version":"2.57",
     "targets":"org.openmole.gridscale%cluster org.openmole.gridscale%condor org.openmole.gridscale%dirac org.openmole.gridscale%egi org.openmole.gridscale%example-condor org.openmole.gridscale%example-egi-cream org.openmole.gridscale%example-egi-dirac org.openmole.gridscale%example-egi-webdav org.openmole.gridscale%example-http org.openmole.gridscale%example-local org.openmole.gridscale%example-oar org.openmole.gridscale%example-pbs org.openmole.gridscale%example-qarnot org.openmole.gridscale%example-sge org.openmole.gridscale%example-slurm org.openmole.gridscale%example-ssh org.openmole.gridscale%gridscale org.openmole.gridscale%http org.openmole.gridscale%ipfs org.openmole.gridscale%ipfsexample org.openmole.gridscale%local org.openmole.gridscale%oar org.openmole.gridscale%pbs org.openmole.gridscale%qarnot org.openmole.gridscale%sge org.openmole.gridscale%slurm org.openmole.gridscale%ssh org.openmole.gridscale%webdav"
   },
   "openmole/mgo":{
@@ -38223,8 +38305,8 @@
   "palanga/picazio":{
     "project":"palanga/picazio",
     "repoUrl":"https://github.com/palanga/picazio.git",
-    "revision":"v0.0.1-beta7",
-    "version":"0.0.1-beta7",
+    "revision":"v0.0.1-beta8",
+    "version":"0.0.1-beta8",
     "targets":"io.github.palanga%picazio-web-dev-server",
     "config":{
       "projects":{
@@ -40528,8 +40610,8 @@
   "playframework/play-ws":{
     "project":"playframework/play-ws",
     "repoUrl":"https://github.com/playframework/play-ws.git",
-    "revision":"3.1.0-M4",
-    "version":"3.1.0-M4",
+    "revision":"3.1.0-M5",
+    "version":"3.1.0-M5",
     "targets":"org.playframework%play-ahc-ws-standalone org.playframework%play-ws-standalone org.playframework%play-ws-standalone-json org.playframework%play-ws-standalone-xml",
     "config":{
       "projects":{
@@ -40563,7 +40645,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3   = \"3.3.4\"",
+          "pattern":"val scala3   = \"3.3.5\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -40628,8 +40710,8 @@
   "playframework/twirl":{
     "project":"playframework/twirl",
     "repoUrl":"https://github.com/playframework/twirl.git",
-    "revision":"2.1.0-M2",
-    "version":"2.1.0-M2",
+    "revision":"2.1.0-M3",
+    "version":"2.1.0-M3",
     "targets":"org.playframework.twirl%twirl-api org.playframework.twirl%twirl-compiler org.playframework.twirl%twirl-maven-plugin org.playframework.twirl%twirl-parser",
     "config":{
       "projects":{
@@ -40663,7 +40745,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val Scala3        = \"3.3.4\"",
+          "pattern":"val Scala3        = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -40726,8 +40808,8 @@
   "pme123/camundala":{
     "project":"pme123/camundala",
     "repoUrl":"https://github.com/pme123/camundala.git",
-    "revision":"v1.30.33",
-    "version":"1.30.33",
+    "revision":"v1.30.35",
+    "version":"1.30.35",
     "targets":"io.github.pme123%camundala-api io.github.pme123%camundala-bpmn io.github.pme123%camundala-camunda io.github.pme123%camundala-camunda7-worker io.github.pme123%camundala-camunda7-zio-worker io.github.pme123%camundala-camunda8-worker io.github.pme123%camundala-dmn io.github.pme123%camundala-domain io.github.pme123%camundala-helper io.github.pme123%camundala-simulation io.github.pme123%camundala-worker",
     "config":{
       "projects":{
@@ -46911,8 +46993,8 @@
   "scalamock/scalamock":{
     "project":"scalamock/scalamock",
     "repoUrl":"https://github.com/scalamock/scalamock.git",
-    "revision":"v7.2.0",
-    "version":"7.2.0",
+    "revision":"v7.3.0-RC1",
+    "version":"7.3.0-RC1",
     "targets":"org.scalamock%scalamock org.scalamock%scalamock-cats-effect org.scalamock%scalamock-zio",
     "config":{
       "projects":{
@@ -46924,7 +47006,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -49097,8 +49179,8 @@
   "sfali/grpc-rest-gateway":{
     "project":"sfali/grpc-rest-gateway",
     "repoUrl":"https://github.com/sfali/grpc-rest-gateway.git",
-    "revision":"v0.8.5",
-    "version":"0.8.5",
+    "revision":"v0.8.6",
+    "version":"0.8.6",
     "targets":"io.github.sfali23%grpc-rest-gateway-code-gen io.github.sfali23%grpc-rest-gateway-runtime-akka io.github.sfali23%grpc-rest-gateway-runtime-core io.github.sfali23%grpc-rest-gateway-runtime-netty io.github.sfali23%grpc-rest-gateway-runtime-pekko",
     "config":{
       "projects":{
@@ -52201,46 +52283,6 @@
         ]
       },
       "tests":"compile-only",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "t83714/elastic4s":{
-    "project":"t83714/elastic4s",
-    "repoUrl":"https://github.com/t83714/elastic4s.git",
-    "revision":"v8.11.6",
-    "version":"8.11.6",
-    "targets":"io.github.t83714%elastic4s-client-core io.github.t83714%elastic4s-client-esjava io.github.t83714%elastic4s-client-pekko io.github.t83714%elastic4s-client-sniffed io.github.t83714%elastic4s-client-sttp io.github.t83714%elastic4s-core io.github.t83714%elastic4s-domain io.github.t83714%elastic4s-effect-cats io.github.t83714%elastic4s-effect-cats-2 io.github.t83714%elastic4s-effect-monix io.github.t83714%elastic4s-effect-zio io.github.t83714%elastic4s-effect-zio-1 io.github.t83714%elastic4s-handlers io.github.t83714%elastic4s-http-streams io.github.t83714%elastic4s-json-builder io.github.t83714%elastic4s-json-circe io.github.t83714%elastic4s-json-jackson io.github.t83714%elastic4s-json-json4s io.github.t83714%elastic4s-json-play io.github.t83714%elastic4s-json-zio io.github.t83714%elastic4s-streams-akka io.github.t83714%elastic4s-streams-pekko io.github.t83714%elastic4s-testkit",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
       "migrationVersions":[
         
       ],
@@ -63026,8 +63068,8 @@
   "zio/zio-json":{
     "project":"zio/zio-json",
     "repoUrl":"https://github.com/zio/zio-json.git",
-    "revision":"v0.7.26",
-    "version":"0.7.26",
+    "revision":"v0.7.31",
+    "version":"0.7.31",
     "targets":"dev.zio%zio-json dev.zio%zio-json-golden dev.zio%zio-json-interop-http4s dev.zio%zio-json-interop-refined dev.zio%zio-json-yaml",
     "config":{
       "projects":{
@@ -63156,8 +63198,8 @@
   "zio/zio-logging":{
     "project":"zio/zio-logging",
     "repoUrl":"https://github.com/zio/zio-logging.git",
-    "revision":"v2.4.0",
-    "version":"2.4.0",
+    "revision":"v2.5.0",
+    "version":"2.5.0",
     "targets":"dev.zio%zio-logging dev.zio%zio-logging-docs dev.zio%zio-logging-jpl dev.zio%zio-logging-jul-bridge dev.zio%zio-logging-slf4j dev.zio%zio-logging-slf4j-bridge dev.zio%zio-logging-slf4j2 dev.zio%zio-logging-slf4j2-bridge",
     "config":{
       "projects":{
@@ -63514,8 +63556,8 @@
   "zio/zio-redis":{
     "project":"zio/zio-redis",
     "repoUrl":"https://github.com/zio/zio-redis.git",
-    "revision":"v1.0.1",
-    "version":"1.0.1",
+    "revision":"v1.1.0",
+    "version":"1.1.0",
     "targets":"dev.zio%zio-redis dev.zio%zio-redis-embedded",
     "config":{
       "projects":{
