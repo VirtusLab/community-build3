@@ -233,7 +233,7 @@ object ValidationScript:
       |scalaVersion=$$(sbt "print ${scala3CompilerProject}/version" | grep . | tail -n 2 | head -n 1)
       |echo "ScalaVersion=$${scalaVersion}"
       |rm -r out
-      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish"
+      |sbt "clean; set every sonatypePublishToBundle := Some(\"CommunityBuildRepo\" at \"$mavenRepo\"); ${scala3Project}/publish" > build.compiler.log
       |${validationCommandStatusModifier}${validationScript.getAbsolutePath} "$$scalaVersion"
       """.stripMargin)
   }
