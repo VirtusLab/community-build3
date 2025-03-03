@@ -173,7 +173,6 @@ object ValidationScript:
     |  jq -c -r "$$path" $$ConfigFile
     |}
     |
-    |
     |git config --global --get user.name > /dev/null || git config --global user.name "Scala 3 Open Community Build"
     |git config --global --get user.email > /dev/null || git config --global user.email "scala3-community-build@virtuslab.com"
     |
