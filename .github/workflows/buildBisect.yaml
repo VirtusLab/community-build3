@@ -64,14 +64,11 @@ jobs:
         with:
           jvm: 8
           
-      - name: Setup git config
-        run: |
-          git config --global user.name "Scala 3 Open Community Build"
-          git config --global user.email "scala3-community-build@virtuslab.com"
-
       - name: "Bisect project"
         shell: bash
         run: |
+          git config --global user.name "Scala 3 Open Community Build"
+          git config --global user.email "scala3-community-build@virtuslab.com"
           cd ${{ github.workspace }}/compiler
           scala-cli ${{ github.workspace }}/opencb/scripts/bisect.scala -- \
             --project-name=${{ inputs.project-name }} \
