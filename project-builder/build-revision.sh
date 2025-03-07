@@ -119,7 +119,7 @@ function setupScalacOptions(){
   extraScalacOptions="$commonAppendScalacOptions"
   disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
   if [[ $isMigrating == true ]]; then
-    extraScalacOptions="-rewrite,$extraScalacOptions"
+    extraScalacOptions="-rewrite"
     disabledScalacOptions="-indent,-no-indent,-new-syntax,$disabledScalacOptions"
   else 
     # Apply extraScalacOptions passed as input only when compiling with target Scala version
