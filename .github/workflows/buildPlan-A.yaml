@@ -394,6 +394,7 @@ jobs:
         - name: "gemini-hlsw/clue"
         - name: "gemini-hlsw/crystal"
         - name: "gemini-hlsw/lucuma-core"
+        - name: "gemini-hlsw/lucuma-odb"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-sso"
         - name: "getkyo/kyo"
@@ -496,6 +497,7 @@ jobs:
         - name: "jczuchnowski/zio-pulsar"
         - name: "jd557/interim"
         - name: "jd557/qrgen"
+        - name: "jd557/spaeti"
         - name: "jelly-rdf/jelly-jvm"
         - name: "jilen/play-circe"
         - name: "joan38/kubernetes-client"
@@ -608,8 +610,6 @@ jobs:
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
-        - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/cfor"
+        - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
@@ -695,7 +697,6 @@ jobs:
         - name: "outr/media4s"
         - name: "outr/perfolation"
         - name: "outr/profig"
-        - name: "outr/scalapass"
         - name: "outr/scarango"
         - name: "outr/scribe"
         - name: "outr/spice"
@@ -708,7 +709,6 @@ jobs:
         - name: "pathikrit/better-files"
         - name: "permutive-engineering/fs2-pubsub"
         - name: "permutive-engineering/prometheus4cats"
-        - name: "petitviolet/scala-operator"
         - name: "phaller/spores3"
         - name: "phenoscape/scowl"
         - name: "philippus/between"

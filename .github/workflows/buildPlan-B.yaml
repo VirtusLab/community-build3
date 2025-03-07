@@ -1,5 +1,5 @@
 
-# projects total:     715
+# projects total:     716
 # min stars count:    -1
 # max projects count: 1000
 
@@ -228,8 +228,10 @@ jobs:
         - name: "dwolla/scala-secure-config"
         - name: "eb2501/fluor-core"
         - name: "eikek/binny"
+        - name: "eikek/borer-compats"
         - name: "eikek/htmx4s"
         - name: "eikek/soidc"
+        - name: "eikek/tus4s"
         - name: "eltherion/http4s-timer"
         - name: "endpoints4s/play"
         - name: "enriquerodbe/borsh4s"
@@ -267,7 +269,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
-        - name: "gemini-hlsw/lucuma-odb"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "gnp/ident"
@@ -329,7 +330,6 @@ jobs:
         - name: "indoorvivants/mdoc-effect"
         - name: "indoorvivants/opaque-newtypes"
         - name: "indoorvivants/rendition"
-        - name: "indoorvivants/sn-demangler"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "indoorvivants/sn-demangler"
         - name: "indoorvivants/subatomic"
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
@@ -377,7 +378,6 @@ jobs:
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
         - name: "jd557/rokrok"
-        - name: "jd557/spaeti"
         - name: "jkobejs/cron"
         - name: "jkugiya/aws-v4-signer-scala"
         - name: "jkugiya/ulid-scala"
@@ -554,7 +554,7 @@ jobs:
         - name: "outr/dd-scala"
         - name: "outr/moduload"
         - name: "outr/rapid"
-        - name: "outr/robobrowser"
+        - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
         - name: "ovotech/meters4s"
         - name: "pablf/teseo"
@@ -568,6 +568,7 @@ jobs:
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
         - name: "permutive-engineering/refreshable"
+        - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
         - name: "philippus/julius"
         - name: "philippus/osita"
@@ -609,7 +610,6 @@ jobs:
         - name: "pschichtel/obd4s"
         - name: "psilicon/avro2s"
         - name: "pureharm/pureharm-config-ciris"
-        - name: "pureharm/pureharm-core"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pureharm/pureharm-core"
         - name: "pureharm/pureharm-db-core-jdbc"
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
