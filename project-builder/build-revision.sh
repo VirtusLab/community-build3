@@ -80,7 +80,7 @@ function detectSourceVersion() {
       else
         sourceVersionSetting="-source:$scalaBinaryVersion"
       fi
-      echo "Explicit source version is great then used Scala version, it would be ignored"
+      echo "Explicit source version is greater then used Scala version, it would be ignored"
     else 
       echo "Using configured source version: $sourceVersion"
       sourceVersionSetting="REQUIRE:-source:$sourceVersion"
@@ -119,7 +119,7 @@ function setupScalacOptions(){
   extraScalacOptions="$commonAppendScalacOptions"
   disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
   if [[ $isMigrating == true ]]; then
-    extraScalacOptions="-rewrite"
+    extraScalacOptions="-rewrite,$extraScalacOptions"
     disabledScalacOptions="-indent,-no-indent,-new-syntax,$disabledScalacOptions"
   else 
     # Apply extraScalacOptions passed as input only when compiling with target Scala version
