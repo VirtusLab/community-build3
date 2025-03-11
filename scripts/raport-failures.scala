@@ -109,7 +109,7 @@ object warnings:
     all
     .find(_.matches(messageNormalized))
     .orElse:
-      // println("\n" + messageNormalized + "\n")
+      System.err.println("Uncategorized warning: " + message)
       None
 
   lazy val all = List(
@@ -166,13 +166,18 @@ object warnings:
     Category("Promoting the value to transitively initialized (Hot) failed due to the following problem:"),
     Category("Unset local variable"),
     // migration warningss
-    Category("Result of implicit search for .* will change"),
+    Category("Result of implicit search for .* change"),
+    Category("Given search preference for .* between alternatives .* change"),
+    Category("Overloading resolution for arguments .* between alternatives .*change"),
     Category("Context bounds will map to context parameters"),
     Category("According to new variance rules, this is no longer accepted; need to annotate with @uncheckedVariance"),
     Category("The conversion .* will not be applied implicitly here in Scala 3 because only implicit methods and instances of Conversion class will continue to work as implicit views"),
     Category("Type ascriptions after patterns other than:.* are no longer supported"),
     Category(".* in package .* has changed semantics in version"),
     Category("@SerialVersionUID does nothing on a trait"),
+    Category("Implicit parameters should be provided with a `using` clause"),
+    // Scaladoc
+    Category("Couldn't resolve a member for the given link query"),
     // project specific
     Category("Found a problem with your DI wiring", Some("7mind/izumi specific")) ,
     Category("Pathological intersection refinement result in lambda being reconstructed ", Some("7mind/izumi specific")),
@@ -185,6 +190,7 @@ object warnings:
     Category("cannot handle class .*: no case accessor", Some("anorm specific")),
     Category("The entry .* must be defined in the enum companion", Some("enumeratun specific")),
     Category("defaulting to foreach, can not optimise range expression", Some("metarank/ltrlib specific")),
+    Category("A non-inlined expression .* is forcing the query to become dynamic", Some("doobie specific"))
   )
 def warningsFilter(warning: Warning): Boolean = warning match {
   case Warning.CompilationWarning(code, kind, sourceFile, line, column, message, source, explained) => 
