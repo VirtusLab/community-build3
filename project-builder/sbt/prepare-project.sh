@@ -28,6 +28,13 @@ if [ ! -f "${buildPropsFile}" ]; then
   echo "sbt.version=${MinSbtVersion}" >$buildPropsFile
 fi
 
+pluginsFile="${repoDir}/project/plugins.sbt"
+scalafixConf="${repoDir}/.scalafix.conf"
+if [[ -f "${scalafixConf}" || `grep 'scalafix' $pluginsFile` ]]; then 
+  # Force minimal scalafix version (to handle Scala 3 nightly version parsing)
+  echo -e '\naddSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.2")' >> $pluginsFile
+fi
+
 sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version | awk -F= '{ print $2 }')
 
 function parseSemver() {
