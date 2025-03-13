@@ -1,5 +1,5 @@
 
-# projects total:     716
+# projects total:     720
 # min stars count:    -1
 # max projects count: 1000
 
@@ -164,6 +164,7 @@ jobs:
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
         - name: "christian-schlichtherle/circe-kafka"
+        - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
         - name: "clevercloud/testcontainers-scala-warp10"
         - name: "clevercloud/warp10-scala-client"
@@ -226,6 +227,7 @@ jobs:
         - name: "dwolla/natchez-smithy4s"
         - name: "dwolla/natchez-tagless"
         - name: "dwolla/scala-secure-config"
+        - name: "earogov/ordset"
         - name: "eb2501/fluor-core"
         - name: "eikek/binny"
         - name: "eikek/borer-compats"
@@ -287,6 +289,7 @@ jobs:
         - name: "guardian/identity-test-users"
         - name: "guardian/mobile-apps-api-models"
         - name: "guardian/pa-football-client"
+        - name: "guardian/panda-hmac"
         - name: "guardian/redirect-resolver"
         - name: "guidoschmidt17/zio-pgcopy"
         - name: "guizmaii-opensource/zio-aes"
@@ -327,9 +330,6 @@ jobs:
         - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
         - name: "indoorvivants/mdoc-effect"
-        - name: "indoorvivants/opaque-newtypes"
-        - name: "indoorvivants/rendition"
-        - name: "indoorvivants/sn-demangler"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "indoorvivants/opaque-newtypes"
+        - name: "indoorvivants/rendition"
+        - name: "indoorvivants/sn-demangler"
         - name: "indoorvivants/subatomic"
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
@@ -409,6 +412,7 @@ jobs:
         - name: "jwojnowski/scuid"
         - name: "jypma/lazagna"
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
+        - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
         - name: "kalin-rudnicki/oxygen"
@@ -606,10 +610,6 @@ jobs:
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
-        - name: "pschichtel/obd4s"
-        - name: "psilicon/avro2s"
-        - name: "pureharm/pureharm-config-ciris"
-        - name: "pureharm/pureharm-core"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pschichtel/obd4s"
+        - name: "psilicon/avro2s"
+        - name: "pureharm/pureharm-config-ciris"
+        - name: "pureharm/pureharm-core"
         - name: "pureharm/pureharm-db-core-jdbc"
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
@@ -648,7 +652,6 @@ jobs:
         - name: "ranyitz/casing"
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
-        - name: "rcardin/yaes"
         - name: "rolang/google-rest-api-codegen"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
@@ -710,6 +713,7 @@ jobs:
         - name: "sciss/scalacollider-if"
         - name: "sciss/transform4s"
         - name: "scoquelin/arugula"
+        - name: "scorexfoundation/debox"
         - name: "sdrafahl/codec"
         - name: "sean-ideabank/rudolf"
         - name: "sfali/grpc-rest-gateway"
