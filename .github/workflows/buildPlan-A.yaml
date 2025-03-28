@@ -159,6 +159,7 @@ jobs:
         - name: "benhutchison/scalaswingcontrib"
         - name: "bilal-fazlani/zio-maelstrom"
         - name: "bilal-fazlani/zio-ulid"
+        - name: "billzabob/fordeckmacia"
         - name: "bishabosha/enhanced-string-interpolator"
         - name: "bishabosha/enum-extensions"
         - name: "bishabosha/ops-mirror"
@@ -329,7 +330,6 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
@@ -609,7 +610,6 @@ jobs:
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
-        - name: "metarank/cfor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
@@ -889,7 +890,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1116,7 +1117,6 @@ jobs:
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
         - name: "zio-archive/zio-nio"
-        - name: "zio-archive/zio-openai"
         - name: "zio-archive/zio-optics"
         - name: "zio-archive/zio-sql"
         - name: "zio-archive/zio-test-intellij"
