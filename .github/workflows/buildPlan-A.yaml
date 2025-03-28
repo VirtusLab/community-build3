@@ -102,6 +102,7 @@ jobs:
         - name: "aliics/mouse"
         - name: "almond-sh/almond"
         - name: "alonsodomin/cron4s"
+        - name: "alstanchev/pekko-persistence-inmemory"
         - name: "altoo-ag/akka-kryo-serialization"
         - name: "altoo-ag/pekko-kryo-serialization"
         - name: "altoo-ag/scala-kryo-serialization"
@@ -316,8 +317,6 @@ jobs:
         - name: "etorreborre/specs2"
         - name: "etspaceman/kinesis4cats"
         - name: "etspaceman/scalacheck-faker"
-        - name: "eventstore/eventstore.akka.persistence"
-        - name: "eventstore/eventstore.jvm"
         - name: "evolution-gaming/derivation"
         - name: "evolution-gaming/scache"
         - name: "fabiopinheiro/scala-did"
@@ -330,6 +329,7 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
@@ -558,6 +557,8 @@ jobs:
         - name: "kubukoz/smithy-playground"
         - name: "kubukoz/spotify-next"
         - name: "kuceramartin/tyqu"
+        - name: "kurrent-io/eventstore.akka.persistence"
+        - name: "kurrent-io/eventstore.jvm"
         - name: "lambdaworks/scountries"
         - name: "lambdaworks/scurl-detector"
         - name: "lambdaworks/zio-elasticsearch"
@@ -609,7 +610,6 @@ jobs:
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
@@ -823,7 +824,6 @@ jobs:
         - name: "scala/scala-xml"
         - name: "scalabin-no/http4s-directives"
         - name: "scalacenter/course-management-tools"
-        - name: "scalacenter/scala-debug-adapter"
         - name: "scalacenter/scalafix"
         - name: "scalacenter/simple-rockets-compiler"
         - name: "scalacenter/tasty-mima"
