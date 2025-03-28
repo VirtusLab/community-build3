@@ -221,7 +221,6 @@ jobs:
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
         - name: "dragonfly-ai/mesh"
-        - name: "durban/scalacheck"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
         - name: "dwolla/http4s-consul-middleware"
@@ -272,7 +271,6 @@ jobs:
         - name: "gchudnov/swearwolf"
         - name: "geirolz/git4s"
         - name: "gemini-hlsw/giapi-scala"
-        - name: "gemini-hlsw/lucuma-catalog"
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
@@ -330,6 +328,8 @@ jobs:
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
         - name: "hughsimpson/scalameter"
+        - name: "ij-plugins/ijp-javacv"
+        - name: "ij-plugins/ijp-scala-console"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,8 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "ij-plugins/ijp-javacv"
-        - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/detective"
         - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
@@ -522,6 +520,7 @@ jobs:
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
         - name: "mobimeo/fs2-gtfs"
+        - name: "mongocamp/micrometer-mongodb"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
         - name: "mrdimosthenis/glicko2"
@@ -610,6 +609,7 @@ jobs:
         - name: "polystat/polystat-cli"
         - name: "polyvariant/caliban-gitlab"
         - name: "polyvariant/respectfully"
+        - name: "polyvariant/scodec-java-classfile"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/treesitter4s"
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
@@ -777,6 +776,7 @@ jobs:
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
+        - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
