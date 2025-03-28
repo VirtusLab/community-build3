@@ -905,7 +905,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         
       ],
@@ -1014,7 +1014,7 @@
       },
       "sbt":{
         "commands":[
-          "disableFatalWarnings"
+          "set every targetSystemJdk := true"
         ],
         "options":[
           
@@ -2611,7 +2611,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set every targetSystemJdk := true"
         ],
         "options":[
           
@@ -4603,9 +4603,8 @@
         ]
       },
       "tests":"full",
-      "sourceVersion":"3.0-migration",
       "migrationVersions":[
-        "3.4.2"
+        
       ],
       "sourcePatches":[
         
@@ -32743,7 +32742,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         
       ],
@@ -34309,46 +34308,6 @@
         "commands":[
           "excludeLibraryDependency org.wartremover:wartremover_{scalaVersion}",
           "removeScalacOptionsStartingWith -P:wartremover"
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "mercurievv/minuscles":{
-    "project":"mercurievv/minuscles",
-    "repoUrl":"https://github.com/mercurievv/minuscles.git",
-    "revision":"v0.1.1",
-    "version":"0.1.1",
-    "targets":"io.github.mercurievv.minuscles%conversions io.github.mercurievv.minuscles%tuples_plens",
-    "config":{
-      "projects":{
-        "exclude":[
-          "io.github.mercurievv.minuscles%conversions"
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
         ],
         "options":[
           
@@ -48378,7 +48337,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         "3.4.2"
       ],
@@ -50372,13 +50331,6 @@
     "revision":"",
     "version":"2.0.5",
     "targets":"de.halcony%scala-argparse"
-  },
-  "simkoc/scala-processes":{
-    "project":"simkoc/scala-processes",
-    "repoUrl":"https://github.com/simkoc/scala-processes.git",
-    "revision":"",
-    "version":"1.0.7",
-    "targets":"de.halcony%scala-processes"
   },
   "simy4/coregex":{
     "project":"simy4/coregex",
@@ -53486,16 +53438,6 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"module/ldbc-schema/src/main/scala/ldbc/schema/TableQuery.scala",
-          "pattern":".asExprOf[T]",
-          "replaceWith":".asExprOf[AbstractTable[AbstractTableQuery.Extract[T]]]"
-        },
-        {
-          "path":"module/ldbc-schema/src/main/scala/ldbc/schema/TableQuery.scala",
-          "pattern":"'{ apply[AbstractTableQuery.Extract[T], T]($table) }",
-          "replaceWith":"'{ apply($table).asInstanceOf[AbstractTableQuery[T, Table.Opt[AbstractTableQuery.Extract[T]]]] }"
-        },
         {
           "path":"project/Versions.scala",
           "pattern":"val scala3  = \"3.3.5\"",
@@ -58768,7 +58710,7 @@
           
         ]
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         "3.4.2"
       ],
@@ -62843,50 +62785,6 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "zio-archive/zio-openai":{
-    "project":"zio-archive/zio-openai",
-    "repoUrl":"https://github.com/zio-archive/zio-openai.git",
-    "revision":"v0.4.1",
-    "version":"0.4.1",
-    "targets":"dev.zio%zio-openai",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"project/BuildHelper.scala",
-          "pattern":"val ScalaDotty: String = versions(\"3.3\")",
-          "replaceWith":"val ScalaDotty: String = \"<SCALA_VERSION>\""
         }
       ]
     }
