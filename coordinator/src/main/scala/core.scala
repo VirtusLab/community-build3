@@ -120,21 +120,37 @@ case class SemVersion(
     major: Int,
     minor: Int,
     patch: Int,
-    milestone: Option[String]
-)
-given Conversion[String, SemVersion] = version =>
-  // There are multiple projects that don't follow standarnd naming convention, especially in snpashots
-  // becouse of that it needs to be more flexible, e.g to handle: x.y-z-<hash>, x.y, x.y-milestone
-  val parts = version.split('.').flatMap(_.split('-')).filter(_.nonEmpty)
-  val versionNums = parts.take(3).takeWhile(_.forall(_.isDigit))
-  def versionPart(idx: Int) =
-    versionNums.lift(idx).flatMap(_.toIntOption).getOrElse(0)
-  val milestone = Some(parts.drop(versionNums.size))
-    .filter(_.nonEmpty)
-    .map(_.mkString("-"))
-  SemVersion(
-    major = versionPart(0),
-    minor = versionPart(1),
-    patch = versionPart(2),
-    milestone = milestone
-  )
+    milestone: Option[String] = None
+) extends Ordered[SemVersion] {
+  override def compare(that: SemVersion): Int = {
+    that match
+      case SemVersion(`major`, `minor`, `patch`, milestone) =>
+        def parseMilestone(v: Option[String]): Int = v.fold(0){
+          _.filter(_.isDigit).toIntOption.getOrElse(Int.MaxValue)
+        }
+        parseMilestone(this.milestone).compareTo(parseMilestone(milestone))
+      case SemVersion(`major`, `minor`, patch, _) =>  this.patch.compareTo(patch)
+      case SemVersion(`major`, minor, _, _) =>  this.minor.compareTo(minor)
+      case SemVersion(major, _, _, _) =>  this.major.compareTo(major)
+  }
+}
+object SemVersion {
+  def unsafe(version: String): SemVersion = SemVersion.unapply(version).get
+  def unapply(version: String): Option[SemVersion] = util.Try {
+    // There are multiple projects that don't follow standarnd naming convention, especially in snpashots
+    // becouse of that it needs to be more flexible, e.g to handle: x.y-z-<hash>, x.y, x.y-milestone
+    val parts = version.split('.').flatMap(_.split('-')).filter(_.nonEmpty)
+    val versionNums = parts.take(3).takeWhile(_.forall(_.isDigit))
+    def versionPart(idx: Int) =
+      versionNums.lift(idx).flatMap(_.toIntOption).getOrElse(0)
+    val milestone = Some(parts.drop(versionNums.size))
+      .filter(_.nonEmpty)
+      .map(_.mkString("-"))
+    SemVersion(
+      major = versionPart(0),
+      minor = versionPart(1),
+      patch = versionPart(2),
+      milestone = milestone
+    )
+  }.toOption
+}

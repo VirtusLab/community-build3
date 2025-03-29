@@ -283,20 +283,40 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
           case _ => None
         }
     }
-    def scala3VersionDefs =
-      commonBuildFiles(projectDir).flatMap { file =>
-        import Scala3VersionDef.Replecement
-        tryReadLines(file).collect { case Scala3VersionDef(toMatch, replecement) =>
-          SourcePatch(
-            path = file.relativeTo(projectDir).toString,
-            pattern = toMatch,
-            replaceWith = replecement
-          )
-        }
+    object SemVerRef:
+      def unapply(v: String): Option[SemVersion] = SemVersion.unapply(v)
+    object AddSbtPluginRef:
+      def unapply(v: String): Option[AddSbtPlugin] = AddSbtPlugin.unapply(v)
+
+    commonBuildFiles(projectDir).flatMap { file =>
+      def patch(pattern: String, replacement: String) = SourcePatch(
+        path = file.relativeTo(projectDir).toString,
+        pattern = pattern,
+        replaceWith = replacement
+      )
+      import Scala3VersionDef.Replecement
+      tryReadLines(file).collect {
+        case Scala3VersionDef(toMatch, replecement) =>
+          patch(pattern = toMatch, replacement = replecement)
+
+        case line @ AddSbtPluginRef(
+              defn @ AddSbtPlugin("org.typelevel", "sbt-typelevel-settings", SemVerRef(version))
+            ) if version < SemVersion.unsafe("0.7.7") =>
+          patch(line, defn.copy(version = "0.7.7").show)
       }
-    end scala3VersionDefs
-    scala3VersionDefs
+    }
   end discoverSourcePatches
+
+  case class AddSbtPlugin(org: String, name: String, version: String) {
+    def show = s"""addSbtPlugin("$org" % "$name" % "$version")"""
+  }
+  object AddSbtPlugin {
+    def unapply(v: String): Option[AddSbtPlugin] = v.trim() match {
+      case s"""addSbtPlugin("$org"${_}%${_}"$name"${_}%${_}"$version")""" =>
+        Some(AddSbtPlugin(org, name, version))
+      case _ => None
+    }
+  }
 
   private def tryReadLines(file: os.Path): Seq[String] = {
     try os.read.lines(file).toSeq
