@@ -1,16 +1,8 @@
-import org.jsoup._
-import scala.jdk.CollectionConverters._
-import java.nio.file._
-import java.net.URL
-import scala.sys.process._
 import scala.util.CommandLineParser.FromString
 import scala.util.Try
 
 import scala.concurrent.*
 import scala.concurrent.duration.*
-import scala.concurrent.ExecutionContext
-import java.util.concurrent.ForkJoinPool
-import os.write
 import scala.collection.mutable
 import scala.collection.SortedMap
 import os.CommandResult
@@ -242,7 +234,7 @@ def makeDependenciesBasedBuildPlan(
   depGraph: DependencyGraph,
   cutOffDate: Option[LocalDate]
 )(using confFiles: ConfigFiles): AsyncResponse[Array[ProjectBuildDef]] =
-  val (topLevelData, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
+  val (_, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
   val configDiscovery =
     ProjectConfigDiscovery(confFiles.projectsConfig.toIO, confFiles.requiredConfigs)
 

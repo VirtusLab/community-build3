@@ -1,6 +1,5 @@
 import org.json4s._
 import org.json4s.native.Serialization
-import org.json4s.ext.EnumSerializer
 import java.time.OffsetDateTime
 
 given Serialization = org.json4s.native.Serialization
@@ -16,7 +15,7 @@ object ProjectBuildDefSerializer
     })
 
 class ProjectSerializer
-    extends CustomSerializer[Project](format => {
+    extends CustomSerializer[Project](_ => {
       def deserialize: PartialFunction[JValue, Project] = { case JString(stringValue) =>
         Project.load(stringValue)
       }
@@ -27,7 +26,7 @@ class ProjectSerializer
     })
 
 class TestingModeEnumSerializer
-    extends CustomSerializer[TestingMode](format => {
+    extends CustomSerializer[TestingMode](_ => {
       val DisabledName = "disabled"
       val CompileOnlyName = "compile-only"
       val FullName = "full"
@@ -55,7 +54,7 @@ def fromJson[T: Manifest](json: String): T = Serialization.read(json)
 
 // Custom serializer in org.json4s.ext does not handle 2022-04-29T03:39:03Z
 class UTCOffsetDateTimeSerializer
-    extends CustomSerializer[OffsetDateTime](format => {
+    extends CustomSerializer[OffsetDateTime](_ => {
       def deserialize: PartialFunction[JValue, OffsetDateTime] = { case JString(value) =>
         OffsetDateTime.parse(value)
       }

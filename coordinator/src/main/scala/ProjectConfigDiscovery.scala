@@ -2,8 +2,6 @@ import com.typesafe.config.ConfigFactory
 import pureconfig._
 import pureconfig.error.*
 import java.io.FileNotFoundException
-import scala.util.Try
-import scala.annotation.tailrec
 import scala.util.chaining.*
 
 class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredConfigsPath: os.Path) {
@@ -205,7 +203,6 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
                 .stripPrefix("1.")
                 .split('.')
                 .headOption
-            case other => None
           }
           .flatMap(_.toIntOption)
       }
@@ -259,25 +256,25 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
           case idx => line.substring(0, idx)
         }
         uncommentedLine.trim match {
-          case StringVersionDefn(wholeDefn, definition, value) =>
+          case StringVersionDefn(wholeDefn, definition, _) =>
             Some(
               Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}")
             )
-          case VersionsSeqDefn(wholeDefn, definition, value, seqType) =>
+          case VersionsSeqDefn(wholeDefn, definition, _, seqType) =>
             Some(
               Replecement(
                 wholeDefn,
                 s"$definition = $seqType(${scalaVersionStringStub})"
               )
             )
-          case VersionsSeqCondDefn(wholeDefn, definition, value, seqType) =>
+          case VersionsSeqCondDefn(wholeDefn, definition, _, seqType) =>
             Some(
               Replecement(
                 wholeDefn,
                 s"$definition = $seqType(${scalaVersionStringStub})"
               )
             )
-          case BinVersionSelector(wholeDefn, definition, value) =>
+          case BinVersionSelector(wholeDefn, definition, _) =>
             Some(
               Replecement(wholeDefn, s"$definition = ${scalaVersionStringStub}")
             )
@@ -295,7 +292,6 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         pattern = pattern,
         replaceWith = replacement
       )
-      import Scala3VersionDef.Replecement
       tryReadLines(file).collect {
         case Scala3VersionDef(toMatch, replecement) =>
           patch(pattern = toMatch, replacement = replecement)

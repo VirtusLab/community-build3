@@ -1,4 +1,4 @@
-//> using scala "3.3"
+//> using scala "3.7.0-RC1"
 //> using jvm 17
 //> using dep "org.jsoup:jsoup:1.19.1"
 //> using dep "org.json4s::json4s-native:4.0.7"
@@ -8,3 +8,4 @@
 //> using toolkit 0.7.0
 
 //> using resourceDir "../resources"
+//> using options -Wunused:all -deprecation

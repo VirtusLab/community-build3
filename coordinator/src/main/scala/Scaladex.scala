@@ -1,9 +1,6 @@
-import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit.SECONDS
 import scala.concurrent.*
 import scala.concurrent.duration.*
-import java.io.IOException
-import java.time.Instant
 import java.time.LocalDate
 import sttp.client4.*
 import sttp.model.Uri
@@ -13,7 +10,7 @@ import scala.annotation.nowarn
 object Scaladex:
   final val ScaladexUrl = uri"https://index.scala-lang.org"
 
-class Scaladex(using ExecutionContext):
+class Scaladex:
   import Scaladex.*
 
   private val backend = DefaultSyncBackend(BackendOptions.Default.connectionTimeout(1.minute))

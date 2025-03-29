@@ -1,10 +1,7 @@
 import org.jsoup._
 import scala.jdk.CollectionConverters._
-import java.nio.file._
-import scala.sys.process._
 import scala.concurrent.*
-import scala.concurrent.duration.*
-import java.time.{OffsetDateTime, LocalDate}
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit.SECONDS
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -60,7 +57,6 @@ case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
 )(using scaladex: Scaladex): AsyncResponse[ProjectModules] = {
-  import util.*
   for {
     scala3JvmArtifacts <- scaladex
       .artifacts(project)
@@ -117,7 +113,6 @@ def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
       groupId <- dep.select("groupId").asScala
       artifactId <- dep.select("artifactId").asScala
       version <- dep.select("version").asScala
-      scope = dep.select("scope").asScala.headOption.fold("compile")(_.text())
     yield Dep(TargetId(groupId.text, artifactId.text), version.text)
 
   Target(TargetId(o, n), deps.toSeq)
@@ -151,8 +146,8 @@ def loadMavenInfo(scalaBinaryVersion: String)(
         Some(target)
       })
         .recoverWith {
-          case ex: UnknownHostException   => backoff("service not found")
-          case ex: SocketTimeoutException => backoff("socket timeout exception")
+          case _: UnknownHostException   => backoff("service not found")
+          case _: SocketTimeoutException => backoff("socket timeout exception")
           case ex: HttpStatusException if ex.getStatusCode == 503 =>
             backoff("service unavailable")
           case ex: java.net.ConnectException if ex.getMessage().contains("Operation timed out") =>

@@ -1,12 +1,7 @@
-import org.jsoup._
-import scala.jdk.CollectionConverters._
-import java.nio.file._
 import pureconfig._
 import pureconfig.generic.derivation.EnumConfigReader
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import org.json4s.FieldSerializer
-import upickle.default.*
 
 type AsyncResponse[T] = ExecutionContext ?=> Future[T]
 
