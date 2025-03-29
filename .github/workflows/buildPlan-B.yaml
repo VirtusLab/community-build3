@@ -1,5 +1,5 @@
 
-# projects total:     725
+# projects total:     726
 # min stars count:    -1
 # max projects count: 1000
 
@@ -151,6 +151,7 @@ jobs:
         - name: "bilal-fazlani/scala-aql"
         - name: "bilal-fazlani/swiftbar4s"
         - name: "bilal-fazlani/zio-mongo"
+        - name: "billzabob/fordeckmacia"
         - name: "bitlap/validation-scala"
         - name: "bitlap/zio-pekko"
         - name: "bitmarck-service/base32check-scala"
@@ -329,7 +330,6 @@ jobs:
         - name: "hughsimpson/scalameter"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
-        - name: "indoorvivants/detective"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "indoorvivants/detective"
         - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
         - name: "indoorvivants/mdoc-effect"
@@ -609,7 +610,6 @@ jobs:
         - name: "polyvariant/respectfully"
         - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/treesitter4s"
-        - name: "pomadchin/tagless-mid"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
         - name: "pschichtel/obd4s"

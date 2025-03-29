@@ -159,7 +159,6 @@ jobs:
         - name: "benhutchison/scalaswingcontrib"
         - name: "bilal-fazlani/zio-maelstrom"
         - name: "bilal-fazlani/zio-ulid"
-        - name: "billzabob/fordeckmacia"
         - name: "bishabosha/enhanced-string-interpolator"
         - name: "bishabosha/enum-extensions"
         - name: "bishabosha/ops-mirror"
@@ -330,6 +329,7 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
@@ -610,6 +609,7 @@ jobs:
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
+        - name: "metarank/cfor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
@@ -825,6 +824,7 @@ jobs:
         - name: "scala/scala-xml"
         - name: "scalabin-no/http4s-directives"
         - name: "scalacenter/course-management-tools"
+        - name: "scalacenter/scala-debug-adapter"
         - name: "scalacenter/scalafix"
         - name: "scalacenter/simple-rockets-compiler"
         - name: "scalacenter/tasty-mima"
