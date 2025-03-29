@@ -308,7 +308,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
             pattern = "libraryDependencies :=", 
             replacement = "libraryDependencies ++= "
           )
-      }
+      }.distinct
     }
   end discoverSourcePatches
 
