@@ -26,7 +26,7 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
         s"$ScaladexUrl/search?${commonSearchParams}&page=$page"
       )
       .get()
-    val batch = d.select(".list-result .row").asScala.flatMap { e =>
+    d.select(".list-result .row").asScala.flatMap { e =>
       e.select("h4").get(0).text().takeWhile(!_.isWhitespace) match {
         case s"${organization}/${repository}" =>
           for ghStars <- e
@@ -39,15 +39,12 @@ def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
         case _ => None
       }
     }.toSeq
-    println(page -> batch.size)
-    batch
   } catch{case err: SocketTimeoutException => 
     println(s"retry load projects, page=$page, err=$err")
     load(page)
   }
   LazyList
     .from(1) // page 0 and page 1 have the same content
-    .tapEach(println)
     .map(load)
     .takeWhile(_.nonEmpty)
     .flatten
