@@ -690,6 +690,11 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.6.4\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -734,6 +739,11 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.2.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -1224,6 +1234,11 @@
       ],
       "sourcePatches":[
         {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
+        {
           "path":"project/Dependencies.scala",
           "pattern":"val Scala3 = \"3.3.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
@@ -1403,6 +1418,11 @@
           "path":"project/Dependencies.scala",
           "pattern":"val Scala3 = \"3.2.2\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"project/Dependencies.scala",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -2127,7 +2147,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         
@@ -2693,9 +2713,19 @@
           "replaceWith":": @unchecked"
         },
         {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
+        {
           "path":"project/Dependencies.scala",
           "pattern":"val Scala3 = \"3.3.4\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"project/Dependencies.scala",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -2886,7 +2916,7 @@
         {
           "path":"build.sbt",
           "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++="
+          "replaceWith":"libraryDependencies ++= "
         },
         {
           "path":"project/Dependencies.scala",
@@ -3241,6 +3271,11 @@
         "3.4.2"
       ],
       "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
         {
           "path":"project/ScalaSettings.scala",
           "pattern":"def Scala3 = \"3.3.3\"",
@@ -7321,6 +7356,11 @@
           "path":"project/Boilerplate.scala",
           "pattern":"CodecTests[Cc$arity](Cc$arity.",
           "replaceWith":"CodecTests[Cc$arity](using Cc$arity."
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -14857,6 +14897,11 @@
           "path":"build.sbt",
           "pattern":"val scala3   = \"3.2.2\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -22245,6 +22290,11 @@
           "replaceWith":".decode"
         },
         {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
+        {
           "path":"project/Http4sPlugin.scala",
           "pattern":"val scala_3 = \"3.3.4\"",
           "replaceWith":"val scala_3 = \"<SCALA_VERSION>\""
@@ -27230,7 +27280,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -29225,7 +29279,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -29308,6 +29366,11 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
+        {
+          "path":"build.sbt",
           "pattern":"val Scala3Version = \"3.0.2\"",
           "replaceWith":"val Scala3Version = \"<SCALA_VERSION>\""
         }
@@ -29355,6 +29418,11 @@
           "path":"build.sbt",
           "pattern":"ThisBuild \\/ scalafixScalaBinaryVersion := \\{(\\n.*)+newVersion\\n\\}",
           "replaceWith":""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -29396,7 +29464,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -29437,7 +29509,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -29478,7 +29554,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -29519,7 +29599,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -29565,6 +29649,11 @@
           "path":"build.sbt",
           "pattern":"ThisBuild \\/ scalafixScalaBinaryVersion := \\{(\\n.*)+newVersion\\n\\}",
           "replaceWith":""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         },
         {
           "path":"build.sbt",
@@ -34840,7 +34929,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -35124,6 +35217,11 @@
           "path":".jvmopts",
           "pattern":"-XX:+CMSClassUnloadingEnabled",
           "replaceWith":""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -35635,6 +35733,11 @@
           "path":"build.sbt",
           "pattern":"def Scala3 = \"3.1.0\"",
           "replaceWith":"def Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -36853,6 +36956,11 @@
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.0.1\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -38652,7 +38760,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -41381,6 +41493,11 @@
           "path":"build.sbt",
           "pattern":"if (scalaVersion.value != \"3.*\")",
           "replaceWith":"if (scalaVersion.value != \"<SCALA_VERSION>\")"
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -42147,6 +42264,11 @@
         
       ],
       "sourcePatches":[
+        {
+          "path":"project/MainScalaVersionHack.scala",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3 = \"3.3.4\"",
@@ -43221,7 +43343,7 @@
         }
       },
       "java":{
-        
+        "version":"21"
       },
       "sbt":{
         "commands":[
@@ -47900,7 +48022,11 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -47944,6 +48070,11 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -47984,7 +48115,11 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -51275,6 +51410,11 @@
           "path":"build.sbt",
           "pattern":"val scala3 = List(\"3.3.3\")",
           "replaceWith":"val scala3 = List(\"<SCALA_VERSION>\")"
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -54447,6 +54587,11 @@
           "path":"build.sbt",
           "pattern":"val scala_3                = \"3.3.5\"",
           "replaceWith":"val scala_3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -55403,13 +55548,13 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++="
+          "pattern":"val scala3 = \"3.3.1\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         },
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.1\"",
-          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -55507,7 +55652,11 @@
     "config":{
       "projects":{
         "exclude":[
-          
+          "tofu-memo",
+          "tofu",
+          "tofu-derivation",
+          "tofu-env",
+          "tofu-concurrent-ce2"
         ],
         "overrides":{
           
@@ -55931,6 +56080,11 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -58175,6 +58329,11 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -59629,7 +59788,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -59753,7 +59916,11 @@
         "3.3.4"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        }
       ]
     }
   },
@@ -62474,50 +62641,6 @@
     "version":"0.2.5",
     "targets":"com.zhranklin%scala-tricks"
   },
-  "zio-archive/caliban-deriving":{
-    "project":"zio-archive/caliban-deriving",
-    "repoUrl":"https://github.com/zio-archive/caliban-deriving.git",
-    "revision":"v0.0.1",
-    "version":"0.0.1",
-    "targets":"dev.zio%caliban-deriving",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"project/BuildHelper.scala",
-          "pattern":"val ScalaDotty: String = versions(\"3.0\")",
-          "replaceWith":"val ScalaDotty: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "zio-archive/interop-guava":{
     "project":"zio-archive/interop-guava",
     "repoUrl":"https://github.com/zio-archive/interop-guava.git",
@@ -62686,6 +62809,11 @@
         
       ],
       "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"libraryDependencies :=",
+          "replaceWith":"libraryDependencies ++= "
+        },
         {
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
@@ -63737,6 +63865,11 @@
         },
         {
           "path":"zio-http/jvm/src/test/scala/zio/http/endpoint/RequestSpec.scala",
+          "pattern":") _\n",
+          "replaceWith":")\n"
+        },
+        {
+          "path":"zio-http/jvm/src/test/scala/zio/http/endpoint/HeaderSpec.scala",
           "pattern":") _\n",
           "replaceWith":")\n"
         },
