@@ -162,7 +162,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
           } =>
         ()
       case reason =>
-        System.err.println(
+        sys.error(
           s"Failed to decode community-build config in ${repoUrl}, reason: ${reason}"
         )
     }
