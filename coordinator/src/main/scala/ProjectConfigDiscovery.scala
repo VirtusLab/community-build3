@@ -303,6 +303,11 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
               defn @ AddSbtPlugin("org.typelevel", "sbt-typelevel-settings", SemVerRef(version))
             ) if version < SemVersion.unsafe("0.7.7") =>
           patch(line, defn.copy(version = "0.7.7").show)
+          
+        case s"${_}libraryDependencies :=${_}" =>   patch(
+            pattern = "libraryDependencies :=", 
+            replacement = "libraryDependencies ++= "
+          )
       }
     }
   end discoverSourcePatches
