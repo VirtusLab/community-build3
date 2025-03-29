@@ -23,6 +23,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
 
   lazy val projectMigrationVersions: Map[Project, List[String]] = loadRequiredProjectsLists(requiredConfigsPath / "migration")
     .groupMap(_._1)(_._2)
+    .view
     .mapValues:
       _.distinct
       .map: version =>
@@ -33,10 +34,10 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         // Ordering of List[Int] matches the semantic versioning if the vector of versions is normalized (all vectors have the same length)
         val longestSemVer = versions.map(_._2).map(_.length).max
         if longestSemVer == 3 then versions.toMap
-        else versions.toMap.mapValues(_.padTo(longestSemVer, 0)).toMap
+        else versions.toMap.view.mapValues(_.padTo(longestSemVer, 0)).toMap
       .pipe: normalizedVersions => 
         val normalizedToVersionString = normalizedVersions.map((k,v) => (v, k))
-        normalizedVersions.map(_._2).toList.sorted.map(normalizedToVersionString(_))
+        normalizedVersions.map(_._2).toList.map(normalizedToVersionString(_)).sorted
     .toMap
 
   lazy val projectTestsConfig: Map[Project, TestingMode] = loadRequiredProjectsLists(requiredConfigsPath / "tests")
