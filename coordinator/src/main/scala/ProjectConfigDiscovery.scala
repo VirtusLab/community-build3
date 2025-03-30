@@ -78,7 +78,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         } catch {
           case ex: Throwable =>
             Console.err.println(
-              s"Failed to resolve project config: ${ex.getMessage}"
+              s"Failed to resolve project config: ${ex}"
             )
             None
         } finally os.remove.all(projectDir)
@@ -203,6 +203,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
                 .stripPrefix("1.")
                 .split('.')
                 .headOption
+            case _ => None
           }
           .flatMap(_.toIntOption)
       }
