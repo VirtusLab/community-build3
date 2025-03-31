@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-source ./versions.sh
 
 if [ $# -ne 10 ]; then
   echo "Wrong number of script arguments, got $# expected 10"
@@ -28,8 +27,8 @@ disabledScalacOptions=${_disabledScalacOptions}
 executeTests=${_executeTests}
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-
 export OPENCB_SCRIPT_DIR=$scriptDir
+source $scriptDir/versions.sh
 
 $scriptDir/checkout.sh "$repoUrl" "$rev" repo
 buildToolFile="build-tool.txt"
