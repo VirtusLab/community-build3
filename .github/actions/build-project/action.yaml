@@ -75,40 +75,52 @@ runs:
       run: |
         ConfigFile=".github/workflows/buildConfig.json"
         URL="https://scala3.westeurope.cloudapp.azure.com/data/project-build-summary/_search"
+        source project-builder/versions.sh
+
+        scalaVersion="${{ inputs.scala-version }}"
 
         canSkip=false
-        if [[ -n "${{ inputs.extra-scalac-options }}" || -n "${{ inputs.disabled-scalac-options }}" ]]; then
-          echo "Using custom scalacOption, cannot skip"
-        else
-          projectName="${{ inputs.project-name }}"
-          scalaVersion="${{ inputs.scala-version }}"
-          projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
-            
-          # Elasticsearch query JSON
-          query='
-          {
-            "_source": ["projectName", "scalaVersion", "version", "status"],
-            "query": {
-              "bool": {
-                "must": [
-                  { "term": { "projectName": "'$projectName'" } },
-                  { "term": { "scalaVersion": "'"$scalaVersion"'" } },
-                  { "term": { "version": "'"$projectVersion"'" } }
-                ]
+        publishScalaVersion="$(jq -r ".\"${{ inputs.project-name }}\".publishedScalaVersion" $ConfigFile)"
+        if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThen "$publishScalaVersion" "$scalaVersion" ; then
+          echo "Can skip build: project published with $publishScalaVersion - cannot guarantee it would work with older Scala version $scalaVersion"
+          canSkip=true
+        else 
+          echo "No reason to skip becouse of Scala version: published with: $publishScalaVersion, building with $scalaVersion"
+        fi 
+        
+        if [[ "$canSkip" == false ]]; then
+          if [[ -n "${{ inputs.extra-scalac-options }}" || -n "${{ inputs.disabled-scalac-options }}" ]]; then
+            echo "Using custom scalacOption, cannot skip"
+          else
+            projectName="${{ inputs.project-name }}"
+            projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
+              
+            # Elasticsearch query JSON
+            query='
+            {
+              "_source": ["projectName", "scalaVersion", "version", "status"],
+              "query": {
+                "bool": {
+                  "must": [
+                    { "term": { "projectName": "'$projectName'" } },
+                    { "term": { "scalaVersion": "'"$scalaVersion"'" } },
+                    { "term": { "version": "'"$projectVersion"'" } }
+                  ]
+                }
               }
-            }
-          }'
+            }'
 
-          # Make the request to Elasticsearch
-          response=$(curl -s -u ${{ inputs.elastic-user }}:${{ inputs.elastic-password }} -XPOST -H "Content-Type: application/json" -d "$query" "$URL")
+            # Make the request to Elasticsearch
+            response=$(curl -s -u ${{ inputs.elastic-user }}:${{ inputs.elastic-password }} -XPOST -H "Content-Type: application/json" -d "$query" "$URL")
 
-          # Check if the request was successful
-          if [ "$(echo "$response" | jq -r '.error')" != "null" ]; then
-            echo "Error: Failed to fetch data from Elasticsearch."
-            echo "$response"
-          else 
-            echo "$response" | jq -r '.hits.hits'
-            canSkip=$(echo "$response" | jq -r 'any(.hits.hits[]; ._source.status == "success")')
+            # Check if the request was successful
+            if [ "$(echo "$response" | jq -r '.error')" != "null" ]; then
+              echo "Error: Failed to fetch data from Elasticsearch."
+              echo "$response"
+            else 
+              echo "$response" | jq -r '.hits.hits'
+              canSkip=$(echo "$response" | jq -r 'any(.hits.hits[]; ._source.status == "success")')
+            fi
           fi
         fi
         echo "Can skip build: $canSkip"

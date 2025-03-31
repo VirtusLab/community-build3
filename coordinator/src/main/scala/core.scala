@@ -76,6 +76,7 @@ case class ProjectBuildDef(
     revision: String,
     version: String,
     targets: String,
+    publishedScalaVersion: Option[String],
     config: Option[ProjectBuildConfig]
 )
 
@@ -116,6 +117,7 @@ case class SemVersion(
     patch: Int,
     milestone: Option[String] = None
 ) extends Ordered[SemVersion] {
+  def show = milestone.foldLeft(s"$major.$minor.$patch")(_ + "-" + _)
   override def compare(that: SemVersion): Int = {
     that match
       case SemVersion(`major`, `minor`, `patch`, milestone) =>

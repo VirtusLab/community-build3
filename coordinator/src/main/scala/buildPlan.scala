@@ -331,12 +331,16 @@ def makeDependenciesBasedBuildPlan(
             case dep          => projects.contains(dep)
           }
           .distinct
+        val publishedScalaVersion = fullInfo(project.p).targets.flatMap(_.deps).collect{
+          case Dep(TargetId("org.scala-lang", "scala3-library_3"), version) => SemVersion.unapply(version) 
+        }.flatten.maxOption
         ProjectBuildDef(
           project = project.p,
           dependencies = dependencies.toArray,
           repoUrl = repoUrl,
           revision = revision.map(_.stringValue).getOrElse(""),
           version = project.v,
+          publishedScalaVersion = publishedScalaVersion.map(_.show),
           targets = fullInfo(project.p).targets
             .map {
               case t @ Target.BuildAll => t.id.asMvnStr
