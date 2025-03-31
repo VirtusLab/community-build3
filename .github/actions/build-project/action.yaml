@@ -81,7 +81,7 @@ runs:
 
         canSkip=false
         publishScalaVersion="$(jq -r ".\"${{ inputs.project-name }}\".publishedScalaVersion" $ConfigFile)"
-        if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThen "$publishScalaVersion" "$scalaVersion" ; then
+        if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishScalaVersion" "$scalaVersion" ; then
           echo "Can skip build: project published with $publishScalaVersion - cannot guarantee it would work with older Scala version $scalaVersion"
           canSkip=true
         else 

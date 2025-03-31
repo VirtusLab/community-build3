@@ -49,7 +49,7 @@ function detectSourceVersion() {
 
   if [[ "$sourceVersion" =~ ^([0-9]+\.[0-9]+)(-migration)?$ ]]; then
     versionPart="${BASH_REMATCH[1]}"
-    if isBinVersionGreaterThen "$versionPart" "$scalaBinaryVersion" ; then
+    if isBinVersionGreaterThan "$versionPart" "$scalaBinaryVersion" ; then
       if [[ $isMigrating == true ]]; then
         sourceVersionSetting="-source:$scalaBinaryVersion-migration"
       else
@@ -198,7 +198,7 @@ fi
 for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
   migrationBinaryVersion=`echo $migrationScalaVersion | cut -d . -f 1,2`
-  if isBinVersionGreaterThen "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
+  if isBinVersionGreaterThan "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
     echo "Skip migration using $migrationScalaVersion, binary version higher then target Scala version $scalaBinaryVersion"
   else 
     isMigrating=true

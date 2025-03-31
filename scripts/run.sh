@@ -29,12 +29,12 @@ function config () {
 }
 DefaultConfig="{}"
 
+scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
+
 publishScalaVersion="$(config .publishedScalaVersion)"
-if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThen "$publishScalaVersion" "$scalaVersion" ; then
+if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishScalaVersion" "$scalaVersion" ; then
   echo "Warning: project published with Scala $publishScalaVersion - cannot guarantee it would work with older Scala version $scalaVersion"
 fi 
-
-scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
 # OPENCB_EXECUTE_TESTS=true \
 $scriptDir/../project-builder/build-revision.sh \
