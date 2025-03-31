@@ -8,6 +8,7 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+. $scriptDir/../project-builder/versions.sh
 
 projectName=$1
 scalaVersion=$2
@@ -27,6 +28,11 @@ function config () {
   jq -c -r "$path" $ConfigFile 
 }
 DefaultConfig="{}"
+
+publishScalaVersion="$(config .publishedScalaVersion)"
+if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThen "$publishScalaVersion" "$scalaVersion" ; then
+  echo "Warning: project published with Scala $publishScalaVersion - cannot guarantee it would work with older Scala version $scalaVersion"
+fi 
 
 scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
