@@ -164,7 +164,7 @@ runs:
           echo 'unknown' > build-tool.txt
 
           OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}" \
-            /build/build-revision.sh \
+            /opencb/project-builder/build-revision.sh \
             "$(config .project)" \
             "$(config .repoUrl)" \
             "$(config .revision)" \
@@ -250,7 +250,7 @@ runs:
           # Remove ASCII coloring from the indexed logs
           cat build-logs.txt | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" > build-logs-uncolored.txt 
 
-          /build/feed-elastic.sh \
+          /opencb/project-builder/feed-elastic.sh \
             'https://scala3.westeurope.cloudapp.azure.com/data' \
             "${{ inputs.project-name }}" \
             "$(cat build-status.txt)" \
