@@ -53,6 +53,18 @@ customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; 
 targetsString="${targets[@]}"
 logFile=build.log
 
+# Compiler plugins, cannot be cross-published before starting the build
+# Allways exclude these from library dependencies
+excludedCompilerPlugins=(
+  "com.github.ghik:zerowaste_{scalaVersion}"
+  "com.olegpy:better-monadic-for_3"
+  "org.polyvariant:better-tostring_{scalaVersion}"
+  "org.wartremover:wartremover_{scalaVersion}"
+)
+excludedCompilerPluginOptPrefixes=(
+  "-P:wartremover"
+)
+
 shouldRetry=false
 forceScalaVersion=false
 appendScalacOptions="${extraScalacOptions}"
@@ -70,6 +82,8 @@ function runSbt() {
     "$setScalaVersionCmd -v" \
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
     "set every credentials := Nil" \
+    "excludeLibraryDependency ${excludedCompilerPlugins[*]}" \
+    "removeScalacOptionsStartingWith ${excludedCompilerPluginOptPrefixes[*]}" \
     "$customCommands" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" 2>&1 | tee $logFile
