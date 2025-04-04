@@ -194,6 +194,11 @@ def loadDepenenecyGraph(
 
   val required = LazyList
     .from(requiredProjects)
+    .filter: project =>
+      project.repositoryExists() || {
+        System.err.println(s"Ignore required project ${project.coordinates} - does not exist")
+        false
+      }
     .map(loadProject)
 
   val customProjectsStream = customProjects.to(LazyList).map(loadProject)
@@ -297,3 +302,14 @@ def projectModulesFilter(
       .filter(_.modules.nonEmpty)
   )
 }
+
+extension (project: Project) def repositoryExists(): Boolean = util.Try {
+    val url = new java.net.URL(s"https://github.com/${project.coordinates}")
+    val connection = url.openConnection().asInstanceOf[java.net.HttpURLConnection]
+    connection.setRequestMethod("HEAD")
+    connection.setConnectTimeout(3000) // 3 seconds timeout
+    connection.setReadTimeout(3000)
+    val responseCode = connection.getResponseCode
+    connection.disconnect()
+    responseCode >= 200 && responseCode < 400 // Accept 2xx and 3xx
+  }.getOrElse(false)
