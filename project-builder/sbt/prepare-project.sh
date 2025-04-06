@@ -16,10 +16,7 @@ export OPENCB_PROJECT_DIR=$repoDir
 
 # Check if using a sbt with a supported version
 javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
-MinSbtVersion="1.6.2"
-if [[ "$javaVersion" -ge 21 ]]; then
-  MinSbtVersion="1.9.0"
-fi
+MinSbtVersion="1.10.0"
 
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then

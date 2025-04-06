@@ -298,10 +298,20 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
           patch(pattern = toMatch, replacement = replecement)
 
         case line @ AddSbtPluginRef(
-              defn @ AddSbtPlugin("org.typelevel", "sbt-typelevel-settings", SemVerRef(version))
+              defn @ AddSbtPlugin("org.typelevel", s"sbt-typelevel-${_}", SemVerRef(version))
             ) if version < SemVersion.unsafe("0.7.7") =>
           patch(line, defn.copy(version = "0.7.7").show)
-          
+        // Conflicts with org.typelevel:sbt-typelevel-settings
+        case line @ AddSbtPluginRef(
+          defn @ AddSbtPlugin("com.armanbilge", "sbt-scala-native-config-brew-github-actions", SemVerRef(version))
+        ) if version < SemVersion.unsafe("0.3.0") =>
+          patch(line, defn.copy(version = "0.3.0").show)
+        // Same eviction problems
+        case line @ AddSbtPluginRef(
+          defn @ AddSbtPlugin("org.scalablytyped.converter", "sbt-converter", SemVerRef(version))
+        ) if version < SemVersion.unsafe("1.0.0-beta44") =>
+          patch(line, defn.copy(version = "1.0.0-beta44").show)
+                  
         case s"${_}libraryDependencies :=${_}" =>   patch(
             pattern = "libraryDependencies :=", 
             replacement = "libraryDependencies ++= "
