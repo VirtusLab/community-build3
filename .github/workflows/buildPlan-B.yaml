@@ -1,5 +1,5 @@
 
-# projects total:     749
+# projects total:     750
 # min stars count:    -1
 # max projects count: 1000
 
@@ -284,7 +284,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
-        - name: "gemini-hlsw/lucuma-odb"
+        - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
@@ -299,7 +299,6 @@ jobs:
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
-        - name: "guardian/anghammarad"
         - name: "guardian/cross-platform-navigation"
         - name: "guardian/etag-caching"
         - name: "guardian/identity-test-users"
@@ -330,6 +329,7 @@ jobs:
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
         - name: "hnaderi/yaml4s"
+        - name: "hsci-r/octavo-indexer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
         - name: "hshn/crypto4s"
         - name: "hshn/slick-codegen-patch"
@@ -375,6 +374,7 @@ jobs:
         - name: "indoorvivants/rendition"
         - name: "indoorvivants/sn-demangler"
         - name: "indoorvivants/subatomic"
+        - name: "indoorvivants/trigs"
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
         - name: "ingarabr/http4s-cloud-functions"
@@ -508,6 +508,7 @@ jobs:
         - name: "losizm/little-security"
         - name: "losizm/little-sql"
         - name: "losizm/little-time"
+        - name: "losizm/scurry"
         - name: "losizm/shampoo"
         - name: "losizm/t2"
         - name: "lowmelvin/hammer-scala"
@@ -609,7 +610,6 @@ jobs:
         - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
         - name: "pjfanning/jackson-module-enumeratum"
-        - name: "pjfanning/jackson-module-scala-duration"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/jackson-scala3-reflection-extensions"
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/pekko-discovery-consul"
