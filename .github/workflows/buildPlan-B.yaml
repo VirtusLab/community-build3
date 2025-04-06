@@ -1,5 +1,5 @@
 
-# projects total:     750
+# projects total:     751
 # min stars count:    -1
 # max projects count: 1000
 
@@ -580,6 +580,7 @@ jobs:
         - name: "outr/dd-scala"
         - name: "outr/moduload"
         - name: "outr/rapid"
+        - name: "outr/robobrowser"
         - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
         - name: "ovotech/meters4s"
@@ -609,7 +610,6 @@ jobs:
         - name: "pjfanning/acked-stream"
         - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
-        - name: "pjfanning/jackson-module-enumeratum"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/jackson-scala3-reflection-extensions"
         - name: "pjfanning/micrometer-akka"
