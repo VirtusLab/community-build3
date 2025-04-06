@@ -282,10 +282,9 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
           case _ => None
         }
     }
-    object SemVerRef:
-      def unapply(v: String): Option[SemVersion] = SemVersion.unapply(v)
     object AddSbtPluginRef:
       def unapply(v: String): Option[AddSbtPlugin] = AddSbtPlugin.unapply(v)
+
 
     commonBuildFiles(projectDir).flatMap { file =>
       def patch(pattern: String, replacement: String) = SourcePatch(
@@ -297,22 +296,40 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         case Scala3VersionDef(toMatch, replecement) =>
           patch(pattern = toMatch, replacement = replecement)
 
+        // See https://github.com/scala/scala3/issues/22890
         case line @ AddSbtPluginRef(
-              defn @ AddSbtPlugin("org.typelevel", s"sbt-typelevel-${_}", SemVerRef(version))
-            ) if version < SemVersion.unsafe("0.7.7") =>
+              defn @ AddSbtPlugin("org.typelevel", s"sbt-typelevel${_}", version)
+            ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("0.7.7")) =>
           patch(line, defn.copy(version = "0.7.7").show)
+
         // Conflicts with org.typelevel:sbt-typelevel-settings
         case line @ AddSbtPluginRef(
-          defn @ AddSbtPlugin("com.armanbilge", "sbt-scala-native-config-brew-github-actions", SemVerRef(version))
-        ) if version < SemVersion.unsafe("0.3.0") =>
+          defn @ AddSbtPlugin("com.armanbilge", "sbt-scala-native-config-brew-github-actions", version)
+        ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("0.3.0")) =>
           patch(line, defn.copy(version = "0.3.0").show)
         // Same eviction problems
         case line @ AddSbtPluginRef(
-          defn @ AddSbtPlugin("org.scalablytyped.converter", "sbt-converter", SemVerRef(version))
-        ) if version < SemVersion.unsafe("1.0.0-beta44") =>
+          defn @ AddSbtPlugin("org.scalablytyped.converter", "sbt-converter", version)
+        ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("1.0.0-beta44")) =>
           patch(line, defn.copy(version = "1.0.0-beta44").show)
-                  
-        case s"${_}libraryDependencies :=${_}" =>   patch(
+        
+        // Same issue as with sbt-typelevel-settings
+         case line @ AddSbtPluginRef(
+              defn @ AddSbtPlugin("io.circe", "sbt-circe-org", version)
+            ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("0.4.0")) =>
+            patch(line, defn.copy(version = "0.4.0").show)
+        
+        case line @ AddSbtPluginRef(
+              defn @ AddSbtPlugin("edu.gemini", "sbt-lucuma-lib", version)
+            ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("0.12.0")) =>
+            patch(line, defn.copy(version = "0.12.0").show)
+            
+        case line @ s"ThisBuild${_}/${_}tlFatalWarnings${_}:=${_}true" =>
+          patch(pattern = line, replacement = "")
+            
+        case s"${_}libraryDependencies :=${rhs}" 
+        if !rhs.contains("libraryDependencies.value") =>  
+          patch(
             pattern = "libraryDependencies :=", 
             replacement = "libraryDependencies ++= "
           )
@@ -326,6 +343,8 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
   object AddSbtPlugin {
     def unapply(v: String): Option[AddSbtPlugin] = v.trim() match {
       case s"""addSbtPlugin("$org"${_}%${_}"$name"${_}%${_}"$version")""" =>
+        Some(AddSbtPlugin(org, name, version))
+      case s"""addSbtPlugin("$org"${_}%${_}"$name"${_}%${_} $version)""" =>
         Some(AddSbtPlugin(org, name, version))
       case _ => None
     }
