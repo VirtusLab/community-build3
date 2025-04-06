@@ -143,7 +143,6 @@ jobs:
         - name: "arturopala/gitignore"
         - name: "arturopala/validator"
         - name: "asflierl/sglicko2"
-        - name: "atedeg/mdm"
         - name: "atnos-org/eff"
         - name: "atry/html.scala"
         - name: "audienceproject/crossbow"
@@ -172,7 +171,6 @@ jobs:
         - name: "camunda-community-hub/camunda-dmn-tester"
         - name: "carlos-verdes/zio-arangodb"
         - name: "carlosedp/riscvassembler"
-        - name: "carlosedp/zio-channel"
         - name: "carueda/tscfg"
         - name: "cb372/cats-retry"
         - name: "cchantep/acolyte"
@@ -330,6 +328,8 @@ jobs:
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
+        - name: "filosganga/batcher"
+        - name: "filosganga/jsonpath"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,8 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/batcher"
-        - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
@@ -392,7 +390,7 @@ jobs:
         - name: "gemini-hlsw/clue"
         - name: "gemini-hlsw/crystal"
         - name: "gemini-hlsw/lucuma-core"
-        - name: "gemini-hlsw/lucuma-refined"
+        - name: "gemini-hlsw/lucuma-odb"
         - name: "gemini-hlsw/lucuma-sso"
         - name: "getkyo/kyo"
         - name: "getshaka-org/native-converter"
@@ -409,6 +407,7 @@ jobs:
         - name: "greenleafoss/green-leaf-mongo"
         - name: "grouzen/zio-apache-arrow"
         - name: "grouzen/zio-apache-parquet"
+        - name: "guardian/anghammarad"
         - name: "guardian/fastly-api-client"
         - name: "guardian/hmac-headers"
         - name: "guardian/pan-domain-authentication"
@@ -610,6 +609,7 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -890,6 +889,7 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -964,6 +963,7 @@ jobs:
         - name: "tabdulradi/nullable"
         - name: "taig/babel"
         - name: "takapi327/ldbc"
+        - name: "takezoe/runtime-scaladoc-reader"
         - name: "takezoe/scala-jdbc"
         - name: "takezoe/solr-scala-client"
         - name: "tarao/record4s"
