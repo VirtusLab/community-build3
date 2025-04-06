@@ -153,7 +153,7 @@ object ValidationScript:
     val configPatch =
       if executeTests
       then ""
-      else """* { "tests": "compile-only"} """
+      else """+ { "tests": "compile-only"} """
     val revision = projectRevision.getOrElse("$(config .revision)")
     val extraLibraryDependencies = ""
     raw"""
