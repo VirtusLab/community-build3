@@ -98,7 +98,9 @@ ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityB
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
 
 # Register utility commands, for more info check command impl comments
-echo -e "\ncommands ++= CommunityBuildPlugin.commands\n" >>$repoDir/build.sbt
+echo -e "\ncommands ++= CommunityBuildPlugin.commands" >>$repoDir/build.sbt
+# Ensure eviction errors are not failing the build
+echo -e "ThisBuild / evictionErrorLevel := Level.Warn\n" >>$repoDir/build.sbt
 
 # Project dependencies
 # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
