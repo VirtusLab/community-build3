@@ -295,8 +295,12 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
       tryReadLines(file).collect {
         case Scala3VersionDef(toMatch, replecement) =>
           patch(pattern = toMatch, replacement = replecement)
-
+          
+        case line @ s"ThisBuild${_}/${_}tlFatalWarnings${_}:=${_}true" =>
+          patch(pattern = line, replacement = "")
+            
         // See https://github.com/scala/scala3/issues/22890
+        // All of the patches below should eventually be removed once the original issue is fixed
         case line @ AddSbtPluginRef(
               defn @ AddSbtPlugin("org.typelevel", s"sbt-typelevel${_}", version)
             ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("0.7.7")) =>
@@ -324,14 +328,11 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
             ) if SemVersion.unapply(version).forall(_ < SemVersion.unsafe("0.12.0")) =>
             patch(line, defn.copy(version = "0.12.0").show)
             
-        case line @ s"ThisBuild${_}/${_}tlFatalWarnings${_}:=${_}true" =>
-          patch(pattern = line, replacement = "")
-            
         case s"${_}libraryDependencies :=${rhs}" 
         if !rhs.contains("libraryDependencies.value") =>  
           patch(
             pattern = "libraryDependencies :=", 
-            replacement = "libraryDependencies ++= "
+            replacement = """libraryDependencies := Seq("org.scala-lang" % "scala3-library_3" % "<SCALA_VERSION>") ++ """
           )
       }.distinct
     }
