@@ -607,11 +607,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.5.0-M9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -713,11 +709,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.6.4\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -763,11 +754,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.2.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -813,11 +799,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.6.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -1273,11 +1254,6 @@
       ],
       "sourcePatches":[
         {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
-        {
           "path":"project/Dependencies.scala",
           "pattern":"val Scala3 = \"3.3.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
@@ -1461,11 +1437,6 @@
           "path":"project/Dependencies.scala",
           "pattern":"val Scala3 = \"3.2.2\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/Dependencies.scala",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -2607,11 +2578,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -2801,19 +2768,9 @@
           "replaceWith":": @unchecked"
         },
         {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
-        {
           "path":"project/Dependencies.scala",
           "pattern":"val Scala3 = \"3.3.4\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/Dependencies.scala",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -3004,11 +2961,6 @@
         "3.5.0"
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3Version = \"3.3.4\"",
@@ -3371,11 +3323,6 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
         {
           "path":"project/ScalaSettings.scala",
           "pattern":"def Scala3 = \"3.3.3\"",
@@ -3944,11 +3891,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.1.3\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -4079,11 +4022,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"    addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.0\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.7\")"
         }
       ]
     }
@@ -5246,11 +5184,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"    % \"sbt-typelevel-site\" % \"0.6.0\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -6590,16 +6523,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.21\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.4.21\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -7536,11 +7460,6 @@
           "path":"project/Boilerplate.scala",
           "pattern":"CodecTests[Cc$arity](Cc$arity.",
           "replaceWith":"CodecTests[Cc$arity](using Cc$arity."
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -7885,21 +7804,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -9107,16 +9012,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -9519,11 +9415,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -9564,11 +9456,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -9609,11 +9497,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -9707,11 +9591,6 @@
           "path":"build.sbt",
           "pattern":"val scala3   = \"3.3.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -9757,11 +9636,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -9852,11 +9726,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.1.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.11\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -9902,11 +9771,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.5.0-M9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -10791,8 +10655,8 @@
   "dacr/zio-lmdb":{
     "project":"dacr/zio-lmdb",
     "repoUrl":"https://github.com/dacr/zio-lmdb.git",
-    "revision":"v1.8.4",
-    "version":"1.8.4",
+    "revision":"v2.0.0",
+    "version":"2.0.0",
     "targets":"fr.janalyse%zio-lmdb",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -11320,26 +11184,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.1.2\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -11462,21 +11307,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -11517,21 +11348,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -11654,21 +11471,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -11750,16 +11553,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -11845,21 +11639,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -11900,26 +11680,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.1.3\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -11957,24 +11718,10 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12060,21 +11807,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.0\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
         }
       ]
     }
@@ -12236,24 +11968,10 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12294,26 +12012,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.1.2\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -12354,21 +12053,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12409,26 +12094,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.1.3\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -12469,21 +12135,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12524,21 +12176,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12661,21 +12299,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.9\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12716,26 +12340,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.2.0-RC1\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -12776,26 +12381,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.1.3\")",
-          "replaceWith":"addSbtPlugin(\"com.armanbilge\" % \"sbt-scala-native-config-brew-github-actions\" % \"0.3.0\")"
-        }
+        
       ]
     }
   },
@@ -12836,21 +12422,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -12895,21 +12467,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.1.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.12\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.12\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.12\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
         }
       ]
     }
@@ -12951,21 +12508,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.5.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.5.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.5.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -13006,21 +12549,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -13449,7 +12978,7 @@
       "sourcePatches":[
         {
           "path":"build.sc",
-          "pattern":"\"3\" -> \"3.3.0\"",
+          "pattern":"\"3\" -> \"3\\.\\d\\.\\d\"",
           "replaceWith":"\"3\" -> \"<SCALA_VERSION>\""
         }
       ]
@@ -13811,11 +13340,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -13856,11 +13381,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -13901,11 +13422,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.19\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -14442,21 +13959,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -14502,21 +14004,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.4\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -14558,36 +14045,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"ThisBuild / mergifyStewardConfig ~= { _.map(_.copy(\n  author = \"dwolla-oss-scala-steward[bot]\",\n  mergeMinors = true,\n))}",
-          "replaceWith":""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.5.0-RC5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.5.0-RC5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.5.0-RC5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.5.0-RC5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.scalablytyped.converter\" % \"sbt-converter\" % \"1.0.0-beta42\")",
-          "replaceWith":"addSbtPlugin(\"org.scalablytyped.converter\" % \"sbt-converter\" % \"1.0.0-beta44\")"
-        }
+        
       ]
     }
   },
@@ -14669,21 +14127,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -14724,21 +14168,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -14779,21 +14209,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -15672,11 +15088,6 @@
           "path":"build.sbt",
           "pattern":"val scala3   = \"3.2.2\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -15808,11 +15219,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.scalablytyped.converter\" % \"sbt-converter\" % \"1.0.0-beta40\")",
-          "replaceWith":"addSbtPlugin(\"org.scalablytyped.converter\" % \"sbt-converter\" % \"1.0.0-beta44\")"
-        }
+        
       ]
     }
   },
@@ -17338,11 +16745,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.13\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -17846,11 +17249,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.22\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -18208,11 +17607,6 @@
           "path":"build.sbt",
           "pattern":"val Scala_3 = \"3.3.4\"",
           "replaceWith":"val Scala_3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -18258,11 +17652,6 @@
           "path":"build.sbt",
           "pattern":"val Scala_3 = \"3.2.2\"",
           "replaceWith":"val Scala_3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -20220,11 +19609,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -21052,8 +20436,8 @@
   "guardian/mobile-apps-api-models":{
     "project":"guardian/mobile-apps-api-models",
     "repoUrl":"https://github.com/guardian/mobile-apps-api-models.git",
-    "revision":"v1.0.55-PREVIEW.gladd-media-pill.2025-04-04T1509.6bb586c4",
-    "version":"1.0.55-PREVIEW.gladd-media-pill.2025-04-04T1509.6bb586c4",
+    "revision":"v1.0.55-PREVIEW.glcorrect-media-pill.2025-04-07T1010.9fbf0a41",
+    "version":"1.0.55-PREVIEW.glcorrect-media-pill.2025-04-07T1010.9fbf0a41",
     "targets":"com.gu%mobile-apps-api-models-v0",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -21933,11 +21317,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.5.0-M6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -21978,16 +21358,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.5.0-M6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -22028,16 +21399,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.5.0-M6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -22215,11 +21577,6 @@
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.3.4\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -22265,11 +21622,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-kernel\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-kernel\" % \"0.7.7\")"
         }
       ]
     }
@@ -22934,11 +22286,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -22984,11 +22331,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.2.0\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.17\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -23075,11 +22417,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -23124,11 +22462,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -23364,11 +22697,6 @@
           "path":"tests/shared/src/test/scala/org/http4s/QueryParamCodecLaws.scala",
           "pattern":".decode _",
           "replaceWith":".decode"
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         },
         {
           "path":"project/Http4sPlugin.scala",
@@ -23624,21 +22952,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.5.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.5.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.5.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -23679,11 +22993,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -25531,11 +24841,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-github-actions\"  % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -26991,10 +26297,10 @@
   "jbwheatley/pact4s":{
     "project":"jbwheatley/pact4s",
     "repoUrl":"https://github.com/jbwheatley/pact4s.git",
-    "revision":"v0.16.0",
-    "version":"0.16.0",
+    "revision":"v0.16.1",
+    "version":"0.16.1",
     "targets":"io.github.jbwheatley%pact4s-circe io.github.jbwheatley%pact4s-core io.github.jbwheatley%pact4s-models io.github.jbwheatley%pact4s-munit-cats-effect io.github.jbwheatley%pact4s-play-json io.github.jbwheatley%pact4s-scalatest io.github.jbwheatley%pact4s-spray-json io.github.jbwheatley%pact4s-weaver io.github.jbwheatley%pact4s-zio-test",
-    "publishedScalaVersion":"3.3.4",
+    "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
         "exclude":[
@@ -27027,7 +26333,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3           = \"3.3.4\"",
+          "pattern":"val scala3           = \"3.3.5\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -27915,8 +27221,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.319",
-    "version":"4.0.319",
+    "revision":"v4.0.320",
+    "version":"4.0.320",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "publishedScalaVersion":"3.5.2",
     "config":{
@@ -28597,11 +27903,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -28642,11 +27944,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28687,11 +27985,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28732,11 +28026,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28777,11 +28067,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28822,11 +28108,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28867,11 +28149,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28912,11 +28190,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -28957,11 +28231,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -29002,11 +28272,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -29047,11 +28313,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -29133,11 +28395,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -29178,11 +28436,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-no-publish\"      % \"0.6.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -29354,11 +28608,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -29444,16 +28694,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\"     % \"0.6.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.6.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -30829,11 +30070,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -30917,11 +30154,6 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
-        {
-          "path":"build.sbt",
           "pattern":"val Scala3Version = \"3.0.2\"",
           "replaceWith":"val Scala3Version = \"<SCALA_VERSION>\""
         }
@@ -30969,11 +30201,6 @@
           "path":"build.sbt",
           "pattern":"ThisBuild \\/ scalafixScalaBinaryVersion := \\{(\\n.*)+newVersion\\n\\}",
           "replaceWith":""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -31015,11 +30242,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -31029,44 +30252,7 @@
     "revision":"v1.0.0",
     "version":"1.0.0",
     "targets":"io.kevinlee%just-sysprocess",
-    "publishedScalaVersion":"3.0.0",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
-      ]
-    }
+    "publishedScalaVersion":"3.0.0"
   },
   "kevin-lee/logger-f":{
     "project":"kevin-lee/logger-f",
@@ -31074,44 +30260,7 @@
     "revision":"v2.1.18",
     "version":"2.1.18",
     "targets":"io.kevinlee%logger-f-cats io.kevinlee%logger-f-core io.kevinlee%logger-f-log4j io.kevinlee%logger-f-log4s io.kevinlee%logger-f-logback-mdc-monix3 io.kevinlee%logger-f-sbt-logging io.kevinlee%logger-f-slf4j io.kevinlee%logger-f-slf4j-mdc io.kevinlee%logger-f-test-kit",
-    "publishedScalaVersion":"3.0.2",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
-      ]
-    }
+    "publishedScalaVersion":"3.0.2"
   },
   "kevin-lee/maven2sbt":{
     "project":"kevin-lee/maven2sbt",
@@ -31119,44 +30268,7 @@
     "revision":"v1.5.0",
     "version":"1.5.0",
     "targets":"io.kevinlee%maven2sbt-core",
-    "publishedScalaVersion":"3.2.2",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
-      ]
-    }
+    "publishedScalaVersion":"3.2.2"
   },
   "kevin-lee/openai4s":{
     "project":"kevin-lee/openai4s",
@@ -31200,11 +30312,6 @@
           "path":"build.sbt",
           "pattern":"ThisBuild \\/ scalafixScalaBinaryVersion := \\{(\\n.*)+newVersion\\n\\}",
           "replaceWith":""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         },
         {
           "path":"build.sbt",
@@ -35903,16 +35010,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3   = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"    % \"sbt-typelevel-scalafix\"    % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"    % \"sbt-typelevel-site\"        % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -36710,11 +35807,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -37005,11 +36098,6 @@
           "path":".jvmopts",
           "pattern":"-XX:+CMSClassUnloadingEnabled",
           "replaceWith":""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -37493,11 +36581,6 @@
           "path":"build.sbt",
           "pattern":"def Scala3 = \"3.1.0\"",
           "replaceWith":"def Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -38574,11 +37657,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.4.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -38750,11 +37828,6 @@
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.0.1\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -39291,11 +38364,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -39393,11 +38462,6 @@
           "path":"build.sbt",
           "pattern":"val scala3   = \"3.2.2\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-ci-release\"      % \"0.4.21\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -39913,11 +38977,6 @@
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.3.3\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-ci-release\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -40356,6 +39415,47 @@
       ]
     }
   },
+  "outr/robobrowser":{
+    "project":"outr/robobrowser",
+    "repoUrl":"https://github.com/outr/robobrowser.git",
+    "revision":"2.1.0",
+    "version":"2.1.0",
+    "targets":"com.outr%robobrowser com.outr%robobrowser-cdp com.outr%robobrowser-core com.outr%robobrowser-selenium",
+    "publishedScalaVersion":"3.6.4",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "outr/scalapass":{
     "project":"outr/scalapass",
     "repoUrl":"https://github.com/outr/scalapass.git",
@@ -40622,11 +39722,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -41845,21 +40941,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.4.0\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.7\")"
         }
       ]
     }
@@ -42798,11 +41879,6 @@
           "path":"src/main/scala/co.blocke.scala_reflection/ReflectionWorker.scala",
           "pattern":"def init(options: List[String]): List[PluginPhase]",
           "replaceWith":"override def init(options: List[String]): List[PluginPhase]"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.5.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -42852,11 +41928,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.5.0-M8\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-sonatype-ci-release\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -43497,11 +42569,6 @@
           "path":"build.sbt",
           "pattern":"if (scalaVersion.value != \"3.*\")",
           "replaceWith":"if (scalaVersion.value != \"<SCALA_VERSION>\")"
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -44292,11 +43359,6 @@
       ],
       "sourcePatches":[
         {
-          "path":"project/MainScalaVersionHack.scala",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
-        {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3 = \"3.3.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -44738,11 +43800,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -45924,16 +44982,6 @@
           "path":"project/ScalaVersions.scala",
           "pattern":"val Scala3 = \"3.2.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-github-actions\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -46320,9 +45368,9 @@
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         },
         {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"  % \"sbt-typelevel-ci-release\" % \"0.5.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings         := true",
+          "replaceWith":""
         }
       ]
     }
@@ -46368,6 +45416,11 @@
           "path":"build.sbt",
           "pattern":"val scala3       = \"3.3.5\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
         }
       ]
     }
@@ -46415,9 +45468,9 @@
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         },
         {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.5.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
         }
       ]
     }
@@ -46465,9 +45518,9 @@
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         },
         {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings         := true",
+          "replaceWith":""
         }
       ]
     }
@@ -47115,11 +46168,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -48619,11 +47667,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.6.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -50233,11 +49276,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -50282,11 +49321,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -50328,11 +49362,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -52537,8 +51567,8 @@
   "shiftleftsecurity/codepropertygraph":{
     "project":"shiftleftsecurity/codepropertygraph",
     "repoUrl":"https://github.com/shiftleftsecurity/codepropertygraph.git",
-    "revision":"v1.7.28",
-    "version":"1.7.28",
+    "revision":"v1.7.29",
+    "version":"1.7.29",
     "targets":"io.shiftleft%codepropertygraph io.shiftleft%codepropertygraph-domain-classes io.shiftleft%codepropertygraph-protos io.shiftleft%codepropertygraph-schema io.shiftleft%schema2json",
     "publishedScalaVersion":"3.5.2",
     "config":{
@@ -53717,11 +52747,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = List(\"3.3.3\")",
           "replaceWith":"val scala3 = List(\"<SCALA_VERSION>\")"
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -54433,11 +53458,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.2.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -56121,6 +55141,11 @@
       ],
       "sourcePatches":[
         {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings    := true",
+          "replaceWith":""
+        },
+        {
           "path":"project/Versions.scala",
           "pattern":"val scala3  = \"3.3.5\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -56304,16 +55329,6 @@
           "path":"build.sbt",
           "pattern":"val Scala_3 = \"3.3.3\"",
           "replaceWith":"val Scala_3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-scalafix\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-site\"     % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -56763,11 +55778,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.2.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.17\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -56813,16 +55823,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3          = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\"     % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
         }
       ]
     }
@@ -56868,16 +55868,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
         }
       ]
     }
@@ -57013,11 +56003,6 @@
           "path":"build.sbt",
           "pattern":"val scala_3 = \"3.3.4\"",
           "replaceWith":"val scala_3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -57063,11 +56048,6 @@
           "path":"build.sbt",
           "pattern":"val scala_3                = \"3.3.5\"",
           "replaceWith":"val scala_3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -57113,11 +56093,6 @@
           "path":"build.sbt",
           "pattern":"val scala_3                = \"3.3.4\"",
           "replaceWith":"val scala_3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"       % \"sbt-typelevel-ci-release\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
         }
       ]
     }
@@ -57570,11 +56545,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-site\"            % \"0.7.0\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -57811,7 +56782,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -57852,7 +56827,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -57893,7 +56872,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -57934,7 +56917,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -57975,7 +56962,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -58016,7 +57007,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings := true",
+          "replaceWith":""
+        }
       ]
     }
   },
@@ -58060,11 +57055,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -58297,16 +57287,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-mergify\"         % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-site\"            % \"0.6.7\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -58612,11 +57593,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.0\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -59836,6 +58812,16 @@
       ],
       "sourcePatches":[
         {
+          "path":"build.sbt",
+          "pattern":"\"1.7\"",
+          "replaceWith":"\"1.8\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"autoScalaLibrary := false,",
+          "replaceWith":"Compile / autoScalaLibrary := false,"
+        },
+        {
           "path":"modules/cats/src/main/scala/org/dhallj/cats/LiftVisitor.scala",
           "pattern":" sortFields",
           "replaceWith":" _sortFields"
@@ -60089,11 +59075,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -60362,11 +59344,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -60411,11 +59389,6 @@
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -60461,11 +59434,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.4\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.6\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -60675,11 +59643,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -60941,11 +59905,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
         }
       ]
     }
@@ -60991,6 +59950,11 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / tlFatalWarnings         := true",
+          "replaceWith":""
         }
       ]
     }
@@ -61406,28 +60370,8 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"ThisBuild / mergifyStewardConfig ~= {\n  _.map(_.copy(mergeMinors = true, author = \"typelevel-steward[bot]\", action = MergifyAction.Merge(method = Option(\"squash\"))))\n}",
-          "replaceWith":""
-        },
-        {
-          "path":"build.sbt",
           "pattern":"val Scala3 = \"3.2.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-settings\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-ci-release\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.4.18\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -61518,11 +60462,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -61605,11 +60544,7 @@
         "3.4.2"
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -61654,11 +60589,6 @@
           "path":"build.sbt",
           "pattern":"val scala3Version           = \"3.3.4\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.5\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
         }
       ]
     }
@@ -61795,11 +60725,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3Version = \"3.3.3\"",
           "replaceWith":"val Scala3Version = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.1\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
         }
       ]
     }
@@ -62017,11 +60942,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.4.12\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -62148,11 +61069,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\"      % \"sbt-typelevel-site\"                          % \"0.7.4\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        }
+        
       ]
     }
   },
@@ -62477,11 +61394,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -62608,11 +61521,7 @@
         "3.3.4"
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        }
+        
       ]
     }
   },
@@ -63538,11 +62447,6 @@
           "path":"build.sbt",
           "pattern":"def scala3Version        = \"3.3.3\"",
           "replaceWith":"def scala3Version = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugin.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.2\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-no-publish\" % \"0.7.7\")"
         }
       ]
     }
@@ -64013,11 +62917,6 @@
           "path":".sbtopts",
           "pattern":"-J-XX:+CMSClassUnloadingEnabled",
           "replaceWith":""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.scalablytyped.converter\" % \"sbt-converter\" % \"1.0.0-beta37\")",
-          "replaceWith":"addSbtPlugin(\"org.scalablytyped.converter\" % \"sbt-converter\" % \"1.0.0-beta44\")"
         }
       ]
     }
@@ -65319,21 +64218,6 @@
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.3\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-mergify\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-site\" % \"0.7.7\")"
-        },
-        {
-          "path":"project/plugins.sbt",
-          "pattern":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.3\")",
-          "replaceWith":"addSbtPlugin(\"org.typelevel\" % \"sbt-typelevel-scalafix\" % \"0.7.7\")"
         }
       ]
     }
@@ -65690,11 +64574,6 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies :=",
-          "replaceWith":"libraryDependencies ++= "
-        },
         {
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
