@@ -91,6 +91,8 @@ runs:
         if [[ "$canSkip" == false ]]; then
           if [[ -n "${{ inputs.extra-scalac-options }}" || -n "${{ inputs.disabled-scalac-options }}" ]]; then
             echo "Using custom scalacOption, cannot skip"
+          elif [[ -n "${{ inputs.custom-build-id }}" ]]; then
+            echo "Using custom build id, won't skip"
           else
             projectName="${{ inputs.project-name }}"
             projectVersion="$(jq -r ".\"${{ inputs.project-name }}\".version" $ConfigFile)"
