@@ -1,5 +1,5 @@
 
-# projects total:     750
+# projects total:     751
 # min stars count:    -1
 # max projects count: 1000
 
@@ -299,6 +299,7 @@ jobs:
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
+        - name: "guardian/anghammarad"
         - name: "guardian/cross-platform-navigation"
         - name: "guardian/etag-caching"
         - name: "guardian/identity-test-users"
@@ -329,7 +330,6 @@ jobs:
         - name: "hnaderi/portainer-client"
         - name: "hnaderi/scala-readpass"
         - name: "hnaderi/yaml4s"
-        - name: "hsci-r/octavo-indexer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
         - name: "hshn/crypto4s"
         - name: "hshn/slick-codegen-patch"
@@ -391,7 +392,6 @@ jobs:
         - name: "j5ik2o/event-store-adapter-scala"
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
-        - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
@@ -580,6 +580,7 @@ jobs:
         - name: "outr/dd-scala"
         - name: "outr/moduload"
         - name: "outr/rapid"
+        - name: "outr/robobrowser"
         - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
         - name: "ovotech/meters4s"
@@ -609,7 +610,6 @@ jobs:
         - name: "pjfanning/acked-stream"
         - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
-        - name: "pjfanning/jackson-module-enumeratum"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
         - name: "pjfanning/jackson-scala3-reflection-extensions"
         - name: "pjfanning/micrometer-akka"
