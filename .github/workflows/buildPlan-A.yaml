@@ -407,6 +407,7 @@ jobs:
         - name: "greenleafoss/green-leaf-mongo"
         - name: "grouzen/zio-apache-arrow"
         - name: "grouzen/zio-apache-parquet"
+        - name: "guardian/anghammarad"
         - name: "guardian/fastly-api-client"
         - name: "guardian/hmac-headers"
         - name: "guardian/pan-domain-authentication"
@@ -609,7 +610,6 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -648,6 +649,7 @@ jobs:
         - name: "monix/monix"
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
+        - name: "mpollmeier/scala-repl-pp"
         - name: "mrumkovskis/tresql"
         - name: "msgpack4z/msgpack4z-circe"
         - name: "msgpack4z/msgpack4z-core"
@@ -675,8 +677,6 @@ jobs:
         - name: "nryanov/consul4s"
         - name: "nscala-time/nscala-time"
         - name: "nulab/play2-oauth2-provider"
-        - name: "ohze/akka-guice"
-        - name: "ohze/couchbase-scala"
         - name: "olivierblanvillain/regsafe"
         - name: "ollls/quartz-h2"
         - name: "ollls/zio-quartz-h2"
