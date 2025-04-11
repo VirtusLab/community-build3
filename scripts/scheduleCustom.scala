@@ -24,7 +24,7 @@ import scala.sys.process.*
   }
   repository match {
     case s"$repo/$project" => println(s"Build $repo/$project branch: $branch")
-    case _ => sys.error("Invalid repository: $repository")
+    case _ => sys.error(s"Invalid repository: $repository")
   }
   val date = LocalDate.now()
 
