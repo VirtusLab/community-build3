@@ -292,10 +292,6 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
       tryReadLines(file).collect {
         case Scala3VersionDef(toMatch, replecement) =>
           patch(pattern = toMatch, replacement = replecement)
-          
-        case s"${_}autoScalaLibrary${_}=${_}false${_}" => 
-          patch(pattern = raw"autoScalaLibrary\s+:=\s+false", "autoScalaLibrary := true")
-          
         case line @ s"ThisBuild${_}/${_}tlFatalWarnings${_}:=${_}true" =>
           patch(pattern = line, replacement = "")
       }.distinct
