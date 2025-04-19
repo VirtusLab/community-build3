@@ -589,6 +589,7 @@ jobs:
         - name: "lloydmeta/ltsv-logger"
         - name: "log4s/log4s"
         - name: "logging4s/logging4s"
+        - name: "lombardo-chcg/websocket-scala"
         - name: "lomigmegard/akka-http-cors"
         - name: "losizm/grapple"
         - name: "losizm/scamper"
@@ -609,7 +610,6 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -889,7 +890,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1073,7 +1074,6 @@ jobs:
         - name: "vagmcs/scalatikz"
         - name: "valdemargr/catch-effect"
         - name: "valskalla/odin"
-        - name: "victornguen/zio-av"
         - name: "vigoo/clipp"
         - name: "vigoo/desert"
         - name: "vincenzobaz/spark-scala3"

@@ -8037,9 +8037,9 @@
   "clulab/processors":{
     "project":"clulab/processors",
     "repoUrl":"https://github.com/clulab/processors.git",
-    "revision":"v8.5.4",
-    "version":"8.5.4",
-    "targets":"org.clulab%processors-corenlp org.clulab%processors-main org.clulab%processors-openie",
+    "revision":"v10.0.1",
+    "version":"10.0.1",
+    "targets":"org.clulab%processors org.clulab%processors-apps org.clulab%processors-debugger",
     "publishedScalaVersion":"3.1.3"
   },
   "clulab/scala-transformers":{
@@ -8552,8 +8552,8 @@
   "com-lihaoyi/os-lib":{
     "project":"com-lihaoyi/os-lib",
     "repoUrl":"https://github.com/com-lihaoyi/os-lib.git",
-    "revision":"0.11.3-M4",
-    "version":"0.11.3-M4",
+    "revision":"0.11.5-M5",
+    "version":"0.11.5-M5",
     "targets":"com.lihaoyi%os-lib com.lihaoyi%os-lib-watch",
     "publishedScalaVersion":"3.3.1",
     "config":{
@@ -14423,9 +14423,9 @@
   "eed3si9n/gigahorse":{
     "project":"eed3si9n/gigahorse",
     "repoUrl":"https://github.com/eed3si9n/gigahorse.git",
-    "revision":"v0.8.0",
-    "version":"0.8.0",
-    "targets":"com.eed3si9n%gigahorse-apache-http com.eed3si9n%gigahorse-asynchttpclient com.eed3si9n%gigahorse-core com.eed3si9n%gigahorse-okhttp",
+    "revision":"v0.9.0",
+    "version":"0.9.0",
+    "targets":"com.eed3si9n%gigahorse-apache-http com.eed3si9n%gigahorse-asynchttpclient com.eed3si9n%gigahorse-core com.eed3si9n%gigahorse-okhttp com.eed3si9n%gigahorse-pekko-http",
     "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
@@ -21129,10 +21129,10 @@
   "guymers/foobie":{
     "project":"guymers/foobie",
     "repoUrl":"https://github.com/guymers/foobie.git",
-    "revision":"v0.15.0",
-    "version":"0.15.0",
+    "revision":"v0.15.1",
+    "version":"0.15.1",
     "targets":"io.github.guymers%foobie-core io.github.guymers%foobie-free io.github.guymers%foobie-h2 io.github.guymers%foobie-h2-circe io.github.guymers%foobie-hikari io.github.guymers%foobie-munit io.github.guymers%foobie-mysql io.github.guymers%foobie-postgis io.github.guymers%foobie-postgres io.github.guymers%foobie-postgres-circe io.github.guymers%foobie-scalatest io.github.guymers%foobie-weaver io.github.guymers%zoobie",
-    "publishedScalaVersion":"3.3.4",
+    "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
         "exclude":[
@@ -21165,7 +21165,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.4\"",
+          "pattern":"val Scala3 = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -25130,7 +25130,44 @@
     "revision":"",
     "version":"0.1.0",
     "targets":"net.ivoah%slippy",
-    "publishedScalaVersion":"3.3.5"
+    "publishedScalaVersion":"3.3.5",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"src/main/scala/Lisp.scala",
+          "pattern":".eval()",
+          "replaceWith":".eval"
+        }
+      ]
+    }
   },
   "ivoah/vial":{
     "project":"ivoah/vial",
@@ -27201,8 +27238,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.332",
-    "version":"4.0.332",
+    "revision":"v4.0.333",
+    "version":"4.0.333",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "publishedScalaVersion":"3.5.2",
     "config":{
@@ -33908,6 +33945,47 @@
     "version":"0.0.1",
     "targets":""
   },
+  "lombardo-chcg/websocket-scala":{
+    "project":"lombardo-chcg/websocket-scala",
+    "repoUrl":"https://github.com/lombardo-chcg/websocket-scala.git",
+    "revision":"v0.0.4",
+    "version":"0.0.4",
+    "targets":"net.domlom%websocket-scala",
+    "publishedScalaVersion":"3.3.5",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "lomigmegard/akka-http-cors":{
     "project":"lomigmegard/akka-http-cors",
     "repoUrl":"https://github.com/lomigmegard/akka-http-cors.git",
@@ -34654,8 +34732,8 @@
   "malliina/mobile-push":{
     "project":"malliina/mobile-push",
     "repoUrl":"https://github.com/malliina/mobile-push.git",
-    "revision":"v3.13.0",
-    "version":"3.13.0",
+    "revision":"v3.13.1",
+    "version":"3.13.1",
     "targets":"com.malliina%mobile-push",
     "publishedScalaVersion":"3.3.1",
     "config":{
@@ -39316,8 +39394,8 @@
   "outr/rapid":{
     "project":"outr/rapid",
     "repoUrl":"https://github.com/outr/rapid.git",
-    "revision":"0.12.0",
-    "version":"0.12.0",
+    "revision":"0.13.0",
+    "version":"0.13.0",
     "targets":"com.outr%rapid com.outr%rapid-cats com.outr%rapid-core com.outr%rapid-scribe com.outr%rapid-test",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -42262,9 +42340,9 @@
   "playframework/playframework":{
     "project":"playframework/playframework",
     "repoUrl":"https://github.com/playframework/playframework.git",
-    "revision":"3.0.7",
-    "version":"3.0.7",
-    "targets":"org.playframework%play org.playframework%play-ahc-ws org.playframework%play-bom org.playframework%play-cache org.playframework%play-caffeine-cache org.playframework%play-cluster-sharding org.playframework%play-configuration org.playframework%play-docs org.playframework%play-ehcache org.playframework%play-filters-helpers org.playframework%play-guice org.playframework%play-java org.playframework%play-java-cluster-sharding org.playframework%play-java-forms org.playframework%play-java-jdbc org.playframework%play-java-jpa org.playframework%play-jcache org.playframework%play-jdbc org.playframework%play-jdbc-api org.playframework%play-jdbc-evolutions org.playframework%play-joda-forms org.playframework%play-logback org.playframework%play-netty-server org.playframework%play-openid org.playframework%play-pekko-http-server org.playframework%play-pekko-http2-support org.playframework%play-routes-compiler org.playframework%play-server org.playframework%play-specs2 org.playframework%play-streams org.playframework%play-test org.playframework%play-ws",
+    "revision":"2.9.7",
+    "version":"2.9.7",
+    "targets":"com.typesafe.play%play com.typesafe.play%play-ahc-ws com.typesafe.play%play-akka-http-server com.typesafe.play%play-akka-http2-support com.typesafe.play%play-bom com.typesafe.play%play-cache com.typesafe.play%play-caffeine-cache com.typesafe.play%play-cluster-sharding com.typesafe.play%play-configuration com.typesafe.play%play-docs com.typesafe.play%play-ehcache com.typesafe.play%play-filters-helpers com.typesafe.play%play-guice com.typesafe.play%play-java com.typesafe.play%play-java-cluster-sharding com.typesafe.play%play-java-forms com.typesafe.play%play-java-jdbc com.typesafe.play%play-java-jpa com.typesafe.play%play-jcache com.typesafe.play%play-jdbc com.typesafe.play%play-jdbc-api com.typesafe.play%play-jdbc-evolutions com.typesafe.play%play-joda-forms com.typesafe.play%play-logback com.typesafe.play%play-netty-server com.typesafe.play%play-openid com.typesafe.play%play-routes-compiler com.typesafe.play%play-server com.typesafe.play%play-specs2 com.typesafe.play%play-streams com.typesafe.play%play-test com.typesafe.play%play-ws",
     "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
@@ -45647,8 +45725,8 @@
   "sageserpent-open/americium":{
     "project":"sageserpent-open/americium",
     "repoUrl":"https://github.com/sageserpent-open/americium.git",
-    "revision":"v1.20.7",
-    "version":"1.20.7",
+    "revision":"v1.20.8",
+    "version":"1.20.8",
     "targets":"com.sageserpent%americium",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -55939,7 +56017,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -62003,47 +62081,6 @@
       ]
     }
   },
-  "victornguen/zio-av":{
-    "project":"victornguen/zio-av",
-    "repoUrl":"https://github.com/victornguen/zio-av.git",
-    "revision":"v0.0.1-test1",
-    "version":"0.0.1-test1",
-    "targets":"io.github.victornguen%zio-av",
-    "publishedScalaVersion":"3.3.1",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "vigoo/clipp":{
     "project":"vigoo/clipp",
     "repoUrl":"https://github.com/vigoo/clipp.git",
@@ -63139,7 +63176,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -63671,6 +63708,47 @@
     "version":"0.1.1",
     "targets":"com.github.xuwei-k%scalatest-test-times-reporter",
     "publishedScalaVersion":"3.3.3"
+  },
+  "xuwei-k/unapply":{
+    "project":"xuwei-k/unapply",
+    "repoUrl":"https://github.com/xuwei-k/unapply.git",
+    "revision":"v0.1.0",
+    "version":"0.1.0",
+    "targets":"com.github.xuwei-k%unapply",
+    "publishedScalaVersion":"3.3.5",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "xuwei-k/unused-proto":{
     "project":"xuwei-k/unused-proto",
@@ -65467,10 +65545,10 @@
   "zio/zio-dynamodb":{
     "project":"zio/zio-dynamodb",
     "repoUrl":"https://github.com/zio/zio-dynamodb.git",
-    "revision":"v1.0.0-RC18",
-    "version":"1.0.0-RC18",
+    "revision":"v1.0.0-RC19",
+    "version":"1.0.0-RC19",
     "targets":"dev.zio%zio-dynamodb dev.zio%zio-dynamodb-ce dev.zio%zio-dynamodb-json",
-    "publishedScalaVersion":"3.3.4",
+    "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
         "exclude":[
@@ -65503,7 +65581,7 @@
       "sourcePatches":[
         {
           "path":"project/BuildHelper.scala",
-          "pattern":"val Scala3                  = \"3.3.4\"",
+          "pattern":"val Scala3                  = \"3.3.5\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
