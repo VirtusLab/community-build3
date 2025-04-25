@@ -1,5 +1,5 @@
 
-# projects total:     753
+# projects total:     759
 # min stars count:    -1
 # max projects count: 1000
 
@@ -240,6 +240,8 @@ jobs:
         - name: "eb2501/fluor-core"
         - name: "edadma/char-reader"
         - name: "edadma/cross-platform"
+        - name: "edadma/dllist"
+        - name: "edadma/logger"
         - name: "edadma/pattern-matcher"
         - name: "eikek/binny"
         - name: "eikek/borer-compats"
@@ -328,8 +330,6 @@ jobs:
         - name: "hjfruit/zio-pulsar"
         - name: "hnaderi/named-codec"
         - name: "hnaderi/portainer-client"
-        - name: "hnaderi/scala-readpass"
-        - name: "hnaderi/yaml4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hnaderi/scala-readpass"
+        - name: "hnaderi/yaml4s"
         - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
         - name: "hshn/crypto4s"
@@ -367,6 +369,7 @@ jobs:
         - name: "hughsimpson/scalameter"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
+        - name: "indoorvivants/decline-completion"
         - name: "indoorvivants/detective"
         - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
@@ -607,9 +610,6 @@ jobs:
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/relational3"
-        - name: "pityka/selfpackage"
-        - name: "pjfanning/acked-stream"
-        - name: "pjfanning/akka-rabbitmq"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pityka/selfpackage"
+        - name: "pjfanning/acked-stream"
+        - name: "pjfanning/akka-rabbitmq"
         - name: "pjfanning/aws-spi-pekko-http"
         - name: "pjfanning/jackson-module-enumeratum"
         - name: "pjfanning/jackson-module-scala-duration"
@@ -679,6 +682,7 @@ jobs:
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rolang/google-rest-api-codegen"
+        - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
         - name: "rssh/scala-appcontext"
@@ -793,6 +797,7 @@ jobs:
         - name: "tegonal/scala-commons"
         - name: "tersesystems/echopraxia-plusscala"
         - name: "tharwaninitin/cache4s"
+        - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
@@ -844,6 +849,7 @@ jobs:
         - name: "typelevel/scalacheck-xml"
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
+        - name: "unit-finance/zio-raft"
         - name: "varwise/prometheus-akka-http"
         - name: "varwise/prometheus-pekko-http"
         - name: "vasilmkd/discipline-specs2"
