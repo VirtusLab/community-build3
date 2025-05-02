@@ -27,7 +27,7 @@ import scala.sys.process.*
     s"""gh workflow run .github/workflows/buildExecuteCustom-$build.yaml 
     | -f build-name=${scalaVersion}${sourceVersionAttr}:$date
     | -f published-scala-version=${scalaVersion}
-    | -f execute-tests=true
+    | -f execute-tests=false
     | -f extra-scalac-options=${scalacOptions.mkString(",")}
     | -f push-to-gh-pages=true
     |""".stripMargin
