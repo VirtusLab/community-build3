@@ -36,6 +36,8 @@ if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishSc
   echo "Warning: project published with Scala $publishScalaVersion - cannot guarantee it would work with older Scala version $scalaVersion"
 fi 
 
+unset GPG_TTY
+
 # OPENCB_EXECUTE_TESTS=true \
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \
