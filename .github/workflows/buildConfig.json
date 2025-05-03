@@ -10122,8 +10122,8 @@
   "dacr/code-examples-manager":{
     "project":"dacr/code-examples-manager",
     "repoUrl":"https://github.com/dacr/code-examples-manager.git",
-    "revision":"v2.4.7",
-    "version":"2.4.7",
+    "revision":"v2.4.8",
+    "version":"2.4.8",
     "targets":"fr.janalyse%code-examples-manager",
     "publishedScalaVersion":"3.6.4",
     "config":{
@@ -11087,7 +11087,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4.2"
       ],
       "sourcePatches":[
         {
@@ -18824,8 +18824,8 @@
   "gemini-hlsw/lucuma-core":{
     "project":"gemini-hlsw/lucuma-core",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-core.git",
-    "revision":"v0.125.0",
-    "version":"0.125.0",
+    "revision":"v0.126.0",
+    "version":"0.126.0",
     "targets":"edu.gemini%lucuma-ags edu.gemini%lucuma-catalog edu.gemini%lucuma-catalog-testkit edu.gemini%lucuma-core edu.gemini%lucuma-core-testkit",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -18906,8 +18906,8 @@
   "gemini-hlsw/lucuma-itc":{
     "project":"gemini-hlsw/lucuma-itc",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-itc.git",
-    "revision":"v0.34.3",
-    "version":"0.34.3",
+    "revision":"v0.34.4",
+    "version":"0.34.4",
     "targets":"edu.gemini%lucuma-itc edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc-testkit",
     "publishedScalaVersion":"3.6.4",
     "config":{
@@ -19111,8 +19111,8 @@
   "gemini-hlsw/lucuma-sso":{
     "project":"gemini-hlsw/lucuma-sso",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-sso.git",
-    "revision":"v0.8.11",
-    "version":"0.8.11",
+    "revision":"v0.8.12",
+    "version":"0.8.12",
     "targets":"edu.gemini%lucuma-sso-backend-client edu.gemini%lucuma-sso-frontend-client",
     "publishedScalaVersion":"3.6.4",
     "config":{
@@ -27380,8 +27380,8 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.347",
-    "version":"4.0.347",
+    "revision":"v4.0.348",
+    "version":"4.0.348",
     "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "publishedScalaVersion":"3.5.2",
     "config":{
@@ -35118,7 +35118,44 @@
     "revision":"v0.110.0",
     "version":"0.110.0",
     "targets":"io.github.marcinzh%turbolift-bindless io.github.marcinzh%turbolift-bindless-next io.github.marcinzh%turbolift-core io.github.marcinzh%turbolift-core-next io.github.marcinzh%turbolift-extra-effects",
-    "publishedScalaVersion":"3.6.4"
+    "publishedScalaVersion":"3.6.4",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val ScalaNext = .*",
+          "replaceWith":"val ScalaNext = \"<SCALA_VERSION>\" "
+        }
+      ]
+    }
   },
   "marcinzh/yamlike":{
     "project":"marcinzh/yamlike",
@@ -42642,8 +42679,8 @@
   "pme123/camundala":{
     "project":"pme123/camundala",
     "repoUrl":"https://github.com/pme123/camundala.git",
-    "revision":"v1.30.46",
-    "version":"1.30.46",
+    "revision":"v1.30.48",
+    "version":"1.30.48",
     "targets":"io.github.pme123%camundala-api io.github.pme123%camundala-camunda io.github.pme123%camundala-camunda7-worker io.github.pme123%camundala-camunda7-zio-worker io.github.pme123%camundala-camunda8-worker io.github.pme123%camundala-dmn io.github.pme123%camundala-domain io.github.pme123%camundala-gateway io.github.pme123%camundala-gateway-zio io.github.pme123%camundala-helper io.github.pme123%camundala-simulation io.github.pme123%camundala-worker",
     "publishedScalaVersion":"3.6.4",
     "config":{
@@ -55364,8 +55401,8 @@
   "takapi327/mcp-scala":{
     "project":"takapi327/mcp-scala",
     "repoUrl":"https://github.com/takapi327/mcp-scala.git",
-    "revision":"v0.1.0-alpha1",
-    "version":"0.1.0-alpha1",
+    "revision":"v0.1.0-alpha2",
+    "version":"0.1.0-alpha2",
     "targets":"io.github.takapi327%mcp-scala-schema io.github.takapi327%mcp-scala-server",
     "publishedScalaVersion":"3.3.5",
     "config":{
