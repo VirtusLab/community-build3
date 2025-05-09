@@ -1,5 +1,5 @@
 
-# projects total:     762
+# projects total:     759
 # min stars count:    -1
 # max projects count: 1000
 
@@ -378,6 +378,7 @@ jobs:
         - name: "indoorvivants/mdoc-effect"
         - name: "indoorvivants/opaque-newtypes"
         - name: "indoorvivants/rendition"
+        - name: "indoorvivants/scala-mcp"
         - name: "indoorvivants/sn-demangler"
         - name: "indoorvivants/subatomic"
         - name: "indoorvivants/trigs"
@@ -486,9 +487,7 @@ jobs:
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
-        - name: "lhns/http4s-errors"
         - name: "lhns/http4s-otel"
-        - name: "lhns/http4s-spa"
         - name: "lhns/jwt-s"
         - name: "lhns/nifi-scala"
         - name: "lhns/remote-io"
@@ -534,9 +533,7 @@ jobs:
         - name: "mateuszkubuszok/explain-given"
         - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
-        - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/scalacheck"
-        - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
         - name: "mimoguz/layeredfonticon"
         - name: "mixql/mixql-core"
@@ -548,6 +545,7 @@ jobs:
         - name: "mongocamp/micrometer-mongodb"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
+        - name: "mpollmeier/sbt-ci-release-early-usage"
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
@@ -610,6 +608,8 @@ jobs:
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
+        - name: "pityka/pairwisealignment"
+        - name: "pityka/relational3"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,8 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "pityka/pairwisealignment"
-        - name: "pityka/relational3"
         - name: "pityka/selfpackage"
         - name: "pjfanning/acked-stream"
         - name: "pjfanning/akka-rabbitmq"
@@ -657,11 +655,12 @@ jobs:
         - name: "pjfanning/scala3-reflection"
         - name: "pjfanning/scala3-sample-classes"
         - name: "pjfanning/zio-metrics-micrometer"
+        - name: "pme123/orchescala"
         - name: "pmeheut/nscala-java-time"
         - name: "polystat/polystat-cli"
-        - name: "polyvariant/caliban-gitlab"
         - name: "polyvariant/respectfully"
         - name: "polyvariant/scodec-java-classfile"
+        - name: "polyvariant/smithy4s-bsp"
         - name: "polyvariant/treesitter4s"
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
@@ -725,6 +724,7 @@ jobs:
         - name: "scalacenter/bloop-config"
         - name: "scalacenter/libdaemon-jvm"
         - name: "scalacenter/scala3-binary-decoder"
+        - name: "scalalandio/chimney-macro-commons"
         - name: "scalalandio/mdc4s"
         - name: "scalameta/munit-scalacheck"
         - name: "scalapb-json/scalapb-argonaut"
@@ -832,12 +832,10 @@ jobs:
         - name: "tpunder/fm-xml"
         - name: "trace4cats/trace4cats-avro"
         - name: "trace4cats/trace4cats-avro-kafka"
-        - name: "trace4cats/trace4cats-cloudtrace"
         - name: "trace4cats/trace4cats-datadog"
         - name: "trace4cats/trace4cats-exporter-http"
         - name: "trace4cats/trace4cats-http4s"
         - name: "trace4cats/trace4cats-jaeger"
-        - name: "trace4cats/trace4cats-jaeger-integration-test"
         - name: "trace4cats/trace4cats-kafka"
         - name: "trace4cats/trace4cats-natchez"
         - name: "trace4cats/trace4cats-newrelic"
@@ -880,7 +878,6 @@ jobs:
         - name: "y-yu/slick-bulk-insert"
         - name: "yacineall/json-schema-inferrer"
         - name: "yrichika/scalahtml"
-        - name: "ysthakur/sline"
         - name: "yurikpanic/zio-postgres"
         - name: "yurique/embedded-files-macro"
         - name: "zhranklin/scala-tricks"
