@@ -97,7 +97,6 @@ jobs:
         - name: "akka/alpakka-kafka"
         - name: "alaz/scala-i18n"
         - name: "alejandrohdezma/http4s-munit"
-        - name: "alejandrohdezma/tapir-golden-openapi-munit"
         - name: "algolia/algoliasearch-client-scala"
         - name: "alhuelamo/dbjobs"
         - name: "aliics/mouse"
@@ -330,6 +329,7 @@ jobs:
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
+        - name: "filosganga/batcher"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
@@ -455,6 +454,7 @@ jobs:
         - name: "iltotore/iron"
         - name: "imaxmelnyk/openai-scala"
         - name: "indoorvivants/decline-derive"
+        - name: "indoorvivants/mcp"
         - name: "indoorvivants/scala-uri"
         - name: "indoorvivants/sn-bindgen"
         - name: "indoorvivants/sn-vcpkg"
@@ -466,7 +466,6 @@ jobs:
         - name: "input-output-hk/scrypto"
         - name: "irevive/union-derivation"
         - name: "ironcorelabs/cats-scalatest"
-        - name: "itv/quartz4s"
         - name: "itv/scala-pact"
         - name: "j-mie6/parsley"
         - name: "j-mie6/parsley-cats"
@@ -610,6 +609,7 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
+        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -890,6 +889,7 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1118,6 +1117,7 @@ jobs:
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
         - name: "zio-archive/zio-nio"
+        - name: "zio-archive/zio-optics"
         - name: "zio-archive/zio-sql"
         - name: "zio-archive/zio-test-intellij"
         - name: "zio-archive/zio-wasm"
