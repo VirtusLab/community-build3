@@ -216,7 +216,6 @@ jobs:
         - name: "commercetools/sphere-scala-libs"
         - name: "coralogix/zio-k8s"
         - name: "cornerman/chameleon"
-        - name: "cornerman/mycelium"
         - name: "cornerman/sloth"
         - name: "coursier/dependency"
         - name: "cquiroz/sbt-locales"
@@ -330,6 +329,7 @@ jobs:
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
+        - name: "filosganga/batcher"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
@@ -610,6 +609,7 @@ jobs:
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
+        - name: "max-leuthaeuser/scroll"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
@@ -890,6 +889,7 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -1063,6 +1062,7 @@ jobs:
         - name: "typelevel/twiddles"
         - name: "typelevel/unique"
         - name: "typelevel/vault"
+        - name: "typelevel/weaver-test"
         - name: "ua-parser/uap-scala"
         - name: "umazalakain/errata"
         - name: "unfiltered/unfiltered"

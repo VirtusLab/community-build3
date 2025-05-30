@@ -1,5 +1,5 @@
 
-# projects total:     773
+# projects total:     778
 # min stars count:    -1
 # max projects count: 1000
 
@@ -105,6 +105,7 @@ jobs:
         - name: "alexdupre/coinpayments-scala"
         - name: "alexdupre/fedex-scala"
         - name: "alterationx10/opinionated-zio"
+        - name: "ancane/recon4s"
         - name: "andimiller/cats-parse-interpolator"
         - name: "andimiller/hedgehogs"
         - name: "andimiller/munit-cats-effect-styles"
@@ -188,6 +189,7 @@ jobs:
         - name: "combinators/templating"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
+        - name: "cornerman/mycelium"
         - name: "cornerman/scala-cuid"
         - name: "cornerman/simple-scalajs-requests"
         - name: "coursier/class-path-util"
@@ -328,8 +330,6 @@ jobs:
         - name: "hamnis/googleapis-discovery-http4s"
         - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
-        - name: "herminiogg/label2thesaurus"
-        - name: "herminiogg/xmlschema2shex"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "herminiogg/label2thesaurus"
+        - name: "herminiogg/xmlschema2shex"
         - name: "hireproof/screening"
         - name: "hjfruit/scalikejdbc-helper"
         - name: "hjfruit/zio-pulsar"
@@ -576,6 +578,7 @@ jobs:
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
+        - name: "nivox/fs2-backpressure-sensor"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
@@ -607,9 +610,6 @@ jobs:
         - name: "permutive-engineering/prometheus4cats-contrib"
         - name: "permutive-engineering/refreshable"
         - name: "petitviolet/scala-operator"
-        - name: "philemone/hobogrid"
-        - name: "philippus/julius"
-        - name: "philippus/osita"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "philemone/hobogrid"
+        - name: "philippus/julius"
+        - name: "philippus/osita"
         - name: "philippus/pureconfig-javanet"
         - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
@@ -766,6 +769,7 @@ jobs:
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
         - name: "sideeffffect/liquibase-doobie"
+        - name: "sideeffffect/scala-quartz"
         - name: "simkoc/scala-argparse"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
@@ -783,6 +787,7 @@ jobs:
         - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
         - name: "swaldman/feedletter"
+        - name: "swaldman/logadapter-scala"
         - name: "swaldman/mailutil"
         - name: "swaldman/mchange-sysadmin-scala"
         - name: "swaldman/mlog-scala"
@@ -885,11 +890,6 @@ jobs:
         - name: "xuwei-k/shapeless-annotation"
         - name: "xuwei-k/shapeless-generic-counter"
         - name: "xuwei-k/test-times-reporter"
-        - name: "xuwei-k/unapply"
-        - name: "xuwei-k/unused-proto"
-        - name: "y-yu/slick-bulk-insert"
-        - name: "yacineall/json-schema-inferrer"
-        - name: "yrichika/scalahtml"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "xuwei-k/unapply"
+        - name: "xuwei-k/unused-proto"
+        - name: "y-yu/slick-bulk-insert"
+        - name: "yacineall/json-schema-inferrer"
+        - name: "yrichika/scalahtml"
         - name: "ysthakur/sline"
         - name: "yurikpanic/zio-postgres"
         - name: "yurique/embedded-files-macro"
