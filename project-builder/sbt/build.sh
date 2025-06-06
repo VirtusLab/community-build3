@@ -92,6 +92,14 @@ function runSbt() {
 function checkLogsForRetry() {
   # Retry only when given modes were not tried yet
   shouldRetry=false
+  # Failed to download artifacts
+  if grep -q 'sbt.librarymanagement.ResolveException' "$logFile"; then
+    TIMEOUT=$(( RANDOM % 241 + 60 ))
+    echo "Failed to download artifacts, retry after $TIMEOUT seconds"
+    sleep "$TIMEOUT"
+    shouldRetry=true
+  fi
+
   # Failed to switch version
   if [ "$forceScalaVersion" = false ]; then
     if grep -q 'Switch failed:' "$logFile"; then
@@ -113,7 +121,7 @@ function checkLogsForRetry() {
 }
 
 retry=0
-maxRetries=1 # 1 retry for each: missing mappings (force scala version)
+maxRetries=2 # 1 retry for each: missing mappings (force scala version)
 
 function retryBuild() {
   while [[ $retry -lt $maxRetries ]]; do
