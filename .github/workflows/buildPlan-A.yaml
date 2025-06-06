@@ -135,7 +135,6 @@ jobs:
         - name: "armanbilge/gcp4s"
         - name: "armanbilge/oxidized"
         - name: "armanbilge/porcupine"
-        - name: "armanbilge/scala-native-config-brew"
         - name: "armanbilge/schrodinger"
         - name: "arturaz/doobie-typesafe"
         - name: "arturaz/otel4s-doobie"
@@ -277,7 +276,6 @@ jobs:
         - name: "disneystreaming/smithy4s"
         - name: "disneystreaming/weaver-test"
         - name: "dispatch/reboot"
-        - name: "dobrynya/zio-jms"
         - name: "donderom/llm4s"
         - name: "dotty-cps-async/cps-async-connect"
         - name: "dotty-cps-async/dotty-cps-async"
@@ -330,6 +328,8 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
+        - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,8 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
@@ -410,6 +408,7 @@ jobs:
         - name: "grouzen/zio-apache-parquet"
         - name: "guardian/fastly-api-client"
         - name: "guardian/hmac-headers"
+        - name: "guardian/janus-app"
         - name: "guardian/pan-domain-authentication"
         - name: "guardian/play-brotli-filter"
         - name: "guardian/play-secret-rotation"
@@ -610,6 +609,7 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
+        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -751,6 +750,7 @@ jobs:
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"
         - name: "profunktor/redis4cats"
+        - name: "propensive/soundness"
         - name: "pureconfig/pureconfig"
         - name: "purplekingdomgames/tyrian"
         - name: "purplekingdomgames/ultraviolet"
