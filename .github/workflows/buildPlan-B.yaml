@@ -1,5 +1,5 @@
 
-# projects total:     778
+# projects total:     779
 # min stars count:    -1
 # max projects count: 1000
 
@@ -121,6 +121,7 @@ jobs:
         - name: "armanbilge/litter"
         - name: "armanbilge/sadalsuud"
         - name: "armanbilge/saslprep"
+        - name: "armanbilge/scala-native-config-brew"
         - name: "armanbilge/stratus"
         - name: "armanbilge/van-cats"
         - name: "arturaz/cats-effect-resource-shared-memoized"
@@ -186,7 +187,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "combinators/templating"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -229,6 +229,7 @@ jobs:
         - name: "davenverse/os-detect"
         - name: "davenverse/publicsuffix"
         - name: "delimobil/fs2-hbase"
+        - name: "dobrynya/zio-jms"
         - name: "dotty-cps-async/shim--scala-async"
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
@@ -329,7 +330,6 @@ jobs:
         - name: "hamnis/google-discovery-scala"
         - name: "hamnis/googleapis-discovery-http4s"
         - name: "hamnis/jwk"
-        - name: "herminiogg/dmaog"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
         - name: "herminiogg/xmlschema2shex"
         - name: "hireproof/screening"
@@ -609,7 +610,6 @@ jobs:
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
         - name: "permutive-engineering/refreshable"
-        - name: "petitviolet/scala-operator"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
         - name: "philippus/julius"
         - name: "philippus/osita"
@@ -889,7 +890,6 @@ jobs:
         - name: "xuwei-k/scala3profile"
         - name: "xuwei-k/shapeless-annotation"
         - name: "xuwei-k/shapeless-generic-counter"
-        - name: "xuwei-k/test-times-reporter"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "xuwei-k/test-times-reporter"
         - name: "xuwei-k/unapply"
         - name: "xuwei-k/unused-proto"
         - name: "y-yu/slick-bulk-insert"
