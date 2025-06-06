@@ -52,6 +52,10 @@ function tryBuild() {
 }
 
 
-if [[ -f ./mill ]]; then tryBuild ./mill
-else tryBuild "${scriptDir}/millw --mill-version $(cat .mill-version)"
+if [[ -f ./mill ]]; then
+  chmod +x ./mill
+  tryBuild ./mill
+else 
+  chmod +x ${scriptDir}/millw
+  tryBuild "${scriptDir}/millw --mill-version $(cat .mill-version)"
 fi
