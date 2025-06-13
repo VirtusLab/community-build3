@@ -1,5 +1,5 @@
 
-# projects total:     779
+# projects total:     781
 # min stars count:    -1
 # max projects count: 1000
 
@@ -132,6 +132,7 @@ jobs:
         - name: "atedeg/scala-release"
         - name: "atry/futurebinding.scala"
         - name: "augustnagro/form-url-codec"
+        - name: "balmungsan/neotypes"
         - name: "banno/cosmos4s"
         - name: "barnardb/tinyplate"
         - name: "bcarter97/id-generator"
@@ -329,7 +330,6 @@ jobs:
         - name: "h8io/borscht"
         - name: "hamnis/google-discovery-scala"
         - name: "hamnis/googleapis-discovery-http4s"
-        - name: "hamnis/jwk"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
         - name: "herminiogg/xmlschema2shex"
@@ -579,7 +580,7 @@ jobs:
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
-        - name: "nivox/fs2-backpressure-sensor"
+        - name: "nivox/cats-effect-treesync"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
@@ -609,7 +610,6 @@ jobs:
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
-        - name: "permutive-engineering/refreshable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "permutive-engineering/refreshable"
         - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
         - name: "philippus/julius"
@@ -677,6 +678,7 @@ jobs:
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
+        - name: "ppurang/asynch"
         - name: "pschichtel/obd4s"
         - name: "psilicon/avro2s"
         - name: "pureharm/pureharm-config-ciris"
@@ -888,8 +890,6 @@ jobs:
         - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"
         - name: "xuwei-k/scala3profile"
-        - name: "xuwei-k/shapeless-annotation"
-        - name: "xuwei-k/shapeless-generic-counter"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "xuwei-k/shapeless-annotation"
+        - name: "xuwei-k/shapeless-generic-counter"
         - name: "xuwei-k/test-times-reporter"
         - name: "xuwei-k/unapply"
         - name: "xuwei-k/unused-proto"
