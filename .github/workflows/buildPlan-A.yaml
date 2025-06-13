@@ -217,6 +217,7 @@ jobs:
         - name: "cornerman/chameleon"
         - name: "cornerman/sloth"
         - name: "coursier/dependency"
+        - name: "coursier/publish"
         - name: "cquiroz/sbt-locales"
         - name: "cquiroz/scala-java-locales"
         - name: "cquiroz/scala-java-time"
@@ -282,6 +283,7 @@ jobs:
         - name: "dragonfly-ai/matrix"
         - name: "dragonfly-ai/narr"
         - name: "dragonfly-ai/slash"
+        - name: "dripower/postgresql-async"
         - name: "durban/choam"
         - name: "dvgica/healthful"
         - name: "dvgica/managerial"
@@ -328,8 +330,6 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
-        - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "fingo/spata"
         - name: "finos/morphir-jvm"
@@ -608,8 +610,6 @@ jobs:
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
-        - name: "max-leuthaeuser/scroll"
-        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "max-leuthaeuser/scroll"
+        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -666,7 +668,7 @@ jobs:
         - name: "neandertech/langoustine"
         - name: "neandertech/smithy4s-deriving"
         - name: "nebula-contrib/zio-nebula"
-        - name: "neotypes/neotypes"
+        - name: "nivox/fs2-backpressure-sensor"
         - name: "nmoncho/helenus3"
         - name: "noelwelsh/mads"
         - name: "nomadblacky/scalatest-otel-reporter"
@@ -745,7 +747,6 @@ jobs:
         - name: "polyvariant/sttp-oauth2"
         - name: "poslegm/munit-zio"
         - name: "postgresql-async/postgresql-async"
-        - name: "ppurang/asynch"
         - name: "profunktor/fs2-rabbit"
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"
@@ -889,7 +890,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -1112,7 +1113,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
