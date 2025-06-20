@@ -1,5 +1,5 @@
 
-# projects total:     781
+# projects total:     783
 # min stars count:    -1
 # max projects count: 1000
 
@@ -235,6 +235,7 @@ jobs:
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
         - name: "dragonfly-ai/mesh"
+        - name: "dragonfly-ai/spatial"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
         - name: "dwolla/http4s-consul-middleware"
@@ -245,6 +246,7 @@ jobs:
         - name: "eb2501/fluor-core"
         - name: "edadma/char-reader"
         - name: "edadma/cross-platform"
+        - name: "edadma/dal"
         - name: "edadma/dllist"
         - name: "edadma/logger"
         - name: "edadma/pattern-matcher"
@@ -253,7 +255,6 @@ jobs:
         - name: "edadma/typesetter"
         - name: "eikek/binny"
         - name: "eikek/borer-compats"
-        - name: "eikek/htmx4s"
         - name: "eikek/soidc"
         - name: "eikek/tus4s"
         - name: "eltherion/http4s-timer"
@@ -329,7 +330,6 @@ jobs:
         - name: "gzoller/listzipper"
         - name: "h8io/borscht"
         - name: "hamnis/google-discovery-scala"
-        - name: "hamnis/googleapis-discovery-http4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "hamnis/googleapis-discovery-http4s"
         - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
@@ -376,6 +377,7 @@ jobs:
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
         - name: "hughsimpson/scalameter"
+        - name: "i10416/cssminifier"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/decline-completion"
@@ -403,6 +405,7 @@ jobs:
         - name: "ivoah/vial"
         - name: "j-mie6/golden-scala"
         - name: "j-mie6/parsley-debug-views"
+        - name: "j5ik2o/base64scala"
         - name: "j5ik2o/event-store-adapter-scala"
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
@@ -607,9 +610,6 @@ jobs:
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
         - name: "permutive-engineering/doobie-pureconfig"
-        - name: "permutive-engineering/gcp-auth"
-        - name: "permutive-engineering/odin-contrib"
-        - name: "permutive-engineering/prometheus4cats-contrib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "permutive-engineering/gcp-auth"
+        - name: "permutive-engineering/odin-contrib"
+        - name: "permutive-engineering/prometheus4cats-contrib"
         - name: "permutive-engineering/refreshable"
         - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
@@ -828,7 +831,6 @@ jobs:
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
         - name: "timbertson/flogger"
-        - name: "tkrs/fluflu"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
         - name: "tlsomers/scala-suspendable"
@@ -888,8 +890,6 @@ jobs:
         - name: "wiwiwa/ezscala"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
-        - name: "xuwei-k/jwt-scala"
-        - name: "xuwei-k/scala3profile"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "xuwei-k/jwt-scala"
+        - name: "xuwei-k/scala3profile"
         - name: "xuwei-k/shapeless-annotation"
         - name: "xuwei-k/shapeless-generic-counter"
         - name: "xuwei-k/test-times-reporter"
