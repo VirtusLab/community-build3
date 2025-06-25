@@ -1,5 +1,5 @@
 
-# projects total:     783
+# projects total:     784
 # min stars count:    -1
 # max projects count: 1000
 
@@ -125,7 +125,6 @@ jobs:
         - name: "armanbilge/stratus"
         - name: "armanbilge/van-cats"
         - name: "arturaz/cats-effect-resource-shared-memoized"
-        - name: "arturaz/yantl"
         - name: "ashwinbhaskar/sight-scala"
         - name: "asragab/unstructured4s"
         - name: "assist-iot-sripas/scala-mqtt-wrapper"
@@ -135,6 +134,7 @@ jobs:
         - name: "balmungsan/neotypes"
         - name: "banno/cosmos4s"
         - name: "barnardb/tinyplate"
+        - name: "bartholomews/scala-iso"
         - name: "bcarter97/id-generator"
         - name: "beangle/boot"
         - name: "beangle/cache"
@@ -796,6 +796,7 @@ jobs:
         - name: "swaldman/logadapter-scala"
         - name: "swaldman/mailutil"
         - name: "swaldman/mchange-sysadmin-scala"
+        - name: "swaldman/mill-daemon"
         - name: "swaldman/mlog-scala"
         - name: "swaldman/sqlutil-scala"
         - name: "swaldman/texttable"
@@ -889,7 +890,6 @@ jobs:
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
         - name: "xebia-functional/munit-compiler-toolkit"
-        - name: "xebia-functional/munit-snap"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"
         - name: "xuwei-k/scala3profile"
         - name: "xuwei-k/shapeless-annotation"
