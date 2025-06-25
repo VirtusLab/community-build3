@@ -45,18 +45,19 @@ class Scala3CommunityBuildMillAdapter(
       .map(new Scala3CommunityBuildMillAdapter(_))
   }
 
-  val scala3Identifiers = Seq(
-    "Scala3",
-    "scala3",
-    "ScalaDotty",
-    "scalaDotty",
-    "Scala3Version",
-    "scala3Version",
-    "Scala_3",
-    "scala_3",
-    "scala"
-    // "Scala" - explicitly ignored
-  )
+  object isScala3Identifier {
+    def apply(value: String): Boolean = scala3Identifiers.exists(value.equalsIgnoreCase)
+
+    val scala3Identifiers = Seq(
+      "Scala3",
+      "ScalaDotty",
+      "Scala3Version",
+      "Scala_3",
+      "Scala",
+      "ScalaLts",
+      "ScalaNext"
+    )
+  }
 
   val Scala3Literal = raw""""3.\d+.\d+(?:-RC\d+)?"""".r
   val millVersionSegments = config.millBinaryVersion.map(_.split('.').toList)
@@ -249,12 +250,12 @@ class Scala3CommunityBuildMillAdapter(
         }
 
         body.toString().trim() match {
-          case Scala3Literal()                                        => replacement
-          case id if id.split('.').exists(scala3Identifiers.contains) => replacement
-          case _                                                      => tree
+          case Scala3Literal()                                   => replacement
+          case id if id.split('.').exists(isScala3Identifier(_)) => replacement
+          case _                                                 => tree
         }
 
-      case tree @ ValOrDefDef(Term.Name(id), tpe, body) if scala3Identifiers.contains(id) =>
+      case tree @ ValOrDefDef(Term.Name(id), tpe, body) if isScala3Identifier(id) =>
         body.toString().trim() match {
           case Scala3Literal() =>
             val updatedBody = config.targetScalaVersion
