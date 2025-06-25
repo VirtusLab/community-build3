@@ -67,7 +67,7 @@ excludedCompilerPluginOptPrefixes=(
 
 shouldRetry=false
 forceScalaVersion=false
-appendScalacOptions="${extraScalacOptions}"
+appendScalacOptions="${extraScalacOptions},-Wconf:msg=can be rewritten automatically under:s"
 removeScalacOptions="${disabledScalacOption}"
 
 function runSbt() {
@@ -109,6 +109,9 @@ function checkLogsForRetry() {
       # Incorrect mappings using Scala 2.13
       forceScalaVersion=true
       shouldRetry=true
+    # elif grep -qF "(using using " "$logFile"; then
+    #   scala-cli run $scriptDir/../shared/searchAndReplace.scala -- "${repoDir}/**/*.scala" '(using using ' '(using '
+    #   shouldRetry=true
     elif grep -q -E "Your tlBaseVersion (.*) is behind the latest tag (.*)" "$logFile"; then
       # TypelevelVersioningPlugin workaround, might get broken after migration (commiting changes)
       newTag=$(grep 'Your tlBaseVersion [0-9]\+\.[0-9]\+ is behind the latest tag' "$logFile" | sed -E 's/.*latest tag ([0-9]+\.[0-9]+).*/\1/' | head -n 1 )

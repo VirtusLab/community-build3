@@ -74,7 +74,7 @@ function detectSourceVersion() {
 
 function setupProjectConfig() {
   currentTests=$(echo "$_projectConfig" | jq '.tests // "compile-only"')
-  projectConfig=$(echo "$_projectConfig" | jq \
+  projectConfig=$(echo "$_projectConfig" | jq -c \
     --argjson executeTests $executeTests \
     --argjson currentTests $currentTests \
     '.tests = if $executeTests then 
@@ -88,7 +88,7 @@ function setupProjectConfig() {
 isMigrating=false
 function setupScalacOptions(){
   detectSourceVersion
-  commonAppendScalacOptions="$sourceVersionSetting,-Wconf:msg=can be rewritten automatically under:s"
+  commonAppendScalacOptions="$sourceVersionSetting"
   commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
 
   extraScalacOptions="$commonAppendScalacOptions"

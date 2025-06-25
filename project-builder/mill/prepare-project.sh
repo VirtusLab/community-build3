@@ -156,6 +156,36 @@ for buildFile in "${adaptedFiles[@]}"; do
   rm $scalaFile
 done
 
+# For portability between MacOS and Linux
+relpath() {
+    from=$(cd "$1" && pwd -P)   # -P: follow symlinks, get physical path
+    to=$(cd "$2" && pwd -P)
+
+    IFS='/' read -ra fparts <<< "$from"
+    IFS='/' read -ra tparts <<< "$to"
+
+    # Find common prefix length
+    common_idx=0
+    for ((i=0; i<${#fparts[@]} && i<${#tparts[@]}; i++)); do
+        [[ "${fparts[i]}" == "${tparts[i]}" ]] || break
+        ((common_idx++))
+    done
+
+    # How many “..” needed
+    up=$(( ${#fparts[@]} - common_idx ))
+    for ((i=0; i<up; i++)); do
+        rel+=('../')
+    done
+
+    # Descend into the remainder of TO
+    for ((i=common_idx; i<${#tparts[@]}; i++)); do
+        rel+="${tparts[i]}"
+        [[ $i -lt $(( ${#tparts[@]} - 1 )) ]] && rel+='/'
+    done
+
+    printf '%s\n' "${rel:-.}"
+}
+
 for f in "${adaptedFiles[@]}"; do
   dir="$(dirname $(realpath "$f"))"
   extension="${f##*.}"
@@ -172,7 +202,17 @@ for f in "${adaptedFiles[@]}"; do
     done
   else
     # Compat for Mill 0.12+ sources
-    echo "package build" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${dir}/CommunityBuildCore.$extension 
+    dirPackage="$(relpath "" "$dir")"
+    dirPackage="${dirPackage/#\./}"          # drop leading "."  ( -> "" or "project/foo")
+    dirPackage="${dirPackage//\//.}"         # "/" → "."         ( -> "" or "project.foo")
+    pkg="build"
+    if [[ -n "$dirPackage" ]]; then
+      pkg+=".${dirPackage}"
+    fi
+    echo "package $pkg" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${dir}/CommunityBuildCore.$extension 
+    for fileCopy in ${dir}/MillCommunityBuild.$extension ${dir}/MillVersionCompat.$extension; do
+      scala-cli $scriptDir/../shared/searchAndReplace.scala -- $fileCopy "package build" "package $pkg" 2> /dev/null
+    done
   fi
 
 done
