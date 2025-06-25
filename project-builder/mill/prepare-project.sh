@@ -62,6 +62,7 @@ else
       if `${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null`; then
         echo "Successfully applied build using mill $v"
         millVersion=$v
+        break
       else 
         echo "Failed to apply build using mill $v"
       fi
