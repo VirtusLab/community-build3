@@ -360,7 +360,6 @@ jobs:
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
-        - name: "fingo/spata"
         - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
@@ -610,6 +609,7 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
+        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -890,6 +889,7 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -942,6 +941,7 @@ jobs:
         - name: "softwaremill/tapir"
         - name: "softwaremill/tapir-loom"
         - name: "soundcloud/twinagle"
+        - name: "sovt/spata"
         - name: "spotify/featran"
         - name: "sqids/sqids-scala"
         - name: "stanch/zipper"
