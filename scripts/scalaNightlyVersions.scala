@@ -16,7 +16,7 @@ import java.time.LocalDate
   val scalaVersions = {
     val regex = raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r
     val xml = io.Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml")
-    regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toList
+    regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toList.sorted
   }
   
   val filters = Seq[List[String] => List[String]](

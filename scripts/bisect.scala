@@ -288,7 +288,7 @@ object Releases:
   lazy val allReleases: Vector[Release] =
     val re = raw"""(?<=title=")(.+-bin-\d{8}-\w{7}-NIGHTLY)(?=/")""".r
     val html = Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/")
-    re.findAllIn(html.mkString).map(Release.apply).toVector
+    re.findAllIn(html.mkString).map(Release.apply).toVector.sortBy(_.date)
 
   def fromRange(range: ReleasesRange): Vector[Release] = range.filter(allReleases)
 
