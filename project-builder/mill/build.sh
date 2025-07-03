@@ -35,7 +35,7 @@ millSettings=(
   "--disable-ticker"
   -D "communitybuild.maven.url=$mavenRepoUrl"
   -D "communitybuild.scala=$scalaVersion"
-  -D "communitybuild.appendScalacOptions=$extraScalacOptions\""
+  -D "communitybuild.appendScalacOptions=$extraScalacOptions"
   -D "communitybuild.removeScalacOptions=-deprecation,-feature,-Xfatal-warnings,-Werror,$disabledScalacOption"
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
