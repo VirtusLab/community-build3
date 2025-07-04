@@ -1,5 +1,5 @@
 
-# projects total:     784
+# projects total:     786
 # min stars count:    -1
 # max projects count: 1000
 
@@ -176,6 +176,7 @@ jobs:
         - name: "casehubdk/hxl"
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
+        - name: "cheleb/zio-magnum"
         - name: "christian-schlichtherle/circe-kafka"
         - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
@@ -217,6 +218,7 @@ jobs:
         - name: "damon-v79/cassandra-migration"
         - name: "dapperware/dappermongo"
         - name: "datastrophic-games/dice"
+        - name: "davenverse/circuit-http4s"
         - name: "davenverse/clippette"
         - name: "davenverse/condemned"
         - name: "davenverse/crossplatformioapp"
@@ -249,6 +251,7 @@ jobs:
         - name: "edadma/dal"
         - name: "edadma/dllist"
         - name: "edadma/logger"
+        - name: "edadma/matrix"
         - name: "edadma/pattern-matcher"
         - name: "edadma/recognizer"
         - name: "edadma/texish"
@@ -327,9 +330,6 @@ jobs:
         - name: "guymers/ceesvee"
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
-        - name: "gzoller/listzipper"
-        - name: "h8io/borscht"
-        - name: "hamnis/google-discovery-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gzoller/listzipper"
+        - name: "h8io/borscht"
+        - name: "hamnis/google-discovery-scala"
         - name: "hamnis/googleapis-discovery-http4s"
         - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
@@ -607,9 +610,6 @@ jobs:
         - name: "palanga/parana"
         - name: "palanga/picazio"
         - name: "pbyrne84/scala-case-class-prettification"
-        - name: "pbyrne84/scala-wiremock-api"
-        - name: "permutive-engineering/common-types-gcp"
-        - name: "permutive-engineering/doobie-pureconfig"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pbyrne84/scala-wiremock-api"
+        - name: "permutive-engineering/common-types-gcp"
+        - name: "permutive-engineering/doobie-pureconfig"
         - name: "permutive-engineering/gcp-auth"
         - name: "permutive-engineering/odin-contrib"
         - name: "permutive-engineering/prometheus4cats-contrib"
@@ -674,7 +677,6 @@ jobs:
         - name: "pmeheut/nscala-java-time"
         - name: "polystat/polystat-cli"
         - name: "polyvariant/caliban-gitlab"
-        - name: "polyvariant/respectfully"
         - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/smithy4s-bsp"
         - name: "polyvariant/treesitter4s"
@@ -888,8 +890,6 @@ jobs:
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
-        - name: "wiwiwa/ezscala"
-        - name: "xebia-functional/munit-compiler-toolkit"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "wiwiwa/ezscala"
+        - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"
         - name: "xuwei-k/scala3profile"

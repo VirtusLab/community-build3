@@ -247,7 +247,6 @@ jobs:
         - name: "davenverse/cats-scalacheck"
         - name: "davenverse/catscript"
         - name: "davenverse/circuit"
-        - name: "davenverse/circuit-http4s"
         - name: "davenverse/epimetheus"
         - name: "davenverse/epimetheus-http4s"
         - name: "davenverse/github"
@@ -330,6 +329,7 @@ jobs:
         - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
+        - name: "fiatjaf/scoin"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
@@ -610,6 +609,7 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -740,6 +739,7 @@ jobs:
         - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/colorize-scala"
+        - name: "polyvariant/respectfully"
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/smithy4s-caliban"
         - name: "polyvariant/sttp-oauth2"
