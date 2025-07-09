@@ -15,7 +15,7 @@ projectConfig="$4"
 export OPENCB_PROJECT_DIR=$repoDir
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-MILL_0_12="0.12.0"
+MILL_0_12="0.12.14"
 MILL_0_11=0.11.12
 MILL_0_10=0.10.15
 MILL_0_9=0.9.12
