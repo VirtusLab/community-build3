@@ -1,5 +1,5 @@
 
-# projects total:     786
+# projects total:     790
 # min stars count:    -1
 # max projects count: 1000
 
@@ -248,12 +248,15 @@ jobs:
         - name: "eb2501/fluor-core"
         - name: "edadma/char-reader"
         - name: "edadma/cross-platform"
+        - name: "edadma/csv"
         - name: "edadma/dal"
         - name: "edadma/dllist"
+        - name: "edadma/indentation"
         - name: "edadma/logger"
         - name: "edadma/matrix"
         - name: "edadma/pattern-matcher"
         - name: "edadma/recognizer"
+        - name: "edadma/tabula"
         - name: "edadma/texish"
         - name: "edadma/typesetter"
         - name: "eikek/binny"
@@ -327,9 +330,6 @@ jobs:
         - name: "guizmaii-opensource/zio-spark"
         - name: "guntiso/mojoz"
         - name: "guntiso/querease"
-        - name: "guymers/ceesvee"
-        - name: "guymers/foobie"
-        - name: "gzoller/deploysample"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "guymers/ceesvee"
+        - name: "guymers/foobie"
+        - name: "gzoller/deploysample"
         - name: "gzoller/listzipper"
         - name: "h8io/borscht"
         - name: "hamnis/google-discovery-scala"
@@ -569,6 +572,7 @@ jobs:
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
+        - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
         - name: "nafg/cloud-logging-logback-scala"
@@ -606,10 +610,6 @@ jobs:
         - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
         - name: "ovotech/meters4s"
-        - name: "pablf/teseo"
-        - name: "palanga/parana"
-        - name: "palanga/picazio"
-        - name: "pbyrne84/scala-case-class-prettification"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "pablf/teseo"
+        - name: "palanga/parana"
+        - name: "palanga/picazio"
+        - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
         - name: "permutive-engineering/doobie-pureconfig"
@@ -886,10 +890,6 @@ jobs:
         - name: "vlmiroshnikov/saga"
         - name: "wangzaixiang/wjson"
         - name: "wehkamp/cakemix"
-        - name: "windymelt/happy-birthday"
-        - name: "windymelt/qw.scala"
-        - name: "windymelt/rss2discord"
-        - name: "wiringbits/wiringbits-webapp-utils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "windymelt/happy-birthday"
+        - name: "windymelt/qw.scala"
+        - name: "windymelt/rss2discord"
+        - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
