@@ -461,22 +461,22 @@ class Scala3CommunityBuildMillAdapter(
       |}
       |""".stripMargin
       else s"""
-      |extension (asSeq: Seq[String]) {
+      |extension (value: Seq[String]) {
       |  def mapScalacOptions(scalaVersion: mill.api.Task[String])(using ctx: mill.api.TaskCtx): Seq[String] = 
       |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).toOption }
-      |     .toOption.flatten
-      |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
-      |     .getOrElse {
+      |    .toOption.flatten
+      |    .map(MillCommunityBuild.mapScalacOptions(_, value))
+      |    .getOrElse {
       |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
-      |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
-      |     }
-      |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
+      |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), value)
+      |    }
+      |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, value)
       |}
       |
-      |extension (asTask: mill.api.Task[Seq[String]]) {
-      |  def mapScalacOptions(scalaVersion: mill.api.Task[String]) = scalaVersion.zip(asTask).map {
-      |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
-      |  }
+      |extension (task: mill.api.Task[Seq[String]]) {
+      |  def mapScalacOptions(scalaVersion: mill.api.Task[String]) = mill.api.Task(
+      |    MillCommunityBuild.mapScalacOptions(scalaVersion(), task())
+      |  )
       |}
       """.stripMargin
     }
@@ -492,10 +492,10 @@ class Scala3CommunityBuildMillAdapter(
             else
               "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
           ),
-        if (useLegacyTasks) None else Some("private object _OpenCommunityBuildOps {"),
+        if (useLegacyTasks || isMill1x) None else Some("private object _OpenCommunityBuildOps {"),
         Some(MapScalacOptionsOps),
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
-        if (useLegacyTasks) None else Some("}\nimport _OpenCommunityBuildOps._"),
+        if (useLegacyTasks || isMill1x) None else Some("}\nimport _OpenCommunityBuildOps._"),
         if (injectRootModuleRunCommand) Some(MillCommunityBuildInject) else None
       ).flatten ++
         Seq("// End of OpenCB code injects\n")
