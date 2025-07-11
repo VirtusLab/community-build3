@@ -357,7 +357,7 @@ object Scala3CommunityBuild {
 
     def filterTargets(targets: Seq[String], excludedPatterns: Seq[Regex]) = {
       targets.filter { target =>
-        target.split('%') match {
+        target.split("%") match {
           case Array(_, name) =>
             val excludingPattern = excludedPatterns.find { pattern =>
               // No Regex.matches in Scala 2.12 (!sic)

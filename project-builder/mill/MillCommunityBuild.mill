@@ -192,11 +192,11 @@ object MillCommunityBuild {
           flatten(soFar ++ deps, mDeps.tail ++ deps)
       }
 
-    val projectsToTest = flatten(topLevelModules, topLevelModules)
     val projectsBuildResults = for {
-      case (ModuleInfo(org, name, module: ScalaModule), idx) <- projectsToTest.toList.zipWithIndex
+      case ModuleInfo(org, name, module: JavaModule) <-
+        flatten(topLevelModules, topLevelModules).toList
     } yield {
-      ctx.log.info(s"\nStarting build for $name - [$idx/${projectsToTest.size}]")
+      ctx.log.info(s"\nStarting build for $name")
       val evaluator = new MillTaskEvaluator()
       import evaluator._
       val overrides = {
@@ -352,7 +352,6 @@ object MillCommunityBuild {
         // Result does not have withFilter method, wrap it into the Option to allow for-comprehension
         for {
           scalaVersion <- tryEval(module.scalaVersion).toOption
-          // _ = println(scalaVersion -> ctx.scalaVersion)
           if scalaVersion == ctx.scalaVersion
 
           case platformSuffix: String <- tryEval(module.platformSuffix).toOption
@@ -361,7 +360,6 @@ object MillCommunityBuild {
           case (mapping @ (targetName, ModuleInfo(_, _, module))) <- toMappingInfo(module).toOption
         } yield mapping
       case other =>
-        // println(other -> other.getClass())
         // We're only intrested in Scala modules
         None
     }.toMap
