@@ -7,6 +7,24 @@ on:
       - '.github/workflows/build*'
 
 jobs:
+  test-e2e:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+        - project: "com-lihaoyi/mill"    # mill 1.0
+        - project: "virtuslab/scala-cli" # mill 0.12
+        - project: "scalameta/munit"     # sbt
+        - project: "kordyjan/pytanie"    # scala-cli
+    steps:
+      - uses: actions/checkout@v4
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1
+        with:
+          apps: scala:3.7.1 scala-cli:1.8.3 sbt:1.11.3 mill:1.0.0 cs
+      # Test using RC version
+      - run: ./scripts/run.sh ${{ matrix.project }} 3.7.2-RC1
+          
   test-build:
     runs-on: ubuntu-22.04
     steps:
