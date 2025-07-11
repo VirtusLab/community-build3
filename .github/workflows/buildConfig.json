@@ -8799,7 +8799,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"mill-build/src/millbuild/Deps.scala",
+          "pattern":"val scalaVersion = \"3.\\..*\"\\",
+          "replaceWith":"val scalaVersion = \"<SCALA_VERSION>\" "
+        }
       ]
     }
   },
