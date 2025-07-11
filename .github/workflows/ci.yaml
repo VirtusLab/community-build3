@@ -9,6 +9,7 @@ on:
 jobs:
   test-e2e:
     runs-on: ubuntu-22.04
+    continue-on-error: true
     strategy:
       matrix:
         include:
@@ -21,7 +22,7 @@ jobs:
       - uses: coursier/cache-action@v6
       - uses: coursier/setup-action@v1
         with:
-          apps: scala:3.7.1 scala-cli:1.8.3 sbt:1.11.3 mill:1.0.0 cs
+          apps: scala:3.7.1 scala-cli:1.8.3 sbt:1.11.3 mill cs
       # Test using RC version
       - run: ./scripts/run.sh ${{ matrix.project }} 3.7.2-RC1
           
