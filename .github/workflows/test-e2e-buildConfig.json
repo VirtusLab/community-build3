@@ -1,0 +1,143 @@
+{
+  "com-lihaoyi/mill":{
+    "project":"com-lihaoyi/mill",
+    "repoUrl":"https://github.com/com-lihaoyi/mill.git",
+    "revision":"1.0.0",
+    "version":"1.0.0",
+    "targets":"com.lihaoyi%mill-libs-javalib-api com.lihaoyi%mill-libs-pythonlib com.lihaoyi%mill-libs-scalajslib",
+    "publishedScalaVersion":"3.7.1",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"mill-build/src/millbuild/Deps.scala",
+          "pattern":"val scalaVersion = \"3\\..*\\\"",
+          "replaceWith":"val scalaVersion = \"<SCALA_VERSION>\" "
+        }
+      ]
+    }
+  },
+  "kordyjan/pytanie":{
+    "project":"kordyjan/pytanie",
+    "repoUrl":"https://github.com/kordyjan/pytanie.git",
+    "revision":"0.1.9",
+    "version":"0.1.9",
+    "targets":"pro.kordyjan%pytanie",
+    "publishedScalaVersion":"3.3.3"
+  },
+  "scalameta/munit":{
+    "project":"scalameta/munit",
+    "repoUrl":"https://github.com/scalameta/munit.git",
+    "revision":"v1.1.1",
+    "version":"1.1.1",
+    "targets":"org.scalameta%munit org.scalameta%munit-diff",
+    "publishedScalaVersion":"3.3.5",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"def scala3 = \"3.3.5\"",
+          "replaceWith":"def scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "virtuslab/scala-cli":{
+    "project":"virtuslab/scala-cli",
+    "repoUrl":"https://github.com/virtuslab/scala-cli.git",
+    "revision":"v1.8.3",
+    "version":"1.8.3",
+    "targets":"org.virtuslab.scala-cli%config org.virtuslab.scala-cli%core org.virtuslab.scala-cli%directives",
+    "publishedScalaVersion":"3.3.6",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          "directives":{
+            "tests":"compile-only"
+          }
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  }
+}
