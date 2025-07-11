@@ -202,6 +202,7 @@ jobs:
         - name: "com-lihaoyi/fastparse"
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/mainargs"
+        - name: "com-lihaoyi/mill"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/pprint"
@@ -329,7 +330,6 @@ jobs:
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
-        - name: "fdimuccio/play2-sockjs"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
@@ -597,7 +598,6 @@ jobs:
         - name: "lunduniversity/introprog-scalalib"
         - name: "m2-oss/calypso"
         - name: "makiftutuncu/e"
-        - name: "makiftutuncu/effect"
         - name: "makingthematrix/inject"
         - name: "makingthematrix/signals3"
         - name: "malliina/mobile-push"

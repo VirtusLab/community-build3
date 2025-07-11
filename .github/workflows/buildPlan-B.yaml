@@ -1,5 +1,5 @@
 
-# projects total:     790
+# projects total:     792
 # min stars count:    -1
 # max projects count: 1000
 
@@ -314,6 +314,7 @@ jobs:
         - name: "greenfossil/commons-i18n"
         - name: "greenfossil/commons-json"
         - name: "greenfossil/data-mapping"
+        - name: "greenfossil/htmltags"
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
@@ -329,7 +330,6 @@ jobs:
         - name: "guizmaii-opensource/zio-aes"
         - name: "guizmaii-opensource/zio-spark"
         - name: "guntiso/mojoz"
-        - name: "guntiso/querease"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "guntiso/querease"
         - name: "guymers/ceesvee"
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
@@ -541,6 +542,7 @@ jobs:
         - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
+        - name: "makiftutuncu/effect"
         - name: "malliina/sbt-utils"
         - name: "malliina/util-base"
         - name: "malyszaryczlowiek/kessenger-lib"
@@ -608,8 +610,6 @@ jobs:
         - name: "outr/rapid"
         - name: "outr/robobrowser"
         - name: "outr/scalapass"
-        - name: "outr/sendgrid4s"
-        - name: "ovotech/meters4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "outr/sendgrid4s"
+        - name: "ovotech/meters4s"
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
@@ -888,8 +890,6 @@ jobs:
         - name: "vlmiroshnikov/aero3"
         - name: "vlmiroshnikov/authz"
         - name: "vlmiroshnikov/saga"
-        - name: "wangzaixiang/wjson"
-        - name: "wehkamp/cakemix"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "wangzaixiang/wjson"
+        - name: "wehkamp/cakemix"
         - name: "windymelt/happy-birthday"
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"
