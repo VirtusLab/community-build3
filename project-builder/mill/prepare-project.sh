@@ -13,6 +13,8 @@ scalaVersion="$3" # e.g. 3.1.2-RC1
 projectConfig="$4" 
 
 export OPENCB_PROJECT_DIR=$repoDir
+export OPENCB_SCALA_VERSION=$scalaVersion
+
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 MILL_1_0="1.0.0"
@@ -109,12 +111,12 @@ for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @bas
   scala-cli run $scriptDir/../shared/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}"
 done
 
-prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}.sh"
+prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
 if [[ -f "$prepareScript" ]]; then
   if [[ -x "$prepareScript" ]]; then 
     echo "Execute project prepare script: ${prepareScript}"
     cat $prepareScript
-    bash "$prepareScript"
+    $prepareScript
   else echo "Project prepare script is not executable: $prepareScript"
   fi
 else 

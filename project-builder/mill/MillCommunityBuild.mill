@@ -192,11 +192,11 @@ object MillCommunityBuild {
           flatten(soFar ++ deps, mDeps.tail ++ deps)
       }
 
+    val projectsToTest = flatten(topLevelModules, topLevelModules)
     val projectsBuildResults = for {
-      case ModuleInfo(org, name, module: JavaModule) <-
-        flatten(topLevelModules, topLevelModules).toList
+      case (ModuleInfo(org, name, module: ScalaModule), idx) <- projectsToTest.toList.zipWithIndex
     } yield {
-      ctx.log.info(s"\nStarting build for $name")
+      ctx.log.info(s"\nStarting build for $name - [$idx/${projectsToTest.size}]")
       val evaluator = new MillTaskEvaluator()
       import evaluator._
       val overrides = {

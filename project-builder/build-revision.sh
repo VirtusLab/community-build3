@@ -149,7 +149,7 @@ function buildForScalaVersion(){
   if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala" ] || [ -f "repo/build.sc" ]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
-    $scriptDir/mill/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
+    $scriptDir/mill/prepare-project.sh "$project" $PWD/repo "$scalaVersion" "$projectConfig"
     createBuildPatch
     $scriptDir/mill/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
     revertBuildPatch
@@ -158,7 +158,7 @@ function buildForScalaVersion(){
   elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
     echo "sbt project found: ${isSbtProject}"
     echo "sbt" > $buildToolFile
-    $scriptDir/sbt/prepare-project.sh "$project" repo "$scalaVersion" "$projectConfig"
+    $scriptDir/sbt/prepare-project.sh "$project" $PWD/repo "$scalaVersion" "$projectConfig"
     createBuildPatch
     $scriptDir/sbt/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
     revertBuildPatch
@@ -172,7 +172,7 @@ function buildForScalaVersion(){
     scala-cli bloop exit
     scala-cli clean $scriptDir/scala-cli/
     scala-cli clean repo
-    scala-cli $scriptDir/scala-cli/build.scala -- repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
+    scala-cli $scriptDir/scala-cli/build.scala -- $PWD/repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
   fi
 
   ## After build steps
