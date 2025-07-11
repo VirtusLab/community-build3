@@ -404,7 +404,7 @@ class Scala3CommunityBuildMillAdapter(
         |  scalaVersion: _root_.scala.Predef.String, 
         |  configJson: _root_.scala.Predef.String, 
         |  projectDir: _root_.scala.Predef.String, 
-        |  targets: _root_.scala.Predef.String*) = Task.Command(exclusive = true) {
+        |  targets: _root_.scala.Predef.String*) = mill.api.Task.Command(exclusive = true) {
         |  given MillCommunityBuild.Ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.Task.log)
         |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
         |}
