@@ -1,0 +1,143 @@
+{
+  "com-lihaoyi/mill":{
+    "project":"com-lihaoyi/mill",
+    "repoUrl":"https://github.com/com-lihaoyi/mill.git",
+    "revision":"1.0.0",
+    "version":"1.0.0",
+    "targets":"com.lihaoyi%mill-contrib-artifactory com.lihaoyi%mill-contrib-buildinfo com.lihaoyi%mill-contrib-codeartifact com.lihaoyi%mill-contrib-docker com.lihaoyi%mill-contrib-flyway com.lihaoyi%mill-contrib-gitlab com.lihaoyi%mill-contrib-jmh com.lihaoyi%mill-contrib-playlib com.lihaoyi%mill-contrib-playlib-worker-2.9 com.lihaoyi%mill-contrib-playlib-worker-3.0 com.lihaoyi%mill-contrib-proguard com.lihaoyi%mill-contrib-scalapblib com.lihaoyi%mill-contrib-scoverage com.lihaoyi%mill-contrib-scoverage-worker2 com.lihaoyi%mill-contrib-sonatypecentral com.lihaoyi%mill-contrib-twirllib com.lihaoyi%mill-contrib-versionfile com.lihaoyi%mill-core-api-daemon com.lihaoyi%mill-core-coursierutil com.lihaoyi%mill-core-eval com.lihaoyi%mill-core-exec com.lihaoyi%mill-core-resolve com.lihaoyi%mill-libs com.lihaoyi%mill-libs-androidlib com.lihaoyi%mill-libs-androidlib-api com.lihaoyi%mill-libs-androidlib-hilt com.lihaoyi%mill-libs-graphviz com.lihaoyi%mill-libs-init com.lihaoyi%mill-libs-init-buildgen com.lihaoyi%mill-libs-init-gradle com.lihaoyi%mill-libs-init-maven com.lihaoyi%mill-libs-init-sbt com.lihaoyi%mill-libs-init-sbt-models com.lihaoyi%mill-libs-javalib-api com.lihaoyi%mill-libs-javalib-classgraph-worker com.lihaoyi%mill-libs-javalib-jarjarabrams-worker com.lihaoyi%mill-libs-javalib-maven-worker com.lihaoyi%mill-libs-javalib-spotless-worker com.lihaoyi%mill-libs-javalib-spring-boot-worker com.lihaoyi%mill-libs-javalib-testrunner com.lihaoyi%mill-libs-javalib-worker com.lihaoyi%mill-libs-javascriptlib com.lihaoyi%mill-libs-kotlinlib com.lihaoyi%mill-libs-kotlinlib-api com.lihaoyi%mill-libs-kotlinlib-worker com.lihaoyi%mill-libs-pythonlib com.lihaoyi%mill-libs-scalajslib com.lihaoyi%mill-libs-scalajslib-api com.lihaoyi%mill-libs-scalajslib-worker-1 com.lihaoyi%mill-libs-scalanativelib com.lihaoyi%mill-libs-scalanativelib-api com.lihaoyi%mill-libs-scalanativelib-worker-0.5 com.lihaoyi%mill-libs-tabcomplete com.lihaoyi%mill-runner-bsp com.lihaoyi%mill-runner-bsp-worker com.lihaoyi%mill-runner-codesig com.lihaoyi%mill-runner-daemon com.lihaoyi%mill-runner-idea com.lihaoyi%mill-runner-launcher com.lihaoyi%mill-runner-meta com.lihaoyi%mill-runner-server com.lihaoyi%mill-testkit",
+    "publishedScalaVersion":"3.7.1",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"mill-build/src/millbuild/Deps.scala",
+          "pattern":"val scalaVersion = \"3.\\..*\"\\",
+          "replaceWith":"val scalaVersion = \"<SCALA_VERSION>\" "
+        }
+      ]
+    }
+  },
+  "kordyjan/pytanie":{
+    "project":"kordyjan/pytanie",
+    "repoUrl":"https://github.com/kordyjan/pytanie.git",
+    "revision":"0.1.9",
+    "version":"0.1.9",
+    "targets":"pro.kordyjan%pytanie",
+    "publishedScalaVersion":"3.3.3"
+  },
+  "scalameta/munit":{
+    "project":"scalameta/munit",
+    "repoUrl":"https://github.com/scalameta/munit.git",
+    "revision":"v1.1.1",
+    "version":"1.1.1",
+    "targets":"org.scalameta%munit org.scalameta%munit-diff",
+    "publishedScalaVersion":"3.3.5",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"def scala3 = \"3.3.5\"",
+          "replaceWith":"def scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "virtuslab/scala-cli":{
+    "project":"virtuslab/scala-cli",
+    "repoUrl":"https://github.com/virtuslab/scala-cli.git",
+    "revision":"v1.8.3",
+    "version":"1.8.3",
+    "targets":"org.virtuslab.scala-cli%build-macros org.virtuslab.scala-cli%build-module org.virtuslab.scala-cli%cli org.virtuslab.scala-cli%config org.virtuslab.scala-cli%core org.virtuslab.scala-cli%directives org.virtuslab.scala-cli%options org.virtuslab.scala-cli%runner org.virtuslab.scala-cli%scala3-graal org.virtuslab.scala-cli%scala3-graal-processor org.virtuslab.scala-cli%scala3-runtime org.virtuslab.scala-cli%specification-level org.virtuslab.scala-cli%tasty-lib org.virtuslab.scala-cli%test-runner",
+    "publishedScalaVersion":"3.3.6",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          "directives":{
+            "tests":"compile-only"
+          }
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"compile-only",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  }
+}

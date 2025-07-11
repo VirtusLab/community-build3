@@ -29,7 +29,8 @@ function config () {
 }
 DefaultConfig="{}"
 
-scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
+
+[ "$SKIP_BUILD_SETUP" != "1" ] && scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
 publishScalaVersion="$(config .publishedScalaVersion)"
 if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishScalaVersion" "$scalaVersion" ; then
