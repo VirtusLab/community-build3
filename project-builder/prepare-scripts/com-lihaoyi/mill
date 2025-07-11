@@ -1,0 +1,26 @@
+#!/usr/bin/env -S scala-cli shebang -S 3
+//> using toolkit default
+
+val projectDir = sys.env.get("OPENCB_PROJECT_DIR")
+  .map(os.Path(_))
+  .getOrElse(sys.error("no OPENCB_PROJECT_DIR env"))
+  
+val scalaVersion = sys.env.get("OPENCB_SCALA_VERSION")
+   .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
+  
+val millDefsVersion = os.read
+  .lines(projectDir / "mill-build"/ "src" / "millbuild"/ "Deps.scala")
+  .map(_.trim)
+  .collectFirst:
+    case s"""val millModuledefsVersion = "$version"""" => version
+  .getOrElse(sys.error("Failed to resolve millModuleDefs version"))
+
+val repositoryDir = os.temp.dir(prefix = "mill-moduledefs-")
+os.proc("git", "clone", "https://github.com/com-lihaoyi/mill-moduledefs", repositoryDir, "-b", millDefsVersion).call(check = true)
+
+val updatedBuild = os.read(repositoryDir / "build.sc")
+  .replaceAll(raw"Cross\[ModuleDefsCross]\(.*\)", s"""Cross[ModuleDefsCross](Seq("3.7.1"))""")
+  .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
+os.write.over(repositoryDir / "build.sc", updatedBuild)
+
+os.proc("./mill", "show", "__.publishLocalCached").call(cwd = repositoryDir, check = true)

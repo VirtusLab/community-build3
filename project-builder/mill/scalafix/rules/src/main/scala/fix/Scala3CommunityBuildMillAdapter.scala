@@ -11,9 +11,9 @@ case class Scala3CommunityBuildMillAdapterConfig(
 )
 object Scala3CommunityBuildMillAdapterConfig {
   def default = Scala3CommunityBuildMillAdapterConfig()
-  implicit val surface =
+  implicit val surface: metaconfig.generic.Surface[fix.Scala3CommunityBuildMillAdapterConfig] =
     metaconfig.generic.deriveSurface[Scala3CommunityBuildMillAdapterConfig]
-  implicit val decoder =
+  implicit val decoder: metaconfig.ConfDecoder[fix.Scala3CommunityBuildMillAdapterConfig] =
     metaconfig.generic.deriveDecoder(default)
 }
 
@@ -55,7 +55,8 @@ class Scala3CommunityBuildMillAdapter(
       "Scala_3",
       "Scala",
       "ScalaLts",
-      "ScalaNext"
+      "ScalaNext",
+      "scalaVersion"
     )
   }
 
@@ -64,6 +65,9 @@ class Scala3CommunityBuildMillAdapter(
   def toIntOption(value: String) =
     try Some(value.toInt)
     catch { case ex: Throwable => None }
+  val isMill0x = millVersionSegments.exists(_.headOption.contains("0"))
+  val isMill1x = millVersionSegments.exists(_.headOption.contains("1"))
+
   val useLegacyMillCross = millVersionSegments.exists {
     case "0" :: minor :: _ => toIntOption(minor).exists(_ < 11)
     case _                 => false
@@ -76,9 +80,15 @@ class Scala3CommunityBuildMillAdapter(
   object Transform {
     val RootMill = Term.Select(Term.Name("_root_"), Term.Name("mill"))
     val TaskType = Term.Select(RootMill, if (useLegacyTasks) Term.Name("T") else Term.Name("Task"))
-    // val TaskTerm =
-    val TaskCommandType =
-      Term.Select(TaskType, if (useLegacyTasks) Term.Name("command") else Term.Name("Command"))
+    val TaskCommandType = {
+      if (isMill0x)
+        Term.Select(TaskType, if (useLegacyTasks) Term.Name("command") else Term.Name("Command"))
+      else
+        Term.Apply(
+          Term.Select(TaskType, Term.Name("Command")),
+          Term.ArgClause(List(Term.Assign(Term.Name("exclusive"), Lit.Boolean(true))))
+        )
+    }
 
     def shouldWrapInTarget(body: Term, tpe: Option[Type]) = {
       val isLiteral = body.isInstanceOf[Lit.String]
@@ -152,42 +162,52 @@ class Scala3CommunityBuildMillAdapter(
       )
     )
 
-    def injectRootModuleRunCommand =                  
+    def injectRootModuleRunCommand = {                  
       // def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
       //   implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
       //   MillCommunityBuild.runBuild(configJson, projectDir, targets)
       // }""".stripMargin
-      Defn.Def(Nil, Term.Name("runCommunityBuild"), Nil, 
-      paramss = List(
-        List(
-          Term.Param(Nil, Term.Name("evaluator"),    Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("eval")), Type.Name("Evaluator"))), None),
-          Term.Param(Nil, Term.Name("scalaVersion"), Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
-          Term.Param(Nil, Term.Name("configJson"),   Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
-          Term.Param(Nil, Term.Name("projectDir"),   Some(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))), None),
-          Term.Param(Nil, Term.Name("targets"),      Some(Type.Repeated(Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String")))), None),
-        )
-      ),
-      decltpe = None,
-      body =
-        Term.Apply(
-          TaskCommandType,
+      val stringType = Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))
+      val evaluatorType = 
+        if (isMill1x) 
+          Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("api")), Type.Name("Evaluator"))
+        else 
+          Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("eval")), Type.Name("Evaluator"))
+      Defn.Def(
+        Nil, Term.Name("runCommunityBuild"), Nil, 
+        paramss = List(
           List(
-            Term.Block(List(
-              Defn.Def(
-                List(Mod.Implicit()), Term.Name("ctx"), Nil, Nil, None, 
+            Term.Param(Nil, Term.Name("evaluator"),    Some(evaluatorType), None),
+            Term.Param(Nil, Term.Name("scalaVersion"), Some(stringType), None),
+            Term.Param(Nil, Term.Name("configJson"),   Some(stringType), None),
+            Term.Param(Nil, Term.Name("projectDir"),   Some(stringType), None),
+            Term.Param(Nil, Term.Name("targets"),      Some(Type.Repeated(stringType)), None),
+          )
+        ),
+        decltpe = None,
+        body =
+          Term.Apply(
+            TaskCommandType,
+            List(
+              Term.Block(List(
+                Defn.Def(
+                  List(if (isMill0x) Mod.Implicit() else Mod.Using()),
+                  Term.Name("ctx"), Nil, Nil, 
+                  Some(Type.Select(Term.Name("MillCommunityBuild"), Type.Name("Ctx"))), 
+                  Term.Apply(
+                    Term.Select(Term.Name("MillCommunityBuild"), Term.Name("Ctx")),
+                    List(Term.This(Name.Anonymous()), Term.Name("scalaVersion"), Term.Name("evaluator"), Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("T")), Term.Name("log")))
+                  )
+                ),
                 Term.Apply(
-                  Term.Select(Term.Name("MillCommunityBuild"), Term.Name("Ctx")),
-                  List(Term.This(Name.Anonymous()), Term.Name("scalaVersion"), Term.Name("evaluator"), Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("T")), Term.Name("log")))
+                  Term.Select(Term.Name("MillCommunityBuild"), Term.Name("runBuild")),
+                  List(Term.Name("configJson"), Term.Name("projectDir"), Term.Name("targets"))
                 )
-              ),
-              Term.Apply(
-                Term.Select(Term.Name("MillCommunityBuild"), Term.Name("runBuild")),
-                List(Term.Name("configJson"), Term.Name("projectDir"), Term.Name("targets"))
-              )
-          ))
+            ))
+          )
         )
-    )
-  )
+      )
+    }
     // format: on
 
     def transformDefn(defn: Tree): Tree = defn match {
@@ -250,9 +270,9 @@ class Scala3CommunityBuildMillAdapter(
         }
 
         body.toString().trim() match {
-          case Scala3Literal()                                   => replacement
-          case id if id.split('.').exists(isScala3Identifier(_)) => replacement
-          case _                                                 => tree
+          case Scala3Literal()                                           => replacement
+          case id if id.split('.').indexWhere(isScala3Identifier(_)) > 0 => replacement
+          case _                                                         => tree
         }
 
       case tree @ ValOrDefDef(Term.Name(id), tpe, body) if isScala3Identifier(id) =>
@@ -290,9 +310,11 @@ class Scala3CommunityBuildMillAdapter(
         }.lastOption
         val shouldInjectRunCommand = !injectsRunCommandInRootModule
         insertAfter match {
-          case Some(Pkg(_, firstStat :: _)) => Patch.addLeft(firstStat, Replacment.injects(shouldInjectRunCommand))
-          case Some(insertAfter)            => Patch.addRight(insertAfter, Replacment.injects(shouldInjectRunCommand))
-          case None                         => Patch.addLeft(doc.tree, Replacment.injects(shouldInjectRunCommand))
+          case Some(Pkg(_, firstStat :: _)) =>
+            Patch.addLeft(firstStat, Replacment.injects(shouldInjectRunCommand))
+          case Some(insertAfter) =>
+            Patch.addRight(insertAfter, Replacment.injects(shouldInjectRunCommand))
+          case None => Patch.addLeft(doc.tree, Replacment.injects(shouldInjectRunCommand))
         }
       }
     }
@@ -373,63 +395,108 @@ class Scala3CommunityBuildMillAdapter(
       quote + stripQutoes + quote
     }
 
-    val MillCommunityBuildInject = s"""
-    |// Main entry point for community build
-    |def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = ${Transform.TaskCommandType.toString()} {
-    |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
-    |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
-    |}
-    |""".stripMargin
-    val MillCommunityBuildCrossInject = """
-    |// Replaces mill.define.Cross allowing to use map used cross versions
-    |class MillCommunityBuildCross[T: _root_.scala.reflect.ClassTag]
-    |  (cases: _root_.scala.Any*)
-    |  (buildScalaVersion: _root_.java.lang.String)
-    |  (implicit ci:  _root_.mill.define.Cross.Factory[T], ctx: _root_.mill.define.Ctx) 
-    |  extends _root_.mill.define.Cross[T](
-    |      MillCommunityBuild.mapCrossVersionsAny(buildScalaVersion, cases): _*
-    |    )
-    |""".stripMargin
-    val MapScalacOptionsOps = """
-    |
-    |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
-    |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = 
-    |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).asSuccess.map(_.value) }
-    |     .toOption.flatten
-    |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
-    |     .getOrElse {
-    |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
-    |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
-    |     }
-    |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
-    |}
-    |
-    |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
-    |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
-    |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
-    |  }
-    |}
-    |implicit class MillCommunityBuildTaskOps(asTarget: MillCompatTask[Seq[String]]){
-    |  def mapScalacOptions(scalaVersion: MillCompatTask[String]) = scalaVersion.zip(asTarget).map {
-    |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
-    |  }
-    |}
-    |""".stripMargin
+    val MillCommunityBuildInject = {
+      if (isMill1x)
+        s"""
+        |// Main entry point for community build
+        |def runCommunityBuild(
+        |  _evaluator: _root_.mill.api.Evaluator,
+        |  scalaVersion: _root_.scala.Predef.String, 
+        |  configJson: _root_.scala.Predef.String, 
+        |  projectDir: _root_.scala.Predef.String, 
+        |  targets: _root_.scala.Predef.String*) = Task.Command(exclusive = true) {
+        |  given MillCommunityBuild.Ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.Task.log)
+        |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
+        |}
+        |""".stripMargin
+      else
+        s"""
+        |// Main entry point for community build
+        |def runCommunityBuild(
+        |   _evaluator: _root_.mill.eval.Evaluator, 
+        |   scalaVersion: _root_.scala.Predef.String, 
+        |   configJson: _root_.scala.Predef.String, 
+        |   projectDir: _root_.scala.Predef.String, 
+        |   targets: _root_.scala.Predef.String*) = ${Transform.TaskCommandType.toString()} {
+        |  implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
+        |  MillCommunityBuild.runBuild(configJson, projectDir, targets)
+        |}
+        |""".stripMargin
+    }
+    val MillCommunityBuildCrossInject = {
+      """
+      |// Replaces mill.define.Cross allowing to use map used cross versions
+      |class MillCommunityBuildCross[T: _root_.scala.reflect.ClassTag]
+      |  (cases: _root_.scala.Any*)
+      |  (buildScalaVersion: _root_.java.lang.String)
+      |  (implicit ci:  _root_.mill.define.Cross.Factory[T], ctx: _root_.mill.define.Ctx) 
+      |  extends _root_.mill.define.Cross[T](
+      |      MillCommunityBuild.mapCrossVersionsAny(buildScalaVersion, cases): _*
+      |    )
+      |""".stripMargin
+    }
+    val MapScalacOptionsOps = {
+      if (isMill0x) s"""|
+      |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
+      |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = 
+      |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).asSuccess.map(_.value) }
+      |     .toOption.flatten
+      |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
+      |     .getOrElse {
+      |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
+      |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
+      |     }
+      |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
+      |}
+      |
+      |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
+      |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
+      |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+      |  }
+      |}
+      |implicit class MillCommunityBuildTaskOps(asTarget: MillCompatTask[Seq[String]]){
+      |  def mapScalacOptions(scalaVersion: MillCompatTask[String]) = scalaVersion.zip(asTarget).map {
+      |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+      |  }
+      |}
+      |""".stripMargin
+      else s"""
+      |extension (asSeq: Seq[String]) {
+      |  def mapScalacOptions(scalaVersion: mill.api.Task[String])(using ctx: mill.api.TaskCtx): Seq[String] = 
+      |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).toOption }
+      |     .toOption.flatten
+      |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
+      |     .getOrElse {
+      |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
+      |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
+      |     }
+      |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
+      |}
+      |
+      |extension (asTask: mill.api.Task[Seq[String]]) {
+      |  def mapScalacOptions(scalaVersion: mill.api.Task[String]) = scalaVersion.zip(asTask).map {
+      |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+      |  }
+      |}
+      """.stripMargin
+    }
 
     def injects(injectRootModuleRunCommand: Boolean) = {
       Seq(
-        Some(
-          if (useLegacyTasks) """
+        if (isMill1x) None
+        else
+          Some(
+            if (useLegacyTasks) """
             |import $file.MillCommunityBuild
             |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}""".stripMargin
-          else
-            "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
-        ),
+            else
+              "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
+          ),
         if (useLegacyTasks) None else Some("private object _OpenCommunityBuildOps {"),
         Some(MapScalacOptionsOps),
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
         if (useLegacyTasks) None else Some("}\nimport _OpenCommunityBuildOps._"),
-        if (injectRootModuleRunCommand) Some(MillCommunityBuildInject) else None,
+        if (injectRootModuleRunCommand) Some(MillCommunityBuildInject) else None
       ).flatten ++
         Seq("// End of OpenCB code injects\n")
     }.mkString("\n")

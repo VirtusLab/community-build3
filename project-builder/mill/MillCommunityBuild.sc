@@ -1,3 +1,4 @@
+// Injects for Mill 0.x
 package build
 import $ivy.`com.lihaoyi::upickle:3.0.0`
 import MillVersionCompat.compat.{
@@ -232,13 +233,11 @@ def runBuild(configJson: String, projectDir: String, targets: Seq[String])(impli
         flatten(soFar ++ deps, mDeps.tail ++ deps)
     }
 
+  val projectsToTest = flatten(topLevelModules, topLevelModules)
   val projectsBuildResults = for {
-    ModuleInfo(org, name, module: ScalaModule) <- flatten(
-      topLevelModules,
-      topLevelModules
-    ).toList
+    (ModuleInfo(org, name, module: ScalaModule), idx) <- projectsToTest.toList.zipWithIndex
   } yield {
-    ctx.log.info(s"\nStarting build for $name")
+    ctx.log.info(s"\nStarting build for $name - [$idx/${projectsToTest.size}]")
     val evaluator = new MillTaskEvaluator()
     import evaluator._
     val overrides = {
