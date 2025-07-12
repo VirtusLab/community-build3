@@ -96,21 +96,6 @@ if [[ "$millBinaryVersionMajor" -gt "1" ]]; then
   exit 1
 fi
 
-# Base64 is used to mitigate spliting json by whitespaces
-for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
-  function field() {
-    echo ${elem} | base64 --decode | jq -r ${1}
-  }
-  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
-  path=$(field '.path')
-  pattern=$(field '.pattern')
-  echo "Try apply source patch:"
-  echo "Path:        $path"
-  echo "Pattern:     $pattern"
-  echo "Replacement: $replaceWith"
-  scala-cli run $scriptDir/../shared/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}"
-done
-
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
 if [[ -f "$prepareScript" ]]; then
   if [[ -x "$prepareScript" ]]; then 

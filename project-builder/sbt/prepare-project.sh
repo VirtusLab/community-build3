@@ -64,25 +64,6 @@ if [[ "$sbtMajor" -lt "$minSbtMajor" ]] ||
   sed -i -E "s/(sbt.version\s*=\s*).*/\1${MinSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$MinSbtVersion" > "${buildPropsFile}"
 fi
 
-scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-
-
-# Base64 is used to mitigate spliting json by whitespaces
-for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
-  function field() {
-    echo ${elem} | base64 --decode | jq -r ${1}
-  }
-  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
-  path=$(field '.path')
-  pattern=$(field '.pattern')
-  
-  echo "Try apply source patch:"
-  echo "Path:        $path"
-  echo "Pattern:     $pattern"
-  echo "Replacement: $replaceWith"
-  scala-cli run $scriptDir/../shared/searchAndReplace.scala -- "${repoDir}/${path}" "${pattern}" "${replaceWith}"
-done
-
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
 if [[ -f "$prepareScript" ]]; then
   if [[ -x "$prepareScript" ]]; then 
@@ -95,6 +76,7 @@ else
   echo "No prepare script found for project $projectName"
 fi
 
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
 ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
 
