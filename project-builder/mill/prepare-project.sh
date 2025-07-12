@@ -45,24 +45,37 @@ if [[ -z "$millBuildFile" ]]; then
 fi
 
 millVersion=
-if [[ -f .mill-version ]];then
-  millVersion=`cat .mill-version`
-  echo "Found explicit mill version $millVersion"
+if [ -f ".mill-version" ] ; then
+  millVersion="$(tr '\r' '\n' < .mill-version | head -n 1 2> /dev/null)"
+  echo "Found explicit mill version $millVersion in ./mill-version"
+elif [ -f ".config/mill-version" ] ; then
+  millVersion="$(tr '\r' '\n' < .config/mill-version | head -n 1 2> /dev/null)"
+  echo "Found explicit mill version $millVersion in .config/mill-version"
+elif [ -n "${millBuildFile}" ] ; then
+  millVersion="$(cat ${millBuildFile} | grep '//[|]  *mill-version:  *' | sed 's;//|  *mill-version:  *;;')"
+  echo "Found explicit mill version $millVersion in build directive"
 else
   echo "No .mill-version file found, detecting compatible mill version"
+  millRunner=""
   if [[ -f ./mill ]];then
+    millRunner="./mill"
+  elif [[ -f ./millw ]]; then
+    millRunner="./millw"
+  fi
+  if [[ -n "$millRunner" ]]; then 
     echo "Found mill runner script, trying to resolve version"
-    ./mill -v $RESOLVE || true
-    millVersion=`./mill -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "([0-9]+\.[0-9]+\.[0-9]+)" || echo ""`
+    $millRunner -v $RESOLVE || true
+    millVersion=`$millRunner -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "([0-9]+\.[0-9]+\.[0-9]+)" || echo ""`
     if [[ -z "$millVersion" ]]; then
       # AI suggested workaround for non-portable grep
-      millVersion=`./mill -v $RESOLVE | awk '/Mill Build Tool version/ { for (i=1; i<=NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) print $i }' || echo ""`
+      millVersion=`$millRunner -v $RESOLVE | awk '/Mill Build Tool version/ { for (i=1; i<=NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) print $i }' || echo ""`
     fi
   fi
   if [[ "$millVersion" == "" ]]; then
     echo "Trying one of predefiend mill versions"
     for v in $MILL_1_0 $MILL_0_12 $MILL_0_11 $MILL_0_10 $MILL_0_9; do
-      if `${scriptDir}/millw --mill-version $v $RESOLVE > /dev/null 2>/dev/null`; then
+      MILL_VERSION=$v ${scriptDir}/millw $RESOLVE || true
+      if `MILL_VERSION=$v ${scriptDir}/millw $RESOLVE > /dev/null 2>/dev/null`; then
         echo "Successfully applied build using mill $v"
         millVersion=$v
         break
