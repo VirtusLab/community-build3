@@ -76,7 +76,6 @@ if [[ -z "$millVersion" ]]; then
   if [[ "$millVersion" == "" ]]; then
     echo "Trying one of predefiend mill versions"
     for v in $MILL_1_0 $MILL_0_12 $MILL_0_11 $MILL_0_10 $MILL_0_9; do
-      MILL_VERSION=$v ${scriptDir}/millw $RESOLVE || true
       if `MILL_VERSION=$v ${scriptDir}/millw $RESOLVE > /dev/null 2>/dev/null`; then
         echo "Successfully applied build using mill $v"
         millVersion=$v
