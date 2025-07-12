@@ -53,8 +53,11 @@ elif [ -f ".config/mill-version" ] ; then
   echo "Found explicit mill version $millVersion in .config/mill-version"
 elif [ -n "${millBuildFile}" ] ; then
   millVersion="$(cat ${millBuildFile} | grep '//[|]  *mill-version:  *' | sed 's;//|  *mill-version:  *;;')"
-  echo "Found explicit mill version $millVersion in build directive"
-else
+  if [[ -n $millVersion ]]; then
+    echo "Found explicit mill version $millVersion in build directive"
+  fi
+fi
+if [[ -z "$millVersion" ]]; then
   echo "No .mill-version file found, detecting compatible mill version"
   millRunner=""
   if [[ -f ./mill ]];then
@@ -64,7 +67,6 @@ else
   fi
   if [[ -n "$millRunner" ]]; then 
     echo "Found mill runner script, trying to resolve version"
-    $millRunner -v $RESOLVE || true
     millVersion=`$millRunner -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "([0-9]+\.[0-9]+\.[0-9]+)" || echo ""`
     if [[ -z "$millVersion" ]]; then
       # AI suggested workaround for non-portable grep
