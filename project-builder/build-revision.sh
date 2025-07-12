@@ -38,22 +38,23 @@ if [[ ! -z $extraLibraryDeps ]]; then
   echo "Would try to append extra library dependencies (best-effort, sbt/scala-cli only): ${extraLibraryDeps}"
 fi
 
-# apply source patches
-# Base64 is used to mitigate spliting json by whitespaces
-for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
-  function field() {
-    echo ${elem} | base64 --decode | jq -r ${1}
-  }
-  replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
-  path=$(field '.path')
-  pattern=$(field '.pattern')
-  
-  echo "Try apply source patch:"
-  echo "Path:        $path"
-  echo "Pattern:     $pattern"
-  echo "Replacement: $replaceWith"
-  (cd "$repoDir" && scala-cli run $scriptDir/shared/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}")
-done
+function applySourcePatches() {
+  # Base64 is used to mitigate spliting json by whitespaces
+  for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
+    function field() {
+      echo ${elem} | base64 --decode | jq -r ${1}
+    }
+    replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
+    path=$(field '.path')
+    pattern=$(field '.pattern')
+    
+    echo "Try apply source patch:"
+    echo "Path:        $path"
+    echo "Pattern:     $pattern"
+    echo "Replacement: $replaceWith"
+    (cd "$repoDir" && scala-cli run $scriptDir/shared/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}")
+  done
+}
 
 
 sourceVersionSetting=""
@@ -158,7 +159,8 @@ function buildForScalaVersion(){
   detectSourceVersion
   setupScalacOptions
   setupProjectConfig
-
+  applySourcePatches
+  
   echo "----"
   echo "Starting build for $scalaVersion"
   echo "Execute tests: ${executeTests}"

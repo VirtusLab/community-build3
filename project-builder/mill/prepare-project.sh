@@ -57,6 +57,10 @@ elif [ -n "${millBuildFile}" ] ; then
     echo "Found explicit mill version $millVersion in build directive"
   fi
 fi
+if [[ "$millVersion" == *-RC* ]]; then
+  echo "Ignoring explicit unstable version: $millVersion"
+  millVersion=
+fi
 if [[ -z "$millVersion" ]]; then
   echo "No .mill-version file found, detecting compatible mill version"
   millRunner=""
