@@ -30,12 +30,32 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
 source $scriptDir/versions.sh
 
-$scriptDir/checkout.sh "$repoUrl" "$rev" repo
+repoDir=$PWD/repo
+$scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
 
 if [[ ! -z $extraLibraryDeps ]]; then
   echo "Would try to append extra library dependencies (best-effort, sbt/scala-cli only): ${extraLibraryDeps}"
 fi
+
+function applySourcePatches() {
+  # Base64 is used to mitigate spliting json by whitespaces
+  for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
+    function field() {
+      echo ${elem} | base64 --decode | jq -r ${1}
+    }
+    replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
+    path=$(field '.path')
+    pattern=$(field '.pattern')
+    
+    echo "Try apply source patch:"
+    echo "Path:        $path"
+    echo "Pattern:     $pattern"
+    echo "Replacement: $replaceWith"
+    (cd "$repoDir" && scala-cli run $scriptDir/shared/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}")
+  done
+}
+
 
 sourceVersionSetting=""
 function detectSourceVersion() {
@@ -89,7 +109,7 @@ isMigrating=false
 function setupScalacOptions(){
   detectSourceVersion
   commonAppendScalacOptions="$sourceVersionSetting"
-  commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-migration,"
+  commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-source:future,-source:future-migration"
 
   extraScalacOptions="$commonAppendScalacOptions"
   disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
@@ -109,7 +129,7 @@ function setupScalacOptions(){
 ## Git utils
 BuildPatchFile=$PWD/build.patch
 function createBuildPatch() {
-  (cd repo && git diff > $BuildPatchFile) 
+  (cd "$repoDir" && git diff > $BuildPatchFile) 
 }
 function revertBuildPatch() {
   # --alow-empty is might be missing in some git versions
@@ -117,14 +137,14 @@ function revertBuildPatch() {
   if git apply --help | grep 'allow-empty' > /dev/null ; then
     maybeAllowEmpty="--allow-empty"
   fi
-  (cd repo && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject $maybeAllowEmpty || true) 
+  (cd "$repoDir" && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject $maybeAllowEmpty || true) 
 }
 function commmitMigrationRewrite() {
-  if [[ -z "$(cd repo && git status --untracked-files=no --porcelain)" ]]; then
+  if [[ -z "$(cd "$repoDir" && git status --untracked-files=no --porcelain)" ]]; then
     echo "No migration rewrite changes found, would not commit"
   else 
     echo "Commit migration rewrites"
-    (cd repo && \
+    (cd "$repoDir" && \
       git checkout -b "opencb/migrate-$scalaVersion"
       git add -u . && \
       git commit -m "Apply Scala compiler rewrites for $scalaVersion"\
@@ -139,7 +159,8 @@ function buildForScalaVersion(){
   detectSourceVersion
   setupScalacOptions
   setupProjectConfig
-
+  applySourcePatches
+  
   echo "----"
   echo "Starting build for $scalaVersion"
   echo "Execute tests: ${executeTests}"
@@ -149,18 +170,18 @@ function buildForScalaVersion(){
   if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala" ] || [ -f "repo/build.sc" ]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
-    $scriptDir/mill/prepare-project.sh "$project" $PWD/repo "$scalaVersion" "$projectConfig"
+    $scriptDir/mill/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
     createBuildPatch
-    $scriptDir/mill/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
+    $scriptDir/mill/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
     revertBuildPatch
   ## Sbt
   ## Apparently built.sbt is a valid build file name. Accept any .sbt file
   elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
     echo "sbt project found: ${isSbtProject}"
     echo "sbt" > $buildToolFile
-    $scriptDir/sbt/prepare-project.sh "$project" $PWD/repo "$scalaVersion" "$projectConfig"
+    $scriptDir/sbt/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
     createBuildPatch
-    $scriptDir/sbt/build.sh repo "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
+    $scriptDir/sbt/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
     revertBuildPatch
   ## Scala-cli
   else
@@ -172,7 +193,7 @@ function buildForScalaVersion(){
     scala-cli bloop exit
     scala-cli clean $scriptDir/scala-cli/
     scala-cli clean repo
-    scala-cli $scriptDir/scala-cli/build.scala -- $PWD/repo "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
+    scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
   fi
 
   ## After build steps
