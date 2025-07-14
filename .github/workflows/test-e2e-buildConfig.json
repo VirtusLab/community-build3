@@ -108,5 +108,56 @@
     "revision":"v0.6.0",
     "version":"0.6.0",
     "targets":"io.github.barnardb%tinyplate"
+  },
+   "almond-sh/almond":{
+    "project":"almond-sh/almond",
+    "repoUrl":"https://github.com/almond-sh/almond.git",
+    "revision":"v0.14.1",
+    "version":"0.14.1",
+    "targets":"sh.almond%kernel sh.almond%interpreter sh.almond%interpreter-api sh.almond%toree-hooks",
+    "publishedScalaVersion":"3.6.3",
+    "config":{
+      "projects":{
+        "exclude":["sh.almond%toree-hooks"],
+        "overrides":{}
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[],
+        "options":[]
+      },
+      "mill":{
+        "options":[]
+      },
+      "tests":"full",
+      "migrationVersions":["3.4.2"],
+      "sourcePatches":[]
+    }
+  },
+  "blackdoor/jose":{
+    "project":"blackdoor/jose",
+    "repoUrl":"https://github.com/blackdoor/jose.git",
+    "revision":"0.4.6",
+    "version":"0.4.6",
+    "targets":"black.door%jose black.door%jose-json-circe",
+    "config":{
+      "projects":{
+        "exclude":[],
+        "overrides":{}
+      },
+      "java":{},
+      "sbt":{
+        "commands":[],
+        "options":[]
+      },
+      "mill":{
+        "options":[]
+      },
+      "tests":"full",
+      "migrationVersions":["3.4.2"],
+      "sourcePatches":[]
+    }
   }
 }
