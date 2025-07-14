@@ -109,7 +109,7 @@ isMigrating=false
 function setupScalacOptions(){
   detectSourceVersion
   commonAppendScalacOptions="$sourceVersionSetting"
-  commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,-source:future,-source:future-migration"
+  commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,"
 
   extraScalacOptions="$commonAppendScalacOptions"
   disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
@@ -119,6 +119,7 @@ function setupScalacOptions(){
   else 
     # Apply extraScalacOptions passed as input only when compiling with target Scala version
     extraScalacOptions="$_extraScalacOptions,$extraScalacOptions"
+    disabledScalacOptions="$disabledScalacOptions,-source:future,-source:future-migration"
   fi
 
   echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
