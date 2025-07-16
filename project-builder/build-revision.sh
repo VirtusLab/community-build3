@@ -87,7 +87,7 @@ function detectSourceVersion() {
   fi
   if [[ -z "$sourceVersionSetting" ]]; then
     sourceVersion="$scalaBinaryVersion-migration"
-    sourceVersionSetting="-source:$sourceVersion"
+    sourceVersionSetting="REQUIRE:-source:$sourceVersion"
     echo "Implicitly using source version $sourceVersion"
   fi
 }
@@ -109,7 +109,7 @@ isMigrating=false
 function setupScalacOptions(){
   detectSourceVersion
   commonAppendScalacOptions="$sourceVersionSetting"
-  commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e,"
+  commonRemoveScalacOptions="-deprecation,-feature,-Xfatal-warnings,-Werror,MATCH:.*-Wconf.*any:e"
 
   extraScalacOptions="$commonAppendScalacOptions"
   disabledScalacOptions="$_disabledScalacOption,$commonRemoveScalacOptions"; 
