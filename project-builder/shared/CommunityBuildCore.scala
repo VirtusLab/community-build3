@@ -445,11 +445,17 @@ object Scala3CommunityBuild {
         ).flatten
 
         standardAppendSettings.filterNot { setting =>
-          excludeIf(
-            setting,
-            isSourceVersion(setting) && (definedSourceSetting.nonEmpty || forceSourceVersion),
-            s"Project has predefined source version: ${definedSourceSetting.orElse(requiredSourceVersion)}"
-          )
+          isSourceVersion(setting) && {
+            excludeIf(
+              setting,
+              definedSourceSetting.nonEmpty,
+              s"Project has predefined source version: ${definedSourceSetting.get}}"
+            ) || excludeIf(
+              setting,
+              forceSourceVersion,
+              s"Needs to force source version: $forcedAppendSettings"
+            )
+          }
         } ++ forcedAppendSettings
       }
 
