@@ -50,14 +50,19 @@ function tryBuild() {
     "${targets[@]}"
 }
 
+for launcher in ./millw ./mill ${scriptDir}/millw; do
+  if [[ ! -f $launcher ]]; then
+    continue
+  fi
+  chmod +x $launcher
+  if $launcher resolve _ > /dev/null 2> /dev/null; then
+    tryBuild $launcher
+    exit 0
+  else
+    echo "Mill launcher $launcher is not executable, skipping"
+    continue
+  fi
+  echo "No working mill launcher found"
+  exit 1
+done
 
-if [[ -f ./mill ]]; then
-  chmod +x ./mill
-  tryBuild ./mill
-elif [[ -f ./millw ]]; then
-  chmod +x ./millw
-  tryBuild ./millw
-else 
-  chmod +x ${scriptDir}/millw
-  tryBuild "${scriptDir}/millw"
-fi
