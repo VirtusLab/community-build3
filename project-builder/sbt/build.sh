@@ -102,7 +102,7 @@ function checkLogsForRetry() {
 
   # Failed to switch version
   if [ "$forceScalaVersion" = false ]; then
-    if grep -q 'Switch failed:' "$logFile"; then
+    if grep -q 'Switch failed:' "$logFile" || grep -q "bad option: '-source:" "$logFile"; then
       forceScalaVersion=true
       shouldRetry=true
     elif grep -q 'Module mapping missing:' "$logFile" && grep -q -e 'moduleIds: .*_2\.1[1-3]' "$logFile"; then
