@@ -9358,11 +9358,6 @@
       ],
       "sourcePatches":[
         {
-          "path":"unroll/plugin/src-3/UnrollPluginScala3.scala",
-          "pattern":"def init(options: List[String]): List[PluginPhase]",
-          "replaceWith":"override def init(options: List[String]): List[PluginPhase]"
-        },
-        {
           "path":"build.mill",
           "pattern":"val scala3  = \"3.7.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -16861,10 +16856,10 @@
   "etspaceman/kinesis4cats":{
     "project":"etspaceman/kinesis4cats",
     "repoUrl":"https://github.com/etspaceman/kinesis4cats.git",
-    "revision":"v0.1.2",
-    "version":"0.1.2",
-    "targets":"io.github.etspaceman%kinesis4cats-aws-v1-localstack io.github.etspaceman%kinesis4cats-aws-v2-localstack io.github.etspaceman%kinesis4cats-compat io.github.etspaceman%kinesis4cats-feral io.github.etspaceman%kinesis4cats-kcl io.github.etspaceman%kinesis4cats-kcl-ciris io.github.etspaceman%kinesis4cats-kcl-http4s io.github.etspaceman%kinesis4cats-kcl-localstack io.github.etspaceman%kinesis4cats-kcl-logging-circe io.github.etspaceman%kinesis4cats-kinesis-client io.github.etspaceman%kinesis4cats-kinesis-client-localstack io.github.etspaceman%kinesis4cats-kinesis-client-logging-circe io.github.etspaceman%kinesis4cats-kpl io.github.etspaceman%kinesis4cats-kpl-ciris io.github.etspaceman%kinesis4cats-kpl-localstack io.github.etspaceman%kinesis4cats-kpl-logging-circe io.github.etspaceman%kinesis4cats-shared io.github.etspaceman%kinesis4cats-shared-circe io.github.etspaceman%kinesis4cats-shared-ciris io.github.etspaceman%kinesis4cats-shared-localstack io.github.etspaceman%kinesis4cats-smithy4s-client io.github.etspaceman%kinesis4cats-smithy4s-client-localstack io.github.etspaceman%kinesis4cats-smithy4s-client-logging-circe",
-    "publishedScalaVersion":"3.3.5",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
+    "targets":"io.github.etspaceman%kinesis4cats-aws-v2-localstack io.github.etspaceman%kinesis4cats-compat io.github.etspaceman%kinesis4cats-feral io.github.etspaceman%kinesis4cats-kcl io.github.etspaceman%kinesis4cats-kcl-ciris io.github.etspaceman%kinesis4cats-kcl-http4s io.github.etspaceman%kinesis4cats-kcl-localstack io.github.etspaceman%kinesis4cats-kcl-logging-circe io.github.etspaceman%kinesis4cats-kinesis-client io.github.etspaceman%kinesis4cats-kinesis-client-localstack io.github.etspaceman%kinesis4cats-kinesis-client-logging-circe io.github.etspaceman%kinesis4cats-kpl io.github.etspaceman%kinesis4cats-kpl-ciris io.github.etspaceman%kinesis4cats-kpl-localstack io.github.etspaceman%kinesis4cats-kpl-logging-circe io.github.etspaceman%kinesis4cats-shared io.github.etspaceman%kinesis4cats-shared-circe io.github.etspaceman%kinesis4cats-shared-ciris io.github.etspaceman%kinesis4cats-shared-localstack io.github.etspaceman%kinesis4cats-smithy4s-client io.github.etspaceman%kinesis4cats-smithy4s-client-localstack io.github.etspaceman%kinesis4cats-smithy4s-client-logging-circe",
+    "publishedScalaVersion":"3.3.6",
     "config":{
       "projects":{
         "exclude":[
@@ -16897,7 +16892,7 @@
       "sourcePatches":[
         {
           "path":"project/Kinesis4CatsPlugin.scala",
-          "pattern":"val Scala3 = \"3.3.5\"",
+          "pattern":"val Scala3 = \"3.3.6\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -16906,10 +16901,10 @@
   "etspaceman/scalacheck-faker":{
     "project":"etspaceman/scalacheck-faker",
     "repoUrl":"https://github.com/etspaceman/scalacheck-faker.git",
-    "revision":"v8.0.6",
-    "version":"8.0.6",
+    "revision":"v9.0.0",
+    "version":"9.0.0",
     "targets":"io.github.etspaceman%scalacheck-faker",
-    "publishedScalaVersion":"3.3.4",
+    "publishedScalaVersion":"3.3.6",
     "config":{
       "projects":{
         "exclude":[
@@ -16942,7 +16937,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.4\"",
+          "pattern":"val Scala3 = \"3.3.6\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -21346,8 +21341,8 @@
   "guardian/fastly-api-client":{
     "project":"guardian/fastly-api-client",
     "repoUrl":"https://github.com/guardian/fastly-api-client.git",
-    "revision":"v1.0.2",
-    "version":"1.0.2",
+    "revision":"v1.0.3",
+    "version":"1.0.3",
     "targets":"com.gu%fastly-api-client",
     "publishedScalaVersion":"3.3.4",
     "config":{
@@ -30292,7 +30287,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4.2"
+        
       ],
       "sourcePatches":[
         {
@@ -30306,9 +30301,9 @@
   "kalin-rudnicki/oxygen":{
     "project":"kalin-rudnicki/oxygen",
     "repoUrl":"https://github.com/kalin-rudnicki/oxygen.git",
-    "revision":"0.0.17",
-    "version":"0.0.17",
-    "targets":"io.github.kalin-rudnicki%oxygen-cli io.github.kalin-rudnicki%oxygen-core io.github.kalin-rudnicki%oxygen-executable io.github.kalin-rudnicki%oxygen-json io.github.kalin-rudnicki%oxygen-meta io.github.kalin-rudnicki%oxygen-quoted io.github.kalin-rudnicki%oxygen-sql io.github.kalin-rudnicki%oxygen-sql-migration io.github.kalin-rudnicki%oxygen-test io.github.kalin-rudnicki%oxygen-test-container io.github.kalin-rudnicki%oxygen-web-model io.github.kalin-rudnicki%oxygen-zio",
+    "revision":"0.0.18",
+    "version":"0.0.18",
+    "targets":"io.github.kalin-rudnicki%oxygen-cli io.github.kalin-rudnicki%oxygen-core io.github.kalin-rudnicki%oxygen-executable io.github.kalin-rudnicki%oxygen-http-model io.github.kalin-rudnicki%oxygen-json io.github.kalin-rudnicki%oxygen-meta io.github.kalin-rudnicki%oxygen-quoted io.github.kalin-rudnicki%oxygen-sql io.github.kalin-rudnicki%oxygen-sql-migration io.github.kalin-rudnicki%oxygen-test io.github.kalin-rudnicki%oxygen-test-container io.github.kalin-rudnicki%oxygen-zio",
     "publishedScalaVersion":"3.7.1",
     "config":{
       "projects":{
@@ -38851,8 +38846,8 @@
   "nationalarchives/dr2-preservica-client":{
     "project":"nationalarchives/dr2-preservica-client",
     "repoUrl":"https://github.com/nationalarchives/dr2-preservica-client.git",
-    "revision":"v0.0.140",
-    "version":"0.0.140",
+    "revision":"v0.0.141",
+    "version":"0.0.141",
     "targets":"uk.gov.nationalarchives%preservica-client-fs2 uk.gov.nationalarchives%preservica-client-root",
     "publishedScalaVersion":"3.7.1",
     "config":{
@@ -43999,8 +43994,8 @@
   "pme123/orchescala":{
     "project":"pme123/orchescala",
     "repoUrl":"https://github.com/pme123/orchescala.git",
-    "revision":"v0.2.10",
-    "version":"0.2.10",
+    "revision":"v0.2.11",
+    "version":"0.2.11",
     "targets":"io.github.pme123%orchescala-api io.github.pme123%orchescala-dmn io.github.pme123%orchescala-domain io.github.pme123%orchescala-engine io.github.pme123%orchescala-engine-c7 io.github.pme123%orchescala-helper io.github.pme123%orchescala-simulation io.github.pme123%orchescala-worker io.github.pme123%orchescala-worker-c7 io.github.pme123%orchescala-worker-c8",
     "publishedScalaVersion":"3.7.1",
     "config":{
@@ -45312,6 +45307,47 @@
       ]
     }
   },
+  "quafadas/inspirerad":{
+    "project":"quafadas/inspirerad",
+    "repoUrl":"https://github.com/quafadas/inspirerad.git",
+    "revision":"v0.0.15",
+    "version":"0.0.15",
+    "targets":"io.github.quafadas%inspireRAD",
+    "publishedScalaVersion":"3.7.1",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "quafadas/live-server-scala-cli-js":{
     "project":"quafadas/live-server-scala-cli-js",
     "repoUrl":"https://github.com/quafadas/live-server-scala-cli-js.git",
@@ -45360,47 +45396,6 @@
     "version":"0.0.5",
     "targets":"io.github.quafadas%narr",
     "publishedScalaVersion":"3.3.4",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "quafadas/spire_ad":{
-    "project":"quafadas/spire_ad",
-    "repoUrl":"https://github.com/quafadas/spire_ad.git",
-    "revision":"v0.0.10",
-    "version":"0.0.10",
-    "targets":"io.github.quafadas%scripts io.github.quafadas%spireAD io.github.quafadas%spireAD-test",
-    "publishedScalaVersion":"3.7.1",
     "config":{
       "projects":{
         "exclude":[
@@ -47684,10 +47679,10 @@
   "sake92/squery":{
     "project":"sake92/squery",
     "repoUrl":"https://github.com/sake92/squery.git",
-    "revision":"0.7.0",
-    "version":"0.7.0",
+    "revision":"0.8.1",
+    "version":"0.8.1",
     "targets":"ba.sake%squery ba.sake%squery-postgres-jawn",
-    "publishedScalaVersion":"3.4.2",
+    "publishedScalaVersion":"3.7.1",
     "config":{
       "projects":{
         "exclude":[
@@ -47698,7 +47693,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -47720,7 +47715,7 @@
       "sourcePatches":[
         {
           "path":"build.mill",
-          "pattern":"val scala3 = \"3.4.2\"",
+          "pattern":"val scala3 = \"3.7.1\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -54516,8 +54511,8 @@
   "softwaremill/ox":{
     "project":"softwaremill/ox",
     "repoUrl":"https://github.com/softwaremill/ox.git",
-    "revision":"v0.7.3",
-    "version":"0.7.3",
+    "revision":"v1.0.0-RC1",
+    "version":"1.0.0-RC1",
     "targets":"com.softwaremill.ox%core com.softwaremill.ox%cron com.softwaremill.ox%flow-reactive-streams com.softwaremill.ox%kafka com.softwaremill.ox%mdc-logback com.softwaremill.ox%otel-context",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -56935,8 +56930,8 @@
   "taig/sql-ext":{
     "project":"taig/sql-ext",
     "repoUrl":"https://github.com/taig/sql-ext.git",
-    "revision":"0.16.1",
-    "version":"0.16.1",
+    "revision":"0.17.1",
+    "version":"0.17.1",
     "targets":"io.taig%sql-ext-core io.taig%sql-ext-skunk",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -59128,8 +59123,8 @@
   "tofu-tf/tofu":{
     "project":"tofu-tf/tofu",
     "repoUrl":"https://github.com/tofu-tf/tofu.git",
-    "revision":"v0.13.7.200",
-    "version":"0.13.7.200",
+    "revision":"v0.14.0",
+    "version":"0.14.0",
     "targets":"tf.tofu%default-bf0cb6 tf.tofu%tofu tf.tofu%tofu-core-ce2 tf.tofu%tofu-core-ce3 tf.tofu%tofu-core-higher-kind tf.tofu%tofu-fs2-ce3-interop tf.tofu%tofu-kernel tf.tofu%tofu-kernel-cats-mtl tf.tofu%tofu-logging tf.tofu%tofu-logging-derivation tf.tofu%tofu-logging-derivation-annotations tf.tofu%tofu-logging-enumeratum tf.tofu%tofu-logging-layout tf.tofu%tofu-logging-log4cats tf.tofu%tofu-logging-log4cats-legacy tf.tofu%tofu-logging-logstash-logback tf.tofu%tofu-logging-refined tf.tofu%tofu-logging-structured tf.tofu%tofu-observable tf.tofu%tofu-streams tf.tofu%tofu-zio2-core tf.tofu%tofu-zio2-logging",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -61024,8 +61019,8 @@
   "typelevel/catapult":{
     "project":"typelevel/catapult",
     "repoUrl":"https://github.com/typelevel/catapult.git",
-    "revision":"v0.7.0-RC2",
-    "version":"0.7.0-RC2",
+    "revision":"v0.7.0-RC3",
+    "version":"0.7.0-RC3",
     "targets":"org.typelevel%catapult org.typelevel%catapult-circe org.typelevel%catapult-mtl org.typelevel%catapult-testkit",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -63018,10 +63013,10 @@
   "typelevel/skunk":{
     "project":"typelevel/skunk",
     "repoUrl":"https://github.com/typelevel/skunk.git",
-    "revision":"v1.0.0-M10",
-    "version":"1.0.0-M10",
+    "revision":"v1.0.0-M11",
+    "version":"1.0.0-M11",
     "targets":"org.tpolecat%skunk-circe org.tpolecat%skunk-core org.tpolecat%skunk-docs org.tpolecat%skunk-postgis org.tpolecat%skunk-refined",
-    "publishedScalaVersion":"3.3.4",
+    "publishedScalaVersion":"3.3.6",
     "config":{
       "projects":{
         "exclude":[
