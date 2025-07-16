@@ -59,10 +59,10 @@ for launcher in ./millw ./mill ${scriptDir}/millw; do
     tryBuild $launcher
     exit 0
   else
-    echo "Mill launcher $launcher is not executable, skipping"
+    echo "Mill launcher $launcher failed to launch, skipping"
     continue
   fi
-  echo "No working mill launcher found"
-  exit 1
 done
+echo "No working mill launcher found"
+exit 1
 

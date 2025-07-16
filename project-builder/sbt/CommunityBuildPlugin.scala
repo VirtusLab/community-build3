@@ -200,7 +200,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         val append = safeArgs.lift(0).getOrElse(Nil)
         lazy val (appendScala3Exclusive, appendScala3Inclusive) =
           append.partition { opt =>
-            scala3ExclusiveFlags.exists(opt.startsWith(_))
+            scala3ExclusiveFlags.exists(opt.contains(_))
           }
         // Make sure to not modify Scala 2 project scalacOptions
         // these can compiled as transitive dependency of custom startup task

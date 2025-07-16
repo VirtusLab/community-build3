@@ -191,12 +191,17 @@ class Scala3CommunityBuildMillAdapter(
             List(
               Term.Block(List(
                 Defn.Def(
-                  List(if (isMill0x) Mod.Implicit() else Mod.Using()),
+                  List(Mod.Implicit()),
                   Term.Name("ctx"), Nil, Nil, 
                   Some(Type.Select(Term.Name("MillCommunityBuild"), Type.Name("Ctx"))), 
                   Term.Apply(
                     Term.Select(Term.Name("MillCommunityBuild"), Term.Name("Ctx")),
-                    List(Term.This(Name.Anonymous()), Term.Name("scalaVersion"), Term.Name("evaluator"), Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("T")), Term.Name("log")))
+                    List(
+                      Term.This(Name.Anonymous()),
+                      Term.Name("scalaVersion"),
+                      Term.Name("evaluator"),
+                      Term.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name(if(useLegacyTasks) "T" else "Task")), Term.Name("log"))
+                    )
                   )
                 ),
                 Term.Apply(
@@ -210,6 +215,25 @@ class Scala3CommunityBuildMillAdapter(
     }
     // format: on
 
+    def isRootModule(defn: Tree) = config.isMainBuildFile.forall(_ == true) && {
+      defn match {
+        case defn: Defn.Object => isMill1x && defn.name.value == "package"
+        case _ =>
+          val template = defn match {
+            case defn: Defn.Class  => defn.templ
+            case defn: Defn.Trait  => defn.templ
+            case defn: Defn.Object => defn.templ
+            case _                 => null
+          }
+          template != null && {
+            val Template(_, traits, _, stats) = template
+            traits.exists {
+              case Init(WithTypeName("RootModule" | "MillBuildRootModule"), _, _) => true
+              case _                                                              => false
+            }
+          }
+      }
+    }
     def transformDefn(defn: Tree): Tree = defn match {
       case defn @ (_: Defn.Class | _: Defn.Trait | _: Defn.Object) =>
         val template = defn match {
@@ -222,17 +246,18 @@ class Scala3CommunityBuildMillAdapter(
           case ValOrDefDef(Term.Name("scalacOptions"), _, _) => true
           case _                                             => false
         }
+
         val canHaveScalacOptions = anyTreeOfTypeName(has = ScalaModuleSubtypes)(traits)
         val updatedTemplate = template.copy(
           inits = mapTraits(traits),
           stats = stats.map(transformDefn).collect { case stat: Stat => stat } ++ {
             if (hasScalacOptions || !canHaveScalacOptions || noInjects) Nil
             else injectScalacOptionsMapping
-          } ++ traits.collectFirst {
-            case Init(WithTypeName("RootModule" | "MillBuildRootModule"), _, _)
-                if !noInjects && config.isMainBuildFile.forall(_ == true) =>
+          } ++ {
+            if (isRootModule(defn) && !noInjects) {
               injectsRunCommandInRootModule = true
-              injectRootModuleRunCommand
+              Some(injectRootModuleRunCommand)
+            } else None
           }
         )
 
@@ -314,7 +339,12 @@ class Scala3CommunityBuildMillAdapter(
             Patch.addLeft(firstStat, Replacment.injects(shouldInjectRunCommand))
           case Some(insertAfter) =>
             Patch.addRight(insertAfter, Replacment.injects(shouldInjectRunCommand))
-          case None => Patch.addLeft(doc.tree, Replacment.injects(shouldInjectRunCommand))
+          case None =>
+            // We want to add patches before first tree but after the comments
+            Patch.addLeft(
+              doc.tree.children.headOption.getOrElse(doc.tree),
+              Replacment.injects(shouldInjectRunCommand)
+            )
         }
       }
     }
@@ -324,15 +354,26 @@ class Scala3CommunityBuildMillAdapter(
       if (transformed.contains(defn) || maybeTransformed == defn) Patch.empty
       else
         Patch.replaceTree(
-          defn,
-          maybeTransformed.syntax + {
-            if (sys.props.contains("communitybuild.noInjects")) ""
-            else "\n"
+          defn, {
+            if (sys.props.contains("communitybuild.noInjects")) maybeTransformed.syntax
+            else
+              replaceLast(maybeTransformed.syntax, "}") {
+                if (Transform.isRootModule(defn))
+                  "\n\t" + Replacment.MapScalacOptionsOps + "\n}"
+                else "}"
+              } + "\n"
           }
         )
     }.asPatch
 
     headerInject + patch
+  }
+
+  def replaceLast(input: String, substring: String)(replacement: String) = {
+    val idx = input.lastIndexOf(substring)
+    if (idx >= 0)
+      input.substring(0, idx) + replacement + input.substring(idx + 1)
+    else input
   }
 
   // format: off
@@ -475,7 +516,7 @@ class Scala3CommunityBuildMillAdapter(
       |
       |extension (task: mill.api.Task[Seq[String]]) {
       |  def mapScalacOptions(scalaVersion: mill.api.Task[String]) = mill.api.Task(
-      |    MillCommunityBuild.mapScalacOptions(scalaVersion(), task())
+      |     MillCommunityBuild.mapScalacOptions(scalaVersion(), task())
       |  )
       |}
       """.stripMargin
@@ -493,14 +534,15 @@ class Scala3CommunityBuildMillAdapter(
               "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
           ),
         if (useLegacyTasks || isMill1x) None else Some("private object _OpenCommunityBuildOps {"),
-        Some(MapScalacOptionsOps),
+        if (isMill1x && !injectRootModuleRunCommand) None else Some(MapScalacOptionsOps),
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
         if (useLegacyTasks || isMill1x) None else Some("}\nimport _OpenCommunityBuildOps._"),
-        if (injectRootModuleRunCommand) Some(MillCommunityBuildInject) else None
+        if (injectRootModuleRunCommand) Some(MillCommunityBuildInject)
+        else if (isMill1x) Some("import build.*")
+        else None
       ).flatten ++
         Seq("// End of OpenCB code injects\n")
     }.mkString("\n")
-
   }
 
   object ValOrDefDef {
