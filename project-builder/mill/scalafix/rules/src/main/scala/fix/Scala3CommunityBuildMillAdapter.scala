@@ -314,7 +314,12 @@ class Scala3CommunityBuildMillAdapter(
             Patch.addLeft(firstStat, Replacment.injects(shouldInjectRunCommand))
           case Some(insertAfter) =>
             Patch.addRight(insertAfter, Replacment.injects(shouldInjectRunCommand))
-          case None => Patch.addLeft(doc.tree, Replacment.injects(shouldInjectRunCommand))
+          case None =>
+            // We want to add patches before first tree but after the comments
+            Patch.addLeft(
+              doc.tree.children.headOption.getOrElse(doc.tree),
+              Replacment.injects(shouldInjectRunCommand)
+            )
         }
       }
     }
