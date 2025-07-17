@@ -157,7 +157,12 @@ class Scala3CommunityBuildMillAdapter(
             ),
             Term.Name("mapScalacOptions")
           ),
-          List(Term.Name("scalaVersion"))
+          List(
+            if(isMill1x)  Term.Apply(
+              Term.Select(Term.This(Name.Anonymous()), Term.Name("scalaVersion")),
+              List()
+            ) else Term.Name("scalaVersion")
+          )
         )
       )
     )
