@@ -66,8 +66,11 @@ function detectSourceVersion() {
 
   sourceVersion=`echo $projectConfig | jq -r '.sourceVersion // ""'`
   sourceVersionSetting=""
-
-  if [[ "$sourceVersion" =~ ^([0-9]+\.[0-9]+)(-migration)?$ ]]; then
+  
+  if [[ "$sourceVersion" == "none" ]]; then
+    echo "Would use project defined source version"
+    return 0
+  elif [[ "$sourceVersion" =~ ^([0-9]+\.[0-9]+)(-migration)?$ ]]; then
     versionPart="${BASH_REMATCH[1]}"
     if isBinVersionGreaterThan "$versionPart" "$scalaBinaryVersion" ; then
       if [[ $isMigrating == true ]]; then
@@ -119,7 +122,7 @@ function setupScalacOptions(){
   else 
     # Apply extraScalacOptions passed as input only when compiling with target Scala version
     extraScalacOptions="$_extraScalacOptions,$extraScalacOptions"
-    disabledScalacOptions="$disabledScalacOptions,-source:future,-source:future-migration"
+    disabledScalacOptions="$disabledScalacOptions"
   fi
 
   echo "Would try to apply common scalacOption (best-effort, sbt/mill only):"
