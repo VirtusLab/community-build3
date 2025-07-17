@@ -215,22 +215,20 @@ class Scala3CommunityBuildMillAdapter(
     }
     // format: on
 
-    def isRootModule(defn: Tree) = config.isMainBuildFile.forall(_ == true) && {
+    def isRootModule(defn: Tree): Boolean = config.isMainBuildFile.forall(_ == true) && {
       defn match {
-        case defn: Defn.Object => isMill1x && defn.name.value == "package"
+        case defn: Defn.Object if isMill1x => defn.name.value == "package"
         case _ =>
           val template = defn match {
             case defn: Defn.Class  => defn.templ
             case defn: Defn.Trait  => defn.templ
             case defn: Defn.Object => defn.templ
-            case _                 => null
+            case _                 => return false
           }
-          template != null && {
-            val Template(_, traits, _, stats) = template
-            traits.exists {
-              case Init(WithTypeName("RootModule" | "MillBuildRootModule"), _, _) => true
-              case _                                                              => false
-            }
+          val Template(_, traits, _, stats) = template
+          traits.exists {
+            case Init(WithTypeName("RootModule" | "MillBuildRootModule"), _, _) => true
+            case _                                                              => false
           }
       }
     }
