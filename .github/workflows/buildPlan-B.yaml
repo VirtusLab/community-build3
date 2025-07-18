@@ -1,5 +1,5 @@
 
-# projects total:     812
+# projects total:     787
 # min stars count:    -1
 # max projects count: 1000
 
@@ -77,7 +77,6 @@ jobs:
         include:
         - name: "2m/yabai-scala"
         - name: "aaronp/args4c"
-        - name: "aaronp/code-template"
         - name: "aaronp/eie"
         - name: "aaronp/franz"
         - name: "ablearthy/td-types"
@@ -119,7 +118,6 @@ jobs:
         - name: "armanbilge/fs2"
         - name: "armanbilge/ip4s"
         - name: "armanbilge/jawn-fs2"
-        - name: "armanbilge/litter"
         - name: "armanbilge/log4cats"
         - name: "armanbilge/munit-cats-effect"
         - name: "armanbilge/sadalsuud"
@@ -229,9 +227,7 @@ jobs:
         - name: "davenverse/condemned"
         - name: "davenverse/crossplatformioapp"
         - name: "davenverse/env"
-        - name: "davenverse/epimetheus-circuit"
         - name: "davenverse/epimetheus-community"
-        - name: "davenverse/epimetheus-rediculous"
         - name: "davenverse/fiberlocal"
         - name: "davenverse/http4s-log4cats-contextlog"
         - name: "davenverse/namecase"
@@ -258,7 +254,6 @@ jobs:
         - name: "eb2501/fluor-core"
         - name: "edadma/char-reader"
         - name: "edadma/cross-platform"
-        - name: "edadma/csv"
         - name: "edadma/dal"
         - name: "edadma/dllist"
         - name: "edadma/indentation"
@@ -268,11 +263,9 @@ jobs:
         - name: "edadma/recognizer"
         - name: "edadma/tabula"
         - name: "edadma/texish"
-        - name: "edadma/typesetter"
         - name: "eikek/binny"
         - name: "eikek/borer-compats"
         - name: "eikek/soidc"
-        - name: "eikek/tus4s"
         - name: "eltherion/http4s-timer"
         - name: "endpoints4s/play"
         - name: "enriquerodbe/borsh4s"
@@ -296,13 +289,12 @@ jobs:
         - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "flextradeukltd/jfixture-scala"
         - name: "fommil/jzon"
+        - name: "fommil/shapely"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
-        - name: "fthomas/status-page"
         - name: "funkode-io/web3-auth"
         - name: "galliaproject/gallia-avro"
         - name: "galliaproject/gallia-mongodb"
-        - name: "galliaproject/gallia-parquet"
         - name: "galliaproject/gallia-spark"
         - name: "gchudnov/bscript"
         - name: "gchudnov/mindthegap"
@@ -320,7 +312,6 @@ jobs:
         - name: "giabao/asm-flow"
         - name: "gnp/ident"
         - name: "gnp/zio-data-streams"
-        - name: "gochaorg/json4s3"
         - name: "gonzih/cats-nats"
         - name: "goodcover/tagless-redux"
         - name: "greenfossil/commons-i18n"
@@ -330,6 +321,15 @@ jobs:
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
+        - name: "guardian/anghammarad"
+        - name: "guardian/cross-platform-navigation"
+        - name: "guardian/etag-caching"
+        - name: "guardian/identity-test-users"
+        - name: "guardian/mobile-apps-api-models"
+        - name: "guardian/pa-football-client"
+        - name: "guardian/panda-hmac"
+        - name: "guardian/redirect-resolver"
+        - name: "guidoschmidt17/zio-pgcopy"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,15 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "guardian/anghammarad"
-        - name: "guardian/cross-platform-navigation"
-        - name: "guardian/etag-caching"
-        - name: "guardian/identity-test-users"
-        - name: "guardian/mobile-apps-api-models"
-        - name: "guardian/pa-football-client"
-        - name: "guardian/panda-hmac"
-        - name: "guardian/redirect-resolver"
-        - name: "guidoschmidt17/zio-pgcopy"
         - name: "guizmaii-opensource/zio-aes"
         - name: "guizmaii-opensource/zio-spark"
         - name: "guntiso/mojoz"
@@ -409,7 +400,6 @@ jobs:
         - name: "indoorvivants/opaque-newtypes"
         - name: "indoorvivants/rendition"
         - name: "indoorvivants/sn-demangler"
-        - name: "indoorvivants/subatomic"
         - name: "indoorvivants/trigs"
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
@@ -431,7 +421,6 @@ jobs:
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
         - name: "jackcviers/cats-saga"
-        - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
         - name: "jd557/rokrok"
@@ -440,8 +429,6 @@ jobs:
         - name: "jkugiya/aws-v4-signer-scala"
         - name: "jkugiya/ulid-scala"
         - name: "jodersky/applib"
-        - name: "jodersky/cronic"
-        - name: "jodersky/identicon"
         - name: "jodersky/redicl"
         - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
@@ -459,7 +446,6 @@ jobs:
         - name: "julianpeeters/dc10-scala"
         - name: "julianpeeters/dc10-scalaq"
         - name: "julianpeeters/dc10-scalaq-twelf"
-        - name: "julianpeeters/destructured"
         - name: "julianpeeters/dynamical"
         - name: "julianpeeters/polynomial"
         - name: "julianpeeters/schemabuilder4cats"
@@ -484,13 +470,11 @@ jobs:
         - name: "keirlawson/fs2-progress"
         - name: "kelvindev15/pps-22-prolog-as-scaladsl"
         - name: "kevin-lee/just-sysprocess"
-        - name: "kevin-lee/openai4s"
         - name: "kiberstender/fjwt"
         - name: "kierendavies/skunk-migrate"
         - name: "kijuky/confluence-for-scala"
         - name: "kijuky/diff-for-scala"
         - name: "kijuky/enumeratum-scalikejdbc"
-        - name: "kijuky/git-for-scala"
         - name: "kijuky/gitlab-for-scala"
         - name: "kijuky/jenkins-for-scala"
         - name: "kijuky/jira-for-scala"
@@ -550,9 +534,7 @@ jobs:
         - name: "losizm/little-time"
         - name: "losizm/scurry"
         - name: "losizm/shampoo"
-        - name: "losizm/t2"
         - name: "lowmelvin/hammer-scala"
-        - name: "lowmelvin/mini-task"
         - name: "lowmelvin/scala-json-schema"
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
@@ -610,6 +592,24 @@ jobs:
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
+        - name: "novamage/typed-map"
+        - name: "nthportal/scala-platform"
+        - name: "nthportal/spaghetti"
+        - name: "oheger/cloud-files"
+        - name: "ohze/php-utils"
+        - name: "olegych/scaposer"
+        - name: "opaliasystems/opalia-commons-core"
+        - name: "openmole/container"
+        - name: "outr/dd-scala"
+        - name: "outr/moduload"
+        - name: "outr/rapid"
+        - name: "outr/robobrowser"
+        - name: "outr/scalapass"
+        - name: "outr/sendgrid4s"
+        - name: "ovotech/meters4s"
+        - name: "pablf/teseo"
+        - name: "palanga/parana"
+        - name: "palanga/picazio"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,24 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "novamage/typed-map"
-        - name: "nthportal/scala-platform"
-        - name: "nthportal/spaghetti"
-        - name: "oheger/cloud-files"
-        - name: "ohze/php-utils"
-        - name: "olegych/scaposer"
-        - name: "opaliasystems/opalia-commons-core"
-        - name: "openmole/container"
-        - name: "outr/dd-scala"
-        - name: "outr/moduload"
-        - name: "outr/rapid"
-        - name: "outr/robobrowser"
-        - name: "outr/scalapass"
-        - name: "outr/sendgrid4s"
-        - name: "ovotech/meters4s"
-        - name: "pablf/teseo"
-        - name: "palanga/parana"
-        - name: "palanga/picazio"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
@@ -667,7 +649,6 @@ jobs:
         - name: "philippus/osita"
         - name: "philippus/pureconfig-javanet"
         - name: "philippus/scala-isbn"
-        - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
@@ -682,10 +663,8 @@ jobs:
         - name: "pjfanning/micrometer-akka"
         - name: "pjfanning/pekko-discovery-consul"
         - name: "pjfanning/pekko-http-session"
-        - name: "pjfanning/pekko-libraries-bom"
         - name: "pjfanning/pekko-mock-scheduler"
         - name: "pjfanning/pekko-rabbitmq"
-        - name: "pjfanning/pekko-serialization-jackson215"
         - name: "pjfanning/pekko-serialization-jackson216"
         - name: "pjfanning/play-json"
         - name: "pjfanning/scala-faker"
@@ -733,7 +712,6 @@ jobs:
         - name: "rtyley/scala-textmatching"
         - name: "ruimo/csvparser"
         - name: "ruimo/gh-sonatype-example"
-        - name: "ruimo/graphics"
         - name: "ruimo/scoins"
         - name: "rustedbones/pekko-http-avro"
         - name: "rustedbones/pekko-http-metrics"
@@ -750,7 +728,6 @@ jobs:
         - name: "sangria-graphql/sangria-json4s-jackson"
         - name: "sangria-graphql/sangria-json4s-native"
         - name: "sangria-graphql/sangria-marshalling-api"
-        - name: "sangria-graphql/sangria-marshalling-testkit"
         - name: "sangria-graphql/sangria-msgpack"
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
@@ -787,7 +764,6 @@ jobs:
         - name: "scoquelin/arugula"
         - name: "scorexfoundation/debox"
         - name: "scorexfoundation/scorex-util"
-        - name: "sdrafahl/codec"
         - name: "sean-ideabank/rudolf"
         - name: "sfali/grpc-rest-gateway"
         - name: "sfxcode/pebble-scala"
@@ -818,7 +794,6 @@ jobs:
         - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
         - name: "swaldman/feedletter"
-        - name: "swaldman/logadapter-scala"
         - name: "swaldman/mailutil"
         - name: "swaldman/mchange-sysadmin-scala"
         - name: "swaldman/mill-daemon"
@@ -890,31 +865,6 @@ jobs:
         - name: "trace4cats/trace4cats-newrelic"
         - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-pubsub"
-    steps:
-      - name: "Git Checkout"
-        uses: actions/checkout@v4
-      - name: "Build project"
-        uses: ./.github/actions/build-project
-        with:
-          project-name: ${{ matrix.name }}
-          custom-build-id: ${{ inputs.custom-build-id }}
-          extra-scalac-options: ${{ inputs.extra-scalac-options }}
-          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
-          extra-library-dependencies: ${{ inputs.extra-library-dependencies }}
-          execute-tests: ${{ inputs.execute-tests }}
-          scala-version: ${{ needs.setup-build.outputs.scala-version }}
-          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
-          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
-          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
-          container-registry-username: ${{ github.actor }}
-          container-registry-token: ${{ secrets.GHCR_TOKEN }}
-  stage-3:
-    runs-on: ubuntu-22.04
-    needs: [ setup-build ]
-    continue-on-error: true
-    strategy:
-      matrix:
-        include:
         - name: "trace4cats/trace4cats-tail-sampling-extras"
         - name: "trace4cats/trace4cats-xray"
         - name: "trace4cats/trace4cats-zio"
@@ -940,6 +890,31 @@ jobs:
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v4
+      - name: "Build project"
+        uses: ./.github/actions/build-project
+        with:
+          project-name: ${{ matrix.name }}
+          custom-build-id: ${{ inputs.custom-build-id }}
+          extra-scalac-options: ${{ inputs.extra-scalac-options }}
+          disabled-scalac-options: ${{ inputs.disabled-scalac-options }}
+          extra-library-dependencies: ${{ inputs.extra-library-dependencies }}
+          execute-tests: ${{ inputs.execute-tests }}
+          scala-version: ${{ needs.setup-build.outputs.scala-version }}
+          maven-repo-url: ${{ needs.setup-build.outputs.maven-repo-url }}
+          elastic-user: ${{ secrets.OPENCB_ELASTIC_USER }}
+          elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+          container-registry-username: ${{ github.actor }}
+          container-registry-token: ${{ secrets.GHCR_TOKEN }}
+  stage-3:
+    runs-on: ubuntu-22.04
+    needs: [ setup-build ]
+    continue-on-error: true
+    strategy:
+      matrix:
+        include:
         - name: "wiwiwa/ezscala"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
