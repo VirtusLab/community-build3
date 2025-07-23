@@ -165,7 +165,8 @@ runs:
           echo 'failure' > build-status.txt 
           echo 'unknown' > build-tool.txt
 
-          OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}" \
+          export OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}"
+          timeout 7200 \
             /opencb/project-builder/build-revision.sh \
             "$(config .project)" \
             "$(config .repoUrl)" \
@@ -178,6 +179,13 @@ runs:
             "${{ inputs.disabled-scalac-options }}" \
             "${{ inputs.extra-library-dependencies }}" \
             2>&1 | tee build-logs.txt
+            
+          exit_code=${PIPESTATUS[0]}
+          if [ $exit_code -eq 124 ]; then
+            echo "::warning title=Build timeout after 2 hours"
+            echo "Build timeout after 2 hours" >> build-logs.txt
+            echo "timeout" > build-status.txt
+          fi
 
           # Store results
           mv build-logs.txt /opencb/
