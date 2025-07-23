@@ -357,6 +357,7 @@ jobs:
         include:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
+        - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
@@ -373,7 +374,6 @@ jobs:
         - name: "fs2-blobstore/fs2-blobstore"
         - name: "fthomas/fs2-cron"
         - name: "fthomas/refined"
-        - name: "fthomas/status-page"
         - name: "funktionalio/pillars"
         - name: "gaeljw/typetrees"
         - name: "gaelrenoux/tranzactio"
@@ -408,6 +408,7 @@ jobs:
         - name: "greenleafoss/green-leaf-mongo"
         - name: "grouzen/zio-apache-arrow"
         - name: "grouzen/zio-apache-parquet"
+        - name: "guardian/fastly-api-client"
         - name: "guardian/hmac-headers"
         - name: "guardian/janus-app"
         - name: "guardian/pan-domain-authentication"
@@ -439,6 +440,7 @@ jobs:
         - name: "http4s/http4s-fs2-data"
         - name: "http4s/http4s-grpc"
         - name: "http4s/http4s-jdk-http-client"
+        - name: "http4s/http4s-jetty"
         - name: "http4s/http4s-netty"
         - name: "http4s/http4s-otel4s-middleware"
         - name: "http4s/http4s-prometheus-metrics"
@@ -496,7 +498,6 @@ jobs:
         - name: "jd557/qrgen"
         - name: "jelly-rdf/jelly-jvm"
         - name: "jilen/play-circe"
-        - name: "jmcardon/tsec"
         - name: "joan38/kubernetes-client"
         - name: "jodersky/scala-argparse"
         - name: "jodersky/simplesql"
@@ -609,7 +610,6 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
-        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -889,7 +890,6 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1049,7 +1050,6 @@ jobs:
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
         - name: "typelevel/paiges"
-        - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
         - name: "typelevel/scalacheck"
         - name: "typelevel/scalacheck-effect"
