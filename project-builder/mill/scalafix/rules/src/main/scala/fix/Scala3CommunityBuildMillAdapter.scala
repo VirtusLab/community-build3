@@ -287,7 +287,10 @@ class Scala3CommunityBuildMillAdapter(
             .map(Lit.String(_))
             .map { v =>
               if (shouldWrapInTarget(body, tpe))
-                Term.Apply(Term.Select(Term.Name("mill"), Term.Name("T")), List(v))
+                if (isMill1x)
+                  Term.Apply(Term.Select(Term.Name("mill"), Term.Name("Task")), List(v))
+                else 
+                  Term.Apply(Term.Select(Term.Name("mill"), Term.Name("T")), List(v))
               else v
             }
             .getOrElse(body)
