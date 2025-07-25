@@ -374,6 +374,7 @@ jobs:
         - name: "fs2-blobstore/fs2-blobstore"
         - name: "fthomas/fs2-cron"
         - name: "fthomas/refined"
+        - name: "fthomas/status-page"
         - name: "funktionalio/pillars"
         - name: "gaeljw/typetrees"
         - name: "gaelrenoux/tranzactio"
@@ -609,7 +610,6 @@ jobs:
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
-        - name: "max-leuthaeuser/scroll"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
@@ -679,7 +680,6 @@ jobs:
         - name: "nscala-time/nscala-time"
         - name: "nulab/play2-oauth2-provider"
         - name: "olivierblanvillain/regsafe"
-        - name: "ollls/quartz-h2"
         - name: "ollls/zio-quartz-h2"
         - name: "ollls/zio-tls-http"
         - name: "openmole/byte-pack"
@@ -1050,6 +1050,7 @@ jobs:
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
         - name: "typelevel/paiges"
+        - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
         - name: "typelevel/scalacheck"
         - name: "typelevel/scalacheck-effect"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
