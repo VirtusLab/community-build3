@@ -19811,40 +19811,7 @@
     "revision":"v0.41.0",
     "version":"0.41.0",
     "targets":"edu.gemini%lucuma-itc edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc-service edu.gemini%lucuma-itc-testkit",
-    "publishedScalaVersion":"3.7.1",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
+    "publishedScalaVersion":"3.7.1"
   },
   "gemini-hlsw/lucuma-jts":{
     "project":"gemini-hlsw/lucuma-jts",
@@ -40206,47 +40173,6 @@
       ]
     }
   },
-  "ollls/quartz-h2":{
-    "project":"ollls/quartz-h2",
-    "repoUrl":"https://github.com/ollls/quartz-h2.git",
-    "revision":"v0.9.0",
-    "version":"0.9.0",
-    "targets":"io.github.ollls%iouring-quartz-h2 io.github.ollls%quartz-h2",
-    "publishedScalaVersion":"3.3.3",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"compile-only",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "ollls/zio-quartz-h2":{
     "project":"ollls/zio-quartz-h2",
     "repoUrl":"https://github.com/ollls/zio-quartz-h2.git",
@@ -59248,6 +59174,11 @@
           "replaceWith":"new ParApplicative[G.F, E](using G.applicative, E)"
         },
         {
+          "path":"modules/logging/derivation/src/test/scala-3/tofu/logging/derivation/DerivedLoggableScala3Suite.scala",
+          "pattern":"(import SealedTraitEnum.*\\n\\s*)json\\(Container\\(A, B, C\\)\\)",
+          "replaceWith":"$1json(Container[SealedTraitEnum,SealedTraitEnum,SealedTraitEnum](A, B, C))"
+        },
+        {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3 = \"3.3.6\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -66795,50 +66726,6 @@
       ]
     }
   },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "zio-archive/zio-jdbc":{
     "project":"zio-archive/zio-jdbc",
     "repoUrl":"https://github.com/zio-archive/zio-jdbc.git",
@@ -67416,6 +67303,11 @@
           "path":"test-sbt/jvm/src/test/scala/zio/test/sbt/TestingSupport.scala",
           "pattern":") _\n",
           "replaceWith":")\n"
+        },
+        {
+          "path":"core/shared/src/main/scala-3/zio/IsReloadableVersionSpecific.scala",
+          "pattern":"parent = Symbol.spliceOwner",
+          "replaceWith":"Symbol.spliceOwner"
         },
         {
           "path":"project/BuildHelper.scala",
