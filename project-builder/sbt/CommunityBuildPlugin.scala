@@ -545,11 +545,11 @@ object CommunityBuildPlugin extends AutoPlugin {
       val allToBuild = flatten(topLevelProjects, topLevelProjects)
       println("Projects: " + allToBuild.map(_.project))
 
-      val projectsBuildResults = allToBuild.toList.map { r =>
+      val projectsBuildResults = allToBuild.toList.zipWithIndex.map { case (r, idx) =>
         val evaluator = new SbtTaskEvaluator(r, cState)
         val s = sbt.Project.extract(cState).structure
         val projectName = (r / moduleName).get(s.data).get
-        println(s"Starting build for $r ($projectName)...")
+        println(s"Starting build for $r ($projectName)... [$idx/${allToBuild.size}]")
 
         val overrideSettings = {
           val overrides = config.projects.overrides
