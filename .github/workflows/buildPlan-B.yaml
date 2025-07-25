@@ -1,5 +1,5 @@
 
-# projects total:     815
+# projects total:     813
 # min stars count:    -1
 # max projects count: 1000
 
@@ -298,7 +298,6 @@ jobs:
         - name: "fommil/shapely"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
-        - name: "fthomas/status-page"
         - name: "funkode-io/web3-auth"
         - name: "galliaproject/gallia-avro"
         - name: "galliaproject/gallia-mongodb"
@@ -330,6 +329,7 @@ jobs:
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
+        - name: "guardian/anghammarad"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "guardian/anghammarad"
         - name: "guardian/cross-platform-navigation"
         - name: "guardian/etag-caching"
         - name: "guardian/identity-test-users"
@@ -610,6 +609,7 @@ jobs:
         - name: "nivox/cats-effect-treesync"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
+        - name: "novakov-alexey/http4s-spnego"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "novakov-alexey/http4s-spnego"
         - name: "novamage/typed-map"
         - name: "nthportal/scala-platform"
         - name: "nthportal/spaghetti"
@@ -654,7 +653,6 @@ jobs:
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
-        - name: "palanga/zio-cassandra"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
@@ -890,6 +888,8 @@ jobs:
         - name: "trace4cats/trace4cats-jaeger-integration-test"
         - name: "trace4cats/trace4cats-kafka"
         - name: "trace4cats/trace4cats-natchez"
+        - name: "trace4cats/trace4cats-newrelic"
+        - name: "trace4cats/trace4cats-opentelemetry"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,8 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "trace4cats/trace4cats-newrelic"
-        - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-pubsub"
         - name: "trace4cats/trace4cats-tail-sampling-extras"
         - name: "trace4cats/trace4cats-xray"
