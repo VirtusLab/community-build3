@@ -703,7 +703,6 @@ jobs:
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "ovotech/natchez-extras"
         - name: "pac4j/http4s-pac4j"
-        - name: "palanga/zio-cassandra"
         - name: "paoloboni/binance-scala-client"
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pathikrit/better-files"
@@ -890,6 +889,7 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1050,6 +1049,7 @@ jobs:
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
         - name: "typelevel/paiges"
+        - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
         - name: "typelevel/scalacheck"
         - name: "typelevel/scalacheck-effect"
