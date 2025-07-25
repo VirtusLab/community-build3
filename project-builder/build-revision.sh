@@ -90,7 +90,12 @@ function detectSourceVersion() {
   fi
   if [[ -z "$sourceVersionSetting" ]]; then
     sourceVersion="$scalaBinaryVersion-migration"
-    sourceVersionSetting="REQUIRE:-source:$sourceVersion"
+    if [[ "${scalaBinaryVersion}" == "3.3" ]]; then
+      # Allow preconfigured source version for Scala 3.3 LTS, it typically might be either 3.0-migration or future
+      sourceVersionSetting="-source:$sourceVersion"
+    else
+      sourceVersionSetting="REQUIRE:-source:$sourceVersion"
+    fi
     echo "Implicitly using source version $sourceVersion"
   fi
 }

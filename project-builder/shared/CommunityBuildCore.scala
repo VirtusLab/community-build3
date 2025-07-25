@@ -429,8 +429,8 @@ object Scala3CommunityBuild {
           .flatMap(m => Option(m.group(1)))
       lazy val requiredSourceVersion =
         requiredAppendSettings.find(isSourceVersion).flatMap(resolveSourceVersion)
-      val forceSourceVersion =
-        definedSourceVersion.contains("future") || requiredSourceVersion.isDefined
+      lazy val usesFutureSourceVersion =
+        Seq("future", "future-migration").exists(definedSourceVersion.contains)
 
       val appendSettings = {
         def excludeIf(setting: String, expr: Boolean, reason: => String) = {
@@ -438,25 +438,27 @@ object Scala3CommunityBuild {
           expr
         }
 
-        val forcedAppendSettings: Seq[String] = Seq(
-          if (forceSourceVersion)
-            Some(s"-source:${requiredSourceVersion.getOrElse("future-migration")}")
-          else None
-        ).flatten
-
+        val forcedSourceSettings: Seq[String] =
+          requiredSourceVersion
+            .map("-source:" + _)
+            .orElse {
+              if (usesFutureSourceVersion) Some("-source:future-migration")
+              else None
+            }
+            .toSeq
         standardAppendSettings.filterNot { setting =>
           isSourceVersion(setting) && {
             excludeIf(
               setting,
-              definedSourceSetting.nonEmpty,
-              s"Project has predefined source version: ${definedSourceSetting.get}}"
+              definedSourceVersion.nonEmpty,
+              s"Project has predefined source version: ${definedSourceVersion.get}}"
             ) || excludeIf(
               setting,
-              forceSourceVersion,
-              s"Needs to force source version: $forcedAppendSettings"
+              forcedSourceSettings.nonEmpty,
+              s"Needs to use forced source version: $forcedSourceSettings instead of ${definedSourceVersion}"
             )
           }
-        } ++ forcedAppendSettings
+        } ++ forcedSourceSettings
       }
 
       val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
