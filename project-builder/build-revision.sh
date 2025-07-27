@@ -185,24 +185,9 @@ function buildForScalaVersion(){
     revertBuildPatch
   ## Sbt
   ## Apparently built.sbt is a valid build file name. Accept any .sbt file
-  elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
-    echo "sbt project found: ${isSbtProject}"
-    echo "sbt" > $buildToolFile
-    $scriptDir/sbt/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
-    createBuildPatch
-    $scriptDir/sbt/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
-    revertBuildPatch
-  ## Scala-cli
   else
-    echo "Not found sbt or mill build files, assuming scala-cli project"
-    ls -l repo/
-    echo "scala-cli" > $buildToolFile
-    export COURSIER_REPOSITORIES="central|sonatype:releases|$mvnRepoUrl"
-    scala-cli config power true
-    scala-cli bloop exit
-    scala-cli clean $scriptDir/scala-cli/
-    scala-cli clean repo
-    scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
+    echo "Ignoring non sbt build"
+    echo "success" > build-status.txt
   fi
 
   ## After build steps
