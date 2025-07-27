@@ -86,14 +86,14 @@ runs:
           echo '##################################'
           
           # Extract major and minor version numbers (first two segments)
-          major_minor=$(echo "${{ steps.calc-version.outputs.effective-maven-url }}" | grep -oE '^[0-9]+\.[0-9]+')
+          major_minor=$(echo "${{ steps.calc-version.outputs.effective-scala-version }}" | grep -oE '^[0-9]+\.[0-9]+')
           major=$(echo "$major_minor" | cut -d. -f1)
           minor=$(echo "$major_minor" | cut -d. -f2)
-          echo "Compiler version: major: $major, minor: $minor"
+          echo "Compiler binary version: $major.$minor"
 
           # If building Scala 3.6 or earlier use Java 8
           JDKVersion=17
-          if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -le 6 ]]); then
+          if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -lt 7 ]]); then
             JDKVersion=8
           fi
 
