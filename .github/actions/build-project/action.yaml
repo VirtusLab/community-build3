@@ -130,7 +130,6 @@ runs:
 
     - name: Build project
       uses: addnab/docker-run-action@v3
-      if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         registry: ${{ inputs.container-registry }}
         username: ${{ inputs.container-registry-username }}
@@ -196,7 +195,6 @@ runs:
     - name: Check status
       id: check-status
       shell: bash
-      if: steps.check-history.outputs.can-skip-build != 'true'
       run: echo "status=$(cat build-status.txt)" >> $GITHUB_OUTPUT
 
     - name: Get current job URL
@@ -240,7 +238,6 @@ runs:
 
     - name: Index results
       uses: addnab/docker-run-action@v3
-      if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         registry: ${{ inputs.container-registry }}
         username: ${{ inputs.container-registry-username }}
@@ -278,7 +275,6 @@ runs:
 
     - name: Check results
       shell: bash
-      if: steps.check-history.outputs.can-skip-build != 'true'
       run: |
         # Set the result of the build
         if [[ "${{ steps.check-status.outputs.status }}" == "success" ]]; then 
