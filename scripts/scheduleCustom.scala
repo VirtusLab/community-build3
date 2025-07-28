@@ -33,6 +33,7 @@ import scala.sys.process.*
     val sourceVersionAttr = sourceVersion.map("-source:" + _).getOrElse("")
     val task =   
     s"""gh workflow run .github/workflows/buildExecuteCustom-$build.yaml 
+    | --ref=scala/new-stdlib
     | -f build-name=${repository}:${branch}${sourceVersionAttr}:$date
     | -f execute-tests=${executeTests}
     | -f repository-url=${repository}
