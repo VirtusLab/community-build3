@@ -52,6 +52,7 @@ sbtSettings=(
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"
 logFile=build.log
+statusFile=build-status.txt
 
 # Compiler plugins, cannot be cross-published before starting the build
 # Allways exclude these from library dependencies
@@ -89,15 +90,27 @@ function runSbt() {
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" 2>&1 | tee $logFile
 }
 
+buildTimeouts=0
+
 function checkLogsForRetry() {
   # Retry only when given modes were not tried yet
   shouldRetry=false
+  # Timeout 
+  if [ "$buildTimeouts" -eq 0 ]; then
+    if grep -q "timeout" "$statusFile"; then
+      buildTimeouts=$((buildTimeouts + 1))
+      shouldRetry=true
+      return 0
+    fi
+  fi
+  
   # Failed to download artifacts
   if grep -q 'sbt.librarymanagement.ResolveException' "$logFile"; then
     TIMEOUT=$(( RANDOM % 241 + 60 ))
     echo "Failed to download artifacts, retry after $TIMEOUT seconds"
     sleep "$TIMEOUT"
     shouldRetry=true
+    return 0
   fi
 
   # Failed to switch version
