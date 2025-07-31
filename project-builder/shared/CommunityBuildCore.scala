@@ -409,7 +409,7 @@ object Scala3CommunityBuild {
         append: Seq[String],
         remove: Seq[String]
     ): Seq[String] = {
-      val (removeMatchSettings, removeSettings) = (remove ++ ignoredScalacOptions).partition {
+      val (removeMatchSettings, removeSettings) = (remove.map(_.stripPrefix("REQUIRE:")) ++ ignoredScalacOptions).partition {
         _.startsWith("MATCH:")
       }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))

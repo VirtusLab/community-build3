@@ -212,7 +212,7 @@ object CommunityBuildPlugin extends AutoPlugin {
                 s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope"
               )
             }
-            append.diff(appendScala3Exclusive) ++ appendScala3Inclusive
+            appendScala3Inclusive
           }
 
         val remove = safeArgs.lift(1).getOrElse(Nil)
