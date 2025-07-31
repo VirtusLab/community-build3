@@ -52,7 +52,7 @@ sbtSettings=(
 customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
 targetsString="${targets[@]}"
 logFile=build.log
-statusFile=build-status.txt
+statusFile=../build-status.txt
 
 # Compiler plugins, cannot be cross-published before starting the build
 # Allways exclude these from library dependencies
