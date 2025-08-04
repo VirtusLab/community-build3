@@ -55,7 +55,7 @@ for launcher in ./millw ./mill ${scriptDir}/millw; do
     continue
   fi
   chmod +x $launcher
-  if $launcher resolve _ > /dev/null 2> /dev/null; then
+  if $launcher resolve _ ; then
     tryBuild $launcher
     exit 0
   else
