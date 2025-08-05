@@ -127,6 +127,7 @@ jobs:
         - name: "apache/pekko-persistence-r2dbc"
         - name: "apache/pekko-projection"
         - name: "apimorphism/telegramium"
+        - name: "arainko/chanterelle"
         - name: "arainko/ducktape"
         - name: "argonaut-io/argonaut"
         - name: "ariskk/flink4s"
@@ -204,7 +205,6 @@ jobs:
         - name: "com-lihaoyi/fastparse"
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/mainargs"
-        - name: "com-lihaoyi/mill"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/pprint"
@@ -702,6 +702,7 @@ jobs:
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "ovotech/natchez-extras"
         - name: "pac4j/http4s-pac4j"
+        - name: "palanga/zio-cassandra"
         - name: "paoloboni/binance-scala-client"
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pathikrit/better-files"
@@ -889,7 +890,6 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
