@@ -1,5 +1,5 @@
 
-# projects total:     816
+# projects total:     820
 # min stars count:    -1
 # max projects count: 1000
 
@@ -172,6 +172,7 @@ jobs:
         - name: "bitmarck-service/base32check-scala"
         - name: "bitmarck-service/fs2-secon"
         - name: "broij/zarrow"
+        - name: "business4s/forms4s"
         - name: "cake-lier/tuples-space-client"
         - name: "cake-lier/tuples-space-core"
         - name: "carlos-verdes/zio-resource"
@@ -329,7 +330,6 @@ jobs:
         - name: "greenfossil/data-mapping"
         - name: "greenfossil/htmltags"
         - name: "greenfossil/typesafe-config-ext"
-        - name: "greyplane/jsonpath4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
         - name: "guardian/anghammarad"
         - name: "guardian/cross-platform-navigation"
@@ -609,7 +610,6 @@ jobs:
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
-        - name: "nivox/cats-effect-treesync"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "nivox/cats-effect-treesync"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
@@ -656,6 +657,7 @@ jobs:
         - name: "pablf/teseo"
         - name: "palanga/parana"
         - name: "palanga/picazio"
+        - name: "palanga/zio-cassandra"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
@@ -700,6 +702,7 @@ jobs:
         - name: "pmeheut/nscala-java-time"
         - name: "polystat/polystat-cli"
         - name: "polyvariant/caliban-gitlab"
+        - name: "polyvariant/respectfully"
         - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/smithy4s-bsp"
         - name: "polyvariant/treesitter4s"
@@ -846,6 +849,7 @@ jobs:
         - name: "taig/scala-pygments"
         - name: "taig/sql-ext"
         - name: "takapi327/mcp-scala"
+        - name: "tanin47/play-json-form"
         - name: "tarao/collection-scala"
         - name: "taymyr/play-repository-java"
         - name: "tegonal/scala-commons"
@@ -886,10 +890,6 @@ jobs:
         - name: "trace4cats/trace4cats-cloudtrace"
         - name: "trace4cats/trace4cats-datadog"
         - name: "trace4cats/trace4cats-exporter-http"
-        - name: "trace4cats/trace4cats-http4s"
-        - name: "trace4cats/trace4cats-jaeger"
-        - name: "trace4cats/trace4cats-jaeger-integration-test"
-        - name: "trace4cats/trace4cats-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "trace4cats/trace4cats-http4s"
+        - name: "trace4cats/trace4cats-jaeger"
+        - name: "trace4cats/trace4cats-jaeger-integration-test"
+        - name: "trace4cats/trace4cats-kafka"
         - name: "trace4cats/trace4cats-natchez"
         - name: "trace4cats/trace4cats-newrelic"
         - name: "trace4cats/trace4cats-opentelemetry"
