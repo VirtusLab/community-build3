@@ -1,6 +1,9 @@
 name: Infra CI
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
     paths-ignore:
       - '.github/actions/**'
