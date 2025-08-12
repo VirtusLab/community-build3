@@ -23,4 +23,14 @@ val updatedBuild = os.read(repositoryDir / "build.sc")
   .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
 os.write.over(repositoryDir / "build.sc", updatedBuild)
 
-os.proc("./mill", "show", "__.publishLocalCached").call(cwd = repositoryDir, check = true)
+val coursierRepositories = Seq(
+  "central",
+  "ivy2local",
+  s"https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion",
+).mkString("|")
+
+os.proc(
+  "./mill",
+  "-D", s"coursier.repositories=$coursierRepositories",
+  "show", "__.publishLocal",
+).call(cwd = repositoryDir, check = true)

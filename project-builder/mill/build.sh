@@ -32,6 +32,7 @@ millSettings=(
   "--no-server"
   "--silent"
   "--disable-ticker"
+  -D "coursier.repositories=central|ivy2local|$mavenRepoUrl"
   -D "communitybuild.maven.url=$mavenRepoUrl"
   -D "communitybuild.scala=$scalaVersion"
   -D "communitybuild.appendScalacOptions=$extraScalacOptions"
