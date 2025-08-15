@@ -61,6 +61,7 @@ excludedCompilerPlugins=(
   "com.olegpy:better-monadic-for_3"
   "org.polyvariant:better-tostring_{scalaVersion}"
   "org.wartremover:wartremover_{scalaVersion}"
+  "org.scala-lang:scaladoc_3"
   "org.scala-lang:scala-reflect"
   "org.scala-lang:scala-compiler"
 )
