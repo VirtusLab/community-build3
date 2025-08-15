@@ -1,5 +1,5 @@
 
-# projects total:     820
+# projects total:     823
 # min stars count:    -1
 # max projects count: 1000
 
@@ -264,6 +264,7 @@ jobs:
         - name: "edadma/indentation"
         - name: "edadma/logger"
         - name: "edadma/matrix"
+        - name: "edadma/path"
         - name: "edadma/pattern-matcher"
         - name: "edadma/recognizer"
         - name: "edadma/tabula"
@@ -329,7 +330,6 @@ jobs:
         - name: "greenfossil/commons-json"
         - name: "greenfossil/data-mapping"
         - name: "greenfossil/htmltags"
-        - name: "greenfossil/typesafe-config-ext"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
         - name: "guardian/anghammarad"
@@ -467,6 +468,7 @@ jobs:
         - name: "julianpeeters/schemabuilder4cats"
         - name: "julianpeeters/typename"
         - name: "julianpeeters/typesize"
+        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/googlecloud4s"
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
@@ -525,6 +527,7 @@ jobs:
         - name: "lhns/http4s-otel"
         - name: "lhns/http4s-spa"
         - name: "lhns/jwt-s"
+        - name: "lhns/munit-tagless-final"
         - name: "lhns/nifi-scala"
         - name: "lhns/remote-io"
         - name: "lhns/scala-commandline"
@@ -607,9 +610,6 @@ jobs:
         - name: "natural-transformation/avro4s"
         - name: "natural-transformation/korolev"
         - name: "nebula-contrib/testcontainers-nebula"
-        - name: "nicolasfara/ecscala"
-        - name: "nicolasfara/template-for-scala-multiplatform-projects"
-        - name: "nikolaiser/biser"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "nicolasfara/ecscala"
+        - name: "nicolasfara/template-for-scala-multiplatform-projects"
+        - name: "nikolaiser/biser"
         - name: "nivox/cats-effect-treesync"
         - name: "note/dhallj-magnolia"
         - name: "novakov-alexey/flink-clients-scastie"
@@ -649,7 +652,6 @@ jobs:
         - name: "openmole/container"
         - name: "outr/dd-scala"
         - name: "outr/moduload"
-        - name: "outr/rapid"
         - name: "outr/robobrowser"
         - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
@@ -658,6 +660,7 @@ jobs:
         - name: "palanga/parana"
         - name: "palanga/picazio"
         - name: "palanga/zio-cassandra"
+        - name: "paoloboni/spray-json-derived-codecs"
         - name: "pbyrne84/scala-case-class-prettification"
         - name: "pbyrne84/scala-wiremock-api"
         - name: "permutive-engineering/common-types-gcp"
@@ -673,7 +676,6 @@ jobs:
         - name: "philippus/pureconfig-javanet"
         - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
-        - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/relational3"
@@ -702,7 +704,6 @@ jobs:
         - name: "pmeheut/nscala-java-time"
         - name: "polystat/polystat-cli"
         - name: "polyvariant/caliban-gitlab"
-        - name: "polyvariant/respectfully"
         - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/smithy4s-bsp"
         - name: "polyvariant/treesitter4s"
@@ -779,6 +780,7 @@ jobs:
         - name: "scalapb/common-protos"
         - name: "scalatest/scalatestplus-easymock"
         - name: "scalatest/scalatestplus-jmock"
+        - name: "scalatest/scalatestplus-junit5"
         - name: "scalax/simple"
         - name: "scalax/slickless"
         - name: "scf37/filewatch"
@@ -888,8 +890,6 @@ jobs:
         - name: "trace4cats/trace4cats-avro"
         - name: "trace4cats/trace4cats-avro-kafka"
         - name: "trace4cats/trace4cats-cloudtrace"
-        - name: "trace4cats/trace4cats-datadog"
-        - name: "trace4cats/trace4cats-exporter-http"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "trace4cats/trace4cats-datadog"
+        - name: "trace4cats/trace4cats-exporter-http"
         - name: "trace4cats/trace4cats-http4s"
         - name: "trace4cats/trace4cats-jaeger"
         - name: "trace4cats/trace4cats-jaeger-integration-test"
@@ -949,6 +951,7 @@ jobs:
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
+        - name: "xebia-functional/karat-scalacheck"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"

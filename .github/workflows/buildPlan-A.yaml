@@ -98,6 +98,7 @@ jobs:
         - name: "alaz/scala-i18n"
         - name: "alejandrohdezma/http4s-munit"
         - name: "alejandrohdezma/tapir-golden-openapi-munit"
+        - name: "alexarchambault/case-app"
         - name: "alexarchambault/mill-native-image"
         - name: "algolia/algoliasearch-client-scala"
         - name: "alhuelamo/dbjobs"
@@ -222,6 +223,7 @@ jobs:
         - name: "coralogix/zio-k8s"
         - name: "cornerman/chameleon"
         - name: "cornerman/sloth"
+        - name: "couchbase/couchbase-jvm-clients"
         - name: "coursier/dependency"
         - name: "coursier/publish"
         - name: "cquiroz/sbt-locales"
@@ -328,8 +330,6 @@ jobs:
         - name: "fabiopinheiro/scala-did"
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
-        - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fasterxml/jackson-module-scala"
+        - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
@@ -498,6 +500,7 @@ jobs:
         - name: "jd557/minart"
         - name: "jd557/qrgen"
         - name: "jelly-rdf/jelly-jvm"
+        - name: "jetbrains/sbt-structure"
         - name: "jilen/play-circe"
         - name: "joan38/kubernetes-client"
         - name: "jodersky/scala-argparse"
@@ -515,7 +518,6 @@ jobs:
         - name: "juliano/pokeapi-scala"
         - name: "julianpeeters/avrohugger"
         - name: "julienrf/play-jsmessages"
-        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/oidc4s"
         - name: "jwt-scala/jwt-scala"
         - name: "kacperfkorban/guinep"
@@ -576,7 +578,6 @@ jobs:
         - name: "lemonlabsuk/scala-uri"
         - name: "leviysoft/oolong"
         - name: "lhns/fs2-compress"
-        - name: "lhns/munit-tagless-final"
         - name: "lichess-org/lila"
         - name: "lichess-org/lila-fishnet"
         - name: "lichess-org/lila-search"
@@ -609,7 +610,6 @@ jobs:
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
-        - name: "matsluni/aws-spi-akka-http"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
@@ -697,6 +698,7 @@ jobs:
         - name: "outr/media4s"
         - name: "outr/perfolation"
         - name: "outr/profig"
+        - name: "outr/rapid"
         - name: "outr/scarango"
         - name: "outr/scribe"
         - name: "outr/spice"
@@ -704,7 +706,6 @@ jobs:
         - name: "ovotech/natchez-extras"
         - name: "pac4j/http4s-pac4j"
         - name: "paoloboni/binance-scala-client"
-        - name: "paoloboni/spray-json-derived-codecs"
         - name: "pathikrit/better-files"
         - name: "permutive-engineering/fs2-pubsub"
         - name: "permutive-engineering/prometheus4cats"
@@ -740,6 +741,7 @@ jobs:
         - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/colorize-scala"
+        - name: "polyvariant/respectfully"
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/smithy4s-caliban"
         - name: "polyvariant/sttp-oauth2"
@@ -855,7 +857,6 @@ jobs:
         - name: "scalapy/scalapy"
         - name: "scalatest/scalatest"
         - name: "scalatest/scalatestplus-junit"
-        - name: "scalatest/scalatestplus-junit5"
         - name: "scalatest/scalatestplus-mockito"
         - name: "scalatest/scalatestplus-scalacheck"
         - name: "scalatest/scalatestplus-selenium"
@@ -889,7 +890,6 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1091,7 +1092,6 @@ jobs:
         - name: "wolfendale/scalacheck-gen-regexp"
         - name: "wvlet/airframe"
         - name: "xebia-functional/fetch"
-        - name: "xebia-functional/karat-scalacheck"
         - name: "xuwei-k/applybuilder"
         - name: "xuwei-k/httpz"
         - name: "xuwei-k/iarray"
