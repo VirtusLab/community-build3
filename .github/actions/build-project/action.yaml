@@ -144,7 +144,8 @@ runs:
           mkdir -p ~/.ssh
           touch ~/.ssh/config
           touch ~/.ssh/known_hosts
-          chmod -R 400 ~/.ssh
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/*
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           printf "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
@@ -181,7 +182,6 @@ runs:
             
           exit_code=${PIPESTATUS[0]}
           if [ $exit_code -eq 124 ]; then
-            echo "::warning title=Build timeout after 2 hours"
             echo "Build timeout after 2 hours" >> build-logs.txt
             echo "timeout" > build-status.txt
           fi

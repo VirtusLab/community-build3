@@ -212,7 +212,7 @@ object CommunityBuildPlugin extends AutoPlugin {
                 s"Exclude Scala3 specific scalacOption `$setting` in Scala ${scalaVersion} module $scope"
               )
             }
-            append.diff(appendScala3Exclusive) ++ appendScala3Inclusive
+            appendScala3Inclusive
           }
 
         val remove = safeArgs.lift(1).getOrElse(Nil)
@@ -589,7 +589,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         val compileResult = mayRetry(Compile / compile)(eval)
 
         val shouldBuildDocs = eval(Compile / doc / skip) match {
-          case EvalResult.Value(skip, _) => false
+          case EvalResult.Value(skip, _) => !skip
           case _                         => false
         }
         val docsResult = mayRetry(Compile / doc) {
@@ -611,7 +611,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
 
         val shouldPublish = eval(Compile / publish / skip) match {
-          case EvalResult.Value(skip, _) => false
+          case EvalResult.Value(skip, _) => !skip
           case _                         => false
         }
         val publishResult = PublishResult(

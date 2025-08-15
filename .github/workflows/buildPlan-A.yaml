@@ -127,6 +127,7 @@ jobs:
         - name: "apache/pekko-persistence-r2dbc"
         - name: "apache/pekko-projection"
         - name: "apimorphism/telegramium"
+        - name: "arainko/chanterelle"
         - name: "arainko/ducktape"
         - name: "argonaut-io/argonaut"
         - name: "ariskk/flink4s"
@@ -329,7 +330,6 @@ jobs:
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
-        - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
@@ -374,7 +375,6 @@ jobs:
         - name: "fs2-blobstore/fs2-blobstore"
         - name: "fthomas/fs2-cron"
         - name: "fthomas/refined"
-        - name: "fthomas/status-page"
         - name: "funktionalio/pillars"
         - name: "gaeljw/typetrees"
         - name: "gaelrenoux/tranzactio"
@@ -703,7 +703,6 @@ jobs:
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "ovotech/natchez-extras"
         - name: "pac4j/http4s-pac4j"
-        - name: "palanga/zio-cassandra"
         - name: "paoloboni/binance-scala-client"
         - name: "paoloboni/spray-json-derived-codecs"
         - name: "pathikrit/better-files"
@@ -741,7 +740,6 @@ jobs:
         - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/colorize-scala"
-        - name: "polyvariant/respectfully"
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/smithy4s-caliban"
         - name: "polyvariant/sttp-oauth2"
@@ -801,6 +799,7 @@ jobs:
         - name: "sbt/contraband"
         - name: "sbt/io"
         - name: "sbt/sbinary"
+        - name: "sbt/sbt"
         - name: "sbt/sbt-dynver"
         - name: "sbt/sbt-jni"
         - name: "sbt/sbt-pgp"
@@ -890,6 +889,7 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1114,6 +1113,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
