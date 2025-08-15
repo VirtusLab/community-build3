@@ -182,7 +182,6 @@ runs:
             
           exit_code=${PIPESTATUS[0]}
           if [ $exit_code -eq 124 ]; then
-            echo "::warning title=Build timeout after 2 hours"
             echo "Build timeout after 2 hours" >> build-logs.txt
             echo "timeout" > build-status.txt
           fi

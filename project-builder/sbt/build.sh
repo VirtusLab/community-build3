@@ -78,7 +78,9 @@ function runSbt() {
     setScalaVersionCmd="++$scalaVersion!"
   fi
   tq='"""'
-  sbt ${sbtSettings[@]} \
+  # Timeout 90 minutes
+  timeout 5400 \
+    sbt ${sbtSettings[@]} \
     "setCrossScalaVersions $scalaVersion" \
     "$setScalaVersionCmd -v" \
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
@@ -88,6 +90,13 @@ function runSbt() {
     "$customCommands" \
     "moduleMappings" \
     "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" 2>&1 | tee $logFile
+
+  exit_code=${PIPESTATUS[0]}
+  if [ $exit_code -eq 124 ]; then
+    echo "Build timeout" >> build-logs.txt
+    echo "timeout" > $statusFile
+  fi
+  return $exit_code
 }
 
 buildTimeouts=0
@@ -95,13 +104,14 @@ buildTimeouts=0
 function checkLogsForRetry() {
   # Retry only when given modes were not tried yet
   shouldRetry=false
-  # Timeout 
-  if [ "$buildTimeouts" -eq 0 ]; then
-    if grep -q "timeout" "$statusFile"; then
-      buildTimeouts=$((buildTimeouts + 1))
+  if grep -q "timeout" "$statusFile"; then
+    buildTimeouts=$((buildTimeouts + 1))
+    if [ "$buildTimeouts" -le 1 ]; then
+      echo "Build timeouts: $buildTimeouts, would retry"
       shouldRetry=true
       return 0
     fi
+    echo "Build timeouts: $buildTimeouts, would not try to restart"
   fi
   
   # Failed to download artifacts
@@ -143,7 +153,7 @@ function retryBuild() {
   while [[ $retry -lt $maxRetries ]]; do
     checkLogsForRetry
     if [[ "$shouldRetry" == "true" ]]; then
-      retry+=1
+      retry=$((retry + 1))
       echo "Retrying build, retry $retry/$maxRetries, force Scala version:$forceScalaVersion, enable migration:$enableMigrationMode"
       runSbt && exit 0
     else
