@@ -7754,8 +7754,8 @@
   "cheleb/zio-laminar-tapir":{
     "project":"cheleb/zio-laminar-tapir",
     "repoUrl":"https://github.com/cheleb/zio-laminar-tapir.git",
-    "revision":"v2.0.0",
-    "version":"2.0.0",
+    "revision":"v2.0.1",
+    "version":"2.0.1",
     "targets":"dev.cheleb%zio-tapir-server dev.cheleb%zio-tapir-shared",
     "publishedScalaVersion":"3.3.6"
   },
@@ -9926,46 +9926,6 @@
       "sbt":{
         "commands":[
           "mapScalacOptions -experimental"
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "couchbase/couchbase-jvm-clients":{
-    "project":"couchbase/couchbase-jvm-clients",
-    "repoUrl":"https://github.com/couchbase/couchbase-jvm-clients.git",
-    "revision":"3.9.0",
-    "version":"3.9.0",
-    "targets":"com.couchbase.client%scala-client",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"21"
-      },
-      "sbt":{
-        "commands":[
-          
         ],
         "options":[
           
@@ -15358,16 +15318,24 @@
     "project":"edadma/char-reader",
     "repoUrl":"https://github.com/edadma/char-reader.git",
     "revision":"",
-    "version":"0.1.21",
+    "version":"0.1.22",
     "targets":"io.github.edadma%char-reader",
-    "publishedScalaVersion":"3.7.1"
+    "publishedScalaVersion":"3.7.2"
   },
-  "edadma/cross-platform":{
-    "project":"edadma/cross-platform",
-    "repoUrl":"https://github.com/edadma/cross-platform.git",
+  "edadma/char_reader":{
+    "project":"edadma/char_reader",
+    "repoUrl":"https://github.com/edadma/char_reader.git",
     "revision":"",
-    "version":"0.0.13",
-    "targets":"io.github.edadma%cross-platform",
+    "version":"0.1.23",
+    "targets":"io.github.edadma%char_reader",
+    "publishedScalaVersion":"3.7.2"
+  },
+  "edadma/cross_platform":{
+    "project":"edadma/cross_platform",
+    "repoUrl":"https://github.com/edadma/cross_platform.git",
+    "revision":"",
+    "version":"0.0.20",
+    "targets":"io.github.edadma%cross_platform",
     "publishedScalaVersion":"3.7.2"
   },
   "edadma/csv":{
@@ -15385,6 +15353,14 @@
     "version":"0.0.2",
     "targets":"io.github.edadma%dal",
     "publishedScalaVersion":"3.7.0"
+  },
+  "edadma/datetime":{
+    "project":"edadma/datetime",
+    "repoUrl":"https://github.com/edadma/datetime.git",
+    "revision":"",
+    "version":"0.0.1",
+    "targets":"io.github.edadma%datetime",
+    "publishedScalaVersion":"3.7.2"
   },
   "edadma/dllist":{
     "project":"edadma/dllist",
@@ -15422,7 +15398,7 @@
     "project":"edadma/path",
     "repoUrl":"https://github.com/edadma/path.git",
     "revision":"",
-    "version":"0.0.3",
+    "version":"0.0.4",
     "targets":"io.github.edadma%path",
     "publishedScalaVersion":"3.7.2"
   },
@@ -15433,6 +15409,14 @@
     "version":"0.0.1",
     "targets":"io.github.edadma%pattern-matcher",
     "publishedScalaVersion":"3.6.4"
+  },
+  "edadma/rdb":{
+    "project":"edadma/rdb",
+    "repoUrl":"https://github.com/edadma/rdb.git",
+    "revision":"",
+    "version":"0.0.1",
+    "targets":"io.github.edadma%rdb",
+    "publishedScalaVersion":"3.7.2"
   },
   "edadma/recognizer":{
     "project":"edadma/recognizer",
@@ -16353,7 +16337,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4.2"
+        
       ],
       "sourcePatches":[
         {
@@ -18184,8 +18168,8 @@
   "flink-extended/flink-scala-api":{
     "project":"flink-extended/flink-scala-api",
     "repoUrl":"https://github.com/flink-extended/flink-scala-api.git",
-    "revision":"v1.2.8",
-    "version":"1.2.8",
+    "revision":"v1.2.9",
+    "version":"1.2.9",
     "targets":"org.flinkextended%flink-scala-api-1 org.flinkextended%flink-scala-api-2 org.flinkextended%flink-scala-api-common",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -31875,8 +31859,8 @@
   "kevin-lee/refined4s":{
     "project":"kevin-lee/refined4s",
     "repoUrl":"https://github.com/kevin-lee/refined4s.git",
-    "revision":"v1.4.0",
-    "version":"1.4.0",
+    "revision":"v1.5.0",
+    "version":"1.5.0",
     "targets":"io.kevinlee%refined4s-cats io.kevinlee%refined4s-chimney io.kevinlee%refined4s-circe io.kevinlee%refined4s-core io.kevinlee%refined4s-doobie-ce2 io.kevinlee%refined4s-doobie-ce3 io.kevinlee%refined4s-extras-render io.kevinlee%refined4s-pureconfig io.kevinlee%refined4s-refined-compat-scala3 io.kevinlee%refined4s-tapir",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -31912,6 +31896,51 @@
         {
           "path":"build.sbt",
           "pattern":"val Scala3Version = \"3.3.5\"",
+          "replaceWith":"val Scala3Version = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "kevin-lee/scala-hedgehog-extra":{
+    "project":"kevin-lee/scala-hedgehog-extra",
+    "repoUrl":"https://github.com/kevin-lee/scala-hedgehog-extra.git",
+    "revision":"v0.12.0",
+    "version":"0.12.0",
+    "targets":"io.kevinlee%hedgehog-extra-core io.kevinlee%hedgehog-extra-refined io.kevinlee%hedgehog-extra-refined4s",
+    "publishedScalaVersion":"3.3.4",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3Version = \"3.3.4\"",
           "replaceWith":"val Scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -44137,8 +44166,8 @@
   "plokhotnyuk/jsoniter-scala":{
     "project":"plokhotnyuk/jsoniter-scala",
     "repoUrl":"https://github.com/plokhotnyuk/jsoniter-scala.git",
-    "revision":"v2.37.5",
-    "version":"2.37.5",
+    "revision":"v2.37.6",
+    "version":"2.37.6",
     "targets":"com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-circe com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-core com.github.plokhotnyuk.jsoniter-scala%jsoniter-scala-macros",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -50431,6 +50460,46 @@
       ]
     }
   },
+  "scalacenter/scaladex":{
+    "project":"scalacenter/scaladex",
+    "repoUrl":"https://github.com/scalacenter/scaladex.git",
+    "revision":"",
+    "version":"HEAD",
+    "targets":"*%*",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        "3.4.2"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
+  },
   "scalacenter/scalafix":{
     "project":"scalacenter/scalafix",
     "repoUrl":"https://github.com/scalacenter/scalafix.git",
@@ -55262,7 +55331,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.5.2"
       ],
       "sourcePatches":[
         {
@@ -67100,50 +67169,6 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }

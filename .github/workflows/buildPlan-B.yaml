@@ -1,5 +1,5 @@
 
-# projects total:     823
+# projects total:     826
 # min stars count:    -1
 # max projects count: 1000
 
@@ -257,15 +257,18 @@ jobs:
         - name: "earogov/ordset"
         - name: "eb2501/fluor-core"
         - name: "edadma/char-reader"
-        - name: "edadma/cross-platform"
+        - name: "edadma/char_reader"
+        - name: "edadma/cross_platform"
         - name: "edadma/csv"
         - name: "edadma/dal"
+        - name: "edadma/datetime"
         - name: "edadma/dllist"
         - name: "edadma/indentation"
         - name: "edadma/logger"
         - name: "edadma/matrix"
         - name: "edadma/path"
         - name: "edadma/pattern-matcher"
+        - name: "edadma/rdb"
         - name: "edadma/recognizer"
         - name: "edadma/tabula"
         - name: "edadma/texish"
@@ -327,9 +330,6 @@ jobs:
         - name: "gonzih/cats-nats"
         - name: "goodcover/tagless-redux"
         - name: "greenfossil/commons-i18n"
-        - name: "greenfossil/commons-json"
-        - name: "greenfossil/data-mapping"
-        - name: "greenfossil/htmltags"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "greenfossil/commons-json"
+        - name: "greenfossil/data-mapping"
+        - name: "greenfossil/htmltags"
         - name: "greenfossil/typesafe-config-ext"
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
@@ -490,6 +493,7 @@ jobs:
         - name: "kevin-lee/just-sysprocess"
         - name: "kevin-lee/openai4s"
         - name: "kevin-lee/orphan"
+        - name: "kevin-lee/scala-hedgehog-extra"
         - name: "kiberstender/fjwt"
         - name: "kierendavies/skunk-migrate"
         - name: "kijuky/confluence-for-scala"
@@ -606,10 +610,6 @@ jobs:
         - name: "nafg/simple-router"
         - name: "narma/tranzactio"
         - name: "nationalarchives/dr2-dynamo-formatters"
-        - name: "nationalarchives/dr2-preservica-client"
-        - name: "natural-transformation/avro4s"
-        - name: "natural-transformation/korolev"
-        - name: "nebula-contrib/testcontainers-nebula"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "nationalarchives/dr2-preservica-client"
+        - name: "natural-transformation/avro4s"
+        - name: "natural-transformation/korolev"
+        - name: "nebula-contrib/testcontainers-nebula"
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
@@ -886,10 +890,6 @@ jobs:
         - name: "tpunder/fm-http"
         - name: "tpunder/fm-json"
         - name: "tpunder/fm-lazyseq"
-        - name: "tpunder/fm-xml"
-        - name: "trace4cats/trace4cats-avro"
-        - name: "trace4cats/trace4cats-avro-kafka"
-        - name: "trace4cats/trace4cats-cloudtrace"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tpunder/fm-xml"
+        - name: "trace4cats/trace4cats-avro"
+        - name: "trace4cats/trace4cats-avro-kafka"
+        - name: "trace4cats/trace4cats-cloudtrace"
         - name: "trace4cats/trace4cats-datadog"
         - name: "trace4cats/trace4cats-exporter-http"
         - name: "trace4cats/trace4cats-http4s"
@@ -951,7 +955,6 @@ jobs:
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
-        - name: "xebia-functional/karat-scalacheck"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"
