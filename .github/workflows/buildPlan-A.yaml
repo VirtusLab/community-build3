@@ -223,7 +223,6 @@ jobs:
         - name: "coralogix/zio-k8s"
         - name: "cornerman/chameleon"
         - name: "cornerman/sloth"
-        - name: "couchbase/couchbase-jvm-clients"
         - name: "coursier/dependency"
         - name: "coursier/publish"
         - name: "cquiroz/sbt-locales"
@@ -330,6 +329,7 @@ jobs:
         - name: "fabiopinheiro/scala-did"
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
+        - name: "fasterxml/jackson-module-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
@@ -610,6 +609,7 @@ jobs:
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
+        - name: "matsluni/aws-spi-akka-http"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
@@ -827,6 +826,7 @@ jobs:
         - name: "scalabin-no/http4s-directives"
         - name: "scalacenter/course-management-tools"
         - name: "scalacenter/scala-debug-adapter"
+        - name: "scalacenter/scaladex"
         - name: "scalacenter/scalafix"
         - name: "scalacenter/simple-rockets-compiler"
         - name: "scalacenter/tasty-mima"
@@ -1092,6 +1092,7 @@ jobs:
         - name: "wolfendale/scalacheck-gen-regexp"
         - name: "wvlet/airframe"
         - name: "xebia-functional/fetch"
+        - name: "xebia-functional/karat-scalacheck"
         - name: "xuwei-k/applybuilder"
         - name: "xuwei-k/httpz"
         - name: "xuwei-k/iarray"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
