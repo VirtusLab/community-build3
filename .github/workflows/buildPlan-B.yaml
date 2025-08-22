@@ -1,5 +1,5 @@
 
-# projects total:     826
+# projects total:     831
 # min stars count:    -1
 # max projects count: 1000
 
@@ -257,17 +257,17 @@ jobs:
         - name: "earogov/ordset"
         - name: "eb2501/fluor-core"
         - name: "edadma/char-reader"
-        - name: "edadma/char_reader"
         - name: "edadma/cross_platform"
         - name: "edadma/csv"
         - name: "edadma/dal"
         - name: "edadma/datetime"
         - name: "edadma/dllist"
+        - name: "edadma/fetch"
         - name: "edadma/indentation"
         - name: "edadma/logger"
         - name: "edadma/matrix"
-        - name: "edadma/path"
         - name: "edadma/pattern-matcher"
+        - name: "edadma/random_uuid"
         - name: "edadma/rdb"
         - name: "edadma/recognizer"
         - name: "edadma/tabula"
@@ -275,6 +275,7 @@ jobs:
         - name: "edadma/typesetter"
         - name: "eikek/binny"
         - name: "eikek/borer-compats"
+        - name: "eikek/fit4s"
         - name: "eikek/soidc"
         - name: "eikek/tus4s"
         - name: "eltherion/http4s-timer"
@@ -329,7 +330,6 @@ jobs:
         - name: "gochaorg/json4s3"
         - name: "gonzih/cats-nats"
         - name: "goodcover/tagless-redux"
-        - name: "greenfossil/commons-i18n"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "greenfossil/commons-i18n"
         - name: "greenfossil/commons-json"
         - name: "greenfossil/data-mapping"
         - name: "greenfossil/htmltags"
@@ -380,6 +381,7 @@ jobs:
         - name: "gzoller/dynalens"
         - name: "gzoller/listzipper"
         - name: "h8io/borscht"
+        - name: "hamnis/dataclass-scalafix"
         - name: "hamnis/google-discovery-scala"
         - name: "hamnis/googleapis-discovery-http4s"
         - name: "hamnis/jwk"
@@ -608,8 +610,6 @@ jobs:
         - name: "nafg/scala-phonenumber"
         - name: "nafg/scheduler"
         - name: "nafg/simple-router"
-        - name: "narma/tranzactio"
-        - name: "nationalarchives/dr2-dynamo-formatters"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "narma/tranzactio"
+        - name: "nationalarchives/dr2-dynamo-formatters"
         - name: "nationalarchives/dr2-preservica-client"
         - name: "natural-transformation/avro4s"
         - name: "natural-transformation/korolev"
@@ -732,6 +734,7 @@ jobs:
         - name: "ranyitz/casing"
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
+        - name: "rchillyard/flog"
         - name: "rolang/google-rest-api-codegen"
         - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
@@ -739,6 +742,7 @@ jobs:
         - name: "rssh/scala-appcontext"
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/logic-signals"
+        - name: "rtyley/play-git-hub"
         - name: "rtyley/rate-limit-status"
         - name: "rtyley/sample-project-using-gha-scala-library-release-workflow"
         - name: "rtyley/scala-collection-plus"
@@ -886,10 +890,6 @@ jobs:
         - name: "tototoshi/play-reverse-router-extension"
         - name: "tpataky/duckling"
         - name: "tpunder/fm-common"
-        - name: "tpunder/fm-html"
-        - name: "tpunder/fm-http"
-        - name: "tpunder/fm-json"
-        - name: "tpunder/fm-lazyseq"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tpunder/fm-html"
+        - name: "tpunder/fm-http"
+        - name: "tpunder/fm-json"
+        - name: "tpunder/fm-lazyseq"
         - name: "tpunder/fm-xml"
         - name: "trace4cats/trace4cats-avro"
         - name: "trace4cats/trace4cats-avro-kafka"
@@ -955,6 +959,7 @@ jobs:
         - name: "windymelt/rss2discord"
         - name: "wiringbits/wiringbits-webapp-utils"
         - name: "wiwiwa/ezscala"
+        - name: "xebia-functional/karat-scalacheck"
         - name: "xebia-functional/munit-compiler-toolkit"
         - name: "xebia-functional/munit-snap"
         - name: "xuwei-k/jwt-scala"
