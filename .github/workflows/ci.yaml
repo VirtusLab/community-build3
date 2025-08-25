@@ -30,9 +30,13 @@ jobs:
         with:
           jvm: 17
           apps: scala:3.7.1 scala-cli:1.8.3 sbt:1.11.3 mill scalafix
-      - run: mv .github/workflows/test-e2e-buildConfig.json .github/workflows/buildConfig.json
-          # Test using RC version
-      - run: SKIP_BUILD_SETUP=1 ./scripts/run.sh ${{ matrix.project }} 3.7.2-RC1
+      - name: Configure
+        run: |
+          mv .github/workflows/test-e2e-buildConfig.json .github/workflows/buildConfig.json
+          git config --global user.name "Scala 3 Open Community Build"
+          git config --global user.email "scala3-community-build@virtuslab.com"
+      - name: Build project
+        run: SKIP_BUILD_SETUP=1 ./scripts/run.sh ${{ matrix.project }} 3.7.2-RC1
           
   test-build:
     runs-on: ubuntu-22.04
