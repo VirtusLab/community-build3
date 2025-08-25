@@ -32,7 +32,7 @@ millSettings=(
   "--no-server"
   "--silent"
   "--disable-ticker"
-  -D "coursier.repositories=central|ivy2local|$mavenRepoUrl"
+  -D "coursier.repositories=central|ivy2local|$mavenRepoUrl|https://repo.scala-lang.org/artifactory/maven-nightlies"
   -D "communitybuild.maven.url=$mavenRepoUrl"
   -D "communitybuild.scala=$scalaVersion"
   -D "communitybuild.appendScalacOptions=$extraScalacOptions"
