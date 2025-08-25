@@ -83,7 +83,7 @@ ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlug
 # Register utility commands, for more info check command impl comments
 echo -e "\ncommands ++= CommunityBuildPlugin.commands" >>$repoDir/build.sbt
 # Add custom repositories 
-echo -e '\nGlobal / resolvers += sbt.librarymanagement.Resolver.scalaNightlyRepository' >>$repoDir/build.sbt
+echo -e '\nGlobal / resolvers += "The Scala Nightly Repository".at("https://repo.scala-lang.org/artifactory/maven-nightlies/")' >>$repoDir/build.sbt
 # Ensure eviction errors are not failing the build
 echo -e "\nThisBuild / evictionErrorLevel := sbt.util.Level.Warn" >>$repoDir/build.sbt
 echo -e "\nThisBuild / evictionErrorLevel := sbt.util.Level.Warn" >>$repoDir/project/plugins.sbt
