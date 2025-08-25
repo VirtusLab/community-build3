@@ -28,6 +28,7 @@ jobs:
       - uses: coursier/cache-action@v6
       - uses: coursier/setup-action@v1
         with:
+          jvm: adopt:17
           apps: scala:3.7.1 scala-cli:1.8.3 sbt:1.11.3 mill scalafix
       - run: mv .github/workflows/test-e2e-buildConfig.json .github/workflows/buildConfig.json
           # Test using RC version
