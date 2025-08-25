@@ -26,6 +26,7 @@ os.write.over(repositoryDir / "build.sc", updatedBuild)
 val coursierRepositories = Seq(
   "central",
   "ivy2local",
+  "https://repo.scala-lang.org/artifactory/maven-nightlies",
   s"https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion",
 ).mkString("|")
 
