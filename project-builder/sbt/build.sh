@@ -86,7 +86,6 @@ function runSbt() {
     "$setScalaVersionCmd -v" \
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
     "set every credentials := Nil" \
-    "set every csrSameVersions := Nil" \
     "excludeLibraryDependency ${excludedCompilerPlugins[*]}" \
     "removeScalacOptionsStartingWith ${excludedCompilerPluginOptPrefixes[*]}" \
     "$customCommands" \
