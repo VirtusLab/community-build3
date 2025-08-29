@@ -449,7 +449,6 @@ jobs:
         - name: "http4s/http4s-scalatags"
         - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-session"
-        - name: "i10416/munkres"
         - name: "ichoran/kse3"
         - name: "iheartradio/ficus"
         - name: "ij-plugins/ijp-color"
@@ -610,6 +609,7 @@ jobs:
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
+        - name: "max-leuthaeuser/scroll"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
@@ -890,6 +889,7 @@ jobs:
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -1114,6 +1113,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
