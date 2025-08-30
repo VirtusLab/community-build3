@@ -14,6 +14,7 @@ object compat {
   def toZincWorker(v: ZincWorkerModule) = v
   trait ZincWorkerOverrideForScala3_8 extends ZincWorkerModule { self: CoursierModule =>
     import mill._
+    import mill.define.Worker
     import mill.scalalib.api.{ZincWorkerApi, ZincWorkerUtil}
     import mill.api.{Ctx, FixSizedCache, KeyedLockedCache, PathRef}
 
