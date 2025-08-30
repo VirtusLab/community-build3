@@ -78,6 +78,7 @@ function runSbt() {
     setScalaVersionCmd="++$scalaVersion!"
   fi
   tq='"""'
+  # csrSameVersions := Nil is set to allow testing Scala 3.8+ (new stdlib) without forcing upgrade to sbt 1.11.5
   # Timeout 90 minutes
   timeout 5400 \
     sbt ${sbtSettings[@]} \

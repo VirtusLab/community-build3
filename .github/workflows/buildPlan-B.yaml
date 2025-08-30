@@ -1,5 +1,5 @@
 
-# projects total:     831
+# projects total:     832
 # min stars count:    -1
 # max projects count: 1000
 
@@ -407,6 +407,7 @@ jobs:
         - name: "http4s/http4s-tomcat"
         - name: "hughsimpson/scalameter"
         - name: "i10416/cssminifier"
+        - name: "i10416/munkres"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/decline-completion"
@@ -453,6 +454,7 @@ jobs:
         - name: "jodersky/redicl"
         - name: "jodersky/scalapb-ujson"
         - name: "jodersky/ustats"
+        - name: "johnhungerford/kyo-test"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
         - name: "jphmrst/scala-automata"
@@ -585,7 +587,6 @@ jobs:
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
-        - name: "mimoguz/layeredfonticon"
         - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
@@ -609,7 +610,6 @@ jobs:
         - name: "nafg/scala-grist"
         - name: "nafg/scala-phonenumber"
         - name: "nafg/scheduler"
-        - name: "nafg/simple-router"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "nafg/simple-router"
         - name: "narma/tranzactio"
         - name: "nationalarchives/dr2-dynamo-formatters"
         - name: "nationalarchives/dr2-preservica-client"
@@ -889,7 +890,6 @@ jobs:
         - name: "totally-trustworthy-org/widely-used-util"
         - name: "tototoshi/play-reverse-router-extension"
         - name: "tpataky/duckling"
-        - name: "tpunder/fm-common"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tpunder/fm-common"
         - name: "tpunder/fm-html"
         - name: "tpunder/fm-http"
         - name: "tpunder/fm-json"

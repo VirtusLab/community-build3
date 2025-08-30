@@ -17,7 +17,7 @@ export OPENCB_SCALA_VERSION=$scalaVersion
 
 # Check if using a sbt with a supported version
 javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
-MinSbtVersion="1.8.3"
+MinSbtVersion="1.11.5"
 
 buildPropsFile="${repoDir}/project/build.properties"
 if [ ! -f "${buildPropsFile}" ]; then
