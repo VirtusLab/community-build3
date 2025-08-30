@@ -15,7 +15,8 @@ object compat {
   
   trait ZincWorkerOverrideForScala3_8 extends ZincWorkerModule { self: CoursierModule =>
     import mill._
-    import mill.scalalib.api.{ZincWorkerApi, ZincWorkerUtil}
+    import mill.define.Worker
+    import mill.scalalib.api.{ZincWorkerApi}
     import mill.api.{Ctx, FixSizedCache, KeyedLockedCache, PathRef}
 
     override def worker: Worker[ZincWorkerApi] = T.worker { 
@@ -36,13 +37,13 @@ object compat {
             Either[
               (ZincWorkerApi.Ctx, (String, String) => (Option[Array[os.Path]], os.Path)),
               String => os.Path
-            ]
-          ],
+              ]
+            ],
           classOf[(Agg[os.Path], String) => os.Path],
           classOf[(Agg[os.Path], String) => os.Path],
           classOf[KeyedLockedCache[_]],
           classOf[Boolean]
-            )
+          )
           .newInstance(
             Left((
               T.ctx(),
@@ -64,7 +65,7 @@ object compat {
             },
             mill.scalalib.api.Util.grepJar(_, "scala-compiler", _, sources = false),
             new FixSizedCache(jobs),
-        false.asInstanceOf[AnyRef]
+            false.asInstanceOf[AnyRef]
           )
         instance.asInstanceOf[mill.scalalib.api.ZincWorkerApi]
       }.getOrElse(super.worker())
