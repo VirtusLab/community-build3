@@ -13,4 +13,71 @@ object compat {
   type Task[+T] = mill.Task[T]
 
   def toZincWorker(v: ZincWorkerModule) = mill.define.ModuleRef(v)
+  
+  trait ZincWorkerOverrideForScala3_8 extends ZincWorkerModule { self: CoursierModule =>
+    import mill._
+    import mill.scalalib.api.{ZincWorkerApi, ZincWorkerUtil}
+    import mill.api.{PathRef}
+
+    override val worker: Worker[ZincWorkerApi] = T.worker { 
+      val instance = super.worker()
+      ValPatcher.set(instance, "libraryJarNameGrep", 
+        (classpath: Agg[PathRef], version: String) => {
+          val searchVersion = sys.props.get("communitybuild.scala")
+            .map(_.split("\\.").take(2).map(_.toInt).toList)
+            .filter(_.length == 2)
+            .orElse{
+              System.err.println("No communitybuild.scala sys prop, mill worker workaround would not work")
+              None
+            }
+            .collectFirst{ case Seq(3, minor) if minor >= 8 =>  "3." 
+            }.getOrElse(version)
+          ZincWorkerUtil.grepJar(classpath, "scala-library", searchVersion, sources = false): PathRef
+        })
+      instance
+    }
+  }
+  
+
+  private object ValPatcher {
+    import java.lang.invoke.{MethodHandles, VarHandle}
+       
+    private lazy val unsafe: sun.misc.Unsafe = {
+      val f = classOf[sun.misc.Unsafe].getDeclaredField("theUnsafe")
+      f.setAccessible(true)
+      f.get(null).asInstanceOf[sun.misc.Unsafe]
+    }
+    
+    /** Set a (possibly private final) instance field by name. */
+    def set[A <: AnyRef: scala.reflect.ClassTag](instance: AnyRef, fieldName: String, value: A): Unit = {
+      val cls = instance.getClass()
+      val field = MethodHandles
+      .privateLookupIn(cls, MethodHandles.lookup())
+      .findVarHandle(cls, fieldName, implicitly[scala.reflect.ClassTag[A]].runtimeClass)
+      
+      // Reflect into the VarHandle implementation to get the native field offset.
+      // JDKs name it "fieldOffset" or "offset".
+      val varHandleOffsetField =
+        Iterator("fieldOffset", "offset")
+          .flatMap{ name => 
+            try Some(field.getClass().getDeclaredField(name)) 
+            catch { case _: NoSuchFieldException => None }
+          }
+          .toList.headOption
+          .orElse {
+            // Fallback: first long field in the hierarchy (works on HotSpot’s Field* VarHandles)
+            Iterator.iterate[Class[_]](field.getClass())(_.getSuperclass).takeWhile(_ != null)
+              .flatMap(_.getDeclaredFields.iterator)
+              .find(_.getType == java.lang.Long.TYPE)
+          }
+          .getOrElse(throw new NoSuchFieldException(s"Couldn't find offset field in ${field.getClass().getName}"))
+
+      varHandleOffsetField.setAccessible(true)
+      val offset = varHandleOffsetField.getLong(field)
+
+       // Write the new value ignoring 'final'
+      unsafe.putObjectVolatile(instance, offset, value)
+      assert(field.get(instance) eq value)
+    }
+  }
 }

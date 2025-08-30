@@ -11,7 +11,8 @@ import MillVersionCompat.compat.{
   ZincWorkerModule,
   Task,
   Val,
-  toZincWorker
+  toZincWorker,
+  ZincWorkerOverrideForScala3_8
 }
 import CommunityBuildCore.Scala3CommunityBuild.{
   TestingMode => _,
@@ -66,7 +67,7 @@ trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
   // Override zinc worker, we need to set custom repostitories there are well,
   // to allow to use our custom repo
   override def zincWorker = toZincWorker(CommunityBuildZincWorker)
-  private object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule {
+  private object CommunityBuildZincWorker extends ZincWorkerModule with CoursierModule with ZincWorkerOverrideForScala3_8 {
     override def repositoriesTask = T.task {
       mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
     }
