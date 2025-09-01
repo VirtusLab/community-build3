@@ -56,7 +56,8 @@ object compat {
           java.lang.Boolean.valueOf(zincLogDebug()),
           javaHome(),
           () => cl.close()
-        )
+        ).asInstanceOf[ZincWorkerApi]
+        
       ValPatcher.set(
         instance,
         "libraryJarNameGrep",
