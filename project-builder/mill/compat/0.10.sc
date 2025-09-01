@@ -12,6 +12,8 @@ object compat {
   type Task[+T] = mill.define.Task[T]
 
   def toZincWorker(v: ZincWorkerModule) = v
+  
+  @scala.annotation.nowarn
   trait ZincWorkerOverrideForScala3_8 extends ZincWorkerModule { self: CoursierModule =>
     import mill._
     import mill.define.Worker

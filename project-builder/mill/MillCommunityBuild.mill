@@ -18,6 +18,7 @@ import MillCommunityBuild.serialization.{*, given}
 import coursier.maven.MavenRepository
 import coursier.Repository
 
+@scala.annotation.nowarn
 object MillCommunityBuild {
   trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
     private val mavenRepoUrl: Option[String] = sys.props
