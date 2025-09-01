@@ -55,6 +55,7 @@ import requests._
 import coursier.maven.MavenRepository
 import coursier.Repository
 
+@scala.annotation.nowarn
 trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
   private val mavenRepoUrl: Option[String] = sys.props
     .get("communitybuild.maven.url")
@@ -163,6 +164,7 @@ case class Ctx(
   lazy val cross = Segment.Cross(scalaVersion :: Nil)
 }
 
+@scala.annotation.nowarn
 class MillTaskEvaluator()(implicit ctx: Ctx) extends TaskEvaluator[NamedTask] {
   import TaskEvaluator._
   def mayRetry[T](task: NamedTask[T])(evaluate: NamedTask[T] => EvalResult[T]): EvalResult[T] = evaluate(task) match {
