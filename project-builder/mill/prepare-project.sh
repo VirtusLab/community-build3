@@ -3,7 +3,7 @@
 set -e
 
 if [ $# -ne 4 ]; then
-  echo "Wrong number of script arguments, expected 3 $0 <repo_dir> <scala_version> <project_config>, got $#: $@"
+  echo "Wrong number of script arguments, expected 4 $0 <projectName> <repo_dir> <scala_version> <project_config>, got $#: $@"
   exit 1
 fi
 
@@ -16,9 +16,10 @@ export OPENCB_PROJECT_DIR=$repoDir
 export OPENCB_SCALA_VERSION=$scalaVersion
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source $scriptDir/../versions.sh
 
 MILL_1_0="1.0.0"
-MILL_0_12="0.12.14"
+MILL_0_12="0.12.15"
 MILL_0_11=0.11.12
 MILL_0_10=0.10.15
 MILL_0_9=0.9.12
@@ -57,10 +58,7 @@ elif [ -n "${millBuildFile}" ] ; then
     echo "Found explicit mill version $millVersion in build directive"
   fi
 fi
-if [[ "$millVersion" == *-RC* ]]; then
-  echo "Ignoring explicit unstable version: $millVersion"
-  millVersion=
-fi
+
 if [[ -z "$millVersion" ]]; then
   echo "No .mill-version file found, detecting compatible mill version"
   millRunner=""
@@ -71,10 +69,10 @@ if [[ -z "$millVersion" ]]; then
   fi
   if [[ -n "$millRunner" ]]; then 
     echo "Found mill runner script, trying to resolve version"
-    millVersion=`$millRunner -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "([0-9]+\.[0-9]+\.[0-9]+)" || echo ""`
+    millVersion=`$millRunner --no-server -v $RESOLVE | grep -E "Mill.*version" | grep -E -o "([0-9]+\.[0-9]+\.[0-9]+)" || echo ""`
     if [[ -z "$millVersion" ]]; then
       # AI suggested workaround for non-portable grep
-      millVersion=`$millRunner -v $RESOLVE | awk '/Mill Build Tool version/ { for (i=1; i<=NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) print $i }' || echo ""`
+      millVersion=`$millRunner --no-server -v $RESOLVE | awk '/Mill Build Tool version/ { for (i=1; i<=NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) print $i }' || echo ""`
     fi
   fi
   if [[ "$millVersion" == "" ]]; then
@@ -92,11 +90,30 @@ if [[ -z "$millVersion" ]]; then
   if [[ -z "$millVersion" ]];then
     echo "Failed to resolve compatible mill version, abort"
     exit 1
-  else
-    # Force found version in build
+  fi
+  # Force found version in build
+  echo $millVersion > .mill-version
+fi # detect version
+
+
+# Scala 3.8 new stdlib adjustements
+scalaBinaryVersion=`echo ${scalaVersion} | cut -d . -f 1,2`
+if isBinVersionGreaterOrEqual "$scalaBinaryVersion" "3.8" ; then
+  if isBinVersionGreaterOrEqual "$millVersion" 1.1; then
+    echo "No mill version upgrade needed, using $millVersion"
+    # no-op
+  elif isBinVersionInRange "$millVersion" 1.0 1.1; then
+    minMillVersion=1.0.4-28-f16413
+    echo "Force upgrade of millVersion $millVersion to $minMillVersion"
+    millVersion=$minMillVersion
+    echo $millVersion > .mill-version
+  elif isVersionInRange "$millVersion" 0.12.0 0.12.15; then
+    minMillVersion=0.12.15-2-561986
+    echo "Force upgrade of millVersion $millVersion to $minMillVersion"
+    millVersion=$minMillVersion
     echo $millVersion > .mill-version
   fi
-fi # detect version
+fi
 
 millBinaryVersion=`echo $millVersion | cut -d . -f 1,2`
 echo "Detected mill version=$millVersion, binary version: $millBinaryVersion"
@@ -130,9 +147,9 @@ fi
 # Use scala 3 dialect to allow for top level defs
 adaptedFiles=( $millBuildFile )
 millBuildDirectory=
-# if [[ -d "./mill-build" ]]; then
-#   millBuildDirectory="./mill-build"
-if [[ -d "./project" ]]; then
+if [[ -d "./mill-build/src" ]]; then
+  millBuildDirectory="./mill-build/src"
+elif [[ -d "./project" ]]; then
    millBuildDirectory="./project"
 fi
 if [[ -z "$millBuildDirectory" ]]; then
@@ -144,6 +161,7 @@ else
   done
   adaptedFiles+=(`find $millBuildDirectory -type f -name "*.mill"`)
   adaptedFiles+=(`find $millBuildDirectory -type f -name "*.sc"`)
+  adaptedFiles+=(`find $millBuildDirectory -type f -name "*.scala"`)
 fi
 for buildFile in "${adaptedFiles[@]}"; do 
   isMainBuildFile=false
@@ -230,8 +248,10 @@ if [[ millBinaryVersionMajor -eq 0 ]]; then
   done
 elif [[ millBinaryVersionMajor -eq 1 ]]; then 
     dir="."
-    cp $scriptDir/MillCommunityBuild.mill $dir/MillCommunityBuild.mill
-    echo "package build" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${dir}/CommunityBuildCore.mill 
+    millBuildDir=$dir/mill-build/src/millbuild
+    mkdir -p $millBuildDir
+    cp $scriptDir/MillCommunityBuild.scala $millBuildDir
+    echo "package millbuild" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${millBuildDir}/CommunityBuildCore.scala 
 else
   echo "Unsupport mill binary version $millBinaryVersion"
   exit 1
