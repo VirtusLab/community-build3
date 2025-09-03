@@ -96,7 +96,9 @@ class Scala3CommunityBuildMillAdapter(
         case Some(Type.Apply(Type.Name("T" | "Task"), _)) => true
         case _                                            => false
       }
-      !isLiteral || hasTargetType
+      val hasStringType = tpe.exists(_.toString().endsWith("String"))
+      if (hasStringType) false
+      else !isLiteral || hasTargetType
     }
 
     def mapTraits(traits: List[Init]): List[Init] = {
@@ -443,7 +445,7 @@ class Scala3CommunityBuildMillAdapter(
     }
 
     val MillCommunityBuildInject = {
-      if (isMill1x)
+      if (isMill1x) 
         s"""
         |// Main entry point for community build
         |def runCommunityBuild(
@@ -483,54 +485,39 @@ class Scala3CommunityBuildMillAdapter(
       |""".stripMargin
     }
     val MapScalacOptionsOps = {
-      if (isMill0x) s"""|
-      |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
-      |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = 
-      |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).asSuccess.map(_.value) }
-      |     .toOption.flatten
-      |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
-      |     .getOrElse {
-      |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
-      |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
-      |     }
-      |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
-      |}
-      |
-      |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
-      |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
-      |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
-      |  }
-      |}
-      |implicit class MillCommunityBuildTaskOps(asTarget: MillCompatTask[Seq[String]]){
-      |  def mapScalacOptions(scalaVersion: MillCompatTask[String]) = scalaVersion.zip(asTarget).map {
-      |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
-      |  }
-      |}
-      |""".stripMargin
-      else s"""
-      |extension (value: Seq[String]) {
-      |  def mapScalacOptions(scalaVersion: mill.api.Task[String])(using ctx: mill.api.TaskCtx): Seq[String] = 
-      |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).toOption }
-      |    .toOption.flatten
-      |    .map(MillCommunityBuild.mapScalacOptions(_, value))
-      |    .getOrElse {
-      |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
-      |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), value)
-      |    }
-      |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, value)
-      |}
-      |
-      |extension (task: mill.api.Task[Seq[String]]) {
-      |  def mapScalacOptions(scalaVersion: mill.api.Task[String]) = mill.api.Task(
-      |     MillCommunityBuild.mapScalacOptions(scalaVersion(), task())
-      |  )
-      |}
-      """.stripMargin
+     """|
+        |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
+        |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = 
+        |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).asSuccess.map(_.value) }
+        |     .toOption.flatten
+        |     .map(MillCommunityBuild.mapScalacOptions(_, asSeq))
+        |     .getOrElse {
+        |        println("Failed to resolve scalaVersion, assume it's Scala 3 project")
+        |        MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), asSeq)
+        |     }
+        |  def mapScalacOptions(scalaVersion: String) = MillCommunityBuild.mapScalacOptions(scalaVersion, asSeq)
+        |}
+        |
+        |implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.define.Target[Seq[String]]){
+        |  def mapScalacOptions(scalaVersion: mill.define.Target[String]) = scalaVersion.zip(asTarget).map {
+        |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+        |  }
+        |}
+        |implicit class MillCommunityBuildTaskOps(asTarget: MillCompatTask[Seq[String]]){
+        |  def mapScalacOptions(scalaVersion: MillCompatTask[String]) = scalaVersion.zip(asTarget).map {
+        |    case (scalaVersion, scalacOptions) => MillCommunityBuild.mapScalacOptions(scalaVersion, scalacOptions)
+        |  }
+        |}
+        |""".stripMargin
     }
 
     def injects(injectRootModuleRunCommand: Boolean) = {
       Seq(
-        if (isMill1x) None
+        if (isMill1x) 
+          Some(
+            """import millbuild.MillCommunityBuild
+              |import millbuild.MillCommunityBuild.mapScalacOptions
+              |""".stripMargin)
         else
           Some(
             if (useLegacyTasks) """
@@ -540,11 +527,12 @@ class Scala3CommunityBuildMillAdapter(
               "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
           ),
         if (useLegacyTasks || isMill1x) None else Some("private object _OpenCommunityBuildOps {"),
-        if (isMill1x && !injectRootModuleRunCommand) None else Some(MapScalacOptionsOps),
+        if (isMill1x) None else Some(MapScalacOptionsOps),
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
         if (useLegacyTasks || isMill1x) None else Some("}\nimport _OpenCommunityBuildOps._"),
-        if (injectRootModuleRunCommand) Some(MillCommunityBuildInject)
-        else if (isMill1x) Some("import build.*")
+        if (injectRootModuleRunCommand)
+          if (isMill1x && !config.isMainBuildFile.forall(_ == true)) None 
+          else Some(MillCommunityBuildInject)
         else None
       ).flatten ++
         Seq("// End of OpenCB code injects\n")
