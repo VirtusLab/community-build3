@@ -21,7 +21,9 @@ os.proc("git", "clone", "https://github.com/com-lihaoyi/mill-moduledefs", reposi
 val updatedBuild = os.read(repositoryDir / "build.sc")
   .replaceAll(raw"Cross\[ModuleDefsCross]\(.*\)", s"""Cross[ModuleDefsCross](Seq("3.7.1"))""")
   .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
+  .replace(""""-Yexplicit-nulls",""", "")
 os.write.over(repositoryDir / "build.sc", updatedBuild)
+os.write.over(repositoryDir / ".mill-version", "0.12.15-2-561986")
 
 val coursierRepositories = Seq(
   "central",
@@ -32,6 +34,7 @@ val coursierRepositories = Seq(
 
 os.proc(
   "./mill",
+  "--no-server",
   "-D", s"coursier.repositories=$coursierRepositories",
-  "show", "__.publishLocal",
+  "show", s"__[$scalaVersion].publishLocal",
 ).call(cwd = repositoryDir, check = true)
