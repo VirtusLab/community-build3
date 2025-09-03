@@ -1,5 +1,5 @@
 // Injects for Mill 1.x
-package build
+package millbuild
 
 import mill.Module
 import mill.api.{Val, Task, ModuleRef, Result, Evaluator}
@@ -18,8 +18,19 @@ import MillCommunityBuild.serialization.{*, given}
 import coursier.maven.MavenRepository
 import coursier.Repository
 
-@scala.annotation.nowarn
 object MillCommunityBuild {
+  extension (value: Seq[String]) {
+    def mapScalacOptions(scalaVersion: mill.api.Task[String])(using ctx: mill.api.TaskCtx): Seq[String] = 
+      _root_.scala.util.Try{ scalaVersion.evaluate(ctx).toOption }
+      .toOption.flatten
+      .map(MillCommunityBuild.mapScalacOptions(_, value))
+      .getOrElse {
+          println("Failed to resolve scalaVersion, assume it's Scala 3 project")
+          MillCommunityBuild.mapScalacOptions(sys.props.getOrElse("communitybuild.scala", "3.3.1"), value)
+      }
+    def mapScalacOptions(scalaVersion: String): Seq[String] = MillCommunityBuild.mapScalacOptions(scalaVersion, value)
+  }
+
   trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
     private val mavenRepoUrl: Option[String] = sys.props
       .get("communitybuild.maven.url")

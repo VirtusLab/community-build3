@@ -44,8 +44,7 @@ function tryBuild() {
   mill=$1
   echo "Try build using $mill"
   # mill 0.11- does not support arg=value inputs
-  JDK_JAVA_OPTIONS="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-exports=java.base/sun.misc=ALL-UNNAMED" \
-    $mill "${millSettings[@]}" runCommunityBuild \
+  $mill "${millSettings[@]}" runCommunityBuild \
     --scalaVersion "$scalaVersion" \
     --configJson "${projectConfig}" \
     --projectDir $repoDir \
