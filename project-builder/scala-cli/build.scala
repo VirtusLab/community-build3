@@ -152,6 +152,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoUR
         "--power",
         task.command,
         repositoryDir,
+        "--jvm=21",
         s"--scala-version=${scalaVersion}",
         "--scalac-option=-J-Xss10M",
         "--scalac-option=-J-Xmx7G",
