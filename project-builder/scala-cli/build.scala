@@ -148,6 +148,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoUR
     val proc = os
       .proc(
         "scala-cli",
+        "--cli-version=1.9.0",
         "--power",
         task.command,
         repositoryDir,
@@ -155,7 +156,6 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoUR
         "--scalac-option=-J-Xss10M",
         "--scalac-option=-J-Xmx7G",
         "--scalac-option=-J-Xms4G",
-        s"--repository=https://repo.scala-lang.org/artifactory/maven-nightlies/",
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies,
         extraScalacOptions.map("--scala-option=" + _),
