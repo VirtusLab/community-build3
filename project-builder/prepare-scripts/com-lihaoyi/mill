@@ -5,6 +5,8 @@ val projectDir = sys.env.get("OPENCB_PROJECT_DIR")
   .map(os.Path(_))
   .getOrElse(sys.error("no OPENCB_PROJECT_DIR env"))
   
+os.write.append(projectDir / ".mill-jvm-opts", "-XX:CompressedClassSpaceSize=1400m")
+  
 val scalaVersion = sys.env.get("OPENCB_SCALA_VERSION")
    .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
   
