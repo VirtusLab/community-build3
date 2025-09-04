@@ -28,6 +28,10 @@ MILL_BUILD_SCALA=build.mill.scala
 MILL_BUILD=build.mill
 
 cd $repoDir
+
+javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
+echo $javaVersion >> .mill-jvm-version
+
 millBuildFile=
 for rootBuildFile in "$MILL_BUILD" "$MILL_BUILD_SCALA" "./build.sc"; do
   if [[ -f $rootBuildFile ]]; then
