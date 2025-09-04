@@ -59,9 +59,18 @@ object compat {
                 )
               ),
               (classpath: Agg[PathRef], version: String) => {
+                def scalaVersionByDependency(artifact: String) = {
+                  val prefix = artifact + "-"
+                  classpath.toSeq
+                  .map(_.last)
+                  .find(_.startsWith(prefix))
+                  .map(_.stripPrefix(prefix).stripSuffix(".jar").stripSuffix("-sources"))
+                }
                 // The only difference from upstream worker
-                val searchVersion = sys.props
-                  .get("communitybuild.scala")
+                val searchVersion = 
+                  scalaVersionByDependency("scala3-compiler_3")
+                  .orElse(scalaVersionByDependency("scala-compiler"))
+                  .orElse(sys.props.get("communitybuild.scala"))
                   .map(_.split("\\.").take(2).map(_.toInt).toList)
                   .filter(_.length == 2)
                   .orElse {
@@ -78,7 +87,7 @@ object compat {
               ZincWorkerUtil.grepJar(_, "scala-compiler", _, sources = false),
               new FixSizedCache(jobs),
               java.lang.Boolean.FALSE,
-              java.lang.Boolean.valueOf(zincLogDebug())
+              java.lang.Boolean.FALSE
             )
           instance.asInstanceOf[ZincWorkerApi]
         }
