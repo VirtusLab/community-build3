@@ -208,6 +208,7 @@ object MillCommunityBuild {
     val projectsBuildResults = for {
       case (ModuleInfo(org, name, module: ScalaModule), idx) <- projectsToTest.toList.zipWithIndex
     } yield {
+      System.gc()
       ctx.log.info(s"\nStarting build for $name - [$idx/${projectsToTest.size}]")
       val evaluator = new MillTaskEvaluator()
       import evaluator._
