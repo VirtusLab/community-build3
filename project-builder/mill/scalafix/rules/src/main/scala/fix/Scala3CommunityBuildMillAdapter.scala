@@ -290,7 +290,20 @@ class Scala3CommunityBuildMillAdapter(
                 ) :: Nil
               )
             )
-          case _ => mapScalacOptions(body)
+          case select: Term.Select if isMill1x =>
+            // If select is used then expected result type is Task[?] 
+            // We need to evaluate it and map
+            Term.Apply(
+              TaskType,
+              Term.ArgClause(
+                Term.Block(
+                  mapScalacOptions(Term.Apply(select, Nil)) :: Nil
+                ) :: Nil
+              )
+            )
+
+          case _ =>
+            mapScalacOptions(body)
         }
         tree match {
           case defn: Defn.Val => defn.copy(rhs = updatedBody)
