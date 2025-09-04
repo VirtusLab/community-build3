@@ -274,11 +274,24 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        val updatedBody =
+        def mapScalacOptions(receiver: Term) =
           Term.Apply(
-            Term.Select(body, Term.Name("mapScalacOptions")),
+            Term.Select(receiver, Term.Name("mapScalacOptions")),
             List(Term.Name("scalaVersion"))
           )
+
+        val updatedBody = body match {
+          case taskApply @ Term.Apply(receiver, Seq(arg @ Term.Block(stats)))
+              if receiver.syntax.contains("Task") =>
+            taskApply.copy(args =
+              Term.ArgClause(
+                Term.Block(
+                  stats.init ::: mapScalacOptions(stats.last.asInstanceOf[Term]) :: Nil
+                ) :: Nil
+              )
+            )
+          case _ => mapScalacOptions(body)
+        }
         tree match {
           case defn: Defn.Val => defn.copy(rhs = updatedBody)
           case defn: Defn.Def => defn.copy(body = updatedBody)
@@ -291,7 +304,7 @@ class Scala3CommunityBuildMillAdapter(
               if (shouldWrapInTarget(body, tpe))
                 if (isMill1x)
                   Term.Apply(Term.Select(Term.Name("mill"), Term.Name("Task")), List(v))
-                else 
+                else
                   Term.Apply(Term.Select(Term.Name("mill"), Term.Name("T")), List(v))
               else v
             }
@@ -366,7 +379,7 @@ class Scala3CommunityBuildMillAdapter(
             if (sys.props.contains("communitybuild.noInjects")) maybeTransformed.syntax
             else
               replaceLast(maybeTransformed.syntax, "}") {
-                if (Transform.isRootModule(defn))
+                if (Transform.isRootModule(defn) && !isMill1x)
                   "\n\t" + Replacment.MapScalacOptionsOps + "\n}"
                 else "}"
               } + "\n"
@@ -445,7 +458,7 @@ class Scala3CommunityBuildMillAdapter(
     }
 
     val MillCommunityBuildInject = {
-      if (isMill1x) 
+      if (isMill1x)
         s"""
         |// Main entry point for community build
         |def runCommunityBuild(
@@ -485,7 +498,7 @@ class Scala3CommunityBuildMillAdapter(
       |""".stripMargin
     }
     val MapScalacOptionsOps = {
-     """|
+      """|
         |implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]){
         |  def mapScalacOptions(scalaVersion: mill.define.Target[String])(implicit ctx: mill.api.Ctx): Seq[String] = 
         |    _root_.scala.util.Try{ scalaVersion.evaluate(ctx).asSuccess.map(_.value) }
@@ -513,9 +526,8 @@ class Scala3CommunityBuildMillAdapter(
 
     def injects(injectRootModuleRunCommand: Boolean) = {
       Seq(
-        if (isMill1x) 
-          Some(
-            """import millbuild.MillCommunityBuild
+        if (isMill1x)
+          Some("""import millbuild.MillCommunityBuild
               |import millbuild.MillCommunityBuild.mapScalacOptions
               |""".stripMargin)
         else
@@ -531,7 +543,7 @@ class Scala3CommunityBuildMillAdapter(
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
         if (useLegacyTasks || isMill1x) None else Some("}\nimport _OpenCommunityBuildOps._"),
         if (injectRootModuleRunCommand)
-          if (isMill1x && !config.isMainBuildFile.forall(_ == true)) None 
+          if (isMill1x && !config.isMainBuildFile.forall(_ == true)) None
           else Some(MillCommunityBuildInject)
         else None
       ).flatten ++

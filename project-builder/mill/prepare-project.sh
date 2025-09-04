@@ -18,14 +18,14 @@ export OPENCB_SCALA_VERSION=$scalaVersion
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source $scriptDir/../versions.sh
 
-MILL_1_0="1.0.0"
-MILL_0_12="0.12.15"
-MILL_0_11=0.11.12
-MILL_0_10=0.10.15
-MILL_0_9=0.9.12
-RESOLVE="resolve _"
-MILL_BUILD_SCALA=build.mill.scala
-MILL_BUILD=build.mill
+readonly MILL_1_0="1.0.0"
+readonly MILL_0_12="0.12.15"
+readonly MILL_0_11=0.11.12
+readonly MILL_0_10=0.10.15
+readonly MILL_0_9=0.9.12
+readonly RESOLVE="resolve _"
+readonly MILL_BUILD_SCALA=build.mill.scala
+readonly MILL_BUILD=build.mill
 
 cd $repoDir
 
@@ -99,23 +99,26 @@ if [[ -z "$millVersion" ]]; then
   echo $millVersion > .mill-version
 fi # detect version
 
+forceMillVersionUpgrade() {
+  local minMillVersion=$1
+  echo "Force upgrade of millVersion $millVersion to $minMillVersion"
+  millVersion=$minMillVersion
+  echo $millVersion > .mill-version
+  return 0
+}
 
 # Scala 3.8 new stdlib adjustements
 scalaBinaryVersion=`echo ${scalaVersion} | cut -d . -f 1,2`
 if isBinVersionGreaterOrEqual "$scalaBinaryVersion" "3.8" ; then
-  if isBinVersionGreaterOrEqual "$millVersion" 1.1; then
+  if isBinVersionGreaterOrEqual "$millVersion" "1.1"; then
     echo "No mill version upgrade needed, using $millVersion"
     # no-op
-  elif isBinVersionInRange "$millVersion" 1.0 1.1; then
-    minMillVersion=1.0.4-28-f16413
-    echo "Force upgrade of millVersion $millVersion to $minMillVersion"
-    millVersion=$minMillVersion
-    echo $millVersion > .mill-version
+  elif isBinVersionInRange "$millVersion" "1.0" "1.1"; then
+    forceMillVersionUpgrade 1.0.4-28-f16413
   elif isVersionInRange "$millVersion" 0.12.0 0.12.15; then
-    minMillVersion=0.12.15-2-561986
-    echo "Force upgrade of millVersion $millVersion to $minMillVersion"
-    millVersion=$minMillVersion
-    echo $millVersion > .mill-version
+    forceMillVersionUpgrade 0.12.15-2-561986
+  elif isVersionInRange "$millVersion" 0.10.0 0.10.14; then
+    forceMillVersionUpgrade $MILL_0_10
   fi
 fi
 
@@ -152,7 +155,9 @@ fi
 adaptedFiles=( $millBuildFile )
 millBuildDirectory=
 if [[ -d "./mill-build/src" ]]; then
-  millBuildDirectory="./mill-build/src"
+  if isVersionGreaterOrEqual "$millBinaryVersion" 1.0 ; then
+    millBuildDirectory="./mill-build/src"
+  fi
 elif [[ -d "./project" ]]; then
    millBuildDirectory="./project"
 fi
@@ -172,6 +177,7 @@ for buildFile in "${adaptedFiles[@]}"; do
   if [[ "$buildFile" == "$millBuildFile" ]]; then
     isMainBuildFile=true
   fi
+  
   echo "Apply scalafix rules to $buildFile"
   scalaFile="${buildFile}.scala"
   cp $buildFile $scalaFile
@@ -253,9 +259,17 @@ if [[ millBinaryVersionMajor -eq 0 ]]; then
 elif [[ millBinaryVersionMajor -eq 1 ]]; then 
     dir="."
     millBuildDir=$dir/mill-build/src/millbuild
+    rootMillBuild=$dir/mill-build/build.mill
     mkdir -p $millBuildDir
     cp $scriptDir/MillCommunityBuild.scala $millBuildDir
     echo "package millbuild" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${millBuildDir}/CommunityBuildCore.scala 
+    if [[ ! -f $rootMillBuild ]]; then 
+        cat > $rootMillBuild <<'EOF'
+package build
+
+object `package` extends mill.meta.MillBuildRootModule {}
+EOF
+    fi
 else
   echo "Unsupport mill binary version $millBinaryVersion"
   exit 1
