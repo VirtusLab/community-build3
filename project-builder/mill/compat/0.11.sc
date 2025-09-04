@@ -62,7 +62,7 @@ object compat {
                 def scalaVersionByDependency(artifact: String) = {
                   val prefix = artifact + "-"
                   classpath.toSeq
-                  .map(_.last)
+                  .flatMap(_.toString().split(java.io.File.separator).lastOption)
                   .find(_.startsWith(prefix))
                   .map(_.stripPrefix(prefix).stripSuffix(".jar").stripSuffix("-sources"))
                 }
