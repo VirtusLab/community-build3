@@ -18,9 +18,9 @@ export OPENCB_SCALA_VERSION=$scalaVersion
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source $scriptDir/../versions.sh
 
-readonly MILL_1_0="1.0.0"
-readonly MILL_0_12="0.12.15"
-readonly MILL_0_11=0.11.12
+readonly MILL_1_0=1.0.4
+readonly MILL_0_12=0.12.15
+readonly MILL_0_11=0.11.13
 readonly MILL_0_10=0.10.15
 readonly MILL_0_9=0.9.12
 readonly RESOLVE="resolve _"
@@ -120,8 +120,12 @@ if isBinVersionGreaterOrEqual "$scalaBinaryVersion" "3.8" ; then
     forceMillVersionUpgrade 1.0.4-28-f16413
   elif isVersionInRange "$millVersion" 0.12.0 0.12.15; then
     forceMillVersionUpgrade 0.12.15-2-561986
+  elif isVersionInRange "$millVersion" 0.11.0 0.11.12; then
+    forceMillVersionUpgrade $MILL_0_11
   elif isVersionInRange "$millVersion" 0.10.0 0.10.14; then
     forceMillVersionUpgrade $MILL_0_10
+  elif isVersionInRange "$millVersion" 0.9.0 0.9.11; then
+    forceMillVersionUpgrade $MILL_0_9
   fi
 fi
 
