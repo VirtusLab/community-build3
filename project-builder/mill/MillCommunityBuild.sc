@@ -428,7 +428,6 @@ private def checkedModuleMappings(
 
 // Evaluation of mill targets/commands
 private def tryEval[T](task: NamedTask[T])(implicit ctx: Ctx): api.Result[T] = {
-  println(s"OpenCB:tryEval $task")
   val evalState = ctx.evaluator.evaluate(Agg(task))
   val failure = evalState.failing.values().flatten.toSeq.headOption
   def result = evalState.rawValues.head

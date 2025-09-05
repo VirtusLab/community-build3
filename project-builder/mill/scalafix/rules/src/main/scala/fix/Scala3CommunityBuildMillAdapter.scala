@@ -540,7 +540,8 @@ class Scala3CommunityBuildMillAdapter(
     def injects(injectRootModuleRunCommand: Boolean) = {
       Seq(
         if (isMill1x)
-          Some("""import millbuild.MillCommunityBuild
+          Some("""
+              |import millbuild.MillCommunityBuild
               |import millbuild.MillCommunityBuild.mapScalacOptions
               |""".stripMargin)
         else
