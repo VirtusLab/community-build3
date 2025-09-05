@@ -1,5 +1,5 @@
 
-# projects total:     832
+# projects total:     838
 # min stars count:    -1
 # max projects count: 1000
 
@@ -171,6 +171,7 @@ jobs:
         - name: "bitlap/zio-pekko"
         - name: "bitmarck-service/base32check-scala"
         - name: "bitmarck-service/fs2-secon"
+        - name: "bp3r/jsonrpc2"
         - name: "broij/zarrow"
         - name: "business4s/forms4s"
         - name: "cake-lier/tuples-space-client"
@@ -181,6 +182,7 @@ jobs:
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
         - name: "cheleb/zio-magnum"
+        - name: "chili-piper/scala-quartz"
         - name: "christian-schlichtherle/circe-kafka"
         - name: "circe/circe-refined"
         - name: "cjsmith-0141/fs2-pgp"
@@ -247,9 +249,11 @@ jobs:
         - name: "dragonfly-ai/democrossy"
         - name: "dragonfly-ai/mesh"
         - name: "dragonfly-ai/spatial"
+        - name: "dragonfly-ai/uriel"
         - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
+        - name: "dwolla/fs2-aws"
         - name: "dwolla/http4s-consul-middleware"
         - name: "dwolla/natchez-smithy4s"
         - name: "dwolla/natchez-tagless"
@@ -326,10 +330,6 @@ jobs:
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "gnp/ident"
-        - name: "gnp/zio-data-streams"
-        - name: "gochaorg/json4s3"
-        - name: "gonzih/cats-nats"
-        - name: "goodcover/tagless-redux"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gnp/zio-data-streams"
+        - name: "gochaorg/json4s3"
+        - name: "gonzih/cats-nats"
+        - name: "goodcover/tagless-redux"
         - name: "greenfossil/commons-i18n"
         - name: "greenfossil/commons-json"
         - name: "greenfossil/data-mapping"
@@ -606,10 +610,6 @@ jobs:
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
         - name: "nafg/cloud-logging-logback-scala"
-        - name: "nafg/jewish-date"
-        - name: "nafg/scala-grist"
-        - name: "nafg/scala-phonenumber"
-        - name: "nafg/scheduler"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "nafg/jewish-date"
+        - name: "nafg/scala-grist"
+        - name: "nafg/scala-phonenumber"
+        - name: "nafg/scheduler"
         - name: "nafg/simple-router"
         - name: "narma/tranzactio"
         - name: "nationalarchives/dr2-dynamo-formatters"
@@ -878,6 +882,7 @@ jobs:
         - name: "timbertson/flogger"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
+        - name: "tkrs/orcus"
         - name: "tlsomers/scala-suspendable"
         - name: "tmccarthy/ausgeo"
         - name: "tmccarthy/digest4s"
@@ -885,11 +890,6 @@ jobs:
         - name: "tmccarthy/scala-db"
         - name: "tmccarthy/tmm-scala-collections"
         - name: "tmccarthy/tmmutils"
-        - name: "toniogela/cross"
-        - name: "torrentdam/bencode"
-        - name: "totally-trustworthy-org/widely-used-util"
-        - name: "tototoshi/play-reverse-router-extension"
-        - name: "tpataky/duckling"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "toniogela/cross"
+        - name: "torrentdam/bencode"
+        - name: "totally-trustworthy-org/widely-used-util"
+        - name: "tototoshi/play-reverse-router-extension"
+        - name: "tpataky/duckling"
         - name: "tpunder/fm-common"
         - name: "tpunder/fm-html"
         - name: "tpunder/fm-http"
@@ -934,6 +939,7 @@ jobs:
         - name: "trace4cats/trace4cats-newrelic"
         - name: "trace4cats/trace4cats-opentelemetry"
         - name: "trace4cats/trace4cats-pubsub"
+        - name: "trace4cats/trace4cats-sttp"
         - name: "trace4cats/trace4cats-tail-sampling-extras"
         - name: "trace4cats/trace4cats-xray"
         - name: "trace4cats/trace4cats-zio"
