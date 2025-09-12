@@ -2175,7 +2175,7 @@
   "almond-sh/almond":{
     "project":"almond-sh/almond",
     "repoUrl":"https://github.com/almond-sh/almond.git",
-    "revision":"v0.14.1-1",
+    "revision":"main",
     "version":"0.14.1-1",
     "targets":"sh.almond%almond-scalapy sh.almond%channels sh.almond%coursier-logger sh.almond%echo sh.almond%interpreter sh.almond%interpreter-api sh.almond%jupyter-api sh.almond%kernel sh.almond%launcher sh.almond%logger sh.almond%protocol sh.almond%shared-directives sh.almond%test sh.almond%toree-hooks",
     "publishedScalaVersion":"3.6.3",
@@ -40571,59 +40571,6 @@
     "targets":"com.github.nscala-time%nscala-time",
     "publishedScalaVersion":"3.3.4"
   },
-  "nthportal/scala-platform":{
-    "project":"nthportal/scala-platform",
-    "repoUrl":"https://github.com/nthportal/scala-platform.git",
-    "revision":"v1.0.2",
-    "version":"1.0.2",
-    "targets":"lgbt.princess%platform lgbt.princess%scala-platform",
-    "publishedScalaVersion":"3.2.2",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val scala3   = \"3.2.2\"",
-          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "nthportal/spaghetti":{
-    "project":"nthportal/spaghetti",
-    "repoUrl":"https://github.com/nthportal/spaghetti.git",
-    "revision":"",
-    "version":"0.2.0",
-    "targets":"lgbt.princess%spaghetti",
-    "publishedScalaVersion":"3.1.0"
-  },
   "nulab/play2-oauth2-provider":{
     "project":"nulab/play2-oauth2-provider",
     "repoUrl":"https://github.com/nulab/play2-oauth2-provider.git",
@@ -45712,47 +45659,6 @@
           "pattern":"val Scala3        = \"3.0.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
-      ]
-    }
-  },
-  "purplekingdomgames/indigo":{
-    "project":"purplekingdomgames/indigo",
-    "repoUrl":"https://github.com/purplekingdomgames/indigo.git",
-    "revision":"v0.22.0",
-    "version":"0.22.0",
-    "targets":"io.indigoengine%indigo-plugin",
-    "publishedScalaVersion":"3.7.1",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
       ]
     }
   },
@@ -67596,50 +67502,6 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }

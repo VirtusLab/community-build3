@@ -1,5 +1,5 @@
 
-# projects total:     841
+# projects total:     837
 # min stars count:    -1
 # max projects count: 1000
 
@@ -241,7 +241,6 @@ jobs:
         - name: "davenverse/natchez-rediculous"
         - name: "davenverse/os-detect"
         - name: "davenverse/publicsuffix"
-        - name: "davenverse/single-fibered"
         - name: "davenverse/snickerdoodle"
         - name: "delimobil/fs2-hbase"
         - name: "dobrynya/zio-jms"
@@ -330,6 +329,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-ui"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
+        - name: "gnp/ident"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "gnp/ident"
         - name: "gnp/zio-data-streams"
         - name: "gochaorg/json4s3"
         - name: "gonzih/cats-nats"
@@ -408,7 +407,6 @@ jobs:
         - name: "http4s/http4s-fabric"
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
-        - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-tomcat"
         - name: "hughsimpson/scalameter"
         - name: "i10416/cssminifier"
@@ -610,6 +608,8 @@ jobs:
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
+        - name: "mvv/typine"
+        - name: "nafg/cloud-logging-logback-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,8 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mvv/typine"
-        - name: "nafg/cloud-logging-logback-scala"
         - name: "nafg/jewish-date"
         - name: "nafg/scala-grist"
         - name: "nafg/scala-phonenumber"
@@ -656,8 +654,6 @@ jobs:
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
         - name: "novamage/typed-map"
-        - name: "nthportal/scala-platform"
-        - name: "nthportal/spaghetti"
         - name: "oheger/cloud-files"
         - name: "ohze/php-utils"
         - name: "olegych/scaposer"
@@ -890,6 +886,10 @@ jobs:
         - name: "tmccarthy/digest4s"
         - name: "tmccarthy/fetch"
         - name: "tmccarthy/scala-db"
+        - name: "tmccarthy/tmm-scala-collections"
+        - name: "tmccarthy/tmmutils"
+        - name: "toniogela/cross"
+        - name: "torrentdam/bencode"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,10 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "tmccarthy/tmm-scala-collections"
-        - name: "tmccarthy/tmmutils"
-        - name: "toniogela/cross"
-        - name: "torrentdam/bencode"
         - name: "totally-trustworthy-org/widely-used-util"
         - name: "tototoshi/nyanda"
         - name: "tototoshi/play-reverse-router-extension"
