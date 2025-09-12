@@ -547,10 +547,12 @@ class Scala3CommunityBuildMillAdapter(
         else
           Some(
             if (useLegacyTasks) """
-            |import $file.MillCommunityBuild
-            |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}""".stripMargin
+              |import $file.MillCommunityBuild
+              |import $file.MillVersionCompat, MillVersionCompat.compat.{Task => MillCompatTask}""".stripMargin
             else
-              "\nimport MillVersionCompat.compat.{Task => MillCompatTask}"
+              """
+              |import MillVersionCompat.compat.{Task => MillCompatTask}
+              """.stripMargin
           ),
         if (useLegacyTasks || isMill1x) None else Some("private object _OpenCommunityBuildOps {"),
         if (isMill1x) None else Some(MapScalacOptionsOps),
