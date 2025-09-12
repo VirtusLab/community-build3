@@ -407,6 +407,7 @@ jobs:
         - name: "gnieh/diffson"
         - name: "gnieh/fs2-data"
         - name: "gnieh/geo-scala"
+        - name: "goodcover/scala-relay"
         - name: "greenfossil/thorium"
         - name: "greenleafoss/green-leaf-mongo"
         - name: "grouzen/zio-apache-arrow"
@@ -422,6 +423,7 @@ jobs:
         - name: "guizmaii-opensource/scala-nimbus-jose-jwt"
         - name: "guizmaii-opensource/zio-uuid"
         - name: "gvolpe/trading"
+        - name: "gzoller/dynalens"
         - name: "gzoller/scala-reflection"
         - name: "gzoller/scalajack"
         - name: "hagay3/skuber"
@@ -509,13 +511,13 @@ jobs:
         - name: "johnspade/csv3s"
         - name: "johnspade/tgbot-utils"
         - name: "jozic/scalaj"
-        - name: "jozic/scalax-collection"
         - name: "jphmrst/bps"
         - name: "jqscala/jqscala"
         - name: "json4s/json4s"
         - name: "juliano/pokeapi-scala"
         - name: "julianpeeters/avrohugger"
         - name: "julienrf/play-jsmessages"
+        - name: "jurajburian/mailer"
         - name: "jwojnowski/oidc4s"
         - name: "jwt-scala/jwt-scala"
         - name: "kacperfkorban/guinep"
@@ -608,8 +610,6 @@ jobs:
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
-        - name: "matsluni/aws-spi-akka-http"
-        - name: "max-leuthaeuser/scroll"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "matsluni/aws-spi-akka-http"
+        - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
@@ -750,7 +752,6 @@ jobs:
         - name: "profunktor/neutron"
         - name: "profunktor/redis4cats"
         - name: "pureconfig/pureconfig"
-        - name: "purplekingdomgames/indigo"
         - name: "purplekingdomgames/tyrian"
         - name: "purplekingdomgames/ultraviolet"
         - name: "quafadas/live-server-scala-cli-js"
@@ -805,6 +806,7 @@ jobs:
         - name: "sbt/sbt-jni"
         - name: "sbt/sbt-pgp"
         - name: "scafi/scafi"
+        - name: "scafi/scafi3"
         - name: "scala-interop/slinc"
         - name: "scala-js/scala-js-stubs"
         - name: "scala-native/scala-native"
@@ -888,8 +890,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
-        - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -994,7 +996,6 @@ jobs:
         - name: "tomasmikula/libretto"
         - name: "torrentdam/bittorrent"
         - name: "tototoshi/dbcache"
-        - name: "tototoshi/nyanda"
         - name: "tototoshi/scala-csv"
         - name: "tototoshi/slick-joda-mapper"
         - name: "touk/influxdb-reporter"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"

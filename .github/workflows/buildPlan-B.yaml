@@ -1,5 +1,5 @@
 
-# projects total:     838
+# projects total:     837
 # min stars count:    -1
 # max projects count: 1000
 
@@ -382,7 +382,6 @@ jobs:
         - name: "guymers/ceesvee"
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
-        - name: "gzoller/dynalens"
         - name: "gzoller/listzipper"
         - name: "h8io/borscht"
         - name: "hamnis/dataclass-scalafix"
@@ -461,6 +460,7 @@ jobs:
         - name: "johnhungerford/kyo-test"
         - name: "johnhungerford/zikyo"
         - name: "joohnnie/retry"
+        - name: "jozic/scalax-collection"
         - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
         - name: "jphmrst/scalautils"
@@ -654,8 +654,6 @@ jobs:
         - name: "novakov-alexey/flink-clients-scastie"
         - name: "novakov-alexey/http4s-spnego"
         - name: "novamage/typed-map"
-        - name: "nthportal/scala-platform"
-        - name: "nthportal/spaghetti"
         - name: "oheger/cloud-files"
         - name: "ohze/php-utils"
         - name: "olegych/scaposer"
@@ -890,6 +888,8 @@ jobs:
         - name: "tmccarthy/scala-db"
         - name: "tmccarthy/tmm-scala-collections"
         - name: "tmccarthy/tmmutils"
+        - name: "toniogela/cross"
+        - name: "torrentdam/bencode"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,9 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "toniogela/cross"
-        - name: "torrentdam/bencode"
         - name: "totally-trustworthy-org/widely-used-util"
+        - name: "tototoshi/nyanda"
         - name: "tototoshi/play-reverse-router-extension"
         - name: "tpataky/duckling"
         - name: "tpunder/fm-common"
