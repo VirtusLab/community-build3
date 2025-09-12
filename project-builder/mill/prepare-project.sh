@@ -30,7 +30,7 @@ readonly MILL_BUILD=build.mill
 cd $repoDir
 
 javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
-echo $javaVersion > .mill-jvm-version
+echo "system" > .mill-jvm-version
 echo "-Xmx7G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
