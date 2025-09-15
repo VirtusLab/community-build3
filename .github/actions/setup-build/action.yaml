@@ -105,4 +105,5 @@ runs:
           sbt \
           'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
           ';set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
-          ';scala3-bootstrapped/publish'
+          ';set `scala3-bootstrapped-new`/publishConfiguration := (`scala3-bootstrapped-new`/publishConfiguration).value.withOverwrite(true)'\
+          ';scala3-bootstrapped-new/publish'
