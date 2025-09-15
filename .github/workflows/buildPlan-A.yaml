@@ -265,7 +265,6 @@ jobs:
         - name: "davenverse/process"
         - name: "davenverse/rediculous"
         - name: "davenverse/rediculous-concurrent"
-        - name: "davenverse/single-fibered"
         - name: "davenverse/tsec"
         - name: "davenverse/whale-tail"
         - name: "delimobil/cabbit"
@@ -330,6 +329,7 @@ jobs:
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
+        - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,7 +355,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
@@ -610,6 +609,7 @@ jobs:
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
+        - name: "max-leuthaeuser/scroll"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
@@ -719,6 +718,7 @@ jobs:
         - name: "pjfanning/jackson-module-scala3-enum"
         - name: "pjfanning/micrometer-pekko"
         - name: "pjfanning/pekko-http-json"
+        - name: "play-swagger/play-swagger"
         - name: "playframework/cachecontrol"
         - name: "playframework/flyway-play"
         - name: "playframework/play-doc"
@@ -995,7 +995,6 @@ jobs:
         - name: "tomasmikula/libretto"
         - name: "torrentdam/bittorrent"
         - name: "tototoshi/dbcache"
-        - name: "tototoshi/nyanda"
         - name: "tototoshi/scala-csv"
         - name: "tototoshi/slick-joda-mapper"
         - name: "touk/influxdb-reporter"
@@ -1114,6 +1113,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
