@@ -1,5 +1,5 @@
 
-# projects total:     838
+# projects total:     839
 # min stars count:    -1
 # max projects count: 1000
 
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "givesocialmovement/moonlight"
         - name: "gnp/ident"
         - name: "gnp/zio-data-streams"
         - name: "gochaorg/json4s3"
@@ -609,7 +610,6 @@ jobs:
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
-        - name: "mvv/typine"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mvv/typine"
         - name: "nafg/cloud-logging-logback-scala"
         - name: "nafg/jewish-date"
         - name: "nafg/scala-grist"
@@ -889,7 +890,6 @@ jobs:
         - name: "tmccarthy/scala-db"
         - name: "tmccarthy/tmm-scala-collections"
         - name: "tmccarthy/tmmutils"
-        - name: "toniogela/cross"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "toniogela/cross"
         - name: "torrentdam/bencode"
         - name: "totally-trustworthy-org/widely-used-util"
         - name: "tototoshi/nyanda"
