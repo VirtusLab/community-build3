@@ -30,6 +30,9 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
 source $scriptDir/versions.sh
 
+# Propagate CI env variable to build tools, ensure consistent behavior in local and CI builds
+export CI=1
+
 repoDir=$PWD/repo
 $scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
