@@ -125,7 +125,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       (_: Scope, currentSettings: Seq[String]) => currentSettings.filterNot(flags.contains)
     }
 
-  private val projectCrossScalaVersions = mutable.Map.empty[ProjectRef, Seq[String]]
+  private val projectCrossScalaVersions = mutable.Map.empty[String, Seq[String]]
 
   /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
@@ -141,8 +141,8 @@ object CommunityBuildPlugin extends AutoPlugin {
 
       (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
         val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
-        if (!projectCrossScalaVersions.contains(ref)) {
-          projectCrossScalaVersions(ref) = currentCrossVersions
+        if (!projectCrossScalaVersions.contains(ref.project)) {
+          projectCrossScalaVersions(ref.project) = currentCrossVersions
             .diff(Seq(scalaVersion)) ++ // exclude current version
             sys.env
               .get("OVERRIDEN_SCALA_VERSION")
@@ -630,7 +630,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           ),
           publish = publishResult,
           metadata = ModuleMetadata(
-            crossScalaVersions = projectCrossScalaVersions.getOrElse(r, Nil)
+            crossScalaVersions = projectCrossScalaVersions.getOrElse(r.project, Nil)
           )
         )
       }
