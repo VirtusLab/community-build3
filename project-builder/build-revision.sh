@@ -231,7 +231,7 @@ fi
 for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
   migrationBinaryVersion=`echo $migrationScalaVersion | cut -d . -f 1,2`
-  if isBinVersionGreaterThan "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
+  if isBinVersionGreaterOrEqual "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
     echo "Skip migration using $migrationScalaVersion, binary version higher then target Scala version $scalaBinaryVersion"
   else 
     isMigrating=true
