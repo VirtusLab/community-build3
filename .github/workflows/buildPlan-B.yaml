@@ -579,7 +579,6 @@ jobs:
         - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
         - name: "makiftutuncu/effect"
-        - name: "malliina/logstreams"
         - name: "malliina/sbt-utils"
         - name: "malliina/util-base"
         - name: "malyszaryczlowiek/kessenger-lib"
@@ -610,6 +609,7 @@ jobs:
         - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
+        - name: "msgpack4z/msgpack4z-jawn"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,7 +635,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
@@ -780,6 +779,7 @@ jobs:
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
+        - name: "sbt/sbt-giter8-resolver"
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"

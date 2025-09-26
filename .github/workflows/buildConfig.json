@@ -16073,6 +16073,50 @@
       ]
     }
   },
+  "eed3si9n/verify":{
+    "project":"eed3si9n/verify",
+    "repoUrl":"https://github.com/eed3si9n/verify.git",
+    "revision":"main",
+    "version":"HEAD",
+    "targets":"*%*",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        "3.7.3"
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.1.3\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "eikek/binny":{
     "project":"eikek/binny",
     "repoUrl":"https://github.com/eikek/binny.git",
@@ -22984,7 +23028,11 @@
         "3.7.3"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"project/plugins.sbt",
+          "pattern":"addSbtPlugin(\"org.scala-js\"        % \"sbt-scalajs\"              % \"1.18.2\")",
+          "replaceWith":"addSbtPlugin(\"org.scala-js\"        % \"sbt-scalajs\"              % \"1.20.1\")"
+        }
       ]
     }
   },
@@ -37156,51 +37204,6 @@
       ]
     }
   },
-  "malliina/logstreams":{
-    "project":"malliina/logstreams",
-    "repoUrl":"https://github.com/malliina/logstreams.git",
-    "revision":"",
-    "version":"6.10.1",
-    "targets":"com.malliina%logstreams-client",
-    "publishedScalaVersion":"3.3.1",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val scala3 = \"3.4.0\"",
-          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "malliina/mobile-push":{
     "project":"malliina/mobile-push",
     "repoUrl":"https://github.com/malliina/mobile-push.git",
@@ -50165,6 +50168,51 @@
       ]
     }
   },
+  "sbt/sbt-giter8-resolver":{
+    "project":"sbt/sbt-giter8-resolver",
+    "repoUrl":"https://github.com/sbt/sbt-giter8-resolver.git",
+    "revision":"v0.18.0",
+    "version":"0.18.0",
+    "targets":"org.scala-sbt.sbt-giter8-resolver%sbt-giter8-resolver",
+    "publishedScalaVersion":"3.7.3",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.7.3\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "sbt/sbt-jni":{
     "project":"sbt/sbt-jni",
     "repoUrl":"https://github.com/sbt/sbt-jni.git",
@@ -58337,6 +58385,7 @@
         ]
       },
       "tests":"full",
+      "sourceVersion":"3.4",
       "migrationVersions":[
         
       ],
@@ -68435,50 +68484,6 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }
