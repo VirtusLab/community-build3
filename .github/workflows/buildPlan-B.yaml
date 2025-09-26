@@ -1,5 +1,5 @@
 
-# projects total:     841
+# projects total:     845
 # min stars count:    -1
 # max projects count: 1000
 
@@ -220,6 +220,7 @@ jobs:
         - name: "dacr/spy"
         - name: "dacr/unittools"
         - name: "dacr/web-echo"
+        - name: "dacr/zio-worksheet"
         - name: "daenyth/cats-effect-guava"
         - name: "daghemberg/paut-program"
         - name: "daghemberg/problemutils"
@@ -329,7 +330,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-ui"
         - name: "gemini-hlsw/refined-algebra"
-        - name: "giabao/asm-flow"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "giabao/asm-flow"
         - name: "givesocialmovement/moonlight"
         - name: "gnp/ident"
         - name: "gnp/zio-data-streams"
@@ -449,6 +450,7 @@ jobs:
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
         - name: "janlisse/zio-jwt-validator"
+        - name: "jatcwang/iohandle"
         - name: "jd557/rokrok"
         - name: "jd557/spaeti"
         - name: "jkobejs/cron"
@@ -482,7 +484,6 @@ jobs:
         - name: "julianpeeters/schemabuilder4cats"
         - name: "julianpeeters/typename"
         - name: "julianpeeters/typesize"
-        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/googlecloud4s"
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
@@ -609,7 +610,6 @@ jobs:
         - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
-        - name: "msgpack4z/msgpack4z-jawn"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
@@ -742,6 +743,7 @@ jobs:
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rchillyard/flog"
+        - name: "rchillyard/matchers"
         - name: "rolang/google-rest-api-codegen"
         - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
@@ -782,6 +784,7 @@ jobs:
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
         - name: "scala-cli/scala-cli-signing"
+        - name: "scala-js/scala-js-logging"
         - name: "scala-tessella/ring-seq"
         - name: "scalacenter/bloop-config"
         - name: "scalacenter/libdaemon-jvm"
@@ -882,14 +885,11 @@ jobs:
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
         - name: "timbertson/flogger"
+        - name: "tkrs/fluflu"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
         - name: "tkrs/orcus"
         - name: "tlsomers/scala-suspendable"
-        - name: "tmccarthy/ausgeo"
-        - name: "tmccarthy/digest4s"
-        - name: "tmccarthy/fetch"
-        - name: "tmccarthy/scala-db"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tmccarthy/ausgeo"
+        - name: "tmccarthy/digest4s"
+        - name: "tmccarthy/fetch"
+        - name: "tmccarthy/scala-db"
         - name: "tmccarthy/tmm-scala-collections"
         - name: "tmccarthy/tmmutils"
         - name: "toniogela/cross"
