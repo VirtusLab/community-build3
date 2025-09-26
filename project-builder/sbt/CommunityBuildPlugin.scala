@@ -458,7 +458,10 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
 
       val idsToUse = ids match {
-        case "*%*" :: _ => originalModuleIds.keys.toSeq
+        case "*%*" :: _ => 
+          originalModuleIds.keys
+          .toSeq
+          .filterNot{id => id.contains("_sjs") || id.contains("_native")}
         case ids        => ids
       }
       val filteredIds = Scala3CommunityBuild.Utils
@@ -589,7 +592,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         val compileResult = mayRetry(Compile / compile)(eval)
 
         val shouldBuildDocs = eval(Compile / doc / skip) match {
-          case EvalResult.Value(skip, _) => !skip
+          case EvalResult.Value(skip, _) => false
           case _                         => false
         }
         val docsResult = mayRetry(Compile / doc) {
@@ -611,7 +614,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
 
         val shouldPublish = eval(Compile / publish / skip) match {
-          case EvalResult.Value(skip, _) => !skip
+          case EvalResult.Value(skip, _) => false
           case _                         => false
         }
         val publishResult = PublishResult(
