@@ -63,7 +63,7 @@ runs:
         CustomMavenRepo="${{ steps.calc-version.outputs.effective-maven-url }}"
         isPublished=false
         # Download jar instead of checking only for pom to ensure that it's complete
-        if cs fetch org.scala-lang:scala3-compiler_3:${Version} -r $CustomMavenRepo -r https://repo.scala-lang.org/artifactory/maven-nightlies/ ; then
+        if cs fetch org.scala-lang:scala3-library_3:${Version} -r $CustomMavenRepo -r https://repo.scala-lang.org/artifactory/maven-nightlies/ ; then
           isPublished=true
         elif [[ ! -z "${{ inputs.scala-version }}" ]]; then
           echo "::error title=Compiler version unavailable::Requested compiler version ${{ inputs.scala-version }} is unavailable" 
@@ -107,6 +107,7 @@ runs:
           if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -le 7 ]]); then
             compilerProject=scala3-bootstrapped
           fi
+          echo "Would publish $compilerProject"
           sbt \
           '-verbose' \
           'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
