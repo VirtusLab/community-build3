@@ -102,7 +102,12 @@ runs:
 
           cd /compiler/
           java -version
+          
+          compilerProject=scala3-bootstrapped-new
+          if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -le 7 ]]); then
+            compilerProject=scala3-bootstrapped
+          fi
           sbt \
           'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
           ';set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
-          ';scala3-bootstrapped/publish'
+          ";${compilerProject}/publish"
