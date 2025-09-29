@@ -108,6 +108,7 @@ runs:
             compilerProject=scala3-bootstrapped
           fi
           sbt \
+          '-verbose' \
           'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
           ';set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
           ";${compilerProject}/publish"
