@@ -30,6 +30,9 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
 source $scriptDir/versions.sh
 
+# Propagate CI env variable to build tools, ensure consistent behavior in local and CI builds
+export CI=true
+
 repoDir=$PWD/repo
 $scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
@@ -228,7 +231,7 @@ fi
 for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
   migrationBinaryVersion=`echo $migrationScalaVersion | cut -d . -f 1,2`
-  if isBinVersionGreaterThan "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
+  if isBinVersionGreaterOrEqual "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
     echo "Skip migration using $migrationScalaVersion, binary version higher then target Scala version $scalaBinaryVersion"
   else 
     isMigrating=true

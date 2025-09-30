@@ -117,6 +117,7 @@ jobs:
         - name: "andyglow/websocket-scala-client"
         - name: "ant8e/uuid4cats-effect"
         - name: "antognini/type-safe-equality"
+        - name: "apache/daffodil"
         - name: "apache/pekko"
         - name: "apache/pekko-connectors"
         - name: "apache/pekko-connectors-kafka"
@@ -170,6 +171,7 @@ jobs:
         - name: "bkirwi/decline"
         - name: "blackdoor/jose"
         - name: "blemale/scaffeine"
+        - name: "bot4s/telegram"
         - name: "bpholt/java-time-literals"
         - name: "business4s/decisions4s"
         - name: "business4s/workflows4s"
@@ -205,7 +207,6 @@ jobs:
         - name: "com-lihaoyi/fastparse"
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/mainargs"
-        - name: "com-lihaoyi/mill"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/pprint"
@@ -239,7 +240,6 @@ jobs:
         - name: "dacr/primes"
         - name: "dacr/sotohp"
         - name: "dacr/zio-lmdb"
-        - name: "dacr/zio-worksheet"
         - name: "dacr/zwords"
         - name: "danslapman/morphling"
         - name: "darrenjw/scala-glm"
@@ -304,6 +304,7 @@ jobs:
         - name: "eed3si9n/manifesto"
         - name: "eed3si9n/scalaxb"
         - name: "eed3si9n/sjson-new"
+        - name: "eed3si9n/verify"
         - name: "eikek/calev"
         - name: "eikek/emil"
         - name: "eikek/htmx4s"
@@ -329,7 +330,6 @@ jobs:
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
-        - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
@@ -370,6 +371,7 @@ jobs:
         - name: "folone/poi.scala"
         - name: "fomkin/levsha"
         - name: "foundweekends/conscript"
+        - name: "foundweekends/giter8"
         - name: "foundweekends/knockoff"
         - name: "foundweekends/pamflet"
         - name: "fs2-blobstore/fs2-blobstore"
@@ -447,7 +449,6 @@ jobs:
         - name: "http4s/http4s-otel4s-middleware"
         - name: "http4s/http4s-prometheus-metrics"
         - name: "http4s/http4s-scalatags"
-        - name: "http4s/http4s-servlet"
         - name: "http4s/http4s-session"
         - name: "ichoran/kse3"
         - name: "iheartradio/ficus"
@@ -516,6 +517,7 @@ jobs:
         - name: "julianpeeters/avrohugger"
         - name: "julienrf/play-jsmessages"
         - name: "jurajburian/mailer"
+        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/oidc4s"
         - name: "jwt-scala/jwt-scala"
         - name: "kacperfkorban/guinep"
@@ -608,8 +610,6 @@ jobs:
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/pipez"
-        - name: "matsluni/aws-spi-akka-http"
-        - name: "max-leuthaeuser/scroll"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "matsluni/aws-spi-akka-http"
+        - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
@@ -665,7 +667,7 @@ jobs:
         - name: "neandertech/cue4s"
         - name: "neandertech/langoustine"
         - name: "neandertech/smithy4s-deriving"
-        - name: "nebula-contrib/zio-nebula"
+        - name: "nebula-contrib/nebula4scala"
         - name: "neotypes/neotypes"
         - name: "nivox/fs2-backpressure-sensor"
         - name: "nmoncho/helenus3"
@@ -888,8 +890,6 @@ jobs:
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
-        - name: "sideeffffect/zio-testcontainers"
-        - name: "sirthias/borer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sideeffffect/zio-testcontainers"
+        - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
@@ -987,7 +989,6 @@ jobs:
         - name: "timbertson/foperator"
         - name: "timwspence/cats-stm"
         - name: "tinkoff/phobos"
-        - name: "tkrs/fluflu"
         - name: "tminglei/slick-pg"
         - name: "tofu-tf/cherry"
         - name: "tofu-tf/glass"
@@ -1000,7 +1001,6 @@ jobs:
         - name: "touk/influxdb-reporter"
         - name: "tpolecat/atto"
         - name: "tpolecat/pool-party"
-        - name: "tpolecat/sourcepos"
         - name: "tpolecat/typename"
         - name: "tpunder/fm-flatfile"
         - name: "tpunder/fm-serializer"
@@ -1055,6 +1055,7 @@ jobs:
         - name: "typelevel/shapeless-3"
         - name: "typelevel/simulacrum-scalafix"
         - name: "typelevel/skunk"
+        - name: "typelevel/sourcepos"
         - name: "typelevel/spire"
         - name: "typelevel/spotted-leopards"
         - name: "typelevel/squants"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
