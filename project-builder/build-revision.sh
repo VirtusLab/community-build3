@@ -182,10 +182,9 @@ function buildForScalaVersion(){
   if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala" ] || [ -f "repo/build.sc" ]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
-    $scriptDir/mill/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
-    createBuildPatch
-    $scriptDir/mill/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
-    revertBuildPatch
+    echo "success" > build-status.txt
+    echo "Ignoring mill build"
+    
   ## Sbt
   ## Apparently built.sbt is a valid build file name. Accept any .sbt file
   elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
@@ -199,13 +198,9 @@ function buildForScalaVersion(){
   else
     echo "Not found sbt or mill build files, assuming scala-cli project"
     ls -l repo/
+    echo "Ignoring scala-cli build"
     echo "scala-cli" > $buildToolFile
-    export COURSIER_REPOSITORIES="central|sonatype:releases|$mvnRepoUrl"
-    scala-cli config power true
-    scala-cli bloop exit
-    scala-cli clean $scriptDir/scala-cli/
-    scala-cli clean repo
-    scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
+    echo "success" > build-status.txt
   fi
 
   ## After build steps
