@@ -207,6 +207,7 @@ jobs:
         - name: "com-lihaoyi/fastparse"
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/mainargs"
+        - name: "com-lihaoyi/mill"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/pprint"
@@ -291,7 +292,6 @@ jobs:
         - name: "dvgica/healthful"
         - name: "dvgica/managerial"
         - name: "dvgica/periodic"
-        - name: "dvreeze/tqa"
         - name: "dvreeze/yaidom"
         - name: "dwickern/sbt-swagger-play"
         - name: "dwickern/scala-nameof"
@@ -477,6 +477,7 @@ jobs:
         - name: "j5ik2o/akka-persistence-s3"
         - name: "j5ik2o/docker-controller-scala"
         - name: "j5ik2o/pekko-persistence-dynamodb"
+        - name: "jacum/pekko-sensors"
         - name: "janstenpickle/hotswap-ref"
         - name: "jap-company/fields"
         - name: "japgolly/clear-config"
@@ -525,7 +526,6 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -609,7 +609,7 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/pipez"
+        - name: "mateuszkubuszok/hearth"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
@@ -663,7 +664,6 @@ jobs:
         - name: "nafg/slick-additions"
         - name: "nafg/slick-migration-api"
         - name: "nafg/slick-migration-api-flyway"
-        - name: "naoh87/lettucef"
         - name: "neandertech/cue4s"
         - name: "neandertech/langoustine"
         - name: "neandertech/smithy4s-deriving"
@@ -875,7 +875,6 @@ jobs:
         - name: "scf37/hottie"
         - name: "scodec/scodec"
         - name: "scodec/scodec-bits"
-        - name: "scodec/scodec-cats"
         - name: "scodec/scodec-protocols"
         - name: "scodec/scodec-stream"
         - name: "scopt/scopt"
@@ -890,6 +889,7 @@ jobs:
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
+        - name: "sideeffffect/zio-testcontainers"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,7 +915,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
@@ -940,7 +939,6 @@ jobs:
         - name: "softwaremill/sttp"
         - name: "softwaremill/sttp-apispec"
         - name: "softwaremill/sttp-model"
-        - name: "softwaremill/sttp-openai"
         - name: "softwaremill/sttp-shared"
         - name: "softwaremill/tapir"
         - name: "softwaremill/tapir-loom"
@@ -1047,6 +1045,7 @@ jobs:
         - name: "typelevel/natchez"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
+        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/paiges"
         - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
@@ -1114,6 +1113,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"

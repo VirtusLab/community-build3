@@ -1,5 +1,5 @@
 
-# projects total:     845
+# projects total:     849
 # min stars count:    -1
 # max projects count: 1000
 
@@ -252,6 +252,7 @@ jobs:
         - name: "dragonfly-ai/mesh"
         - name: "dragonfly-ai/spatial"
         - name: "dragonfly-ai/uriel"
+        - name: "dvreeze/tqa"
         - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
@@ -329,7 +330,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-ui"
-        - name: "gemini-hlsw/refined-algebra"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,8 +355,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "givesocialmovement/moonlight"
+        - name: "givesocialmovement/play-json-form"
         - name: "gnp/ident"
         - name: "gnp/zio-data-streams"
         - name: "gochaorg/json4s3"
@@ -491,6 +493,7 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -607,9 +610,6 @@ jobs:
         - name: "mpollmeier/sbt-ci-release-early-usage"
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
-        - name: "mschuwalow/play-ziojson"
-        - name: "msgpack4z/msgpack4z-argonaut"
-        - name: "msgpack4z/msgpack4z-jawn"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mschuwalow/play-ziojson"
+        - name: "msgpack4z/msgpack4z-argonaut"
+        - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
         - name: "mvv/typine"
@@ -644,6 +647,7 @@ jobs:
         - name: "nafg/scala-phonenumber"
         - name: "nafg/scheduler"
         - name: "nafg/simple-router"
+        - name: "naoh87/lettucef"
         - name: "narma/tranzactio"
         - name: "nationalarchives/dr2-dynamo-formatters"
         - name: "nationalarchives/dr2-preservica-client"
@@ -811,6 +815,7 @@ jobs:
         - name: "sciss/scalacollider-dot"
         - name: "sciss/scalacollider-if"
         - name: "sciss/transform4s"
+        - name: "scodec/scodec-cats"
         - name: "scoquelin/arugula"
         - name: "scorexfoundation/debox"
         - name: "scorexfoundation/scorex-util"
@@ -885,11 +890,6 @@ jobs:
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
         - name: "timbertson/flogger"
-        - name: "tkrs/fluflu"
-        - name: "tkrs/mess"
-        - name: "tkrs/mmdb-grpc-scala"
-        - name: "tkrs/orcus"
-        - name: "tlsomers/scala-suspendable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tkrs/fluflu"
+        - name: "tkrs/mess"
+        - name: "tkrs/mmdb-grpc-scala"
+        - name: "tkrs/orcus"
+        - name: "tlsomers/scala-suspendable"
         - name: "tmccarthy/ausgeo"
         - name: "tmccarthy/digest4s"
         - name: "tmccarthy/fetch"
@@ -952,7 +957,6 @@ jobs:
         - name: "trace4cats/trace4cats-zio"
         - name: "trace4cats/trace4cats-zipkin"
         - name: "typelevel/log4cats-natchez"
-        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/scalacheck-xml"
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
