@@ -1,6 +1,7 @@
 //> using scala "3"
 //> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.11.5"
-//> using dep "org.slf4j:slf4j-simple:2.0.12"
+//> using dep "org.slf4j:slf4j-simple:2.0.17"
+//> using file ./scalaVersions.scala
 
 import com.sksamuel.elastic4s
 import elastic4s.*
@@ -20,8 +21,8 @@ import scala.concurrent.duration.*
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
 
-val printer: Printer = 
-  if sys.env.contains("FOR_HTML") then Printer.HTMLCompatPrinter 
+val printer: Printer =
+  if sys.env.contains("FOR_HTML") then Printer.HTMLCompatPrinter
   else Printer.StandardPrinter
 import printer.{println, *}
 
@@ -61,35 +62,6 @@ lazy val esClient = {
   )
 }
 
-lazy val NightlyReleases = {
-  val regex = raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r
-  val xml = io.Source.fromURL(
-    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml"
-  )
-  regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toVector
-}
-
-lazy val StableScalaVersions = {
-  val regex = raw"<version>(\d+\.\d+\.\d+(-RC\d+)?)</version>".r
-  val xml = io.Source.fromURL(
-    "https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml"
-  )
-  regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toVector
-}
-object ScalaVersionOrdering extends Ordering[String] {
-  object StableVersion {
-    def unapply(v: String): Option[String] =
-      if !v.contains('-') && v.split('.').size == 3 then Some(v) else None
-  }
-  override def compare(x: String, y: String): Int = (x, y) match {
-    case (StableVersion(stable), other) if other.startsWith(stable) => 1
-    case (other, StableVersion(stable)) if other.startsWith(stable) => -1
-    case _                                                          => Ordering.String.compare(x, y)
-  }
-}
-lazy val PreviousScalaReleases =
-  (StableScalaVersions ++ NightlyReleases).sorted(using ScalaVersionOrdering)
-
 // Report all community build filures for given Scala version
 @main def raportForScalaVersion(opts: String*) = try {
   val scalaVersion = opts.toList.filterNot(_.startsWith("-")) match {
@@ -128,7 +100,10 @@ lazy val PreviousScalaReleases =
 
   printLine()
   val failedProjects = listFailedProjects(scalaVersion, checkBuildId)
-    .ensuring(_.nonEmpty, s"No failed projects found for scalaVersion=$scalaVersion, buildId=${checkBuildId}")
+    .ensuring(
+      _.nonEmpty,
+      s"No failed projects found for scalaVersion=$scalaVersion, buildId=${checkBuildId}"
+    )
   printLine()
 
   val reportedProjects =
@@ -250,7 +225,7 @@ def listFailedProjects(
             reference = failedVersion
           )
         }))
-        .await(DefaultTimeout)
+        .await(using DefaultTimeout)
         .result
     end hasNewerPassingVersion
 
@@ -284,13 +259,15 @@ def listFailedProjects(
           def lazyLogProject() =
             if buildFailure then
               logProject(s"BUILD${fields.get("buildTool").map(":" + _).getOrElse("")}")(RED)
-            else 
+            else
               if summary.compilerFailure then logProject("COMPILER")(RED)
               if summary.testsFailure then logProject("TEST")(YELLOW)
               if summary.docFailure then logProject("DOC")(MAGENTA)
               if summary.publishFailure then logProject("PUBLISH")(MAGENTA)
           end lazyLogProject
-          Option.when(compilerFailure || buildFailure || (ShowTestFailures && summary.testsFailure) ) {
+          Option.when(
+            compilerFailure || buildFailure || (ShowTestFailures && summary.testsFailure)
+          ) {
             TimedFailure(
               project = FailedProject(
                 project,
@@ -324,9 +301,9 @@ def listFailedProjects(
             )
             .must(
               Seq(
-                  buildId.map(termQuery("buildId", _)),
-                  scalaVersion.map(termQuery("scalaVersion", _))
-                ).flatten
+                buildId.map(termQuery("buildId", _)),
+                scalaVersion.map(termQuery("scalaVersion", _))
+              ).flatten
             )
         )
         .size(Limit)
@@ -338,7 +315,7 @@ def listFailedProjects(
             .subaggs(projectVersionsStatusAggregation)
         )
     }
-    .await(DefaultTimeout)
+    .await(using DefaultTimeout)
     .fold(
       reportFailedQuery("GetFailedQueries").andThen(_ => Nil),
       process(_)
@@ -399,10 +376,10 @@ def projectHistory(project: FailedProject) =
                 .compilerFailure
             )
           }
-          .filter(v => PreviousScalaReleases.contains(v.scalaVersion))
+          .filter(v => versions.Releases.contains(v.scalaVersion))
       )
     )
-    .await(DefaultTimeout)
+    .await(using DefaultTimeout)
 end projectHistory
 
 trait Reporter {
@@ -473,7 +450,7 @@ private def reportCompilerRegressions(
     printLine()
     println(reporter.prelude)
   val alwaysFailing =
-    PreviousScalaReleases.reverse
+    versions.Releases.reverse
       .dropWhile(isVersionNewerOrEqualThen(_, scalaVersion))
       .foldLeft(failedProjects.keySet) { case (prev, scalaVersion) =>
         def regressionsSinceLastVersion(exactVersion: Boolean) = allHistory
@@ -549,21 +526,20 @@ end isVersionNewerThen
 def isVersionNewerOrEqualThen(version: String, reference: String) =
   version == reference || isVersionNewerThen(version, reference)
 
-
-sealed trait Printer{
+sealed trait Printer {
   import scala.Console
   def RED: String
   def YELLOW: String
   def MAGENTA: String
-  def RESET :String
-  def BOLD :String
-  def LINE_BREAK : String
+  def RESET: String
+  def BOLD: String
+  def LINE_BREAK: String
 
   def println(text: String): Unit
   def printLine(): Unit
   def log(text: String): Unit
   def showUrl(url: String, text: String): String
-  
+
   final def projectUrlString(projectName: String, version: String, buildUrl: String): String = {
     val projectVerString = if version.isEmpty then projectName else s"$projectName @ $version"
     if buildUrl.isEmpty then projectVerString
@@ -571,8 +547,8 @@ sealed trait Printer{
   }
 }
 
-object Printer{
-  object StandardPrinter extends Printer{
+object Printer {
+  object StandardPrinter extends Printer {
     import scala.Console
     override val RED = Console.RED
     override val YELLOW = Console.YELLOW
@@ -584,12 +560,11 @@ object Printer{
     override def println(text: String): Unit = Predef.println(text)
     override def log(text: String) = Predef.println(text)
     override def printLine() = println("-" * 20)
-    override def showUrl(url: String, text: String): String = 
+    override def showUrl(url: String, text: String): String =
       s"$text - $url"
   }
 
-
-  object HTMLCompatPrinter extends Printer{
+  object HTMLCompatPrinter extends Printer {
     override val RED = """<span style="color:red">"""
     override val YELLOW = """<span style="color:yellow">"""
     override val MAGENTA = """<span style="color:magenta">"""
@@ -600,7 +575,7 @@ object Printer{
     override def println(text: String): Unit = Predef.println(s"$text")
     override def log(text: String) = System.err.println(s"$text")
     override def printLine() = println("<hr>")
-    override def showUrl(url: String, text: String): String= 
+    override def showUrl(url: String, text: String): String =
       s"""<a href="$url">$text</a>"""
   }
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env scala shebang
+//> using file ./scalaVersions.scala
 
 import java.nio.file.Path
 import java.nio.file.Files
@@ -26,15 +27,10 @@ import java.time.LocalDate
     println(s"Refreshing config for $projectName")
     println(s"""scala run coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/""".!!)
   }
-  
-  val scalaVersions = {
-    val regex = raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r
-    val xml = io.Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml")
-    regex.findAllMatchIn(xml.mkString).map(_.group(1)).filter(_ != null).toList
-  }
-  val scalaVersionStart = scalaVersions.find(_.startsWith(minScalaVersion)).getOrElse(s"Not version with prefix $minScalaVersion")
+    
+  val scalaVersionStart = versions.Releases.find(_.startsWith(minScalaVersion)).getOrElse(s"Not version with prefix $minScalaVersion")
   val scalaVersionEnd = maxScalaVersion.map: maxVersion => 
-    scalaVersions.findLast(_.startsWith(maxVersion))
+    versions.Releases.findLast(_.startsWith(maxVersion))
       .getOrElse(s"Not version with prefix $maxVersion")
   
   val task =   

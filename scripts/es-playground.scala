@@ -1,7 +1,6 @@
-//> using scala "3.nightly"
 //> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.11.5"
-//> using dep "org.slf4j:slf4j-simple:2.0.13"
-//> using toolkit 0.4.0
+//> using dep "org.slf4j:slf4j-simple:2.0.17"
+//> using toolkit 0.7.0
 //> using options -Wunused:all
 
 import com.sksamuel.elastic4s
@@ -19,7 +18,6 @@ import scala.concurrent.*
 import scala.concurrent.duration.*
 import org.elasticsearch.client.RestClient
 import org.apache.http.HttpHost
-import scala.reflect.TypeTest
 
 val BuildSummariesIndex = "project-build-summary"
 val DefaultTimeout = 5.minutes
@@ -42,7 +40,7 @@ val ElasticsearchCredentials = new UsernamePasswordCredentials(
       .size(10 * 1000)
       // .size(1)F
       .sourceInclude("projectName", "buildTool", "summary")
-  .await(DefaultTimeout)
+  .await(using DefaultTimeout)
   .fold(
     err => sys.error(s"Failed to list projects from Elasticsearch: ${err.error}"),
     result => 

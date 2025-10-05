@@ -1,6 +1,6 @@
 //> using scala "3"
-//> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.10.0"
-//> using dep "org.slf4j:slf4j-simple:2.0.9"
+//> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.11.5"
+//> using dep "org.slf4j:slf4j-simple:2.0.17"
 //> using options -Wunused:all -deprecation
 
 import com.sksamuel.elastic4s
@@ -111,7 +111,9 @@ final val logMultipleVersions = false
     println("Failing in both versions")
     println("By build tool:")
     failingInBoth.map(_._1).groupBy(_.buildTool).foreach { case (tool, toolProjects) =>
-      println(s"  - $tool: ${toolProjects.size} (${fraction(toolProjects.size, failingInBoth.size)})")
+      println(
+        s"  - $tool: ${toolProjects.size} (${fraction(toolProjects.size, failingInBoth.size)})"
+      )
     }
     failingInBoth.sortBy(_._1.projectName).foreach { case (v1, v2) =>
       println(v1.projectName + ":")
@@ -136,7 +138,8 @@ final val logMultipleVersions = false
     |Comparsion results
     |Projects with the same version: ${sameProjectVersions.size} (used for comparsion)
     |By build tool:
-    |${projectsV1.filter(v => sameProjectVersions.contains(ProjectVersion(v.projectName, v.version)))
+    |${projectsV1
+      .filter(v => sameProjectVersions.contains(ProjectVersion(v.projectName, v.version)))
       .groupBy(_.buildTool)
       .map { case (tool, toolProjects) =>
         s"  - $tool: ${toolProjects.size} (${fraction(toolProjects.size, sameProjectVersions.size)})"
@@ -222,7 +225,7 @@ def getProjectsInfo(scalaVersion: String)(using esClient: ElasticClient): Seq[Pr
         )
         .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
     }
-    .await(DefaultTimeout)
+    .await(using DefaultTimeout)
     .fold(
       ex => sys.error(s"Failed to execute query: scalaVersion=${scalaVersion}, ex: $ex"),
       _.hits.hits
