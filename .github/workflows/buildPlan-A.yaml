@@ -292,6 +292,7 @@ jobs:
         - name: "dvgica/healthful"
         - name: "dvgica/managerial"
         - name: "dvgica/periodic"
+        - name: "dvreeze/tqa"
         - name: "dvreeze/yaidom"
         - name: "dwickern/sbt-swagger-play"
         - name: "dwickern/scala-nameof"
@@ -329,7 +330,6 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
@@ -363,7 +364,6 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
-        - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "fmonniot/scala3mock"
@@ -526,6 +526,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -609,7 +610,6 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/hearth"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mateuszkubuszok/hearth"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
@@ -670,7 +671,6 @@ jobs:
         - name: "nebula-contrib/nebula4scala"
         - name: "neotypes/neotypes"
         - name: "nivox/fs2-backpressure-sensor"
-        - name: "nmoncho/helenus3"
         - name: "noelwelsh/mads"
         - name: "nomadblacky/scalatest-otel-reporter"
         - name: "norbert-radyk/spoiwo"
@@ -937,6 +937,7 @@ jobs:
         - name: "softwaremill/scala-common"
         - name: "softwaremill/scala-id-generator"
         - name: "softwaremill/sttp"
+        - name: "softwaremill/sttp-ai"
         - name: "softwaremill/sttp-apispec"
         - name: "softwaremill/sttp-model"
         - name: "softwaremill/sttp-shared"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
