@@ -592,7 +592,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         val compileResult = mayRetry(Compile / compile)(eval)
 
         val shouldBuildDocs = eval(Compile / doc / skip) match {
-          case EvalResult.Value(skip, _) => false
+          case EvalResult.Value(skip, _) => skip
           case _                         => false
         }
         val docsResult = mayRetry(Compile / doc) {
@@ -614,7 +614,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           )
 
         val shouldPublish = eval(Compile / publish / skip) match {
-          case EvalResult.Value(skip, _) => false
+          case EvalResult.Value(skip, _) => skip
           case _                         => false
         }
         val publishResult = PublishResult(
