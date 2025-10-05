@@ -79,8 +79,8 @@ function runSbt() {
   fi
   tq='"""'
   # csrSameVersions := Nil is set to allow testing Scala 3.8+ (new stdlib) without forcing upgrade to sbt 1.11.5
-  # Timeout 90 minutes
-  timeout 5400 \
+  # Timeout 110 minutes
+  timeout 6600 \
     sbt ${sbtSettings[@]} \
     "setCrossScalaVersions $scalaVersion" \
     "$setScalaVersionCmd -v" \
@@ -116,7 +116,10 @@ function checkLogsForRetry() {
   fi
   
   # Failed to download artifacts
-  if grep -q 'sbt.librarymanagement.ResolveException' "$logFile"; then
+if grep -qF -e 'sbt.librarymanagement.ResolveException' \
+            -e 'coursier.error.FetchError$DownloadingArtifacts' \
+            -e 'coursier.cache.ArtifactError$DownloadError' \
+            -e '(Connection timed out) while downloading' -- "$logFile"; then
     TIMEOUT=$(( RANDOM % 241 + 60 ))
     echo "Failed to download artifacts, retry after $TIMEOUT seconds"
     sleep "$TIMEOUT"
