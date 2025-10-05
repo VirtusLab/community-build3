@@ -1,6 +1,7 @@
 // Based on https://github.com/scala/scala3/blob/main/project/scripts/bisect.scala
 //> using dep "com.github.scopt::scopt:4.1.0"
 //> using scala 3.3
+//> using file scalaVersions.scala
 
 import sys.process._
 import scala.io.Source
@@ -285,11 +286,7 @@ object ReleasesRange:
 class Releases(val releases: Vector[Release])
 
 object Releases:
-  lazy val allReleases: Vector[Release] =
-    val re = raw"""(?<=title=")(.+-bin-\d{8}-\w{7}-NIGHTLY)(?=/")""".r
-    val html = Source.fromURL("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/")
-    re.findAllIn(html.mkString).map(Release.apply).toVector.sortBy(_.date)
-
+  lazy val allReleases: Vector[Release] = versions.Nightly.map(Release.apply).toVector
   def fromRange(range: ReleasesRange): Vector[Release] = range.filter(allReleases)
 
 case class Release(version: String):
