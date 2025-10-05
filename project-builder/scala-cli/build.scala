@@ -1,4 +1,4 @@
-//> using toolkit 0.2.1
+//> using toolkit 0.7.0
 //> using scala 3.3
 //> using file ../shared/CommunityBuildCore.scala
 //> using file ../shared/searchAndReplace.scala
@@ -29,18 +29,19 @@ import os.CommandResult
     if (configJson.isEmpty()) ProjectBuildConfig()
     else read[ProjectBuildConfig](configJson)
   println(s"Parsed config: ${config}")
-  
-  config.sourcePatches.foreach{ case SourcePatch(path, pattern, replaceWith) => 
-    searchAndReplace((repositoryDir / path).toNIO, pattern, replaceWith)  
+
+  config.sourcePatches.foreach { case SourcePatch(path, pattern, replaceWith, _) =>
+    // TODO: version select unsupported
+    searchAndReplace((repositoryDir / path).toNIO, pattern, replaceWith)
   }
 
   val evaluator = CliTaskEvaluator(
     scalaVersion = scalaVersion,
     repositoryDir = repositoryDir,
     mavenRepoURL = Option(mavenRepoURL).filterNot(_.isEmpty),
-    extraScalacOptions = extraScalacOptions.split(",").toList.map{
+    extraScalacOptions = extraScalacOptions.split(",").toList.map {
       case s"REQUIRE:$opt" => opt
-      case opt => opt
+      case opt             => opt
     }
   )
   import evaluator.{eval, evalAsDependencyOf, evalWhen}
@@ -123,8 +124,12 @@ case class CliCommand[T](
   override def toString(): String = s"${command.mkString(" ")}"
 }
 def cmd(args: String*) = CliCommand[Unit](args, (_, failure) => failure)
-class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoURL: Option[String], extraScalacOptions: List[String])
-    extends TaskEvaluator[CliCommand] {
+class CliTaskEvaluator(
+    scalaVersion: String,
+    repositoryDir: os.Path,
+    mavenRepoURL: Option[String],
+    extraScalacOptions: List[String]
+) extends TaskEvaluator[CliCommand] {
   import TaskEvaluator.*
 
   def evalAsDependencyOf(
@@ -160,7 +165,7 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoUR
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies,
         extraScalacOptions.map("--scala-option=" + _),
-        "--platform=jvm",
+        "--platform=jvm"
       )
       .call(
         cwd = repositoryDir,
@@ -188,24 +193,21 @@ class CliTaskEvaluator(scalaVersion: String, repositoryDir: os.Path, mavenRepoUR
 }
 
 object uPickleSerializers {
-  object OptionPickler extends upickle.AttributeTagged {
-    override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
-      implicitly[Writer[T]].comap[Option[T]] {
+  import OptionPickler.{*, given}
+  object OptionPickler extends upickle.AttributeTagged:
+    override given OptionWriter[T: Writer]: Writer[Option[T]] =
+      summon[Writer[T]].comap[Option[T]] {
         case None    => null.asInstanceOf[T]
         case Some(x) => x
       }
 
-    override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
-      new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
+    override given OptionReader[T: Reader]: Reader[Option[T]] = {
+      new Reader.Delegate[Any, Option[T]](summon[Reader[T]].map(Some(_))) {
         override def visitNull(index: Int) = None
       }
     }
-  }
 
-  // Used to asssume coding of Option as nulls, instead of arrays (default)
-  import OptionPickler._
-
-  implicit lazy val TestingModeRW: ReadWriter[TestingMode] = {
+  given ReadWriter[TestingMode] = {
     import TestingMode._
     val DisabledString = "disabled"
     val CompileOnlyString = "compile-only"
@@ -223,10 +225,11 @@ object uPickleSerializers {
     readwriter[String].bimap[TestingMode](toJson, fromJson)
   }
 
-  implicit lazy val ProjectOverridesR: Reader[ProjectOverrides] = macroR
-  implicit lazy val ProjectsConfigR: Reader[ProjectsConfig] = macroR
-  implicit lazy val ProjectBuildConfigR: Reader[ProjectBuildConfig] = macroR
-  implicit lazy val SourcePatchR: Reader[SourcePatch] = macroR
+  given Reader[ProjectOverrides] = macroR
+  given Reader[ProjectsConfig] = macroR
+  given Reader[ProjectBuildConfig] = macroR
+  given Reader[ScalaVersionRange] = macroR
+  given Reader[SourcePatch] = macroR
 }
 
 private given FromString[os.Path] = { str =>
