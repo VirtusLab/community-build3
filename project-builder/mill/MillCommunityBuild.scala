@@ -450,6 +450,7 @@ object MillCommunityBuild {
     given Reader[ProjectOverrides] = macroR
     given Reader[ProjectsConfig] = macroR
     given Reader[ProjectBuildConfig] = macroR
+    given Reader[ScalaVersionRange] = macroR
     given Reader[SourcePatch] = macroR
   }
 }

@@ -95,7 +95,8 @@ case class ProjectsConfig(
     overrides: Map[String, ProjectOverrides] = Map.empty
 ) derives ConfigReader
 // Describes a simple textual replecement performed on path (relative Unix-style path to the file
-case class SourcePatch(path: String, pattern: String, replaceWith: String) derives ConfigReader
+case class SourcePatch(path: String, pattern: String, replaceWith: String, selectVersion: Option[ScalaVersionRange] = None) derives ConfigReader
+case class ScalaVersionRange(min: Option[String] = None, max: Option[String] = None) derives ConfigReader
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
     java: JavaConfig = JavaConfig(),
