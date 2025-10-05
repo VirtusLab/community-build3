@@ -32,7 +32,12 @@ object Scala3CommunityBuild {
   case class SourcePatch(
       path: String,
       pattern: String,
-      replaceWith: String
+      replaceWith: String,
+      selectVersion: Option[ScalaVersionRange] = None,
+  )
+  case class ScalaVersionRange(
+    min: Option[String] = None,
+    max: Option[String] = None,
   )
 
 // Output

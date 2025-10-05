@@ -45,16 +45,28 @@ function applySourcePatches() {
   # Base64 is used to mitigate spliting json by whitespaces
   for elem in $(echo "${projectConfig}" | jq -r '.sourcePatches // [] | .[] | @base64'); do
     function field() {
-      echo ${elem} | base64 --decode | jq -r ${1}
+      echo ${elem} | base64 --decode | jq -r "${1}"
     }
     replaceWith=$(echo "$(field '.replaceWith')" | sed "s/<SCALA_VERSION>/${scalaVersion}/")
     path=$(field '.path')
     pattern=$(field '.pattern')
     
+    echo ""
     echo "Try apply source patch:"
     echo "Path:        $path"
     echo "Pattern:     $pattern"
     echo "Replacement: $replaceWith"
+    if [[ "$(field '.selectVersion')" != "null" ]]; then
+      scalaVersionMin=$(field '.selectVersion.min // "3.0.0"'  )
+      scalaVersionMax=$(field '.selectVersion.max // "3.99.99"')
+      if isVersionInRange $scalaVersion $scalaVersionMin $scalaVersionMax  ; then
+        echo "Patch using $scalaVersion matches version range: <$scalaVersionMin, $scalaVersionMax>"
+      else
+        echo "Skip patch, $scalaVersion not matches version range: <$scalaVersionMin, $scalaVersionMax>"
+        continue
+      fi
+    fi   
+
     (cd "$repoDir" && scala-cli run $scriptDir/shared/searchAndReplace.scala -- "${path}" "${pattern}" "${replaceWith}")
   done
 }
@@ -185,7 +197,7 @@ function buildForScalaVersion(){
     $scriptDir/mill/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
     createBuildPatch
     $scriptDir/mill/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
-    revertBuildPatch
+    revertBuildPatch || echo "Failed to fully revery build patch"
   ## Sbt
   ## Apparently built.sbt is a valid build file name. Accept any .sbt file
   elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
@@ -194,7 +206,7 @@ function buildForScalaVersion(){
     $scriptDir/sbt/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
     createBuildPatch
     $scriptDir/sbt/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
-    revertBuildPatch
+    revertBuildPatch || echo "Failed to fully revery build patch"
   ## Scala-cli
   else
     echo "Not found sbt or mill build files, assuming scala-cli project"
