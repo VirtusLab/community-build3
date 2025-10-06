@@ -82,9 +82,11 @@ object CommunityBuildPlugin extends AutoPlugin {
     .filter(_.nonEmpty)
     .map("Community Build Repo".at(_))
     .toSeq
+  private lazy val scala3NightliesRepo = "The Scala Nightly Repository".at("https://repo.scala-lang.org/artifactory/maven-nightlies/")
+  private lazy val extraOpenCBMavenRepos = customMavenRepoRepository ++  Seq(scala3NightliesRepo)
 
   override def projectSettings = Seq(
-    externalResolvers := customMavenRepoRepository ++ externalResolvers.value,
+    externalResolvers := extraOpenCBMavenRepos ++ externalResolvers.value,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
     // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
@@ -366,7 +368,7 @@ object CommunityBuildPlugin extends AutoPlugin {
   }
 
   override def globalSettings = Seq(
-    resolvers ++= customMavenRepoRepository,
+    resolvers ++= extraOpenCBMavenRepos,
     moduleMappings := { // Store settings in file to capture its original scala versions
       val moduleIds = mkMappings.value
       IO.write(
