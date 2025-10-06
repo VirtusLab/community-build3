@@ -252,6 +252,7 @@ jobs:
         - name: "dragonfly-ai/mesh"
         - name: "dragonfly-ai/spatial"
         - name: "dragonfly-ai/uriel"
+        - name: "dvreeze/tqa"
         - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
         - name: "dwolla/epimetheus-server"
@@ -329,7 +330,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-ui"
-        - name: "gemini-hlsw/refined-algebra"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "givesocialmovement/moonlight"
         - name: "givesocialmovement/play-json-form"
@@ -609,7 +610,6 @@ jobs:
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
-        - name: "msgpack4z/msgpack4z-argonaut"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
@@ -745,7 +746,6 @@ jobs:
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rchillyard/flog"
-        - name: "rchillyard/matchers"
         - name: "rolang/google-rest-api-codegen"
         - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
