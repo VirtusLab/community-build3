@@ -44,7 +44,7 @@ jobs:
           git config --global user.email "scala3-community-build@virtuslab.com"
 
       - name: Build project 
-        run:  SKIP_BUILD_SETUP=1 ./scripts/run.sh ${{ matrix.project }} 3.7.3
+        run:  SKIP_BUILD_SETUP=1 ./scripts/run.sh ${{ matrix.project }} $(./scripts/lastVersionNightly.sc)
           
   test-build:
     runs-on: ubuntu-22.04
