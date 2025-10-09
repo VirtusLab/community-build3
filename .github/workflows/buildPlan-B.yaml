@@ -1,5 +1,5 @@
 
-# projects total:     848
+# projects total:     849
 # min stars count:    -1
 # max projects count: 1000
 
@@ -127,7 +127,6 @@ jobs:
         - name: "armanbilge/stratus"
         - name: "armanbilge/van-cats"
         - name: "arturaz/cats-effect-resource-shared-memoized"
-        - name: "arturaz/yantl"
         - name: "ashwinbhaskar/sight-scala"
         - name: "asragab/unstructured4s"
         - name: "assist-iot-sripas/scala-mqtt-wrapper"
@@ -249,6 +248,7 @@ jobs:
         - name: "dotty-cps-async/shim--scala-async"
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
+        - name: "dragonfly-ai/img"
         - name: "dragonfly-ai/mesh"
         - name: "dragonfly-ai/spatial"
         - name: "dragonfly-ai/uriel"
@@ -395,6 +395,7 @@ jobs:
         - name: "hamnis/jwk"
         - name: "herminiogg/dmaog"
         - name: "herminiogg/label2thesaurus"
+        - name: "herminiogg/shexml-streaming"
         - name: "herminiogg/xmlschema2shex"
         - name: "hireproof/screening"
         - name: "hjfruit/scalikejdbc-helper"
@@ -609,7 +610,6 @@ jobs:
         - name: "mpollmeier/sbt-ci-release-early-usage"
         - name: "mrdimosthenis/glicko2"
         - name: "mrdimosthenis/scala-synapses"
-        - name: "mschuwalow/play-ziojson"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
@@ -796,6 +797,7 @@ jobs:
         - name: "scalalandio/mdc4s"
         - name: "scalameta/munit-scalacheck"
         - name: "scalapatisserie/muffin"
+        - name: "scalapb-json/protoc-lint"
         - name: "scalapb-json/scalapb-argonaut"
         - name: "scalapb-json/scalapb-json-common"
         - name: "scalapb/common-protos"
@@ -888,8 +890,6 @@ jobs:
         - name: "throup/couldbe"
         - name: "timbertson/auditspec"
         - name: "timbertson/backpressure-sensor"
-        - name: "timbertson/flogger"
-        - name: "tkrs/fluflu"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,9 +915,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "timbertson/flogger"
+        - name: "tkrs/fluflu"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
-        - name: "tkrs/orcus"
         - name: "tlsomers/scala-suspendable"
         - name: "tmccarthy/ausgeo"
         - name: "tmccarthy/digest4s"

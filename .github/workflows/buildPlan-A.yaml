@@ -143,6 +143,7 @@ jobs:
         - name: "armanbilge/schrodinger"
         - name: "arturaz/doobie-typesafe"
         - name: "arturaz/otel4s-doobie"
+        - name: "arturaz/yantl"
         - name: "arturopala/buffer-and-slice"
         - name: "arturopala/gitignore"
         - name: "arturopala/validator"
@@ -329,7 +330,6 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
@@ -609,7 +610,6 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/hearth"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mateuszkubuszok/hearth"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
@@ -843,7 +844,6 @@ jobs:
         - name: "scalamock/scalamock"
         - name: "scalamolecule/molecule"
         - name: "scalanlp/breeze"
-        - name: "scalapb-json/protoc-lint"
         - name: "scalapb-json/scalapb-circe"
         - name: "scalapb-json/scalapb-playjson"
         - name: "scalapb/protobuf-scala-runtime"
@@ -987,6 +987,7 @@ jobs:
         - name: "timbertson/foperator"
         - name: "timwspence/cats-stm"
         - name: "tinkoff/phobos"
+        - name: "tkrs/orcus"
         - name: "tminglei/slick-pg"
         - name: "tofu-tf/cherry"
         - name: "tofu-tf/glass"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
