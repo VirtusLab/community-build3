@@ -521,7 +521,7 @@ object Scala3CommunityBuild {
         }
         abstract class IntSettingExtractor(names: String*) {
           private val Self = this
-          private val IntSetting = s"""^-{1,2}(${names.mkString("|")}):?(\\d)?""".r
+          private val IntSetting = s"""^-{1,2}(${names.mkString("|")}):?(\\d+)?""".r
           def unapply(option: String): Option[Option[Int]] = option match {
             case IntSetting(_, IntValue(version)) => Some(Some(version))
             case IntSetting(_, _)                 => Some(None)
