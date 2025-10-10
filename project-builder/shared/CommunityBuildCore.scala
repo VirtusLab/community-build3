@@ -33,11 +33,11 @@ object Scala3CommunityBuild {
       path: String,
       pattern: String,
       replaceWith: String,
-      selectVersion: Option[ScalaVersionRange] = None,
+      selectVersion: Option[ScalaVersionRange] = None
   )
   case class ScalaVersionRange(
-    min: Option[String] = None,
-    max: Option[String] = None,
+      min: Option[String] = None,
+      max: Option[String] = None
   )
 
 // Output
@@ -410,13 +410,15 @@ object Scala3CommunityBuild {
     )
     val ignoredScalacOptions = invalidLanguageOptions.map(v => s"-language:$v")
     def mapScalacOptions(
+        scalaVersion: Option[String],
         current: Seq[String],
         append: Seq[String],
         remove: Seq[String]
     ): Seq[String] = {
-      val (removeMatchSettings, removeSettings) = (remove.map(_.stripPrefix("REQUIRE:")) ++ ignoredScalacOptions).partition {
-        _.startsWith("MATCH:")
-      }
+      val (removeMatchSettings, removeSettings) =
+        (remove.map(_.stripPrefix("REQUIRE:")) ++ ignoredScalacOptions).partition {
+          _.startsWith("MATCH:")
+        }
       val matchPatterns = removeMatchSettings.map(_.stripPrefix("MATCH:"))
 
       val (required, standardAppendSettings) = append.partition(_.startsWith("REQUIRE:"))
@@ -466,30 +468,34 @@ object Scala3CommunityBuild {
         } ++ forcedSourceSettings
       }
 
-      val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
-        Seq[String => String](
-          setting => if (setting.startsWith("--")) setting.tail else setting,
-          setting => {
-            setting.indexOf(':') match {
-              case -1 => setting
-              case n =>
-                val name = setting.substring(0, n)
-                def pattern = s"$name(:.*)?"
-                if (multiStringSettings.contains(name)) setting // use original full setting
-                else pattern
-            }
-          },
-          setting => raw"^-?$setting"
-        ).reduce(_.andThen(_))
-          .apply(setting)
+      type ScalacOptionsTransformer = Seq[String] => Seq[String]
+
+      val filterLanguage: ScalacOptionsTransformer = _.flatMap {
+        case opt if opt.startsWith("-language:") =>
+          opt.stripPrefix("-language:").split(',').map(v => s"-language:$v")
+        case opt => List(opt)
       }
-      current
-        .flatMap {
-          case opt if opt.startsWith("-language:") =>
-            opt.stripPrefix("-language:").split(',').map(v => s"-language:$v")
-          case opt => List(opt)
+
+      val filterByRegex: ScalacOptionsTransformer = {
+        val normalizedExcludePatterns = (appendSettings ++ removeSettings).distinct.map { setting =>
+          Seq[String => String](
+            setting => if (setting.startsWith("--")) setting.tail else setting,
+            setting => {
+              setting.indexOf(':') match {
+                case -1 => setting
+                case n =>
+                  val name = setting.substring(0, n)
+                  def pattern = s"$name(:.*)?"
+                  if (multiStringSettings.contains(name)) setting // use original full setting
+                  else pattern
+              }
+            },
+            setting => raw"^-?$setting"
+          ).reduce(_.andThen(_))
+            .apply(setting)
         }
-        .filterNot { s =>
+        // filter out by regex
+        _.filterNot { s =>
           def isMatching(reason: String, found: Option[String]): Boolean = found match {
             case Some(matched) =>
               if (!appendSettings.contains(s))
@@ -503,7 +509,88 @@ object Scala3CommunityBuild {
             "is dangling source version",
             SourceVersionPattern.findFirstIn(s.trim())
           )
-        } ++ appendSettings.distinct
+        }
+      }
+
+      val adjustJavaTargetVersion: ScalacOptionsTransformer = { settings =>
+        object IntValue {
+          def unapply(value: String): Option[Int] =
+            Option(value)
+              .filter(_.forall(_.isDigit))
+              .map(_.toInt)
+        }
+        abstract class IntSettingExtractor(names: String*) {
+          private val Self = this
+          private val IntSetting = s"""^-{1,2}(${names.mkString("|")}):?(\\d)?""".r
+          def unapply(option: String): Option[Option[Int]] = option match {
+            case IntSetting(_, IntValue(version)) => Some(Some(version))
+            case IntSetting(_, _)                 => Some(None)
+            case _                                => None
+          }
+          def unapply(options: Seq[String]): Option[Option[Int]] = options match {
+            case Seq(Self(version))                 => Some(version)
+            case Seq(Self(None), IntValue(version)) => Some(Some(version))
+            case opts =>
+              val _ = opts.ensuring(
+                _.size <= 2,
+                s"Invalid usage: expecting collection of at most 2 elements, got ${opts.size}: $opts"
+              )
+              None
+          }
+        }
+        object JavaOutputVersion extends IntSettingExtractor("java-output-version", "release")
+        object UncheckedJavaOutputVersion
+            extends IntSettingExtractor("Xunchecked-java-output-version", "Xtarget")
+
+        val MinJdkVersion = scalaVersion match {
+          case None => 17
+          case Some(version) =>
+            version
+              .split('.')
+              .take(2)
+              .map(_.toInt) match {
+              case Array(3, minor) if minor >= 8 => 17
+              case _                             => 8
+            }
+        }
+        val MinJavaOutputVersion = s"--java-output-version:$MinJdkVersion"
+        val MinUncheckedJavaOutputVersion = s"-Xunchecked-java-output-version:$MinJdkVersion"
+
+        settings
+          .map {
+            // --setting:value syntax
+            case JavaOutputVersion(Some(version)) if version < MinJdkVersion =>
+              MinJavaOutputVersion
+            case UncheckedJavaOutputVersion(Some(version)) if version < MinJdkVersion =>
+              MinUncheckedJavaOutputVersion
+            case opt => opt
+          }
+          .sliding(2, 1)
+          .zipWithIndex
+          .flatMap {
+            // --setting value syntax
+            case (JavaOutputVersion(Some(version)), _) if version < MinJdkVersion =>
+              Seq(MinJavaOutputVersion)
+            case (UncheckedJavaOutputVersion(Some(version)), _) if version < MinJdkVersion =>
+              Seq(MinUncheckedJavaOutputVersion)
+            case (opts, idx) =>
+              // Include only head to avoid duplicates. Add both elements only from last group, otherwise last option would be lost
+              if (idx + 2 < settings.size) Seq(opts.head)
+              else opts
+          }
+          .toSeq
+      }
+
+      val transformers = Seq[ScalacOptionsTransformer](
+        filterLanguage,
+        adjustJavaTargetVersion,
+        filterByRegex,
+        _ ++ appendSettings.distinct
+      )
+
+      transformers.foldLeft(current) { case (options, transform) =>
+        transform(options)
+      }
     }
 
     case class LibraryDependency(

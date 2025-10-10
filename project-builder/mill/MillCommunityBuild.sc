@@ -147,6 +147,7 @@ private object ScalacOptionsSettings {
 
 def mapScalacOptions(scalaVersion: String, current: Seq[String]): Seq[String] = 
   if(scalaVersion.startsWith("3.")) CommunityBuildCore.Scala3CommunityBuild.Utils.mapScalacOptions(
+    scalaVersion = Some(scalaVersion),
     current = current,
     append = ScalacOptionsSettings.append,
     remove = ScalacOptionsSettings.remove
