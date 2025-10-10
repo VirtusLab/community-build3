@@ -1,5 +1,5 @@
 
-# projects total:     849
+# projects total:     851
 # min stars count:    -1
 # max projects count: 1000
 
@@ -323,13 +323,13 @@ jobs:
         - name: "geirolz/fluent-copy"
         - name: "geirolz/git4s"
         - name: "gemini-hlsw/giapi-scala"
+        - name: "gemini-hlsw/lucuma-apps"
         - name: "gemini-hlsw/lucuma-catalog"
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
-        - name: "gemini-hlsw/lucuma-ui"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gemini-hlsw/lucuma-ui"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
         - name: "givesocialmovement/moonlight"
@@ -494,6 +495,7 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -608,8 +610,6 @@ jobs:
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
         - name: "mpollmeier/sbt-ci-release-early-usage"
-        - name: "mrdimosthenis/glicko2"
-        - name: "mrdimosthenis/scala-synapses"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mrdimosthenis/glicko2"
+        - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
         - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
@@ -888,8 +890,6 @@ jobs:
         - name: "thatscalaguy/ulid4cats"
         - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
-        - name: "timbertson/auditspec"
-        - name: "timbertson/backpressure-sensor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "timbertson/auditspec"
+        - name: "timbertson/backpressure-sensor"
         - name: "timbertson/flogger"
         - name: "tkrs/fluflu"
         - name: "tkrs/mess"
