@@ -9,7 +9,12 @@ os.write.append(projectDir / ".mill-jvm-opts", "-XX:CompressedClassSpaceSize=140
   
 val scalaVersion = sys.env.get("OPENCB_SCALA_VERSION")
    .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
-  
+
+val minJDKVersion = scalaVersion.split('.').take(2).map(_.toInt) match {
+  case Array(3, minor) if minor >= 8  => 17
+  case _ => 8
+}
+
 val millDefsVersion = os.read
   .lines(projectDir / "mill-build"/ "src" / "millbuild"/ "Deps.scala")
   .map(_.trim)
@@ -24,6 +29,7 @@ val updatedBuild = os.read(repositoryDir / "build.sc")
   .replaceAll(raw"Cross\[ModuleDefsCross]\(.*\)", s"""Cross[ModuleDefsCross](Seq("3.7.1"))""")
   .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
   .replace(""""-Yexplicit-nulls",""", "")
+  .replace(""""-java-output-version", "8""", s""""-java-output-version:${minJDKVersion}""")
 os.write.over(repositoryDir / "build.sc", updatedBuild)
 os.write.over(repositoryDir / ".mill-version", "0.12.15-2-561986")
 
