@@ -223,6 +223,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           else remove ++ appendScala3Exclusive
 
         Scala3CommunityBuild.Utils.mapScalacOptions(
+          scalaVersion = Some(scalaVersion),
           current = currentScalacOptions,
           append = filteredAppend,
           remove = filteredRemove

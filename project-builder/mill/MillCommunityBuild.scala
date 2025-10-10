@@ -122,6 +122,7 @@ object MillCommunityBuild {
 
   def mapScalacOptions(scalaVersion: String, current: Seq[String]): Seq[String] =
     if (scalaVersion.startsWith("3.")) Scala3CommunityBuild.Utils.mapScalacOptions(
+      scalaVersion = Some(scalaVersion),
       current = current,
       append = ScalacOptionsSettings.append,
       remove = ScalacOptionsSettings.remove
