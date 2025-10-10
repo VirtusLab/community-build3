@@ -580,7 +580,7 @@ object CommunityBuildPlugin extends AutoPlugin {
           case EvalResult.Value(settings, _) => settings
           case _                             => Nil
         }
-        println(s"Compile scalacOptions: ${scalacOptions}")
+        println(s"Compile scalacOptions: ${scalacOptions.mkString(", ")}")
         def mayRetry[T](task: TaskKey[T])(
             evaluate: TaskKey[T] => EvalResult[T]
         ): EvalResult[T] = evaluate(task) match {
