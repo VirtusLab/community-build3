@@ -541,6 +541,7 @@ def createGithubActionJob(
           println("    elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}")
           println("    container-registry-username: ${{ github.actor }}")
           println("    container-registry-token: ${{ secrets.GHCR_TOKEN }}")
+          println("    akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}")
         }
       }
     }

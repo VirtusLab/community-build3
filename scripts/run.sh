@@ -39,6 +39,7 @@ fi
 
 unset GPG_TTY
 
+export OPENCB_AKKA_REPO_TOKEN=$(cat $scriptDir/../.secrets/akka-repo-token || true)
 # OPENCB_EXECUTE_TESTS=true \
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \

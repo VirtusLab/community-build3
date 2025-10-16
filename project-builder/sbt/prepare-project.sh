@@ -88,6 +88,16 @@ echo -e '\nGlobal / resolvers += "The Scala Nightly Repository".at("https://repo
 echo -e "\nThisBuild / evictionErrorLevel := sbt.util.Level.Warn" >>$repoDir/build.sbt
 echo -e "\nThisBuild / evictionErrorLevel := sbt.util.Level.Warn" >>$repoDir/project/plugins.sbt
 
+
+if [ -z "${OPENCB_AKKA_REPO_TOKEN:-}" ]; then
+  echo "Warning: OPENCB_AKKA_REPO_TOKEN environment variable not set, skipping Akka secure repository configuration"
+else
+  echo -e '
+ThisBuild / resolvers += "akka-secure-mvn" at "https://repo.akka.io/AKKA_REPO_TOKEN/secure"
+ThisBuild / resolvers += Resolver.url("akka-secure-ivy", url("https://repo.akka.io/AKKA_REPO_TOKEN/secure"))(Resolver.ivyStylePatterns)
+' | sed "s/AKKA_REPO_TOKEN/$OPENCB_AKKA_REPO_TOKEN/" >> $repoDir/project/akka.sbt
+fi
+
 # Project dependencies
 # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
 cd $repoDir

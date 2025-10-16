@@ -47,6 +47,9 @@ inputs:
   container-registry-token:
     description: "Container registry password"
     required: true
+  akka-repository-token:
+    description: "Token providing access to Akka Maven repositories"
+    required: false
 
 runs:
   using: "composite"
@@ -167,6 +170,7 @@ runs:
           echo 'unknown' > build-tool.txt
 
           export OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}"
+          export OPENCB_AKKA_REPO_TOKEN="${{ inputs.akka-repository-token }}"
           timeout 7200 \
             /opencb/project-builder/build-revision.sh \
             "$(config .project)" \
