@@ -82,8 +82,26 @@ object CommunityBuildPlugin extends AutoPlugin {
     .filter(_.nonEmpty)
     .map("Community Build Repo".at(_))
     .toSeq
-  private lazy val scala3NightliesRepo = "The Scala Nightly Repository".at("https://repo.scala-lang.org/artifactory/maven-nightlies/")
-  private lazy val extraOpenCBMavenRepos = customMavenRepoRepository ++  Seq(scala3NightliesRepo)
+
+  private lazy val akkaRepos = sys.env
+    .get("OPENCB_AKKA_REPO_TOKEN")
+    .filter(_.nonEmpty)
+    .toSeq
+    .flatMap { AkkaToken =>
+      Seq(
+        "akka-secure-mvn" at s"https://repo.akka.io/$AkkaToken/secure",
+        Resolver.url("akka-secure-ivy", url(s"https://repo.akka.io/$AkkaToken/secure"))(
+          Resolver.ivyStylePatterns
+        )
+      )
+    }
+  private lazy val scala3NightliesRepo = "The Scala Nightly Repository"
+    .at("https://repo.scala-lang.org/artifactory/maven-nightlies/")
+
+  private lazy val extraOpenCBMavenRepos =
+    customMavenRepoRepository ++
+      Seq(scala3NightliesRepo) ++
+      akkaRepos
 
   override def projectSettings = Seq(
     externalResolvers := extraOpenCBMavenRepos ++ externalResolvers.value,
@@ -461,11 +479,10 @@ object CommunityBuildPlugin extends AutoPlugin {
       }
 
       val idsToUse = ids match {
-        case "*%*" :: _ => 
-          originalModuleIds.keys
-          .toSeq
-          .filterNot{id => id.contains("_sjs") || id.contains("_native")}
-        case ids        => ids
+        case "*%*" :: _ =>
+          originalModuleIds.keys.toSeq
+            .filterNot { id => id.contains("_sjs") || id.contains("_native") }
+        case ids => ids
       }
       val filteredIds = Scala3CommunityBuild.Utils
         .filterTargets(idsToUse, config.projects.exclude.map(_.r))
