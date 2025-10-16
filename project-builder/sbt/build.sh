@@ -82,6 +82,7 @@ function runSbt() {
   # Timeout 110 minutes
   timeout 6600 \
     sbt ${sbtSettings[@]} \
+    "--batch" \
     "setCrossScalaVersions $scalaVersion" \
     "$setScalaVersionCmd -v" \
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
