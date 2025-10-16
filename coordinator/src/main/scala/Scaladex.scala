@@ -5,7 +5,6 @@ import java.time.LocalDate
 import sttp.client4.*
 import sttp.model.Uri
 import upickle.default.*
-import scala.annotation.nowarn
 
 object Scaladex:
   final val ScaladexUrl = uri"https://index.scala-lang.org"
@@ -18,7 +17,6 @@ class Scaladex:
   private inline def get[T: Reader](
       uri: Uri
   ): AsyncResponse[T] = {
-    @nowarn("msg=New anonymous class definition will be duplicated at each inline site")
     def tryGet(backoffSeconds: Int): AsyncResponse[T] = Future {
       quickRequest
         .get(uri)
