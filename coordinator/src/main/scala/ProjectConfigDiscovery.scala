@@ -19,7 +19,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
   lazy val projectSourceVersions: Map[Project, String] = 
     loadRequiredProjectsLists(requiredConfigsPath / "source-version").toMap
 
-  lazy val projectMigrationVersions: Map[Project, List[String]] = loadRequiredProjectsLists(requiredConfigsPath / "migration")
+  lazy val projectMigrationVersions: Map[Project, List[String]] = loadRequiredProjectsLists(requiredConfigsPath / "source-migration-rewrite")
     .groupMap(_._1)(_._2)
     .view
     .mapValues:

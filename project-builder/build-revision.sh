@@ -74,6 +74,10 @@ function applySourcePatches() {
 
 sourceVersionSetting=""
 function detectSourceVersion() {
+  if [[ $isMigrating == true ]]; then
+    return 0 # handled elsewhere
+  fi
+
   local scalaBinaryVersion=`echo $scalaVersion | cut -d . -f 1,2`
   local scalaBinaryVersionMajor=`echo $scalaVersion | cut -d . -f 1`
   local scalaBinaryVersionMinor=`echo $scalaVersion | cut -d . -f 2`
@@ -82,17 +86,15 @@ function detectSourceVersion() {
   sourceVersion=`echo $projectConfig | jq -r '.sourceVersion // ""'`
   sourceVersionSetting=""
   
+  # No source version override
   if [[ "$sourceVersion" == "none" ]]; then
-    echo "Would use project defined source version"
+e    echo "Would use project defined source version"
     return 0
+  # Source version override
   elif [[ "$sourceVersion" =~ ^([0-9]+\.[0-9]+)(-migration)?$ ]]; then
     versionPart="${BASH_REMATCH[1]}"
     if isBinVersionGreaterThan "$versionPart" "$scalaBinaryVersion" ; then
-      if [[ $isMigrating == true ]]; then
-        sourceVersionSetting="-source:$scalaBinaryVersion-migration"
-      else
-        sourceVersionSetting="-source:$scalaBinaryVersion"
-      fi
+      sourceVersionSetting="-source:$scalaBinaryVersion"
       echo "Explicit source version is greater then used Scala version, it would be ignored"
     else 
       echo "Using configured source version: $sourceVersion"
@@ -103,8 +105,9 @@ function detectSourceVersion() {
   else
     echo "Configured version `$sourceVersion` is invalid, it would be ignored"
   fi
+  
   if [[ -z "$sourceVersionSetting" ]]; then
-    sourceVersion="$scalaBinaryVersion-migration"
+    sourceVersion="$scalaBinaryVersion"
     if [[ "${scalaBinaryVersion}" == "3.3" ]]; then
       # Allow preconfigured source version for Scala 3.3 LTS, it typically might be either 3.0-migration or future
       sourceVersionSetting="-source:$sourceVersion"
@@ -163,15 +166,16 @@ function revertBuildPatch() {
   fi
   (cd "$repoDir" && git apply --reverse $BuildPatchFile --ignore-space-change --ignore-whitespace --recount -C 1 --reject $maybeAllowEmpty || true) 
 }
-function commmitMigrationRewrite() {
+function commitMigrationRewrite() {
+  scalaSourceVersion=$1
   if [[ -z "$(cd "$repoDir" && git status --untracked-files=no --porcelain)" ]]; then
     echo "No migration rewrite changes found, would not commit"
   else 
     echo "Commit migration rewrites"
     (cd "$repoDir" && \
-      git checkout -b "opencb/migrate-$scalaVersion"
+      git checkout -b "opencb/migrate-source-$scalaSourceVersion"
       git add -u . && \
-      git commit -m "Apply Scala compiler rewrites for $scalaVersion"\
+      git commit -m "Apply Scala compiler rewrites using -source:$scalaSourceVersion-migration using Scala $scalaVersion"\
     ) 
   fi
 }
@@ -220,10 +224,6 @@ function buildForScalaVersion(){
     scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
   fi
 
-  ## After build steps
-  if [[ $isMigrating == true ]]; then
-    commmitMigrationRewrite
-  fi
 }
 
 # Find original Scala version used by project, it would be used to calculate cross scala versions
@@ -239,17 +239,23 @@ if [[ -n "$OVERRIDEN_SCALA_VERSION" ]]; then
   echo "Would override fixed Scala version: $OVERRIDEN_SCALA_VERSION"
 fi
 
-
-for migrationScalaVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
+for migrationVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
-  migrationBinaryVersion=`echo $migrationScalaVersion | cut -d . -f 1,2`
+  migrationBinaryVersion=`echo $migrationVersion | cut -d . -f 1,2`
   if isBinVersionGreaterOrEqual "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
-    echo "Skip migration using $migrationScalaVersion, binary version higher then target Scala version $scalaBinaryVersion"
+    echo "Skip migration using $migrationVersion, binary version higher then target Scala version $scalaBinaryVersion"
   else 
     isMigrating=true
     executeTests=false
-    echo "Migrating project using Scala $migrationScalaVersion"
-    buildForScalaVersion $migrationScalaVersion
+    scalaMigrationVersion="${_scalaVersion}"
+    # Scala 3.8 new stdlib and the implicit -> using change would break compilation at any -source version, requires prior migration to 3.7
+    if isBinVersionInRange "$migrationVersion" "3.0" "3.7" ; then
+      scalaMigrationVersion="3.7.4-RC1"
+    fi
+    sourceVersionSetting="REQUIRE:-source:$migrationVersion-migration"
+    echo "Migrating project for -source:$migrationVersion using Scala $scalaMigrationVersion"
+    buildForScalaVersion "$scalaMigrationVersion"
+    commitMigrationRewrite $migrationBinaryVersion
     executeTests=${_executeTests}
     isMigrating=false
   fi
