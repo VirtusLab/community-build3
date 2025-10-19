@@ -200,6 +200,7 @@ jobs:
         - name: "clulab/processors"
         - name: "clulab/scala-transformers"
         - name: "codingwell/scala-guice"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
@@ -329,7 +330,6 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -355,6 +355,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
@@ -524,6 +525,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -608,8 +610,6 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/hearth"
-        - name: "mateuszkubuszok/pipez"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -635,6 +635,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mateuszkubuszok/hearth"
+        - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
@@ -888,8 +890,6 @@ jobs:
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
-        - name: "sideeffffect/zio-testcontainers"
-        - name: "sirthias/borer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -915,6 +915,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sideeffffect/zio-testcontainers"
+        - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
@@ -1045,7 +1047,6 @@ jobs:
         - name: "typelevel/natchez"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
-        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/paiges"
         - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
@@ -1113,7 +1114,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
