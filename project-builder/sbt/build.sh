@@ -120,6 +120,7 @@ function checkLogsForRetry() {
 if grep -qF -e 'sbt.librarymanagement.ResolveException' \
             -e 'coursier.error.FetchError$DownloadingArtifacts' \
             -e 'coursier.cache.ArtifactError$DownloadError' \
+            -e 'coursier.cache.ArtifactError$NotFound' \
             -e '(Connection timed out) while downloading' -- "$logFile"; then
     TIMEOUT=$(( RANDOM % 241 + 60 ))
     echo "Failed to download artifacts, retry after $TIMEOUT seconds"
