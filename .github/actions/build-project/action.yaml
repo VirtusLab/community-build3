@@ -163,6 +163,8 @@ runs:
             path=".\"${{ inputs.project-name }}\"$@" 
             jq -c -r "$path" $ConfigFile 
           }
+          
+          echo "Project config: $(config .)"
 
           touch build-logs.txt  build-summary.txt
           # Assume failure unless overwritten by a successful build
