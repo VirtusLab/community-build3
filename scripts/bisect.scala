@@ -212,7 +212,7 @@ object ValidationScript:
       |docker run --rm \
       |  -v ${validationScript.getAbsolutePath()}:$validationScriptPath \
       |  -v ${openCBDir.getAbsolutePath()}:/opencb/ \
-      |  virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-latest \
+      |  ghcr.io/virtuslab/scala-community-build-project-builder:jdk$${javaVersion}-latest \
       |  /bin/bash -c "$validationScriptPath $$scalaVersion"
     """.stripMargin)
   }

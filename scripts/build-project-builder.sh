@@ -14,10 +14,10 @@ JDK_VERSION="$2"
 TAG_NAME=$(buildTag $VERSION $JDK_VERSION)
 CACHE_FROM_TAG=$(buildTag "$PREV_CB_VERSION" $JDK_VERSION)
 
-imageName=virtuslab/scala-community-build-project-builder
+imageName=ghcr.io/virtuslab/scala-community-build-project-builder
 
 docker build \
-  --build-arg BASE_IMAGE="virtuslab/scala-community-build-builder-base:$TAG_NAME" \
+  --build-arg BASE_IMAGE="ghcr.io/virtuslab/scala-community-build-builder-base:$TAG_NAME" \
   --cache-from "$imageName:$CACHE_FROM_TAG" \
   --cache-from "$imageName:$(buildTag "$VERSION" $JDK_VERSION)" \
   --cache-from "$imageName:$(buildTag latest $JDK_VERSION)" \

@@ -11,9 +11,9 @@ VERSION="$1"
 javaVersions=(17 21)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
-BUILDER_BASE=virtuslab/scala-community-build-builder-base
-PROJECT_BUILDER=virtuslab/scala-community-build-project-builder
-# MVN_REPO=virtuslab/scala-community-build-mvn-repo
+BUILDER_BASE=ghcr.io/virtuslab/scala-community-build-builder-base
+PROJECT_BUILDER=ghcr.io/virtuslab/scala-community-build-project-builder
+# MVN_REPO=ghcr.io/virtuslab/scala-community-build-mvn-repo
 
 # JDK-specifc images
 for image in $BUILDER_BASE $PROJECT_BUILDER; do
@@ -24,7 +24,6 @@ for image in $BUILDER_BASE $PROJECT_BUILDER; do
     for tag in $JDK_VERSION $JDK_LATEST; do
       docker push $image:$tag
     done
-
   done
 done
 

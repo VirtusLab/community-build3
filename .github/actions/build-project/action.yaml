@@ -135,7 +135,7 @@ runs:
         registry: ${{ inputs.container-registry }}
         username: ${{ inputs.container-registry-username }}
         password: ${{ inputs.container-registry-token }}
-        image: "virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
+        image: "ghcr.io/virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
         options: -v ${{ github.workspace }}:/opencb/
         shell: bash
         run: |
@@ -245,7 +245,7 @@ runs:
         registry: ${{ inputs.container-registry }}
         username: ${{ inputs.container-registry-username }}
         password: ${{ inputs.container-registry-token }}
-        image: "virtuslab/scala-community-build-project-builder:jdk17-latest"
+        image: "ghcr.io/virtuslab/scala-community-build-project-builder:jdk17-latest"
         options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         shell: bash
         run: |

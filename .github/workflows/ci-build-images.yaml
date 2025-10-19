@@ -14,29 +14,15 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v4
 
-      - name: Login to container image repository
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build all images
-        run: scripts/build-all.sh ${{ inputs.version }}
-
-      - name: Push images to image registry
-        run: scripts/publish-all.sh ${{ inputs.version }}
-
-      - name: Login to container image repository
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Publish to ghcr.io
-        run: |
-          for javaVersion in 17 21 ; do 
-            imageName=virtuslab/scala-community-build-project-builder:jdk${javaVersion}-latest
-            docker tag $imageName ghcr.io/$imageName
-            docker push ghcr.io/$imageName
-          done
+      - name: Build all images
+        run: scripts/build-all.sh ${{ inputs.version }}
+
+      - name: Push images to GitHub Container Registry
+        run: scripts/publish-all.sh ${{ inputs.version }}
