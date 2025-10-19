@@ -25,6 +25,10 @@ case $JDK_VERSION in
 "21")
   jdkDistro="21-tem"
   ;;
+  
+"25")
+  jdkDistro="25-tem"
+  ;;
 
 *)
   echo "Unexpected JDK version $JDK_VERSION"

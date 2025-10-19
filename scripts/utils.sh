@@ -9,7 +9,7 @@ function scbk() {
 
 function checkJavaVersion() {
   version="$1"
-  supportedVersions=(17 21)
+  supportedVersions=(17 21 25)
   
   if [ -z "$version" ]; then
     echo >&2 "Java version has to be set"
