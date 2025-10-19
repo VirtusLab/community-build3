@@ -11,7 +11,7 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 TAG_NAME="$1"
 CACHE_FROM_TAG="$PREV_CB_VERSION"
 
-imageName=virtuslab/scala-community-build-mvn-repo
+imageName=ghcr.io/virtuslab/scala-community-build-mvn-repo
 
 docker build \
   -t "$imageName:$TAG_NAME" \

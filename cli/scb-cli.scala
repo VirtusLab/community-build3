@@ -817,7 +817,7 @@ object MinikubeReproducer:
     Container(
       name = "builder",
       image =
-        s"virtuslab/scala-community-build-$imageName$communityBuildVersion",
+        s"ghcr.io/virtuslab/scala-community-build-$imageName$communityBuildVersion",
       volumeMounts = Seq(
         VolumeMount(
           name = mvnRepoCrtSecret,

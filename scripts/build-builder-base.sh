@@ -14,7 +14,7 @@ JDK_VERSION="$2"
 TAG_NAME=$(buildTag $VERSION $JDK_VERSION)
 CACHE_FROM_TAG=$(buildTag "$PREV_CB_VERSION" $JDK_VERSION)
 
-imageName=virtuslab/scala-community-build-builder-base
+imageName=ghcr.io/virtuslab/scala-community-build-builder-base
 
 jdkDistro=""
 case $JDK_VERSION in
