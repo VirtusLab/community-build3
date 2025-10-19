@@ -8,7 +8,7 @@ fi
 
 VERSION="$1"
 
-javaVersions=(17 21)
+javaVersions=(17 21 25)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 BUILDER_BASE=virtuslab/scala-community-build-builder-base
