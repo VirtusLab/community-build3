@@ -1,5 +1,5 @@
 
-# projects total:     855
+# projects total:     857
 # min stars count:    -1
 # max projects count: 1000
 
@@ -348,6 +348,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -392,6 +393,7 @@ jobs:
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
         - name: "gzoller/listzipper"
+        - name: "gzoller/testkit"
         - name: "h8io/borscht"
         - name: "hamnis/dataclass-scalafix"
         - name: "hamnis/google-discovery-scala"
@@ -498,7 +500,6 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -628,6 +629,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -888,8 +890,8 @@ jobs:
         - name: "tharwaninitin/cache4s"
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
+        - name: "tharwaninitin/gcp4zio"
         - name: "thatscalaguy/nats4cats"
-        - name: "thatscalaguy/skunk-crypt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -908,6 +910,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
   stage-3:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -915,6 +918,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
         - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
@@ -963,6 +967,7 @@ jobs:
         - name: "trace4cats/trace4cats-zipkin"
         - name: "typebricks/pureconfig-toggleable"
         - name: "typelevel/log4cats-natchez"
+        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/scalacheck-xml"
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
@@ -1023,3 +1028,4 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}

@@ -348,6 +348,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
   stage-1:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -363,6 +364,7 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
+        - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
         - name: "flxj/platdb"
         - name: "fmonniot/scala3mock"
@@ -524,6 +526,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -608,8 +611,6 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/hearth"
-        - name: "mateuszkubuszok/pipez"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -628,6 +629,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
   stage-2:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -635,6 +637,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mateuszkubuszok/hearth"
+        - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
@@ -669,6 +673,7 @@ jobs:
         - name: "nebula-contrib/nebula4scala"
         - name: "neotypes/neotypes"
         - name: "nivox/fs2-backpressure-sensor"
+        - name: "nmoncho/helenus3"
         - name: "noelwelsh/mads"
         - name: "nomadblacky/scalatest-otel-reporter"
         - name: "norbert-radyk/spoiwo"
@@ -887,9 +892,6 @@ jobs:
         - name: "shiftleftsecurity/codepropertygraph"
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
-        - name: "shiftleftsecurity/overflowdb-codegen"
-        - name: "sideeffffect/zio-testcontainers"
-        - name: "sirthias/borer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -908,6 +910,7 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
   stage-3:
     runs-on: ubuntu-22.04
     needs: [ setup-build ]
@@ -915,6 +918,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "shiftleftsecurity/overflowdb-codegen"
+        - name: "sideeffffect/zio-testcontainers"
+        - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
@@ -972,7 +978,6 @@ jobs:
         - name: "testcontainers/testcontainers-scala"
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
-        - name: "tharwaninitin/gcp4zio"
         - name: "thatscalaguy/circe-jq"
         - name: "thedrawingcoder-gamer/swing.io"
         - name: "theiterators/baklava"
@@ -1045,7 +1050,6 @@ jobs:
         - name: "typelevel/natchez"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
-        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/paiges"
         - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
@@ -1113,7 +1117,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
@@ -1168,3 +1171,4 @@ jobs:
           elastic-password: ${{ secrets.OPENCB_ELASTIC_PSWD }}
           container-registry-username: ${{ github.actor }}
           container-registry-token: ${{ secrets.GHCR_TOKEN }}
+          akka-repository-token: ${{ secrets.OPENCB_AKKA_REPO_TOKEN }}
