@@ -116,10 +116,10 @@ if isBinVersionGreaterOrEqual "$scalaBinaryVersion" "3.8" ; then
   if isBinVersionGreaterOrEqual "$millVersion" "1.1"; then
     echo "No mill version upgrade needed, using $millVersion"
     # no-op
-  elif isBinVersionInRange "$millVersion" "1.0" "1.1"; then
-    forceMillVersionUpgrade 1.0.4-28-f16413
+  elif isVersionInRange "$millVersion" "1.0.0" "1.0.4"; then
+    forceMillVersionUpgrade 1.0.5
   elif isVersionInRange "$millVersion" 0.12.0 0.12.15; then
-    forceMillVersionUpgrade 0.12.15-2-561986
+    forceMillVersionUpgrade 0.12.16
   elif isVersionInRange "$millVersion" 0.11.0 0.11.12; then
     forceMillVersionUpgrade $MILL_0_11
   elif isVersionInRange "$millVersion" 0.10.0 0.10.14; then
