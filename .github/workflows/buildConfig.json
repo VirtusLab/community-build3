@@ -16545,7 +16545,7 @@
     "repoUrl":"https://github.com/eikek/soidc.git",
     "revision":"v0.2.0",
     "version":"0.2.0",
-    "targets":"com.github.eikek%soidc-borer com.github.eikek%soidc-core com.github.eikek%soidc-http4s-client com.github.eikek%soidc-http4s-routes com.github.eikek%soidc-jwt",
+    "targets":"com.github.eikek%soidc-borer com.github.eikek%soidc-core com.github.eikek%soidc-http4s-routes com.github.eikek%soidc-jwt",
     "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
@@ -34093,7 +34093,7 @@
     "repoUrl":"https://github.com/kostaskougios/terminal21-restapi.git",
     "revision":"0.30-release",
     "version":"0.30",
-    "targets":"io.github.kostaskougios%end-to-end-tests io.github.kostaskougios%terminal21-client-common io.github.kostaskougios%terminal21-code-generation io.github.kostaskougios%terminal21-mathjax io.github.kostaskougios%terminal21-nivo io.github.kostaskougios%terminal21-server io.github.kostaskougios%terminal21-server-app io.github.kostaskougios%terminal21-server-client-common io.github.kostaskougios%terminal21-spark io.github.kostaskougios%terminal21-ui-std io.github.kostaskougios%terminal21-ui-std-exports",
+    "targets":"io.github.kostaskougios%terminal21-client-common io.github.kostaskougios%terminal21-code-generation io.github.kostaskougios%terminal21-mathjax io.github.kostaskougios%terminal21-nivo io.github.kostaskougios%terminal21-server io.github.kostaskougios%terminal21-server-app io.github.kostaskougios%terminal21-server-client-common io.github.kostaskougios%terminal21-spark io.github.kostaskougios%terminal21-ui-std io.github.kostaskougios%terminal21-ui-std-exports",
     "publishedScalaVersion":"3.3.3",
     "config":{
       "projects":{
@@ -48160,6 +48160,56 @@
       ]
     }
   },
+  "rjolly/scas":{
+    "project":"rjolly/scas",
+    "repoUrl":"https://github.com/rjolly/scas.git",
+    "revision":"master",
+    "version":"3.1",
+    "targets":"com.github.rjolly%scas com.github.rjolly%scas.application",
+    "publishedScalaVersion":"2.4.0",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sc",
+          "pattern":"sys.props(\"dottyVersion\")",
+          "replaceWith":"\"<SCALA_VERSION>\""
+        },
+        {
+          "path":"build.sc",
+          "pattern":"object application extends ScalaModule {",
+          "replaceWith":"object application extends ScalaModule with PublishModule {\n    def publishVersion = scas.publishVersion\n    def pomSettings = scas.pomSettings \n    override def artifactName = \"scas.application\" \n    "
+        }
+      ]
+    }
+  },
   "rolang/dumbo":{
     "project":"rolang/dumbo",
     "repoUrl":"https://github.com/rolang/dumbo.git",
@@ -58284,7 +58334,8 @@
     "repoUrl":"https://github.com/swaldman/feedletter.git",
     "revision":"v0.1.8",
     "version":"0.1.8",
-    "targets":"com.mchange%feedletter"
+    "targets":"com.mchange%feedletter",
+    "publishedScalaVersion":"3.3.6"
   },
   "swaldman/logadapter-scala":{
     "project":"swaldman/logadapter-scala",
