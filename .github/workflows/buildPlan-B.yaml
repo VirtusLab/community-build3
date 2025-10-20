@@ -1,5 +1,5 @@
 
-# projects total:     858
+# projects total:     859
 # min stars count:    -1
 # max projects count: 1000
 
@@ -676,6 +676,7 @@ jobs:
         - name: "olegych/scaposer"
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
+        - name: "otavia-projects/mill-rust-jni"
         - name: "outr/dd-scala"
         - name: "outr/moduload"
         - name: "outr/robobrowser"
@@ -891,7 +892,6 @@ jobs:
         - name: "tharwaninitin/cache4s"
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
-        - name: "tharwaninitin/gcp4zio"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,6 +918,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tharwaninitin/gcp4zio"
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
