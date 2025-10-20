@@ -1,5 +1,5 @@
 
-# projects total:     858
+# projects total:     845
 # min stars count:    -1
 # max projects count: 1000
 
@@ -154,7 +154,6 @@ jobs:
         - name: "beangle/template"
         - name: "beangle/web"
         - name: "beangle/webmvc"
-        - name: "benoitlouy/indent"
         - name: "benoitlouy/tele"
         - name: "besselstudio/coingecko"
         - name: "bilal-fazlani/akka-http-jwt-auth"
@@ -250,7 +249,6 @@ jobs:
         - name: "dotty-cps-async/shim--scala-async"
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
-        - name: "dragonfly-ai/img"
         - name: "dragonfly-ai/mesh"
         - name: "dragonfly-ai/spatial"
         - name: "dragonfly-ai/uriel"
@@ -270,7 +268,6 @@ jobs:
         - name: "edadma/csv"
         - name: "edadma/dal"
         - name: "edadma/datetime"
-        - name: "edadma/dllist"
         - name: "edadma/fetch"
         - name: "edadma/indentation"
         - name: "edadma/logger"
@@ -330,6 +327,9 @@ jobs:
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
+        - name: "gemini-hlsw/lucuma-refined"
+        - name: "gemini-hlsw/lucuma-schemas"
+        - name: "gemini-hlsw/lucuma-sso"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -356,9 +356,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "gemini-hlsw/lucuma-refined"
-        - name: "gemini-hlsw/lucuma-schemas"
-        - name: "gemini-hlsw/lucuma-sso"
         - name: "gemini-hlsw/lucuma-ui"
         - name: "gemini-hlsw/refined-algebra"
         - name: "giabao/asm-flow"
@@ -392,7 +389,6 @@ jobs:
         - name: "guymers/ceesvee"
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
-        - name: "gzoller/listzipper"
         - name: "gzoller/testkit"
         - name: "h8io/borscht"
         - name: "hamnis/dataclass-scalafix"
@@ -438,7 +434,6 @@ jobs:
         - name: "indoorvivants/trigs"
         - name: "indoorvivants/yank"
         - name: "ingarabr/gcs-lock"
-        - name: "ingarabr/http4s-cloud-functions"
         - name: "ingarabr/sbt-firebase"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
@@ -473,7 +468,6 @@ jobs:
         - name: "jodersky/ustats"
         - name: "johnhungerford/kyo-test"
         - name: "johnhungerford/zikyo"
-        - name: "joohnnie/retry"
         - name: "jozic/scalax-collection"
         - name: "jphmrst/scala-automata"
         - name: "jphmrst/scala-latex"
@@ -497,7 +491,6 @@ jobs:
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
         - name: "jypma/lazagna"
-        - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
         - name: "kalin-rudnicki/oxygen"
@@ -611,6 +604,13 @@ jobs:
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
+        - name: "mobimeo/fs2-gtfs"
+        - name: "mongocamp/micrometer-mongodb"
+        - name: "monix/monix-testing"
+        - name: "mpollmeier/colordiff"
+        - name: "mpollmeier/sbt-ci-release-early-usage"
+        - name: "mrdimosthenis/glicko2"
+        - name: "mrdimosthenis/scala-synapses"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -637,15 +637,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mobimeo/fs2-gtfs"
-        - name: "mongocamp/micrometer-mongodb"
-        - name: "monix/monix-testing"
-        - name: "mpollmeier/colordiff"
-        - name: "mpollmeier/sbt-ci-release-early-usage"
-        - name: "mrdimosthenis/glicko2"
-        - name: "mrdimosthenis/scala-synapses"
         - name: "mschuwalow/play-ziojson"
-        - name: "msgpack4z/msgpack4z-argonaut"
         - name: "msgpack4z/msgpack4z-jawn"
         - name: "msgpack4z/msgpack4z-native"
         - name: "mutsuhiro6/ulid-scala3"
@@ -662,7 +654,6 @@ jobs:
         - name: "nationalarchives/dr2-preservica-client"
         - name: "natural-transformation/avro4s"
         - name: "natural-transformation/korolev"
-        - name: "nebula-contrib/testcontainers-nebula"
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
         - name: "nikolaiser/biser"
@@ -676,8 +667,8 @@ jobs:
         - name: "olegych/scaposer"
         - name: "opaliasystems/opalia-commons-core"
         - name: "openmole/container"
+        - name: "otavia-projects/mill-rust-jni"
         - name: "outr/dd-scala"
-        - name: "outr/moduload"
         - name: "outr/robobrowser"
         - name: "outr/scalapass"
         - name: "outr/sendgrid4s"
@@ -844,7 +835,6 @@ jobs:
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
-        - name: "snowplow/iglu-scala-core"
         - name: "softinio/duck4s"
         - name: "spaceteams/scala-json-logging"
         - name: "spilne/spilne"
@@ -855,7 +845,6 @@ jobs:
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
         - name: "swaldman/audiofluidity-rss"
-        - name: "swaldman/conveniences"
         - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
         - name: "swaldman/feedletter"
@@ -892,6 +881,17 @@ jobs:
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
         - name: "tharwaninitin/gcp4zio"
+        - name: "thatscalaguy/nats4cats"
+        - name: "thatscalaguy/skunk-crypt"
+        - name: "thatscalaguy/ulid4cats"
+        - name: "thepiwo/petname-scala"
+        - name: "throup/couldbe"
+        - name: "timbertson/auditspec"
+        - name: "timbertson/backpressure-sensor"
+        - name: "timbertson/flogger"
+        - name: "tkrs/fluflu"
+        - name: "tkrs/mmdb-grpc-scala"
+        - name: "tlsomers/scala-suspendable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,18 +918,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "thatscalaguy/nats4cats"
-        - name: "thatscalaguy/skunk-crypt"
-        - name: "thatscalaguy/ulid4cats"
-        - name: "thepiwo/petname-scala"
-        - name: "throup/couldbe"
-        - name: "timbertson/auditspec"
-        - name: "timbertson/backpressure-sensor"
-        - name: "timbertson/flogger"
-        - name: "tkrs/fluflu"
-        - name: "tkrs/mess"
-        - name: "tkrs/mmdb-grpc-scala"
-        - name: "tlsomers/scala-suspendable"
         - name: "tmccarthy/ausgeo"
         - name: "tmccarthy/digest4s"
         - name: "tmccarthy/fetch"
@@ -983,7 +971,6 @@ jobs:
         - name: "vlmiroshnikov/authz"
         - name: "vlmiroshnikov/saga"
         - name: "wangzaixiang/wjson"
-        - name: "wehkamp/cakemix"
         - name: "windymelt/happy-birthday"
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"
