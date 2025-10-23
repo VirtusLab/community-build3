@@ -250,7 +250,7 @@ for migrationVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [
     scalaMigrationVersion="${_scalaVersion}"
     # Scala 3.8 new stdlib and the implicit -> using change would break compilation at any -source version, requires prior migration to 3.7
     if isBinVersionInRange "$migrationVersion" "3.0" "3.7" ; then
-      scalaMigrationVersion="3.7.4-RC1"
+      scalaMigrationVersion="3.7.4-RC2"
     fi
     sourceVersionSetting="REQUIRE:-source:$migrationVersion-migration"
     echo "Migrating project for -source:$migrationVersion using Scala $scalaMigrationVersion"
