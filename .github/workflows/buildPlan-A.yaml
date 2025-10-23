@@ -526,6 +526,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -610,7 +611,6 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/hearth"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -637,6 +637,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mateuszkubuszok/hearth"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
@@ -891,7 +892,6 @@ jobs:
         - name: "shiftleftsecurity/codepropertygraph"
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
-        - name: "shiftleftsecurity/overflowdb-codegen"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,6 +918,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
@@ -1116,7 +1117,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"

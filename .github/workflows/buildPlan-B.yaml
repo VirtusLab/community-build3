@@ -1,5 +1,5 @@
 
-# projects total:     859
+# projects total:     858
 # min stars count:    -1
 # max projects count: 1000
 
@@ -500,7 +500,6 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -611,6 +610,7 @@ jobs:
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
+        - name: "mobimeo/fs2-gtfs"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -637,7 +637,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mobimeo/fs2-gtfs"
         - name: "mongocamp/micrometer-mongodb"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
@@ -892,6 +891,7 @@ jobs:
         - name: "tharwaninitin/cache4s"
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
+        - name: "tharwaninitin/gcp4zio"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,7 +918,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "tharwaninitin/gcp4zio"
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
