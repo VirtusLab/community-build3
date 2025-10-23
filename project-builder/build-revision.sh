@@ -88,7 +88,7 @@ function detectSourceVersion() {
   
   # No source version override
   if [[ "$sourceVersion" == "none" ]]; then
-e    echo "Would use project defined source version"
+    echo "Would use project defined source version"
     return 0
   # Source version override
   elif [[ "$sourceVersion" =~ ^([0-9]+\.[0-9]+)(-migration)?$ ]]; then
