@@ -1054,7 +1054,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set every targetSystemJdk := true"
         ],
         "options":[
           
@@ -1067,9 +1067,16 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4",
+        "3.5",
+        "3.7"
       ],
       "sourcePatches":[
+        {
+          "path":"akka-remote/src/main/scala/akka/remote/RemoteDaemon.scala",
+          "pattern":"(\\w+): (\\w+) with (\\w+),",
+          "replaceWith":"$1: ($2 & $3),"
+        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3Version = \"3.2.2\"",
@@ -2123,7 +2130,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.6"
+        "3.7"
       ],
       "sourcePatches":[
         
@@ -11263,6 +11270,11 @@
           "path":"src/test/scala/fr/janalyse/ssh/ShellOperationsTest.scala",
           "pattern":" ls ",
           "replaceWith":" ls() "
+        },
+        {
+          "path":"src/main/scala/fr/janalyse/ssh/SSH.scala",
+          "pattern":"getMessage contains (\".*\") =>",
+          "replaceWith":"getMessage.contains($1) =>"
         }
       ]
     }
@@ -17938,7 +17950,7 @@
         {
           "path":"facsimile-util/src/main/scala/org/facsim/util/Manifest.scala",
           "pattern":"Success\\(sysProp\\((\\S+)\\)\\)",
-          "replaceWith":"Success(sysProp($1).nn))"
+          "replaceWith":"Success(sysProp($1).nn)"
         },
         {
           "path":"facsimile-util/src/main/scala/org/facsim/util/Version.scala",
@@ -27844,7 +27856,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4"
+        "3.0"
       ],
       "sourcePatches":[
         {
@@ -37522,47 +37534,6 @@
       ]
     }
   },
-  "maif/wasm4s":{
-    "project":"maif/wasm4s",
-    "repoUrl":"https://github.com/maif/wasm4s.git",
-    "revision":"5.0.3",
-    "version":"5.0.3",
-    "targets":"fr.maif%wasm4s",
-    "publishedScalaVersion":"3.3.6",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
   "makiftutuncu/as":{
     "project":"makiftutuncu/as",
     "repoUrl":"https://github.com/makiftutuncu/as.git",
@@ -38139,6 +38110,11 @@
         
       ],
       "sourcePatches":[
+        {
+          "path":"hearth-cross-quotes/src/main/scala-3/hearth/cq/CrossQuotesPlugin.scala",
+          "pattern":"def init(options: List[String]): List[PluginPhase]",
+          "replaceWith":"override def init(options: List[String]): List[PluginPhase]"
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.6\"",
@@ -39298,7 +39274,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.0"
       ],
       "sourcePatches":[
         {
@@ -41960,7 +41936,11 @@
         "3.6"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"src/main/scala/container/Singularity.scala",
+          "pattern":") createDirectoryIfNotExists (",
+          "replaceWith":").createDirectoryIfNotExists("
+        }
       ]
     }
   },
@@ -51512,7 +51492,7 @@
         },
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.6\"",
+          "pattern":"val Scala3 = \"3.3.7\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -51555,7 +51535,11 @@
         "3.6"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"shared/src/test/scala/scala/concurrent/stm/examples/IndexedMap.scala",
+          "pattern":" copy (",
+          "replaceWith":".copy("
+        }
       ]
     }
   },
@@ -54825,6 +54809,7 @@
       },
       "tests":"full",
       "migrationVersions":[
+        "3.3",
         "3.4"
       ],
       "sourcePatches":[
@@ -55706,7 +55691,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.6"
+        "3.7"
       ],
       "sourcePatches":[
         {
@@ -55977,7 +55962,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.5"
+        
       ],
       "sourcePatches":[
         {
@@ -57012,7 +56997,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.5"
       ],
       "sourcePatches":[
         {
@@ -58372,8 +58357,7 @@
     "repoUrl":"https://github.com/swaldman/feedletter.git",
     "revision":"v0.1.8",
     "version":"0.1.8",
-    "targets":"com.mchange%feedletter",
-    "publishedScalaVersion":"3.3.6"
+    "targets":"com.mchange%feedletter"
   },
   "swaldman/logadapter-scala":{
     "project":"swaldman/logadapter-scala",
@@ -59629,7 +59613,7 @@
       "tests":"compile-only",
       "migrationVersions":[
         "3.4",
-        "3.6"
+        "3.7"
       ],
       "sourcePatches":[
         {
@@ -62024,7 +62008,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.6"
+        "3.7"
       ],
       "sourcePatches":[
         
@@ -69240,50 +69224,6 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }
