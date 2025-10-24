@@ -1,5 +1,5 @@
 
-# projects total:     858
+# projects total:     861
 # min stars count:    -1
 # max projects count: 1000
 
@@ -655,6 +655,7 @@ jobs:
         - name: "nafg/scala-phonenumber"
         - name: "nafg/scheduler"
         - name: "nafg/simple-router"
+        - name: "nafg/simpleivr"
         - name: "naoh87/lettucef"
         - name: "narma/tranzactio"
         - name: "nationalarchives/dr2-dynamo-formatters"
@@ -702,6 +703,7 @@ jobs:
         - name: "philippus/pureconfig-javanet"
         - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
+        - name: "philwalk/pallet"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/relational3"
@@ -874,6 +876,7 @@ jobs:
         - name: "sweet-delights/delightful-typeclasses"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
+        - name: "taig/data"
         - name: "taig/enumeration-ext"
         - name: "taig/flog"
         - name: "taig/geojson"
@@ -889,9 +892,6 @@ jobs:
         - name: "tegonal/scala-commons"
         - name: "tersesystems/echopraxia-plusscala"
         - name: "tharwaninitin/cache4s"
-        - name: "tharwaninitin/cron4zio"
-        - name: "tharwaninitin/crypto4s"
-        - name: "tharwaninitin/gcp4zio"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,6 +918,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tharwaninitin/cron4zio"
+        - name: "tharwaninitin/crypto4s"
+        - name: "tharwaninitin/gcp4zio"
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
