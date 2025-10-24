@@ -86,7 +86,7 @@ jobs:
         - name: "ahjohannessen/sec"
         - name: "ajozwik/pekko-smtp-server"
         - name: "akiomik/cats-nio-file"
-        - name: "akka/akka"
+        - name: "akka/akka-core"
         - name: "akka/akka-grpc"
         - name: "akka/akka-http"
         - name: "akka/akka-management"
@@ -663,7 +663,6 @@ jobs:
         - name: "msgpack4z/msgpack4z-play"
         - name: "mvv/sager"
         - name: "nafg/css-dsl"
-        - name: "nafg/simpleivr"
         - name: "nafg/slick-additions"
         - name: "nafg/slick-migration-api"
         - name: "nafg/slick-migration-api-flyway"
@@ -892,6 +891,7 @@ jobs:
         - name: "shiftleftsecurity/codepropertygraph"
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
+        - name: "shiftleftsecurity/overflowdb-codegen"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,7 +918,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
@@ -1117,6 +1116,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
