@@ -3111,8 +3111,8 @@
   "apache/pekko-http":{
     "project":"apache/pekko-http",
     "repoUrl":"https://github.com/apache/pekko-http.git",
-    "revision":"v1.2.0",
-    "version":"1.2.0",
+    "revision":"v1.3.0",
+    "version":"1.3.0",
     "targets":"org.apache.pekko%pekko-http org.apache.pekko%pekko-http-bom org.apache.pekko%pekko-http-caching org.apache.pekko%pekko-http-core org.apache.pekko%pekko-http-cors org.apache.pekko%pekko-http-jackson org.apache.pekko%pekko-http-spray-json org.apache.pekko%pekko-http-testkit org.apache.pekko%pekko-http-testkit-munit org.apache.pekko%pekko-http-xml org.apache.pekko%pekko-parsing",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -7188,6 +7188,51 @@
       ]
     }
   },
+  "buildo/retro":{
+    "project":"buildo/retro",
+    "repoUrl":"https://github.com/buildo/retro.git",
+    "revision":"metarpheus-v1.0.0",
+    "version":"1.0.0",
+    "targets":"io.buildo%toctoc-core io.buildo%toctoc-ldap",
+    "publishedScalaVersion":"3.3.1",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.0.0\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "business4s/decisions4s":{
     "project":"business4s/decisions4s",
     "repoUrl":"https://github.com/business4s/decisions4s.git",
@@ -9823,7 +9868,6 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4",
         "3.7"
       ],
       "sourcePatches":[
@@ -14238,8 +14282,8 @@
   "disneystreaming/smithy-translate":{
     "project":"disneystreaming/smithy-translate",
     "repoUrl":"https://github.com/disneystreaming/smithy-translate.git",
-    "revision":"v0.7.2",
-    "version":"0.7.2",
+    "revision":"v0.7.3",
+    "version":"0.7.3",
     "targets":"com.disneystreaming.smithy%smithytranslate-compiler-core com.disneystreaming.smithy%smithytranslate-formatter com.disneystreaming.smithy%smithytranslate-json-schema com.disneystreaming.smithy%smithytranslate-openapi com.disneystreaming.smithy%smithytranslate-proto com.disneystreaming.smithy%smithytranslate-runners com.disneystreaming.smithy%smithytranslate-transitive",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -15771,47 +15815,6 @@
           "pattern":"val scala3Version = \"3.3.0\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
-      ]
-    }
-  },
-  "edadma/char-reader":{
-    "project":"edadma/char-reader",
-    "repoUrl":"https://github.com/edadma/char-reader.git",
-    "revision":"",
-    "version":"0.1.22",
-    "targets":"io.github.edadma%char-reader",
-    "publishedScalaVersion":"3.7.2",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        "3.7"
-      ],
-      "sourcePatches":[
-        
       ]
     }
   },
@@ -18063,10 +18066,10 @@
   "fd4s/fs2-kafka":{
     "project":"fd4s/fs2-kafka",
     "repoUrl":"https://github.com/fd4s/fs2-kafka.git",
-    "revision":"v3.9.0",
-    "version":"3.9.0",
+    "revision":"v3.9.1",
+    "version":"3.9.1",
     "targets":"com.github.fd4s%fs2-kafka com.github.fd4s%fs2-kafka-vulcan com.github.fd4s%fs2-kafka-vulcan-testkit-munit",
-    "publishedScalaVersion":"3.3.5",
+    "publishedScalaVersion":"3.3.6",
     "config":{
       "projects":{
         "exclude":[
@@ -18099,7 +18102,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.5\"",
+          "pattern":"val scala3 = \"3.3.6\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -28549,9 +28552,15 @@
       "tests":"compile-only",
       "sourceVersion":"3.0-migration",
       "migrationVersions":[
+        "3.4",
         "3.7"
       ],
       "sourcePatches":[
+        {
+          "path":"project/plugins.sbt",
+          "pattern":"addSbtPlugin(\"org.scala-js\"       % \"sbt-scalajs\"              % \"1.11.0\")",
+          "replaceWith":"addSbtPlugin(\"org.scala-js\"       % \"sbt-scalajs\"              % \"1.20.1\")"
+        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3           = \"3.1.3\"",
@@ -29838,9 +29847,9 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.437",
-    "version":"4.0.437",
-    "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
+    "revision":"v4.0.438",
+    "version":"4.0.438",
+    "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg",
     "publishedScalaVersion":"3.6.4",
     "config":{
       "projects":{
@@ -31136,14 +31145,6 @@
       ]
     }
   },
-  "jurajburian/mailer":{
-    "project":"jurajburian/mailer",
-    "repoUrl":"https://github.com/jurajburian/mailer.git",
-    "revision":"",
-    "version":"2.1.2",
-    "targets":"com.dispalt%mailer",
-    "publishedScalaVersion":"3.3.6"
-  },
   "jwojnowski/fs2-aes":{
     "project":"jwojnowski/fs2-aes",
     "repoUrl":"https://github.com/jwojnowski/fs2-aes.git",
@@ -31898,6 +31899,21 @@
           "path":"instrumentation/kamon-okhttp/src/test/scala/kamon/okhttp3/utils/JettySupport.scala",
           "pattern":"TreeMap(headers.result().toList: _*)(Ordering.comparatorToOrdering(String.CASE_INSENSITIVE_ORDER))",
           "replaceWith":"TreeMap(headers.result().toList: _*)(using Ordering.comparatorToOrdering(String.CASE_INSENSITIVE_ORDER))"
+        },
+        {
+          "path":"project/plugins.sbt",
+          "pattern":"addSbtPlugin(\"com.eed3si9n\" % \"sbt-assembly\" % \"0.14.10\")",
+          "replaceWith":"addSbtPlugin(\"com.eed3si9n\" % \"sbt-assembly\" % \"1.2.0\")"
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"assembly\\s*/\\s*assemblyOption\\s*:=\\s*[\\s\\S]*?\\),",
+          "replaceWith":""
+        },
+        {
+          "path":"project/Build.scala",
+          "pattern":"assembly\\s*/\\s*assemblyOption\\s*:=\\s*[\\s\\S]*?\\),",
+          "replaceWith":""
         }
       ]
     }
@@ -36543,8 +36559,8 @@
   "lightbend/ssl-config":{
     "project":"lightbend/ssl-config",
     "repoUrl":"https://github.com/lightbend/ssl-config.git",
-    "revision":"v0.7.0",
-    "version":"0.7.0",
+    "revision":"v0.7.1",
+    "version":"0.7.1",
     "targets":"com.typesafe%ssl-config-core",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -42239,8 +42255,8 @@
   "outr/lightdb":{
     "project":"outr/lightdb",
     "repoUrl":"https://github.com/outr/lightdb.git",
-    "revision":"4.10.0",
-    "version":"4.10.0",
+    "revision":"4.11.1",
+    "version":"4.11.1",
     "targets":"com.outr%lightdb com.outr%lightdb-all com.outr%lightdb-chroniclemap com.outr%lightdb-core com.outr%lightdb-duckdb com.outr%lightdb-h2 com.outr%lightdb-halo com.outr%lightdb-lmdb com.outr%lightdb-lucene com.outr%lightdb-mapdb com.outr%lightdb-postgresql com.outr%lightdb-redis com.outr%lightdb-rocks com.outr%lightdb-sql com.outr%lightdb-sqlite",
     "publishedScalaVersion":"3.7.3",
     "config":{
@@ -42439,9 +42455,9 @@
   "outr/rapid":{
     "project":"outr/rapid",
     "repoUrl":"https://github.com/outr/rapid.git",
-    "revision":"2.0.0",
-    "version":"2.0.0",
-    "targets":"com.outr%rapid com.outr%rapid-cats com.outr%rapid-core com.outr%rapid-scribe com.outr%rapid-test",
+    "revision":"2.1.0",
+    "version":"2.1.0",
+    "targets":"com.outr%rapid-cats com.outr%rapid-core com.outr%rapid-scribe com.outr%rapid-test",
     "publishedScalaVersion":"3.7.3",
     "config":{
       "projects":{
@@ -42705,10 +42721,10 @@
   "outr/spice":{
     "project":"outr/spice",
     "repoUrl":"https://github.com/outr/spice.git",
-    "revision":"0.10.13",
-    "version":"0.10.13",
+    "revision":"0.10.14",
+    "version":"0.10.14",
     "targets":"com.outr%spice com.outr%spice-client com.outr%spice-client-jvm com.outr%spice-client-netty com.outr%spice-client-okhttp com.outr%spice-core com.outr%spice-delta com.outr%spice-openapi com.outr%spice-server com.outr%spice-server-undertow",
-    "publishedScalaVersion":"3.3.7",
+    "publishedScalaVersion":"3.7.3",
     "config":{
       "projects":{
         "exclude":[
@@ -42741,7 +42757,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3: String = \"3.3.7\"",
+          "pattern":"val scala3: String = \"3.7.3\"",
           "replaceWith":"val scala3: String = \"<SCALA_VERSION>\""
         }
       ]
@@ -43674,10 +43690,10 @@
   "philippus/elastic4s":{
     "project":"philippus/elastic4s",
     "repoUrl":"https://github.com/philippus/elastic4s.git",
-    "revision":"v9.1.0",
-    "version":"9.1.0",
-    "targets":"nl.gn0s1s%elastic4s-client-core nl.gn0s1s%elastic4s-client-esjava nl.gn0s1s%elastic4s-client-http4s nl.gn0s1s%elastic4s-client-pekko nl.gn0s1s%elastic4s-client-sniffed nl.gn0s1s%elastic4s-client-sttp nl.gn0s1s%elastic4s-core nl.gn0s1s%elastic4s-domain nl.gn0s1s%elastic4s-effect-monix nl.gn0s1s%elastic4s-effect-zio nl.gn0s1s%elastic4s-effect-zio-1 nl.gn0s1s%elastic4s-handlers nl.gn0s1s%elastic4s-json-builder nl.gn0s1s%elastic4s-json-circe nl.gn0s1s%elastic4s-json-jackson nl.gn0s1s%elastic4s-json-json4s nl.gn0s1s%elastic4s-json-play nl.gn0s1s%elastic4s-json-spray nl.gn0s1s%elastic4s-json-zio nl.gn0s1s%elastic4s-reactivestreams-akka nl.gn0s1s%elastic4s-reactivestreams-pekko nl.gn0s1s%elastic4s-streams-akka nl.gn0s1s%elastic4s-streams-pekko nl.gn0s1s%elastic4s-testkit",
-    "publishedScalaVersion":"3.3.6",
+    "revision":"v9.1.1",
+    "version":"9.1.1",
+    "targets":"nl.gn0s1s%elastic4s-client-esjava nl.gn0s1s%elastic4s-client-http4s nl.gn0s1s%elastic4s-client-sniffed nl.gn0s1s%elastic4s-client-sttp nl.gn0s1s%elastic4s-effect-monix nl.gn0s1s%elastic4s-json-json4s nl.gn0s1s%elastic4s-json-play nl.gn0s1s%elastic4s-json-spray nl.gn0s1s%elastic4s-json-zio",
+    "publishedScalaVersion":"3.3.7",
     "config":{
       "projects":{
         "exclude":[
@@ -45439,8 +45455,8 @@
   "playframework/play-ws":{
     "project":"playframework/play-ws",
     "repoUrl":"https://github.com/playframework/play-ws.git",
-    "revision":"3.1.0-M7",
-    "version":"3.1.0-M7",
+    "revision":"3.1.0-M8",
+    "version":"3.1.0-M8",
     "targets":"org.playframework%play-ahc-ws-standalone org.playframework%play-ws-standalone org.playframework%play-ws-standalone-json org.playframework%play-ws-standalone-xml",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -47833,8 +47849,8 @@
   "reactivecore/kreuzberg":{
     "project":"reactivecore/kreuzberg",
     "repoUrl":"https://github.com/reactivecore/kreuzberg.git",
-    "revision":"v0.11.3",
-    "version":"0.11.3",
+    "revision":"v0.11.4",
+    "version":"0.11.4",
     "targets":"net.reactivecore%kreuzberg net.reactivecore%kreuzberg-extras net.reactivecore%kreuzberg-miniserver net.reactivecore%kreuzberg-rpc net.reactivecore%kreuzberg-scalajs-dom-mock net.reactivecore%kreuzberg-scalatags net.reactivecore%kreuzberg-xml",
     "publishedScalaVersion":"3.7.3",
     "config":{
@@ -49068,6 +49084,11 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
+          "pattern":"libraryDependencies ++= Seq(",
+          "replaceWith":"libraryDependencies ++= Seq(\"javax.annotation\" % \"javax.annotation-api\" % \"1.3.2\","
+        },
+        {
+          "path":"build.sbt",
           "pattern":"val scala3       = \"3.3.3\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         },
@@ -49331,7 +49352,8 @@
       "tests":"full",
       "sourceVersion":"3.5",
       "migrationVersions":[
-        
+        "3.6+3.6.3",
+        "3.7"
       ],
       "sourcePatches":[
         {
@@ -51767,6 +51789,14 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
+          "pattern":"Seq(\"org.scala-lang\" % \"scala-library\" % scala213)",
+          "replaceWith":"Seq(\"org.scala-lang\" % \"scala-library\" % scala3)",
+          "selectVersion":{
+            "min":"3.8.0"
+          }
+        },
+        {
+          "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.6\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
@@ -52159,14 +52189,10 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.7"
+        
       ],
       "sourcePatches":[
-        {
-          "path":"modules/tests/src/main/scala/ch/epfl/scala/debugadapter/testfmk/DebugStepAssert.scala",
-          "pattern":"val assertion = if (ignore) assertIgnore(result.toString) _ else assertSuccess(result)(_)",
-          "replaceWith":"val assertion = if (ignore) assertIgnore(result.toString) else assertSuccess(result)"
-        }
+        
       ]
     }
   },
@@ -52205,47 +52231,6 @@
       "tests":"full",
       "migrationVersions":[
         
-      ],
-      "sourcePatches":[
-        
-      ]
-    }
-  },
-  "scalacenter/scaladex":{
-    "project":"scalacenter/scaladex",
-    "repoUrl":"https://github.com/scalacenter/scaladex.git",
-    "revision":"",
-    "version":"HEAD",
-    "targets":"*%*",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        "3.4",
-        "3.7"
       ],
       "sourcePatches":[
         
@@ -52909,18 +52894,35 @@
       },
       "tests":"full",
       "migrationVersions":[
+        "3.4",
         "3.7"
       ],
       "sourcePatches":[
         {
           "path":"core/jvm/src/test/scala/com.paulbutcher.test/mock/JavaMocksTest.scala",
-          "pattern":"(m.simplePolymorphicMethod)",
-          "replaceWith":"(m.simplePolymorphicMethod[Int])"
+          "pattern":"(m.simplePolymorphicMethod) ",
+          "replaceWith":"(m.simplePolymorphicMethod[Int]) "
         },
         {
           "path":"core/shared/src/test/scala/org/scalamock/test/scalatest/PathSpecTest.scala",
           "pattern":"val mockFun = mockFunction[String, Unit](\"mockFun\")",
           "replaceWith":"val mockFun = mockFunction[String, Unit](functionName(\"mockFun\"))"
+        },
+        {
+          "path":"core/shared/src/main/scala-3/org/scalamock/stubs/internal/StubMaker.scala",
+          "pattern":"parent = Symbol.spliceOwner,",
+          "replaceWith":"owner = Symbol.spliceOwner,",
+          "selectVersion":{
+            "min":"3.7.0"
+          }
+        },
+        {
+          "path":"core/shared/src/main/scala-3/org/scalamock/clazz/MockMaker.scala",
+          "pattern":"parent = Symbol.spliceOwner,",
+          "replaceWith":"owner = Symbol.spliceOwner,",
+          "selectVersion":{
+            "min":"3.7.0"
+          }
         }
       ]
     }
@@ -53838,7 +53840,8 @@
           "set every Test/classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat",
           "set scalatestTestDotty/Test/managedSources ~= (_.filterNot(v => Seq(\"GeneratorSpec.scala\", \"FrameworkSuite.scala\", \"WaitersSpec.scala\", \"TestSortingReporterSpec.scala\", \"JavaFuturesSpec.scala\", \"ParallelTestExecutionSpec.scala\", \"TimeLimitsSpec.scala\", \"DispatchReporterSpec.scala\", \"TestThreadsStartingCounterSpec.scala\", \"SuiteSortingReporterSpec.scala\", \"CommonGeneratorsSpec.scala\", \"PropCheckerAssertingSpec.scala\", \"ConductorMethodsSuite.scala\", \"EventuallySpec.scala\").contains(v.getName) ))",
           "set scalacticTestDotty/Test/managedSources ~= (_.filterNot(_.getName == \"NonEmptyArraySpec.scala\"))",
-          "set genRegularTests4/Test/managedSources ~= (_.filterNot(v => Seq(\"FrameworkSuite.scala\", \"GeneratorSpec.scala\", \"CommonGeneratorsSpec.scala\", \"ParallelTestExecutionSpec.scala\", \"DispatchReporterSpec.scala\", \"TestThreadsStartingCounterSpec.scala\", \"EventuallySpec.scala\").contains(v.getName) ))"
+          "set genRegularTests4/Test/managedSources ~= (_.filterNot(v => Seq(\"FrameworkSuite.scala\", \"GeneratorSpec.scala\", \"CommonGeneratorsSpec.scala\", \"ParallelTestExecutionSpec.scala\", \"DispatchReporterSpec.scala\", \"TestThreadsStartingCounterSpec.scala\", \"EventuallySpec.scala\").contains(v.getName) ))",
+          "mapScalacOptions -noindent "
         ],
         "options":[
           
@@ -53852,11 +53855,15 @@
       "tests":"full",
       "sourceVersion":"3.4-migration",
       "migrationVersions":[
-        "3.4",
+        "3.4+3.4.2",
         "3.7"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"jvm/scalactic/src/main/scala/org/scalactic/anyvals/NonEmptyString.scala",
+          "pattern":"final def startsWith(that: String): Boolean =\\n\\S+theString.startsWith(that.toVector)",
+          "replaceWith":"final def startsWith(that: String): Boolean = theString.startsWith(that)"
+        }
       ]
     }
   },
@@ -54809,8 +54816,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.3",
-        "3.4"
+        "3.4+3.4.2"
       ],
       "sourcePatches":[
         {
@@ -55781,7 +55787,11 @@
         "3.7"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"modules/core/src/main/scala/version/parser.scala",
+          "pattern":".toInt",
+          "replaceWith":".nn.toInt"
+        }
       ]
     }
   },
@@ -55962,7 +55972,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4+3.4.2"
       ],
       "sourcePatches":[
         {
@@ -57697,7 +57707,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "mapScalacOptions \"\" \"-Wunused:strict-no-implicit-warn\" "
         ],
         "options":[
           
@@ -59612,8 +59622,8 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4",
-        "3.7"
+        "3.4+3.4.2",
+        "3.6+3.6.3"
       ],
       "sourcePatches":[
         {
@@ -60459,7 +60469,6 @@
     "revision":"v3.0.0",
     "version":"3.0.0",
     "targets":"com.thoughtworks.binding%bindable",
-    "publishedScalaVersion":"3.2.1",
     "config":{
       "projects":{
         "exclude":[
@@ -64073,10 +64082,10 @@
   "typelevel/fabric":{
     "project":"typelevel/fabric",
     "repoUrl":"https://github.com/typelevel/fabric.git",
-    "revision":"v1.18.3",
-    "version":"1.18.3",
+    "revision":"v1.18.4",
+    "version":"1.18.4",
     "targets":"org.typelevel%fabric-core org.typelevel%fabric-io org.typelevel%fabric-reactify",
-    "publishedScalaVersion":"3.3.6",
+    "publishedScalaVersion":"3.3.7",
     "config":{
       "projects":{
         "exclude":[
@@ -64109,7 +64118,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.6\"",
+          "pattern":"val scala3 = \"3.3.7\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
