@@ -290,7 +290,9 @@ class Scala3CommunityBuildMillAdapter(
                 ) :: Nil
               )
             )
-          case select: Term.Select if isMill1x =>
+          case select: Term.Select if isMill1x && 
+            // Ad-hoc fix for com-lihaoyi/cask defining Option().toSeq
+            !Seq(".toSeq").exists(select.syntax.endsWith) =>
             // If select is used then expected result type is Task[?] 
             // We need to evaluate it and map
             Term.Apply(
