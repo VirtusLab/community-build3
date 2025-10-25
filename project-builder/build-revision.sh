@@ -239,23 +239,40 @@ if [[ -n "$OVERRIDEN_SCALA_VERSION" ]]; then
   echo "Would override fixed Scala version: $OVERRIDEN_SCALA_VERSION"
 fi
 
-for migrationVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
+for configuredMigrationVersion in $(echo "$projectConfig" | jq -r '.migrationVersions // [] | .[]'); do
   scalaBinaryVersion=`echo ${_scalaVersion} | cut -d . -f 1,2`
-  migrationBinaryVersion=`echo $migrationVersion | cut -d . -f 1,2`
-  if isBinVersionGreaterOrEqual "$migrationBinaryVersion" "$scalaBinaryVersion" ; then
-    echo "Skip migration using $migrationVersion, binary version higher then target Scala version $scalaBinaryVersion"
+  migrationScalaVersion="${_scalaVersion}"
+  migrationSourceVersion="${scalaBinaryVersion}"
+  
+  # Migration version can have two formats:
+  # only binary version, like 3.7
+  # or binary version with explicit Scala version to use, like 3.7+3.7.2 (which means use Scala 3.7.2 for migration)
+  if [[ "$configuredMigrationVersion" =~ ^([0-9]+\.[0-9]+)\+([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+    # Format: binaryVersion+explicitScalaVersion (e.g., "3.7+3.7.2")
+    migrationSourceVersion="${BASH_REMATCH[1]}"
+    migrationScalaVersion="${BASH_REMATCH[2]}"
+    echo "Using explicit Scala version for migration: $migrationScalaVersion for source version $migrationBinaryVersion"
+  else
+    # Format: only binary version (e.g., "3.7")
+    migrationSourceVersion="$configuredMigrationVersion"
+    migrationScalaVersion="${_scalaVersion}"
+    # Scala 3.8 new stdlib and the implicit -> using change would break compilation at any -source version, requires prior migration to 3.7
+    if isBinVersionInRange "$migrationSourceVersion" "3.0" "3.7" ; then
+      migrationScalaVersion="3.7.4-RC2"
+    fi
+    echo "Using target Scala version for migration: $migrationScalaVersion"
+  fi
+  
+  if isBinVersionGreaterThan "$migrationSourceVersion" "$scalaBinaryVersion" ; then
+    echo "Skip migration using $migrationSourceVersion, binary version higher then target Scala version $scalaBinaryVersion"
   else 
     isMigrating=true
     executeTests=false
-    scalaMigrationVersion="${_scalaVersion}"
-    # Scala 3.8 new stdlib and the implicit -> using change would break compilation at any -source version, requires prior migration to 3.7
-    if isBinVersionInRange "$migrationVersion" "3.0" "3.7" ; then
-      scalaMigrationVersion="3.7.4-RC2"
-    fi
-    sourceVersionSetting="REQUIRE:-source:$migrationVersion-migration"
-    echo "Migrating project for -source:$migrationVersion using Scala $scalaMigrationVersion"
-    buildForScalaVersion "$scalaMigrationVersion"
-    commitMigrationRewrite $migrationBinaryVersion
+
+    sourceVersionSetting="REQUIRE:-source:$migrationSourceVersion-migration"
+    echo "Migrating project for -source:$migrationSourceVersion using Scala $migrationScalaVersion"
+    buildForScalaVersion "$migrationScalaVersion"
+    commitMigrationRewrite $migrationSourceVersion
     executeTests=${_executeTests}
     isMigrating=false
   fi
