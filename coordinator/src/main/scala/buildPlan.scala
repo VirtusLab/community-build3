@@ -486,6 +486,8 @@ def createGithubActionJob(
     |        required: true
     |      GHCR_TOKEN:
     |        required: true
+    |      OPENCB_AKKA_REPO_TOKEN:
+    |        required: true
     |
     |jobs:
     |  $setupId:
