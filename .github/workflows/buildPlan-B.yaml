@@ -1,5 +1,5 @@
 
-# projects total:     859
+# projects total:     857
 # min stars count:    -1
 # max projects count: 1000
 
@@ -48,6 +48,8 @@ on:
       OPENCB_ELASTIC_PSWD:
         required: true
       GHCR_TOKEN:
+        required: true
+      OPENCB_AKKA_REPO_TOKEN:
         required: true
 
 jobs:
@@ -265,7 +267,6 @@ jobs:
         - name: "dwolla/scala-secure-config"
         - name: "earogov/ordset"
         - name: "eb2501/fluor-core"
-        - name: "edadma/char-reader"
         - name: "edadma/cross_platform"
         - name: "edadma/csv"
         - name: "edadma/dal"
@@ -330,6 +331,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
+        - name: "gemini-hlsw/lucuma-refined"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -356,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-sso"
         - name: "gemini-hlsw/lucuma-ui"
@@ -611,6 +612,7 @@ jobs:
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
         - name: "mobimeo/fs2-gtfs"
+        - name: "mongocamp/micrometer-mongodb"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -637,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mongocamp/micrometer-mongodb"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
         - name: "mpollmeier/sbt-ci-release-early-usage"
@@ -850,7 +851,6 @@ jobs:
         - name: "spilne/spilne"
         - name: "ssanj/delight"
         - name: "staeff777/scalaveusz"
-        - name: "stg-tud/bismuth"
         - name: "stringbean/text-utils"
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
@@ -892,6 +892,8 @@ jobs:
         - name: "tharwaninitin/cache4s"
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
+        - name: "tharwaninitin/gcp4zio"
+        - name: "thatscalaguy/nats4cats"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -918,8 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "tharwaninitin/gcp4zio"
-        - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
         - name: "thepiwo/petname-scala"
