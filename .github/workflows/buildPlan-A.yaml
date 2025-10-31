@@ -264,7 +264,6 @@ jobs:
         - name: "davenverse/mapref"
         - name: "davenverse/mules"
         - name: "davenverse/mules-http4s"
-        - name: "davenverse/natchez-http4s-otel"
         - name: "davenverse/process"
         - name: "davenverse/rediculous"
         - name: "davenverse/rediculous-concurrent"
@@ -332,6 +331,7 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
+        - name: "fd4s/fs2-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
@@ -613,6 +612,7 @@ jobs:
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/hearth"
+        - name: "mateuszkubuszok/pipez"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
@@ -664,7 +663,7 @@ jobs:
         - name: "msgpack4z/msgpack4z-play"
         - name: "mvv/sager"
         - name: "nafg/css-dsl"
-        - name: "nafg/simpleivr"
+        - name: "nafg/scalac-options"
         - name: "nafg/slick-additions"
         - name: "nafg/slick-migration-api"
         - name: "nafg/slick-migration-api-flyway"
@@ -693,7 +692,6 @@ jobs:
         - name: "openmole/scaladget"
         - name: "optics-dev/monocle"
         - name: "oranda/libanius"
-        - name: "otavia-projects/mill-rust-jni"
         - name: "otavia-projects/otavia"
         - name: "outr/hasher"
         - name: "outr/lightdb"
@@ -875,6 +873,7 @@ jobs:
         - name: "scalikejdbc/scalikejdbc-async"
         - name: "scallop/scallop"
         - name: "scalqa/scalqa"
+        - name: "scalus3/scalus"
         - name: "scanamo/scanamo"
         - name: "scf37/config3"
         - name: "scf37/hottie"
@@ -894,6 +893,7 @@ jobs:
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
+        - name: "sideeffffect/zio-testcontainers"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
@@ -1119,6 +1118,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
