@@ -1,5 +1,5 @@
 
-# projects total:     861
+# projects total:     864
 # min stars count:    -1
 # max projects count: 1000
 
@@ -442,6 +442,7 @@ jobs:
         - name: "ingarabr/gcs-lock"
         - name: "ingarabr/http4s-cloud-functions"
         - name: "ingarabr/sbt-firebase"
+        - name: "irevive/fs2-grpc-otel4s"
         - name: "ist-dsi/scala-cinder-client"
         - name: "ist-dsi/scala-designate-client"
         - name: "ist-dsi/scala-keystone-client"
@@ -516,7 +517,6 @@ jobs:
         - name: "kevin-lee/just-sysprocess"
         - name: "kevin-lee/openai4s"
         - name: "kevin-lee/orphan"
-        - name: "kevin-lee/scala-hedgehog-extra"
         - name: "kiberstender/fjwt"
         - name: "kierendavies/skunk-migrate"
         - name: "kijuky/confluence-for-scala"
@@ -845,9 +845,11 @@ jobs:
         - name: "sideeffffect/liquibase-doobie"
         - name: "sideeffffect/scala-quartz"
         - name: "simkoc/scala-argparse"
+        - name: "simkoc/scala-conf-parser"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
+        - name: "snowplow/iglu-scala-client"
         - name: "snowplow/iglu-scala-core"
         - name: "softinio/duck4s"
         - name: "spaceteams/scala-json-logging"
@@ -863,6 +865,7 @@ jobs:
         - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
         - name: "swaldman/feedletter"
+        - name: "swaldman/latest"
         - name: "swaldman/logadapter-scala"
         - name: "swaldman/mailutil"
         - name: "swaldman/mchange-sysadmin-scala"
@@ -891,9 +894,6 @@ jobs:
         - name: "tanin47/play-json-form"
         - name: "tarao/collection-scala"
         - name: "taymyr/play-repository-java"
-        - name: "tegonal/scala-commons"
-        - name: "tersesystems/echopraxia-plusscala"
-        - name: "tharwaninitin/cache4s"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "tegonal/scala-commons"
+        - name: "tersesystems/echopraxia-plusscala"
+        - name: "tharwaninitin/cache4s"
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
         - name: "tharwaninitin/gcp4zio"
