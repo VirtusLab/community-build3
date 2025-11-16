@@ -233,7 +233,7 @@ object Scala3CommunityBuild {
       override def toJson: String = {
         // Used to match output colored using scala.io.AnsiColor
         // ; is optional, it is not a part of AnsiColor, but is allowed in general to specify both foreground and background color
-        val AnsiColorPattern = raw"\u001B\[[;\d]*m"
+        val AnsiColorPattern = "\\u001B\\[[;\\d]*m"
         val reasonsArray = reasons
           .mkString("[", ", ", "]")
           .replaceAll(AnsiColorPattern, "")
