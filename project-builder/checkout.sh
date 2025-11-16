@@ -19,5 +19,27 @@ branch=""
 if [ -n "$rev" ]; then
   branch="-b $rev"
 fi
-git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch || 
-  ( git clone --quiet --recurse-submodules "$repo" "$repoDir" && cd $repoDir && git fetch --shallow-since=2021-05-13 && git fetch --tags && git checkout $rev )
+
+if ! git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch; then
+  echo "Initial clone with submodules failed, retrying with fallbacks..."
+
+  # Clean up any partial clone from the failed attempt
+  rm -rf "$repoDir" || true
+
+  git clone --quiet "$repo" "$repoDir" $branch
+  cd $repoDir
+  git fetch --shallow-since=2021-05-13 || true
+  git fetch --tags || true
+  
+  if [ -n "$rev" ]; then 
+    git checkout "$rev"
+  fi
+  
+  if ! git submodule update --init --recursive; then
+    echo "Submodule update via SSH failed, retrying with HTTPS remap..." >&2
+
+    git config url."https://github.com/".insteadOf "git@github.com:"
+    git submodule sync --recursive
+    git submodule update --init --recursive
+  fi
+fi
