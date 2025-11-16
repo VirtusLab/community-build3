@@ -102,7 +102,3 @@ fi
 # https://github.com/shiftleftsecurity/codepropertygraph#building-the-code
 cd $repoDir
 git lfs pull || true
-## scala-debug adapter
-# Skip if no .ssh key provided
-(echo "StrictHostKeyChecking no" >> ~/.ssh/config) || true
-(git submodule sync && git submodule update --init --recursive) || true
