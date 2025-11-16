@@ -93,8 +93,7 @@ if [ -z "${OPENCB_AKKA_REPO_TOKEN:-}" ]; then
   echo "Warning: OPENCB_AKKA_REPO_TOKEN environment variable not set, skipping Akka secure repository configuration"
 else
   echo -e '
-ThisBuild / resolvers += "akka-secure-mvn" at "https://repo.akka.io/AKKA_REPO_TOKEN/secure"
-ThisBuild / resolvers += Resolver.url("akka-secure-ivy", url("https://repo.akka.io/AKKA_REPO_TOKEN/secure"))(Resolver.ivyStylePatterns)
+ThisBuild / resolvers += "akka-secure-mvn" at "https://repo.akka.io/AKKA_REPO_TOKEN/secure/"
 ' | sed "s/AKKA_REPO_TOKEN/$OPENCB_AKKA_REPO_TOKEN/" >> $repoDir/project/akka.sbt
 fi
 

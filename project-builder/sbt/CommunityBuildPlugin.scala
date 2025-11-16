@@ -87,13 +87,8 @@ object CommunityBuildPlugin extends AutoPlugin {
     .get("OPENCB_AKKA_REPO_TOKEN")
     .filter(_.nonEmpty)
     .toSeq
-    .flatMap { AkkaToken =>
-      Seq(
-        "akka-secure-mvn" at s"https://repo.akka.io/$AkkaToken/secure",
-        Resolver.url("akka-secure-ivy", url(s"https://repo.akka.io/$AkkaToken/secure"))(
-          Resolver.ivyStylePatterns
-        )
-      )
+    .map { AkkaToken =>
+      "akka-secure-mvn" at s"https://repo.akka.io/$AkkaToken/secure"
     }
   private lazy val scala3NightliesRepo = "The Scala Nightly Repository"
     .at("https://repo.scala-lang.org/artifactory/maven-nightlies/")
