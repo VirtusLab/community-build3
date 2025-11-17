@@ -31,6 +31,7 @@ cd $repoDir
 
 javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
 echo "system" > .mill-jvm-version
+echo "" >> .mill-jvm-opts
 echo "-Xmx7G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
@@ -116,8 +117,8 @@ if isBinVersionGreaterOrEqual "$scalaBinaryVersion" "3.8" ; then
   if isBinVersionGreaterOrEqual "$millVersion" "1.1"; then
     echo "No mill version upgrade needed, using $millVersion"
     # no-op
-  elif isVersionInRange "$millVersion" "1.0.0" "1.0.4"; then
-    forceMillVersionUpgrade 1.0.5
+  elif isVersionInRange "$millVersion" "1.0.0" "1.0.5"; then
+    forceMillVersionUpgrade 1.0.6
   elif isVersionInRange "$millVersion" 0.12.0 0.12.15; then
     forceMillVersionUpgrade 0.12.16
   elif isVersionInRange "$millVersion" 0.11.0 0.11.12; then

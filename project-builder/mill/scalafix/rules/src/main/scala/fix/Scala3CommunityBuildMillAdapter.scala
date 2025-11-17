@@ -290,10 +290,15 @@ class Scala3CommunityBuildMillAdapter(
                 ) :: Nil
               )
             )
-          case select: Term.Select if isMill1x && 
-            // Ad-hoc fix for com-lihaoyi/cask defining Option().toSeq
-            !Seq(".toSeq").exists(select.syntax.endsWith) =>
-            // If select is used then expected result type is Task[?] 
+
+          // Task(foo) => foo.mapScalacOptions(scalaVersion)
+          case Term.Apply(receiver, Seq(body: Term.Select)) if receiver.syntax.contains("Task") =>
+            System.err.println(s"mapScalacOptions args: $body: ${body.structure}")
+            mapScalacOptions(body)
+
+          // Ad-hoc fix for com-lihaoyi/cask defining Option().toSeq
+          case select: Term.Select if isMill1x && !Seq(".toSeq").exists(select.syntax.endsWith) =>
+            // If select is used then expected result type is Task[?]
             // We need to evaluate it and map
             Term.Apply(
               TaskType,
@@ -554,6 +559,7 @@ class Scala3CommunityBuildMillAdapter(
             else
               """
               |import MillVersionCompat.compat.{Task => MillCompatTask}
+              |import $file.MillCommunityBuild
               """.stripMargin
           ),
         if (useLegacyTasks || isMill1x) None else Some("private object _OpenCommunityBuildOps {"),
@@ -561,7 +567,7 @@ class Scala3CommunityBuildMillAdapter(
         if (useLegacyMillCross) Some(MillCommunityBuildCrossInject) else None,
         if (useLegacyTasks || isMill1x) None else Some("}\nimport _OpenCommunityBuildOps._"),
         if (injectRootModuleRunCommand)
-          if (isMill1x && !config.isMainBuildFile.forall(_ == true)) None
+          if (!config.isMainBuildFile.forall(_ == true)) None
           else Some(MillCommunityBuildInject)
         else None
       ).flatten ++
