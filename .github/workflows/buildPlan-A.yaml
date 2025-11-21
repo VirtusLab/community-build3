@@ -203,6 +203,7 @@ jobs:
         - name: "clulab/processors"
         - name: "clulab/scala-transformers"
         - name: "codingwell/scala-guice"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
@@ -264,7 +265,6 @@ jobs:
         - name: "davenverse/mapref"
         - name: "davenverse/mules"
         - name: "davenverse/mules-http4s"
-        - name: "davenverse/process"
         - name: "davenverse/rediculous"
         - name: "davenverse/rediculous-concurrent"
         - name: "davenverse/tsec"
@@ -283,6 +283,7 @@ jobs:
         - name: "disneystreaming/weaver-test"
         - name: "dispatch/reboot"
         - name: "donderom/llm4s"
+        - name: "doriordan/skuber"
         - name: "dotty-cps-async/cps-async-connect"
         - name: "dotty-cps-async/dotty-cps-async"
         - name: "dragonfly-ai/matrix"
@@ -331,7 +332,6 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
@@ -446,7 +447,6 @@ jobs:
         - name: "http4s/http4s-fs2-data"
         - name: "http4s/http4s-grpc"
         - name: "http4s/http4s-jdk-http-client"
-        - name: "http4s/http4s-jetty"
         - name: "http4s/http4s-netty"
         - name: "http4s/http4s-otel4s-middleware"
         - name: "http4s/http4s-prometheus-metrics"
@@ -527,7 +527,6 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -613,6 +612,7 @@ jobs:
         - name: "martinhh/scalacheck-derived"
         - name: "mateuszkubuszok/hearth"
         - name: "mateuszkubuszok/pipez"
+        - name: "matsluni/aws-spi-akka-http"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
@@ -715,7 +714,6 @@ jobs:
         - name: "phenoscape/scowl"
         - name: "philippus/between"
         - name: "philippus/elastic4s"
-        - name: "pidoveproject/scala-showdown-api"
         - name: "pityka/lamp"
         - name: "pityka/nspl"
         - name: "pityka/saddle"
@@ -767,7 +765,6 @@ jobs:
         - name: "rcardin/raise4s"
         - name: "rcardin/sus4s"
         - name: "rcardin/yaes"
-        - name: "rchillyard/flog"
         - name: "reactivecore/kreuzberg"
         - name: "reactivecore/quest"
         - name: "reactivecore/rc-circe-json-schema"
@@ -865,7 +862,6 @@ jobs:
         - name: "scalatest/scalatestplus-junit"
         - name: "scalatest/scalatestplus-mockito"
         - name: "scalatest/scalatestplus-scalacheck"
-        - name: "scalatest/scalatestplus-selenium"
         - name: "scalatra/scalamd"
         - name: "scalawilliam/xs4s"
         - name: "scalaz/scalaz"
@@ -894,6 +890,10 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
+        - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
+        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,10 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -999,6 +995,7 @@ jobs:
         - name: "tofu-tf/glass"
         - name: "tofu-tf/tofu"
         - name: "tomasmikula/libretto"
+        - name: "toolsplus/atlassian-connect-play"
         - name: "torrentdam/bittorrent"
         - name: "tototoshi/dbcache"
         - name: "tototoshi/scala-csv"
@@ -1051,6 +1048,7 @@ jobs:
         - name: "typelevel/natchez"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
+        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/paiges"
         - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
@@ -1094,6 +1092,7 @@ jobs:
         - name: "vlovgr/ciris"
         - name: "vmunier/scalajs-scripts"
         - name: "webjars/webjars-play"
+        - name: "wirthan/s3dsl"
         - name: "wolfendale/scalacheck-gen-regexp"
         - name: "wvlet/airframe"
         - name: "xebia-functional/fetch"
@@ -1131,6 +1130,7 @@ jobs:
         - name: "zio/izumi-reflect"
         - name: "zio/zio"
         - name: "zio/zio-amqp"
+        - name: "zio/zio-bson"
         - name: "zio/zio-cache"
         - name: "zio/zio-cli"
         - name: "zio/zio-config"
