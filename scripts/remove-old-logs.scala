@@ -1,0 +1,137 @@
+//> using scala "3"
+//> using dep "com.sksamuel.elastic4s:elastic4s-client-esjava_2.13:8.11.5"
+//> using dep "org.slf4j:slf4j-simple:2.0.17"
+//> using toolkit default
+//> using options -Wunused:all
+
+import com.sksamuel.elastic4s
+import elastic4s.*
+import elastic4s.http.JavaClient
+import elastic4s.ElasticDsl.*
+import org.elasticsearch.client.RestClientBuilder.{HttpClientConfigCallback, RequestConfigCallback}
+import org.apache.http.impl.nio.client.*
+import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.auth.*
+import org.apache.http.client.config.RequestConfig
+
+import scala.concurrent.*
+import scala.concurrent.duration.*
+import org.elasticsearch.client.RestClient
+import org.apache.http.HttpHost
+
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+
+given ExecutionContext = ExecutionContext.global
+
+val BuildSummariesIndex = "project-build-summary"
+val DefaultTimeout = 10.minutes
+val ElasticsearchHost = "scala3.westeurope.cloudapp.azure.com"
+val ElasticsearchCredentials = new UsernamePasswordCredentials(
+  sys.env.getOrElse("ES_USERNAME", "elastic"),
+  sys.env.getOrElse("ES_PASSWORD", "changeme")
+)
+
+def createElasticsearchClient: ElasticClient = {
+  val clientConfig = new HttpClientConfigCallback {
+    override def customizeHttpClient(
+        httpClientBuilder: HttpAsyncClientBuilder
+    ): HttpAsyncClientBuilder = {
+      val creds = new BasicCredentialsProvider()
+      creds.setCredentials(AuthScope.ANY, ElasticsearchCredentials)
+      httpClientBuilder.setDefaultCredentialsProvider(creds)
+    }
+  }
+
+  val requestConfig = new RequestConfigCallback {
+    override def customizeRequestConfig(
+        requestConfigBuilder: RequestConfig.Builder
+    ): RequestConfig.Builder = {
+      val timeoutMs = 5.minutes.toMillis.toInt
+      requestConfigBuilder
+        .setSocketTimeout(timeoutMs)
+        .setConnectTimeout(timeoutMs)
+        .setConnectionRequestTimeout(timeoutMs)
+    }
+  }
+
+  ElasticClient(
+    JavaClient.fromRestClient(
+      RestClient
+        .builder(HttpHost(ElasticsearchHost, -1, "https"))
+        .setPathPrefix("/data")
+        .setHttpClientConfigCallback(clientConfig)
+        .setRequestConfigCallback(requestConfig)
+        .build()
+    )
+  )
+}
+
+@main def removeOldLogs(dryRun: Boolean = true): Unit = util
+  .Using(createElasticsearchClient) { client =>
+    val retentionPeriod = 480.days
+    val retentionInstant = Instant.now().minusSeconds(retentionPeriod.toSeconds)
+    val retentionTimestamp = DateTimeFormatter.ISO_INSTANT.format(retentionInstant)
+
+    println(
+      s"Looking for documents with timestamp older than: $retentionTimestamp - ($retentionPeriod)"
+    )
+    println(s"Dry run mode: $dryRun")
+    println("Continue? (y/n)")
+    if !io.StdIn.readBoolean() then
+      println("Aborting...")
+      sys.exit(0)
+
+    // First, count how many documents match
+    val countResult = client
+      .execute {
+        count(BuildSummariesIndex)
+          .query(
+            rangeQuery("timestamp").lt(retentionTimestamp)
+          )
+      }
+      .await(using DefaultTimeout)
+
+    countResult.fold(
+      err => sys.error(s"Failed to count documents: ${err.error}"),
+      count =>
+        println(s"Found ${count.count} documents with timestamp older than $retentionPeriod")
+        println()
+
+        if count.count == 0 then println("No documents to update.")
+        else if dryRun then
+          println("DRY RUN: Would remove 'logs' field from the above documents.")
+          println("Run with --dry-run=false to actually perform the update.")
+        else
+          println("Removing 'logs' field from old documents...")
+
+          val query = rangeQuery("timestamp").lt(retentionTimestamp)
+          val updateResult = client
+            .execute {
+              updateByQuery(BuildSummariesIndex, query)
+                .script(
+                  script("ctx._source.remove('logs')")
+                )
+                .proceedOnConflicts(true)
+                .refreshImmediately
+            }
+            .await(using DefaultTimeout)
+
+          updateResult.fold(
+            err => sys.error(s"Failed to update documents: ${err}"),
+            result =>
+              println(s"Successfully updated ${result.updated} documents")
+              if result.versionConflicts > 0 then
+                println(s"Warning: ${result.versionConflicts} version conflicts occurred (proceeded anyway)")
+              if result.failures.nonEmpty then
+                println(s"Warning: ${result.failures.size} failures occurred:")
+                result.failures.take(10).foreach { failure =>
+                  println(s"  - Failure: $failure")
+                }
+          )
+    )
+  }
+  .fold(
+    err => sys.error(s"Failed to remove old logs: $err"),
+    _ => println("Logs removed successfully")
+  )
