@@ -1,5 +1,5 @@
 
-# projects total:     864
+# projects total:     873
 # min stars count:    -1
 # max projects count: 1000
 
@@ -197,7 +197,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -245,6 +244,7 @@ jobs:
         - name: "davenverse/natchez-local"
         - name: "davenverse/natchez-rediculous"
         - name: "davenverse/os-detect"
+        - name: "davenverse/process"
         - name: "davenverse/publicsuffix"
         - name: "davenverse/single-fibered"
         - name: "davenverse/snickerdoodle"
@@ -419,6 +419,7 @@ jobs:
         - name: "hshn/slick-codegen-patch"
         - name: "http4s/http4s-async-http-client"
         - name: "http4s/http4s-fabric"
+        - name: "http4s/http4s-jetty"
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
         - name: "http4s/http4s-servlet"
@@ -469,6 +470,7 @@ jobs:
         - name: "jkugiya/aws-v4-signer-scala"
         - name: "jkugiya/ulid-scala"
         - name: "jodersky/applib"
+        - name: "jodersky/clip"
         - name: "jodersky/cronic"
         - name: "jodersky/identicon"
         - name: "jodersky/redicl"
@@ -503,6 +505,7 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -517,6 +520,7 @@ jobs:
         - name: "kevin-lee/just-sysprocess"
         - name: "kevin-lee/openai4s"
         - name: "kevin-lee/orphan"
+        - name: "kevin-lee/scala-hedgehog-extra"
         - name: "kiberstender/fjwt"
         - name: "kierendavies/skunk-migrate"
         - name: "kijuky/confluence-for-scala"
@@ -609,10 +613,6 @@ jobs:
         - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
-        - name: "mixql/mixql-engine-stub"
-        - name: "mixql/mixql-protobuf"
-        - name: "mkroli/lpm"
-        - name: "mobimeo/fs2-gtfs"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mixql/mixql-engine-stub"
+        - name: "mixql/mixql-protobuf"
+        - name: "mkroli/lpm"
+        - name: "mobimeo/fs2-gtfs"
         - name: "mongocamp/micrometer-mongodb"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
@@ -759,11 +763,13 @@ jobs:
         - name: "ranyitz/casing"
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
+        - name: "rchillyard/flog"
         - name: "rolang/google-rest-api-codegen"
         - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
         - name: "rssh/scala-appcontext"
+        - name: "rtyley/k-way-merge"
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/logic-signals"
         - name: "rtyley/play-git-hub"
@@ -785,6 +791,7 @@ jobs:
         - name: "sake92/sbt-build-extract"
         - name: "sakulk/serval"
         - name: "salesforce/kineticpulse"
+        - name: "salesforce/telepathy"
         - name: "sangria-graphql/sangria-argonaut"
         - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-json4s-jackson"
@@ -816,6 +823,7 @@ jobs:
         - name: "scalatest/scalatestplus-easymock"
         - name: "scalatest/scalatestplus-jmock"
         - name: "scalatest/scalatestplus-junit5"
+        - name: "scalatest/scalatestplus-selenium"
         - name: "scalax/simple"
         - name: "scalax/slickless"
         - name: "scf37/filewatch"
@@ -842,6 +850,7 @@ jobs:
         - name: "shopstic/caliban"
         - name: "shuwariafrica/doobie-util"
         - name: "shuwariafrica/version"
+        - name: "shuwariafrica/world"
         - name: "sideeffffect/liquibase-doobie"
         - name: "sideeffffect/scala-quartz"
         - name: "simkoc/scala-argparse"
@@ -885,15 +894,6 @@ jobs:
         - name: "taig/enumeration-ext"
         - name: "taig/flog"
         - name: "taig/geojson"
-        - name: "taig/hmap"
-        - name: "taig/object-fit"
-        - name: "taig/scala-linguist"
-        - name: "taig/scala-pygments"
-        - name: "taig/sql-ext"
-        - name: "takapi327/mcp-scala"
-        - name: "tanin47/play-json-form"
-        - name: "tarao/collection-scala"
-        - name: "taymyr/play-repository-java"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,15 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "taig/hmap"
+        - name: "taig/object-fit"
+        - name: "taig/scala-linguist"
+        - name: "taig/scala-pygments"
+        - name: "taig/sql-ext"
+        - name: "takapi327/mcp-scala"
+        - name: "tanin47/play-json-form"
+        - name: "tarao/collection-scala"
+        - name: "taymyr/play-repository-java"
         - name: "tegonal/scala-commons"
         - name: "tersesystems/echopraxia-plusscala"
         - name: "tharwaninitin/cache4s"
@@ -945,6 +954,8 @@ jobs:
         - name: "tmccarthy/tmm-scala-collections"
         - name: "tmccarthy/tmmutils"
         - name: "toniogela/cross"
+        - name: "toolsplus/atlassian-connect-play-slick"
+        - name: "toolsplus/atlassian-jwt"
         - name: "torrentdam/bencode"
         - name: "totally-trustworthy-org/widely-used-util"
         - name: "tototoshi/nyanda"
@@ -976,7 +987,6 @@ jobs:
         - name: "trace4cats/trace4cats-zipkin"
         - name: "typebricks/pureconfig-toggleable"
         - name: "typelevel/log4cats-natchez"
-        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/scalacheck-xml"
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
@@ -1016,7 +1026,6 @@ jobs:
         - name: "zhranklin/scala-tricks"
         - name: "zio-archive/interop-guava"
         - name: "zio-archive/zio-morphir"
-        - name: "zio/zio-bson"
         - name: "zio/zio-streams-compress"
         - name: "zygfryd/scala-zygf-jackshaft"
     steps:
