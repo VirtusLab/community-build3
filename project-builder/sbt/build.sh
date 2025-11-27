@@ -49,7 +49,7 @@ sbtSettings=(
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
-customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")')
+customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 targetsString="${targets[@]}"
 logFile=build.log
 statusFile=../build-status.txt
