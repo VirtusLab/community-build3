@@ -1,5 +1,5 @@
 
-# projects total:     873
+# projects total:     875
 # min stars count:    -1
 # max projects count: 1000
 
@@ -459,6 +459,7 @@ jobs:
         - name: "j5ik2o/event-store-adapter-scala"
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
+        - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
@@ -612,7 +613,6 @@ jobs:
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
-        - name: "mixql/mixql-engine"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
@@ -710,6 +711,7 @@ jobs:
         - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
+        - name: "pidoveproject/scala-showdown-api"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
         - name: "pityka/relational3"
@@ -892,8 +894,6 @@ jobs:
         - name: "taig/cloud-sql-proxy"
         - name: "taig/data"
         - name: "taig/enumeration-ext"
-        - name: "taig/flog"
-        - name: "taig/geojson"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "taig/flog"
+        - name: "taig/geojson"
         - name: "taig/hmap"
         - name: "taig/object-fit"
         - name: "taig/scala-linguist"
