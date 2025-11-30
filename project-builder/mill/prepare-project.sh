@@ -271,7 +271,9 @@ elif [[ millBinaryVersionMajor -eq 1 ]]; then
     mkdir -p $millBuildDir
     cp $scriptDir/MillCommunityBuild.scala $millBuildDir
     echo "package millbuild" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${millBuildDir}/CommunityBuildCore.scala 
-    if [[ ! -f $rootMillBuild ]]; then 
+    # Count .mill files, but ignore out directory - it might be left from previous build
+    millFileCount=$(find "$dir" -path "$dir/out" -prune -o -type f -name "*.mill" -print | wc -l)
+    if [[ ! -f $rootMillBuild ]] && [[ $millFileCount -gt 1 ]]; then 
         cat > $rootMillBuild <<'EOF'
 package build
 
