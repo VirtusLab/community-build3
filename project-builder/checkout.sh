@@ -20,7 +20,12 @@ if [ -n "$rev" ]; then
   branch="-b $rev"
 fi
 
-if ! git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch; then
+depth=""
+if [ -n "$OPENCB_GIT_DEPTH" ]; then
+  depth="--depth=$OPENCB_GIT_DEPTH"
+fi
+
+if ! git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch $depth; then
   echo "Initial clone with submodules failed, retrying with fallbacks..."
 
   # Clean up any partial clone from the failed attempt

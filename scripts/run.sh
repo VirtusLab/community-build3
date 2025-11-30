@@ -39,8 +39,13 @@ fi
 
 unset GPG_TTY
 
-export OPENCB_AKKA_REPO_TOKEN=$(cat $scriptDir/../.secrets/akka-repo-token || true)
-# OPENCB_EXECUTE_TESTS=true \
+if [[ -f $scriptDir/../.secrets/akka-repo-token ]]; then
+    export OPENCB_AKKA_REPO_TOKEN=$(cat $scriptDir/../.secrets/akka-repo-token)
+    # Variable that can be found in the projects
+    export AKKA_IO_REPOSITORY_KEY=${OPENCB_AKKA_REPO_TOKEN}
+fi
+export OPENCB_GIT_DEPTH=1 
+export OPENCB_EXECUTE_TESTS=true 
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \
   "$(config .repoUrl)" \
