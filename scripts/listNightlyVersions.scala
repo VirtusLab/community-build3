@@ -1,4 +1,5 @@
 #!/usr/bin/env scala shebang
+//> using file ./scalaVersions.scala
 
 package scala.versions
 
