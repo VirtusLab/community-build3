@@ -77,6 +77,7 @@ function runSbt() {
     echo "Would force Scala version $scalaVersion"
     setScalaVersionCmd="++$scalaVersion!"
   fi
+  # timeout is not installed by default on MacOS: brew install coreutils
   tq='"""'
   # csrSameVersions := Nil is set to allow testing Scala 3.8+ (new stdlib) without forcing upgrade to sbt 1.11.5
   # Timeout 110 minutes
