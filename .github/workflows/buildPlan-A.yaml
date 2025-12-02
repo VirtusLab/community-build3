@@ -477,6 +477,7 @@ jobs:
         - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "j5ik2o/akka-persistence-s3"
         - name: "j5ik2o/docker-controller-scala"
+        - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jacum/pekko-sensors"
         - name: "janstenpickle/hotswap-ref"
         - name: "jap-company/fields"
@@ -567,6 +568,7 @@ jobs:
         - name: "lambdaworks/scurl-detector"
         - name: "lambdaworks/zio-elasticsearch"
         - name: "lampepfl/gears"
+        - name: "lampepfl/steps"
         - name: "lancewalton/treelog"
         - name: "laserdisc-io/fs2-aws"
         - name: "laserdisc-io/log-effect"
@@ -611,8 +613,6 @@ jobs:
         - name: "mateuszkubuszok/hearth"
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
-        - name: "max-leuthaeuser/scroll"
-        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "max-leuthaeuser/scroll"
+        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -704,7 +706,6 @@ jobs:
         - name: "outr/spice"
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "ovotech/natchez-extras"
-        - name: "oyvindberg/typr"
         - name: "pac4j/http4s-pac4j"
         - name: "paoloboni/binance-scala-client"
         - name: "pathikrit/better-files"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1117,7 +1118,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"

@@ -1,5 +1,5 @@
 
-# projects total:     875
+# projects total:     874
 # min stars count:    -1
 # max projects count: 1000
 
@@ -459,7 +459,6 @@ jobs:
         - name: "j5ik2o/event-store-adapter-scala"
         - name: "j5ik2o/intervals-scala"
         - name: "j5ik2o/pekko-kinesis"
-        - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jackcviers/cats-saga"
         - name: "jamesward/zio-mavencentral"
         - name: "jandom-devel/scalafix"
@@ -544,7 +543,6 @@ jobs:
         - name: "kubukoz/drops"
         - name: "kubukoz/dualshock4s"
         - name: "kzmake/uuid7s"
-        - name: "lampepfl/steps"
         - name: "laserdisc-io/scanamo-circe"
         - name: "laserdisc-io/slack4s"
         - name: "laserdisc-io/zio-oci-objectstorage"
@@ -613,6 +611,8 @@ jobs:
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
+        - name: "mixql/mixql-engine"
+        - name: "mixql/mixql-engine-stub"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,8 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mixql/mixql-engine"
-        - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
         - name: "mobimeo/fs2-gtfs"
@@ -766,6 +764,7 @@ jobs:
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rchillyard/flog"
+        - name: "reactivecore/datacomparison"
         - name: "rolang/google-rest-api-codegen"
         - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
@@ -894,6 +893,7 @@ jobs:
         - name: "taig/cloud-sql-proxy"
         - name: "taig/data"
         - name: "taig/enumeration-ext"
+        - name: "taig/flog"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "taig/flog"
         - name: "taig/geojson"
         - name: "taig/hmap"
         - name: "taig/object-fit"
