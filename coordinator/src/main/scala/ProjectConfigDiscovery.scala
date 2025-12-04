@@ -122,7 +122,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
     val config = ConfigSource
       .file(internalProjectConfigsPath)
       .withFallback(ConfigSource.fromConfig(fallbackConfig))
-      .at(projectName)
+      .at(projectName.toLowerCase)
       .load[ProjectBuildConfig]
 
     config.left.foreach {
