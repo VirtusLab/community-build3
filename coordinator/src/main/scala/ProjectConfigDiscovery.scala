@@ -117,12 +117,13 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
 
   // Resolve project config from mainted, internal project configs list
   private def internalProjectConfigs(projectName: String) = {
+    val configEntryName = projectName.toLowerCase
     val fallbackConfig =
-      referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(projectName, _))
+      referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(configEntryName, _))
     val config = ConfigSource
       .file(internalProjectConfigsPath)
       .withFallback(ConfigSource.fromConfig(fallbackConfig))
-      .at(projectName)
+      .at(configEntryName)
       .load[ProjectBuildConfig]
 
     config.left.foreach {
