@@ -203,7 +203,6 @@ jobs:
         - name: "clulab/processors"
         - name: "clulab/scala-transformers"
         - name: "codingwell/scala-guice"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
@@ -332,6 +331,7 @@ jobs:
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
+        - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
@@ -477,6 +476,7 @@ jobs:
         - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "j5ik2o/akka-persistence-s3"
         - name: "j5ik2o/docker-controller-scala"
+        - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jacum/pekko-sensors"
         - name: "janstenpickle/hotswap-ref"
         - name: "jap-company/fields"
