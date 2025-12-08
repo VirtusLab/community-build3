@@ -1,5 +1,5 @@
 
-# projects total:     875
+# projects total:     876
 # min stars count:    -1
 # max projects count: 1000
 
@@ -197,6 +197,7 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -331,7 +332,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-catalog"
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
-        - name: "gemini-hlsw/lucuma-jts"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-sso"
@@ -612,7 +613,6 @@ jobs:
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
-        - name: "mixql/mixql-engine"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
@@ -754,6 +755,7 @@ jobs:
         - name: "pureharm/pureharm-db-core-jdbc"
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-testkit"
+        - name: "quadstingray/quartz-manager"
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/inspirerad"
         - name: "quafadas/narr"
@@ -770,7 +772,6 @@ jobs:
         - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
-        - name: "rssh/scala-appcontext"
         - name: "rtyley/k-way-merge"
         - name: "rtyley/line-break-preserving-line-splitting"
         - name: "rtyley/logic-signals"
@@ -850,7 +851,7 @@ jobs:
         - name: "sh4869/semver-parser-scala"
         - name: "shawjef3/tryutils"
         - name: "shopstic/caliban"
-        - name: "shuwariafrica/doobie-util"
+        - name: "shuwariafrica/ashtray"
         - name: "shuwariafrica/version"
         - name: "shuwariafrica/world"
         - name: "sideeffffect/liquibase-doobie"
@@ -893,7 +894,6 @@ jobs:
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
         - name: "taig/data"
-        - name: "taig/enumeration-ext"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "taig/enumeration-ext"
         - name: "taig/flog"
         - name: "taig/geojson"
         - name: "taig/hmap"
