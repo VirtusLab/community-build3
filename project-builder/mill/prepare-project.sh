@@ -34,7 +34,6 @@ echo "system" > .mill-jvm-version
 echo "" >> .mill-jvm-opts
 echo "-Xmx7G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
-echo "-Xms4G" >> .mill-jvm-opts
 
 millBuildFile=
 for rootBuildFile in "$MILL_BUILD" "$MILL_BUILD_SCALA" "./build.sc"; do
@@ -272,14 +271,16 @@ elif [[ millBinaryVersionMajor -eq 1 ]]; then
     cp $scriptDir/MillCommunityBuild.scala $millBuildDir
     echo "package millbuild" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${millBuildDir}/CommunityBuildCore.scala 
     # Count .mill files, but ignore out directory - it might be left from previous build
-    millFileCount=$(find "$dir" -path "$dir/out" -prune -o -type f -name "*.mill" -print | wc -l)
-    if [[ ! -f $rootMillBuild ]] && [[ $millFileCount -gt 1 ]]; then 
+    if [[ ! -f $rootMillBuild ]] ; then
+      millFileCount=$(find "$dir" -path "$dir/out" -prune -o -type f -name "*.mill" -print | wc -l)
+      if [[ $millBinaryVersionMinor -eq 0 ]] || [[ $millFileCount -gt 1 ]]; then 
         cat > $rootMillBuild <<'EOF'
 package build
 
 object `package` extends mill.meta.MillBuildRootModule {}
 EOF
-    fi
+      fi
+    fi # root mill build file not found
 else
   echo "Unsupport mill binary version $millBinaryVersion"
   exit 1
