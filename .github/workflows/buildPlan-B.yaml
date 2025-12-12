@@ -1,5 +1,5 @@
 
-# projects total:     876
+# projects total:     878
 # min stars count:    -1
 # max projects count: 1000
 
@@ -197,7 +197,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -332,6 +331,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-catalog"
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
+        - name: "gemini-hlsw/lucuma-jts"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-sso"
@@ -432,6 +431,7 @@ jobs:
         - name: "ij-plugins/ijp-scala-console"
         - name: "indoorvivants/decline-completion"
         - name: "indoorvivants/detective"
+        - name: "indoorvivants/fxprof"
         - name: "indoorvivants/genovese"
         - name: "indoorvivants/mdoc-d2"
         - name: "indoorvivants/mdoc-effect"
@@ -600,6 +600,7 @@ jobs:
         - name: "malliina/util-base"
         - name: "malyszaryczlowiek/kessenger-lib"
         - name: "marcinzh/beam"
+        - name: "marcinzh/enterprise"
         - name: "marcinzh/spot"
         - name: "marcinzh/yamlike"
         - name: "massimosiani/monix-newtypes-cats"
@@ -612,7 +613,6 @@ jobs:
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
-        - name: "mixql/mixql-core"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
@@ -893,7 +894,6 @@ jobs:
         - name: "sweet-delights/delightful-typeclasses"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
-        - name: "taig/data"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "taig/data"
         - name: "taig/enumeration-ext"
         - name: "taig/flog"
         - name: "taig/geojson"
@@ -938,6 +939,7 @@ jobs:
         - name: "tharwaninitin/cron4zio"
         - name: "tharwaninitin/crypto4s"
         - name: "tharwaninitin/gcp4zio"
+        - name: "thatscalaguy/fs2-nats"
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
