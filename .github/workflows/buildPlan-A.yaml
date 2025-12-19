@@ -210,7 +210,6 @@ jobs:
         - name: "com-lihaoyi/fastparse"
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/mainargs"
-        - name: "com-lihaoyi/mill"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/pprint"
@@ -332,6 +331,7 @@ jobs:
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
+        - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
@@ -525,6 +524,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -684,6 +684,7 @@ jobs:
         - name: "olivierblanvillain/regsafe"
         - name: "ollls/zio-quartz-h2"
         - name: "ollls/zio-tls-http"
+        - name: "opalj/opal"
         - name: "openmole/byte-pack"
         - name: "openmole/gridscale"
         - name: "openmole/mgo"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1000,7 +1001,6 @@ jobs:
         - name: "tototoshi/dbcache"
         - name: "tototoshi/scala-csv"
         - name: "tototoshi/slick-joda-mapper"
-        - name: "touk/influxdb-reporter"
         - name: "tpolecat/atto"
         - name: "tpolecat/pool-party"
         - name: "tpolecat/typename"
