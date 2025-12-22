@@ -2400,8 +2400,8 @@
   "altoo-ag/pekko-kryo-serialization":{
     "project":"altoo-ag/pekko-kryo-serialization",
     "repoUrl":"https://github.com/altoo-ag/pekko-kryo-serialization.git",
-    "revision":"v1.3.1",
-    "version":"1.3.1",
+    "revision":"v1.3.2",
+    "version":"1.3.2",
     "targets":"io.altoo%pekko-kryo-serialization io.altoo%pekko-kryo-serialization-akka-compat io.altoo%pekko-kryo-serialization-typed",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -2414,7 +2414,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -3270,10 +3270,10 @@
   "apache/pekko-persistence-jdbc":{
     "project":"apache/pekko-persistence-jdbc",
     "repoUrl":"https://github.com/apache/pekko-persistence-jdbc.git",
-    "revision":"v1.1.1",
-    "version":"1.1.1",
+    "revision":"v1.2.0",
+    "version":"1.2.0",
     "targets":"org.apache.pekko%pekko-persistence-jdbc",
-    "publishedScalaVersion":"3.3.5",
+    "publishedScalaVersion":"3.3.7",
     "config":{
       "projects":{
         "exclude":[
@@ -3306,7 +3306,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val Scala3 = \"3.3.5\"",
+          "pattern":"val Scala3 = \"3.3.7\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -5336,7 +5336,7 @@
     "repoUrl":"https://github.com/avast/scala-server-toolkit.git",
     "revision":"v0.19.3",
     "version":"0.19.3",
-    "targets":"com.avast%sst-app-monix com.avast%sst-app-zio com.avast%sst-bundle-monix-http4s-blaze com.avast%sst-bundle-monix-http4s-ember com.avast%sst-bundle-zio-http4s-blaze com.avast%sst-bundle-zio-http4s-ember com.avast%sst-cassandra-datastax-driver com.avast%sst-cassandra-datastax-driver-pureconfig com.avast%sst-cats-effect com.avast%sst-doobie-hikari com.avast%sst-doobie-hikari-pureconfig com.avast%sst-flyway com.avast%sst-flyway-pureconfig com.avast%sst-fs2-kafka com.avast%sst-fs2-kafka-pureconfig com.avast%sst-grpc-server com.avast%sst-grpc-server-micrometer com.avast%sst-grpc-server-pureconfig com.avast%sst-http4s-client-blaze com.avast%sst-http4s-client-blaze-pureconfig com.avast%sst-http4s-client-ember com.avast%sst-http4s-client-ember-pureconfig com.avast%sst-http4s-client-monix-catnap com.avast%sst-http4s-server com.avast%sst-http4s-server-blaze com.avast%sst-http4s-server-blaze-pureconfig com.avast%sst-http4s-server-ember com.avast%sst-http4s-server-ember-pureconfig com.avast%sst-http4s-server-micrometer com.avast%sst-jdk-http-client com.avast%sst-jdk-http-client-pureconfig com.avast%sst-jvm com.avast%sst-jvm-micrometer com.avast%sst-jvm-pureconfig com.avast%sst-lettuce com.avast%sst-lettuce-pureconfig com.avast%sst-micrometer com.avast%sst-micrometer-jmx com.avast%sst-micrometer-jmx-pureconfig com.avast%sst-micrometer-prometheus com.avast%sst-micrometer-prometheus-pureconfig com.avast%sst-micrometer-statsd com.avast%sst-micrometer-statsd-pureconfig com.avast%sst-monix-catnap com.avast%sst-monix-catnap-micrometer com.avast%sst-monix-catnap-pureconfig com.avast%sst-pureconfig com.avast%sst-sentry com.avast%sst-sentry-pureconfig com.avast%sst-ssl-config",
+    "targets":"com.avast%sst-app-monix com.avast%sst-app-zio com.avast%sst-bundle-monix-http4s-blaze com.avast%sst-bundle-monix-http4s-ember com.avast%sst-bundle-zio-http4s-blaze com.avast%sst-bundle-zio-http4s-ember com.avast%sst-cassandra-datastax-driver com.avast%sst-cassandra-datastax-driver-pureconfig com.avast%sst-cats-effect com.avast%sst-doobie-hikari com.avast%sst-doobie-hikari-pureconfig com.avast%sst-flyway com.avast%sst-flyway-pureconfig com.avast%sst-fs2-kafka com.avast%sst-fs2-kafka-pureconfig com.avast%sst-grpc-server com.avast%sst-grpc-server-micrometer com.avast%sst-grpc-server-pureconfig com.avast%sst-http4s-client-blaze com.avast%sst-http4s-client-blaze-pureconfig com.avast%sst-http4s-client-ember com.avast%sst-http4s-client-ember-pureconfig com.avast%sst-http4s-client-monix-catnap com.avast%sst-http4s-server com.avast%sst-http4s-server-blaze com.avast%sst-http4s-server-blaze-pureconfig com.avast%sst-http4s-server-ember com.avast%sst-http4s-server-ember-pureconfig com.avast%sst-http4s-server-micrometer com.avast%sst-jdk-http-client com.avast%sst-jdk-http-client-pureconfig com.avast%sst-jvm com.avast%sst-jvm-micrometer com.avast%sst-jvm-pureconfig com.avast%sst-lettuce com.avast%sst-lettuce-pureconfig com.avast%sst-micrometer com.avast%sst-micrometer-jmx com.avast%sst-micrometer-jmx-pureconfig com.avast%sst-micrometer-prometheus com.avast%sst-micrometer-statsd com.avast%sst-micrometer-statsd-pureconfig com.avast%sst-monix-catnap com.avast%sst-monix-catnap-micrometer com.avast%sst-monix-catnap-pureconfig com.avast%sst-pureconfig com.avast%sst-sentry com.avast%sst-sentry-pureconfig com.avast%sst-ssl-config",
     "publishedScalaVersion":"3.3.7",
     "config":{
       "projects":{
@@ -5757,8 +5757,8 @@
   "bdmendes/smockito":{
     "project":"bdmendes/smockito",
     "repoUrl":"https://github.com/bdmendes/smockito.git",
-    "revision":"v2.3.0",
-    "version":"2.3.0",
+    "revision":"v2.3.1",
+    "version":"2.3.1",
     "targets":"com.bdmendes%smockito",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -17077,7 +17077,40 @@
     "revision":"v3.1.1",
     "version":"3.1.1",
     "targets":"io.github.enriquerodbe%borsh4s",
-    "publishedScalaVersion":"3.7.4"
+    "publishedScalaVersion":"3.7.4",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          "excludeLibraryDependency \"org.wartremover:wartremover-contrib_{scalaVersion}\""
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "epfl-lara/lisa":{
     "project":"epfl-lara/lisa",
@@ -20613,8 +20646,8 @@
   "gemini-hlsw/lucuma-core":{
     "project":"gemini-hlsw/lucuma-core",
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-core.git",
-    "revision":"v0.164.0",
-    "version":"0.164.0",
+    "revision":"v0.165.1",
+    "version":"0.165.1",
     "targets":"edu.gemini%lucuma-ags edu.gemini%lucuma-catalog edu.gemini%lucuma-catalog-testkit edu.gemini%lucuma-core edu.gemini%lucuma-core-testkit edu.gemini%lucuma-horizons",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -21672,7 +21705,7 @@
         },
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version = \"3.2.0\"",
+          "pattern":"val scala3Version = \"3.4.1\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -26046,8 +26079,8 @@
   "iltotore/iron":{
     "project":"iltotore/iron",
     "repoUrl":"https://github.com/iltotore/iron.git",
-    "revision":"v3.2.1",
-    "version":"3.2.1",
+    "revision":"v3.2.2",
+    "version":"3.2.2",
     "targets":"io.github.iltotore%iron io.github.iltotore%iron-borer io.github.iltotore%iron-cats io.github.iltotore%iron-circe io.github.iltotore%iron-ciris io.github.iltotore%iron-decline io.github.iltotore%iron-docs io.github.iltotore%iron-doobie io.github.iltotore%iron-jsoniter io.github.iltotore%iron-play-json io.github.iltotore%iron-pureconfig io.github.iltotore%iron-scalacheck io.github.iltotore%iron-scodec io.github.iltotore%iron-skunk io.github.iltotore%iron-upickle io.github.iltotore%iron-zio io.github.iltotore%iron-zio-json io.github.iltotore%sandbox",
     "publishedScalaVersion":"3.3.6",
     "config":{
@@ -27676,10 +27709,10 @@
   "j-mie6/parsley":{
     "project":"j-mie6/parsley",
     "repoUrl":"https://github.com/j-mie6/parsley.git",
-    "revision":"v5.0.0-M15",
-    "version":"5.0.0-M15",
-    "targets":"com.github.j-mie6%parsley com.github.j-mie6%parsley-debug com.github.j-mie6%parsley-docs",
-    "publishedScalaVersion":"3.3.3",
+    "revision":"v4.6.2",
+    "version":"4.6.2",
+    "targets":"com.github.j-mie6%parsley com.github.j-mie6%parsley-debug",
+    "publishedScalaVersion":"3.3.1",
     "config":{
       "projects":{
         "exclude":[
@@ -27690,7 +27723,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"17"
       },
       "sbt":{
         "commands":[
@@ -27718,7 +27751,7 @@
         },
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.3\"",
+          "pattern":"val Scala3 = \"3.3.1\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -29927,9 +29960,9 @@
   "joernio/joern":{
     "project":"joernio/joern",
     "repoUrl":"https://github.com/joernio/joern.git",
-    "revision":"v4.0.456",
-    "version":"4.0.456",
-    "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
+    "revision":"v4.0.457",
+    "version":"4.0.457",
+    "targets":"io.joern%c2cpg io.joern%console io.joern%csharpsrc2cpg io.joern%dataflowengineoss io.joern%ghidra2cpg io.joern%gosrc2cpg io.joern%javasrc2cpg io.joern%jimple2cpg io.joern%joern-cli io.joern%jssrc2cpg io.joern%kotlin2cpg io.joern%macros io.joern%php2cpg io.joern%pysrc2cpg io.joern%querydb io.joern%rubysrc2cpg io.joern%semanticcpg io.joern%swiftsrc2cpg io.joern%x2cpg",
     "publishedScalaVersion":"3.6.4",
     "config":{
       "projects":{
@@ -31850,8 +31883,8 @@
   "kalin-rudnicki/oxygen":{
     "project":"kalin-rudnicki/oxygen",
     "repoUrl":"https://github.com/kalin-rudnicki/oxygen.git",
-    "revision":"0.2.7",
-    "version":"0.2.7",
+    "revision":"0.2.7.1",
+    "version":"0.2.7.1",
     "targets":"io.github.kalin-rudnicki%oxygen-cli io.github.kalin-rudnicki%oxygen-core io.github.kalin-rudnicki%oxygen-crypto-model io.github.kalin-rudnicki%oxygen-crypto-service io.github.kalin-rudnicki%oxygen-executable io.github.kalin-rudnicki%oxygen-http-zio io.github.kalin-rudnicki%oxygen-json io.github.kalin-rudnicki%oxygen-meta io.github.kalin-rudnicki%oxygen-quoted io.github.kalin-rudnicki%oxygen-schema io.github.kalin-rudnicki%oxygen-sql io.github.kalin-rudnicki%oxygen-sql-migration io.github.kalin-rudnicki%oxygen-sql-test io.github.kalin-rudnicki%oxygen-storage io.github.kalin-rudnicki%oxygen-storage-in-memory io.github.kalin-rudnicki%oxygen-test io.github.kalin-rudnicki%oxygen-test-container io.github.kalin-rudnicki%oxygen-transform io.github.kalin-rudnicki%oxygen-zio",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -32913,7 +32946,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.5"
       ],
       "sourcePatches":[
         {
@@ -36897,8 +36930,8 @@
   "logging4s/logging4s":{
     "project":"logging4s/logging4s",
     "repoUrl":"https://github.com/logging4s/logging4s.git",
-    "revision":"0.14.4",
-    "version":"0.14.4",
+    "revision":"v0.15.0",
+    "version":"0.15.0",
     "targets":"org.logging4s%logging4s-argonaut org.logging4s%logging4s-borer org.logging4s%logging4s-cats-core org.logging4s%logging4s-ce-2 org.logging4s%logging4s-ce-3 org.logging4s%logging4s-circe org.logging4s%logging4s-core org.logging4s%logging4s-fabric org.logging4s%logging4s-json4s org.logging4s%logging4s-jsoniter org.logging4s%logging4s-kyo org.logging4s%logging4s-play-json org.logging4s%logging4s-rapid org.logging4s%logging4s-spray-json org.logging4s%logging4s-upickle org.logging4s%logging4s-weepickle org.logging4s%logging4s-zio",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -37781,8 +37814,8 @@
   "malliina/mobile-push":{
     "project":"malliina/mobile-push",
     "repoUrl":"https://github.com/malliina/mobile-push.git",
-    "revision":"v3.15.3",
-    "version":"3.15.3",
+    "revision":"v3.15.5",
+    "version":"3.15.5",
     "targets":"com.malliina%mobile-push",
     "publishedScalaVersion":"3.3.1",
     "config":{
@@ -40770,10 +40803,10 @@
   "natural-transformation/avro4s":{
     "project":"natural-transformation/avro4s",
     "repoUrl":"https://github.com/natural-transformation/avro4s.git",
-    "revision":"v5.1.0",
-    "version":"5.1.0",
-    "targets":"com.natural-transformation%avro4s-cats com.natural-transformation%avro4s-core",
-    "publishedScalaVersion":"3.3.4",
+    "revision":"v5.2.0",
+    "version":"5.2.0",
+    "targets":"com.natural-transformation%avro4s-cats com.natural-transformation%avro4s-core com.natural-transformation%avro4s-kafka",
+    "publishedScalaVersion":"3.3.7",
     "config":{
       "projects":{
         "exclude":[
@@ -42435,7 +42468,7 @@
     "repoUrl":"https://github.com/outr/lightdb.git",
     "revision":"4.13.0",
     "version":"4.13.0",
-    "targets":"com.outr%lightdb com.outr%lightdb-all com.outr%lightdb-chroniclemap com.outr%lightdb-core com.outr%lightdb-duckdb com.outr%lightdb-h2 com.outr%lightdb-halo com.outr%lightdb-lmdb com.outr%lightdb-lucene com.outr%lightdb-postgresql com.outr%lightdb-redis com.outr%lightdb-rocks com.outr%lightdb-sql com.outr%lightdb-sqlite",
+    "targets":"com.outr%lightdb com.outr%lightdb-all com.outr%lightdb-chroniclemap com.outr%lightdb-core com.outr%lightdb-duckdb com.outr%lightdb-h2 com.outr%lightdb-halo com.outr%lightdb-lmdb com.outr%lightdb-lucene com.outr%lightdb-mapdb com.outr%lightdb-postgresql com.outr%lightdb-redis com.outr%lightdb-rocks com.outr%lightdb-sql com.outr%lightdb-sqlite",
     "publishedScalaVersion":"3.7.4",
     "config":{
       "projects":{
@@ -42995,7 +43028,7 @@
     "repoUrl":"https://github.com/ovotech/natchez-extras.git",
     "revision":"9.0.0-M1",
     "version":"9.0.0-M1",
-    "targets":"com.ovoenergy%natchez-extras-ce3 com.ovoenergy%natchez-extras-combine com.ovoenergy%natchez-extras-core com.ovoenergy%natchez-extras-datadog com.ovoenergy%natchez-extras-datadog-stable com.ovoenergy%natchez-extras-dogstatsd com.ovoenergy%natchez-extras-doobie com.ovoenergy%natchez-extras-doobie-legacy com.ovoenergy%natchez-extras-fs2 com.ovoenergy%natchez-extras-http4s com.ovoenergy%natchez-extras-http4s-stable com.ovoenergy%natchez-extras-log4cats com.ovoenergy%natchez-extras-metrics com.ovoenergy%natchez-extras-slf4j com.ovoenergy%natchez-extras-testkit",
+    "targets":"com.ovoenergy%natchez-extras-ce3 com.ovoenergy%natchez-extras-combine com.ovoenergy%natchez-extras-datadog com.ovoenergy%natchez-extras-datadog-stable com.ovoenergy%natchez-extras-dogstatsd com.ovoenergy%natchez-extras-doobie com.ovoenergy%natchez-extras-doobie-legacy com.ovoenergy%natchez-extras-fs2 com.ovoenergy%natchez-extras-http4s com.ovoenergy%natchez-extras-http4s-stable com.ovoenergy%natchez-extras-log4cats com.ovoenergy%natchez-extras-metrics com.ovoenergy%natchez-extras-slf4j com.ovoenergy%natchez-extras-testkit",
     "publishedScalaVersion":"3.3.5",
     "config":{
       "projects":{
@@ -45633,8 +45666,8 @@
   "playframework/play-ws":{
     "project":"playframework/play-ws",
     "repoUrl":"https://github.com/playframework/play-ws.git",
-    "revision":"3.1.0-M11",
-    "version":"3.1.0-M11",
+    "revision":"3.0.10",
+    "version":"3.0.10",
     "targets":"org.playframework%play-ahc-ws-standalone org.playframework%play-ws-standalone org.playframework%play-ws-standalone-json org.playframework%play-ws-standalone-xml",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -53271,8 +53304,8 @@
   "scalamolecule/molecule":{
     "project":"scalamolecule/molecule",
     "repoUrl":"https://github.com/scalamolecule/molecule.git",
-    "revision":"v0.28.0",
-    "version":"0.28.0",
+    "revision":"v0.29.0",
+    "version":"0.29.0",
     "targets":"org.scalamolecule%molecule-core org.scalamolecule%molecule-db-common org.scalamolecule%molecule-db-compliance org.scalamolecule%molecule-db-h2 org.scalamolecule%molecule-db-mariadb org.scalamolecule%molecule-db-mysql org.scalamolecule%molecule-db-postgresql org.scalamolecule%molecule-db-sqlite",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -64418,7 +64451,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "mapScalacOptions \"\" \"-Wunused:strict-no-implicit-warn,unsafe-warn-patvars\"  "
         ],
         "options":[
           
@@ -69940,50 +69973,6 @@
       ]
     }
   },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "zio-archive/zio-jdbc":{
     "project":"zio-archive/zio-jdbc",
     "repoUrl":"https://github.com/zio-archive/zio-jdbc.git",
@@ -70387,8 +70376,8 @@
   "zio/interop-cats":{
     "project":"zio/interop-cats",
     "repoUrl":"https://github.com/zio/interop-cats.git",
-    "revision":"v23.1.0.12",
-    "version":"23.1.0.12",
+    "revision":"v23.1.0.13",
+    "version":"23.1.0.13",
     "targets":"dev.zio%zio-interop-cats dev.zio%zio-interop-tracer dev.zio%zio-test-interop-cats",
     "publishedScalaVersion":"3.3.7",
     "config":{
