@@ -1,5 +1,5 @@
 
-# projects total:     877
+# projects total:     879
 # min stars count:    -1
 # max projects count: 1000
 
@@ -499,6 +499,7 @@ jobs:
         - name: "julianpeeters/schemabuilder4cats"
         - name: "julianpeeters/typename"
         - name: "julianpeeters/typesize"
+        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/googlecloud4s"
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
@@ -612,7 +613,6 @@ jobs:
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
-        - name: "mixql/mixql-core"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
         - name: "mixql/mixql-protobuf"
@@ -893,7 +894,6 @@ jobs:
         - name: "sweet-delights/delightful-typeclasses"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
-        - name: "taig/data"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "taig/data"
         - name: "taig/enumeration-ext"
         - name: "taig/flog"
         - name: "taig/geojson"
@@ -964,6 +965,7 @@ jobs:
         - name: "totally-trustworthy-org/widely-used-util"
         - name: "tototoshi/nyanda"
         - name: "tototoshi/play-reverse-router-extension"
+        - name: "touk/influxdb-reporter"
         - name: "tpataky/duckling"
         - name: "tpunder/fm-common"
         - name: "tpunder/fm-html"

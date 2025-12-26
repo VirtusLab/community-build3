@@ -517,7 +517,6 @@ jobs:
         - name: "juliano/pokeapi-scala"
         - name: "julianpeeters/avrohugger"
         - name: "julienrf/play-jsmessages"
-        - name: "jwojnowski/fs2-aes"
         - name: "jwojnowski/oidc4s"
         - name: "jwt-scala/jwt-scala"
         - name: "kacperfkorban/guinep"
@@ -613,6 +612,7 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -894,6 +893,7 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
+        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1001,7 +1000,6 @@ jobs:
         - name: "tototoshi/dbcache"
         - name: "tototoshi/scala-csv"
         - name: "tototoshi/slick-joda-mapper"
-        - name: "touk/influxdb-reporter"
         - name: "tpolecat/atto"
         - name: "tpolecat/pool-party"
         - name: "tpolecat/typename"
@@ -1118,6 +1116,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
@@ -1130,6 +1129,7 @@ jobs:
         - name: "zio/izumi-reflect"
         - name: "zio/zio"
         - name: "zio/zio-amqp"
+        - name: "zio/zio-blocks"
         - name: "zio/zio-bson"
         - name: "zio/zio-cache"
         - name: "zio/zio-cli"
