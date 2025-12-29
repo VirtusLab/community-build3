@@ -1,7 +1,7 @@
-# This cron file defines an daily task to delete stale artifacts 
+# This cron file defines a task to delete stale artifacts (older than 30 days)
 # to prevent getting out of storage space
 
 # Minute   Hour   Day of Month       Month          Day of Week        User      Command
 # (0-59)  (0-23)     (1-31)    (1-12 or Jan-Dec)  (0-6 or Sun-Sat)
 
-*/5 * * * * /usr/bin/find /mvn-repo/upload-dir/ -maxdepth 1 -type d -ctime +1 -exec rm -rf {} \; >> /mvn-repo/remove-artifacts.log 2>&1
+0 0 * * * /usr/bin/find /mvn-repo/upload-dir/ -maxdepth 1 -type d -ctime +30 -exec rm -rf {} \; >> /mvn-repo/remove-artifacts.log 2>&1
