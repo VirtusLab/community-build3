@@ -99,7 +99,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       akkaRepos
 
   override def projectSettings = Seq(
-    externalResolvers := extraOpenCBMavenRepos ++ externalResolvers.value,
+    externalResolvers ++= extraOpenCBMavenRepos,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
     // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
