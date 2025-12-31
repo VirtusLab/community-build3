@@ -1,5 +1,5 @@
 
-# projects total:     879
+# projects total:     881
 # min stars count:    -1
 # max projects count: 1000
 
@@ -395,6 +395,7 @@ jobs:
         - name: "guymers/foobie"
         - name: "gzoller/deploysample"
         - name: "gzoller/listzipper"
+        - name: "gzoller/swaggerjack"
         - name: "gzoller/testkit"
         - name: "h8io/borscht"
         - name: "hamnis/dataclass-scalafix"
@@ -612,7 +613,6 @@ jobs:
         - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
-        - name: "mercurievv/minuscles"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
@@ -670,6 +671,7 @@ jobs:
         - name: "nationalarchives/dr2-preservica-client"
         - name: "natural-transformation/avro4s"
         - name: "natural-transformation/korolev"
+        - name: "natural-transformation/levsha"
         - name: "nebula-contrib/testcontainers-nebula"
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
@@ -892,8 +894,6 @@ jobs:
         - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
         - name: "sweet-delights/delightful-typeclasses"
-        - name: "taig/backmail"
-        - name: "taig/cloud-sql-proxy"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "taig/backmail"
+        - name: "taig/cloud-sql-proxy"
         - name: "taig/data"
         - name: "taig/enumeration-ext"
         - name: "taig/flog"
