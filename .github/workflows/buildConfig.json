@@ -5103,7 +5103,6 @@
     "revision":"v3.0.3",
     "version":"3.0.3",
     "targets":"com.yang-bo%html-interpolationparser",
-    "publishedScalaVersion":"3.2.2",
     "config":{
       "projects":{
         "exclude":[
@@ -63962,7 +63961,10 @@
         {
           "path":"src/main/scala/internal/InspectTree.scala",
           "pattern":"override def transform(using q: Quotes)(tree: q.reflect.Definition): List[q.reflect.Definition]",
-          "replaceWith":"override def transform(using q: Quotes)(tree: q.reflect.Definition, companion: Option[q.reflect.Definition]): List[q.reflect.Definition]"
+          "replaceWith":"override def transform(using q: Quotes)(tree: q.reflect.Definition, companion: Option[q.reflect.Definition]): List[q.reflect.Definition]",
+          "selectVersion":{
+            "min":"3.7.0"
+          }
         }
       ]
     }
