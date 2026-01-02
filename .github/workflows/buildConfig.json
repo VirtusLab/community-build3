@@ -2600,10 +2600,10 @@
   "andreamarcolin/oidc4s":{
     "project":"andreamarcolin/oidc4s",
     "repoUrl":"https://github.com/andreamarcolin/oidc4s.git",
-    "revision":"v0.1.0",
-    "version":"0.1.0",
+    "revision":"v0.2.0-RC1",
+    "version":"0.2.0-RC1",
     "targets":"io.github.andreamarcolin%oidc4s-core io.github.andreamarcolin%oidc4s-http4s",
-    "publishedScalaVersion":"3.2.1",
+    "publishedScalaVersion":"3.7.4",
     "config":{
       "projects":{
         "exclude":[
@@ -2636,7 +2636,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3         = \"3.2.1\"",
+          "pattern":"val scala3         = \"3.7.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -5103,6 +5103,7 @@
     "revision":"v3.0.3",
     "version":"3.0.3",
     "targets":"com.yang-bo%html-interpolationparser",
+    "publishedScalaVersion":"3.2.2",
     "config":{
       "projects":{
         "exclude":[
@@ -9422,8 +9423,8 @@
   "com-lihaoyi/mill-moduledefs":{
     "project":"com-lihaoyi/mill-moduledefs",
     "repoUrl":"https://github.com/com-lihaoyi/mill-moduledefs.git",
-    "revision":"0.12.7",
-    "version":"0.12.7",
+    "revision":"0.12.8",
+    "version":"0.12.8",
     "targets":"com.lihaoyi%mill-moduledefs",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -9468,7 +9469,7 @@
     "project":"com-lihaoyi/os-lib",
     "repoUrl":"https://github.com/com-lihaoyi/os-lib.git",
     "revision":"main",
-    "version":"0.11.6",
+    "version":"0.11.6-M1",
     "targets":"com.lihaoyi%os-lib com.lihaoyi%os-lib-watch",
     "publishedScalaVersion":"3.3.5",
     "config":{
@@ -20647,7 +20648,7 @@
     "repoUrl":"https://github.com/gemini-hlsw/lucuma-core.git",
     "revision":"v0.166.2",
     "version":"0.166.2",
-    "targets":"edu.gemini%lucuma-ags edu.gemini%lucuma-catalog-testkit edu.gemini%lucuma-core edu.gemini%lucuma-core-testkit edu.gemini%lucuma-horizons",
+    "targets":"edu.gemini%lucuma-ags edu.gemini%lucuma-catalog edu.gemini%lucuma-catalog-testkit edu.gemini%lucuma-core edu.gemini%lucuma-core-testkit edu.gemini%lucuma-horizons",
     "publishedScalaVersion":"3.7.4",
     "config":{
       "projects":{
@@ -22655,8 +22656,8 @@
   "guardian/play-secret-rotation":{
     "project":"guardian/play-secret-rotation",
     "repoUrl":"https://github.com/guardian/play-secret-rotation.git",
-    "revision":"v15.2.7",
-    "version":"15.2.7",
+    "revision":"v16.0.0",
+    "version":"16.0.0",
     "targets":"com.gu.play-secret-rotation%aws-parameterstore-lambda com.gu.play-secret-rotation%aws-parameterstore-sdk-v1 com.gu.play-secret-rotation%aws-parameterstore-sdk-v2 com.gu.play-secret-rotation%aws-parameterstore-secret-supplier-base com.gu.play-secret-rotation%core com.gu.play-secret-rotation%play-v29 com.gu.play-secret-rotation%play-v30 com.gu.play-secret-rotation%secret-generator",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -33926,8 +33927,8 @@
   "kitlangton/neotype":{
     "project":"kitlangton/neotype",
     "repoUrl":"https://github.com/kitlangton/neotype.git",
-    "revision":"v0.4.4",
-    "version":"0.4.4",
+    "revision":"v0.4.7",
+    "version":"0.4.7",
     "targets":"io.github.kitlangton%comptime io.github.kitlangton%neotype io.github.kitlangton%neotype-caliban io.github.kitlangton%neotype-cats io.github.kitlangton%neotype-chimney io.github.kitlangton%neotype-circe io.github.kitlangton%neotype-ciris io.github.kitlangton%neotype-doobie io.github.kitlangton%neotype-jsoniter io.github.kitlangton%neotype-play-json io.github.kitlangton%neotype-pureconfig io.github.kitlangton%neotype-scanamo io.github.kitlangton%neotype-tapir io.github.kitlangton%neotype-tethys io.github.kitlangton%neotype-upickle io.github.kitlangton%neotype-zio-config io.github.kitlangton%neotype-zio-json io.github.kitlangton%neotype-zio-quill io.github.kitlangton%neotype-zio-schema io.github.kitlangton%neotype-zio-test",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -36302,7 +36303,40 @@
     "repoUrl":"https://github.com/lichess-org/lila.git",
     "revision":"",
     "version":"HEAD",
-    "targets":"*%*"
+    "targets":"*%*",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        "3.7"
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "lichess-org/lila-fishnet":{
     "project":"lichess-org/lila-fishnet",
@@ -40864,7 +40898,7 @@
         }
       },
       "java":{
-        "version":"21"
+        
       },
       "sbt":{
         "commands":[
@@ -40906,8 +40940,8 @@
   "natural-transformation/levsha":{
     "project":"natural-transformation/levsha",
     "repoUrl":"https://github.com/natural-transformation/levsha.git",
-    "revision":"v1.6.0",
-    "version":"1.6.0",
+    "revision":"v1.6.1",
+    "version":"1.6.1",
     "targets":"com.natural-transformation%levsha-core com.natural-transformation%levsha-events",
     "publishedScalaVersion":"3.1.3"
   },
@@ -56831,8 +56865,8 @@
   "snowplow/iglu-scala-client":{
     "project":"snowplow/iglu-scala-client",
     "repoUrl":"https://github.com/snowplow/iglu-scala-client.git",
-    "revision":"4.1.0",
-    "version":"4.1.0",
+    "revision":"4.2.0-M1",
+    "version":"4.2.0-M1",
     "targets":"com.snowplowanalytics%iglu-scala-client com.snowplowanalytics%iglu-scala-client-data com.snowplowanalytics%iglu-scala-client-http4s",
     "publishedScalaVersion":"3.2.0",
     "config":{
@@ -61050,7 +61084,6 @@
     "revision":"v3.0.0",
     "version":"3.0.0",
     "targets":"com.thoughtworks.binding%bindable",
-    "publishedScalaVersion":"3.2.1",
     "config":{
       "projects":{
         "exclude":[
@@ -70670,8 +70703,8 @@
   "zio/zio-blocks":{
     "project":"zio/zio-blocks",
     "repoUrl":"https://github.com/zio/zio-blocks.git",
-    "revision":"v0.0.4",
-    "version":"0.0.4",
+    "revision":"v0.0.5",
+    "version":"0.0.5",
     "targets":"dev.zio%zio-blocks-schema dev.zio%zio-blocks-schema-avro dev.zio%zio-blocks-streams",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -71636,8 +71669,8 @@
   "zio/zio-redis":{
     "project":"zio/zio-redis",
     "repoUrl":"https://github.com/zio/zio-redis.git",
-    "revision":"v1.1.11",
-    "version":"1.1.11",
+    "revision":"v1.1.12",
+    "version":"1.1.12",
     "targets":"dev.zio%zio-redis dev.zio%zio-redis-embedded",
     "publishedScalaVersion":"3.3.7",
     "config":{
