@@ -103,10 +103,7 @@ runs:
           cd /compiler/
           java -version
           
-          compilerProject=scala3-bootstrapped-new
-          if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -le 7 ]]); then
-            compilerProject=scala3-bootstrapped
-          fi
+          compilerProject=scala3-bootstrapped
           echo "Would publish $compilerProject"
           sbt \
           '-verbose' \
