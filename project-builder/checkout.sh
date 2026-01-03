@@ -43,8 +43,15 @@ if ! git clone --quiet --recurse-submodules "$repo" "$repoDir" $branch $depth; t
   if ! git submodule update --init --recursive; then
     echo "Submodule update via SSH failed, retrying with HTTPS remap..." >&2
 
-    git config url."https://github.com/".insteadOf "git@github.com:"
-    git submodule sync --recursive
+    # Set global git config to rewrite SSH URLs to HTTPS
+    git config --global url."https://github.com/".insteadOf "git@github.com:"
+    
+    # Also directly rewrite .gitmodules file in case insteadOf doesn't apply
+    if [ -f .gitmodules ]; then
+      sed -i 's|git@github.com:|https://github.com/|g' .gitmodules
+      git submodule sync --recursive
+    fi
+    
     git submodule update --init --recursive
   fi
 fi
