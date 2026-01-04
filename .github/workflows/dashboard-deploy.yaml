@@ -30,8 +30,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: coursier/cache-action@v6.4
-      - uses: VirtusLab/scala-cli-setup@v1.5
+      - uses: coursier/cache-action@v7
+      - uses: VirtusLab/scala-cli-setup@v1.11
       - run: scala-cli test dashboard
 
   build:
