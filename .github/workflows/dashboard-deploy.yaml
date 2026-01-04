@@ -7,6 +7,10 @@ on:
     paths:
       - 'dashboard/**'
       - '.github/workflows/dashboard-deploy.yaml'
+  pull_request:
+    paths:
+      - 'dashboard/**'
+      - '.github/workflows/dashboard-deploy.yaml'
   workflow_dispatch:
     inputs:
       deploy_only:
@@ -19,8 +23,19 @@ env:
   IMAGE_NAME: virtuslab/scala-community-build-dashboard
 
 jobs:
-  build:
+  test:
     if: ${{ !inputs.deploy_only }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: coursier/cache-action@v6.4
+      - uses: VirtusLab/scala-cli-setup@v1.5
+      - run: scala-cli test dashboard
+
+  build:
+    if: ${{ github.event_name != 'pull_request' && !inputs.deploy_only }}
     runs-on: ubuntu-22.04
     permissions:
       contents: read
