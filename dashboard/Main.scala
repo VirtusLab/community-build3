@@ -29,7 +29,8 @@ object Main extends IOApp.Simple:
   private val config = AppConfig.default
 
   override def run: IO[Unit] =
-    log.info("Starting Community Build Dashboard...") *>
+    configureLogging() *>
+      log.info("Starting Community Build Dashboard...") *>
       serverResource
         .use: _ =>
           log.info(s"Server started at http://${config.host}:${config.port}") *>
@@ -144,6 +145,14 @@ object Main extends IOApp.Simple:
     val authRoutes = GitHubOAuth.routes(config.github, httpClient)
     authRoutes <+> mainRoutes
 
+  private def configureLogging(): IO[Unit] = IO {
+    scribe.Logger.root
+      .clearHandlers()
+      .clearModifiers()
+      .withHandler(minimumLevel = Some(Env("LOG_LEVEL", scribe.Level.Info)))
+      .replace()
+  }
+
 final case class AppConfig(
     host: Host,
     port: Port,
@@ -230,3 +239,10 @@ object Env:
   given FromString[String] = Some(_)
   given FromString[Int] = _.toIntOption
   given FromString[Boolean] = _.toBooleanOption
+  given FromString[scribe.Level] = _.toUpperCase match
+    case "DEBUG" => Some(scribe.Level.Debug)
+    case "TRACE" => Some(scribe.Level.Trace)
+    case "INFO"  => Some(scribe.Level.Info)
+    case "WARN"  => Some(scribe.Level.Warn)
+    case "ERROR" => Some(scribe.Level.Error)
+    case _       => None

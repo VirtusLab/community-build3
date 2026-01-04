@@ -1,6 +1,6 @@
 package dashboard.data
 
-import cats.effect.{IO, Resource}
+import cats.effect.{Clock, IO, Resource}
 import scribe.cats.{io => log}
 
 import com.sksamuel.elastic4s.{ElasticClient, ElasticNodeEndpoint}
@@ -308,11 +308,18 @@ object ElasticsearchClient:
         response.hits.hits.toList.flatMap(hit => parseBuildResult(hit.sourceAsMap))
 
     private def executeRaw(request: SearchRequest): IO[SearchResponse] =
-      client
-        .execute(request)
-        .flatMap:
-          case response if response.isSuccess => IO.pure(response.result)
-          case response                       => IO.raiseError(RuntimeException(s"ES query failed: ${response.error}"))
+      for
+        start <- Clock[IO].monotonic
+        response <- client.execute(request)
+        end <- Clock[IO].monotonic
+        duration = end - start
+        responseKb = response.body.map(_.length / 1024.0).getOrElse(0.0)
+        // queryStr = request.query.map(_.toString).getOrElse("*").take(80)
+        _ <- log.debug(f"ES ${request.indexes.values.mkString} ${duration.toMillis}ms ${responseKb}%.1fKB [$request]")
+        result <- response match
+          case r if r.isSuccess => IO.pure(r.result)
+          case r                => IO.raiseError(RuntimeException(s"ES query failed: ${r.error}"))
+      yield result
 
     private val standardFields = Seq(
       "projectName",
