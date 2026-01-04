@@ -1,74 +1,245 @@
 {
-  "mappings": {
-    "properties": {
-      "projectName": {"type": "keyword"},
-      "buildId": {"type": "keyword"},
-      "buildURL": {"type": "text"},
-      "timestamp": {"type": "date"},
-      "version": {"type": "version"},
-      "scalaVersion": {"type": "version"},
-      "buildTool": {"type": "keyword"},
-      "status": {"type": "keyword"},
-      "summary": {
-        "type": "nested", 
-        "properties": {
-          "module": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
+  "project-build-summary": {
+    "mappings": {
+      "properties": {
+        "buildId": {
+          "type": "keyword"
+        },
+        "buildTool": {
+          "type": "keyword"
+        },
+        "buildURL": {
+          "type": "text"
+        },
+        "logs": {
+          "type": "text"
+        },
+        "projectName": {
+          "type": "keyword"
+        },
+        "scalaVersion": {
+          "type": "version"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "summary": {
+          "type": "nested",
+          "properties": {
+            "compile": {
+              "properties": {
+                "errors": {
+                  "type": "short"
+                },
+                "failureContext": {
+                  "properties": {
+                    "reasons": {
+                      "type": "text"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "sourceVersion": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "tookMs": {
+                  "type": "integer"
+                },
+                "warnings": {
+                  "type": "short"
+                }
+              }
+            },
+            "doc": {
+              "properties": {
+                "failureContext": {
+                  "properties": {
+                    "reasons": {
+                      "type": "text"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "files": {
+                  "type": "short"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "tookMs": {
+                  "type": "integer"
+                },
+                "totalSizeKb": {
+                  "type": "integer"
+                }
+              }
+            },
+            "metadata": {
+              "properties": {
+                "crossScalaVersions": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            },
+            "module": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "publish": {
+              "properties": {
+                "failureContext": {
+                  "properties": {
+                    "reasons": {
+                      "type": "text"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "tookMs": {
+                  "type": "integer"
+                }
+              }
+            },
+            "test": {
+              "properties": {
+                "byFramework": {
+                  "properties": {
+                    "framework": {
+                      "type": "text",
+                      "fields": {
+                        "keyword": {
+                          "type": "keyword",
+                          "ignore_above": 256
+                        }
+                      }
+                    },
+                    "stats": {
+                      "properties": {
+                        "failed": {
+                          "type": "long"
+                        },
+                        "ignored": {
+                          "type": "long"
+                        },
+                        "passed": {
+                          "type": "long"
+                        },
+                        "skipped": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "failed": {
+                  "type": "short"
+                },
+                "failureContext": {
+                  "properties": {
+                    "reasons": {
+                      "type": "text"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "ignored": {
+                  "type": "short"
+                },
+                "passed": {
+                  "type": "integer"
+                },
+                "skipped": {
+                  "type": "short"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "tookMs": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "test-compile": {
+              "properties": {
+                "errors": {
+                  "type": "short"
+                },
+                "failureContext": {
+                  "properties": {
+                    "reasons": {
+                      "type": "text"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "sourceVersion": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "tookMs": {
+                  "type": "integer"
+                },
+                "warnings": {
+                  "type": "short"
+                }
               }
             }
-          },
-          "compile": {
-            "properties": {
-              "status": {"type": "keyword"},
-              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
-              "tookMs": {"type": "integer"},
-              "warnings": {"type": "short"},
-              "errors": {"type": "short"}
-            }
-          },
-          "doc": {
-            "properties": {
-              "status": {"type": "keyword"},
-              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
-              "tookMs": {"type": "integer"},
-              "files": {"type": "short"},
-              "totalSizeKb": {"type": "integer"}
-            }
-          },
-          "test-compile": {
-            "properties": {
-              "status": {"type": "keyword"},
-              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
-              "tookMs": {"type": "integer"},
-              "warnings": {"type": "short"},
-              "errors": {"type": "short"}
-            }
-          },
-          "test": {
-            "properties": {
-              "status": {"type": "keyword"},
-              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
-              "tookMs": {"type": "integer"},
-              "passed": {"type": "integer"},
-              "failed": {"type": "short"},
-              "ignored": {"type": "short"},
-              "skipped": {"type": "short"}
-            }
-          },
-          "publish": {
-            "properties": {
-              "status": {"type": "keyword"},
-              "failureContext": {"properties": {"type": {"type": "keyword"}, "reasons": {"type": "text"}}},
-              "tookMs": {"type": "integer"}
-            }
           }
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "version": {
+          "type": "version"
         }
-      },
-      "logs": { "type": "text" }
+      }
     }
   }
 }
