@@ -300,18 +300,13 @@ object Templates:
       )
     )
 
-  /** Filter builds based on home params */
+  /** Filter builds based on home params (reason filtering happens in homeResultsContent) */
   private def filterHomeBuilds(builds: List[BuildResult], params: HomeParams): List[BuildResult] =
     builds.filter: build =>
       val matchesSeries = params.series match
         case Some(s) => ScalaSeries.fromScalaVersion(build.scalaVersion) == s
         case None    => true
-      val matchesReason = params.reason match
-        case Some(r) if build.status == BuildStatus.Failure =>
-          build.failureReasons.exists(_.toString == r)
-        case Some(_) => false // If filtering by reason, only show failures
-        case None    => true
-      matchesSeries && matchesReason
+      matchesSeries
 
   /** Home page results content */
   def homeResultsContent(
@@ -333,8 +328,8 @@ object Templates:
         p(cls := "text-gray-500", "Choose a Scala version or series above to view build results")
       )
 
-    // If series selected but no builds available for it
-    if builds.isEmpty && params.series.isDefined then
+    // If series selected but no builds available for it (only if no reason filter applied)
+    if builds.isEmpty && params.series.isDefined && params.reason.isEmpty then
       val seriesName = params.series.map(_.toString).getOrElse("")
       return div(
         cls := "bg-white rounded-lg shadow p-12 text-center",
@@ -348,7 +343,11 @@ object Templates:
         p(cls := "text-gray-500", "No versions are available for this series yet")
       )
 
-    val failures = builds.filter(_.status == BuildStatus.Failure)
+    // Get all failures first (for stats), then apply reason filter for display
+    val allFailures = builds.filter(_.status == BuildStatus.Failure)
+    val failures = params.reason match
+      case Some(r) => allFailures.filter(_.failureReasons.exists(_.toString == r))
+      case None    => allFailures
     val successes = builds.count(_.status == BuildStatus.Success)
 
     // Sort failures based on params.sort and direction
@@ -362,12 +361,12 @@ object Templates:
     val sortedFailures = if params.sortAsc then baseSorted else baseSorted.reverse
 
     frag(
-      // Summary stats
+      // Summary stats (show unfiltered counts)
       div(
         cls := "grid grid-cols-1 md:grid-cols-4 gap-4 mb-6",
         statCard("Total", builds.length.toString, "text-gray-900"),
         statCard("Passing", successes.toString, "text-emerald-600"),
-        statCard("Failing", failures.length.toString, "text-red-600"),
+        statCard("Failing", allFailures.length.toString, "text-red-600"),
         // Build info
         builds.headOption.map: b =>
           div(
@@ -1378,7 +1377,7 @@ object Templates:
             case FailureReason.TestCompilation => ("bg-red-400", "TC")
             case FailureReason.Tests           => ("bg-orange-500", "T")
             case FailureReason.Publish         => ("bg-yellow-500", "P")
-            case FailureReason.Scaladoc        => ("bg-yellow-400", "D")
+            case FailureReason.Scaladoc        => ("bg-purple-500", "S")
             case FailureReason.Build           => ("bg-gray-500", "B")
             case FailureReason.Other           => ("bg-purple-500", "?")
           span(
