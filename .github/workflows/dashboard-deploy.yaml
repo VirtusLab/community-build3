@@ -36,6 +36,7 @@ jobs:
 
   build:
     if: ${{ github.event_name != 'pull_request' && !inputs.deploy_only }}
+    needs: [test]
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -71,8 +72,13 @@ jobs:
           echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
 
   deploy:
-    needs: [build]
-    if: always() && (needs.build.result == 'success' || inputs.deploy_only)
+    needs: [test, build]
+    # Run when: build succeeded, OR deploy_only (skips both test and build)
+    if: |
+      always() && (
+        needs.build.result == 'success' ||
+        (inputs.deploy_only && needs.test.result == 'skipped' && needs.build.result == 'skipped')
+      )
     runs-on: ubuntu-22.04
     environment: production
     steps:
