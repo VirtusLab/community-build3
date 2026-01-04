@@ -328,9 +328,11 @@ object Routes:
           // Compute failure streaks in PARALLEL - expensive but cached
           failures
             .parTraverse: build =>
-              esClient.getFailureStreakInfo(build.projectName).map:
-                case Some(info) => Some(build.projectName -> info)
-                case None       => None
+              esClient
+                .getFailureStreakInfo(build.projectName)
+                .map:
+                  case Some(info) => Some(build.projectName -> info)
+                  case None       => None
             .map(_.flatten.toMap)
         )
 
@@ -367,7 +369,8 @@ object Routes:
           // Only compute failure streaks when sorting by Streak (expensive but cached)
           failures = builds.filter(_.status == BuildStatus.Failure)
           failureStreaks <-
-            if sort == Templates.FailureSort.Streak then getCachedFailureStreaks(effectiveScalaVersion, buildId, failures)
+            if sort == Templates.FailureSort.Streak then
+              getCachedFailureStreaks(effectiveScalaVersion, buildId, failures)
             else IO.pure(Map.empty[ProjectName, FailureStreakInfo])
           response <-
             if isHtmx then
@@ -380,7 +383,10 @@ object Routes:
                   )
                 case _ =>
                   // Version/filter changed - return just results
-                  Ok(Templates.homeResultsPartial(builds, homeParams, failureStreaks), `Content-Type`(MediaType.text.html))
+                  Ok(
+                    Templates.homeResultsPartial(builds, homeParams, failureStreaks),
+                    `Content-Type`(MediaType.text.html)
+                  )
             else
               // Full page request
               Ok(

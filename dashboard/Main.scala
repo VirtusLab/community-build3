@@ -53,7 +53,14 @@ object Main extends IOApp.Simple:
       logsCache <- Resource.eval(LogsCache.inMemory())
       projectsCache <- Resource.eval(ProjectsCache.inMemory())
       failureStreaksCache <- Resource.eval(FailureStreaksCache.inMemory())
-      cacheManager = CacheManager(comparisonCache, historyCache, buildsCache, logsCache, projectsCache, failureStreaksCache)
+      cacheManager = CacheManager(
+        comparisonCache,
+        historyCache,
+        buildsCache,
+        logsCache,
+        projectsCache,
+        failureStreaksCache
+      )
       _ <- Resource.eval(log.info("Caches initialized"))
       routes = buildRoutes(
         httpClient,

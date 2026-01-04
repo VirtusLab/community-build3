@@ -530,7 +530,9 @@ object Templates:
             title := "Swap Base and Target",
             attr("onclick") := "swapCompareValues()",
             // Double-headed arrow icon
-            raw("""<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>""")
+            raw(
+              """<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>"""
+            )
           ),
           span(cls := "text-xs text-gray-400 mt-1", "Swap")
         ),
@@ -553,7 +555,9 @@ object Templates:
           tpe := "button",
           cls := "px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors text-sm flex items-center gap-2",
           attr("onclick") := "swapCompareValues()",
-          raw("""<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>"""),
+          raw(
+            """<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>"""
+          ),
           "Swap Base ↔ Target"
         )
       ),
@@ -804,7 +808,9 @@ object Templates:
         excludeSnapshots: Boolean = params.excludeSnapshots,
         excludeNightlies: Boolean = params.excludeNightlies
     ): String =
-      path(s"/projects/$projectPath/history/filter?series=${series}&excludeSnapshots=$excludeSnapshots&excludeNightlies=$excludeNightlies")
+      path(
+        s"/projects/$projectPath/history/filter?series=${series}&excludeSnapshots=$excludeSnapshots&excludeNightlies=$excludeNightlies"
+      )
 
     div(
       cls := "flex flex-wrap gap-4 items-center",

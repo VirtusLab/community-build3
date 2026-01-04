@@ -7,7 +7,15 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
-import dashboard.core.{BuildResult, ComparisonResult, FailureStreakInfo, ParsedLogs, ProjectHistory, ProjectName, ProjectsList}
+import dashboard.core.{
+  BuildResult,
+  ComparisonResult,
+  FailureStreakInfo,
+  ParsedLogs,
+  ProjectHistory,
+  ProjectName,
+  ProjectsList
+}
 
 /** Generic in-memory cache with TTL */
 class InMemoryCache[K, V](
@@ -241,7 +249,10 @@ object ProjectsCache:
 /** Cache for failure streaks (info per project) - expensive to compute */
 trait FailureStreaksCache:
   /** Get cached failure streaks or compute them */
-  def getOrCompute(key: FailureStreaksCache.Key, compute: IO[Map[ProjectName, FailureStreakInfo]]): IO[Map[ProjectName, FailureStreakInfo]]
+  def getOrCompute(
+      key: FailureStreaksCache.Key,
+      compute: IO[Map[ProjectName, FailureStreakInfo]]
+  ): IO[Map[ProjectName, FailureStreakInfo]]
 
   /** Clear all cached entries */
   def clear(): IO[Int]
@@ -258,7 +269,10 @@ object FailureStreaksCache:
     IO.delay:
       val underlying = new InMemoryCache[Key, Map[ProjectName, FailureStreakInfo]](ttl, maxSize)
       new FailureStreaksCache:
-        override def getOrCompute(key: Key, compute: IO[Map[ProjectName, FailureStreakInfo]]): IO[Map[ProjectName, FailureStreakInfo]] =
+        override def getOrCompute(
+            key: Key,
+            compute: IO[Map[ProjectName, FailureStreakInfo]]
+        ): IO[Map[ProjectName, FailureStreakInfo]] =
           underlying.getOrCompute(key, compute)
         override def clear(): IO[Int] = underlying.clear()
         override def stats: IO[CacheStats] = underlying.stats

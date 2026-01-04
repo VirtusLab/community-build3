@@ -115,20 +115,22 @@ object Components:
         div(
           cls := "flex items-center gap-2",
           // Duration badge for failures - shows days and starting Scala version
-          streakInfo.filter(_ => result.status == BuildStatus.Failure).map: info =>
-            val (bgColor, textColor) = info.days match
-              case d if d >= 30 => ("bg-red-100", "text-red-700")
-              case d if d >= 7  => ("bg-orange-100", "text-orange-700")
-              case _            => ("bg-yellow-100", "text-yellow-700")
-            val daysText =
-              if info.days == 0 then "< 1 day"
-              else if info.days == 1 then "1 day"
-              else s"${info.days} days"
-            span(
-              cls := s"px-2 py-1 text-xs font-medium rounded $bgColor $textColor whitespace-nowrap",
-              title := s"Failing for ${info.days} days, started on ${info.startedOnScalaVersion}",
-              s"$daysText • ${info.startedOnScalaVersion}"
-            )
+          streakInfo
+            .filter(_ => result.status == BuildStatus.Failure)
+            .map: info =>
+              val (bgColor, textColor) = info.days match
+                case d if d >= 30 => ("bg-red-100", "text-red-700")
+                case d if d >= 7  => ("bg-orange-100", "text-orange-700")
+                case _            => ("bg-yellow-100", "text-yellow-700")
+              val daysText =
+                if info.days == 0 then "< 1 day"
+                else if info.days == 1 then "1 day"
+                else s"${info.days} days"
+              span(
+                cls := s"px-2 py-1 text-xs font-medium rounded $bgColor $textColor whitespace-nowrap",
+                title := s"Failing for ${info.days} days, started on ${info.startedOnScalaVersion}",
+                s"$daysText • ${info.startedOnScalaVersion}"
+              )
           ,
           statusBadge(result.status)
         )
