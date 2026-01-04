@@ -17,6 +17,7 @@ RUN scala-cli --power package . --assembly -o /build/dashboard.jar --force
 
 # Runtime image - minimal JRE
 FROM eclipse-temurin:25-jre-alpine
+LABEL org.opencontainers.image.source="https://github.com/VirtusLab/community-build3"
 
 WORKDIR /app
 
