@@ -449,10 +449,11 @@ object Templates:
       attr("hx-target") := "#comparison-results",
       attr("hx-swap") := "innerHTML",
       div(
-        cls := "grid grid-cols-1 md:grid-cols-2 gap-6",
+        cls := "grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center",
         // Base selection
         div(
-          h3(cls := "font-medium mb-3", "Base (compare from)"),
+          h3(cls := "font-medium mb-2", "Base"),
+          p(cls := "text-xs text-gray-500 mb-3", "The version to compare against (previous)"),
           div(
             cls := "space-y-3",
             selectField("baseScalaVersion", "Scala Version", scalaVersions),
@@ -460,15 +461,40 @@ object Templates:
             selectField("baseBuildId", "Build ID", buildIds)
           )
         ),
+        // Swap button
+        div(
+          cls := "hidden md:flex flex-col items-center justify-center pt-8",
+          button(
+            tpe := "button",
+            cls := "p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors",
+            title := "Swap Base and Target",
+            attr("onclick") := "swapCompareValues()",
+            // Double-headed arrow icon
+            raw("""<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>""")
+          ),
+          span(cls := "text-xs text-gray-400 mt-1", "Swap")
+        ),
         // Target selection
         div(
-          h3(cls := "font-medium mb-3", "Target (compare to)"),
+          h3(cls := "font-medium mb-2", "Target"),
+          p(cls := "text-xs text-gray-500 mb-3", "The version to compare with (current)"),
           div(
             cls := "space-y-3",
             selectField("targetScalaVersion", "Scala Version", scalaVersions),
             div(cls := "text-center text-gray-400", "or"),
             selectField("targetBuildId", "Build ID", buildIds)
           )
+        )
+      ),
+      // Mobile swap button (shown on small screens)
+      div(
+        cls := "md:hidden flex justify-center my-2",
+        button(
+          tpe := "button",
+          cls := "px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-colors text-sm flex items-center gap-2",
+          attr("onclick") := "swapCompareValues()",
+          raw("""<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>"""),
+          "Swap Base ↔ Target"
         )
       ),
       div(
@@ -479,8 +505,30 @@ object Templates:
           "Compare",
           span(cls := "htmx-indicator ml-2", loadingSpinner)
         )
-      )
+      ),
+      // Swap script
+      script(raw(swapCompareScript))
     )
+
+  /** JavaScript for swapping compare form values */
+  private val swapCompareScript: String = """
+    function swapCompareValues() {
+      const baseVersion = document.querySelector('select[name="baseScalaVersion"]');
+      const targetVersion = document.querySelector('select[name="targetScalaVersion"]');
+      const baseBuildId = document.querySelector('select[name="baseBuildId"]');
+      const targetBuildId = document.querySelector('select[name="targetBuildId"]');
+      
+      // Swap Scala versions
+      const tempVersion = baseVersion.value;
+      baseVersion.value = targetVersion.value;
+      targetVersion.value = tempVersion;
+      
+      // Swap Build IDs
+      const tempBuildId = baseBuildId.value;
+      baseBuildId.value = targetBuildId.value;
+      targetBuildId.value = tempBuildId;
+    }
+  """
 
   private def selectField(name: String, label: String, options: List[String]): Frag =
     div(
@@ -520,10 +568,30 @@ object Templates:
       // Summary
       div(
         cls := "grid grid-cols-1 md:grid-cols-4 gap-4 mb-6",
-        statCard("New Failures", result.newFailures.length.toString, "text-red-600"),
-        statCard("New Fixes", result.newFixes.length.toString, "text-emerald-600"),
-        statCard("Still Failing", result.stillFailing.length.toString, "text-yellow-600"),
-        statCard("Still Passing", result.stillPassing.toString, "text-gray-600")
+        statCardWithTooltip(
+          "New Failures",
+          result.newFailures.length.toString,
+          "text-red-600",
+          "Projects that passed in Base but fail in Target (regressions)"
+        ),
+        statCardWithTooltip(
+          "New Fixes",
+          result.newFixes.length.toString,
+          "text-emerald-600",
+          "Projects that failed in Base but pass in Target (improvements)"
+        ),
+        statCardWithTooltip(
+          "Still Failing",
+          result.stillFailing.length.toString,
+          "text-yellow-600",
+          "Projects that fail in both Base and Target"
+        ),
+        statCardWithTooltip(
+          "Still Passing",
+          result.stillPassing.toString,
+          "text-gray-600",
+          "Projects that pass in both Base and Target"
+        )
       ),
 
       // Filter buttons
@@ -1024,6 +1092,25 @@ object Templates:
     div(
       cls := "bg-white rounded-lg shadow p-6",
       p(cls := "text-sm text-gray-500", label),
+      p(cls := s"text-3xl font-bold $valueColor", value)
+    )
+
+  /** Stat card with tooltip explanation */
+  private def statCardWithTooltip(label: String, value: String, valueColor: String, tooltip: String): Frag =
+    div(
+      cls := "bg-white rounded-lg shadow p-6 relative group",
+      p(
+        cls := "text-sm text-gray-500 flex items-center gap-1 cursor-help",
+        label,
+        span(cls := "text-gray-400 text-xs", "ⓘ"),
+        // Tooltip that appears on hover
+        span(
+          cls := "absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 w-56 text-center",
+          tooltip,
+          // Tooltip arrow
+          span(cls := "absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-gray-900")
+        )
+      ),
       p(cls := s"text-3xl font-bold $valueColor", value)
     )
 
