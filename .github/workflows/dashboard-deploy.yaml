@@ -60,9 +60,6 @@ jobs:
     if: always() && (needs.build.result == 'success' || inputs.deploy_only)
     runs-on: ubuntu-22.04
     environment: production
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,9 +67,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
