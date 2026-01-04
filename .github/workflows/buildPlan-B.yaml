@@ -1,5 +1,5 @@
 
-# projects total:     881
+# projects total:     883
 # min stars count:    -1
 # max projects count: 1000
 
@@ -197,6 +197,7 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -331,7 +332,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-catalog"
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
-        - name: "gemini-hlsw/lucuma-jts"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-sso"
@@ -430,6 +431,7 @@ jobs:
         - name: "i10416/munkres"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
+        - name: "imaxmelnyk/openai-scala"
         - name: "indoorvivants/decline-completion"
         - name: "indoorvivants/detective"
         - name: "indoorvivants/fxprof"
@@ -508,7 +510,6 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -612,7 +613,6 @@ jobs:
         - name: "mattlangsenkamp/svgbounds"
         - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/scalacheck"
-        - name: "memo33/metarules"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
@@ -747,6 +748,7 @@ jobs:
         - name: "polyvariant/scodec-java-classfile"
         - name: "polyvariant/smithy4s-bsp"
         - name: "polyvariant/treesitter4s"
+        - name: "pomadchin/dynosaur-derivation"
         - name: "pomadchin/tagless-mid"
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
@@ -892,8 +894,6 @@ jobs:
         - name: "swaldman/unstatic"
         - name: "swaldman/untemplate"
         - name: "sweet-delights/delightful-cron"
-        - name: "sweet-delights/delightful-parsing"
-        - name: "sweet-delights/delightful-typeclasses"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sweet-delights/delightful-parsing"
+        - name: "sweet-delights/delightful-typeclasses"
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
         - name: "taig/data"
