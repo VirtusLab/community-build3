@@ -372,7 +372,7 @@ object Components:
           Some("Compilation") -> "Compile",
           Some("TestCompilation") -> "Test Compile",
           Some("Tests") -> "Tests",
-          Some("Scaladoc") -> "Doc",
+          Some("Scaladoc") -> "Scaladoc",
           Some("Publish") -> "Publish",
           Some("Build") -> "Build"
         ).map: (reasonOpt, label) =>
@@ -382,7 +382,9 @@ object Components:
               if active then "bg-red-600 text-white" else "bg-red-100 text-red-700 hover:bg-red-200"
             case Some("Tests") =>
               if active then "bg-orange-600 text-white" else "bg-orange-100 text-orange-700 hover:bg-orange-200"
-            case Some("Scaladoc") | Some("Publish") =>
+            case Some("Scaladoc") =>
+              if active then "bg-purple-600 text-white" else "bg-purple-100 text-purple-700 hover:bg-purple-200"
+            case Some("Publish") =>
               if active then "bg-yellow-600 text-white" else "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
             case Some("Build") =>
               if active then "bg-gray-600 text-white" else "bg-gray-200 text-gray-700 hover:bg-gray-300"
