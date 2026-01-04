@@ -34,6 +34,9 @@ trait ElasticsearchClient:
   /** Get project history across all scala versions */
   def getProjectHistory(projectName: ProjectName): IO[List[ProjectHistoryEntry]]
 
+  /** Get failure streak info (optimized - fetches minimal data) */
+  def getFailureStreakInfo(projectName: ProjectName): IO[Option[FailureStreakInfo]]
+
   /** Get a single build's full details including logs */
   def getBuildDetails(projectName: ProjectName, buildId: String): IO[Option[BuildResult]]
 
@@ -156,6 +159,40 @@ object ElasticsearchClient:
             val summary = extractSummary(fields)
             val reasons = computeFailureReasons(status, summary)
             ProjectHistoryEntry(name, scalaVersion, version, status, reasons, timestamp, buildURL, buildId)
+
+    override def getFailureStreakInfo(projectName: ProjectName): IO[Option[FailureStreakInfo]] =
+      // Optimized query: only fetch status, timestamp, scalaVersion - limited to recent entries
+      val query = search(BuildSummariesIndex)
+        .query(
+          boolQuery()
+            .should(
+              termQuery("projectName", projectName.searchName),
+              termQuery("projectName", projectName.legacySearchName)
+            )
+            .minimumShouldMatch(1)
+        )
+        .size(200) // Fetch limited entries - enough to find streak start
+        .sourceInclude("status", "timestamp", "scalaVersion")
+        .sortBy(fieldSort("timestamp").desc())
+
+      executeRaw(query).map: response =>
+        val entries = response.hits.hits.toList.flatMap: hit =>
+          val fields = hit.sourceAsMap
+          for
+            status <- fields.get("status").map(s => BuildStatus.fromString(s.toString))
+            timestamp <- fields.get("timestamp").map(t => Instant.parse(t.toString))
+            scalaVersion <- fields.get("scalaVersion").map(_.toString)
+          yield (status, timestamp, scalaVersion)
+
+        // Check if currently failing
+        entries.headOption match
+          case Some((BuildStatus.Failure, _, _)) =>
+            // Find where failure streak started (oldest failing entry in streak)
+            val failingEntries = entries.takeWhile(_._1 == BuildStatus.Failure)
+            failingEntries.lastOption.map: (_, streakStart, scalaVersion) =>
+              val days = java.time.Duration.between(streakStart, Instant.now()).toDays
+              FailureStreakInfo(days, scalaVersion)
+          case _ => None
 
     override def getBuildDetails(projectName: ProjectName, buildId: String): IO[Option[BuildResult]] =
       val query = search(BuildSummariesIndex)

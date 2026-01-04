@@ -15,6 +15,7 @@ import dashboard.data.{
   BuildsCache,
   CacheManager,
   ComparisonCache,
+  FailureStreaksCache,
   HistoryCache,
   LogsCache,
   ProjectsCache,
@@ -51,7 +52,8 @@ object Main extends IOApp.Simple:
       buildsCache <- Resource.eval(BuildsCache.inMemory())
       logsCache <- Resource.eval(LogsCache.inMemory())
       projectsCache <- Resource.eval(ProjectsCache.inMemory())
-      cacheManager = CacheManager(comparisonCache, historyCache, buildsCache, logsCache, projectsCache)
+      failureStreaksCache <- Resource.eval(FailureStreaksCache.inMemory())
+      cacheManager = CacheManager(comparisonCache, historyCache, buildsCache, logsCache, projectsCache, failureStreaksCache)
       _ <- Resource.eval(log.info("Caches initialized"))
       routes = buildRoutes(
         httpClient,
@@ -62,6 +64,7 @@ object Main extends IOApp.Simple:
         buildsCache,
         logsCache,
         projectsCache,
+        failureStreaksCache,
         cacheManager
       )
       server <- EmberServerBuilder
@@ -113,6 +116,7 @@ object Main extends IOApp.Simple:
       buildsCache: BuildsCache,
       logsCache: LogsCache,
       projectsCache: ProjectsCache,
+      failureStreaksCache: FailureStreaksCache,
       cacheManager: CacheManager
   ): org.http4s.HttpRoutes[IO] =
     val jwtSecret = config.github.jwtSecret
@@ -125,6 +129,7 @@ object Main extends IOApp.Simple:
       buildsCache,
       logsCache,
       projectsCache,
+      failureStreaksCache,
       cacheManager,
       jwtSecret,
       basePath

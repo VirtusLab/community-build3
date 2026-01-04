@@ -108,19 +108,27 @@ object Templates:
       text
     )
 
+  /** Sort options for home page failures */
+  enum FailureSort:
+    case Name, Streak, Reason
+
   /** Home page parameters */
   final case class HomeParams(
       scalaVersion: Option[String] = None,
       buildId: Option[String] = None,
       series: Option[ScalaSeries] = None,
-      reason: Option[String] = None
+      reason: Option[String] = None,
+      sort: FailureSort = FailureSort.Name,
+      sortAsc: Boolean = true
   ):
     def queryString: String =
       val params = List(
         scalaVersion.map(v => s"scalaVersion=$v"),
         buildId.map(v => s"buildId=$v"),
         series.map(s => s"series=${s.toString}"),
-        reason.map(r => s"reason=$r")
+        reason.map(r => s"reason=$r"),
+        Option.when(sort != FailureSort.Name)(s"sort=${sort.toString}"),
+        Option.when(!sortAsc)(s"sortAsc=false")
       ).flatten
       if params.isEmpty then "" else "?" + params.mkString("&")
 
@@ -129,7 +137,8 @@ object Templates:
       builds: List[BuildResult],
       scalaVersions: List[String],
       buildIds: List[String],
-      params: HomeParams = HomeParams()
+      params: HomeParams = HomeParams(),
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
   ): String =
     val filteredBuilds = filterHomeBuilds(builds, params)
 
@@ -143,7 +152,7 @@ object Templates:
         // Results section (for htmx updates)
         div(
           id := "home-results",
-          homeResultsContent(filteredBuilds, params)
+          homeResultsContent(filteredBuilds, params, failureStreaks)
         )
       )
     )
@@ -153,7 +162,8 @@ object Templates:
       builds: List[BuildResult],
       scalaVersions: List[String],
       buildIds: List[String],
-      params: HomeParams
+      params: HomeParams,
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
   ): String =
     val filteredBuilds = filterHomeBuilds(builds, params)
     div(
@@ -161,7 +171,7 @@ object Templates:
       homeVersionSelector(scalaVersions, buildIds, params),
       div(
         id := "home-results",
-        homeResultsContent(filteredBuilds, params)
+        homeResultsContent(filteredBuilds, params, failureStreaks)
       )
     ).render
 
@@ -304,7 +314,11 @@ object Templates:
       matchesSeries && matchesReason
 
   /** Home page results content */
-  def homeResultsContent(builds: List[BuildResult], params: HomeParams = HomeParams()): Frag =
+  def homeResultsContent(
+      builds: List[BuildResult],
+      params: HomeParams = HomeParams(),
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
+  ): Frag =
     // If no builds and no version/series selected, show prompt to select one
     if builds.isEmpty && params.scalaVersion.isEmpty && params.series.isEmpty then
       return div(
@@ -336,6 +350,16 @@ object Templates:
 
     val failures = builds.filter(_.status == BuildStatus.Failure)
     val successes = builds.count(_.status == BuildStatus.Success)
+
+    // Sort failures based on params.sort and direction
+    val baseSorted = params.sort match
+      case FailureSort.Streak =>
+        failures.sortBy(f => failureStreaks.get(f.projectName).map(_.days).getOrElse(0L))
+      case FailureSort.Reason =>
+        failures.sortBy(f => f.failureReasons.headOption.map(_.toString).getOrElse("Z"))
+      case FailureSort.Name =>
+        failures.sortBy(_.projectName: String)
+    val sortedFailures = if params.sortAsc then baseSorted else baseSorted.reverse
 
     frag(
       // Summary stats
@@ -394,22 +418,58 @@ object Templates:
       // Failures section
       section(
         cls := "mb-8",
-        h2(cls := "text-xl font-semibold mb-4", s"Failures (${failures.length})"),
+        // Header with sort options
+        div(
+          cls := "flex flex-wrap justify-between items-center mb-4 gap-2",
+          h2(cls := "text-xl font-semibold", s"Failures (${failures.length})"),
+          // Sort buttons with direction toggle
+          if failures.nonEmpty then
+            div(
+              cls := "flex items-center gap-2",
+              span(cls := "text-sm text-gray-500", "Sort by:"),
+              List(
+                FailureSort.Name -> "Name",
+                FailureSort.Streak -> "Streak",
+                FailureSort.Reason -> "Reason"
+              ).map: (sortOpt, label) =>
+                val active = params.sort == sortOpt
+                // If clicking same button, toggle direction; otherwise default to ascending
+                val newParams =
+                  if active then params.copy(sortAsc = !params.sortAsc)
+                  else params.copy(sort = sortOpt, sortAsc = true)
+                val dirIndicator = if active then (if params.sortAsc then " ↑" else " ↓") else ""
+                button(
+                  cls := s"px-3 py-1 rounded text-xs font-medium transition-colors ${
+                      if active then "bg-gray-700 text-white" else "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }",
+                  attr("hx-get") := path(s"/${newParams.queryString}"),
+                  attr("hx-target") := "#home-results",
+                  attr("hx-swap") := "innerHTML",
+                  attr("hx-indicator") := "#home-loading",
+                  s"$label$dirIndicator"
+                )
+            )
+          else frag()
+        ),
         if failures.isEmpty then
           if params.reason.isDefined then emptyState("No failures matching this filter")
           else emptyState("All projects passing! 🎉")
         else
           div(
             cls := "grid gap-4",
-            failures.map(buildCard)
+            sortedFailures.map(f => buildCardWithDuration(f, failureStreaks.get(f.projectName)))
           )
       )
     )
 
   /** Partial: home results for htmx updates */
-  def homeResultsPartial(builds: List[BuildResult], params: HomeParams = HomeParams()): String =
+  def homeResultsPartial(
+      builds: List[BuildResult],
+      params: HomeParams = HomeParams(),
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
+  ): String =
     val filteredBuilds = filterHomeBuilds(builds, params)
-    homeResultsContent(filteredBuilds, params).render
+    homeResultsContent(filteredBuilds, params, failureStreaks).render
 
   /** Comparison page */
   def comparePage(

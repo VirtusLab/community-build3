@@ -18,6 +18,7 @@ import dashboard.data.{
   BuildsCache,
   CacheManager,
   ComparisonCache,
+  FailureStreaksCache,
   HistoryCache,
   LogsCache,
   ProjectsCache,
@@ -65,6 +66,7 @@ object Routes:
       buildsCache: BuildsCache,
       logsCache: LogsCache,
       projectsCache: ProjectsCache,
+      failureStreaksCache: FailureStreaksCache,
       cacheManager: CacheManager,
       jwtSecret: String,
       basePath: String
@@ -102,6 +104,7 @@ object Routes:
       buildsCache,
       logsCache,
       projectsCache,
+      failureStreaksCache,
       jwtSecret
     )
 
@@ -245,6 +248,7 @@ object Routes:
       buildsCache: BuildsCache,
       logsCache: LogsCache,
       projectsCache: ProjectsCache,
+      failureStreaksCache: FailureStreaksCache,
       jwtSecret: String
   ): HttpRoutes[IO] =
 
@@ -310,6 +314,26 @@ object Routes:
     def getCachedProjects(): IO[ProjectsList] =
       projectsCache.getOrCompute(esClient.listAllProjects())
 
+    // Helper to compute failure streaks for a list of failing projects - CACHED
+    def getCachedFailureStreaks(
+        scalaVersion: Option[String],
+        buildId: Option[String],
+        failures: List[BuildResult]
+    ): IO[Map[ProjectName, FailureStreakInfo]] =
+      if failures.isEmpty then IO.pure(Map.empty)
+      else
+        val cacheKey = FailureStreaksCache.Key(scalaVersion, buildId)
+        failureStreaksCache.getOrCompute(
+          cacheKey,
+          // Compute failure streaks in PARALLEL - expensive but cached
+          failures
+            .parTraverse: build =>
+              esClient.getFailureStreakInfo(build.projectName).map:
+                case Some(info) => Some(build.projectName -> info)
+                case None       => None
+            .map(_.flatten.toMap)
+        )
+
     HttpRoutes.of[IO] {
       // Home page - build results with version selector
       case req @ GET -> Root =>
@@ -319,6 +343,12 @@ object Routes:
         val series =
           params.get("series").filter(_.nonEmpty).flatMap(s => scala.util.Try(ScalaSeries.valueOf(s)).toOption)
         val reason = params.get("reason").filter(_.nonEmpty)
+        val sort = params
+          .get("sort")
+          .filter(_.nonEmpty)
+          .flatMap(s => scala.util.Try(Templates.FailureSort.valueOf(s)).toOption)
+          .getOrElse(Templates.FailureSort.Name)
+        val sortAsc = params.get("sortAsc").forall(_ != "false") // Default true
         val isHtmx = req.headers.get(ci"HX-Request").isDefined
         val htmxTarget = req.headers.get(ci"HX-Target").map(_.head.value)
 
@@ -328,27 +358,35 @@ object Routes:
           effectiveScalaVersion = scalaVersion.orElse:
             series.flatMap: s =>
               allVersions.find(v => ScalaSeries.fromScalaVersion(v) == s)
-          homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason)
+          homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
           // Load builds if: htmx request (user clicked something), or version/buildId selected
           // Skip only on initial full page load with no selection
           shouldLoadBuilds = isHtmx || effectiveScalaVersion.isDefined || buildId.isDefined
           buildIds <- if shouldLoadBuilds then esClient.listBuildIds(effectiveScalaVersion) else IO.pure(Nil)
           builds <- if shouldLoadBuilds then getCachedBuilds(effectiveScalaVersion, buildId) else IO.pure(Nil)
+          // Only compute failure streaks when sorting by Streak (expensive but cached)
+          failures = builds.filter(_.status == BuildStatus.Failure)
+          failureStreaks <-
+            if sort == Templates.FailureSort.Streak then getCachedFailureStreaks(effectiveScalaVersion, buildId, failures)
+            else IO.pure(Map.empty[ProjectName, FailureStreakInfo])
           response <-
             if isHtmx then
               htmxTarget match
                 case Some("home-content") =>
                   // Series changed - return full content (selector + results)
                   Ok(
-                    Templates.homeContentPartial(builds, allVersions, buildIds, homeParams),
+                    Templates.homeContentPartial(builds, allVersions, buildIds, homeParams, failureStreaks),
                     `Content-Type`(MediaType.text.html)
                   )
                 case _ =>
                   // Version/filter changed - return just results
-                  Ok(Templates.homeResultsPartial(builds, homeParams), `Content-Type`(MediaType.text.html))
+                  Ok(Templates.homeResultsPartial(builds, homeParams, failureStreaks), `Content-Type`(MediaType.text.html))
             else
               // Full page request
-              Ok(Templates.homePage(builds, allVersions, buildIds, homeParams), `Content-Type`(MediaType.text.html))
+              Ok(
+                Templates.homePage(builds, allVersions, buildIds, homeParams, failureStreaks),
+                `Content-Type`(MediaType.text.html)
+              )
         yield response
 
       // Compare page

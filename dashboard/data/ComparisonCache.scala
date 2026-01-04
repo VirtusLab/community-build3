@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.concurrent.duration.*
 import scala.jdk.CollectionConverters.*
 
-import dashboard.core.{BuildResult, ComparisonResult, ParsedLogs, ProjectHistory, ProjectName, ProjectsList}
+import dashboard.core.{BuildResult, ComparisonResult, FailureStreakInfo, ParsedLogs, ProjectHistory, ProjectName, ProjectsList}
 
 /** Generic in-memory cache with TTL */
 class InMemoryCache[K, V](
@@ -238,6 +238,31 @@ object ProjectsCache:
         override def clear(): IO[Int] = underlying.clear()
         override def stats: IO[CacheStats] = underlying.stats
 
+/** Cache for failure streaks (info per project) - expensive to compute */
+trait FailureStreaksCache:
+  /** Get cached failure streaks or compute them */
+  def getOrCompute(key: FailureStreaksCache.Key, compute: IO[Map[ProjectName, FailureStreakInfo]]): IO[Map[ProjectName, FailureStreakInfo]]
+
+  /** Clear all cached entries */
+  def clear(): IO[Int]
+
+  /** Get cache statistics */
+  def stats: IO[CacheStats]
+
+object FailureStreaksCache:
+  /** Cache key - by scala version or build ID */
+  final case class Key(scalaVersion: Option[String], buildId: Option[String])
+
+  /** Create an in-memory cache with TTL */
+  def inMemory(ttl: FiniteDuration = 15.minutes, maxSize: Int = 50): IO[FailureStreaksCache] =
+    IO.delay:
+      val underlying = new InMemoryCache[Key, Map[ProjectName, FailureStreakInfo]](ttl, maxSize)
+      new FailureStreaksCache:
+        override def getOrCompute(key: Key, compute: IO[Map[ProjectName, FailureStreakInfo]]): IO[Map[ProjectName, FailureStreakInfo]] =
+          underlying.getOrCompute(key, compute)
+        override def clear(): IO[Int] = underlying.clear()
+        override def stats: IO[CacheStats] = underlying.stats
+
 /** Aggregated cache manager for clearing all caches */
 trait CacheManager:
   /** Clear all caches and return total cleared entries */
@@ -251,16 +276,18 @@ final case class ClearAllResult(
     history: Int,
     builds: Int,
     logs: Int,
-    projects: Int
+    projects: Int,
+    failureStreaks: Int
 ):
-  def total: Int = comparisons + history + builds + logs + projects
+  def total: Int = comparisons + history + builds + logs + projects + failureStreaks
 
 final case class AllCacheStats(
     comparisons: CacheStats,
     history: CacheStats,
     builds: CacheStats,
     logs: CacheStats,
-    projects: CacheStats
+    projects: CacheStats,
+    failureStreaks: CacheStats
 )
 
 object CacheManager:
@@ -269,7 +296,8 @@ object CacheManager:
       historyCache: HistoryCache,
       buildsCache: BuildsCache,
       logsCache: LogsCache,
-      projectsCache: ProjectsCache
+      projectsCache: ProjectsCache,
+      failureStreaksCache: FailureStreaksCache
   ): CacheManager = new CacheManager:
     override def clearAll(): IO[ClearAllResult] =
       for
@@ -278,7 +306,8 @@ object CacheManager:
         b <- buildsCache.clear()
         l <- logsCache.clear()
         p <- projectsCache.clear()
-      yield ClearAllResult(c, h, b, l, p)
+        f <- failureStreaksCache.clear()
+      yield ClearAllResult(c, h, b, l, p, f)
 
     override def allStats: IO[AllCacheStats] =
       for
@@ -287,4 +316,5 @@ object CacheManager:
         b <- buildsCache.stats
         l <- logsCache.stats
         p <- projectsCache.stats
-      yield AllCacheStats(c, h, b, l, p)
+        f <- failureStreaksCache.stats
+      yield AllCacheStats(c, h, b, l, p, f)

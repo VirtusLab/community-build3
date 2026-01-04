@@ -97,6 +97,50 @@ object Components:
       )
     )
 
+  /** Build info card with failure duration badge */
+  def buildCardWithDuration(result: BuildResult, streakInfo: Option[FailureStreakInfo]): Frag =
+    val logsUrl = path(
+      s"/projects/${result.projectName.org}/${result.projectName.repo}/builds/${urlEncode(result.buildId)}/logs"
+    )
+
+    div(
+      cls := "bg-white rounded-lg shadow p-4 border-l-4",
+      cls := (if result.status == BuildStatus.Success then "border-emerald-500" else "border-red-500"),
+      div(
+        cls := "flex justify-between items-start",
+        div(
+          projectLink(result.projectName, Some(result.buildURL)),
+          p(cls := "text-sm text-gray-500 mt-1", s"Version: ${result.version}")
+        ),
+        div(
+          cls := "flex items-center gap-2",
+          // Duration badge for failures - shows days and starting Scala version
+          streakInfo.filter(_ => result.status == BuildStatus.Failure).map: info =>
+            val (bgColor, textColor) = info.days match
+              case d if d >= 30 => ("bg-red-100", "text-red-700")
+              case d if d >= 7  => ("bg-orange-100", "text-orange-700")
+              case _            => ("bg-yellow-100", "text-yellow-700")
+            val daysText =
+              if info.days == 0 then "< 1 day"
+              else if info.days == 1 then "1 day"
+              else s"${info.days} days"
+            span(
+              cls := s"px-2 py-1 text-xs font-medium rounded $bgColor $textColor whitespace-nowrap",
+              title := s"Failing for ${info.days} days, started on ${info.startedOnScalaVersion}",
+              s"$daysText • ${info.startedOnScalaVersion}"
+            )
+          ,
+          statusBadge(result.status)
+        )
+      ),
+      failureReasons(result.failureReasons),
+      div(
+        cls := "mt-2 text-xs text-gray-400 flex items-center gap-3",
+        span(s"${result.buildTool} • ${result.scalaVersion}"),
+        a(href := logsUrl, cls := "text-blue-600 hover:underline font-medium", "📋 Logs")
+      )
+    )
+
   /** Comparison diff row */
   def diffRow(diff: ProjectDiff, diffType: String): Frag =
     val (icon, rowClass) = diffType match

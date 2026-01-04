@@ -174,3 +174,16 @@ final case class ProjectsList(
     passingCount: Int,
     failingCount: Int
 ) derives Codec.AsObject
+
+/** Build result enriched with failure streak information */
+final case class BuildWithFailureStreak(
+    build: BuildResult,
+    failingSince: Option[Instant],
+    failingForDays: Option[Long]
+) derives Codec.AsObject
+
+/** Failure streak info - how long failing and on which Scala version it started */
+final case class FailureStreakInfo(
+    days: Long,
+    startedOnScalaVersion: String
+) derives Codec.AsObject
