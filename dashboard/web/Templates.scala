@@ -676,7 +676,7 @@ object Templates:
         excludeSnapshots: Boolean = params.excludeSnapshots,
         excludeNightlies: Boolean = params.excludeNightlies
     ): String =
-      s"""/projects/$projectPath/history/filter?series=${series}&excludeSnapshots=$excludeSnapshots&excludeNightlies=$excludeNightlies"""
+      path(s"/projects/$projectPath/history/filter?series=${series}&excludeSnapshots=$excludeSnapshots&excludeNightlies=$excludeNightlies")
 
     div(
       cls := "flex flex-wrap gap-4 items-center",

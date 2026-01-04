@@ -219,7 +219,7 @@ object Components:
       id := "note-form",
       cls := "bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-3",
       form(
-        attr("hx-post") := s"/projects/$projectName/notes",
+        attr("hx-post") := path(s"/projects/$projectName/notes"),
         attr("hx-target") := "#note-form",
         attr("hx-swap") := "outerHTML",
         div(
