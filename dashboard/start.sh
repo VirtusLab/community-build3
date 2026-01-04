@@ -21,7 +21,7 @@ export ES_PASSWORD=$(scbk get secret "community-build-es-elastic-user" -o go-tem
 export SQLITE_PATH="${SQLITE_PATH:-$projectRoot/dashboard.db}"
 
 # GitHub OAuth configuration
-export GITHUB_CLIENT_ID=Iv23li6uz2vQoq0Zwgze
+export GITHUB_CLIENT_ID="${GITHUB_CLIENT_ID:-}"
 export GITHUB_CLIENT_SECRET="${GITHUB_CLIENT_SECRET:-}"
 export GITHUB_CALLBACK_URL="${GITHUB_CALLBACK_URL:-http://localhost:8080/auth/callback}"
 export JWT_SECRET="${JWT_SECRET:-$(openssl rand -base64 32 2>/dev/null)}"
