@@ -81,14 +81,16 @@ class SimilarityApi(esClient: ElasticsearchClient, sqliteRepo: SqliteRepository)
     ProjectName(projectNameRaw) match
       case Left(error)        => IO.pure(Left(error))
       case Right(projectName) =>
-        for
-          currentSig <- getOrCreateSignature(projectName, currentBuildId)
-          previousSig <- getOrCreateSignature(projectName, previousBuildId)
-        yield (currentSig, previousSig) match
-          case (Right(curr), Right(prev)) =>
-            Right(curr.isSimilarTo(prev))
-          case (Left(err), _) => Left(err)
-          case (_, Left(err)) => Left(err)
+        // Fetch both signatures in parallel - they are independent
+        (
+          getOrCreateSignature(projectName, currentBuildId),
+          getOrCreateSignature(projectName, previousBuildId)
+        )
+          .parMapN:
+            case (Right(curr), Right(prev)) =>
+              Right(curr.isSimilarTo(prev))
+            case (Left(err), _) => Left(err)
+            case (_, Left(err)) => Left(err)
 
   private def getOrCreateSignature(
       projectName: ProjectName,
@@ -114,7 +116,7 @@ class SimilarityApi(esClient: ElasticsearchClient, sqliteRepo: SqliteRepository)
     for
       builds <- esClient.getBuildsByBuildId(buildId)
       failures = builds.filter(_.status == BuildStatus.Failure)
-      analyzed <- failures.traverse: build =>
+      analyzed <- failures.parTraverse: build =>
         build.logs match
           case Some(logs) =>
             val sig = FailureSignature.fromLogs(build.projectName, build.buildId, logs)

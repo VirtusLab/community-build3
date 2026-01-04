@@ -1,6 +1,7 @@
 package dashboard.api
 
 import cats.effect.IO
+import cats.syntax.all.*
 
 import dashboard.core.*
 import dashboard.data.ElasticsearchClient
@@ -14,11 +15,12 @@ class ComparisonApi(esClient: ElasticsearchClient):
     validation match
       case Left(error) => IO.pure(Left(error))
       case Right(_)    =>
-        for
-          baseBuilds <- getBuilds(request.baseScalaVersion, request.baseBuildId)
-          targetBuilds <- getBuilds(request.targetScalaVersion, request.targetBuildId)
-          result = computeComparison(request, baseBuilds, targetBuilds)
-        yield Right(result)
+        // Fetch base and target builds in parallel - they are independent queries
+        (
+          getBuilds(request.baseScalaVersion, request.baseBuildId),
+          getBuilds(request.targetScalaVersion, request.targetBuildId)
+        ).parMapN: (baseBuilds, targetBuilds) =>
+          Right(computeComparison(request, baseBuilds, targetBuilds))
 
   private def validateRequest(request: CompareRequest): Either[String, Unit] =
     val hasTarget = request.targetScalaVersion.isDefined || request.targetBuildId.isDefined
