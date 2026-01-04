@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  labels:
+    app: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      imagePullSecrets:
+      - name: ghcr-secret
+      volumes:
+      - name: dashboard-data
+        persistentVolumeClaim:
+          claimName: dashboard-data
+      containers:
+      - name: dashboard
+        image: ghcr.io/virtuslab/scala-community-build-dashboard:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        volumeMounts:
+        - name: dashboard-data
+          mountPath: /data
+        env:
+        # Base path for URL generation (matches ingress path)
+        - name: BASE_PATH
+          value: "/dashboard"
+        # Elasticsearch connection (internal k8s service)
+        - name: ES_HOST
+          value: "community-build-es-http"
+        - name: ES_PORT
+          value: "9200"
+        # No path prefix for internal service
+        - name: ES_PATH_PREFIX
+          value: ""
+        # Accept self-signed certificates from ECK
+        - name: ES_TLS_INSECURE
+          value: "true"
+        - name: ES_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: dashboard-secrets
+              key: es-username
+        - name: ES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dashboard-secrets
+              key: es-password
+        # SQLite database path (on persistent volume)
+        - name: SQLITE_PATH
+          value: "/data/dashboard.db"
+        # GitHub OAuth
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: dashboard-secrets
+              key: github-client-id
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: dashboard-secrets
+              key: github-client-secret
+        - name: GITHUB_CALLBACK_URL
+          value: "https://scala3.westeurope.cloudapp.azure.com/dashboard/auth/callback"
+        # JWT secret for session tokens
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: dashboard-secrets
+              key: jwt-secret
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+spec:
+  type: ClusterIP
+  selector:
+    app: dashboard
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    name: http
+
