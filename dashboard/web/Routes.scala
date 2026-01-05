@@ -588,7 +588,8 @@ object Routes:
             yield response
 
       // Build logs page (org/repo format) - cached
-      case req @ GET -> Root / "projects" / org / repo / "builds" / buildId / "logs" =>
+      // Uses custom extractor to handle buildId containing slashes
+      case req @ GET -> ProjectBuildLogs(org, repo, buildId) =>
         val projectName = s"$org/$repo"
         val severityFilter = req.params.get("severity").filter(_ != "all")
         for
@@ -611,3 +612,22 @@ object Routes:
       case GET -> Root / "docs" =>
         PermanentRedirect(headers.Location(Uri.unsafeFromString("/docs/index.html")))
     }
+
+
+/** Custom path extractor for build logs URLs with buildId containing slashes.
+  *
+  * Build IDs can contain `/` characters (e.g., `dotty:lts/varhandle-lazy-vals:2025-12-29`). When
+  * URL-encoded as `%2F`, http4s decodes these before path matching, causing standard route patterns to fail because
+  * there are too many path segments.
+  *
+  * This extractor handles paths like: `/projects/org/repo/builds/ANYTHING_WITH_SLASHES/logs`
+  */
+object ProjectBuildLogs:
+  def unapply(path: Uri.Path): Option[(String, String, String)] =
+    val segments = path.segments.map(_.decoded())
+    segments.toList match
+      case "projects" :: org :: repo :: "builds" :: rest if rest.lastOption.contains("logs") =>
+        val buildId = rest.init.mkString("/")
+        if buildId.nonEmpty then Some((org, repo, buildId))
+        else None
+      case _ => None
