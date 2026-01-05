@@ -116,23 +116,36 @@ object FailureReason:
 
 /** Scala version series for filtering history */
 enum ScalaSeries derives CanEqual:
+  case All // All series (no filtering)
   case Lts33 // LTS 3.3.x
   case Lts39 // LTS 3.9.x (upcoming)
   case Next // Everything else (3.4, 3.5, 3.6, 3.7, 3.8, etc.)
 
 object ScalaSeries:
+  /** Concrete series (excludes All) */
+  val concreteValues: List[ScalaSeries] = List(Next, Lts33, Lts39)
+
+  /** All series options including All */
+  val allValues: List[ScalaSeries] = this.values.toList
+
   /** Determine which series a Scala version belongs to */
   def fromScalaVersion(version: String): ScalaSeries =
     if version.startsWith("3.3.") then Lts33
     else if version.startsWith("3.9.") then Lts39
     else Next
 
+  /** Check if a version matches the series filter */
+  def matches(series: ScalaSeries, version: String): Boolean =
+    series == All || fromScalaVersion(version) == series
+
   def label(series: ScalaSeries): String = series match
+    case All   => "All"
     case Lts33 => "LTS 3.3"
     case Lts39 => "LTS 3.9"
     case Next  => "Next"
 
   def description(series: ScalaSeries): String = series match
+    case All   => "All Scala versions"
     case Lts33 => "Long Term Support 3.3.x"
     case Lts39 => "Long Term Support 3.9.x (upcoming)"
     case Next  => "Latest development (3.4+, excluding LTS)"

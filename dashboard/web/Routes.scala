@@ -58,8 +58,9 @@ object Routes:
       case "info"    => Some(LogSeverity.Info)
       case _         => None
 
-  private def parseSeries(series: String): Option[ScalaSeries] =
-    scala.util.Try(ScalaSeries.valueOf(series)).toOption
+  private def parseSeries(series: String): ScalaSeries =
+    if series.isEmpty then ScalaSeries.All
+    else scala.util.Try(ScalaSeries.valueOf(series)).getOrElse(ScalaSeries.All)
 
   def all(
       esClient: ElasticsearchClient,
@@ -345,8 +346,7 @@ object Routes:
         val params = req.params
         val scalaVersion = params.get("scalaVersion").filter(_.nonEmpty)
         val buildId = params.get("buildId").filter(_.nonEmpty)
-        val series =
-          params.get("series").filter(_.nonEmpty).flatMap(s => scala.util.Try(ScalaSeries.valueOf(s)).toOption)
+        val series = parseSeries(params.get("series").getOrElse(""))
         val reason = params.get("reason").filter(_.nonEmpty)
         val sort = params
           .get("sort")
@@ -361,8 +361,10 @@ object Routes:
           allVersions <- esClient.listScalaVersions()
           // When series is selected but no specific version, use latest version of that series
           effectiveScalaVersion = scalaVersion.orElse:
-            series.flatMap: s =>
-              allVersions.find(v => ScalaSeries.fromScalaVersion(v) == s)
+            Option
+              .when(series != ScalaSeries.All):
+                allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
+              .flatten
           homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
           // Load builds if: htmx request (user clicked something), or version/buildId selected
           // Skip only on initial full page load with no selection
@@ -443,7 +445,7 @@ object Routes:
       // Compare form partial (for htmx series filter) - returns form with filtered versions
       case req @ GET -> Root / "compare" / "form" =>
         val params = req.params
-        val series = params.get("series").filter(_.nonEmpty).flatMap(parseSeries)
+        val series = parseSeries(params.get("series").getOrElse(""))
         val compareParams = Templates.CompareParams(
           baseScalaVersion = None,
           baseBuildId = None,
@@ -636,12 +638,11 @@ object Routes:
         PermanentRedirect(headers.Location(Uri.unsafeFromString("/docs/index.html")))
     }
 
-
 /** Custom path extractor for build logs URLs with buildId containing slashes.
   *
-  * Build IDs can contain `/` characters (e.g., `dotty:lts/varhandle-lazy-vals:2025-12-29`). When
-  * URL-encoded as `%2F`, http4s decodes these before path matching, causing standard route patterns to fail because
-  * there are too many path segments.
+  * Build IDs can contain `/` characters (e.g., `dotty:lts/varhandle-lazy-vals:2025-12-29`). When URL-encoded as `%2F`,
+  * http4s decodes these before path matching, causing standard route patterns to fail because there are too many path
+  * segments.
   *
   * This extractor handles paths like: `/projects/org/repo/builds/ANYTHING_WITH_SLASHES/logs`
   */

@@ -116,7 +116,7 @@ object Templates:
   final case class HomeParams(
       scalaVersion: Option[String] = None,
       buildId: Option[String] = None,
-      series: Option[ScalaSeries] = None,
+      series: ScalaSeries = ScalaSeries.All,
       reason: Option[String] = None,
       sort: FailureSort = FailureSort.Name,
       sortAsc: Boolean = true
@@ -125,7 +125,7 @@ object Templates:
       val params = List(
         scalaVersion.map(v => s"scalaVersion=$v"),
         buildId.map(v => s"buildId=$v"),
-        series.map(s => s"series=${s.toString}"),
+        Option.when(series != ScalaSeries.All)(s"series=${series.toString}"),
         reason.map(r => s"reason=$r"),
         Option.when(sort != FailureSort.Name)(s"sort=${sort.toString}"),
         Option.when(!sortAsc)(s"sortAsc=false")
@@ -182,9 +182,7 @@ object Templates:
       params: HomeParams
   ): Frag =
     // Filter versions by selected series
-    val filteredVersions = params.series match
-      case Some(s) => scalaVersions.filter(v => ScalaSeries.fromScalaVersion(v) == s)
-      case None    => scalaVersions
+    val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
 
     div(
       id := "home-selector", // For full replacement on series change
@@ -196,18 +194,18 @@ object Templates:
         span(cls := "text-sm text-gray-600", "Series:"),
         div(
           cls := "flex gap-1",
-          seriesOptions.map: (seriesOpt, label) =>
-            val active = params.series == seriesOpt
-            val colorClass = seriesButtonStyle(seriesOpt, active)
+          ScalaSeries.allValues.map: series =>
+            val active = params.series == series
+            val colorClass = seriesButtonStyle(series, active)
             // When changing series, clear scalaVersion and buildId to get fresh data
-            val newParams = HomeParams(series = seriesOpt)
+            val newParams = HomeParams(series = series)
             button(
               cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
               attr("hx-get") := path(s"/${newParams.queryString}"),
               attr("hx-target") := "#home-content",
               attr("hx-swap") := "outerHTML",
               attr("hx-indicator") := "#home-loading",
-              label
+              ScalaSeries.label(series)
             )
         ),
         // Loading indicator
@@ -277,7 +275,11 @@ object Templates:
         div(
           id := "home-filters",
           cls := "hidden",
-          input(tpe := "hidden", name := "series", value := params.series.map(_.toString).getOrElse("")),
+          input(
+            tpe := "hidden",
+            name := "series",
+            value := (if params.series == ScalaSeries.All then "" else params.series.toString)
+          ),
           input(tpe := "hidden", name := "reason", value := params.reason.getOrElse(""))
         )
       )
@@ -285,11 +287,7 @@ object Templates:
 
   /** Filter builds based on home params (reason filtering happens in homeResultsContent) */
   private def filterHomeBuilds(builds: List[BuildResult], params: HomeParams): List[BuildResult] =
-    builds.filter: build =>
-      val matchesSeries = params.series match
-        case Some(s) => ScalaSeries.fromScalaVersion(build.scalaVersion) == s
-        case None    => true
-      matchesSeries
+    builds.filter(build => ScalaSeries.matches(params.series, build.scalaVersion))
 
   /** Home page results content */
   def homeResultsContent(
@@ -298,7 +296,7 @@ object Templates:
       failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
   ): Frag =
     // If no builds and no version/series selected, show prompt to select one
-    if builds.isEmpty && params.scalaVersion.isEmpty && params.series.isEmpty then
+    if builds.isEmpty && params.scalaVersion.isEmpty && params.series == ScalaSeries.All then
       return div(
         cls := "bg-white rounded-lg shadow p-12 text-center",
         div(
@@ -312,8 +310,8 @@ object Templates:
       )
 
     // If series selected but no builds available for it (only if no reason filter applied)
-    if builds.isEmpty && params.series.isDefined && params.reason.isEmpty then
-      val seriesName = params.series.map(_.toString).getOrElse("")
+    if builds.isEmpty && params.series != ScalaSeries.All && params.reason.isEmpty then
+      val seriesName = ScalaSeries.label(params.series)
       return div(
         cls := "bg-white rounded-lg shadow p-12 text-center",
         div(
@@ -461,9 +459,7 @@ object Templates:
       params: CompareParams = CompareParams(None, None, None, None)
   ): String =
     // Filter versions by selected series
-    val filteredVersions = params.series match
-      case Some(s) => scalaVersions.filter(v => ScalaSeries.fromScalaVersion(v) == s)
-      case None    => scalaVersions
+    val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
 
     layout(
       "Compare Builds",
@@ -498,9 +494,7 @@ object Templates:
       params: CompareParams
   ): String =
     // Filter versions by selected series
-    val filteredVersions = params.series match
-      case Some(s) => scalaVersions.filter(v => ScalaSeries.fromScalaVersion(v) == s)
-      case None    => scalaVersions
+    val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
     compareForm(filteredVersions, buildIds, params).render
 
   /** Comparison form */
@@ -518,10 +512,10 @@ object Templates:
         span(cls := "text-sm text-gray-600", "Series:"),
         div(
           cls := "flex gap-1",
-          seriesOptions.map: (seriesOpt, label) =>
-            val active = params.series == seriesOpt
-            val colorClass = seriesButtonStyle(seriesOpt, active)
-            val seriesParam = seriesOpt.map(_.toString).getOrElse("")
+          ScalaSeries.allValues.map: series =>
+            val active = params.series == series
+            val colorClass = seriesButtonStyle(series, active)
+            val seriesParam = if series == ScalaSeries.All then "" else series.toString
             button(
               tpe := "button",
               cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
@@ -529,7 +523,7 @@ object Templates:
               attr("hx-target") := "#compare-form-container",
               attr("hx-swap") := "innerHTML",
               attr("hx-indicator") := "#compare-loading",
-              label
+              ScalaSeries.label(series)
             )
         ),
         // Loading indicator
@@ -540,7 +534,6 @@ object Templates:
           span(cls := "ml-2 text-sm text-gray-500", "Loading...")
         )
       ),
-
       div(
         cls := "grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center",
         // Base selection
@@ -646,7 +639,7 @@ object Templates:
       targetBuildId: Option[String],
       filter: String = "all",
       reason: Option[String] = None,
-      series: Option[ScalaSeries] = None
+      series: ScalaSeries = ScalaSeries.All
   )
 
   /** Comparison results content (without outer container) */
@@ -849,13 +842,13 @@ object Templates:
     div(
       cls := "flex flex-wrap gap-4 items-center",
 
-      // Series selector (uses shared styling from Components)
+      // Series selector (uses shared list and styling from Components)
       div(
         cls := "flex gap-1 items-center",
         span(cls := "text-sm text-gray-500 self-center mr-2", "Series:"),
-        List(ScalaSeries.Next, ScalaSeries.Lts33, ScalaSeries.Lts39).map: series =>
+        ScalaSeries.concreteValues.map: series =>
           val active = params.series == series
-          val colorClass = seriesButtonStyle(Some(series), active)
+          val colorClass = seriesButtonStyle(series, active)
           button(
             cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
             attr("hx-get") := filterUrl(series = series),

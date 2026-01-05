@@ -434,27 +434,18 @@ object Components:
 
   // ==================== Shared Series Filter Components ====================
 
-  /** All series options with labels */
-  val seriesOptions: List[(Option[ScalaSeries], String)] = List(
-    None -> "All",
-    Some(ScalaSeries.Next) -> "Next",
-    Some(ScalaSeries.Lts33) -> "LTS 3.3",
-    Some(ScalaSeries.Lts39) -> "LTS 3.9"
-  )
-
   /** Get CSS classes for a series button based on active state */
-  def seriesButtonStyle(series: Option[ScalaSeries], active: Boolean): String =
+  def seriesButtonStyle(series: ScalaSeries, active: Boolean): String =
     series match
-      case Some(ScalaSeries.Lts33) =>
+      case ScalaSeries.Lts33 =>
         if active then "bg-amber-600 text-white ring-2 ring-amber-400 ring-offset-1"
         else "bg-amber-100 text-amber-700 hover:bg-amber-200"
-      case Some(ScalaSeries.Lts39) =>
+      case ScalaSeries.Lts39 =>
         if active then "bg-teal-600 text-white ring-2 ring-teal-400 ring-offset-1"
         else "bg-teal-100 text-teal-700 hover:bg-teal-200"
-      case Some(ScalaSeries.Next) =>
+      case ScalaSeries.Next =>
         if active then "bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-1"
         else "bg-blue-100 text-blue-700 hover:bg-blue-200"
-      case None =>
+      case ScalaSeries.All =>
         if active then "bg-gray-700 text-white ring-2 ring-gray-400 ring-offset-1"
         else "bg-gray-100 text-gray-700 hover:bg-gray-200"
-
