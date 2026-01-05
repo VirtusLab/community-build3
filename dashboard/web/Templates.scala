@@ -190,32 +190,15 @@ object Templates:
       id := "home-selector", // For full replacement on series change
       cls := "bg-white rounded-lg shadow p-4 mb-6 space-y-3",
 
-      // Row 1: Series selector
+      // Row 1: Series selector (uses shared styling from Components)
       div(
         cls := "flex items-center gap-2",
         span(cls := "text-sm text-gray-600", "Series:"),
         div(
           cls := "flex gap-1",
-          List(
-            None -> "All",
-            Some(ScalaSeries.Next) -> "Next",
-            Some(ScalaSeries.Lts33) -> "LTS 3.3",
-            Some(ScalaSeries.Lts39) -> "LTS 3.9"
-          ).map: (seriesOpt, label) =>
+          seriesOptions.map: (seriesOpt, label) =>
             val active = params.series == seriesOpt
-            val colorClass = seriesOpt match
-              case Some(ScalaSeries.Lts33) =>
-                if active then "bg-amber-600 text-white ring-2 ring-amber-400 ring-offset-1"
-                else "bg-amber-100 text-amber-700 hover:bg-amber-200"
-              case Some(ScalaSeries.Lts39) =>
-                if active then "bg-teal-600 text-white ring-2 ring-teal-400 ring-offset-1"
-                else "bg-teal-100 text-teal-700 hover:bg-teal-200"
-              case Some(ScalaSeries.Next) =>
-                if active then "bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-1"
-                else "bg-blue-100 text-blue-700 hover:bg-blue-200"
-              case None =>
-                if active then "bg-gray-700 text-white ring-2 ring-gray-400 ring-offset-1"
-                else "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            val colorClass = seriesButtonStyle(seriesOpt, active)
             // When changing series, clear scalaVersion and buildId to get fresh data
             val newParams = HomeParams(series = seriesOpt)
             button(
@@ -477,13 +460,21 @@ object Templates:
       result: Option[ComparisonResult],
       params: CompareParams = CompareParams(None, None, None, None)
   ): String =
+    // Filter versions by selected series
+    val filteredVersions = params.series match
+      case Some(s) => scalaVersions.filter(v => ScalaSeries.fromScalaVersion(v) == s)
+      case None    => scalaVersions
+
     layout(
       "Compare Builds",
       div(
         h1(cls := "text-2xl font-bold mb-6", "Compare Builds"),
 
-        // Comparison form
-        compareForm(scalaVersions, buildIds),
+        // Comparison form (with series filtering)
+        div(
+          id := "compare-form-container",
+          compareForm(filteredVersions, buildIds, params)
+        ),
 
         // Results container (always present for htmx targeting)
         div(
@@ -500,13 +491,56 @@ object Templates:
       )
     )
 
+  /** Partial: compare form for htmx updates (when series changes) */
+  def compareFormPartial(
+      scalaVersions: List[String],
+      buildIds: List[String],
+      params: CompareParams
+  ): String =
+    // Filter versions by selected series
+    val filteredVersions = params.series match
+      case Some(s) => scalaVersions.filter(v => ScalaSeries.fromScalaVersion(v) == s)
+      case None    => scalaVersions
+    compareForm(filteredVersions, buildIds, params).render
+
   /** Comparison form */
-  private def compareForm(scalaVersions: List[String], buildIds: List[String]): Frag =
+  private def compareForm(scalaVersions: List[String], buildIds: List[String], params: CompareParams): Frag =
     form(
+      id := "compare-form",
       cls := "bg-white rounded-lg shadow p-6 mb-8",
       attr("hx-get") := path("/compare"),
       attr("hx-target") := "#comparison-results",
       attr("hx-swap") := "innerHTML",
+
+      // Series filter row (HTMX-based)
+      div(
+        cls := "mb-4 pb-4 border-b border-gray-200 flex items-center gap-2",
+        span(cls := "text-sm text-gray-600", "Series:"),
+        div(
+          cls := "flex gap-1",
+          seriesOptions.map: (seriesOpt, label) =>
+            val active = params.series == seriesOpt
+            val colorClass = seriesButtonStyle(seriesOpt, active)
+            val seriesParam = seriesOpt.map(_.toString).getOrElse("")
+            button(
+              tpe := "button",
+              cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
+              attr("hx-get") := path(s"/compare/form?series=$seriesParam"),
+              attr("hx-target") := "#compare-form-container",
+              attr("hx-swap") := "innerHTML",
+              attr("hx-indicator") := "#compare-loading",
+              label
+            )
+        ),
+        // Loading indicator
+        div(
+          id := "compare-loading",
+          cls := "htmx-indicator ml-4",
+          loadingSpinner,
+          span(cls := "ml-2 text-sm text-gray-500", "Loading...")
+        )
+      ),
+
       div(
         cls := "grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center",
         // Base selection
@@ -569,7 +603,7 @@ object Templates:
           span(cls := "htmx-indicator ml-2", loadingSpinner)
         )
       ),
-      // Swap script
+      // JavaScript for swap only
       script(raw(swapCompareScript))
     )
 
@@ -611,7 +645,8 @@ object Templates:
       targetScalaVersion: Option[String],
       targetBuildId: Option[String],
       filter: String = "all",
-      reason: Option[String] = None
+      reason: Option[String] = None,
+      series: Option[ScalaSeries] = None
   )
 
   /** Comparison results content (without outer container) */
@@ -814,19 +849,13 @@ object Templates:
     div(
       cls := "flex flex-wrap gap-4 items-center",
 
-      // Series selector
+      // Series selector (uses shared styling from Components)
       div(
         cls := "flex gap-1 items-center",
         span(cls := "text-sm text-gray-500 self-center mr-2", "Series:"),
         List(ScalaSeries.Next, ScalaSeries.Lts33, ScalaSeries.Lts39).map: series =>
           val active = params.series == series
-          val colorClass = series match
-            case ScalaSeries.Lts33 =>
-              if active then "bg-amber-600 text-white" else "bg-amber-100 text-amber-700 hover:bg-amber-200"
-            case ScalaSeries.Lts39 =>
-              if active then "bg-teal-600 text-white" else "bg-teal-100 text-teal-700 hover:bg-teal-200"
-            case ScalaSeries.Next =>
-              if active then "bg-blue-600 text-white" else "bg-blue-100 text-blue-700 hover:bg-blue-200"
+          val colorClass = seriesButtonStyle(Some(series), active)
           button(
             cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
             attr("hx-get") := filterUrl(series = series),

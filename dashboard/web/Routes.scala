@@ -58,6 +58,9 @@ object Routes:
       case "info"    => Some(LogSeverity.Info)
       case _         => None
 
+  private def parseSeries(series: String): Option[ScalaSeries] =
+    scala.util.Try(ScalaSeries.valueOf(series)).toOption
+
   def all(
       esClient: ElasticsearchClient,
       sqliteRepo: SqliteRepository,
@@ -435,6 +438,26 @@ object Routes:
                 Templates.comparePage(versions, buildIds, resultOpt, compareParams),
                 `Content-Type`(MediaType.text.html)
               )
+        yield response
+
+      // Compare form partial (for htmx series filter) - returns form with filtered versions
+      case req @ GET -> Root / "compare" / "form" =>
+        val params = req.params
+        val series = params.get("series").filter(_.nonEmpty).flatMap(parseSeries)
+        val compareParams = Templates.CompareParams(
+          baseScalaVersion = None,
+          baseBuildId = None,
+          targetScalaVersion = None,
+          targetBuildId = None,
+          series = series
+        )
+        for
+          versions <- esClient.listScalaVersions()
+          buildIds <- esClient.listBuildIds(None)
+          response <- Ok(
+            Templates.compareFormPartial(versions, buildIds, compareParams),
+            `Content-Type`(MediaType.text.html)
+          )
         yield response
 
       // Compare filter partial (for htmx filter buttons) - uses cache
