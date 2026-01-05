@@ -4917,7 +4917,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"project/plugins.sbt",
+          "pattern":"addSbtPlugin(\"com.github.sbt\" % \"sbt-jacoco\" % \"3.0.3\")",
+          "replaceWith":"addSbtPlugin(\"com.github.sbt\" % \"sbt-jacoco\" % \"3.4.0\")"
+        }
       ]
     }
   },
@@ -23078,8 +23082,8 @@
   "guntiso/querease":{
     "project":"guntiso/querease",
     "repoUrl":"https://github.com/guntiso/querease.git",
-    "revision":"v8.0.0",
-    "version":"8.0.0",
+    "revision":"v9.0.0",
+    "version":"9.0.0",
     "targets":"org.mojoz%querease",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -36980,8 +36984,8 @@
   "logging4s/logging4s":{
     "project":"logging4s/logging4s",
     "repoUrl":"https://github.com/logging4s/logging4s.git",
-    "revision":"v0.15.0",
-    "version":"0.15.0",
+    "revision":"v0.15.1",
+    "version":"0.15.1",
     "targets":"org.logging4s%logging4s-argonaut org.logging4s%logging4s-borer org.logging4s%logging4s-cats-core org.logging4s%logging4s-ce-2 org.logging4s%logging4s-ce-3 org.logging4s%logging4s-circe org.logging4s%logging4s-core org.logging4s%logging4s-fabric org.logging4s%logging4s-json4s org.logging4s%logging4s-jsoniter org.logging4s%logging4s-kyo org.logging4s%logging4s-play-json org.logging4s%logging4s-rapid org.logging4s%logging4s-spray-json org.logging4s%logging4s-upickle org.logging4s%logging4s-weepickle org.logging4s%logging4s-zio",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -40889,8 +40893,8 @@
   "natural-transformation/korolev":{
     "project":"natural-transformation/korolev",
     "repoUrl":"https://github.com/natural-transformation/korolev.git",
-    "revision":"",
-    "version":"1.17.2",
+    "revision":"v1.18.1",
+    "version":"1.18.1",
     "targets":"com.natural-transformation%korolev com.natural-transformation%korolev-akka com.natural-transformation%korolev-bytes com.natural-transformation%korolev-ce2 com.natural-transformation%korolev-ce3 com.natural-transformation%korolev-effect com.natural-transformation%korolev-fs2-ce2 com.natural-transformation%korolev-fs2-ce3 com.natural-transformation%korolev-http com.natural-transformation%korolev-monix com.natural-transformation%korolev-pekko com.natural-transformation%korolev-scodec com.natural-transformation%korolev-slf4j com.natural-transformation%korolev-standalone com.natural-transformation%korolev-testkit com.natural-transformation%korolev-web com.natural-transformation%korolev-web-dsl com.natural-transformation%korolev-zio com.natural-transformation%korolev-zio-http com.natural-transformation%korolev-zio-streams com.natural-transformation%korolev-zio2 com.natural-transformation%korolev-zio2-streams",
     "publishedScalaVersion":"3.3.1",
     "config":{
@@ -48200,8 +48204,8 @@
     "project":"rchillyard/number",
     "repoUrl":"https://github.com/rchillyard/number.git",
     "revision":"",
-    "version":"1.4.0",
-    "targets":"com.phasmidsoftware%number-algebra com.phasmidsoftware%number-core com.phasmidsoftware%number-expression com.phasmidsoftware%number-parse com.phasmidsoftware%number-top",
+    "version":"1.4.4",
+    "targets":"com.phasmidsoftware%number com.phasmidsoftware%number-algebra com.phasmidsoftware%number-core com.phasmidsoftware%number-expression com.phasmidsoftware%number-parse com.phasmidsoftware%number-top",
     "publishedScalaVersion":"3.7.3"
   },
   "reactivecore/datacomparison":{
@@ -48248,8 +48252,8 @@
   "reactivecore/kreuzberg":{
     "project":"reactivecore/kreuzberg",
     "repoUrl":"https://github.com/reactivecore/kreuzberg.git",
-    "revision":"v0.11.7",
-    "version":"0.11.7",
+    "revision":"v0.12.0",
+    "version":"0.12.0",
     "targets":"net.reactivecore%kreuzberg net.reactivecore%kreuzberg-extras net.reactivecore%kreuzberg-miniserver net.reactivecore%kreuzberg-rpc net.reactivecore%kreuzberg-scalajs-dom-mock net.reactivecore%kreuzberg-scalatags net.reactivecore%kreuzberg-xml",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -48691,8 +48695,8 @@
   "rolang/google-rest-api-codegen":{
     "project":"rolang/google-rest-api-codegen",
     "repoUrl":"https://github.com/rolang/google-rest-api-codegen.git",
-    "revision":"v0.0.12",
-    "version":"0.0.12",
+    "revision":"v0.0.13",
+    "version":"0.0.13",
     "targets":"dev.rolang%gcp-codegen",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -53302,8 +53306,8 @@
   "scalameta/scalameta":{
     "project":"scalameta/scalameta",
     "repoUrl":"https://github.com/scalameta/scalameta.git",
-    "revision":"v4.14.3",
-    "version":"4.14.3",
+    "revision":"v4.14.4",
+    "version":"4.14.4",
     "targets":"org.scalameta%parsers org.scalameta%scalameta org.scalameta%testkit",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -70082,50 +70086,6 @@
       ]
     }
   },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "zio-archive/zio-jdbc":{
     "project":"zio-archive/zio-jdbc",
     "repoUrl":"https://github.com/zio-archive/zio-jdbc.git",
@@ -70762,8 +70722,8 @@
   "zio/zio-blocks":{
     "project":"zio/zio-blocks",
     "repoUrl":"https://github.com/zio/zio-blocks.git",
-    "revision":"v0.0.5",
-    "version":"0.0.5",
+    "revision":"v0.0.7",
+    "version":"0.0.7",
     "targets":"dev.zio%zio-blocks-schema dev.zio%zio-blocks-schema-avro dev.zio%zio-blocks-streams",
     "publishedScalaVersion":"3.3.7",
     "config":{
@@ -71074,8 +71034,8 @@
   "zio/zio-ftp":{
     "project":"zio/zio-ftp",
     "repoUrl":"https://github.com/zio/zio-ftp.git",
-    "revision":"v0.5.2",
-    "version":"0.5.2",
+    "revision":"v0.5.3",
+    "version":"0.5.3",
     "targets":"dev.zio%zio-ftp",
     "publishedScalaVersion":"3.3.6",
     "config":{

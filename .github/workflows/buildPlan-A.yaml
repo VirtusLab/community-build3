@@ -455,6 +455,7 @@ jobs:
         - name: "ij-plugins/ijp-debayer2sx"
         - name: "ij-plugins/ijp-toolkit"
         - name: "iltotore/iron"
+        - name: "imaxmelnyk/openai-scala"
         - name: "indoorvivants/decline-derive"
         - name: "indoorvivants/mcp"
         - name: "indoorvivants/scala-uri"
@@ -612,7 +613,6 @@ jobs:
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
-        - name: "metarank/cfor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1116,7 +1117,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
