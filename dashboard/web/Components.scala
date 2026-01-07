@@ -517,12 +517,8 @@ object Components:
       isLoggedIn: Boolean
   ): Frag =
     if notes.isEmpty && !isLoggedIn then
-      // No notes and not logged in - show subtle placeholder (login to add)
-      span(
-        cls := "text-gray-200 text-sm cursor-default",
-        title := "Login to add notes",
-        "📝"
-      )
+      // No notes and cannot edit - leave blank
+      frag()
     else if notes.isEmpty && isLoggedIn then
       // No notes but logged in - show add button
       button(
