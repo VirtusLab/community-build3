@@ -337,53 +337,59 @@ object Components:
   private def noteFormWithBuild(projectName: String, buildId: Option[String], formId: String): Frag =
     val isInline = buildId.isDefined
     if isInline then
-      // Inline form - absolute positioned dropdown
-      div(
-        cls := "absolute left-0 top-full mt-1 z-50 bg-white border border-blue-200 rounded-lg p-3 shadow-lg",
-        style := "min-width: 280px;",
-        form(
-          attr("hx-post") := path(s"/projects/$projectName/notes"),
-          attr("hx-target") := s"#$formId",
-          attr("hx-swap") := "innerHTML",
-          // Hidden fields
-          input(tpe := "hidden", name := "buildId", value := buildId.get),
-          input(tpe := "hidden", name := "formId", value := formId),
-          div(
-            cls := "mb-2",
-            tag("textarea")(
-              name := "note",
-              cls := "w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-              attr("rows") := "2",
-              attr("placeholder") := "Note for this build...",
-              attr("required") := "required"
-            )
-          ),
-          div(
-            cls := "mb-2",
-            input(
-              tpe := "url",
-              name := "githubIssueUrl",
-              cls := "w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-              attr("placeholder") := "GitHub Issue URL (optional)"
-            )
-          ),
-          div(
-            cls := "flex justify-end gap-2",
-            button(
-              tpe := "button",
-              cls := "px-3 py-1 text-xs text-gray-600 hover:text-gray-800",
-              attr("hx-get") := path(s"/projects/$projectName/notes/cancel?formId=$formId&buildId=${urlEncode(buildId.get)}"),
-              attr("hx-target") := s"#$formId",
-              attr("hx-swap") := "innerHTML",
-              "Cancel"
+      // Inline form - positioned to the left of the icon (same as tooltip)
+      span(
+        cls := "relative inline-block",
+        div(
+          cls := "absolute right-full top-0 mr-2 z-50 bg-white border border-blue-200 rounded-lg p-3 shadow-lg",
+          style := "min-width: 280px;",
+          form(
+            attr("hx-post") := path(s"/projects/$projectName/notes"),
+            attr("hx-target") := s"#$formId",
+            attr("hx-swap") := "innerHTML",
+            // Hidden fields
+            input(tpe := "hidden", name := "buildId", value := buildId.get),
+            input(tpe := "hidden", name := "formId", value := formId),
+            div(
+              cls := "mb-2",
+              tag("textarea")(
+                name := "note",
+                cls := "w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                attr("rows") := "2",
+                attr("placeholder") := "Note for this build...",
+                attr("required") := "required",
+                attr("autofocus") := "autofocus"
+              )
             ),
-            button(
-              tpe := "submit",
-              cls := "px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors",
-              "Save"
+            div(
+              cls := "mb-2",
+              input(
+                tpe := "url",
+                name := "githubIssueUrl",
+                cls := "w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                attr("placeholder") := "GitHub Issue URL (optional)"
+              )
+            ),
+            div(
+              cls := "flex justify-end gap-2",
+              button(
+                tpe := "button",
+                cls := "px-3 py-1 text-xs text-gray-600 hover:text-gray-800",
+                attr("hx-get") := path(s"/projects/$projectName/notes/cancel?formId=$formId&buildId=${urlEncode(buildId.get)}"),
+                attr("hx-target") := s"#$formId",
+                attr("hx-swap") := "innerHTML",
+                "Cancel"
+              ),
+              button(
+                tpe := "submit",
+                cls := "px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors",
+                "Save"
+              )
             )
           )
-        )
+        ),
+        // Placeholder icon while form is open
+        span(cls := "text-blue-500 text-sm", "📝")
       )
     else
       // Full page form
