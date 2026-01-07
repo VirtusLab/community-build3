@@ -142,7 +142,7 @@ object Main extends IOApp.Simple:
       jwtSecret,
       basePath
     )
-    val authRoutes = GitHubOAuth.routes(config.github, httpClient)
+    val authRoutes = GitHubOAuth.routes(config.github, httpClient, basePath)
     authRoutes <+> mainRoutes
 
   private def configureLogging(): IO[Unit] = IO {

@@ -635,7 +635,8 @@ object Routes:
 
       // API docs redirect
       case GET -> Root / "docs" =>
-        PermanentRedirect(headers.Location(Uri.unsafeFromString("/docs/index.html")))
+        val docsPath = if Templates.basePath.isEmpty then "/docs/index.html" else s"${Templates.basePath}/docs/index.html"
+        PermanentRedirect(headers.Location(Uri.unsafeFromString(docsPath)))
     }
 
 /** Custom path extractor for build logs URLs with buildId containing slashes.

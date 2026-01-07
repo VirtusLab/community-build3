@@ -45,7 +45,10 @@ object GitHubOAuth:
   )
 
   /** Create auth routes */
-  def routes(config: Config, httpClient: Client[IO]): HttpRoutes[IO] =
+  def routes(config: Config, httpClient: Client[IO], basePath: String = ""): HttpRoutes[IO] =
+    // Helper to prefix paths with basePath
+    def path(p: String): String = if p.startsWith("/") then s"$basePath$p" else s"$basePath/$p"
+
     HttpRoutes.of[IO] {
       // Redirect to GitHub OAuth
       case GET -> Root / "auth" / "github" =>
@@ -64,13 +67,14 @@ object GitHubOAuth:
             BadRequest("Missing authorization code")
           case Some(code) =>
             val isSecure = config.callbackUrl.startsWith("https://")
+            val cookiePath = if basePath.isEmpty then "/" else basePath
             val result = for
               tokenResponse <- exchangeCodeForToken(httpClient, config, code)
               user <- fetchUserInfo(httpClient, tokenResponse.accessToken)
               isAdmin <- checkAdminTeamMembership(httpClient, tokenResponse.accessToken, user.login)
               userWithAdmin = user.copy(isAdmin = isAdmin)
               jwt = createJwt(config.jwtSecret, userWithAdmin)
-              response <- Found(Location(Uri.unsafeFromString("/")))
+              response <- Found(Location(Uri.unsafeFromString(path("/"))))
                 .map(
                   _.addCookie(
                     ResponseCookie(
@@ -79,7 +83,7 @@ object GitHubOAuth:
                       httpOnly = true,
                       secure = isSecure,
                       maxAge = Some(7.days.toSeconds),
-                      path = Some("/")
+                      path = Some(cookiePath)
                     )
                   )
                 )
@@ -91,7 +95,8 @@ object GitHubOAuth:
 
       // Logout
       case POST -> Root / "auth" / "logout" =>
-        Found(Location(Uri.unsafeFromString("/")))
+        val cookiePath = if basePath.isEmpty then "/" else basePath
+        Found(Location(Uri.unsafeFromString(path("/"))))
           .map(
             _.addCookie(
               ResponseCookie(
@@ -99,7 +104,7 @@ object GitHubOAuth:
                 content = "",
                 httpOnly = true,
                 maxAge = Some(0),
-                path = Some("/")
+                path = Some(cookiePath)
               )
             )
           )
@@ -126,7 +131,7 @@ object GitHubOAuth:
               <div class="flex items-center space-x-3">
                 <img src="${user.avatarUrl}" alt="${user.login}" class="w-8 h-8 rounded-full" />
                 <span class="text-gray-700 font-medium">${user.login}$adminBadge</span>
-                <form action="/auth/logout" method="POST" class="inline">
+                <form action="${path("/auth/logout")}" method="POST" class="inline">
                   <button type="submit" class="text-gray-500 hover:text-gray-700 text-sm">Logout</button>
                 </form>
               </div>
@@ -135,7 +140,7 @@ object GitHubOAuth:
             )
           case None =>
             Ok(
-              """<a href="/auth/github" class="text-gray-600 hover:text-gray-900">Sign in with GitHub</a>""",
+              s"""<a href="${path("/auth/github")}" class="text-gray-600 hover:text-gray-900">Sign in with GitHub</a>""",
               `Content-Type`(MediaType.text.html)
             )
     }
