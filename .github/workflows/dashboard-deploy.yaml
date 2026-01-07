@@ -119,3 +119,12 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
 
+  clenaup-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: scala-community-build-dashboard
+          package-type: container
+          min-versions-to-keep: 5
+          delete-only-untagged-versions: true
