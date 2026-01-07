@@ -97,11 +97,17 @@ object Components:
       )
     )
 
-  /** Build info card with failure duration badge */
-  def buildCardWithDuration(result: BuildResult, streakInfo: Option[FailureStreakInfo]): Frag =
+  /** Build info card with failure duration badge and notes */
+  def buildCardWithDuration(
+      result: BuildResult,
+      streakInfo: Option[FailureStreakInfo],
+      notes: List[ProjectNote] = Nil,
+      canEdit: Boolean = false
+  ): Frag =
     val logsUrl = path(
       s"/projects/${result.projectName.org}/${result.projectName.repo}/builds/${urlEncode(result.buildId)}/logs"
     )
+    val notesCellId = s"home-notes-${result.projectName.org}-${result.projectName.repo}-${result.buildId.hashCode.abs}"
 
     div(
       cls := "bg-white rounded-lg shadow p-4 border-l-4",
@@ -139,7 +145,12 @@ object Components:
       div(
         cls := "mt-2 text-xs text-gray-400 flex items-center gap-3",
         span(s"${result.buildTool} • ${result.scalaVersion}"),
-        a(href := logsUrl, cls := "text-blue-600 hover:underline font-medium", "📋 Logs")
+        a(href := logsUrl, cls := "text-blue-600 hover:underline font-medium", "📋 Logs"),
+        // Notes indicator
+        span(
+          cls := "ml-auto",
+          noteIndicator(result.projectName: String, result.buildId, notesCellId, notes, canEdit)
+        )
       )
     )
 

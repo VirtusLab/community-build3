@@ -367,6 +367,8 @@ object Routes:
         val isHtmx = req.headers.get(ci"HX-Request").isDefined
         val htmxTarget = req.headers.get(ci"HX-Target").map(_.head.value)
 
+        val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
+
         for
           allVersions <- esClient.listScalaVersions()
           // When series is selected but no specific version, use latest version of that series
@@ -387,25 +389,35 @@ object Routes:
             if sort == Templates.FailureSort.Streak then
               getCachedFailureStreaks(effectiveScalaVersion, buildId, failures)
             else IO.pure(Map.empty[ProjectName, FailureStreakInfo])
+          // Fetch notes for failures - keyed by "projectName:buildId"
+          actualBuildId = builds.headOption.map(_.buildId)
+          notesMap <- actualBuildId match
+            case Some(bid) =>
+              notesApi.getAllNotesByBuildId(bid).map: byProject =>
+                // Re-key to "projectName:buildId"
+                byProject.flatMap: (projName, notes) =>
+                  notes.groupBy(_.buildId).collect:
+                    case (Some(notesBid), notesList) => s"$projName:$notesBid" -> notesList
+            case None => IO.pure(Map.empty[String, List[ProjectNote]])
           response <-
             if isHtmx then
               htmxTarget match
                 case Some("home-content") =>
                   // Series changed - return full content (selector + results)
                   Ok(
-                    Templates.homeContentPartial(builds, allVersions, buildIds, homeParams, failureStreaks),
+                    Templates.homeContentPartial(builds, allVersions, buildIds, homeParams, failureStreaks, notesMap, canEdit),
                     `Content-Type`(MediaType.text.html)
                   )
                 case _ =>
                   // Version/filter changed - return just results
                   Ok(
-                    Templates.homeResultsPartial(builds, homeParams, failureStreaks),
+                    Templates.homeResultsPartial(builds, homeParams, failureStreaks, notesMap, canEdit),
                     `Content-Type`(MediaType.text.html)
                   )
             else
               // Full page request
               Ok(
-                Templates.homePage(builds, allVersions, buildIds, homeParams, failureStreaks),
+                Templates.homePage(builds, allVersions, buildIds, homeParams, failureStreaks, notesMap, canEdit),
                 `Content-Type`(MediaType.text.html)
               )
         yield response

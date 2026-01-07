@@ -138,7 +138,9 @@ object Templates:
       scalaVersions: List[String],
       buildIds: List[String],
       params: HomeParams = HomeParams(),
-      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      canEdit: Boolean = false
   ): String =
     val filteredBuilds = filterHomeBuilds(builds, params)
 
@@ -152,7 +154,7 @@ object Templates:
         // Results section (for htmx updates)
         div(
           id := "home-results",
-          homeResultsContent(filteredBuilds, params, failureStreaks)
+          homeResultsContent(filteredBuilds, params, failureStreaks, notesMap, canEdit)
         )
       )
     )
@@ -163,7 +165,9 @@ object Templates:
       scalaVersions: List[String],
       buildIds: List[String],
       params: HomeParams,
-      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      canEdit: Boolean = false
   ): String =
     val filteredBuilds = filterHomeBuilds(builds, params)
     div(
@@ -171,7 +175,7 @@ object Templates:
       homeVersionSelector(scalaVersions, buildIds, params),
       div(
         id := "home-results",
-        homeResultsContent(filteredBuilds, params, failureStreaks)
+        homeResultsContent(filteredBuilds, params, failureStreaks, notesMap, canEdit)
       )
     ).render
 
@@ -293,7 +297,9 @@ object Templates:
   def homeResultsContent(
       builds: List[BuildResult],
       params: HomeParams = HomeParams(),
-      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      canEdit: Boolean = false
   ): Frag =
     // If no builds and no version/series selected, show prompt to select one
     if builds.isEmpty && params.scalaVersion.isEmpty && params.series == ScalaSeries.All then
@@ -437,7 +443,9 @@ object Templates:
         else
           div(
             cls := "grid gap-4",
-            sortedFailures.map(f => buildCardWithDuration(f, failureStreaks.get(f.projectName)))
+            sortedFailures.map: f =>
+              val notes = notesMap.getOrElse(s"${f.projectName: String}:${f.buildId}", Nil)
+              buildCardWithDuration(f, failureStreaks.get(f.projectName), notes, canEdit)
           )
       )
     )
@@ -446,10 +454,12 @@ object Templates:
   def homeResultsPartial(
       builds: List[BuildResult],
       params: HomeParams = HomeParams(),
-      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty
+      failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      canEdit: Boolean = false
   ): String =
     val filteredBuilds = filterHomeBuilds(builds, params)
-    homeResultsContent(filteredBuilds, params, failureStreaks).render
+    homeResultsContent(filteredBuilds, params, failureStreaks, notesMap, canEdit).render
 
   /** Comparison page */
   def comparePage(
