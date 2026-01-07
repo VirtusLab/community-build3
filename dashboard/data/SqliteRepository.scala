@@ -19,7 +19,11 @@ trait SqliteRepository:
   def updateNote(id: Long, note: String, issueUrl: Option[String]): IO[Boolean]
   def deleteNote(id: Long): IO[Boolean]
   def getNotes(projectName: ProjectName): IO[List[ProjectNote]]
+  def getProjectLevelNotes(projectName: ProjectName): IO[List[ProjectNote]]
   def getNotesByBuild(projectName: ProjectName, buildId: String): IO[List[ProjectNote]]
+
+  /** Get all notes for a specific buildId across all projects (for batch loading) */
+  def getAllNotesByBuildId(buildId: String): IO[List[ProjectNote]]
 
   /** Failure signatures management */
   def saveSignature(signature: FailureSignature): IO[Unit]
@@ -129,6 +133,17 @@ object SqliteRepository:
             ORDER BY created_at DESC
           """.query[ProjectNoteRow].run().toList.flatMap(_.toProjectNote)
 
+    override def getProjectLevelNotes(projectName: ProjectName): IO[List[ProjectNote]] =
+      IO.blocking:
+        val projectNameStr: String = projectName
+        connect(ds):
+          sql"""
+            SELECT id, project_name, scala_version, build_id, github_user, note, github_issue_url, created_at, updated_at
+            FROM project_notes
+            WHERE project_name = $projectNameStr AND build_id IS NULL
+            ORDER BY created_at DESC
+          """.query[ProjectNoteRow].run().toList.flatMap(_.toProjectNote)
+
     override def getNotesByBuild(projectName: ProjectName, buildId: String): IO[List[ProjectNote]] =
       IO.blocking:
         val projectNameStr: String = projectName
@@ -138,6 +153,16 @@ object SqliteRepository:
             FROM project_notes
             WHERE project_name = $projectNameStr AND build_id = $buildId
             ORDER BY created_at DESC
+          """.query[ProjectNoteRow].run().toList.flatMap(_.toProjectNote)
+
+    override def getAllNotesByBuildId(buildId: String): IO[List[ProjectNote]] =
+      IO.blocking:
+        connect(ds):
+          sql"""
+            SELECT id, project_name, scala_version, build_id, github_user, note, github_issue_url, created_at, updated_at
+            FROM project_notes
+            WHERE build_id = $buildId
+            ORDER BY project_name, created_at DESC
           """.query[ProjectNoteRow].run().toList.flatMap(_.toProjectNote)
 
     override def saveSignature(signature: FailureSignature): IO[Unit] =

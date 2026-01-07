@@ -456,7 +456,9 @@ object Templates:
       scalaVersions: List[String],
       buildIds: List[String],
       result: Option[ComparisonResult],
-      params: CompareParams = CompareParams(None, None, None, None)
+      params: CompareParams = CompareParams(None, None, None, None),
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
   ): String =
     // Filter versions by selected series
     val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
@@ -476,7 +478,7 @@ object Templates:
         div(
           id := "comparison-results",
           result
-            .map(r => comparisonResultsContent(r, params))
+            .map(r => comparisonResultsContent(r, params, notesMap, isLoggedIn))
             .getOrElse(
               div(
                 cls := "text-center py-12 text-gray-500",
@@ -499,10 +501,6 @@ object Templates:
 
   /** Comparison form */
   private def compareForm(scalaVersions: List[String], buildIds: List[String], params: CompareParams): Frag =
-    // Check if we have comparison params (for showing copy link on direct page load)
-    val hasComparison = params.targetScalaVersion.isDefined || params.targetBuildId.isDefined
-    val shareUrl = if hasComparison then buildCompareUrl(params) else ""
-
     form(
       id := "compare-form",
       cls := "bg-white rounded-lg shadow p-6 mb-8",
@@ -593,22 +591,6 @@ object Templates:
       ),
       div(
         cls := "mt-6 flex justify-end gap-3",
-        // Copy link button - shown when comparison results exist
-        div(
-          id := "copy-link-container",
-          if hasComparison then
-            button(
-              id := "share-btn",
-              tpe := "button",
-              cls := "flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors",
-              attr("onclick") := s"copyShareLink('$shareUrl')",
-              raw(
-                """<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>"""
-              ),
-              span("Copy link")
-            )
-          else frag()
-        ),
         button(
           tpe := "submit",
           cls := "bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors",
@@ -616,7 +598,7 @@ object Templates:
           span(cls := "htmx-indicator ml-2", loadingSpinner)
         )
       ),
-      // JavaScript for swap only
+      // JavaScript for swap and copy link
       script(raw(swapCompareScript))
     )
 
@@ -689,15 +671,31 @@ object Templates:
   )
 
   /** Comparison results content (without outer container) */
-  def comparisonResultsContent(result: ComparisonResult, params: CompareParams): Frag =
+  def comparisonResultsContent(
+      result: ComparisonResult,
+      params: CompareParams,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
+  ): Frag =
     // Build shareable URL from params
     val shareUrl = buildCompareUrl(params)
 
     frag(
-      // Out-of-band swap to show the Copy link button in the form
+      // Hidden inputs to store comparison parameters for htmx requests
       div(
-        id := "copy-link-container",
-        attr("hx-swap-oob") := "true",
+        id := "comparison-params",
+        input(tpe := "hidden", name := "baseScalaVersion", value := params.baseScalaVersion.getOrElse("")),
+        input(tpe := "hidden", name := "baseBuildId", value := params.baseBuildId.getOrElse("")),
+        input(tpe := "hidden", name := "targetScalaVersion", value := params.targetScalaVersion.getOrElse("")),
+        input(tpe := "hidden", name := "targetBuildId", value := params.targetBuildId.getOrElse("")),
+        input(tpe := "hidden", name := "filter", value := params.filter),
+        input(tpe := "hidden", name := "reason", value := params.reason.getOrElse(""))
+      ),
+
+      // Header with Copy link button
+      div(
+        cls := "flex justify-between items-center mb-4",
+        h3(cls := "text-lg font-semibold text-gray-700", "Comparison Results"),
         button(
           id := "share-btn",
           tpe := "button",
@@ -710,20 +708,15 @@ object Templates:
         )
       ),
 
-      // Hidden inputs to store comparison parameters for htmx requests
-      div(
-        id := "comparison-params",
-        input(tpe := "hidden", name := "baseScalaVersion", value := params.baseScalaVersion.getOrElse("")),
-        input(tpe := "hidden", name := "baseBuildId", value := params.baseBuildId.getOrElse("")),
-        input(tpe := "hidden", name := "targetScalaVersion", value := params.targetScalaVersion.getOrElse("")),
-        input(tpe := "hidden", name := "targetBuildId", value := params.targetBuildId.getOrElse("")),
-        input(tpe := "hidden", name := "filter", value := params.filter),
-        input(tpe := "hidden", name := "reason", value := params.reason.getOrElse(""))
-      ),
-
       // Summary
       div(
-        cls := "grid grid-cols-1 md:grid-cols-4 gap-4 mb-6",
+        cls := "grid grid-cols-2 md:grid-cols-5 gap-4 mb-6",
+        statCardWithTooltip(
+          "Total",
+          (result.newFailures.length + result.newFixes.length + result.stillFailing.length + result.stillPassing).toString,
+          "text-blue-600",
+          "Total number of projects compared"
+        ),
         statCardWithTooltip(
           "New Failures",
           result.newFailures.length.toString,
@@ -756,19 +749,30 @@ object Templates:
       // Results table
       div(
         id := "results",
-        comparisonTable(result, params.filter, params.reason)
+        comparisonTable(result, params.filter, params.reason, notesMap, isLoggedIn)
       )
     )
 
   /** Comparison results with container (for full page render) */
-  def comparisonResults(result: ComparisonResult, params: CompareParams): Frag =
+  def comparisonResults(
+      result: ComparisonResult,
+      params: CompareParams,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
+  ): Frag =
     div(
       id := "comparison-results",
-      comparisonResultsContent(result, params)
+      comparisonResultsContent(result, params, notesMap, isLoggedIn)
     )
 
-  /** Comparison results table */
-  def comparisonTable(result: ComparisonResult, filter: String, reason: Option[String]): Frag =
+  /** Comparison results table with pre-fetched notes (avoids N+1 HTTP requests) */
+  def comparisonTable(
+      result: ComparisonResult,
+      filter: String,
+      reason: Option[String],
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
+  ): Frag =
     // Apply filter
     val (newFailures, newFixes, stillFailing) = filter match
       case "new-failures"  => (result.newFailures, Nil, Nil)
@@ -786,6 +790,10 @@ object Templates:
     val filteredNewFixes = filterByReason(newFixes)
     val filteredStillFailing = filterByReason(stillFailing)
 
+    // Helper to get notes for a project
+    def notesFor(diff: ProjectDiff): List[ProjectNote] =
+      notesMap.getOrElse(diff.projectName: String, Nil)
+
     if filteredNewFailures.isEmpty && filteredNewFixes.isEmpty && filteredStillFailing.isEmpty then
       emptyState("No matching results")
     else
@@ -801,21 +809,28 @@ object Templates:
               th(cls := "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase", "Version"),
               th(cls := "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase", "Status"),
               th(cls := "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase", "Reason"),
-              th(cls := "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase", "Logs")
+              th(cls := "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase", "Logs"),
+              th(cls := "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase", "Notes")
             )
           ),
           tbody(
             cls := "divide-y divide-gray-200",
-            filteredNewFailures.map(diffRow(_, "new-failure")),
-            filteredNewFixes.map(diffRow(_, "new-fix")),
-            filteredStillFailing.map(diffRow(_, "still-failing"))
+            filteredNewFailures.map(d => diffRow(d, "new-failure", notesFor(d), isLoggedIn)),
+            filteredNewFixes.map(d => diffRow(d, "new-fix", notesFor(d), isLoggedIn)),
+            filteredStillFailing.map(d => diffRow(d, "still-failing", notesFor(d), isLoggedIn))
           )
         )
       )
 
   /** Partial: filtered table for htmx */
-  def comparisonTablePartial(result: ComparisonResult, filter: String, reason: Option[String]): String =
-    comparisonTable(result, filter, reason).render
+  def comparisonTablePartial(
+      result: ComparisonResult,
+      filter: String,
+      reason: Option[String],
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
+  ): String =
+    comparisonTable(result, filter, reason, notesMap, isLoggedIn).render
 
   /** Parameters for history filtering */
   final case class HistoryParams(
@@ -828,8 +843,10 @@ object Templates:
   /** Project history page */
   def projectHistoryPage(
       history: ProjectHistory,
-      notes: List[ProjectNote],
-      params: HistoryParams = HistoryParams("")
+      projectNotes: List[ProjectNote],
+      buildNotesMap: Map[String, List[ProjectNote]] = Map.empty,
+      params: HistoryParams = HistoryParams(""),
+      canEdit: Boolean = false
   ): String =
     val effectiveParams = params.copy(projectName = history.projectName: String)
     val filteredEntries = filterHistoryEntries(history.entries, effectiveParams)
@@ -851,31 +868,36 @@ object Templates:
           historyStatusHeader(filteredHistory, versionStats)
         ),
 
-        // Notes section
-        section(
-          cls := "mb-8",
-          div(
-            cls := "flex justify-between items-center mb-4",
-            h2(cls := "text-xl font-semibold", "Notes"),
-            button(
-              cls := "text-blue-600 hover:text-blue-800 text-sm",
-              attr("hx-get") := path(s"/projects/${history.projectName: String}/notes/new"),
-              attr("hx-target") := "#notes-container",
-              attr("hx-swap") := "afterbegin",
-              "+ Add Note"
+        // Notes section - always visible, but add/delete only for users with edit access
+        if projectNotes.nonEmpty || canEdit then
+          section(
+            cls := "mb-8",
+            div(
+              cls := "flex justify-between items-center mb-4",
+              h2(cls := "text-xl font-semibold", "Project Notes"),
+              // Add button only for users with edit access
+              if canEdit then
+                button(
+                  cls := "text-blue-600 hover:text-blue-800 text-sm",
+                  attr("hx-get") := path(s"/projects/${history.projectName: String}/notes/new"),
+                  attr("hx-target") := "#notes-container",
+                  attr("hx-swap") := "afterbegin",
+                  "+ Add Note"
+                )
+              else frag()
+            ),
+            div(
+              id := "notes-container",
+              if projectNotes.isEmpty then p(cls := "text-gray-500 text-sm", "No project-level notes yet")
+              else projectNotes.map(n => projectNoteCard(n, canEdit))
             )
-          ),
-          div(
-            id := "notes-container",
-            if notes.isEmpty then p(cls := "text-gray-500 text-sm", "No notes yet")
-            else notes.map(noteCard)
           )
-        ),
+        else frag(),
 
         // Timeline with filters - wrapped for htmx updates
         div(
           id := "history-section",
-          historySectionContent(filteredEntries, effectiveParams)
+          historySectionContent(filteredEntries, effectiveParams, buildNotesMap, canEdit)
         )
       )
     )
@@ -1033,11 +1055,17 @@ object Templates:
   private def historySectionContent(
       filteredEntries: List[ProjectHistoryEntry],
       params: HistoryParams,
+      notesMap: Map[String, List[ProjectNote]],
+      canEdit: Boolean,
       offset: Int = 0
   ): Frag =
     val visibleEntries = filteredEntries.slice(offset, offset + HistoryPageSize)
     val hasMore = offset + HistoryPageSize < filteredEntries.length
     val nextOffset = offset + HistoryPageSize
+
+    // Helper to get notes for a specific build
+    def notesFor(entry: ProjectHistoryEntry): List[ProjectNote] =
+      notesMap.getOrElse(entry.buildId, Nil)
 
     section(
       // Header with filters
@@ -1059,79 +1087,72 @@ object Templates:
         else
           div(
             id := "history-entries",
-            visibleEntries.zipWithIndex.map: (entry, i) =>
-              val isLast = i == visibleEntries.length - 1 && hasMore
-              historyEntryWithScroll(entry, isLast, params, nextOffset)
+            visibleEntries.map(e => historyEntry(e, notesFor(e), canEdit))
           )
         ,
-        // Load more indicator
-        if hasMore then
-          div(
-            id := "history-load-more",
-            cls := "pt-4 text-center text-gray-500 text-sm border-t mt-4",
-            span(cls := "htmx-indicator", loadingSpinner),
-            span(s"Showing ${math.min(nextOffset, filteredEntries.length)} of ${filteredEntries.length} builds")
-          )
-        else if filteredEntries.nonEmpty then
-          div(
-            cls := "pt-4 text-center text-gray-500 text-sm border-t mt-4",
-            s"Showing all ${filteredEntries.length} builds"
-          )
-        else frag()
+        // Load more trigger - triggers when scrolled into view
+        loadMoreTrigger(filteredEntries.length, nextOffset, hasMore, params)
       )
     )
 
-  /** History entry with optional infinite scroll trigger */
-  private def historyEntryWithScroll(
-      entry: ProjectHistoryEntry,
-      isLastVisible: Boolean,
-      params: HistoryParams,
-      nextOffset: Int
+  /** Load more trigger for infinite scroll */
+  private def loadMoreTrigger(
+      totalEntries: Int,
+      nextOffset: Int,
+      hasMore: Boolean,
+      params: HistoryParams
   ): Frag =
-    val baseEntry = historyEntry(entry)
-    if isLastVisible then
+    if hasMore then
       val filterUrl = path(
         s"/projects/${params.projectName}/history/more?series=${params.series}&excludeSnapshots=${params.excludeSnapshots}&excludeNightlies=${params.excludeNightlies}&offset=$nextOffset"
       )
       div(
+        id := "history-load-more",
+        cls := "pt-4 text-center text-gray-500 text-sm border-t mt-4",
         attr("hx-get") := filterUrl,
         attr("hx-trigger") := "revealed",
-        attr("hx-swap") := "afterend",
-        attr("hx-indicator") := "#history-load-more",
-        baseEntry
+        attr("hx-swap") := "outerHTML",
+        loadingSpinner,
+        span(cls := "ml-2", s"Loading more... (${math.min(nextOffset, totalEntries)} of $totalEntries)")
       )
-    else baseEntry
+    else if totalEntries > 0 then
+      div(
+        cls := "pt-4 text-center text-gray-500 text-sm border-t mt-4",
+        s"Showing all $totalEntries builds"
+      )
+    else frag()
 
   /** Partial: more history entries for infinite scroll */
-  def historyMoreEntries(history: ProjectHistory, params: HistoryParams, offset: Int): String =
+  def historyMoreEntries(
+      history: ProjectHistory,
+      params: HistoryParams,
+      offset: Int,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      canEdit: Boolean = false
+  ): String =
     val filteredEntries = filterHistoryEntries(history.entries, params)
     val visibleEntries = filteredEntries.slice(offset, offset + HistoryPageSize)
     val hasMore = offset + HistoryPageSize < filteredEntries.length
     val nextOffset = offset + HistoryPageSize
 
-    val entries = visibleEntries.zipWithIndex.map: (entry, i) =>
-      val isLast = i == visibleEntries.length - 1 && hasMore
-      historyEntryWithScroll(entry, isLast, params, nextOffset)
+    // Helper to get notes for a specific build
+    def notesFor(entry: ProjectHistoryEntry): List[ProjectNote] =
+      notesMap.getOrElse(entry.buildId, Nil)
 
-    val loadMoreIndicator =
-      if hasMore then
-        div(
-          id := "history-load-more",
-          cls := "pt-4 text-center text-gray-500 text-sm border-t mt-4",
-          span(cls := "htmx-indicator", loadingSpinner),
-          span(s"Showing ${math.min(nextOffset, filteredEntries.length)} of ${filteredEntries.length} builds")
-        )
-      else
-        div(
-          id := "history-load-more",
-          cls := "pt-4 text-center text-gray-500 text-sm border-t mt-4",
-          s"Showing all ${filteredEntries.length} builds"
-        )
+    val entries = visibleEntries.map(e => historyEntry(e, notesFor(e), canEdit))
 
-    frag(entries, loadMoreIndicator).render
+    frag(
+      entries,
+      loadMoreTrigger(filteredEntries.length, nextOffset, hasMore, params)
+    ).render
 
   /** Partial: history section for htmx updates (includes filters) */
-  def historyContentPartial(history: ProjectHistory, params: HistoryParams): String =
+  def historyContentPartial(
+      history: ProjectHistory,
+      params: HistoryParams,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      canEdit: Boolean = false
+  ): String =
     val filteredEntries = filterHistoryEntries(history.entries, params)
     val filteredHistory = computeFilteredStats(history, filteredEntries)
     val versionStats = computeVersionStats(filteredEntries)
@@ -1143,7 +1164,7 @@ object Templates:
         historyStatusHeader(filteredHistory, versionStats)
       ),
       // Main content
-      historySectionContent(filteredEntries, params, 0)
+      historySectionContent(filteredEntries, params, notesMap, canEdit, 0)
     ).render
 
   /** Log viewer page */
@@ -1237,8 +1258,13 @@ object Templates:
     )
 
   /** Partial: comparison results for htmx updates */
-  def comparisonResultsPartial(result: ComparisonResult, params: CompareParams): String =
-    comparisonResultsContent(result, params).render
+  def comparisonResultsPartial(
+      result: ComparisonResult,
+      params: CompareParams,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
+  ): String =
+    comparisonResultsContent(result, params, notesMap, isLoggedIn).render
 
   /** Stat card component */
   private def statCard(label: String, value: String, valueColor: String): Frag =

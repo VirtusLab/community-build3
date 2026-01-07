@@ -22,6 +22,7 @@ import dashboard.data.{
   HistoryCache,
   LogsCache,
   ProjectsCache,
+  ProjectNote,
   ElasticsearchClient,
   SqliteRepository
 }
@@ -419,6 +420,15 @@ object Routes:
 
         val isHtmx = req.headers.get(ci"HX-Request").isDefined
         val hasComparison = request.targetScalaVersion.isDefined || request.targetBuildId.isDefined
+        val isLoggedIn = GitHubOAuth.extractUser(jwtSecret, req).isDefined
+
+        // Helper to get the actual buildId from comparison result (from diffs, not request params)
+        def getActualBuildId(result: ComparisonResult): Option[String] =
+          result.targetBuildId.orElse(
+            result.newFailures.headOption.map(_.buildId)
+              .orElse(result.newFixes.headOption.map(_.buildId))
+              .orElse(result.stillFailing.headOption.map(_.buildId))
+          )
 
         for
           versions <- esClient.listScalaVersions()
@@ -427,17 +437,21 @@ object Routes:
             if hasComparison
             then getCachedComparison(request).map(_.toOption)
             else IO.pure(None)
+          // Batch fetch notes for the target buildId (avoids N+1 requests)
+          notesMap <- resultOpt.flatMap(getActualBuildId) match
+            case Some(buildId) => notesApi.getAllNotesByBuildId(buildId)
+            case None          => IO.pure(Map.empty[String, List[ProjectNote]])
           response <-
             if isHtmx && hasComparison then
               // htmx request - return partial only
               resultOpt match
                 case Some(result) =>
-                  Ok(Templates.comparisonResultsPartial(result, compareParams), `Content-Type`(MediaType.text.html))
+                  Ok(Templates.comparisonResultsPartial(result, compareParams, notesMap, isLoggedIn), `Content-Type`(MediaType.text.html))
                 case None => Ok("No comparison results", `Content-Type`(MediaType.text.html))
             else
               // Full page request
               Ok(
-                Templates.comparePage(versions, buildIds, resultOpt, compareParams),
+                Templates.comparePage(versions, buildIds, resultOpt, compareParams, notesMap, isLoggedIn),
                 `Content-Type`(MediaType.text.html)
               )
         yield response
@@ -474,12 +488,25 @@ object Routes:
 
         val filter = params.get("filter").filter(_.nonEmpty).getOrElse("all")
         val reason = params.get("reason").filter(_.nonEmpty)
+        val isLoggedIn = GitHubOAuth.extractUser(jwtSecret, req).isDefined
+
+        // Helper to get the actual buildId from comparison result
+        def getActualBuildId(result: ComparisonResult): Option[String] =
+          result.targetBuildId.orElse(
+            result.newFailures.headOption.map(_.buildId)
+              .orElse(result.newFixes.headOption.map(_.buildId))
+              .orElse(result.stillFailing.headOption.map(_.buildId))
+          )
 
         for
           result <- getCachedComparison(request)
+          // Batch fetch notes for the target buildId
+          notesMap <- result.toOption.flatMap(getActualBuildId) match
+            case Some(buildId) => notesApi.getAllNotesByBuildId(buildId)
+            case None          => IO.pure(Map.empty[String, List[ProjectNote]])
           response <- result match
             case Right(r) =>
-              Ok(Templates.comparisonTablePartial(r, filter, reason), `Content-Type`(MediaType.text.html))
+              Ok(Templates.comparisonTablePartial(r, filter, reason, notesMap, isLoggedIn), `Content-Type`(MediaType.text.html))
             case Left(err) => BadRequest(err)
         yield response
 
@@ -500,11 +527,25 @@ object Routes:
           targetBuildId = request.targetBuildId
         )
 
+        val isLoggedIn = GitHubOAuth.extractUser(jwtSecret, req).isDefined
+
+        // Helper to get the actual buildId from comparison result
+        def getActualBuildId(result: ComparisonResult): Option[String] =
+          result.targetBuildId.orElse(
+            result.newFailures.headOption.map(_.buildId)
+              .orElse(result.newFixes.headOption.map(_.buildId))
+              .orElse(result.stillFailing.headOption.map(_.buildId))
+          )
+
         for
           result <- getCachedComparison(request)
+          // Batch fetch notes for the target buildId
+          notesMap <- result.toOption.flatMap(getActualBuildId) match
+            case Some(buildId) => notesApi.getAllNotesByBuildId(buildId)
+            case None          => IO.pure(Map.empty[String, List[ProjectNote]])
           response <- result match
             case Right(r) =>
-              Ok(Templates.comparisonResultsPartial(r, compareParams), `Content-Type`(MediaType.text.html))
+              Ok(Templates.comparisonResultsPartial(r, compareParams, notesMap, isLoggedIn), `Content-Type`(MediaType.text.html))
             case Left(err) => BadRequest(err)
         yield response
 
@@ -524,15 +565,20 @@ object Routes:
         val excludeSnapshots = params.get("excludeSnapshots").forall(_ != "false")
         val excludeNightlies = params.get("excludeNightlies").contains("true")
         val historyParams = Templates.HistoryParams(projectName, series, excludeSnapshots, excludeNightlies)
+        val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
         for
           historyResult <- getCachedHistory(projectName)
           response <- historyResult match
             case Right(history) =>
               for
-                notes <- sqliteRepo.getNotes(history.projectName)
+                // Fetch all notes for this project (project-level and build-level)
+                allNotes <- sqliteRepo.getNotes(history.projectName)
+                // Split into project-level and build-level notes
+                projectNotes = allNotes.filter(_.buildId.isEmpty)
+                buildNotesMap = allNotes.filter(_.buildId.isDefined).groupBy(_.buildId.get)
                 resp <- Ok(
-                  Templates.projectHistoryPage(history, notes, historyParams),
+                  Templates.projectHistoryPage(history, projectNotes, buildNotesMap, historyParams, canEdit),
                   `Content-Type`(MediaType.text.html)
                 )
               yield resp
@@ -549,12 +595,17 @@ object Routes:
         val excludeSnapshots = params.get("excludeSnapshots").forall(_ != "false")
         val excludeNightlies = params.get("excludeNightlies").contains("true")
         val historyParams = Templates.HistoryParams(projectName, series, excludeSnapshots, excludeNightlies)
+        val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
         for
           historyResult <- getCachedHistory(projectName)
           response <- historyResult match
             case Right(history) =>
-              Ok(Templates.historyContentPartial(history, historyParams), `Content-Type`(MediaType.text.html))
+              for
+                allNotes <- sqliteRepo.getNotes(history.projectName)
+                buildNotesMap = allNotes.filter(_.buildId.isDefined).groupBy(_.buildId.get)
+                resp <- Ok(Templates.historyContentPartial(history, historyParams, buildNotesMap, canEdit), `Content-Type`(MediaType.text.html))
+              yield resp
             case Left(err) =>
               NotFound(err)
         yield response
@@ -569,12 +620,17 @@ object Routes:
         val excludeNightlies = params.get("excludeNightlies").contains("true")
         val offset = params.get("offset").flatMap(_.toIntOption).getOrElse(0)
         val historyParams = Templates.HistoryParams(projectName, series, excludeSnapshots, excludeNightlies)
+        val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
         for
           historyResult <- getCachedHistory(projectName)
           response <- historyResult match
             case Right(history) =>
-              Ok(Templates.historyMoreEntries(history, historyParams, offset), `Content-Type`(MediaType.text.html))
+              for
+                allNotes <- sqliteRepo.getNotes(history.projectName)
+                buildNotesMap = allNotes.filter(_.buildId.isDefined).groupBy(_.buildId.get)
+                resp <- Ok(Templates.historyMoreEntries(history, historyParams, offset, buildNotesMap, canEdit), `Content-Type`(MediaType.text.html))
+              yield resp
             case Left(err) =>
               NotFound(err)
         yield response
@@ -588,6 +644,91 @@ object Routes:
           case None =>
             Forbidden("<div class='text-red-600 p-2'>Please log in with GitHub to add notes</div>")
 
+      // Note indicator (for htmx lazy loading in comparison table - shows icon + tooltip)
+      case req @ GET -> Root / "projects" / org / repo / "notes" / "indicator" =>
+        val projectName = s"$org/$repo"
+        val params = req.params
+        val buildId = params.get("buildId").filter(_.nonEmpty).getOrElse("")
+        val indicatorId = params.get("indicatorId").filter(_.nonEmpty).getOrElse(s"note-ind-$org-$repo-${buildId.hashCode.abs}")
+        val isLoggedIn = GitHubOAuth.extractUser(jwtSecret, req).isDefined
+        for
+          notesResult <- notesApi.getNotesByBuild(projectName, buildId)
+          notes = notesResult.getOrElse(Nil)
+          response <- Ok(
+            Components.noteIndicator(projectName, buildId, indicatorId, notes, isLoggedIn).render,
+            `Content-Type`(MediaType.text.html)
+          )
+        yield response
+
+      // Notes cell content (for htmx lazy loading in comparison table - full notes column)
+      case req @ GET -> Root / "projects" / org / repo / "builds" / buildId / "notes" / "cell" =>
+        val projectName = s"$org/$repo"
+        val params = req.params
+        val cellId = params.get("cellId").filter(_.nonEmpty).getOrElse(s"notes-cell-$org-$repo-${buildId.hashCode.abs}")
+        val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
+        for
+          notesResult <- notesApi.getNotesByBuild(projectName, buildId)
+          notes = notesResult.getOrElse(Nil)
+          response <- Ok(
+            Components.notesCellContent(projectName, buildId, cellId, notes, canEdit).render,
+            `Content-Type`(MediaType.text.html)
+          )
+        yield response
+
+      // Delete note (htmx) - requires authentication (author or admin), returns refreshed cell
+      case req @ DELETE -> Root / "projects" / org / repo / "notes" / LongVar(noteId) =>
+        val projectName = s"$org/$repo"
+        val params = req.params
+        val cellId = params.get("cellId").filter(_.nonEmpty).getOrElse(s"notes-cell-$org-$repo")
+        val buildId = params.get("buildId").filter(_.nonEmpty).getOrElse("")
+        GitHubOAuth.extractUser(jwtSecret, req) match
+          case Some(user) =>
+            for
+              deleteResult <- notesApi.deleteNote(projectName, noteId, user.login, canEdit = user.isAdmin)
+              response <- deleteResult match
+                case Right(_) =>
+                  for
+                    notesResult <- notesApi.getNotesByBuild(projectName, buildId)
+                    notes = notesResult.getOrElse(Nil)
+                    resp <- Ok(
+                      Components.notesCellContent(projectName, buildId, cellId, notes, canEdit = user.isAdmin).render,
+                      `Content-Type`(MediaType.text.html)
+                    )
+                  yield resp
+                case Left(err) =>
+                  BadRequest(s"<div class='text-red-600 text-xs'>$err</div>")
+            yield response
+          case None =>
+            Forbidden("<div class='text-red-600 text-xs'>Please log in first</div>")
+
+      // Note form for inline/build-specific notes (for htmx) - requires authentication
+      case req @ GET -> Root / "projects" / org / repo / "notes" / "form" =>
+        val projectName = s"$org/$repo"
+        val params = req.params
+        val buildId = params.get("buildId").filter(_.nonEmpty)
+        val formId = params.get("formId").filter(_.nonEmpty).getOrElse(
+          s"note-form-$org-$repo-${buildId.map(_.hashCode.abs).getOrElse(0)}"
+        )
+        GitHubOAuth.extractUser(jwtSecret, req) match
+          case Some(_) =>
+            buildId match
+              case Some(bid) =>
+                Ok(Components.noteFormInline(projectName, bid, formId).render, `Content-Type`(MediaType.text.html))
+              case None =>
+                Ok(Components.noteForm(projectName).render, `Content-Type`(MediaType.text.html))
+          case None =>
+            Forbidden("<div class='text-red-600 text-xs p-1'>Please log in first</div>")
+
+      // Cancel note form (for htmx) - returns to notes cell state
+      case req @ GET -> Root / "projects" / org / repo / "notes" / "cancel" =>
+        val projectName = s"$org/$repo"
+        val params = req.params
+        val buildId = params.get("buildId").filter(_.nonEmpty)
+        val formId = params.get("formId").filter(_.nonEmpty).getOrElse(
+          s"note-form-$org-$repo-${buildId.map(_.hashCode.abs).getOrElse(0)}"
+        )
+        Ok(Components.noteFormCancelled(projectName, buildId, formId).render, `Content-Type`(MediaType.text.html))
+
       // Create note (htmx form submission) - requires authentication
       case req @ POST -> Root / "projects" / org / repo / "notes" =>
         val projectName = s"$org/$repo"
@@ -599,18 +740,45 @@ object Routes:
               formData <- req.as[UrlForm]
               noteText = formData.getFirst("note").getOrElse("")
               githubIssueUrl = formData.getFirst("githubIssueUrl").filter(_.nonEmpty)
+              buildId = formData.getFirst("buildId").filter(_.nonEmpty)
+              formId = formData.getFirst("formId").filter(_.nonEmpty).getOrElse(
+                s"note-form-${org}-${repo}-${buildId.map(_.hashCode.abs).getOrElse(0)}"
+              )
               response <-
                 if noteText.isEmpty then BadRequest("<div class='text-red-600 p-2'>Note text is required</div>")
                 else
-                  val request = AddNoteRequest(None, None, noteText, githubIssueUrl)
+                  val request = AddNoteRequest(None, buildId, noteText, githubIssueUrl)
                   notesApi
                     .addNote(projectName, request, user.login)
                     .flatMap:
                       case Right(note) =>
-                        Ok(Components.noteCard(note).render, `Content-Type`(MediaType.text.html))
+                        // For inline forms, show success message; for regular forms, show the note card
+                        if buildId.isDefined then
+                          Ok(Components.noteAddedInline(projectName, buildId.get, formId).render, `Content-Type`(MediaType.text.html))
+                        else
+                          Ok(Components.noteCard(note).render, `Content-Type`(MediaType.text.html))
                       case Left(err) =>
                         BadRequest(s"<div class='text-red-600 p-2'>$err</div>")
             yield response
+
+      // Delete project-level note (htmx) - requires edit access (admin)
+      case req @ DELETE -> Root / "projects" / org / repo / "notes" / LongVar(noteId) / "delete" =>
+        val projectName = s"$org/$repo"
+        GitHubOAuth.extractUser(jwtSecret, req) match
+          case Some(user) if user.isAdmin =>
+            for
+              deleteResult <- notesApi.deleteNote(projectName, noteId, user.login, canEdit = true)
+              response <- deleteResult match
+                case Right(_) =>
+                  // Return empty fragment to remove the note card
+                  Ok("", `Content-Type`(MediaType.text.html))
+                case Left(err) =>
+                  BadRequest(s"<div class='text-red-600 text-sm p-2'>$err</div>")
+            yield response
+          case Some(_) =>
+            Forbidden("<div class='text-red-600 text-sm p-2'>Admin access required</div>")
+          case None =>
+            Forbidden("<div class='text-red-600 text-sm p-2'>Please log in first</div>")
 
       // Build logs page (org/repo format) - cached
       // Uses custom extractor to handle buildId containing slashes

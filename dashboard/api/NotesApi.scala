@@ -16,6 +16,13 @@ class NotesApi(sqliteRepo: SqliteRepository):
       case Right(projectName) =>
         sqliteRepo.getNotes(projectName).map(Right(_))
 
+  /** Get project-level notes (not tied to a specific build) */
+  def getProjectLevelNotes(projectNameRaw: String): IO[Either[String, List[ProjectNote]]] =
+    ProjectName(projectNameRaw) match
+      case Left(error)        => IO.pure(Left(error))
+      case Right(projectName) =>
+        sqliteRepo.getProjectLevelNotes(projectName).map(Right(_))
+
   /** Get notes for a specific build */
   def getNotesByBuild(
       projectNameRaw: String,
@@ -25,6 +32,11 @@ class NotesApi(sqliteRepo: SqliteRepository):
       case Left(error)        => IO.pure(Left(error))
       case Right(projectName) =>
         sqliteRepo.getNotesByBuild(projectName, buildId).map(Right(_))
+
+  /** Get all notes for a buildId across all projects, grouped by project name */
+  def getAllNotesByBuildId(buildId: String): IO[Map[String, List[ProjectNote]]] =
+    sqliteRepo.getAllNotesByBuildId(buildId).map: notes =>
+      notes.groupBy(n => n.projectName: String)
 
   /** Add a new note (requires authenticated user) */
   def addNote(
@@ -84,11 +96,12 @@ class NotesApi(sqliteRepo: SqliteRepository):
                       )
                     else Left("Failed to update note")
 
-  /** Delete a note (only by the author) */
+  /** Delete a note (by author or users with edit permissions) */
   def deleteNote(
       projectNameRaw: String,
       noteId: Long,
-      githubUser: String
+      githubUser: String,
+      canEdit: Boolean = false
   ): IO[Either[String, Unit]] =
     ProjectName(projectNameRaw) match
       case Left(error)        => IO.pure(Left(error))
@@ -99,7 +112,7 @@ class NotesApi(sqliteRepo: SqliteRepository):
             notes.find(_.id == noteId) match
               case None =>
                 IO.pure(Left(s"Note not found: $noteId"))
-              case Some(existing) if existing.githubUser != githubUser =>
+              case Some(existing) if !canEdit && existing.githubUser != githubUser =>
                 IO.pure(Left("You can only delete your own notes"))
               case Some(_) =>
                 sqliteRepo
