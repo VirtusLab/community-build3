@@ -836,7 +836,7 @@ object Templates:
   final case class HistoryParams(
       projectName: String,
       series: ScalaSeries = ScalaSeries.Next,
-      excludeSnapshots: Boolean = true,
+      excludeSnapshots: Boolean = false,
       excludeNightlies: Boolean = false
   )
 
