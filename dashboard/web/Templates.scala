@@ -839,27 +839,16 @@ object Templates:
     layout(
       s"${history.projectName} History",
       div(
-        // Header with stats
+        // Header with project name (static)
         div(
-          cls := "mb-8",
-          h1(cls := "text-2xl font-bold", history.projectName: String),
-          div(
-            cls := "mt-3 flex flex-wrap gap-4",
-            // Failure status
-            if filteredHistory.currentlyFailing then
-              div(
-                cls := "text-red-600",
-                s"⚠️ Currently failing",
-                filteredHistory.failingForDays.map(d => s" for $d days").getOrElse("")
-              )
-            else div(cls := "text-emerald-600", "✅ Currently passing"),
-            // Version stats
-            versionStats.map: stats =>
-              div(
-                cls := "text-gray-500 border-l pl-4",
-                stats
-              )
-          )
+          cls := "mb-4",
+          h1(cls := "text-2xl font-bold", history.projectName: String)
+        ),
+
+        // Status header (updates with filters)
+        div(
+          id := "history-status",
+          historyStatusHeader(filteredHistory, versionStats)
         ),
 
         // Notes section
@@ -966,6 +955,26 @@ object Templates:
       )
     )
 
+  /** Status header for project history (shown below project name, updates with filters) */
+  private def historyStatusHeader(filteredHistory: ProjectHistory, versionStats: Option[String]): Frag =
+    div(
+      cls := "mb-6 flex flex-wrap gap-4",
+      // Failure status
+      if filteredHistory.currentlyFailing then
+        div(
+          cls := "text-red-600",
+          s"⚠️ Currently failing",
+          filteredHistory.failingForDays.map(d => s" for $d days").getOrElse("")
+        )
+      else div(cls := "text-emerald-600", "✅ Currently passing"),
+      // Version stats
+      versionStats.map: stats =>
+        div(
+          cls := "text-gray-500 border-l pl-4",
+          stats
+        )
+    )
+
   /** Filter history entries based on params */
   private def filterHistoryEntries(
       entries: List[ProjectHistoryEntry],
@@ -1026,12 +1035,6 @@ object Templates:
       params: HistoryParams,
       offset: Int = 0
   ): Frag =
-    val filteredHistory = computeFilteredStats(
-      ProjectHistory(ProjectName.unsafeApply(params.projectName), filteredEntries, false, None, None),
-      filteredEntries
-    )
-    val versionStats = computeVersionStats(filteredEntries)
-
     val visibleEntries = filteredEntries.slice(offset, offset + HistoryPageSize)
     val hasMore = offset + HistoryPageSize < filteredEntries.length
     val nextOffset = offset + HistoryPageSize
@@ -1044,20 +1047,7 @@ object Templates:
           cls := "flex items-center gap-4",
           h2(cls := "text-xl font-semibold", "Build History"),
           // Entry count
-          span(cls := "text-sm text-gray-400", s"(${filteredEntries.length} entries)"),
-          // Status badge
-          if filteredHistory.currentlyFailing then
-            span(
-              cls := "text-sm text-red-600 bg-red-50 px-2 py-1 rounded",
-              s"⚠️ Failing",
-              filteredHistory.failingForDays.map(d => s" $d days").getOrElse("")
-            )
-          else if filteredEntries.nonEmpty then
-            span(cls := "text-sm text-emerald-600 bg-emerald-50 px-2 py-1 rounded", "✅ Passing")
-          else frag(),
-          // Version stats
-          versionStats.map: stats =>
-            span(cls := "text-sm text-gray-500", stats)
+          span(cls := "text-sm text-gray-400", s"(${filteredEntries.length} entries)")
         ),
         // Filter controls
         historyFilters(params)
@@ -1143,7 +1133,18 @@ object Templates:
   /** Partial: history section for htmx updates (includes filters) */
   def historyContentPartial(history: ProjectHistory, params: HistoryParams): String =
     val filteredEntries = filterHistoryEntries(history.entries, params)
-    historySectionContent(filteredEntries, params, 0).render
+    val filteredHistory = computeFilteredStats(history, filteredEntries)
+    val versionStats = computeVersionStats(filteredEntries)
+    frag(
+      // OOB update for status header
+      div(
+        id := "history-status",
+        attr("hx-swap-oob") := "true",
+        historyStatusHeader(filteredHistory, versionStats)
+      ),
+      // Main content
+      historySectionContent(filteredEntries, params, 0)
+    ).render
 
   /** Log viewer page */
   def logsPage(projectName: String, buildId: String, logs: ParsedLogs): String =
