@@ -499,6 +499,10 @@ object Templates:
 
   /** Comparison form */
   private def compareForm(scalaVersions: List[String], buildIds: List[String], params: CompareParams): Frag =
+    // Check if we have comparison params (for showing copy link on direct page load)
+    val hasComparison = params.targetScalaVersion.isDefined || params.targetBuildId.isDefined
+    val shareUrl = if hasComparison then buildCompareUrl(params) else ""
+
     form(
       id := "compare-form",
       cls := "bg-white rounded-lg shadow p-6 mb-8",
@@ -542,9 +546,9 @@ object Templates:
           p(cls := "text-xs text-gray-500 mb-3", "The version to compare against (previous)"),
           div(
             cls := "space-y-3",
-            selectField("baseScalaVersion", "Scala Version", scalaVersions),
+            selectField("baseScalaVersion", "Scala Version", scalaVersions, params.baseScalaVersion),
             div(cls := "text-center text-gray-400", "or"),
-            selectField("baseBuildId", "Build ID", buildIds)
+            selectField("baseBuildId", "Build ID", buildIds, params.baseBuildId)
           )
         ),
         // Swap button
@@ -568,9 +572,9 @@ object Templates:
           p(cls := "text-xs text-gray-500 mb-3", "The version to compare with (current)"),
           div(
             cls := "space-y-3",
-            selectField("targetScalaVersion", "Scala Version", scalaVersions),
+            selectField("targetScalaVersion", "Scala Version", scalaVersions, params.targetScalaVersion),
             div(cls := "text-center text-gray-400", "or"),
-            selectField("targetBuildId", "Build ID", buildIds)
+            selectField("targetBuildId", "Build ID", buildIds, params.targetBuildId)
           )
         )
       ),
@@ -588,7 +592,23 @@ object Templates:
         )
       ),
       div(
-        cls := "mt-6 flex justify-end",
+        cls := "mt-6 flex justify-end gap-3",
+        // Copy link button - shown when comparison results exist
+        div(
+          id := "copy-link-container",
+          if hasComparison then
+            button(
+              id := "share-btn",
+              tpe := "button",
+              cls := "flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors",
+              attr("onclick") := s"copyShareLink('$shareUrl')",
+              raw(
+                """<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>"""
+              ),
+              span("Copy link")
+            )
+          else frag()
+        ),
         button(
           tpe := "submit",
           cls := "bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors",
@@ -600,7 +620,18 @@ object Templates:
       script(raw(swapCompareScript))
     )
 
-  /** JavaScript for swapping compare form values */
+  /** Build a shareable URL for comparison */
+  private def buildCompareUrl(params: CompareParams): String =
+    val queryParams = List(
+      params.baseScalaVersion.map(v => s"baseScalaVersion=${urlEncode(v)}"),
+      params.baseBuildId.map(v => s"baseBuildId=${urlEncode(v)}"),
+      params.targetScalaVersion.map(v => s"targetScalaVersion=${urlEncode(v)}"),
+      params.targetBuildId.map(v => s"targetBuildId=${urlEncode(v)}")
+    ).flatten
+    if queryParams.isEmpty then path("/compare")
+    else path(s"/compare?${queryParams.mkString("&")}")
+
+  /** JavaScript for swapping compare form values and copying share link */
   private val swapCompareScript: String = """
     function swapCompareValues() {
       const baseVersion = document.querySelector('select[name="baseScalaVersion"]');
@@ -618,16 +649,31 @@ object Templates:
       baseBuildId.value = targetBuildId.value;
       targetBuildId.value = tempBuildId;
     }
+    
+    function copyShareLink(path) {
+      const url = window.location.origin + path;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('share-btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Copied!</span>';
+        btn.className = btn.className.replace('bg-gray-100 text-gray-600', 'bg-green-100 text-green-700');
+        setTimeout(() => {
+          btn.innerHTML = original;
+          btn.className = btn.className.replace('bg-green-100 text-green-700', 'bg-gray-100 text-gray-600');
+        }, 2000);
+      });
+    }
   """
 
-  private def selectField(name: String, label: String, options: List[String]): Frag =
+  private def selectField(name: String, label: String, options: List[String], selected: Option[String]): Frag =
     div(
       tag("label")(cls := "block text-sm text-gray-600 mb-1", label),
       tag("select")(
         attr("name") := name,
         cls := "w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-        option(value := "", "Select..."),
-        options.map(v => option(value := v, v))
+        option(value := "", if selected.isEmpty then attr("selected") := "selected" else frag(), "Select..."),
+        options.map: v =>
+          option(value := v, if selected.contains(v) then attr("selected") := "selected" else frag(), v)
       )
     )
 
@@ -644,7 +690,26 @@ object Templates:
 
   /** Comparison results content (without outer container) */
   def comparisonResultsContent(result: ComparisonResult, params: CompareParams): Frag =
+    // Build shareable URL from params
+    val shareUrl = buildCompareUrl(params)
+
     frag(
+      // Out-of-band swap to show the Copy link button in the form
+      div(
+        id := "copy-link-container",
+        attr("hx-swap-oob") := "true",
+        button(
+          id := "share-btn",
+          tpe := "button",
+          cls := "flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors",
+          attr("onclick") := s"copyShareLink('$shareUrl')",
+          raw(
+            """<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>"""
+          ),
+          span("Copy link")
+        )
+      ),
+
       // Hidden inputs to store comparison parameters for htmx requests
       div(
         id := "comparison-params",
