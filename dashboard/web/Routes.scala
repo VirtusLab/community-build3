@@ -369,58 +369,63 @@ object Routes:
 
         val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
-        for
-          allVersions <- esClient.listScalaVersions()
-          // When series is selected but no specific version, use latest version of that series
-          effectiveScalaVersion = scalaVersion.orElse:
-            Option
-              .when(series != ScalaSeries.All):
-                allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
-              .flatten
-          homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
-          // Load builds if: htmx request (user clicked something), or version/buildId selected
-          // Skip only on initial full page load with no selection
-          shouldLoadBuilds = isHtmx || effectiveScalaVersion.isDefined || buildId.isDefined
-          buildIds <- if shouldLoadBuilds then esClient.listBuildIds(effectiveScalaVersion) else IO.pure(Nil)
-          builds <- if shouldLoadBuilds then getCachedBuilds(effectiveScalaVersion, buildId) else IO.pure(Nil)
-          // Only compute failure streaks when sorting by Streak (expensive but cached)
-          failures = builds.filter(_.status == BuildStatus.Failure)
-          failureStreaks <-
-            if sort == Templates.FailureSort.Streak then
-              getCachedFailureStreaks(effectiveScalaVersion, buildId, failures)
-            else IO.pure(Map.empty[ProjectName, FailureStreakInfo])
-          // Fetch notes for failures - keyed by "projectName:buildId"
-          actualBuildId = builds.headOption.map(_.buildId)
-          notesMap <- actualBuildId match
-            case Some(bid) =>
-              notesApi.getAllNotesByBuildId(bid).map: byProject =>
-                // Re-key to "projectName:buildId"
-                byProject.flatMap: (projName, notes) =>
-                  notes.groupBy(_.buildId).collect:
-                    case (Some(notesBid), notesList) => s"$projName:$notesBid" -> notesList
-            case None => IO.pure(Map.empty[String, List[ProjectNote]])
-          response <-
-            if isHtmx then
-              htmxTarget match
-                case Some("home-content") =>
-                  // Series changed - return full content (selector + results)
-                  Ok(
-                    Templates.homeContentPartial(builds, allVersions, buildIds, homeParams, failureStreaks, notesMap, canEdit),
-                    `Content-Type`(MediaType.text.html)
-                  )
-                case _ =>
-                  // Version/filter changed - return just results
-                  Ok(
-                    Templates.homeResultsPartial(builds, homeParams, failureStreaks, notesMap, canEdit),
-                    `Content-Type`(MediaType.text.html)
-                  )
-            else
-              // Full page request
-              Ok(
-                Templates.homePage(builds, allVersions, buildIds, homeParams, failureStreaks, notesMap, canEdit),
-                `Content-Type`(MediaType.text.html)
-              )
-        yield response
+        // For initial full page load, return shell immediately and load results via HTMX
+        if !isHtmx then
+          for
+            allVersions <- esClient.listScalaVersions()
+            effectiveScalaVersion = scalaVersion.orElse:
+              Option
+                .when(series != ScalaSeries.All):
+                  allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
+                .flatten
+            homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
+            response <- Ok(
+              Templates.homePageDeferred(allVersions, homeParams),
+              `Content-Type`(MediaType.text.html)
+            )
+          yield response
+        else
+          // HTMX request - load actual data
+          for
+            allVersions <- esClient.listScalaVersions()
+            effectiveScalaVersion = scalaVersion.orElse:
+              Option
+                .when(series != ScalaSeries.All):
+                  allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
+                .flatten
+            homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
+            buildIds <- esClient.listBuildIds(effectiveScalaVersion)
+            builds <- getCachedBuilds(effectiveScalaVersion, buildId)
+            // Only compute failure streaks when sorting by Streak (expensive but cached)
+            failures = builds.filter(_.status == BuildStatus.Failure)
+            failureStreaks <-
+              if sort == Templates.FailureSort.Streak then
+                getCachedFailureStreaks(effectiveScalaVersion, buildId, failures)
+              else IO.pure(Map.empty[ProjectName, FailureStreakInfo])
+            // Fetch notes for failures - keyed by "projectName:buildId"
+            actualBuildId = builds.headOption.map(_.buildId)
+            notesMap <- actualBuildId match
+              case Some(bid) =>
+                notesApi.getAllNotesByBuildId(bid).map: byProject =>
+                  // Re-key to "projectName:buildId"
+                  byProject.flatMap: (projName, notes) =>
+                    notes.groupBy(_.buildId).collect:
+                      case (Some(notesBid), notesList) => s"$projName:$notesBid" -> notesList
+              case None => IO.pure(Map.empty[String, List[ProjectNote]])
+            response <- htmxTarget match
+              case Some("home-content") =>
+                // Series changed - return full content (selector + results)
+                Ok(
+                  Templates.homeContentPartial(builds, allVersions, buildIds, homeParams, failureStreaks, notesMap, canEdit),
+                  `Content-Type`(MediaType.text.html)
+                )
+              case _ =>
+                // Version/filter changed or initial load - return just results
+                Ok(
+                  Templates.homeResultsPartial(builds, homeParams, failureStreaks, notesMap, canEdit),
+                  `Content-Type`(MediaType.text.html)
+                )
+          yield response
 
       // Compare page
       case req @ GET -> Root / "compare" =>

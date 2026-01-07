@@ -159,6 +159,35 @@ object Templates:
       )
     )
 
+  /** Home page shell - loads quickly, then fetches results via HTMX */
+  def homePageDeferred(
+      scalaVersions: List[String],
+      params: HomeParams = HomeParams()
+  ): String =
+    layout(
+      "Build Results",
+      div(
+        id := "home-content",
+        // Version selector (with empty buildIds for now - will be populated on results load)
+        homeVersionSelector(scalaVersions, Nil, params),
+
+        // Results section - triggers load after page render
+        div(
+          id := "home-results",
+          cls := "min-h-[400px]",
+          attr("hx-get") := path(s"/${params.queryString}"),
+          attr("hx-trigger") := "load",
+          attr("hx-swap") := "innerHTML",
+          // Loading state
+          div(
+            cls := "flex flex-col items-center justify-center py-16",
+            loadingSpinner,
+            p(cls := "mt-4 text-gray-500", "Loading build results...")
+          )
+        )
+      )
+    )
+
   /** Partial: full home content for series changes (includes selector + results) */
   def homeContentPartial(
       builds: List[BuildResult],
