@@ -63,6 +63,15 @@ object Routes:
     if series.isEmpty then ScalaSeries.All
     else scala.util.Try(ScalaSeries.valueOf(series)).getOrElse(ScalaSeries.All)
 
+  /** Parse history params from request, with defaults */
+  private def parseHistoryParams(projectName: String, params: Map[String, String]): Templates.HistoryParams =
+    Templates.HistoryParams(
+      projectName = projectName,
+      series = params.get("series").flatMap(s => scala.util.Try(ScalaSeries.valueOf(s)).toOption).getOrElse(ScalaSeries.Next),
+      excludeSnapshots = params.get("excludeSnapshots").contains("true"),
+      excludeNightlies = params.get("excludeNightlies").contains("true")
+    )
+
   def all(
       esClient: ElasticsearchClient,
       sqliteRepo: SqliteRepository,
@@ -559,12 +568,7 @@ object Routes:
       // Project history page (org/repo format) - uses cache
       case req @ GET -> Root / "projects" / org / repo / "history" =>
         val projectName = s"$org/$repo"
-        val params = req.params
-        val series =
-          params.get("series").flatMap(s => scala.util.Try(ScalaSeries.valueOf(s)).toOption).getOrElse(ScalaSeries.Next)
-        val excludeSnapshots = params.get("excludeSnapshots").forall(_ != "false")
-        val excludeNightlies = params.get("excludeNightlies").contains("true")
-        val historyParams = Templates.HistoryParams(projectName, series, excludeSnapshots, excludeNightlies)
+        val historyParams = parseHistoryParams(projectName, req.params)
         val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
         for
@@ -589,12 +593,7 @@ object Routes:
       // Project history filter partial (for htmx) - uses cache
       case req @ GET -> Root / "projects" / org / repo / "history" / "filter" =>
         val projectName = s"$org/$repo"
-        val params = req.params
-        val series =
-          params.get("series").flatMap(s => scala.util.Try(ScalaSeries.valueOf(s)).toOption).getOrElse(ScalaSeries.Next)
-        val excludeSnapshots = params.get("excludeSnapshots").forall(_ != "false")
-        val excludeNightlies = params.get("excludeNightlies").contains("true")
-        val historyParams = Templates.HistoryParams(projectName, series, excludeSnapshots, excludeNightlies)
+        val historyParams = parseHistoryParams(projectName, req.params)
         val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
         for
@@ -613,13 +612,8 @@ object Routes:
       // Project history infinite scroll - load more entries
       case req @ GET -> Root / "projects" / org / repo / "history" / "more" =>
         val projectName = s"$org/$repo"
-        val params = req.params
-        val series =
-          params.get("series").flatMap(s => scala.util.Try(ScalaSeries.valueOf(s)).toOption).getOrElse(ScalaSeries.Next)
-        val excludeSnapshots = params.get("excludeSnapshots").forall(_ != "false")
-        val excludeNightlies = params.get("excludeNightlies").contains("true")
-        val offset = params.get("offset").flatMap(_.toIntOption).getOrElse(0)
-        val historyParams = Templates.HistoryParams(projectName, series, excludeSnapshots, excludeNightlies)
+        val historyParams = parseHistoryParams(projectName, req.params)
+        val offset = req.params.get("offset").flatMap(_.toIntOption).getOrElse(0)
         val canEdit = GitHubOAuth.extractUser(jwtSecret, req).exists(_.isAdmin)
 
         for
