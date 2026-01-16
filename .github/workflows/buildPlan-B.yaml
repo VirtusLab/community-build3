@@ -1,5 +1,5 @@
 
-# projects total:     883
+# projects total:     886
 # min stars count:    -1
 # max projects count: 1000
 
@@ -183,6 +183,7 @@ jobs:
         - name: "casehubdk/hxl"
         - name: "catap/scala-blake3"
         - name: "catap/scala-sha"
+        - name: "cheleb/sbt-fullstack-js"
         - name: "cheleb/zio-magnum"
         - name: "chili-piper/scala-quartz"
         - name: "christian-schlichtherle/circe-kafka"
@@ -331,7 +332,6 @@ jobs:
         - name: "gemini-hlsw/lucuma-apps"
         - name: "gemini-hlsw/lucuma-catalog"
         - name: "gemini-hlsw/lucuma-graphql-routes"
-        - name: "gemini-hlsw/lucuma-itc"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
@@ -510,6 +511,7 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -611,8 +613,6 @@ jobs:
         - name: "mateuszkubuszok/renamer"
         - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
-        - name: "mbannour/mongoscala3codec"
-        - name: "mdedetrich/scalacheck"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mbannour/mongoscala3codec"
+        - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
         - name: "mixql/mixql-core"
@@ -715,6 +717,7 @@ jobs:
         - name: "philippus/scala-isbn"
         - name: "phillhenry/dreadnought"
         - name: "philwalk/pallet"
+        - name: "philwalk/uni"
         - name: "pidoveproject/scala-showdown-api"
         - name: "pismute/classy-optics"
         - name: "pityka/pairwisealignment"
@@ -891,9 +894,6 @@ jobs:
         - name: "swaldman/sqlutil-scala"
         - name: "swaldman/texttable"
         - name: "swaldman/unify-rss"
-        - name: "swaldman/unstatic"
-        - name: "swaldman/untemplate"
-        - name: "sweet-delights/delightful-cron"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/unstatic"
+        - name: "swaldman/untemplate"
+        - name: "sweet-delights/delightful-cron"
         - name: "sweet-delights/delightful-parsing"
         - name: "sweet-delights/delightful-typeclasses"
         - name: "taig/backmail"
