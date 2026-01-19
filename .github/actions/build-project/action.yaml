@@ -283,19 +283,29 @@ runs:
           redact_one "${{ inputs.container-registry-token }}"
           redact_one "${{ inputs.akka-repository-token }}"
 
-          /opencb/project-builder/feed-elastic.sh \
-            'https://scala3.westeurope.cloudapp.azure.com/data' \
-            "${{ inputs.project-name }}" \
-            "$(cat build-status.txt)" \
-            "$(date --iso-8601=seconds)" \
-            build-summary.txt \
-            build-logs-redacted.txt \
-            "$(config .version)" \
-            "${{ inputs.scala-version }}" \
-            "${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}" \
-            "${{ steps.job-info.outputs.build-url }}" \
-            "$(cat build-tool.txt)"
-          if [ $? != 0 ]; then 
+          index_exit=0
+          for attempt in 1 2 3; do
+            /opencb/project-builder/feed-elastic.sh \
+              'https://scala3.westeurope.cloudapp.azure.com/data' \
+              "${{ inputs.project-name }}" \
+              "$(cat build-status.txt)" \
+              "$(date --iso-8601=seconds)" \
+              build-summary.txt \
+              build-logs-redacted.txt \
+              "$(config .version)" \
+              "${{ inputs.scala-version }}" \
+              "${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}" \
+              "${{ steps.job-info.outputs.build-url }}" \
+              "$(cat build-tool.txt)"
+            index_exit=$?
+            if [ $index_exit -eq 0 ]; then
+              break
+            elif [ $attempt -lt 3 ]; then
+              echo "Indexing failed, would retry"
+              sleep $((attempt * 5))
+            fi
+          done
+          if [ $index_exit != 0 ]; then 
             echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
           fi
 
