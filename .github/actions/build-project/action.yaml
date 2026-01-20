@@ -254,35 +254,13 @@ runs:
           cd /opencb/
 
           # Remove ASCII coloring and redact secrets using Scala
-          cat > redact-logs.sc <<- 'SCALA_SCRIPT'
-            import scala.io.Source
-            import java.nio.file.{Files, Paths}
-
-            val logFile = "build-logs.txt"
-            val outputFile = "build-logs-redacted.txt"
-
-            // Read the log file and remove ANSI color codes
-            val contentWithoutColors = Source.fromFile(logFile).mkString
-              .replaceAll("\u001B\\[[0-9;]*[mGK]", "")
-
-            // Redact secrets using foldLeft
-            val secrets = Seq(
-              "${{ inputs.elastic-password }}",
-              "${{ inputs.github-key }}",
-              "${{ inputs.container-registry-token }}",
-              "${{ inputs.akka-repository-token }}"
-            ).filter(_.nonEmpty)
-
-            val redactedContent = secrets.foldLeft(contentWithoutColors) { (content, secret) =>
-              content.replace(secret, "<REDACTED>")
-            }
-
-            // Write the redacted logs
-            Files.write(Paths.get(outputFile), redactedContent.getBytes)
-            println(s"Redacted logs written to $outputFile")
-          SCALA_SCRIPT
-
-          scala-cli redact-logs.sc
+          scala-cli /opencb/scripts/redact-logs.scala \
+            build-logs.txt \
+            build-logs-redacted.txt \
+            "${{ inputs.elastic-password }}" \
+            "${{ inputs.github-key }}" \
+            "${{ inputs.container-registry-token }}" \
+            "${{ inputs.akka-repository-token }}"
 
           index_exit=0
           for attempt in 1 2 3; do
