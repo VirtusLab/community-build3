@@ -254,7 +254,7 @@ runs:
           cd /opencb/
 
           # Remove ASCII coloring and redact secrets using Scala
-          scala-cli /opencb/scripts/redact-logs.scala \
+          scala-cli run /opencb/project-builder/redact-logs.scala --server=false -- \
             build-logs.txt \
             build-logs-redacted.txt \
             "${{ inputs.elastic-password }}" \
