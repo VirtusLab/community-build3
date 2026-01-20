@@ -104,8 +104,9 @@ runs:
           java -version
           
           compilerProject=scala3-bootstrapped
-          if [[ "${{ steps.calc-version.outputs.effective-scala-version }}" == 3.8.0-RC* \
-                || "${{ steps.calc-version.outputs.effective-scala-version }}" == 3.8.1* ]]; then
+          if [[ "${{ steps.calc-version.outputs.effective-scala-version }}" == 3.8.0* \
+                || "${{ steps.calc-version.outputs.effective-scala-version }}" == 3.8.1* \
+                || "${{ steps.calc-version.outputs.effective-scala-version }}" == 3.8.2-RC*  ]]; then
             compilerProject=scala3-bootstrapped-new
           fi
           echo "Would publish $compilerProject"
