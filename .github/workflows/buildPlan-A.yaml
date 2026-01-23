@@ -177,6 +177,7 @@ jobs:
         - name: "bpholt/java-time-literals"
         - name: "buildo/retro"
         - name: "business4s/decisions4s"
+        - name: "business4s/forms4s"
         - name: "business4s/workflows4s"
         - name: "camunda-community-hub/camunda-dmn-tester"
         - name: "carlos-verdes/zio-arangodb"
@@ -331,7 +332,6 @@ jobs:
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
-        - name: "fdimuccio/play2-sockjs"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
@@ -474,7 +475,6 @@ jobs:
         - name: "j5ik2o/akka-persistence-dynamodb"
         - name: "j5ik2o/akka-persistence-s3"
         - name: "j5ik2o/docker-controller-scala"
-        - name: "j5ik2o/pekko-persistence-dynamodb"
         - name: "jacum/pekko-sensors"
         - name: "janstenpickle/hotswap-ref"
         - name: "jap-company/fields"
@@ -503,7 +503,6 @@ jobs:
         - name: "joan38/kubernetes-client"
         - name: "jodersky/scala-argparse"
         - name: "jodersky/simplesql"
-        - name: "jodersky/yamlesque"
         - name: "joernio/flatgraph"
         - name: "joernio/joern"
         - name: "johnspade/csv3s"
@@ -522,6 +521,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
