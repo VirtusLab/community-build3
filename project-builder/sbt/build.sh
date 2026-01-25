@@ -17,6 +17,7 @@ disabledScalacOption="$7"
 extraLibraryDeps="$8"
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+source "$scriptDir/../versions.sh"
 
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
@@ -49,7 +50,11 @@ sbtSettings=(
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
-customCommands=$(echo "$projectConfig" | jq -r '.sbt?.commands // [] | join ("; ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
+customCommandsFilter='.sbt?.commands // []'
+if ! isBinVersionGreaterOrEqual "$scalaVersion" "3.8"; then
+  customCommandsFilter='(.sbt?.commands // []) | map(select(test("libraryDependencies|scala3-repl") | not))'
+fi
+customCommands=$(echo "$projectConfig" | jq -r "$customCommandsFilter | join(\"; \")" | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 targetsString="${targets[@]}"
 logFile=build.log
 statusFile=../build-status.txt
