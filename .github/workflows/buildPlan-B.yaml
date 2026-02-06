@@ -1,5 +1,5 @@
 
-# projects total:     888
+# projects total:     898
 # min stars count:    -1
 # max projects count: 1000
 
@@ -130,6 +130,7 @@ jobs:
         - name: "armanbilge/stratus"
         - name: "armanbilge/van-cats"
         - name: "arturaz/cats-effect-resource-shared-memoized"
+        - name: "arturaz/yantl"
         - name: "ashwinbhaskar/sight-scala"
         - name: "asragab/unstructured4s"
         - name: "assist-iot-sripas/scala-mqtt-wrapper"
@@ -198,6 +199,10 @@ jobs:
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
         - name: "cognitedata/cognite-sdk-scala"
+        - name: "colofabrix/cuttlefish"
+        - name: "colofabrix/declinio"
+        - name: "colofabrix/h4sbl"
+        - name: "combinators/expression-problem"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -282,6 +287,7 @@ jobs:
         - name: "edadma/random_uuid"
         - name: "edadma/rdb"
         - name: "edadma/recognizer"
+        - name: "edadma/recursive_descent_parser"
         - name: "edadma/tabula"
         - name: "edadma/texish"
         - name: "edadma/typesetter"
@@ -326,12 +332,6 @@ jobs:
         - name: "gchudnov/mindthegap"
         - name: "gchudnov/swearwolf"
         - name: "geirolz/fluent-copy"
-        - name: "geirolz/git4s"
-        - name: "gemini-hlsw/giapi-scala"
-        - name: "gemini-hlsw/lucuma-apps"
-        - name: "gemini-hlsw/lucuma-catalog"
-        - name: "gemini-hlsw/lucuma-graphql-routes"
-        - name: "gemini-hlsw/lucuma-itc"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,12 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "geirolz/git4s"
+        - name: "gemini-hlsw/giapi-scala"
+        - name: "gemini-hlsw/lucuma-apps"
+        - name: "gemini-hlsw/lucuma-catalog"
+        - name: "gemini-hlsw/lucuma-graphql-routes"
+        - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
@@ -432,6 +438,7 @@ jobs:
         - name: "i10416/munkres"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
+        - name: "imaxmelnyk/openai-scala"
         - name: "indoorvivants/decline-completion"
         - name: "indoorvivants/detective"
         - name: "indoorvivants/fxprof"
@@ -606,13 +613,6 @@ jobs:
         - name: "marcinzh/beam"
         - name: "marcinzh/enterprise"
         - name: "marcinzh/spot"
-        - name: "marcinzh/yamlike"
-        - name: "massimosiani/monix-newtypes-cats"
-        - name: "mateuszkubuszok/dbg-schema"
-        - name: "mateuszkubuszok/explain-given"
-        - name: "mateuszkubuszok/renamer"
-        - name: "mateuszkubuszok/scala-cli-md-spec"
-        - name: "mattlangsenkamp/svgbounds"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,10 +639,18 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "marcinzh/yamlike"
+        - name: "massimosiani/monix-newtypes-cats"
+        - name: "mateuszkubuszok/dbg-schema"
+        - name: "mateuszkubuszok/explain-given"
+        - name: "mateuszkubuszok/renamer"
+        - name: "mateuszkubuszok/scala-cli-md-spec"
+        - name: "mattlangsenkamp/svgbounds"
         - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
+        - name: "mikla/diode"
         - name: "mixql/mixql-core"
         - name: "mixql/mixql-engine"
         - name: "mixql/mixql-engine-stub"
@@ -711,6 +719,7 @@ jobs:
         - name: "permutive-engineering/refreshable"
         - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
+        - name: "philippus/between"
         - name: "philippus/julius"
         - name: "philippus/osita"
         - name: "philippus/pureconfig-javanet"
@@ -885,15 +894,6 @@ jobs:
         - name: "swaldman/conveniences"
         - name: "swaldman/cryptoutil"
         - name: "swaldman/failable"
-        - name: "swaldman/feedletter"
-        - name: "swaldman/latest"
-        - name: "swaldman/logadapter-scala"
-        - name: "swaldman/mailutil"
-        - name: "swaldman/mchange-sysadmin-scala"
-        - name: "swaldman/mill-daemon"
-        - name: "swaldman/mlog-scala"
-        - name: "swaldman/sqlutil-scala"
-        - name: "swaldman/texttable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,15 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/feedletter"
+        - name: "swaldman/latest"
+        - name: "swaldman/logadapter-scala"
+        - name: "swaldman/mailutil"
+        - name: "swaldman/mchange-sysadmin-scala"
+        - name: "swaldman/mill-daemon"
+        - name: "swaldman/mlog-scala"
+        - name: "swaldman/sqlutil-scala"
+        - name: "swaldman/texttable"
         - name: "swaldman/unify-rss"
         - name: "swaldman/unstatic"
         - name: "swaldman/untemplate"
@@ -937,6 +946,7 @@ jobs:
         - name: "taig/scala-linguist"
         - name: "taig/scala-pygments"
         - name: "taig/sql-ext"
+        - name: "taig/unimog"
         - name: "takapi327/mcp-scala"
         - name: "tanin47/play-json-form"
         - name: "tarao/collection-scala"
