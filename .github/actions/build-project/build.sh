@@ -106,10 +106,4 @@ if [[ $exit_code -eq 124 ]]; then
   echo "timeout" > build-status.txt
 fi
 
-# Store results (they're already in ${OPENCB_ROOT}, but keep the original move behavior safe)
-mv -f build-logs.txt "${OPENCB_ROOT}/"
-mv -f build-status.txt "${OPENCB_ROOT}/"
-mv -f build-summary.txt "${OPENCB_ROOT}/"
-mv -f build-tool.txt "${OPENCB_ROOT}/"
-
 exit "$exit_code"
