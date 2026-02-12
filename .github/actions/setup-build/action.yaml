@@ -21,6 +21,7 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         repository: ${{ inputs.repository-url }}
         ref: ${{ inputs.repository-branch }}
@@ -80,7 +81,7 @@ runs:
         options: -v ${{ github.workspace }}/compiler:/compiler/
         shell: bash
         run: |
-          bash .github/actions/setup-build/build.sh
+          bash .github/actions/setup-build/build.sh \
             "${{ steps.calc-version.outputs.effective-scala-version }}" \
             "${{ steps.calc-version.outputs.effective-maven-url }}" \
             "/compiler"
