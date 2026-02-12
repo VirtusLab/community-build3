@@ -80,36 +80,7 @@ runs:
         options: -v ${{ github.workspace }}/compiler:/compiler/
         shell: bash
         run: |
-          echo '##################################'
-          echo "Release Scala in version: ${{ steps.calc-version.outputs.effective-scala-version }}"
-          echo "Maven repo at: ${{ steps.calc-version.outputs.effective-maven-url }}"
-          echo '##################################'
-          
-          # Extract major and minor version numbers (first two segments)
-          major_minor=$(echo "${{ steps.calc-version.outputs.effective-scala-version }}" | grep -oE '^[0-9]+\.[0-9]+')
-          major=$(echo "$major_minor" | cut -d. -f1)
-          minor=$(echo "$major_minor" | cut -d. -f2)
-          echo "Compiler binary version: $major.$minor"
-
-          # If building Scala 3.6 or earlier use Java 8
-          JDKVersion=17
-          if [[ "$major" -lt 3 ]] || ([[ "$major" -eq 3 ]] && [[ "$minor" -lt 7 ]]); then
-            JDKVersion=8
-          fi
-
-          echo "Would try to use JDK ${JDKVersion} to build compiler"
-          PATH="/usr/lib/jvm/java-${JDKVersion}-openjdk-amd64/bin:$PATH"
-
-          cd /compiler/
-          java -version
-          
-          compilerProject=scala3-bootstrapped
-          if [[ "${{ steps.calc-version.outputs.effective-scala-version }}" == 3.8.2-RC* ]]; then
-            compilerProject=scala3-bootstrapped-new
-          fi
-          echo "Would publish $compilerProject"
-          sbt \
-          '-verbose' \
-          'set every publishTo := Some("Community Build Repo" at "${{ steps.calc-version.outputs.effective-maven-url }}")' \
-          ';set every version := "${{ steps.calc-version.outputs.effective-scala-version }}"' \
-          ";${compilerProject}/publish"
+          bash .github/actions/setup-build/build.sh
+            "${{ steps.calc-version.outputs.effective-scala-version }}" \
+            "${{ steps.calc-version.outputs.effective-maven-url }}" \
+            "/compiler"

@@ -142,52 +142,18 @@ runs:
         options: -v ${{ github.workspace }}:/opencb/
         shell: bash
         run: |
-          # Git config for migration patches
-          git config --global user.email "scala3-community-build@virtuslab.com"
-          git config --global user.name "Scala 3 Open Community Build"
-
-          DefaultConfig='{}'
-          ConfigFile="/opencb/.github/workflows/buildConfig.json"
-          config () { 
-            path=".\"${{ inputs.project-name }}\"$@" 
-            jq -c -r "$path" $ConfigFile 
-          }
-          
-          echo "Project config: $(config '')"
-
-          touch build-logs.txt  build-summary.txt
-          # Assume failure unless overwritten by a successful build
-          echo 'failure' > build-status.txt 
-          echo 'unknown' > build-tool.txt
-
-          export OPENCB_EXECUTE_TESTS="${{ inputs.execute-tests }}"
-          export OPENCB_AKKA_REPO_TOKEN="${{ inputs.akka-repository-token }}"
-          timeout 7200 \
-            /opencb/project-builder/build-revision.sh \
-            "$(config .project)" \
-            "$(config .repoUrl)" \
-            "$(config .revision)" \
+          bash ./.github/actions/build-project/build.sh \
+            "${{ inputs.project-name }}" \
             "${{ inputs.scala-version }}" \
-            "$(config .targets)" \
             "${{ inputs.maven-repo-url }}" \
-            "$(config .config // ${DefaultConfig})" \
+            "${{ inputs.execute-tests }}" \
+            "${{ inputs.akka-repository-token }}" \
             "${{ inputs.extra-scalac-options }}" \
             "${{ inputs.disabled-scalac-options }}" \
             "${{ inputs.extra-library-dependencies }}" \
-            2>&1 | tee build-logs.txt
-            
-          exit_code=${PIPESTATUS[0]}
-          if [ $exit_code -eq 124 ]; then
-            echo "Build timeout after 2 hours" >> build-logs.txt
-            echo "timeout" > build-status.txt
-          fi
-
-          # Store results
-          mv build-logs.txt /opencb/
-          mv build-status.txt /opencb/
-          mv build-summary.txt /opencb/
-          mv build-tool.txt /opencb/
-
+            "/opencb" \
+            "7200"
+    
     - name: Check status
       id: check-status
       shell: bash
@@ -241,52 +207,23 @@ runs:
         username: ${{ inputs.container-registry-username }}
         password: ${{ inputs.container-registry-token }}
         image: "ghcr.io/virtuslab/scala-community-build-project-builder:jdk17-latest"
-        options: -v ${{ github.workspace }}:/opencb/ -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
+        options: >
+          -v ${{ github.workspace }}:/opencb/ 
+          -e  ELASTIC_USERNAME=${{ inputs.elastic-user }} 
+          -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         shell: bash
         run: |
-          ConfigFile="/opencb/.github/workflows/buildConfig.json"
-          config () { 
-            path=".\"${{ inputs.project-name }}\"$@" 
-            jq -c -r "$path" $ConfigFile 
-          }
-
-          echo "Indexing build results..."
-          cd /opencb/
-
-          # Remove ASCII coloring and redact secrets using Scala
-          scala-cli run /opencb/project-builder/redact-logs.scala --server=false -- \
-            build-logs.txt \
-            build-logs-redacted.txt \
+          bash ./.github/actions/build-project/index.sh \
+            "${{ inputs.project-name }}" \
+            "${{ inputs.scala-version }}" \
+            "${{ inputs.elastic-user }}" \
             "${{ inputs.elastic-password }}" \
             "${{ inputs.github-key }}" \
             "${{ inputs.container-registry-token }}" \
-            "${{ inputs.akka-repository-token }}"
-
-          index_exit=0
-          for attempt in 1 2 3; do
-            /opencb/project-builder/feed-elastic.sh \
-              'https://scala3.westeurope.cloudapp.azure.com/data' \
-              "${{ inputs.project-name }}" \
-              "$(cat build-status.txt)" \
-              "$(date --iso-8601=seconds)" \
-              build-summary.txt \
-              build-logs-redacted.txt \
-              "$(config .version)" \
-              "${{ inputs.scala-version }}" \
-              "${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}" \
-              "${{ steps.job-info.outputs.build-url }}" \
-              "$(cat build-tool.txt)"
-            index_exit=$?
-            if [ $index_exit -eq 0 ]; then
-              break
-            elif [ $attempt -lt 3 ]; then
-              echo "Indexing failed, would retry"
-              sleep $((attempt * 5))
-            fi
-          done
-          if [ $index_exit != 0 ]; then 
-            echo "::warning title=Indexing failure::Indexing results of ${{ inputs.project-name }} failed" 
-          fi
+            "${{ inputs.akka-repository-token }}" \
+            "${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}" \
+            "${{ steps.job-info.outputs.build-url }}" \
+            "/opencb"
 
     - name: Check results
       shell: bash
