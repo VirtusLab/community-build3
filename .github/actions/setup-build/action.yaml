@@ -73,7 +73,7 @@ runs:
         echo "is-compiler-published=${isPublished}" >> $GITHUB_OUTPUT
 
     - name: Build compiler
-      uses: addnab/docker-run-action@v3
+      uses: WojciechMazur/docker-run-action@1.0.0
       if: steps.check-published.outputs.is-compiler-published == 'false'
       with:
         image: "lampepfl/dotty:2024-10-18"

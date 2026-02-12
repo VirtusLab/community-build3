@@ -132,7 +132,7 @@ runs:
         echo "can-skip-build=${canSkip}" >> $GITHUB_OUTPUT
 
     - name: Build project
-      uses: addnab/docker-run-action@v3
+      uses: WojciechMazur/docker-run-action@1.0.0
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         registry: ${{ inputs.container-registry }}
@@ -234,7 +234,7 @@ runs:
         echo "build-url=${buildURL}" >> $GITHUB_OUTPUT
 
     - name: Index results
-      uses: addnab/docker-run-action@v3
+      uses: WojciechMazur/docker-run-action@1.0.0
       if: steps.check-history.outputs.can-skip-build != 'true'
       with:
         registry: ${{ inputs.container-registry }}
