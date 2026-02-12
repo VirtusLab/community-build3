@@ -81,8 +81,8 @@ runs:
           -v ${{ github.workspace }}/compiler:/compiler/
           -v ${{ github.workspace }}:/opencb/
         shell: bash
-        run: |
-          bash /opencb/.github/actions/setup-build/build.sh \
-            "${{ steps.calc-version.outputs.effective-scala-version }}" \
-            "${{ steps.calc-version.outputs.effective-maven-url }}" \
+        run: >
+          bash /opencb/.github/actions/setup-build/build.sh
+            "${{ steps.calc-version.outputs.effective-scala-version }}"
+            "${{ steps.calc-version.outputs.effective-maven-url }}"
             "/compiler"

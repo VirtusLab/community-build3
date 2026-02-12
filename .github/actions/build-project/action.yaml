@@ -141,17 +141,17 @@ runs:
         image: "ghcr.io/virtuslab/scala-community-build-project-builder:jdk${{ env.java-version }}-latest"
         options: -v ${{ github.workspace }}:/opencb/
         shell: bash
-        run: |
-          bash /opencb/.github/actions/build-project/build.sh \
-            "${{ inputs.project-name }}" \
-            "${{ inputs.scala-version }}" \
-            "${{ inputs.maven-repo-url }}" \
-            "${{ inputs.execute-tests }}" \
-            "${{ inputs.akka-repository-token }}" \
-            "${{ inputs.extra-scalac-options }}" \
-            "${{ inputs.disabled-scalac-options }}" \
-            "${{ inputs.extra-library-dependencies }}" \
-            "/opencb" \
+        run: >
+          bash /opencb/.github/actions/build-project/build.sh
+            "${{ inputs.project-name }}"
+            "${{ inputs.scala-version }}"
+            "${{ inputs.maven-repo-url }}"
+            "${{ inputs.execute-tests }}"
+            "${{ inputs.akka-repository-token }}"
+            "${{ inputs.extra-scalac-options }}"
+            "${{ inputs.disabled-scalac-options }}"
+            "${{ inputs.extra-library-dependencies }}"
+            "/opencb"
             "7200"
     
     - name: Check status
@@ -212,17 +212,17 @@ runs:
           -e ELASTIC_USERNAME=${{ inputs.elastic-user }} 
           -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
         shell: bash
-        run: |
-          bash /opencb/.github/actions/build-project/index.sh \
-            "${{ inputs.project-name }}" \
-            "${{ inputs.scala-version }}" \
-            "${{ inputs.elastic-user }}" \
-            "${{ inputs.elastic-password }}" \
-            "${{ inputs.github-key }}" \
-            "${{ inputs.container-registry-token }}" \
-            "${{ inputs.akka-repository-token }}" \
-            "${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}" \
-            "${{ steps.job-info.outputs.build-url }}" \
+        run: >
+          bash /opencb/.github/actions/build-project/index.sh
+            "${{ inputs.project-name }}"
+            "${{ inputs.scala-version }}"
+            "${{ inputs.elastic-user }}"
+            "${{ inputs.elastic-password }}"
+            "${{ inputs.github-key }}"
+            "${{ inputs.container-registry-token }}"
+            "${{ inputs.akka-repository-token }}"
+            "${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}"
+            "${{ steps.job-info.outputs.build-url }}"
             "/opencb"
 
     - name: Check results
