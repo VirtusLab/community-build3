@@ -21,7 +21,6 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v4
-    - uses: actions/checkout@v4
       with:
         repository: ${{ inputs.repository-url }}
         ref: ${{ inputs.repository-branch }}
@@ -78,10 +77,12 @@ runs:
       if: steps.check-published.outputs.is-compiler-published == 'false'
       with:
         image: "lampepfl/dotty:2024-10-18"
-        options: -v ${{ github.workspace }}/compiler:/compiler/
+        options: >
+          -v ${{ github.workspace }}/compiler:/compiler/
+          -v ${{ github.workspace }}:/opencb/
         shell: bash
         run: |
-          bash .github/actions/setup-build/build.sh \
+          bash /opencb/.github/actions/setup-build/build.sh \
             "${{ steps.calc-version.outputs.effective-scala-version }}" \
             "${{ steps.calc-version.outputs.effective-maven-url }}" \
             "/compiler"
