@@ -1,44 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# index-results.sh
+# index.sh (env-driven)
 #
-# Usage:
-#   index-results.sh \
-#     <project_name> \
-#     <scala_version> \
-#     <elastic_username> \
-#     <elastic_password> \
-#     <github_key_secret> \
-#     <container_registry_token_secret> \
-#     <akka_repository_token_secret> \
-#     <build_id> \
-#     <build_url> \
-#     [opencb_root]
+# Required env:
+#   PROJECT_NAME
+#   SCALA_VERSION
+#   ELASTIC_USERNAME
+#   ELASTIC_PASSWORD
+#   GITHUB_KEY_SECRET
+#   CONTAINER_REGISTRY_TOKEN_SECRET
+#   AKKA_REPOSITORY_TOKEN_SECRET
+#   BUILD_ID
+#   BUILD_URL
 #
-# Notes:
-# - opencb_root defaults to /opencb
-# - expects build-logs.txt, build-status.txt, build-summary.txt, build-tool.txt in opencb_root
-# - expects:
-#     - project-builder/redact-logs.scala
-#     - project-builder/feed-elastic.sh
-#     - .github/workflows/buildConfig.json
-#
-# Exit codes:
-# - script exits non-zero on hard failures (missing files, redaction failure, etc.)
-# - indexing failures are downgraded to warning (exit 0) to match the original step
+# Optional env:
+#   OPENCB_ROOT (default: /opencb)
 
-PROJECT_NAME="${1:?Missing <project_name>}"
-SCALA_VERSION="${2:?Missing <scala_version>}"
-ELASTIC_USERNAME="${3:?Missing <elastic_username>}"
-ELASTIC_PASSWORD="${4:?Missing <elastic_password>}"
-GITHUB_KEY_SECRET="${5:?Missing <github_key_secret>}"
-CONTAINER_REGISTRY_TOKEN_SECRET="${6:?Missing <container_registry_token_secret>}"
-AKKA_REPOSITORY_TOKEN_SECRET="${7:?Missing <akka_repository_token_secret>}"
-BUILD_ID="${8:?Missing <build_id>}"
-BUILD_URL="${9:?Missing <build_url>}"
-OPENCB_ROOT="${10:-/opencb}"
+: "${PROJECT_NAME:?Missing required env PROJECT_NAME}"
+: "${SCALA_VERSION:?Missing required env SCALA_VERSION}"
+: "${ELASTIC_USERNAME:?Missing required env ELASTIC_USERNAME}"
+: "${ELASTIC_PASSWORD:?Missing required env ELASTIC_PASSWORD}"
+: "${GITHUB_KEY_SECRET:?Missing required env GITHUB_KEY_SECRET}"
+: "${CONTAINER_REGISTRY_TOKEN_SECRET:?Missing required env CONTAINER_REGISTRY_TOKEN_SECRET}"
+: "${AKKA_REPOSITORY_TOKEN_SECRET:?Missing required env AKKA_REPOSITORY_TOKEN_SECRET}"
+: "${BUILD_ID:?Missing required env BUILD_ID}"
+: "${BUILD_URL:?Missing required env BUILD_URL}"
 
+OPENCB_ROOT="${OPENCB_ROOT:-/opencb}"
 DATA_ENDPOINT='https://scala3.westeurope.cloudapp.azure.com/data'
 CONFIG_FILE="${OPENCB_ROOT}/.github/workflows/buildConfig.json"
 

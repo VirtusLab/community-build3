@@ -1,37 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# build-project.sh
+# build.sh (env-driven)
 #
-# Usage:
-#   build-project.sh \
-#     <project_name> \
-#     <scala_version> \
-#     <maven_repo_url> \
-#     <execute_tests> \
-#     <akka_repository_token> \
-#     <extra_scalac_options> \
-#     <disabled_scalac_options> \
-#     <extra_library_dependencies> \
-#     [opencb_root] \
-#     [timeout_seconds]
+# Required env:
+#   PROJECT_NAME
+#   SCALA_VERSION
+#   MAVEN_REPO_URL
+#   EXECUTE_TESTS
+#   AKKA_REPO_TOKEN
 #
-# Notes:
-# - opencb_root defaults to /opencb
-# - timeout_seconds defaults to 7200 (2 hours)
-# - expects /opencb/.github/workflows/buildConfig.json and /opencb/project-builder/build-revision.sh in the container
-# - writes/moves build-logs.txt, build-summary.txt, build-status.txt, build-tool.txt into opencb_root
+# Optional env:
+#   EXTRA_SCALAC_OPTIONS
+#   DISABLED_SCALAC_OPTIONS
+#   EXTRA_LIBRARY_DEPENDENCIES
+#   OPENCB_ROOT (default: /opencb)
+#   TIMEOUT_SECONDS (default: 7200)
 
-PROJECT_NAME="${1:?Missing <project_name>}"
-SCALA_VERSION="${2:?Missing <scala_version>}"
-MAVEN_REPO_URL="${3:?Missing <maven_repo_url>}"
-EXECUTE_TESTS="${4:?Missing <execute_tests>}"                 # pass "true"/"false" or whatever your builder expects
-AKKA_REPO_TOKEN="${5:?Missing <akka_repository_token>}"
-EXTRA_SCALAC_OPTIONS="${6:-}"
-DISABLED_SCALAC_OPTIONS="${7:-}"
-EXTRA_LIBRARY_DEPENDENCIES="${8:-}"
-OPENCB_ROOT="${9:-/opencb}"
-TIMEOUT_SECONDS="${10:-7200}"
+: "${PROJECT_NAME:?Missing required env PROJECT_NAME}"
+: "${SCALA_VERSION:?Missing required env SCALA_VERSION}"
+: "${MAVEN_REPO_URL:?Missing required env MAVEN_REPO_URL}"
+: "${EXECUTE_TESTS:?Missing required env EXECUTE_TESTS}"
+: "${AKKA_REPO_TOKEN:?Missing required env AKKA_REPO_TOKEN}"
+
+EXTRA_SCALAC_OPTIONS="${EXTRA_SCALAC_OPTIONS:-}"
+DISABLED_SCALAC_OPTIONS="${DISABLED_SCALAC_OPTIONS:-}"
+EXTRA_LIBRARY_DEPENDENCIES="${EXTRA_LIBRARY_DEPENDENCIES:-}"
+OPENCB_ROOT="${OPENCB_ROOT:-/opencb}"
+TIMEOUT_SECONDS="${TIMEOUT_SECONDS:-7200}"
 
 DEFAULT_CONFIG='{}'
 CONFIG_FILE="${OPENCB_ROOT}/.github/workflows/buildConfig.json"

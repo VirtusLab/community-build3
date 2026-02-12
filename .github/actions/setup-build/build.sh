@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# build-compiler.sh
-#
-# Usage:
-#   build-compiler.sh <effective_scala_version> <effective_maven_url> [compiler_dir]
+# Required env:
+#   SCALA_VERSION
+#   MAVEN_URL
+# Optional env:
+#   COMPILER_DIR (default: /compiler)
 
-SCALA_VERSION="${1:?Missing <effective_scala_version>}"
-MAVEN_URL="${2:?Missing <effective_maven_url>}"
-COMPILER_DIR="${3:-/compiler}"
+: "${SCALA_VERSION:?Missing required env SCALA_VERSION}"
+: "${MAVEN_URL:?Missing required env MAVEN_URL}"
+COMPILER_DIR="${COMPILER_DIR:-/compiler}"
 
 echo '##################################'
 echo "Release Scala in version: ${SCALA_VERSION}"
