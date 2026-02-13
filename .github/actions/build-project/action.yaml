@@ -32,9 +32,6 @@ inputs:
   elastic-password:
     description: "Secret with auth token to elasticsearch"
     required: true
-  github-key:
-    description: "Secret with GitHub SSH eky required to clone repositories/submodules using ssh"
-    required: true
   workflow-name:
     description: "Name of the calling workflow, used to resolve build URL. Leave empty to use default (execute-build-plan / {{github.job}} (<project-name>))"
     default: ""
@@ -213,7 +210,6 @@ runs:
           -e SCALA_VERSION=${{ inputs.scala-version }}
           -e ELASTIC_USERNAME=${{ inputs.elastic-user }}
           -e ELASTIC_PASSWORD=${{ inputs.elastic-password }}
-          -e GITHUB_KEY_SECRET=${{ inputs.github-key }}
           -e CONTAINER_REGISTRY_TOKEN_SECRET=${{ inputs.container-registry-token }}
           -e AKKA_REPOSITORY_TOKEN_SECRET=${{ inputs.akka-repository-token }}
           -e BUILD_ID=${{ inputs.custom-build-id != '' && inputs.custom-build-id || github.run_id }}
