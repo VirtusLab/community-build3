@@ -203,6 +203,7 @@ jobs:
         - name: "clulab/processors"
         - name: "clulab/scala-transformers"
         - name: "codingwell/scala-guice"
+        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
@@ -282,6 +283,7 @@ jobs:
         - name: "disneystreaming/weaver-test"
         - name: "dispatch/reboot"
         - name: "donderom/llm4s"
+        - name: "doriordan/skuber"
         - name: "dotty-cps-async/cps-async-connect"
         - name: "dotty-cps-async/dotty-cps-async"
         - name: "dragonfly-ai/matrix"
@@ -330,8 +332,6 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
-        - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fd4s/fs2-kafka"
+        - name: "fd4s/vulcan"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
@@ -611,8 +613,6 @@ jobs:
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
-        - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/cfor"
+        - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
@@ -892,8 +894,6 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/parboiled2"
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -976,7 +978,6 @@ jobs:
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
         - name: "thatscalaguy/circe-jq"
-        - name: "thedrawingcoder-gamer/swing.io"
         - name: "theiterators/baklava"
         - name: "theiterators/http4s-stir"
         - name: "theiterators/kebs"
@@ -989,7 +990,6 @@ jobs:
         - name: "timbertson/foperator"
         - name: "timwspence/cats-stm"
         - name: "tinkoff/phobos"
-        - name: "tkrs/orcus"
         - name: "tminglei/slick-pg"
         - name: "tofu-tf/cherry"
         - name: "tofu-tf/glass"
