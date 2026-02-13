@@ -8,7 +8,6 @@ set -euo pipefail
 #   SCALA_VERSION
 #   ELASTIC_USERNAME
 #   ELASTIC_PASSWORD
-#   GITHUB_KEY_SECRET
 #   CONTAINER_REGISTRY_TOKEN_SECRET
 #   AKKA_REPOSITORY_TOKEN_SECRET
 #   BUILD_ID
@@ -21,7 +20,6 @@ set -euo pipefail
 : "${SCALA_VERSION:?Missing required env SCALA_VERSION}"
 : "${ELASTIC_USERNAME:?Missing required env ELASTIC_USERNAME}"
 : "${ELASTIC_PASSWORD:?Missing required env ELASTIC_PASSWORD}"
-: "${GITHUB_KEY_SECRET:?Missing required env GITHUB_KEY_SECRET}"
 : "${CONTAINER_REGISTRY_TOKEN_SECRET:?Missing required env CONTAINER_REGISTRY_TOKEN_SECRET}"
 : "${AKKA_REPOSITORY_TOKEN_SECRET:?Missing required env AKKA_REPOSITORY_TOKEN_SECRET}"
 : "${BUILD_ID:?Missing required env BUILD_ID}"
@@ -77,7 +75,6 @@ scala-cli run "${OPENCB_ROOT}/project-builder/redact-logs.scala" --server=false 
   "${OPENCB_ROOT}/build-logs.txt" \
   "${OPENCB_ROOT}/build-logs-redacted.txt" \
   "${ELASTIC_PASSWORD}" \
-  "${GITHUB_KEY_SECRET}" \
   "${CONTAINER_REGISTRY_TOKEN_SECRET}" \
   "${AKKA_REPOSITORY_TOKEN_SECRET}"
 
