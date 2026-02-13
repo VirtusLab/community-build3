@@ -11,9 +11,9 @@ set -euo pipefail
 #   CONTAINER_REGISTRY_TOKEN_SECRET
 #   AKKA_REPOSITORY_TOKEN_SECRET
 #   BUILD_ID
-#   BUILD_URL
 #
 # Optional env:
+#   BUILD_URL 
 #   OPENCB_ROOT (default: /opencb)
 
 : "${PROJECT_NAME:?Missing required env PROJECT_NAME}"
@@ -23,8 +23,8 @@ set -euo pipefail
 : "${CONTAINER_REGISTRY_TOKEN_SECRET:?Missing required env CONTAINER_REGISTRY_TOKEN_SECRET}"
 : "${AKKA_REPOSITORY_TOKEN_SECRET:?Missing required env AKKA_REPOSITORY_TOKEN_SECRET}"
 : "${BUILD_ID:?Missing required env BUILD_ID}"
-: "${BUILD_URL:?Missing required env BUILD_URL}"
 
+BUILD_URL="${BUILD_URL:-}"
 OPENCB_ROOT="${OPENCB_ROOT:-/opencb}"
 DATA_ENDPOINT='https://scala3.westeurope.cloudapp.azure.com/data'
 CONFIG_FILE="${OPENCB_ROOT}/.github/workflows/buildConfig.json"
