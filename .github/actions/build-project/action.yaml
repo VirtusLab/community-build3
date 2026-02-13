@@ -154,12 +154,12 @@ runs:
     - name: Check status
       id: check-status
       shell: bash
-      if: steps.check-history.outputs.can-skip-build != 'true'
+      if: always() && steps.check-history.outputs.can-skip-build != 'true'
       run: echo "status=$(cat build-status.txt)" >> $GITHUB_OUTPUT
 
     - name: Get current job URL
       id: job-info
-      if: steps.check-status.outputs.status != 'success'
+      if: always() && steps.check-status.outputs.status != 'success'
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
@@ -198,7 +198,7 @@ runs:
 
     - name: Index results
       uses: WojciechMazur/docker-run-action@1.0.0
-      if: steps.check-history.outputs.can-skip-build != 'true'
+      if: always() && steps.check-history.outputs.can-skip-build != 'true'
       with:
         registry: ${{ inputs.container-registry }}
         username: ${{ inputs.container-registry-username }}
@@ -220,7 +220,7 @@ runs:
 
     - name: Check results
       shell: bash
-      if: steps.check-history.outputs.can-skip-build != 'true'
+      if: always() && steps.check-history.outputs.can-skip-build != 'true'
       run: |
         # Set the result of the build
         if [[ "${{ steps.check-status.outputs.status }}" == "success" ]]; then 
