@@ -1,5 +1,5 @@
 
-# projects total:     898
+# projects total:     902
 # min stars count:    -1
 # max projects count: 1000
 
@@ -198,7 +198,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "colofabrix/cuttlefish"
         - name: "colofabrix/declinio"
         - name: "colofabrix/h4sbl"
@@ -256,6 +255,7 @@ jobs:
         - name: "davenverse/snickerdoodle"
         - name: "delimobil/fs2-hbase"
         - name: "dobrynya/zio-jms"
+        - name: "dotty-cps-async/rl-logic"
         - name: "dotty-cps-async/shim--scala-async"
         - name: "dragonfly-ai/cliviz"
         - name: "dragonfly-ai/democrossy"
@@ -588,6 +588,7 @@ jobs:
         - name: "lloydmeta/play-csv"
         - name: "logicovercode/core-adts"
         - name: "logicovercode/core-commons"
+        - name: "lolgab/layers-dotty-plugin"
         - name: "lorandszakacs/enclosure"
         - name: "losizm/bolster"
         - name: "losizm/ergo"
@@ -612,7 +613,6 @@ jobs:
         - name: "malyszaryczlowiek/kessenger-lib"
         - name: "marcinzh/beam"
         - name: "marcinzh/enterprise"
-        - name: "marcinzh/spot"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "marcinzh/spot"
         - name: "marcinzh/yamlike"
         - name: "massimosiani/monix-newtypes-cats"
         - name: "mateuszkubuszok/dbg-schema"
@@ -647,6 +648,7 @@ jobs:
         - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
         - name: "mbannour/mongoscala3codec"
+        - name: "mcsherrylabs/sss-events"
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
         - name: "mercurievv/minuscles"
@@ -892,8 +894,6 @@ jobs:
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/bskyarchive"
         - name: "swaldman/conveniences"
-        - name: "swaldman/cryptoutil"
-        - name: "swaldman/failable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "swaldman/cryptoutil"
+        - name: "swaldman/failable"
         - name: "swaldman/feedletter"
         - name: "swaldman/latest"
         - name: "swaldman/logadapter-scala"
@@ -938,10 +940,10 @@ jobs:
         - name: "taig/backmail"
         - name: "taig/cloud-sql-proxy"
         - name: "taig/data"
-        - name: "taig/enumeration-ext"
         - name: "taig/flog"
         - name: "taig/geojson"
         - name: "taig/hmap"
+        - name: "taig/mapping"
         - name: "taig/object-fit"
         - name: "taig/scala-linguist"
         - name: "taig/scala-pygments"
@@ -961,6 +963,7 @@ jobs:
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
+        - name: "thedrawingcoder-gamer/swing.io"
         - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
         - name: "timbertson/auditspec"
@@ -969,6 +972,7 @@ jobs:
         - name: "tkrs/fluflu"
         - name: "tkrs/mess"
         - name: "tkrs/mmdb-grpc-scala"
+        - name: "tkrs/orcus"
         - name: "tlsomers/scala-suspendable"
         - name: "tmccarthy/ausgeo"
         - name: "tmccarthy/digest4s"
