@@ -145,7 +145,6 @@ jobs:
         - name: "arturaz/doobie-typesafe"
         - name: "arturaz/otel4s-doobie"
         - name: "arturopala/buffer-and-slice"
-        - name: "arturopala/gitignore"
         - name: "arturopala/validator"
         - name: "asflierl/sglicko2"
         - name: "atnos-org/eff"
@@ -282,6 +281,7 @@ jobs:
         - name: "disneystreaming/weaver-test"
         - name: "dispatch/reboot"
         - name: "donderom/llm4s"
+        - name: "doriordan/skuber"
         - name: "dotty-cps-async/cps-async-connect"
         - name: "dotty-cps-async/dotty-cps-async"
         - name: "dragonfly-ai/matrix"
@@ -609,10 +609,10 @@ jobs:
         - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
+        - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
@@ -666,6 +667,7 @@ jobs:
         - name: "neandertech/smithy4s-deriving"
         - name: "nebula-contrib/nebula4scala"
         - name: "neotypes/neotypes"
+        - name: "netflix/atlas"
         - name: "nivox/fs2-backpressure-sensor"
         - name: "nixiesearch/nixiesearch"
         - name: "nmoncho/helenus3"
@@ -892,8 +894,6 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/parboiled2"
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -976,7 +978,6 @@ jobs:
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
         - name: "thatscalaguy/circe-jq"
-        - name: "thedrawingcoder-gamer/swing.io"
         - name: "theiterators/baklava"
         - name: "theiterators/http4s-stir"
         - name: "theiterators/kebs"
@@ -989,7 +990,6 @@ jobs:
         - name: "timbertson/foperator"
         - name: "timwspence/cats-stm"
         - name: "tinkoff/phobos"
-        - name: "tkrs/orcus"
         - name: "tminglei/slick-pg"
         - name: "tofu-tf/cherry"
         - name: "tofu-tf/glass"
