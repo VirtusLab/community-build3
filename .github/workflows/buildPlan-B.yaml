@@ -1,5 +1,5 @@
 
-# projects total:     910
+# projects total:     915
 # min stars count:    -1
 # max projects count: 1000
 
@@ -200,7 +200,6 @@ jobs:
         - name: "codacy/kamon-http4s"
         - name: "codacy/scalaj-http"
         - name: "codedx/mapk"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "colofabrix/cuttlefish"
         - name: "colofabrix/declinio"
         - name: "colofabrix/h4sbl"
@@ -287,9 +286,11 @@ jobs:
         - name: "edadma/indentation"
         - name: "edadma/logger"
         - name: "edadma/matrix"
+        - name: "edadma/microserve"
+        - name: "edadma/path"
         - name: "edadma/pattern-matcher"
+        - name: "edadma/petradb"
         - name: "edadma/random_uuid"
-        - name: "edadma/rdb"
         - name: "edadma/recognizer"
         - name: "edadma/recursive_descent_parser"
         - name: "edadma/stow"
@@ -320,8 +321,8 @@ jobs:
         - name: "fdietze/formidable"
         - name: "fehu/opentracing-scala"
         - name: "fenixedu/fenixedu-scala-sdk"
-        - name: "fgrutsch/akka-persistence-mapdb"
         - name: "fgrutsch/emergence"
+        - name: "fgrutsch/pekko-persistence-mapdb"
         - name: "fiatjaf/nlog"
         - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "flextradeukltd/jfixture-scala"
@@ -331,7 +332,6 @@ jobs:
         - name: "frawa/typed-json"
         - name: "fthomas/status-page"
         - name: "funkode-io/web3-auth"
-        - name: "galliaproject/gallia-avro"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "galliaproject/gallia-avro"
         - name: "galliaproject/gallia-mongodb"
         - name: "galliaproject/gallia-parquet"
         - name: "galliaproject/gallia-spark"
@@ -432,6 +433,7 @@ jobs:
         - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
         - name: "hshn/crypto4s"
+        - name: "hshn/diffact"
         - name: "hshn/slick-codegen-patch"
         - name: "http4s/http4s-async-http-client"
         - name: "http4s/http4s-fabric"
@@ -611,8 +613,6 @@ jobs:
         - name: "losizm/t2"
         - name: "lowmelvin/hammer-scala"
         - name: "lowmelvin/mini-task"
-        - name: "lowmelvin/scala-json-schema"
-        - name: "lunatech-labs/lunatech-play-googleopenconnect"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "lowmelvin/scala-json-schema"
+        - name: "lunatech-labs/lunatech-play-googleopenconnect"
         - name: "makiftutuncu/as"
         - name: "makiftutuncu/effect"
         - name: "malliina/sbt-utils"
@@ -648,6 +650,7 @@ jobs:
         - name: "marcinzh/enterprise"
         - name: "marcinzh/spot"
         - name: "marcinzh/yamlike"
+        - name: "marmaladesky/mill-explicit-dependencies"
         - name: "massimosiani/monix-newtypes-cats"
         - name: "mateuszkubuszok/dbg-schema"
         - name: "mateuszkubuszok/explain-given"
@@ -665,6 +668,7 @@ jobs:
         - name: "mixql/mixql-protobuf"
         - name: "mkroli/lpm"
         - name: "mobimeo/fs2-gtfs"
+        - name: "moia-oss/itkit-pekko"
         - name: "mongocamp/micrometer-mongodb"
         - name: "monix/monix-testing"
         - name: "mpollmeier/colordiff"
@@ -795,6 +799,7 @@ jobs:
         - name: "raquo/buildkit"
         - name: "rayrobdod/string-context-parser-combinator"
         - name: "rchillyard/flog"
+        - name: "rchillyard/visitor"
         - name: "reactivecore/datacomparison"
         - name: "rolang/google-rest-api-codegen"
         - name: "rossabaker/no"
@@ -889,11 +894,6 @@ jobs:
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
-        - name: "snowplow/iglu-scala-client"
-        - name: "snowplow/iglu-scala-core"
-        - name: "softinio/duck4s"
-        - name: "spaceteams/scala-json-logging"
-        - name: "spilne/spilne"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,6 +920,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "snowplow/iglu-scala-client"
+        - name: "snowplow/iglu-scala-core"
+        - name: "softinio/duck4s"
+        - name: "spaceteams/scala-json-logging"
+        - name: "spilne/spilne"
         - name: "ssanj/delight"
         - name: "staeff777/scalaveusz"
         - name: "stringbean/text-utils"
