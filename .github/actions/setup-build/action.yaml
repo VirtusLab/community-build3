@@ -26,6 +26,12 @@ runs:
         ref: ${{ inputs.repository-branch }}
         path: "compiler"
 
+    - name: Install coursier
+      uses: coursier/setup-action@v2
+      with:
+        jvm: adopt:17
+        apps: cs
+
     - name: Calculate version if missing
       id: calc-version
       shell: bash
@@ -34,6 +40,8 @@ runs:
         if [[ -z $scalaVersion ]]; then
           cd compiler
           git --no-pager log -1
+          java -version
+          
           commitHash=$(git --no-pager rev-parse --short=7 HEAD | xargs)
           commitDate=$(git --no-pager show -s --format=%cd --date=format:"%Y%m%d" HEAD | xargs)
           baseVersion=$(sbt --no-colors 'eval Build.baseVersion' | grep 'ans: String =' | awk '{ print $5 }' | xargs)
@@ -51,10 +59,6 @@ runs:
         echo "Effective Maven repository for this build: $buildMavenRepo"
         echo "effective-maven-url=${buildMavenRepo}" >> $GITHUB_OUTPUT
 
-    - name: Install coursier
-      uses: coursier/setup-action@v1
-      with:
-        apps: cs
     - name: Check version is published
       shell: bash
       id: check-published
