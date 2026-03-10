@@ -202,7 +202,6 @@ jobs:
         - name: "clulab/processors"
         - name: "clulab/scala-transformers"
         - name: "codingwell/scala-guice"
-        - name: "cognitedata/cognite-sdk-scala"
         - name: "com-lihaoyi/cask"
         - name: "com-lihaoyi/castor"
         - name: "com-lihaoyi/fansi"
@@ -332,6 +331,7 @@ jobs:
         - name: "fasterxml/jackson-module-scala"
         - name: "fd4s/fs2-kafka"
         - name: "fd4s/vulcan"
+        - name: "fdimuccio/play2-sockjs"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
@@ -429,6 +428,7 @@ jobs:
         - name: "gzoller/scalajack"
         - name: "hagay3/skuber"
         - name: "haifengl/smile"
+        - name: "hamnis/jsonschema"
         - name: "hedgehogqa/scala-hedgehog"
         - name: "herminiogg/shexml"
         - name: "higherkindness/droste"
@@ -521,7 +521,6 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -613,6 +612,7 @@ jobs:
         - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
+        - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
@@ -894,6 +893,7 @@ jobs:
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1104,6 +1103,7 @@ jobs:
         - name: "xuwei-k/play-json-extra"
         - name: "xuwei-k/play2scalaz"
         - name: "xuwei-k/sbt-warning-diff"
+        - name: "xuwei-k/unused-code"
         - name: "xuwei-k/zeroapply"
         - name: "yakivy/dupin"
         - name: "yakivy/jam"
