@@ -83,20 +83,13 @@ object CommunityBuildPlugin extends AutoPlugin {
     .map("Community Build Repo".at(_))
     .toSeq
 
-  private lazy val akkaRepos = sys.env
-    .get("OPENCB_AKKA_REPO_TOKEN")
-    .filter(_.nonEmpty)
-    .toSeq
-    .map { AkkaToken =>
-      "akka-secure-mvn" at s"https://repo.akka.io/$AkkaToken/secure"
-    }
+
   private lazy val scala3NightliesRepo = "The Scala Nightly Repository"
     .at("https://repo.scala-lang.org/artifactory/maven-nightlies/")
 
   private lazy val extraOpenCBMavenRepos =
     customMavenRepoRepository ++
-      Seq(scala3NightliesRepo) ++
-      akkaRepos
+      Seq(scala3NightliesRepo) 
 
   override def projectSettings = Seq(
     externalResolvers ++= extraOpenCBMavenRepos,
