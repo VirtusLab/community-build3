@@ -38,6 +38,11 @@ spec:
         - name: dashboard-data
           mountPath: /data
         env:
+        # Ensure JVM uses the full container memory allocation
+        - name: JDK_JAVA_OPTIONS
+          value: >-
+            -XX:MaxRAMPercentage=75.0
+            -XX:+UseStringDeduplication
         # Base path for URL generation (matches ingress path)
         - name: BASE_PATH
           value: "/dashboard"
