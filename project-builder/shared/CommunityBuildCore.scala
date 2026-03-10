@@ -1,6 +1,7 @@
 import scala.collection.JavaConverters._
 import java.nio.file.Files
 import java.io.File
+import java.util.regex.Pattern
 
 import scala.util.matching.Regex
 import scala.language.higherKinds
@@ -490,7 +491,10 @@ object Scala3CommunityBuild {
                   else pattern
               }
             },
-            setting => raw"^-?$setting"
+            setting =>
+              // Quote literal settings so chars like * and . in e.g. -opt-inline:** or !java.** are not regex
+              if (setting.endsWith("(:.*)?")) raw"^-?$setting" 
+              else "^-?" + Pattern.quote(setting)
           ).reduce(_.andThen(_))
             .apply(setting)
         }
