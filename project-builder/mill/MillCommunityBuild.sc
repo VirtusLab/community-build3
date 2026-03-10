@@ -141,8 +141,17 @@ private object ScalacOptionsSettings {
       .get(propName)
       .map(_.split(',').filter(_.nonEmpty).toList)
       .getOrElse(Nil)
-  val append = parse("communitybuild.appendScalacOptions")
-  val remove = parse("communitybuild.removeScalacOptions")
+  private def isSourceVersion(setting: String): Boolean =
+    setting.stripPrefix("REQUIRE:")
+      .matches(raw"^-?-source(:(future|(\\d\\.\\d+))(-migration)?)?")
+  private def normalizeRequire(settings: List[String]): List[String] =
+    settings.map { setting =>
+      if (setting.startsWith("REQUIRE:") && !isSourceVersion(setting))
+        setting.stripPrefix("REQUIRE:")
+      else setting
+    }
+  val append = normalizeRequire(parse("communitybuild.appendScalacOptions"))
+  val remove = normalizeRequire(parse("communitybuild.removeScalacOptions"))
 }
 
 def mapScalacOptions(scalaVersion: String, current: Seq[String]): Seq[String] = 
