@@ -31,7 +31,7 @@ jobs:
         - project: "kordyjan/pytanie"
           tool: "scala-cli"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: coursier/cache-action@v6
       - uses: coursier/setup-action@v1
         with:
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Test mill scalafix rules
         run: cd project-builder/mill/scalafix && sbt test

@@ -498,7 +498,7 @@ def createGithubActionJob(
     |      maven-repo-url: $${{ steps.setup.outputs.maven-repo-url }}
     |    steps:
     |      - name: "Git Checkout"
-    |        uses: actions/checkout@v4
+    |        uses: actions/checkout@v6
     |      - name: "Setup build"
     |        uses: ./.github/actions/setup-build
     |        id: setup
@@ -527,7 +527,7 @@ def createGithubActionJob(
         println("steps:")
         indented {
           println("- name: \"Git Checkout\"")
-          println("  uses: actions/checkout@v4")
+          println("  uses: actions/checkout@v6")
           println("- name: \"Build project\"")
           println("  uses: ./.github/actions/build-project")
           println("  with:")

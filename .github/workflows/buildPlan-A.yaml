@@ -1,7 +1,7 @@
 
-# projects total:     1000
-# min stars count:    -1
-# max projects count: 1000
+# projects total:     1
+# min stars count:    1
+# max projects count: 1
 
 name: "Execute Open Community Build plan"
 on:
@@ -61,7 +61,7 @@ jobs:
       maven-repo-url: ${{ steps.setup.outputs.maven-repo-url }}
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Setup build"
         uses: ./.github/actions/setup-build
         id: setup
@@ -77,51 +77,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "2m/ciris-hocon"
-        - name: "47degrees/github4s"
-        - name: "47degrees/memeid"
-        - name: "47degrees/munit-akka"
-        - name: "47degrees/sbt-energymonitor"
-        - name: "7mind/izumi"
-        - name: "7mind/sbtgen"
-        - name: "afsalthaj/constraintless"
-        - name: "ahjohannessen/sec"
-        - name: "ajozwik/pekko-smtp-server"
-        - name: "akiomik/cats-nio-file"
-        - name: "akka/akka-core"
-        - name: "akka/akka-grpc"
-        - name: "akka/akka-http"
-        - name: "akka/akka-management"
-        - name: "akka/akka-persistence-cassandra"
-        - name: "akka/akka-persistence-r2dbc"
-        - name: "akka/akka-projection"
-        - name: "akka/alpakka"
-        - name: "akka/alpakka-kafka"
-        - name: "alaz/scala-i18n"
-        - name: "alejandrohdezma/http4s-munit"
-        - name: "alejandrohdezma/tapir-golden-openapi-munit"
-        - name: "alexarchambault/case-app"
-        - name: "alexarchambault/mill-native-image"
-        - name: "algolia/algoliasearch-client-scala"
-        - name: "alhuelamo/dbjobs"
-        - name: "aliics/mouse"
-        - name: "almond-sh/almond"
-        - name: "alonsodomin/cron4s"
-        - name: "alstanchev/pekko-persistence-inmemory"
-        - name: "altoo-ag/akka-kryo-serialization"
-        - name: "altoo-ag/pekko-kryo-serialization"
-        - name: "altoo-ag/scala-kryo-serialization"
-        - name: "analogweb/analogweb-scala"
-        - name: "andimiller/decline-completion"
-        - name: "andresilva/scala-pool"
-        - name: "andyglow/scala-xml-diff"
-        - name: "andyglow/typesafe-config-scala"
-        - name: "andyglow/websocket-scala-client"
-        - name: "ant8e/uuid4cats-effect"
-        - name: "apache/daffodil"
-        - name: "apache/pekko"
-        - name: "apache/pekko-connectors"
-        - name: "apache/pekko-connectors-kafka"
         - name: "apache/pekko-grpc"
         - name: "apache/pekko-http"
         - name: "apache/pekko-management"
@@ -334,7 +289,7 @@ jobs:
         - name: "fd4s/vulcan"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Build project"
         uses: ./.github/actions/build-project
         with:
@@ -615,7 +570,7 @@ jobs:
         - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Build project"
         uses: ./.github/actions/build-project
         with:
@@ -896,7 +851,7 @@ jobs:
         - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Build project"
         uses: ./.github/actions/build-project
         with:
@@ -1157,7 +1112,7 @@ jobs:
         - name: "zio/zio-telemetry"
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Build project"
         uses: ./.github/actions/build-project
         with:

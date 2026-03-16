@@ -43,7 +43,7 @@ jobs:
       maven-repo-url: ${{ steps.setup.outputs.maven-repo-url }}
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Setup build"
         uses: ./.github/actions/setup-build
         id: setup
@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: "Git Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: "Build project"
         uses: ./.github/actions/build-project
         with:
