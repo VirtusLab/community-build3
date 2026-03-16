@@ -265,7 +265,9 @@ object CommunityBuildPlugin extends AutoPlugin {
     "-Yprint-debug", "-Yprint-debug-owners", "-Yprint-level", "-Yprint-pos", "-Yprint-pos-syms", "-Yprint-syms", "-Yprint-tasty",
     "-Yread-docs", "-Yrecheck-test", "-Yrequire-targetName", "-Yretain-trees",
     "-Ysafe-init", "-Ysafe-init-global", "-Yscala2-unpickler", "-Ysemanticdb", "-Yshow-print-errors",
-    "-Yshow-suppressed-errors", "-Yshow-tree-ids", "-Yshow-var-bounds", "-Ytest-pickler"  
+    "-Yshow-suppressed-errors", "-Yshow-tree-ids", "-Yshow-var-bounds", "-Ytest-pickler",
+    // Different semantics / input type
+    "-opt",
  )
   // format: on
   import sbt.librarymanagement.InclExclRule
