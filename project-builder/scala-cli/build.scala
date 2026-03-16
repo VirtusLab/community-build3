@@ -39,7 +39,7 @@ import os.CommandResult
     scalaVersion = scalaVersion,
     repositoryDir = repositoryDir,
     mavenRepoURL = Option(mavenRepoURL).filterNot(_.isEmpty),
-    extraScalacOptions = extraScalacOptions.split(",").toList.map {
+    extraScalacOptions = Scala3CommunityBuild.Utils.splitScalacOptionArgs(extraScalacOptions).map {
       case s"REQUIRE:$opt" => opt
       case opt             => opt
     }

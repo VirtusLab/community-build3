@@ -410,6 +410,31 @@ object Scala3CommunityBuild {
       "Scala2Compat"
     )
     val ignoredScalacOptions = invalidLanguageOptions.map(v => s"-language:$v")
+
+    /** Split by comma only when the remainder starts a new option (-, !, REQUIRE:, MATCH:), so e.g. "-opt-inline:**,!java.**" stays one token. */
+    def splitScalacOptionArgs(s: String): List[String] = {
+      val trimmed = s.trim
+      if (trimmed.isEmpty) return Nil
+      val result = List.newBuilder[String]
+      var start = 0
+      var i = 0
+      while (i < trimmed.length) {
+        if (trimmed(i) == ',') {
+          val afterComma = trimmed.substring(i + 1).trim
+          if (
+            afterComma.startsWith("-") || afterComma.startsWith("!") ||
+            afterComma.startsWith("REQUIRE:") || afterComma.startsWith("MATCH:")
+          ) {
+            result += trimmed.substring(start, i).trim
+            start = i + 1
+          }
+        }
+        i += 1
+      }
+      result += trimmed.substring(start).trim
+      result.result().filter(_.nonEmpty)
+    }
+
     def mapScalacOptions(
         scalaVersion: Option[String],
         current: Seq[String],

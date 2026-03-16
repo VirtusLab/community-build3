@@ -114,7 +114,7 @@ object MillCommunityBuild {
     private def parse(propName: String): List[String] =
       sys.props
         .get(propName)
-        .map(_.split(',').filter(_.nonEmpty).toList)
+        .map(Scala3CommunityBuild.Utils.splitScalacOptionArgs)
         .getOrElse(Nil)
     private def isSourceVersion(setting: String): Boolean =
       setting.stripPrefix("REQUIRE:")

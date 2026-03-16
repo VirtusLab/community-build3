@@ -204,7 +204,7 @@ object CommunityBuildPlugin extends AutoPlugin {
     keyTransformCommand("mapScalacOptions", Keys.scalacOptions) {
       (args, extracted) => (scope: Scope, currentScalacOptions: Seq[String]) =>
         val scalaVersion = extracted.get(scope / Keys.scalaVersion)
-        val safeArgs = args.map(_.split(",").toList.filter(_.nonEmpty))
+        val safeArgs = args.map(Scala3CommunityBuild.Utils.splitScalacOptionArgs)
         val append = safeArgs.lift(0).getOrElse(Nil)
         lazy val (appendScala3Exclusive, appendScala3Inclusive) =
           append.partition { opt =>
