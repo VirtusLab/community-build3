@@ -18,7 +18,7 @@ jobs:
     if: github.repository == 'VirtusLab/community-build3' && contains(github.ref, 'master')
     steps:
       - uses: actions/checkout@v6
-      - uses: coursier/cache-action@v6
+      - uses: coursier/cache-action@v8
       - uses: coursier/setup-action@v1
         with:
           apps: scala-cli:1.7.1
