@@ -58,6 +58,10 @@ $scriptDir/../project-builder/build-revision.sh \
   "$disabledScalacOptions" \
   "$extraLibraryDependencies" 2>&1 | tee build-logs.txt
 
+if [[ "$SKIP_BUILD_SETUP" != "1" ]]; then 
+  (cd $scriptDir/../ && git restore .github/workflows/buildConfig.json || false); 
+fi
+
 echo "------"
 echo "$projectName status=$(cat build-status.txt)"
 echo "-------"
