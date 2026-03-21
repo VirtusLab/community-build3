@@ -1,5 +1,5 @@
 
-# projects total:     926
+# projects total:     929
 # min stars count:    -1
 # max projects count: 1000
 
@@ -173,6 +173,7 @@ jobs:
         - name: "bilal-fazlani/swiftbar4s"
         - name: "bilal-fazlani/zio-mongo"
         - name: "billzabob/fordeckmacia"
+        - name: "bishabosha/scala-object-notation"
         - name: "bitlap/validation-scala"
         - name: "bitlap/zio-pekko"
         - name: "bitmarck-service/base32check-scala"
@@ -331,7 +332,6 @@ jobs:
         - name: "flextradeukltd/jfixture-scala"
         - name: "fommil/jzon"
         - name: "fommil/shapely"
-        - name: "frawa/inline-files"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "frawa/inline-files"
         - name: "frawa/typed-json"
         - name: "fthomas/status-page"
         - name: "funkode-io/web3-auth"
@@ -534,7 +535,6 @@ jobs:
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kalin-rudnicki/harness"
-        - name: "kalin-rudnicki/oxygen"
         - name: "kalin-rudnicki/slyce-zio"
         - name: "kapunga/fallatol"
         - name: "karadzhov/scala-iso-country"
@@ -668,6 +668,7 @@ jobs:
         - name: "mcsherrylabs/sss-events"
         - name: "mdedetrich/scalacheck"
         - name: "memo33/metarules"
+        - name: "memo33/scdbpf"
         - name: "mercurievv/minuscles"
         - name: "mikla/diode"
         - name: "mixql/mixql-core"
@@ -848,6 +849,7 @@ jobs:
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
+        - name: "sbt/sbinary"
         - name: "sbt/sbt-giter8-resolver"
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
@@ -892,8 +894,6 @@ jobs:
         - name: "sfali/grpc-rest-gateway"
         - name: "sfxcode/pebble-scala"
         - name: "sfxcode/sapphire-data"
-        - name: "sh4869/semver-parser-scala"
-        - name: "shawjef3/tryutils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sh4869/semver-parser-scala"
+        - name: "shawjef3/tryutils"
         - name: "shopstic/caliban"
         - name: "shuwariafrica/ashtray"
         - name: "shuwariafrica/version"
@@ -1079,6 +1081,7 @@ jobs:
         - name: "zhranklin/scala-tricks"
         - name: "zio-archive/interop-guava"
         - name: "zio-archive/zio-morphir"
+        - name: "zio/zio-bson"
         - name: "zio/zio-streams-compress"
         - name: "zygfryd/scala-zygf-jackshaft"
     steps:
