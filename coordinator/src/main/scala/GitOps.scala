@@ -1,5 +1,4 @@
 import scala.annotation.tailrec
-import scala.concurrent.duration._
 
 object Git {
   enum Revision:
@@ -27,7 +26,8 @@ object Git {
       repoUrl: String,
       projectName: String,
       revision: Option[Revision],
-      depth: Option[Int]
+      depth: Option[Int],
+      checkoutWorktree: Boolean = true
   ): Option[os.Path] = {
     val branchOpt = revision.flatMap {
       case Revision.Branch(name) => Some(s"--branch=$name")
@@ -41,17 +41,24 @@ object Git {
         backoffSeconds: Int = 1
     ): Option[os.Path] = {
       val projectDir = os.temp.dir(prefix = s"repo-$projectName")
-      val proc = os
-        .proc(
-          "git",
-          "clone",
-          repoUrl,
-          projectDir,
-          "--quiet",
-          branchOpt,
-          depthOpt
-        )
-        .call(stderr = os.Pipe, check = false, timeout = 10.minutes.toMillis)
+      val proc = CoordinatorRuntime.withPermit(CoordinatorRuntime.gitClone) {
+        os
+          .proc(
+            "git",
+            "clone",
+            repoUrl,
+            projectDir,
+            "--quiet",
+            "--no-checkout",
+            branchOpt,
+            depthOpt
+          )
+          .call(
+            stderr = os.Pipe,
+            check = false,
+            timeout = CoordinatorRuntime.gitCloneTimeout.toMillis
+          )
+      }
 
       if proc.exitCode == 0 then Some(projectDir)
       else if retries > 0 then
@@ -59,6 +66,7 @@ object Git {
           s"Failed to clone $repoUrl at revision ${revision}, backoff ${backoffSeconds}s"
         )
         proc.err.lines().foreach(Console.err.println)
+        os.remove.all(projectDir)
         Thread.sleep(backoffSeconds * 1000)
         tryClone(retries - 1, (backoffSeconds * 2).min(60))
       else
@@ -66,27 +74,29 @@ object Git {
           s"Failed to clone $repoUrl at revision ${revision}:"
         )
         proc.err.lines().foreach(Console.err.println)
+        os.remove.all(projectDir)
         None
     }
 
-    def checkoutRevision(projectDir: os.Path): Boolean = revision match {
-      case None | Some(_: Revision.Branch)       => true // no need to checkout
-      case Some(Revision.Tag("master" | "main")) => true
-      case Some(revision: (Revision.Commit | Revision.Tag)) =>
+    def checkoutRevision(projectDir: os.Path): Boolean =
+      if !checkoutWorktree then true
+      else {
         val rev = revision match
-          case Revision.Commit(sha) =>
+          case Some(Revision.Commit(sha)) =>
             unshallowSinceDottyRelease(projectDir)
             sha
-          case Revision.Tag(tag) =>
+          case Some(Revision.Tag(tag)) if tag != "master" && tag != "main" =>
             fetchTags(projectDir)
             tag
-        
+          case _ =>
+            "HEAD"
+
         val proc = os
-          .proc("git", "checkout", rev, "--quiet")
+          .proc("git", "checkout", "--quiet", "--force", rev)
           .call(
             cwd = projectDir,
             check = false,
-            timeout = 15.seconds.toMillis,
+            timeout = CoordinatorRuntime.gitCheckoutTimeout.toMillis,
             mergeErrIntoOut = true
           )
         if (proc.exitCode != 0)
@@ -96,8 +106,13 @@ object Git {
               .mkString
           )
         proc.exitCode == 0
-    }
+      }
 
-    tryClone(retries = 10).filter(checkoutRevision(_))
+    tryClone(retries = 10).flatMap { projectDir =>
+      if checkoutRevision(projectDir) then Some(projectDir)
+      else
+        os.remove.all(projectDir)
+        None
+    }
   }
 }

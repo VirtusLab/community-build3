@@ -23,16 +23,17 @@ object CoordinatorRuntime:
   private val AvailableProcessors = Runtime.getRuntime().availableProcessors()
   opaque type Permit = Semaphore
 
-  val scaladexApiParallelism: Int = AvailableProcessors.min(8).max(4)
-  val gitLsRemoteParallelism: Int = AvailableProcessors.min(8).max(4)
-  val mavenInfoParallelism: Int = AvailableProcessors.min(16).max(4)
+
   val gitLsRemoteTimeoutSeconds: Int = 30
+  val gitCloneTimeout: FiniteDuration = 5.minutes
+  val gitCheckoutTimeout: FiniteDuration = 2.minutes
 
   private def permit(parallelism: Int): Permit = new Semaphore(parallelism)
 
-  val scaladexApi: Permit = permit(scaladexApiParallelism)
-  val gitLsRemote: Permit = permit(gitLsRemoteParallelism)
-  val mavenInfo: Permit = permit(mavenInfoParallelism)
+  val scaladexApi: Permit = permit(AvailableProcessors.min(8).max(4))
+  val gitLsRemote: Permit = permit(AvailableProcessors.min(8).max(4))
+  val gitClone: Permit = permit(AvailableProcessors.min(4).max(2))
+  val mavenInfo: Permit = permit(AvailableProcessors.min(16).max(4))
 
   def withPermit[T](permit: Permit)(op: => T): T =
     blocking(permit.acquire())
@@ -327,7 +328,8 @@ def makeDependenciesBasedBuildPlan(
         repoUrl,
         project.repository,
         revision = None,
-        depth = Some(1)
+        depth = Some(1),
+        checkoutWorktree = false
       )
       _ = Git.unshallowSinceDottyRelease(repoDir)
       lastCommit <- os
