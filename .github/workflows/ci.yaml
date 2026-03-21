@@ -36,7 +36,7 @@ jobs:
       - uses: coursier/setup-action@v2
         with:
           jvm: 17
-          apps: scala:3.7.1 scala-cli:1.8.3 sbt:1.11.3 mill scalafix
+          apps: scala:3.7.1 scala-cli:1.12.5 sbt:1.11.3 mill scalafix
       - name: Configure
         run: |
           mv .github/workflows/test-e2e-buildConfig.json .github/workflows/buildConfig.json
