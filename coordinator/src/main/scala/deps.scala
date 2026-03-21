@@ -152,6 +152,8 @@ def loadMavenInfo(scalaBinaryVersion: String)(
           case _: SocketTimeoutException => backoff("socket timeout exception")
           case ex: HttpStatusException if ex.getStatusCode == 503 =>
             backoff("service unavailable")
+          case ex: HttpStatusException if ex.getStatusCode == 500 =>
+            backoff(s"HTTP ${ex.getStatusCode} from Scaladex")
           case ex: java.net.ConnectException if ex.getMessage().contains("Operation timed out") =>
             backoff(ex.getMessage())
           case ex: Exception =>
@@ -165,9 +167,8 @@ def loadMavenInfo(scalaBinaryVersion: String)(
   }
 
   Future
-    .foldLeft(tasks)(List.empty[Target]) { case (acc, target) =>
-      acc ::: target.toList
-    }
+    .sequence(tasks)
+    .map(_.flatten)
     .map(LoadedProject(projectModules.project, version, _))
 
   /** @param scalaBinaryVersion
