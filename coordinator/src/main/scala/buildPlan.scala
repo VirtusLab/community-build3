@@ -9,6 +9,7 @@ import os.CommandResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 
 class ConfigFiles(path: os.Path) {
   val projectsConfig: os.Path = path / "projects-config.conf"
@@ -17,6 +18,26 @@ class ConfigFiles(path: os.Path) {
   val customProjects: os.Path = path / "custom-projects.txt"
   val requiredConfigs: os.Path = path / "require"
 }
+
+object CoordinatorRuntime:
+  private val AvailableProcessors = Runtime.getRuntime().availableProcessors()
+  opaque type Permit = Semaphore
+
+  val scaladexApiParallelism: Int = AvailableProcessors.min(8).max(4)
+  val gitLsRemoteParallelism: Int = AvailableProcessors.min(8).max(4)
+  val mavenInfoParallelism: Int = AvailableProcessors.min(16).max(4)
+  val gitLsRemoteTimeoutSeconds: Int = 30
+
+  private def permit(parallelism: Int): Permit = new Semaphore(parallelism)
+
+  val scaladexApi: Permit = permit(scaladexApiParallelism)
+  val gitLsRemote: Permit = permit(gitLsRemoteParallelism)
+  val mavenInfo: Permit = permit(mavenInfoParallelism)
+
+  def withPermit[T](permit: Permit)(op: => T): T =
+    blocking(permit.acquire())
+    try op
+    finally permit.release()
 
 val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
 
@@ -148,35 +169,67 @@ def splitBuildPlan(
 val TagRef = """.+refs\/tags\/(.+)""".r
 
 def findTag(repoUrl: String, version: String): Option[String] = {
-  def retryConnect(retries: Int, backoffSeconds: Int = 1): CommandResult =
-    val proc =
-      os.proc("git", "ls-remote", "--tags", repoUrl)
-        .call(check = false, stderr = os.Pipe)
-    if (proc.exitCode == 0) proc
-    else if retries > 0 && proc.err
-        .lines()
-        .exists(_.contains("Could not resolve host: github.com"))
-    then
-      Console.err.println(
-        s"Github unavailable, retry with backoff ${backoffSeconds}s"
-      )
-      Thread.sleep(backoffSeconds)
-      retryConnect(retries - 1, (backoffSeconds * 2) min 60)
-    else
-      Console.err.println(s"Failed to list tags of $repoUrl: ")
-      proc.err.lines().foreach(Console.err.println)
-      proc
+  val timeout = CoordinatorRuntime.gitLsRemoteTimeoutSeconds.seconds
 
-  val lsRemote = retryConnect(10)
-  if lsRemote.exitCode != 0
-  then None
-  else {
-    val lines = lsRemote.out.lines().filter(_.contains(version)).toList
-    val (exactMatch, partialMatch) = lines
-      .partition(_.endsWith(version))
-    (exactMatch ::: partialMatch) // sorted candidates
-      .collectFirst { case TagRef(tag) => tag }.headOption
-  }
+  def retryWithBackoff(
+    retries: Int,
+    backoffSeconds: Int,
+    message: String
+  ): Option[CommandResult] =
+    if retries <= 0
+    then
+      Console.err.println(message)
+      None
+    else
+      Console.err.println(s"$message, retry with backoff ${backoffSeconds}s")
+      Thread.sleep(backoffSeconds * 1000L)
+      retryConnect(retries - 1, (backoffSeconds * 2) min 60)
+
+  def retryConnect(
+    retries: Int,
+    backoffSeconds: Int = 1
+  ): Option[CommandResult] =
+    try
+      val proc =
+        CoordinatorRuntime.withPermit(CoordinatorRuntime.gitLsRemote) {
+          os.proc("git", "ls-remote", "--tags", repoUrl)
+            .call(
+              check = false,
+              stderr = os.Pipe,
+              timeout = timeout.toMillis
+            )
+        }
+      if proc.exitCode == 0 then Some(proc)
+      else if proc.err
+          .lines()
+          .exists(_.contains("Could not resolve host: github.com"))
+      then
+        retryWithBackoff(
+          retries,
+          backoffSeconds,
+          s"Github unavailable while listing tags of $repoUrl"
+        )
+      else
+        Console.err.println(s"Failed to list tags of $repoUrl: ")
+        proc.err.lines().foreach(Console.err.println)
+        Some(proc)
+    catch
+      case _: java.util.concurrent.TimeoutException =>
+        retryWithBackoff(
+          retries,
+          backoffSeconds,
+          s"Timed out after $timeout while listing tags of $repoUrl"
+        )
+
+  retryConnect(10)
+    .filter(_.exitCode == 0)
+    .flatMap { lsRemote =>
+      val lines = lsRemote.out.lines().filter(_.contains(version)).toList
+      val (exactMatch, partialMatch) = lines
+        .partition(_.endsWith(version))
+      (exactMatch ::: partialMatch) // sorted candidates
+        .collectFirst { case TagRef(tag) => tag }.headOption
+    }
 }
 
 object WithExtractedScala3Suffix {

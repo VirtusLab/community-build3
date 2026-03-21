@@ -97,25 +97,27 @@ val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
 
 def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
   import mv._
-  val url =
-    s"$ScaladexUrl/${p.organization}/${p.repository}/${name}/${version}?target=_$scalaBinaryVersion"
-  val d = Jsoup.connect(url).get()
-  val gradle = d.select("#copy-gradle").text()
-  val GradleDep(o, n, v) = gradle: @unchecked
-  val orgParsed = o.split('.').mkString("/")
-  val mCentralUrl =
-    s"https://repo1.maven.org/maven2/$orgParsed/$n/$v/$n-$v.pom"
-  val md = Jsoup.connect(mCentralUrl).get
+  CoordinatorRuntime.withPermit(CoordinatorRuntime.mavenInfo) {
+    val url =
+      s"$ScaladexUrl/${p.organization}/${p.repository}/${name}/${version}?target=_$scalaBinaryVersion"
+    val d = Jsoup.connect(url).get()
+    val gradle = d.select("#copy-gradle").text()
+    val GradleDep(o, n, v) = gradle: @unchecked
+    val orgParsed = o.split('.').mkString("/")
+    val mCentralUrl =
+      s"https://repo1.maven.org/maven2/$orgParsed/$n/$v/$n-$v.pom"
+    val md = Jsoup.connect(mCentralUrl).get
 
-  val deps =
-    for
-      dep <- md.select("dependency").asScala
-      groupId <- dep.select("groupId").asScala
-      artifactId <- dep.select("artifactId").asScala
-      version <- dep.select("version").asScala
-    yield Dep(TargetId(groupId.text, artifactId.text), version.text)
+    val deps =
+      for
+        dep <- md.select("dependency").asScala
+        groupId <- dep.select("groupId").asScala
+        artifactId <- dep.select("artifactId").asScala
+        version <- dep.select("version").asScala
+      yield Dep(TargetId(groupId.text, artifactId.text), version.text)
 
-  Target(TargetId(o, n), deps.toSeq)
+    Target(TargetId(o, n), deps.toSeq)
+  }
 
 def loadMavenInfo(scalaBinaryVersion: String)(
     projectModules: CandidateProject.BuildSelected
@@ -262,7 +264,7 @@ def loadDepenenecyGraph(
         println(
           s"Filling remaining ${remainingSlots} slots, trying to load $toLoad next projects"
         )
-        load(optional(from = continueFrom, limit = Some(remainingSlots)))
+        load(optional(from = continueFrom, limit = Some(toLoad)))
           .map(available ++ _.flatten.take(remainingSlots))
       }
     }

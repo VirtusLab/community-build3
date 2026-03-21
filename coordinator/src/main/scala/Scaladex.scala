@@ -18,10 +18,12 @@ class Scaladex:
       uri: Uri
   ): AsyncResponse[T] = {
     def tryGet(backoffSeconds: Int): AsyncResponse[T] = Future {
-      quickRequest
-        .get(uri)
-        .mapResponse(read[T](_))
-        .send(backend)
+      CoordinatorRuntime.withPermit(CoordinatorRuntime.scaladexApi) {
+        quickRequest
+          .get(uri)
+          .mapResponse(read[T](_))
+          .send(backend)
+      }
     }.map(_.body)
       .recoverWith { 
         case err: SttpClientException =>
