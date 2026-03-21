@@ -64,13 +64,10 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
     )
   }.flatten
   given confFiles: ConfigFiles = ConfigFiles(configsPath)
-  // Most of the time is spend in IO, though we can use higher parallelism
-  val threadPool = Executors.newFixedThreadPool(
-    Runtime.getRuntime().availableProcessors() * 2
-  )
+  val executor = Executors.newVirtualThreadPerTaskExecutor()
   val customProjects =
     readNormalized(confFiles.customProjects).map(Project.load)
-  given ExecutionContext = ExecutionContext.fromExecutor(threadPool)
+  given ExecutionContext = ExecutionContext.fromExecutor(executor)
 
   val task = for {
     dependencyGraph <- loadDepenenecyGraph(
@@ -142,8 +139,8 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       ex.printStackTrace()
       sys.error(s"Uncought exception: $ex")
   } finally {
-    threadPool.shutdownNow()
-    threadPool.awaitTermination(10, SECONDS)
+    executor.shutdownNow()
+    executor.awaitTermination(10, SECONDS)
   }
 }
 
