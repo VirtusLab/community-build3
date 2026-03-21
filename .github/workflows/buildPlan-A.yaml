@@ -1,7 +1,7 @@
 
-# projects total:     1
-# min stars count:    1
-# max projects count: 1
+# projects total:     1000
+# min stars count:    -1
+# max projects count: 1000
 
 name: "Execute Open Community Build plan"
 on:
@@ -77,6 +77,51 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "2m/ciris-hocon"
+        - name: "47degrees/github4s"
+        - name: "47degrees/memeid"
+        - name: "47degrees/munit-akka"
+        - name: "47degrees/sbt-energymonitor"
+        - name: "7mind/izumi"
+        - name: "7mind/sbtgen"
+        - name: "afsalthaj/constraintless"
+        - name: "ahjohannessen/sec"
+        - name: "ajozwik/pekko-smtp-server"
+        - name: "akiomik/cats-nio-file"
+        - name: "akka/akka-core"
+        - name: "akka/akka-grpc"
+        - name: "akka/akka-http"
+        - name: "akka/akka-management"
+        - name: "akka/akka-persistence-cassandra"
+        - name: "akka/akka-persistence-r2dbc"
+        - name: "akka/akka-projection"
+        - name: "akka/alpakka"
+        - name: "akka/alpakka-kafka"
+        - name: "alaz/scala-i18n"
+        - name: "alejandrohdezma/http4s-munit"
+        - name: "alejandrohdezma/tapir-golden-openapi-munit"
+        - name: "alexarchambault/case-app"
+        - name: "alexarchambault/mill-native-image"
+        - name: "algolia/algoliasearch-client-scala"
+        - name: "alhuelamo/dbjobs"
+        - name: "aliics/mouse"
+        - name: "almond-sh/almond"
+        - name: "alonsodomin/cron4s"
+        - name: "alstanchev/pekko-persistence-inmemory"
+        - name: "altoo-ag/akka-kryo-serialization"
+        - name: "altoo-ag/pekko-kryo-serialization"
+        - name: "altoo-ag/scala-kryo-serialization"
+        - name: "analogweb/analogweb-scala"
+        - name: "andimiller/decline-completion"
+        - name: "andresilva/scala-pool"
+        - name: "andyglow/scala-xml-diff"
+        - name: "andyglow/typesafe-config-scala"
+        - name: "andyglow/websocket-scala-client"
+        - name: "ant8e/uuid4cats-effect"
+        - name: "apache/daffodil"
+        - name: "apache/pekko"
+        - name: "apache/pekko-connectors"
+        - name: "apache/pekko-connectors-kafka"
         - name: "apache/pekko-grpc"
         - name: "apache/pekko-http"
         - name: "apache/pekko-management"
@@ -357,6 +402,7 @@ jobs:
         - name: "getshaka-org/native-converter"
         - name: "ghik/anodi"
         - name: "ghostdogpr/caliban"
+        - name: "ghostdogpr/purelogic"
         - name: "giabao/paho-akka"
         - name: "giiita/refuel"
         - name: "gitbucket/blocking-slick"
@@ -476,6 +522,7 @@ jobs:
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kaizen-solutions/virgil-kyo"
+        - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
         - name: "karelcemus/play-redis"
@@ -528,6 +575,7 @@ jobs:
         - name: "lego/woof"
         - name: "lemonlabsuk/scala-uri"
         - name: "leviysoft/oolong"
+        - name: "lewisjkl/header"
         - name: "lhns/fs2-compress"
         - name: "lichess-org/lila"
         - name: "lichess-org/lila-fishnet"
@@ -565,9 +613,6 @@ jobs:
         - name: "max-leuthaeuser/scroll"
         - name: "mbannour/mongoscala3codec"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
-        - name: "metarank/cfor"
-        - name: "metarank/ltrlib"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -594,6 +639,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "medeia/medeia"
+        - name: "metarank/cfor"
+        - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
         - name: "mkroli/dns4s"
@@ -756,7 +804,6 @@ jobs:
         - name: "sbt-jib/sbt-jib"
         - name: "sbt/contraband"
         - name: "sbt/io"
-        - name: "sbt/sbinary"
         - name: "sbt/sbt"
         - name: "sbt/sbt-dynver"
         - name: "sbt/sbt-jni"
@@ -844,11 +891,9 @@ jobs:
         - name: "shiftleftsecurity/codepropertygraph"
         - name: "shiftleftsecurity/js2cpg"
         - name: "shiftleftsecurity/overflowdb"
-        - name: "shiftleftsecurity/overflowdb-codegen"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -875,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -970,7 +1016,7 @@ jobs:
         - name: "typelevel/cats"
         - name: "typelevel/cats-collections"
         - name: "typelevel/cats-effect"
-        - name: "typelevel/cats-effect-cps"
+        - name: "typelevel/cats-effect-direct"
         - name: "typelevel/cats-effect-testing"
         - name: "typelevel/cats-mtl"
         - name: "typelevel/cats-parse"
@@ -1019,7 +1065,6 @@ jobs:
         - name: "typelevel/unique"
         - name: "typelevel/vault"
         - name: "typelevel/weaver-test"
-        - name: "typr-dev/typr"
         - name: "ua-parser/uap-scala"
         - name: "umazalakain/errata"
         - name: "unfiltered/unfiltered"
@@ -1072,6 +1117,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
@@ -1085,7 +1131,6 @@ jobs:
         - name: "zio/zio"
         - name: "zio/zio-amqp"
         - name: "zio/zio-blocks"
-        - name: "zio/zio-bson"
         - name: "zio/zio-cache"
         - name: "zio/zio-cli"
         - name: "zio/zio-config"
