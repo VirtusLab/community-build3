@@ -30,10 +30,18 @@ object CoordinatorRuntime:
 
   private def permit(parallelism: Int): Permit = new Semaphore(parallelism)
 
-  val scaladexApi: Permit = permit(AvailableProcessors.min(8).max(4))
-  val gitLsRemote: Permit = permit(AvailableProcessors.min(8).max(4))
-  val gitClone: Permit = permit(AvailableProcessors.min(4).max(2))
-  val mavenInfo: Permit = permit(AvailableProcessors.min(16).max(4))
+  /** Network-bound work: allow ~2× vCPU in flight (e.g. GHA ubuntu-22.04 is 2–4 cores). */
+  private def ioBoundParallelism(min: Int, max: Int): Int =
+    (AvailableProcessors * 2).min(max).max(min)
+
+  /** Heavier local git work: stay near core count. */
+  private def cpuBoundParallelism(min: Int, max: Int): Int =
+    AvailableProcessors.min(max).max(min)
+
+  val gitClone: Permit = permit(cpuBoundParallelism(min = 4, max = 8))
+  val gitLsRemote: Permit = permit(ioBoundParallelism(min = 4, max = 16))
+  val mavenInfo: Permit = permit(ioBoundParallelism(min = 8, max = 16))
+  val scaladexApi: Permit = permit(ioBoundParallelism(min = 8, max = 16))
 
   def withPermit[T](permit: Permit)(op: => T): T =
     blocking(permit.acquire())
