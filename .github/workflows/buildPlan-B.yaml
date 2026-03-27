@@ -1,5 +1,5 @@
 
-# projects total:     930
+# projects total:     933
 # min stars count:    -1
 # max projects count: 1000
 
@@ -103,6 +103,7 @@ jobs:
         - name: "alejandrohdezma/tapir-anyof"
         - name: "alexarchambault/class-path-inspector"
         - name: "alexarchambault/cli-test-util"
+        - name: "alexarchambault/mill-checks"
         - name: "alexcardell/openfeature-scala"
         - name: "alexdupre/coinpayments-scala"
         - name: "alexdupre/fedex-scala"
@@ -287,6 +288,7 @@ jobs:
         - name: "edadma/datetime"
         - name: "edadma/dllist"
         - name: "edadma/fetch"
+        - name: "edadma/gramma"
         - name: "edadma/indentation"
         - name: "edadma/logger"
         - name: "edadma/matrix"
@@ -330,8 +332,6 @@ jobs:
         - name: "fiatjaf/nlog"
         - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "flextradeukltd/jfixture-scala"
-        - name: "fommil/jzon"
-        - name: "fommil/shapely"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fommil/jzon"
+        - name: "fommil/shapely"
         - name: "frawa/inline-files"
         - name: "frawa/typed-json"
         - name: "fthomas/status-page"
@@ -571,6 +573,8 @@ jobs:
         - name: "krrrr38/protoquill-finagle-mysql"
         - name: "kubukoz/drops"
         - name: "kubukoz/dualshock4s"
+        - name: "kubuszok/scala-cli-md-spec"
+        - name: "kubuszok/scala-sax-parser"
         - name: "kzmake/uuid7s"
         - name: "laserdisc-io/scanamo-circe"
         - name: "laserdisc-io/slack4s"
@@ -609,10 +613,6 @@ jobs:
         - name: "lorandszakacs/enclosure"
         - name: "losizm/bolster"
         - name: "losizm/ergo"
-        - name: "losizm/little-cli"
-        - name: "losizm/little-config"
-        - name: "losizm/little-io"
-        - name: "losizm/little-json"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "losizm/little-cli"
+        - name: "losizm/little-config"
+        - name: "losizm/little-io"
+        - name: "losizm/little-json"
         - name: "losizm/little-security"
         - name: "losizm/little-sql"
         - name: "losizm/little-time"
@@ -663,7 +667,6 @@ jobs:
         - name: "mateuszkubuszok/dbg-schema"
         - name: "mateuszkubuszok/explain-given"
         - name: "mateuszkubuszok/renamer"
-        - name: "mateuszkubuszok/scala-cli-md-spec"
         - name: "mattlangsenkamp/svgbounds"
         - name: "mcsherrylabs/sss-events"
         - name: "mdedetrich/scalacheck"
@@ -743,6 +746,7 @@ jobs:
         - name: "petitviolet/scala-operator"
         - name: "philemone/hobogrid"
         - name: "philippus/between"
+        - name: "philippus/cakemix"
         - name: "philippus/julius"
         - name: "philippus/osita"
         - name: "philippus/pureconfig-javanet"
@@ -890,10 +894,6 @@ jobs:
         - name: "scorexfoundation/debox"
         - name: "scorexfoundation/scorex-util"
         - name: "sdrafahl/codec"
-        - name: "sean-ideabank/rudolf"
-        - name: "sfali/grpc-rest-gateway"
-        - name: "sfxcode/pebble-scala"
-        - name: "sfxcode/sapphire-data"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sean-ideabank/rudolf"
+        - name: "sfali/grpc-rest-gateway"
+        - name: "sfxcode/pebble-scala"
+        - name: "sfxcode/sapphire-data"
         - name: "sh4869/semver-parser-scala"
         - name: "shawjef3/tryutils"
         - name: "shiftleftsecurity/overflowdb-codegen"
@@ -1057,7 +1061,6 @@ jobs:
         - name: "vlmiroshnikov/authz"
         - name: "vlmiroshnikov/saga"
         - name: "wangzaixiang/wjson"
-        - name: "wehkamp/cakemix"
         - name: "windymelt/happy-birthday"
         - name: "windymelt/qw.scala"
         - name: "windymelt/rss2discord"

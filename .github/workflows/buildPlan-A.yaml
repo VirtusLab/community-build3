@@ -402,6 +402,7 @@ jobs:
         - name: "getshaka-org/native-converter"
         - name: "ghik/anodi"
         - name: "ghostdogpr/caliban"
+        - name: "ghostdogpr/proteus"
         - name: "ghostdogpr/purelogic"
         - name: "giabao/paho-akka"
         - name: "giiita/refuel"
@@ -558,6 +559,8 @@ jobs:
         - name: "kubukoz/slick-effect"
         - name: "kubukoz/smithy-playground"
         - name: "kubukoz/spotify-next"
+        - name: "kubuszok/hearth"
+        - name: "kubuszok/pipez"
         - name: "kuceramartin/tyqu"
         - name: "kurrent-io/eventstore.akka.persistence"
         - name: "kurrent-io/eventstore.jvm"
@@ -607,12 +610,9 @@ jobs:
         - name: "marcinzh/daae"
         - name: "marcinzh/turbolift"
         - name: "martinhh/scalacheck-derived"
-        - name: "mateuszkubuszok/hearth"
-        - name: "mateuszkubuszok/pipez"
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mbannour/mongoscala3codec"
-        - name: "mdedetrich/pekko-streams-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mdedetrich/pekko-streams-circe"
         - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
@@ -893,7 +894,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -1117,7 +1118,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
