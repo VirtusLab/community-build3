@@ -59,6 +59,7 @@ jobs:
       - name: Install coursier
         uses: coursier/setup-action@v2
         with:
+          jvm: 25
           apps: scala-cli:1.12.5
 
       - name: Cache last successfull version
