@@ -167,6 +167,7 @@ jobs:
         - name: "bishabosha/enhanced-string-interpolator"
         - name: "bishabosha/enum-extensions"
         - name: "bishabosha/ops-mirror"
+        - name: "bishabosha/scala-object-notation"
         - name: "bitlap/rolls"
         - name: "bkirwi/decline"
         - name: "blackdoor/jose"
@@ -330,8 +331,7 @@ jobs:
         - name: "facsimile/facsimile"
         - name: "failurewall/failurewall"
         - name: "fasterxml/jackson-module-scala"
-        - name: "fd4s/fs2-kafka"
-        - name: "fd4s/vulcan"
+        - name: "fdimuccio/play2-sockjs"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
@@ -522,7 +521,6 @@ jobs:
         - name: "kailuowang/mau"
         - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
-        - name: "kaizen-solutions/virgil-kyo"
         - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
         - name: "karelcemus/play-i18n"
@@ -560,6 +558,7 @@ jobs:
         - name: "kubukoz/smithy-playground"
         - name: "kubukoz/spotify-next"
         - name: "kubuszok/hearth"
+        - name: "kubuszok/kindlings"
         - name: "kubuszok/pipez"
         - name: "kuceramartin/tyqu"
         - name: "kurrent-io/eventstore.akka.persistence"
@@ -574,6 +573,7 @@ jobs:
         - name: "laserdisc-io/log-effect"
         - name: "laserdisc-io/mysql-binlog-stream"
         - name: "laserdisc-io/tamer"
+        - name: "lbialy/parlance"
         - name: "leanovate/play-mockws"
         - name: "lego/woof"
         - name: "lemonlabsuk/scala-uri"
@@ -680,7 +680,6 @@ jobs:
         - name: "note/mini-refined"
         - name: "nremond/pbkdf2-scala"
         - name: "nrkno/bigquery-scala"
-        - name: "nryanov/consul4s"
         - name: "nscala-time/nscala-time"
         - name: "nulab/play2-oauth2-provider"
         - name: "olivierblanvillain/regsafe"
@@ -715,6 +714,7 @@ jobs:
         - name: "phaller/spores3"
         - name: "phenoscape/scowl"
         - name: "philippus/elastic4s"
+        - name: "philwalk/uni"
         - name: "pityka/lamp"
         - name: "pityka/nspl"
         - name: "pityka/saddle"
@@ -743,7 +743,6 @@ jobs:
         - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/colorize-scala"
-        - name: "polyvariant/respectfully"
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/smithy4s-caliban"
         - name: "polyvariant/sttp-oauth2"
@@ -839,7 +838,6 @@ jobs:
         - name: "scalacenter/tasty-mima"
         - name: "scalacenter/tasty-query"
         - name: "scalalandio/chimney"
-        - name: "scalalandio/chimney-macro-commons"
         - name: "scalalandio/enumz"
         - name: "scalameta/mdoc"
         - name: "scalameta/metaconfig"
@@ -894,6 +892,8 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
+        - name: "sirthias/parboiled2"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,8 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/macrolizer"
-        - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
@@ -1033,6 +1031,7 @@ jobs:
         - name: "typelevel/feral"
         - name: "typelevel/fs2"
         - name: "typelevel/fs2-grpc"
+        - name: "typelevel/fs2-kafka"
         - name: "typelevel/grackle"
         - name: "typelevel/idna4s"
         - name: "typelevel/jawn"
@@ -1065,6 +1064,7 @@ jobs:
         - name: "typelevel/twiddles"
         - name: "typelevel/unique"
         - name: "typelevel/vault"
+        - name: "typelevel/vulcan"
         - name: "typelevel/weaver-test"
         - name: "ua-parser/uap-scala"
         - name: "umazalakain/errata"
