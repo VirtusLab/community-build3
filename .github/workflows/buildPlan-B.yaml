@@ -1,5 +1,5 @@
 
-# projects total:     942
+# projects total:     944
 # min stars count:    -1
 # max projects count: 1000
 
@@ -534,6 +534,7 @@ jobs:
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
         - name: "jypma/lazagna"
+        - name: "kaitai-io/kaitai-yaml"
         - name: "kaizen-solutions/fs2-kafka-jsonschema"
         - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
@@ -612,7 +613,6 @@ jobs:
         - name: "liquibase4s/liquibase4s"
         - name: "lloydmeta/play-csv"
         - name: "logicovercode/core-adts"
-        - name: "logicovercode/core-commons"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "logicovercode/core-commons"
         - name: "lolgab/layers-dotty-plugin"
         - name: "lorandszakacs/enclosure"
         - name: "losizm/bolster"
@@ -882,6 +883,7 @@ jobs:
         - name: "scalapb/common-protos"
         - name: "scalatest/scalatestplus-easymock"
         - name: "scalatest/scalatestplus-jmock"
+        - name: "scalatest/scalatestplus-junit"
         - name: "scalatest/scalatestplus-junit5"
         - name: "scalatest/scalatestplus-selenium"
         - name: "scalawag/sarong"
@@ -892,8 +894,6 @@ jobs:
         - name: "sciss/linkernighantsp"
         - name: "sciss/log"
         - name: "sciss/lucrepi"
-        - name: "sciss/model"
-        - name: "sciss/optional"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sciss/model"
+        - name: "sciss/optional"
         - name: "sciss/scalacollider-dot"
         - name: "sciss/scalacollider-if"
         - name: "sciss/transform4s"
