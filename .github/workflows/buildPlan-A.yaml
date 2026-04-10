@@ -861,7 +861,6 @@ jobs:
         - name: "scalapy/python-native-libs"
         - name: "scalapy/scalapy"
         - name: "scalatest/scalatest"
-        - name: "scalatest/scalatestplus-junit"
         - name: "scalatest/scalatestplus-mockito"
         - name: "scalatest/scalatestplus-scalacheck"
         - name: "scalatra/scalamd"
@@ -894,6 +893,7 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
+        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1118,6 +1117,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
