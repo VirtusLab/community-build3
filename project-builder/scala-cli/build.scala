@@ -61,16 +61,20 @@ import os.CommandResult
           else failure
       )
     )
-  val publishResult = PublishResult(Status.Skipped, tookMs = 0)
+  val publishResult = PublishResult.skipped
 
   def collectCompileResults(evalResult: EvalResult[Unit]): CompileResult =
-    CompileResult(
-      evalResult.toStatus,
-      failureContext = evalResult.toBuildError,
-      warnings = 0,
-      errors = 0,
-      tookMs = evalResult.evalTime
-    )
+    evalResult match {
+      case EvalResult.Skipped => CompileResult.skipped()
+      case _ =>
+        CompileResult(
+          evalResult.toStatus,
+          failureContext = evalResult.toBuildError,
+          warnings = 0,
+          errors = 0,
+          tookMs = evalResult.evalTime
+        )
+    }
 
   val projectResults = ModuleBuildResults(
     artifactName = "",

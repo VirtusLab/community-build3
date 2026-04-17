@@ -182,6 +182,9 @@ object MillCommunityBuild {
 
   // Main entry point for Mill community build
   // Evaluate tasks until first failure and publish report
+  //
+  // Unlike sbt CommunityBuildPlugin, Mill does not track per-module compile success across a
+  // topological order, so `ModuleBuildResults.skippedDueToFailedDependencies` is not used here.
   def runBuild(configJson: String, projectDir: String, targets: Seq[String])(using ctx: Ctx) = {
     val defaultOutputDir: os.Path = os.Path.expandUser(projectDir) / os.up
     println(s"Build config: ${configJson}")
@@ -275,7 +278,7 @@ object MillCommunityBuild {
 
         case _ =>
           ctx.log.error(s"Module $module is not a publish module, skipping publishing")
-          PublishResult(Status.Skipped, tookMs = 0)
+          PublishResult.skipped
       }
 
       ModuleBuildResults(
@@ -325,13 +328,17 @@ object MillCommunityBuild {
   private def collectCompileResults(evalResult: EvalResult[CompilationResult]): CompileResult = {
     // TODO: No direct access to CompileAnalysis, CompileResult contains path to serialized analysis
     // However using it would require external dependencies
-    CompileResult(
-      evalResult.toStatus,
-      failureContext = evalResult.toBuildError,
-      warnings = 0,
-      errors = 0,
-      tookMs = evalResult.evalTime
-    )
+    evalResult match {
+      case EvalResult.Skipped => CompileResult.skipped()
+      case _ =>
+        CompileResult(
+          evalResult.toStatus,
+          failureContext = evalResult.toBuildError,
+          warnings = 0,
+          errors = 0,
+          tookMs = evalResult.evalTime
+        )
+    }
   }
 
   private def collectTestResults(evalResult: EvalResult[Seq[TestResult]]): TestsResult = {

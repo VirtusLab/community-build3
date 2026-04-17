@@ -562,94 +562,124 @@ object CommunityBuildPlugin extends AutoPlugin {
       val allToBuild = flatten(topLevelProjects, topLevelProjects)
       println("Projects: " + allToBuild.map(_.project))
 
-      val projectsBuildResults = allToBuild.toList.zipWithIndex.map { case (r, idx) =>
+      val buildOrder = topologicalBuildOrder(allToBuild, projectDeps)
+      val compileOkByProject = mutable.Map.empty[ProjectRef, Boolean]
+
+      val projectsBuildResults = buildOrder.zipWithIndex.map { case (r, idx) =>
         val evaluator = new SbtTaskEvaluator(r, cState)
         val s = sbt.Project.extract(cState).structure
         val projectName = (r / moduleName).get(s.data).get
-        println(s"Starting build for $r ($projectName)... [$idx/${allToBuild.size}]")
 
-        val overrideSettings = {
-          val overrides = config.projects.overrides
-          overrides
-            .get(projectName)
-            .orElse {
-              overrides.collectFirst {
-                // No Regex.matches in Scala 2.12
-                // Exclude cases when excluded name is a prefix of other projects
-                case (key, value)
-                    if key.r.findFirstIn(projectName).isDefined &&
-                      !projectName.startsWith(key) =>
-                  value
-              }
-            }
-        }
-        val testingMode =
-          overrideSettings.flatMap(_.tests).getOrElse(config.tests)
-
-        import evaluator._
-        val scalacOptions = eval(Compile / Keys.scalacOptions) match {
-          case EvalResult.Value(settings, _) => settings
-          case _                             => Nil
-        }
-        println(s"Compile scalacOptions: ${scalacOptions.mkString(", ")}")
-        def mayRetry[T](task: TaskKey[T])(
-            evaluate: TaskKey[T] => EvalResult[T]
-        ): EvalResult[T] = evaluate(task) match {
-          case EvalResult.Failure(reasons, _) if reasons.exists {
-                case ex: AssertionError =>
-                  ex.getMessage.contains("overlapping patches")
-                case _ => false
-              } =>
-            evaluate(task)
-          case result => result
-        }
-        val compileResult = mayRetry(Compile / compile)(eval)
-
-        val shouldBuildDocs = eval(Compile / doc / skip) match {
-          case EvalResult.Value(skip, _) => skip
-          case _                         => false
-        }
-        val docsResult = mayRetry(Compile / doc) {
-          evalWhen(shouldBuildDocs, compileResult)
-        }
-
-        val testsCompileResult = mayRetry(Test / compile) {
-          evalWhen(testingMode != TestingMode.Disabled, compileResult)
-        }
-        // Introduced to fix publishing artifact locally in scala-debug-adapter
-        lazy val testOptionsResult = eval(Test / testOptions)
-        val testsExecuteResult =
-          evalWhen(
-            testingMode == TestingMode.Full,
-            testsCompileResult,
-            testOptionsResult
-          )(
-            Test / executeTests
+        val failedInBuildDeps = projectDeps
+          .getOrElse(r, Nil)
+          .filter(allToBuild.contains)
+          .filter(dep => compileOkByProject.get(dep).contains(false))
+        if (failedInBuildDeps.nonEmpty) {
+          val failedNames = failedInBuildDeps.map(_.project).sorted.mkString(", ")
+          println(
+            s"Skipping build for $r ($projectName): dependency compile did not succeed ($failedNames)... [$idx/${buildOrder.size}]"
           )
-
-        val shouldPublish = eval(Compile / publish / skip) match {
-          case EvalResult.Value(skip, _) => skip
-          case _                         => false
-        }
-        val publishResult = PublishResult(
-          evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
-        )
-
-        ModuleBuildResults(
-          artifactName = projectName,
-          compile = collectCompileResult(compileResult, scalacOptions),
-          doc = DocsResult(docsResult),
-          testsCompile = collectCompileResult(testsCompileResult, scalacOptions),
-          testsExecute = collectTestResults(
-            testsExecuteResult,
-            eval(Test / definedTests),
-            eval(Test / loadedTestFrameworks)
-          ),
-          publish = publishResult,
-          metadata = ModuleMetadata(
+          val skipCtx = Some(
+            FailureContext.BuildError(
+              List(
+                s"Skipped because these community-build dependency module(s) did not compile successfully: $failedNames"
+              )
+            )
+          )
+          compileOkByProject(r) = false
+          ModuleBuildResults.skippedDueToFailedDependencies(
+            artifactName = projectName,
+            compileSkipContext = skipCtx,
             crossScalaVersions = projectCrossScalaVersions.getOrElse(r.project, Nil)
           )
-        )
+        } else {
+          println(s"Starting build for $r ($projectName)... [$idx/${buildOrder.size}]")
+
+          val overrideSettings = {
+            val overrides = config.projects.overrides
+            overrides
+              .get(projectName)
+              .orElse {
+                overrides.collectFirst {
+                  // No Regex.matches in Scala 2.12
+                  // Exclude cases when excluded name is a prefix of other projects
+                  case (key, value)
+                      if key.r.findFirstIn(projectName).isDefined &&
+                        !projectName.startsWith(key) =>
+                    value
+                }
+              }
+          }
+          val testingMode =
+            overrideSettings.flatMap(_.tests).getOrElse(config.tests)
+
+          import evaluator._
+          val scalacOptions = eval(Compile / Keys.scalacOptions) match {
+            case EvalResult.Value(settings, _) => settings
+            case _                             => Nil
+          }
+          println(s"Compile scalacOptions: ${scalacOptions.mkString(", ")}")
+          def mayRetry[T](task: TaskKey[T])(
+              evaluate: TaskKey[T] => EvalResult[T]
+          ): EvalResult[T] = evaluate(task) match {
+            case EvalResult.Failure(reasons, _) if reasons.exists {
+                  case ex: AssertionError =>
+                    ex.getMessage.contains("overlapping patches")
+                  case _ => false
+                } =>
+              evaluate(task)
+            case result => result
+          }
+          val compileResult = mayRetry(Compile / compile)(eval)
+
+          val shouldBuildDocs = eval(Compile / doc / skip) match {
+            case EvalResult.Value(skip, _) => skip
+            case _                         => false
+          }
+          val docsResult = mayRetry(Compile / doc) {
+            evalWhen(shouldBuildDocs, compileResult)
+          }
+
+          val testsCompileResult = mayRetry(Test / compile) {
+            evalWhen(testingMode != TestingMode.Disabled, compileResult)
+          }
+          // Introduced to fix publishing artifact locally in scala-debug-adapter
+          lazy val testOptionsResult = eval(Test / testOptions)
+          val testsExecuteResult =
+            evalWhen(
+              testingMode == TestingMode.Full,
+              testsCompileResult,
+              testOptionsResult
+            )(
+              Test / executeTests
+            )
+
+          val shouldPublish = eval(Compile / publish / skip) match {
+            case EvalResult.Value(skip, _) => skip
+            case _                         => false
+          }
+          val publishResult = PublishResult(
+            evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
+          )
+
+          val built = ModuleBuildResults(
+            artifactName = projectName,
+            compile = collectCompileResult(compileResult, scalacOptions),
+            doc = DocsResult(docsResult),
+            testsCompile = collectCompileResult(testsCompileResult, scalacOptions),
+            testsExecute = collectTestResults(
+              testsExecuteResult,
+              eval(Test / definedTests),
+              eval(Test / loadedTestFrameworks)
+            ),
+            publish = publishResult,
+            metadata = ModuleMetadata(
+              crossScalaVersions = projectCrossScalaVersions.getOrElse(r.project, Nil)
+            )
+          )
+          compileOkByProject(r) = built.compile.status == Status.Ok
+          built
+        }
       }
 
       val buildSummary = BuildSummary(projectsBuildResults)
@@ -680,6 +710,51 @@ object CommunityBuildPlugin extends AutoPlugin {
     },
     (runBuild / aggregate) := false
   )
+
+  /** Project dependency order for the community-build subset: dependencies first when acyclic. */
+  private def topologicalBuildOrder(
+      nodes: Set[ProjectRef],
+      deps: Map[ProjectRef, Seq[ProjectRef]]
+  ): List[ProjectRef] = {
+    def inBuildDeps(ref: ProjectRef): Seq[ProjectRef] =
+      deps.getOrElse(ref, Nil).filter(nodes.contains)
+
+    val inDegree = mutable.Map.empty[ProjectRef, Int]
+    nodes.foreach { n =>
+      inDegree(n) = inBuildDeps(n).size
+    }
+    val dependents = mutable.Map.empty[ProjectRef, mutable.ListBuffer[ProjectRef]]
+    nodes.foreach { n =>
+      inBuildDeps(n).foreach { d =>
+        dependents.getOrElseUpdate(d, mutable.ListBuffer.empty) += n
+      }
+    }
+
+    val queue = mutable.Queue(
+      nodes.toSeq.filter(n => inDegree(n) == 0).sortBy(_.project): _*
+    )
+    val ordered = mutable.ListBuffer.empty[ProjectRef]
+    while (queue.nonEmpty) {
+      val n = queue.dequeue()
+      ordered += n
+      val becameReady =
+        dependents.getOrElse(n, mutable.ListBuffer.empty).flatMap { v =>
+          inDegree(v) -= 1
+          if (inDegree(v) == 0) Some(v) else None
+        }
+      becameReady.sortBy(_.project).foreach(queue.enqueue(_))
+    }
+
+    if (ordered.size == nodes.size) ordered.toList
+    else {
+      val remaining = (nodes -- ordered.toSet).toSeq.sortBy(_.project)
+      println(
+        s"OpenCB::Project dependency graph has a cycle or missing edges among ${nodes.size} modules; " +
+          s"${remaining.size} module(s) were not topologically ordered before dependents."
+      )
+      ordered.toList ++ remaining
+    }
+  }
 
   private def collectCompileResult(
       evalResult: EvalResult[CompileAnalysis],
@@ -738,7 +813,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         )
 
       case EvalResult.Skipped =>
-        CompileResult(Status.Skipped, warnings = 0, errors = 0, tookMs = 0)
+        CompileResult.skipped()
     }
   }
 

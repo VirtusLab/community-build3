@@ -84,6 +84,43 @@ object Scala3CommunityBuild {
     }
   }
 
+  object ModuleBuildResults {
+    /** Module was not run because an upstream dependency in this build failed first. */
+    def skippedDueToFailedDependencies(
+        artifactName: String,
+        compileSkipContext: Option[FailureContext],
+        crossScalaVersions: Seq[String]
+    ): ModuleBuildResults = {
+      val compileSkipped =
+        CompileResult.skipped(failureContext = compileSkipContext)
+      ModuleBuildResults(
+        artifactName = artifactName,
+        compile = compileSkipped,
+        doc = DocsResult(
+          status = Status.Skipped,
+          failureContext = None,
+          files = 0,
+          totalSizeKb = 0,
+          tookMs = 0
+        ),
+        testsCompile = compileSkipped,
+        testsExecute = TestsResult(
+          status = Status.Skipped,
+          tookMs = 0,
+          failureContext = None,
+          overall = TestStats.empty,
+          byFramework = Map.empty
+        ),
+        publish = PublishResult(
+          status = Status.Skipped,
+          failureContext = None,
+          tookMs = 0
+        ),
+        metadata = ModuleMetadata(crossScalaVersions = crossScalaVersions)
+      )
+    }
+  }
+
   sealed trait StepResult {
     def status: Status
     def tookMs: Int
@@ -113,6 +150,17 @@ object Scala3CommunityBuild {
         else optionals.mkString(", ", ", ", "")
       s"""{$commonJsonFields, "warnings": ${warnings}, "errors": ${errors}$optionalsString}"""
     }
+  }
+
+  object CompileResult {
+    def skipped(failureContext: Option[FailureContext] = None): CompileResult =
+      CompileResult(
+        Status.Skipped,
+        failureContext = failureContext,
+        warnings = 0,
+        errors = 0,
+        tookMs = 0
+      )
   }
 
   case class DocsResult(
@@ -211,6 +259,9 @@ object Scala3CommunityBuild {
         tookMs = evalResult.evalTime
       )
     }
+
+    def skipped: PublishResult =
+      PublishResult(Status.Skipped, failureContext = None, tookMs = 0)
   }
 
   sealed abstract class Status(stringValue: String) {
