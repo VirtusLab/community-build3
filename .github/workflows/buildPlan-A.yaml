@@ -409,6 +409,7 @@ jobs:
         - name: "gnieh/diffson"
         - name: "gnieh/fs2-data"
         - name: "gnieh/geo-scala"
+        - name: "golemcloud/golem"
         - name: "goodcover/scala-relay"
         - name: "greenfossil/thorium"
         - name: "greenleafoss/green-leaf-mongo"
@@ -534,7 +535,6 @@ jobs:
         - name: "kcrypt/scala-biginteger"
         - name: "kcrypt/scala-blake3"
         - name: "kcrypt/scala-sha"
-        - name: "keirlawson/meters4s"
         - name: "kevin-lee/effectie"
         - name: "kevin-lee/extras"
         - name: "kevin-lee/just-semver"
@@ -743,6 +743,7 @@ jobs:
         - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/colorize-scala"
+        - name: "polyvariant/respectfully"
         - name: "polyvariant/scala-git-markers"
         - name: "polyvariant/smithy4s-caliban"
         - name: "polyvariant/sttp-oauth2"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/borer"
         - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
-        - name: "sirthias/scala-ssh"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
@@ -1046,7 +1047,6 @@ jobs:
         - name: "typelevel/natchez"
         - name: "typelevel/natchez-http4s"
         - name: "typelevel/otel4s"
-        - name: "typelevel/otel4s-experimental"
         - name: "typelevel/paiges"
         - name: "typelevel/scalac-compat"
         - name: "typelevel/scalac-options"
