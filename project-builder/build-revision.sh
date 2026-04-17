@@ -33,7 +33,8 @@ source $scriptDir/versions.sh
 # Propagate CI env variable to build tools, ensure consistent behavior in local and CI builds
 export CI=true
 
-repoDir=$PWD/repo
+repoDir=$PWD/repo/$project
+mkdir -p $repoDir
 $scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
 
@@ -192,10 +193,12 @@ function buildForScalaVersion(){
   echo "----"
   echo "Starting build for $scalaVersion"
   echo "Execute tests: ${executeTests}"
-  echo "started" > build-status.txt 
+  export CB_STATUS_FILE="${CB_STATUS_FILE:-$PWD/build-status.txt}"
+  export CB_SUMMARY_FILE="${CB_SUMMARY_FILE:-$PWD/build-summary.txt}"
+  echo "started" > "$CB_STATUS_FILE"
   # Mill
   # We check either for mill boostrap script or one of valid root build files
-  if [ -f "repo/mill" ] || [ -f "repo/build.mill" ] || [ -f "repo/build.mill.scala" ] || [ -f "repo/build.sc" ]; then
+  if [ -f "${repoDir}/mill" ] || [ -f "${repoDir}/build.mill" ] || [ -f "${repoDir}/build.mill.scala" ] || [ -f "${repoDir}/build.sc" ]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
     $scriptDir/mill/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
@@ -204,7 +207,7 @@ function buildForScalaVersion(){
     revertBuildPatch || echo "Failed to fully revery build patch"
   ## Sbt
   ## Apparently built.sbt is a valid build file name. Accept any .sbt file
-  elif ls repo/*.sbt 1> /dev/null 2>&1 ; then
+  elif ls ${repoDir}/*.sbt 1> /dev/null 2>&1 ; then
     echo "sbt project found: ${isSbtProject}"
     echo "sbt" > $buildToolFile
     $scriptDir/sbt/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
@@ -214,13 +217,13 @@ function buildForScalaVersion(){
   ## Scala-cli
   else
     echo "Not found sbt or mill build files, assuming scala-cli project"
-    ls -l repo/
+    ls -l $repoDir/
     echo "scala-cli" > $buildToolFile
     export COURSIER_REPOSITORIES="central|sonatype:releases|$mvnRepoUrl"
     scala-cli config power true
     scala-cli bloop exit
     scala-cli clean $scriptDir/scala-cli/
-    scala-cli clean repo
+    scala-cli clean $repoDir/
     scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
   fi
 

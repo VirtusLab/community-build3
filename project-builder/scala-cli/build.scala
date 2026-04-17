@@ -101,8 +101,11 @@ import os.CommandResult
      |************************"
      |""".stripMargin)
 
-  val outputDir = os.pwd
-  os.write.over(outputDir / "build-summary.txt", buildSummary.toJson)
+  val summaryPath = sys.env
+    .get("CB_SUMMARY_FILE")
+    .map(os.Path(_, os.pwd))
+    .getOrElse(os.pwd / "build-summary.txt")
+  os.write.over(summaryPath, buildSummary.toJson)
 
   val failedModules = projectsBuildResults
     .filter(_.hasFailedStep)
@@ -111,7 +114,11 @@ import os.CommandResult
   val buildStatus =
     if (hasFailedSteps) "failure"
     else "success"
-  os.write.over(outputDir / "build-status.txt", buildStatus)
+  val statusPath = sys.env
+    .get("CB_STATUS_FILE")
+    .map(os.Path(_, os.pwd))
+    .getOrElse(os.pwd / "build-status.txt")
+  os.write.over(statusPath, buildStatus)
   if (hasFailedSteps) {
     throw new ProjectBuildFailureException(failedModules)
   }

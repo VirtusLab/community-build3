@@ -183,7 +183,7 @@ object MillCommunityBuild {
   // Main entry point for Mill community build
   // Evaluate tasks until first failure and publish report
   def runBuild(configJson: String, projectDir: String, targets: Seq[String])(using ctx: Ctx) = {
-    val outputDir: os.Path = os.Path.expandUser(projectDir) / os.up
+    val defaultOutputDir: os.Path = os.Path.expandUser(projectDir) / os.up
     println(s"Build config: ${configJson}")
     val config = read[ProjectBuildConfig](configJson)
     println(s"Parsed config: ${config}")
@@ -299,7 +299,11 @@ object MillCommunityBuild {
                     |************************"
                     |""".stripMargin)
 
-    os.write.over(outputDir / "build-summary.txt", buildSummary.toJson)
+    val summaryPath = sys.env
+      .get("CB_SUMMARY_FILE")
+      .map(os.Path(_, os.pwd))
+      .getOrElse(defaultOutputDir / "build-summary.txt")
+    os.write.over(summaryPath, buildSummary.toJson)
 
     val failedModules = projectsBuildResults
       .filter(_.hasFailedStep)
@@ -308,7 +312,11 @@ object MillCommunityBuild {
     val buildStatus =
       if (hasFailedSteps) "failure"
       else "success"
-    os.write.over(outputDir / "build-status.txt", buildStatus)
+    val statusPath = sys.env
+      .get("CB_STATUS_FILE")
+      .map(os.Path(_, os.pwd))
+      .getOrElse(defaultOutputDir / "build-status.txt")
+    os.write.over(statusPath, buildStatus)
     if (hasFailedSteps) {
       throw new ProjectBuildFailureException(failedModules)
     }

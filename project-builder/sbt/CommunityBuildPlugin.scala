@@ -658,7 +658,11 @@ object CommunityBuildPlugin extends AutoPlugin {
         |Build summary:
         |${buildSummary.toJson}
         |************************""".stripMargin)
-      IO.write(file("..") / "build-summary.txt", buildSummary.toJson)
+      val communitySummaryFile = sys.env
+        .get("CB_SUMMARY_FILE")
+        .map(new java.io.File(_))
+        .getOrElse(file("..") / "build-summary.txt")
+      IO.write(communitySummaryFile, buildSummary.toJson)
 
       val failedModules = projectsBuildResults
         .filter(_.hasFailedStep)
@@ -667,7 +671,11 @@ object CommunityBuildPlugin extends AutoPlugin {
       val buildStatus =
         if (hasFailedSteps) "failure"
         else "success"
-      IO.write(file("..") / "build-status.txt", buildStatus)
+      val communityStatusFile = sys.env
+        .get("CB_STATUS_FILE")
+        .map(new java.io.File(_))
+        .getOrElse(file("..") / "build-status.txt")
+      IO.write(communityStatusFile, buildStatus)
       if (hasFailedSteps) throw new ProjectBuildFailureException(failedModules)
     },
     (runBuild / aggregate) := false

@@ -57,7 +57,7 @@ fi
 customCommands=$(echo "$projectConfig" | jq -r "$customCommandsFilter | join(\"; \")" | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 targetsString="${targets[@]}"
 logFile=build.log
-statusFile=../build-status.txt
+statusFile="${CB_STATUS_FILE:-../build-status.txt}"
 
 # Compiler plugins, cannot be cross-published before starting the build
 # Allways exclude these from library dependencies

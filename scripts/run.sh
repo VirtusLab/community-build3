@@ -63,6 +63,7 @@ if [[ "$SKIP_BUILD_SETUP" != "1" ]]; then
 fi
 
 echo "------"
-echo "$projectName status=$(cat build-status.txt)"
+status_file="${CB_STATUS_FILE:-$PWD/build-status.txt}"
+echo "$projectName status=$(cat "$status_file")"
 echo "-------"
-if [[ $(cat build-status.txt) != "success" ]]; then exit 1; fi
+if [[ $(cat "$status_file") != "success" ]]; then exit 1; fi
