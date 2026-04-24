@@ -127,7 +127,6 @@ jobs:
         - name: "armanbilge/litter"
         - name: "armanbilge/munit-cats-effect"
         - name: "armanbilge/sadalsuud"
-        - name: "armanbilge/saslprep"
         - name: "armanbilge/scala-native-config-brew"
         - name: "armanbilge/scalacheck-effect"
         - name: "armanbilge/stratus"
@@ -332,6 +331,7 @@ jobs:
         - name: "fgrutsch/emergence"
         - name: "fgrutsch/pekko-persistence-mapdb"
         - name: "fiatjaf/nlog"
+        - name: "firstbirdtech/akka-persistence-inmemory"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "firstbirdtech/akka-persistence-inmemory"
         - name: "flextradeukltd/jfixture-scala"
         - name: "fommil/jzon"
         - name: "fommil/shapely"
@@ -613,6 +612,7 @@ jobs:
         - name: "lhns/scala-http-problem"
         - name: "lhns/scala-trustmanager-utils"
         - name: "liewhite/common"
+        - name: "liewhite/swopen"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "liewhite/swopen"
         - name: "likeligood-ab/scala-react"
         - name: "limansky/scala-test-it"
         - name: "linyxus/papiers-core"
@@ -894,6 +893,7 @@ jobs:
         - name: "scalatest/scalatestplus-junit"
         - name: "scalatest/scalatestplus-junit5"
         - name: "scalatest/scalatestplus-selenium"
+        - name: "scalawag/sarong"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "scalawag/sarong"
         - name: "scalax/simple"
         - name: "scalax/slickless"
         - name: "scf37/filewatch"
@@ -1066,6 +1065,7 @@ jobs:
         - name: "typelevel/log4cats-natchez"
         - name: "typelevel/otel4s-experimental"
         - name: "typelevel/otel4s-sdk"
+        - name: "typelevel/saslprep"
         - name: "typelevel/scalacheck-xml"
         - name: "typesafeconfigops/typesafeconfigops"
         - name: "ulitol97/comet"
