@@ -41,7 +41,7 @@ object CoordinatorRuntime:
   val gitClone: Permit = permit(cpuBoundParallelism(min = 4, max = 8))
   val gitLsRemote: Permit = permit(ioBoundParallelism(min = 4, max = 16))
   val mavenInfo: Permit = permit(ioBoundParallelism(min = 8, max = 16))
-  val scaladexApi: Permit = permit(ioBoundParallelism(min = 8, max = 16))
+  val scaladexApi: Permit = permit(ioBoundParallelism(min = 4, max = 8))
 
   def withPermit[T](permit: Permit)(op: => T): T =
     blocking(permit.acquire())
