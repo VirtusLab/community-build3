@@ -4,7 +4,7 @@ package millbuild
 import mill.Module
 import mill.api.{Val, Task, ModuleRef, Result, Evaluator}
 import mill.api.daemon.Segment
-import mill.javalib.JvmWorkerModule
+import mill.javalib.{Dep, JvmWorkerModule}
 import mill.javalib.testrunner.TestResult
 import mill.javalib.api.CompilationResult
 import mill.scalalib.{CoursierModule, JavaModule, PublishModule, ScalaModule, TestModule}
@@ -46,6 +46,13 @@ object MillCommunityBuild {
     private object CommunityBuildJvmWorker extends JvmWorkerModule with CoursierModule:
       override def repositoriesTask = Task.Anon:
         mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
+
+    // Break diamond inheritance when this trait is mixed into a TestModule
+    // alongside JavaModule (e.g. `extends TestModule.ScalaTest with
+    // CommunityBuildCoursierModule`). The `super.` calls resolve via the
+    // concrete class's linearization, so the TestModule overrides win.
+    override def defaultTask(): String = super.defaultTask()
+    override def mandatoryMvnDeps: mill.T[Seq[Dep]] = Task { super.mandatoryMvnDeps() }
   }
 
   // Extension to publish module allowing to upload artifacts to custom maven repo
@@ -167,9 +174,9 @@ object MillCommunityBuild {
         case Result.Success(v) =>
           ctx.log.info(s"Successfully evaluated $task")
           EvalResult.Value(v, evalTime = tookMillis)
-        case Result.Failure(error) =>
-          ctx.log.error(s"Failed to evaluated $task: ${error}")
-          EvalResult.Failure(EvaluationFailure(error) :: Nil, evalTime = tookMillis)
+        case f: Result.Failure =>
+          ctx.log.error(s"Failed to evaluated $task: ${f.error}")
+          EvalResult.Failure(EvaluationFailure(f.error) :: Nil, evalTime = tookMillis)
       }
     }
 

@@ -4,16 +4,11 @@
 val projectDir = sys.env.get("OPENCB_PROJECT_DIR")
   .map(os.Path(_))
   .getOrElse(sys.error("no OPENCB_PROJECT_DIR env"))
-  
+
 os.write.append(projectDir / ".mill-jvm-opts", "-XX:CompressedClassSpaceSize=1400m")
-  
+
 val scalaVersion = sys.env.get("OPENCB_SCALA_VERSION")
    .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
-
-val minJDKVersion = scalaVersion.split('.').take(2).map(_.toInt) match {
-  case Array(3, minor) if minor >= 8  => 17
-  case _ => 8
-}
 
 val millDefsVersion = os.read
   .lines(projectDir / "mill-build"/ "src" / "millbuild"/ "Deps.scala")
@@ -25,14 +20,6 @@ val millDefsVersion = os.read
 val repositoryDir = os.temp.dir(prefix = "mill-moduledefs-")
 os.proc("git", "clone", "https://github.com/com-lihaoyi/mill-moduledefs", repositoryDir, "-b", millDefsVersion).call(check = true)
 
-val updatedBuild = os.read(repositoryDir / "build.sc")
-  .replaceAll(raw"Cross\[ModuleDefsCross]\(.*\)", s"""Cross[ModuleDefsCross](Seq("3.7.1"))""")
-  .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
-  .replace(""""-Yexplicit-nulls",""", "")
-  .replace(""""-java-output-version", "8""", s""""-java-output-version:${minJDKVersion}""")
-os.write.over(repositoryDir / "build.sc", updatedBuild)
-os.write.over(repositoryDir / ".mill-version", "0.12.15-2-561986")
-
 val coursierRepositories = Seq(
   "central",
   "ivy2local",
@@ -40,9 +27,16 @@ val coursierRepositories = Seq(
   s"https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion",
 ).mkString("|")
 
+// mill-moduledefs's `build.mill` already adds `SCALA_VERSION` from the env to
+// its Scala 3 cross matrix, and self-declares the Mill version via the
+// `//| mill-version: …` magic comment, so we just pass the env through.
 os.proc(
   "./mill",
   "--no-server",
   "-D", s"coursier.repositories=$coursierRepositories",
   "show", s"__[$scalaVersion].publishLocal",
-).call(cwd = repositoryDir, check = true)
+).call(
+  cwd = repositoryDir,
+  env = Map("SCALA_VERSION" -> scalaVersion),
+  check = true,
+)
