@@ -38,6 +38,9 @@ mkdir -p $repoDir
 $scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
 
+export CB_STATUS_FILE="${CB_STATUS_FILE:-$PWD/build-status.txt}"
+export CB_SUMMARY_FILE="${CB_SUMMARY_FILE:-$PWD/build-summary.txt}"
+
 if [[ ! -z $extraLibraryDeps ]]; then
   echo "Would try to append extra library dependencies (best-effort, sbt/scala-cli only): ${extraLibraryDeps}"
 fi
@@ -193,9 +196,19 @@ function buildForScalaVersion(){
   echo "----"
   echo "Starting build for $scalaVersion"
   echo "Execute tests: ${executeTests}"
-  export CB_STATUS_FILE="${CB_STATUS_FILE:-$PWD/build-status.txt}"
-  export CB_SUMMARY_FILE="${CB_SUMMARY_FILE:-$PWD/build-summary.txt}"
   echo "started" > "$CB_STATUS_FILE"
+  # If prepare or an early step fails, nothing overwrites status (Mill/sbt write success/failure at end).
+  # Without this, build-status.txt would incorrectly stay on "started".
+  opencb_mark_failure_if_still_started() {
+    local current=""
+    if [[ -f "$CB_STATUS_FILE" ]]; then
+      current=$(tr -d '\r\n' <"$CB_STATUS_FILE" || true)
+    fi
+    if [[ "$current" == "started" ]]; then
+      echo "failure" > "$CB_STATUS_FILE"
+    fi
+  }
+  trap 'opencb_mark_failure_if_still_started' ERR
   # Mill
   # We check either for mill boostrap script or one of valid root build files
   if [ -f "${repoDir}/mill" ] || [ -f "${repoDir}/build.mill" ] || [ -f "${repoDir}/build.mill.scala" ] || [ -f "${repoDir}/build.sc" ]; then
@@ -226,6 +239,7 @@ function buildForScalaVersion(){
     scala-cli clean $repoDir/
     scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
   fi
+  trap - ERR
 
 }
 
