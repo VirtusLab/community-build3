@@ -60,5 +60,6 @@ echo "Would publish ${compilerProject}"
 # so it is safe even if a runner/action flattens whitespace.
 sbt -verbose \
   "set every publishTo := Some(\"Community Build Repo\" at \"${MAVEN_URL}\")" \
+  'set every doc := new File("unused")' \
   ";set every version := \"${SCALA_VERSION}\"" \
   ";${compilerProject}/publish"
