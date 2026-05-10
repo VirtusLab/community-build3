@@ -1,12 +1,50 @@
 #!/bin/bash
 
 ProjectDir="${OPENCB_PROJECT_DIR:?OPENCB_PROJECT_DIR is not defined}"
-cd $ProjectDir
-if which cs >/dev/null 2>&1; then
+cd "$ProjectDir"
+
+# PortableResource.embedResources compiles against classpath; ClassGraph may not see
+# src/test/resources during Test/compile. Mirror the test fixture under main/resources.
+portable_resource_dir="fundamentals/fundamentals-platform/src/main/resources/portable-test"
+mkdir -p "$portable_resource_dir"
+cat > "$portable_resource_dir/test-resource.txt" << 'EOF'
+This is a test resource file for PortableResource macro.
+It contains multiple lines.
+Line three has some content.
+EOF
+
+# Coursier native launcher URLs (see https://github.com/coursier/launchers)
+coursier_launcher_url() {
+  local os arch
+  os=$(uname -s)
+  arch=$(uname -m)
+  case "$os:$arch" in
+    Darwin:arm64)
+      echo "https://github.com/coursier/launchers/raw/master/cs-aarch64-apple-darwin.gz"
+      ;;
+    Darwin:x86_64)
+      echo "https://github.com/coursier/launchers/raw/master/cs-x86_64-apple-darwin.gz"
+      ;;
+    Linux:x86_64|Linux:amd64)
+      echo "https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz"
+      ;;
+    Linux:aarch64|Linux:arm64)
+      echo "https://github.com/coursier/launchers/raw/master/cs-aarch64-pc-linux.gz"
+      ;;
+    *)
+      echo "Unsupported platform for automatic coursier install: $os $arch" >&2
+      echo "Install coursier (cs) on PATH and re-run the build." >&2
+      return 1
+      ;;
+  esac
+}
+
+if command -v cs >/dev/null 2>&1; then
   ./sbtgen.sc
 else
-  echo "Not found coursier, trying to install"
-  curl -fL "https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz" | gzip -d > ./cs
+  echo "Coursier (cs) not found in PATH; downloading a native launcher for this machine."
+  url=$(coursier_launcher_url) || exit 1
+  curl -fL "$url" | gzip -d > ./cs
   chmod +x ./cs
-  PATH=$PATH:$PWD ./sbtgen.sc
+  PATH="$PATH:$PWD" ./sbtgen.sc
 fi
