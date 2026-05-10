@@ -10,6 +10,11 @@ os.write.append(projectDir / ".mill-jvm-opts", "-XX:CompressedClassSpaceSize=140
 val scalaVersion = sys.env.get("OPENCB_SCALA_VERSION")
    .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
 
+val minJDKVersion = scalaVersion.split('.').take(2).map(_.toInt) match {
+  case Array(3, minor) if minor >= 8  => 17
+  case _ => 8
+}
+
 val millDefsVersion = os.read
   .lines(projectDir / "mill-build"/ "src" / "millbuild"/ "Deps.scala")
   .map(_.trim)
@@ -27,9 +32,32 @@ val coursierRepositories = Seq(
   s"https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion",
 ).mkString("|")
 
-// mill-moduledefs's `build.mill` already adds `SCALA_VERSION` from the env to
-// its Scala 3 cross matrix, and self-declares the Mill version via the
-// `//| mill-version: …` magic comment, so we just pass the env through.
+// mill-moduledefs migrated from `build.sc` (Mill 0.x cross-style) to
+// `build.mill` (Mill 1.x, env-driven cross matrix) at version 0.13.x. We
+// support both because mill@1.0.x still pins moduledefs 0.11.x while
+// mill@1.1.x pins 0.13.x.
+val buildMill = repositoryDir / "build.mill"
+val buildSc = repositoryDir / "build.sc"
+
+val extraEnv: Map[String, String] = if (os.exists(buildMill)) {
+  // 0.13.x+: `build.mill` reads SCALA_VERSION from env and self-declares its
+  // mill version via `//| mill-version: …`, so just pass the env through.
+  Map("SCALA_VERSION" -> scalaVersion)
+} else if (os.exists(buildSc)) {
+  // 0.11.x/0.12.x: `build.sc` hard-codes its cross matrix and scalacOptions,
+  // so patch the requested Scala version in.
+  val updatedBuild = os.read(buildSc)
+    .replaceAll(raw"Cross\[ModuleDefsCross]\(.*\)", s"""Cross[ModuleDefsCross](Seq("3.7.1"))""")
+    .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
+    .replace(""""-Yexplicit-nulls",""", "")
+    .replace(""""-java-output-version", "8""", s""""-java-output-version:${minJDKVersion}""")
+  os.write.over(buildSc, updatedBuild)
+  os.write.over(repositoryDir / ".mill-version", "0.12.15-2-561986")
+  Map.empty
+} else {
+  sys.error(s"mill-moduledefs $millDefsVersion has neither build.mill nor build.sc")
+}
+
 os.proc(
   "./mill",
   "--no-server",
@@ -37,6 +65,6 @@ os.proc(
   "show", s"__[$scalaVersion].publishLocal",
 ).call(
   cwd = repositoryDir,
-  env = Map("SCALA_VERSION" -> scalaVersion),
+  env = extraEnv,
   check = true,
 )
