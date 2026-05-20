@@ -10,6 +10,8 @@ os.write.append(projectDir / ".mill-jvm-opts", "-XX:CompressedClassSpaceSize=140
 val scalaVersion = sys.env.get("OPENCB_SCALA_VERSION")
    .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
 
+println(s"OPENCB_SCALA_VERSION: $scalaVersion")
+
 val minJDKVersion = scalaVersion.split('.').take(2).map(_.toInt) match {
   case Array(3, minor) if minor >= 8  => 17
   case _ => 8
@@ -25,24 +27,58 @@ val millDefsVersion = os.read
 val repositoryDir = os.temp.dir(prefix = "mill-moduledefs-")
 os.proc("git", "clone", "https://github.com/com-lihaoyi/mill-moduledefs", repositoryDir, "-b", millDefsVersion).call(check = true)
 
-val updatedBuild = os.read(repositoryDir / "build.sc")
-  .replaceAll(raw"Cross\[ModuleDefsCross]\(.*\)", s"""Cross[ModuleDefsCross](Seq("3.7.1"))""")
-  .replaceAll(raw"Cross\[PluginCross]\(.*\)", s"""Cross[PluginCross](Seq("$scalaVersion"))""")
+
+val buildFile = repositoryDir / "build.mill"
+val rawBuild = os.read(buildFile)
+
+val updatedBuild = rawBuild
+  .replace(
+    "//| mill-jvm-version: 11",
+    "//| mill-jvm-version: system"
+  )
+  .replace(
+    """def jvmId = Task{ if (scalaVersion().startsWith("3.8.")) "17" else "11" }""",
+    """def jvmId = Task{
+      scalaVersion().split('.').take(2).map(_.toInt) match {
+        case Array(3, minor) if minor >= 8 => "17"
+        case _ => "11"
+      }
+    }"""
+  )
   .replace(""""-Yexplicit-nulls",""", "")
-  .replace(""""-java-output-version", "8""", s""""-java-output-version:${minJDKVersion}""")
-os.write.over(repositoryDir / "build.sc", updatedBuild)
-os.write.over(repositoryDir / ".mill-version", "0.12.15-2-561986")
+  .replace(
+    """"-java-output-version", "8""",
+    s""""-java-output-version:${minJDKVersion}"""
+  )
+os.write.over(buildFile, updatedBuild)
+
+rawBuild.linesIterator
+  .collectFirst:
+    case l if l.contains("//|") && l.contains("mill-version:") =>
+      l.replaceFirst(".*mill-version:\\s*", "").trim
+  match
+    case Some(millVer) if millVer.nonEmpty =>
+      os.write.over(repositoryDir / ".mill-version", millVer)
+    case _ =>
+      os.write.over(repositoryDir / ".mill-version", "0.12.15-2-561986")
 
 val coursierRepositories = Seq(
   "central",
   "ivy2local",
+  "sonatype:releases",
   "https://repo.scala-lang.org/artifactory/maven-nightlies",
   s"https://scala3.westeurope.cloudapp.azure.com/maven2/$scalaVersion",
 ).mkString("|")
 
+// mill-moduledefs reads SCALA_VERSION to extend scala3Versions / pluginScalaVersions (see Deps in build.mill).
+val millEnv = sys.env.updated("SCALA_VERSION", scalaVersion)
+
 os.proc(
   "./mill",
-  "--no-server",
+  "--no-daemon",
   "-D", s"coursier.repositories=$coursierRepositories",
+  "--keep-going",
   "show", s"__[$scalaVersion].publishLocal",
-).call(cwd = repositoryDir, check = true)
+).call(cwd = repositoryDir, env = millEnv, check = true)
+
+println("Mill moduledefs published locally")
