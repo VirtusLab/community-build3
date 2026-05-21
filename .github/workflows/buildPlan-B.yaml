@@ -1,5 +1,5 @@
 
-# projects total:     982
+# projects total:     981
 # min stars count:    -1
 # max projects count: 1000
 
@@ -78,7 +78,6 @@ jobs:
       matrix:
         include:
         - name: "2m/yabai-scala"
-        - name: "47degrees/sbt-energymonitor"
         - name: "aaronp/args4c"
         - name: "aaronp/code-template"
         - name: "aaronp/eie"
@@ -332,6 +331,7 @@ jobs:
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
+        - name: "etorreborre/registry-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "etorreborre/registry-scala"
         - name: "eugene-sy/play-quartz"
         - name: "evolution-gaming/random"
         - name: "faveoled/sous-title"
@@ -613,6 +612,7 @@ jobs:
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
         - name: "lhns/http4s-errors"
+        - name: "lhns/http4s-otel"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "lhns/http4s-otel"
         - name: "lhns/http4s-spa"
         - name: "lhns/jwt-s"
         - name: "lhns/munit-tagless-final"
@@ -894,6 +893,7 @@ jobs:
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
+        - name: "scala-cli/scala-cli-signing"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "scala-cli/scala-cli-signing"
         - name: "scala-js/scala-js-js-envs"
         - name: "scala-js/scala-js-logging"
         - name: "scala-tessella/dcel"
