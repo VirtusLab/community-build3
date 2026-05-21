@@ -1,7 +1,8 @@
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueType}
 import pureconfig._
 import pureconfig.error.*
 import java.io.FileNotFoundException
+import scala.jdk.CollectionConverters.*
 import scala.util.chaining.*
 
 class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredConfigsPath: os.Path) {
@@ -46,6 +47,46 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
       case _ => ??? // unreachable
     }.toMap
 
+  private lazy val requireFilesByProject: Map[Project, Seq[(String, String)]] =
+    Seq("source-version", "source-migration-rewrite", "tests")
+      .flatMap: subdir =>
+        loadRequiredProjectsLists(requiredConfigsPath / subdir).map:
+          case (project, file) => project -> (subdir, file)
+      .groupMap(_._1)(_._2)
+
+  private lazy val parsedProjectsConfig: Config =
+    val configPath = os.Path(internalProjectConfigsPath)
+    if os.exists(configPath) then ConfigFactory.parseFile(internalProjectConfigsPath)
+    else ConfigFactory.empty()
+
+  private lazy val referenceConfigRoot: Config =
+    ConfigFactory.parseResources(getClass.getClassLoader, "buildPlan.reference.conf")
+
+  /** Effective coordinator config for one project (file block + reference fallback + dotted keys). */
+  def projectConfigFingerprintBytes(projectName: String): Array[Byte] =
+    val key = projectName.toLowerCase
+    val fallback =
+      ConfigFactory.empty().withValue(key, referenceConfigRoot.root())
+    val merged = parsedProjectsConfig.withFallback(fallback)
+    val block =
+      if merged.hasPath(key) && merged.getValue(key).valueType() == ConfigValueType.OBJECT then
+        merged.getConfig(key).root().render()
+      else ""
+    val dottedKeys =
+      parsedProjectsConfig.entrySet().asScala.toSeq
+        .filter(e => e.getKey.startsWith(s"$key."))
+        .sortBy(_.getKey)
+        .map(e => s"${e.getKey}=${e.getValue.render()}")
+        .mkString("\n")
+    s"$block\n$dottedKeys".getBytes(java.nio.charset.StandardCharsets.UTF_8)
+
+  /** Require-file contents that list this project (for cache invalidation). */
+  def requireConfigBytes(project: Project): Seq[(String, Array[Byte])] =
+    requireFilesByProject.getOrElse(project, Nil).map { case (subdir, file) =>
+      val path = requiredConfigsPath / subdir / file
+      (s"$subdir/$file", os.read.bytes(path))
+    }
+
   def apply(
       project: ProjectVersion,
       repoUrl: String,
@@ -55,10 +96,16 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
 
     Git
       .checkout(repoUrl, name, revision, depth = Some(1))
-      .flatMap { projectDir =>
+      .fold {
+        CoordinatorLog.exclude(
+          project.p,
+          "git clone failure",
+          s"repo=$repoUrl revision=${revision.map(_.stringValue).getOrElse("<none>")}"
+        )
+        None
+      } { projectDir =>
         try {
-          readProjectConfig(projectDir, repoUrl)
-            .orElse(internalProjectConfigs(project.showName))
+          internalProjectConfigs(project.showName)
             .orElse(Some(ProjectBuildConfig.empty))
             .map: c =>
               if c.java.version.nonEmpty then c
@@ -67,18 +114,20 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
               c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
             .map: c =>
               if c.sourceVersion.isDefined then c
-              else c.copy(sourceVersion = projectSourceVersions.get(project.p))  
+              else c.copy(sourceVersion = projectSourceVersions.get(project.p))
             .map: c =>
               if c.migrationVersions.nonEmpty then c
               else c.copy(migrationVersions = projectMigrationVersions.getOrElse(project.p, Nil))
             .map: c =>
               if c.tests != TestingMode.default then c
-              else projectTestsConfig.get(project.p).foldLeft(c){(c, value) => c.copy(tests = value)}
+              else projectTestsConfig.get(project.p).foldLeft(c) { (c, value) =>
+                c.copy(tests = value)
+              }
             .filter(_ != ProjectBuildConfig.empty)
         } catch {
           case ex: Throwable =>
             Console.err.println(
-              s"Failed to resolve project config: ${ex}"
+              s"Failed to resolve project config for ${project.p.coordinates}: ${ex}"
             )
             None
         } finally os.remove.all(projectDir)
@@ -115,7 +164,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
       .flatMap(_.asConfigValue)
       .toOption
 
-  // Resolve project config from mainted, internal project configs list
+  // Resolve project config from coordinator/configs/projects-config.conf
   private def internalProjectConfigs(projectName: String) = {
     val configEntryName = projectName.toLowerCase
     val fallbackConfig =
@@ -141,31 +190,6 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         )
     }
 
-    config.toOption
-  }
-
-  // Read project config defined withing the repo
-  private def readProjectConfig(
-      projectDir: os.Path,
-      repoUrl: String
-  ): Option[ProjectBuildConfig] = {
-    val config = ConfigSource
-      .file((projectDir / "scala3-community-build.conf").toIO)
-      .withFallback(ConfigSource.resources("buildPlan.reference.conf"))
-      .load[ProjectBuildConfig]
-
-    config.left.foreach {
-      case reasons: ConfigReaderFailures if reasons.toList.exists {
-            case CannotReadFile(_, Some(_: java.io.FileNotFoundException)) =>
-              true
-            case _ => false
-          } =>
-        ()
-      case reason =>
-        sys.error(
-          s"Failed to decode community-build config in ${repoUrl}, reason: ${reason}"
-        )
-    }
     config.toOption
   }
 

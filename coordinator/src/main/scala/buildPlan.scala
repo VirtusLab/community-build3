@@ -23,10 +23,13 @@ object CoordinatorRuntime:
   private val AvailableProcessors = Runtime.getRuntime().availableProcessors()
   opaque type Permit = Semaphore
 
-
   val gitLsRemoteTimeoutSeconds: Int = 30
-  val gitCloneTimeout: FiniteDuration = 5.minutes
-  val gitCheckoutTimeout: FiniteDuration = 2.minutes
+  val gitCloneTimeout: FiniteDuration = 10.minutes
+  val gitFetchTimeout: FiniteDuration = 3.minutes
+  val gitCheckoutTimeout: FiniteDuration = 5.minutes
+
+  /** Match [[gitClone]] permit capacity — avoids hundreds of tasks blocked on the semaphore. */
+  val gitCloneParallelism: Int = cpuBoundParallelism(min = 4, max = 8)
 
   private def permit(parallelism: Int): Permit = new Semaphore(parallelism)
 
@@ -38,26 +41,37 @@ object CoordinatorRuntime:
   private def cpuBoundParallelism(min: Int, max: Int): Int =
     AvailableProcessors.min(max).max(min)
 
-  val gitClone: Permit = permit(cpuBoundParallelism(min = 4, max = 8))
+  val gitClone: Permit = permit(gitCloneParallelism)
   val gitLsRemote: Permit = permit(ioBoundParallelism(min = 4, max = 16))
-  val mavenInfo: Permit = permit(ioBoundParallelism(min = 8, max = 16))
-  val scaladexApi: Permit = permit(ioBoundParallelism(min = 4, max = 8))
+  val mavenInfo: Permit = permit(ioBoundParallelism(min = 4, max = 4))
+  val scaladexApi: Permit = permit(ioBoundParallelism(min = 4, max = 4))
 
   def withPermit[T](permit: Permit)(op: => T): T =
     blocking(permit.acquire())
     try op
     finally permit.release()
 
+  def describeFailure(ex: Throwable): String =
+    ex match
+      case ex: org.jsoup.HttpStatusException =>
+        s"HTTP ${ex.getStatusCode} ${ex.getUrl()}"
+      case ex: sttp.client4.SttpClientException =>
+        s"${ex.getClass.getSimpleName}${Option(ex.getMessage).fold("")(msg => s": $msg")}${Option(ex.cause).fold("")(
+            cause => s" (cause: ${describeFailure(cause)})"
+          )}"
+      case ex =>
+        s"${ex.getClass.getSimpleName}: ${ex.getMessage}"
+
 val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
 
 @main def storeDependenciesBasedBuildPlan(
-  scalaBinaryVersion: String,
-  minStarsCount: Int,
-  maxProjectsInConfig: Int,
-  maxProjectsInBuildPlan: Int,
-  requiredProjects: Seq[Project],
-  configsPath: os.Path,
-  varargs: String*
+    scalaBinaryVersion: String,
+    minStarsCount: Int,
+    maxProjectsInConfig: Int,
+    maxProjectsInBuildPlan: Int,
+    requiredProjects: Seq[Project],
+    configsPath: os.Path,
+    varargs: String*
 ) = {
   val releaseCutOffDate = varargs.collectFirst { case s"--release-cutoff=${date}" =>
     Try(LocalDate.parse(date)).fold[Option[LocalDate]](
@@ -73,6 +87,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
     )
   }.flatten
   given confFiles: ConfigFiles = ConfigFiles(configsPath)
+  val cacheOptions = CoordinatorCacheOptions.parse(varargs)
   val executor = Executors.newVirtualThreadPerTaskExecutor()
   val customProjects =
     readNormalized(confFiles.customProjects).map(Project.load)
@@ -93,7 +108,8 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
     )
     fullBuildPlan <- makeDependenciesBasedBuildPlan(
       dependencyGraph,
-      releaseCutOffDate
+      releaseCutOffDate,
+      cacheOptions
     )
     _ = println("Generated build plan")
   } yield {
@@ -155,8 +171,8 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
 
 case class SplittedBuildPlan(projects: Array[ProjectBuildDef], index: Int = 0)
 def splitBuildPlan(
-  buildPlan: Array[ProjectBuildDef],
-  limit: Int
+    buildPlan: Array[ProjectBuildDef],
+    limit: Int
 ): List[SplittedBuildPlan] = {
   // Sort ascending by ammount of starts, required projects have highest priority
   buildPlan
@@ -178,9 +194,9 @@ def findTag(repoUrl: String, version: String): Option[String] = {
   val timeout = CoordinatorRuntime.gitLsRemoteTimeoutSeconds.seconds
 
   def retryWithBackoff(
-    retries: Int,
-    backoffSeconds: Int,
-    message: String
+      retries: Int,
+      backoffSeconds: Int,
+      message: String
   ): Option[CommandResult] =
     if retries <= 0
     then
@@ -192,8 +208,8 @@ def findTag(repoUrl: String, version: String): Option[String] = {
       retryConnect(retries - 1, (backoffSeconds * 2) min 60)
 
   def retryConnect(
-    retries: Int,
-    backoffSeconds: Int = 1
+      retries: Int,
+      backoffSeconds: Int = 1
   ): Option[CommandResult] =
     try
       val proc =
@@ -201,7 +217,7 @@ def findTag(repoUrl: String, version: String): Option[String] = {
           os.proc("git", "ls-remote", "--tags", repoUrl)
             .call(
               check = false,
-              stderr = os.Pipe,
+              mergeErrIntoOut = true,
               timeout = timeout.toMillis
             )
         }
@@ -290,12 +306,15 @@ def buildPlanCommons(depGraph: DependencyGraph) =
   (topLevelData, fullInfo, projectsDeps)
 
 def makeDependenciesBasedBuildPlan(
-  depGraph: DependencyGraph,
-  cutOffDate: Option[LocalDate]
+    depGraph: DependencyGraph,
+    cutOffDate: Option[LocalDate],
+    cacheOptions: CoordinatorCacheOptions = CoordinatorCacheOptions()
 )(using confFiles: ConfigFiles): AsyncResponse[Array[ProjectBuildDef]] =
   val (_, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
   val configDiscovery =
     ProjectConfigDiscovery(confFiles.projectsConfig.toIO, confFiles.requiredConfigs)
+  val cacheStats = ProjectBuildDefCacheStats()
+  val buildConfigSeed = BuildConfigSeedIndex(cacheOptions.seedBuildConfigPath)
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =
@@ -304,9 +323,8 @@ def makeDependenciesBasedBuildPlan(
       )
     then Map.empty
     else
-      readNormalized(confFiles.replacedProjects).map {
-        case replacementPattern(org1, name1, org2, name2, branch) =>
-          (org1, name1) -> ((org2, name2), Option(branch))
+      readNormalized(confFiles.replacedProjects).map { case replacementPattern(org1, name1, org2, name2, branch) =>
+        (org1, name1) -> ((org2, name2), Option(branch))
       }.toMap
 
   def projectRepoUrl(project: Project) =
@@ -326,9 +344,9 @@ def makeDependenciesBasedBuildPlan(
   val projects = projectsDeps.keys.map(_.p).toList
 
   def findCutOffCommit(
-    project: Project,
-    repoUrl: String,
-    cutOffDate: Option[LocalDate]
+      project: Project,
+      repoUrl: String,
+      cutOffDate: Option[LocalDate]
   ): Option[String] =
     for
       cutOffDate <- cutOffDate
@@ -349,70 +367,107 @@ def makeDependenciesBasedBuildPlan(
           "--pretty=format:%H",
           "--max-count=1"
         )
-        .call(cwd = repoDir, check = false, timeout = 5.minutes.toMillis)
+        .call(
+          cwd = repoDir,
+          check = false,
+          mergeErrIntoOut = true,
+          timeout = 5.minutes.toMillis
+        )
         .out
         .lines()
         .headOption
       _ = os.remove.all(repoDir) // best-effort, it's tmp dir anyway
     yield lastCommit.trim()
 
-  Future
-    .traverse(projectsDeps.toList) { (project, deps) =>
-      Future {
-        val repoUrl = projectRepoUrl(project.p)
-        val revision: Option[Git.Revision] =
-          getRevision(project.p)
-            .orElse(
-              findTag(repoUrl, project.v)
-                .tapEach(v =>
-                  println(
-                    s"Would use tag: $v for ${project.p.coordinates} @ ${project.v}"
-                  )
-                )
-                .headOption
-                .map(Git.Revision.Tag(_))
-            )
-            .orElse(
-              findCutOffCommit(project.p, repoUrl, cutOffDate)
-                .tapEach(v =>
-                  println(
-                    s"Would use commit: $v for ${project.p.coordinates} @ ${project.v}"
-                  )
-                )
-                .headOption
-                .map(Git.Revision.Commit(_))
-            )
-        val self = project.p
-        val dependencies = deps
-          .map(_.p)
-          .filter {
-            case DottyProject => false
-            case `self`       => false
-            case dep          => projects.contains(dep)
-          }
-          .distinct
-        val publishedScalaVersion = fullInfo(project.p).targets.flatMap(_.deps).collect{
-          case Dep(TargetId("org.scala-lang", "scala3-library_3"), version) => SemVersion.unapply(version) 
-        }.flatten.maxOption
-        ProjectBuildDef(
-          project = project.p,
-          dependencies = dependencies.toArray,
-          repoUrl = repoUrl,
-          revision = revision.map(_.stringValue).getOrElse(""),
-          version = project.v,
-          publishedScalaVersion = publishedScalaVersion.map(_.show),
-          targets = fullInfo(project.p).targets
-            .map {
-              case t @ Target.BuildAll => t.id.asMvnStr
-              case t                   => stripScala3Suffix(t.id.asMvnStr)
-            }
-            .sorted
-            .mkString(" "),
-          config = configDiscovery(project, repoUrl, revision)
-        )
+  def traverseLimited[A, B](items: List[A], parallelism: Int)(
+      f: A => Future[B]
+  )(using ExecutionContext): Future[List[B]] =
+    val limit = parallelism.max(1)
+    items
+      .grouped(limit)
+      .foldLeft(Future.successful(List.empty[B])) { (accF, batch) =>
+        accF.flatMap(acc => Future.traverse(batch)(f).map(acc ++ _))
       }
+
+  val projectBuildParallelism = CoordinatorRuntime.gitCloneParallelism
+
+  traverseLimited(projectsDeps.toList, projectBuildParallelism) { (project, deps) =>
+    Future {
+      val fingerprint =
+        ProjectBuildDefCache.computeFingerprint(project.p, confFiles, configDiscovery)
+
+      def resolveRevisionForUrl(repoUrl: String): Option[Git.Revision] =
+        getRevision(project.p)
+          .orElse(
+            findTag(repoUrl, project.v)
+              .tapEach(v =>
+                println(
+                  s"Would use tag: $v for ${project.p.coordinates} @ ${project.v}"
+                )
+              )
+              .headOption
+              .map(Git.Revision.Tag(_))
+          )
+          .orElse(
+            findCutOffCommit(project.p, repoUrl, cutOffDate)
+              .tapEach(v =>
+                println(
+                  s"Would use commit: $v for ${project.p.coordinates} @ ${project.v}"
+                )
+              )
+              .headOption
+              .map(Git.Revision.Commit(_))
+          )
+
+      val (repoUrl, revisionStr, config) =
+        ProjectBuildDefCache.resolveStableFields(
+          project = project,
+          fingerprint = fingerprint,
+          repoUrlForProject = projectRepoUrl,
+          resolveRevision = resolveRevisionForUrl,
+          configDiscovery = configDiscovery.apply,
+          options = cacheOptions,
+          buildConfigSeed = buildConfigSeed,
+          stats = cacheStats
+        )
+
+      val self = project.p
+      val dependencies = deps
+        .map(_.p)
+        .filter {
+          case DottyProject => false
+          case `self`       => false
+          case dep          => projects.contains(dep)
+        }
+        .distinct
+      val publishedScalaVersion = fullInfo(project.p).targets
+        .flatMap(_.deps)
+        .collect { case Dep(TargetId("org.scala-lang", "scala3-library_3"), version) =>
+          SemVersion.unapply(version)
+        }
+        .flatten
+        .maxOption
+      ProjectBuildDef(
+        project = project.p,
+        dependencies = dependencies.toArray,
+        repoUrl = repoUrl,
+        revision = revisionStr,
+        version = project.v,
+        publishedScalaVersion = publishedScalaVersion.map(_.show),
+        targets = fullInfo(project.p).targets
+          .map {
+            case t @ Target.BuildAll => t.id.asMvnStr
+            case t                   => stripScala3Suffix(t.id.asMvnStr)
+          }
+          .sorted
+          .mkString(" "),
+        config = config
+      )
     }
-    .map(_.filter(_.project != DottyProject).toArray)
+  }
+    .map: results =>
+      cacheStats.report()
+      results.filter(_.project != DottyProject).toArray
 
 private def loadFilters(using confFiles: ConfigFiles): Seq[String] =
   readNormalized(
@@ -467,13 +522,13 @@ lazy val workflowsDir: os.Path = {
 }
 
 case class BuildMeta(
-  minStarsCount: Int,
-  maxProjectsCount: Int,
-  totalProjects: Int
+    minStarsCount: Int,
+    maxProjectsCount: Int,
+    totalProjects: Int
 )
 def createGithubActionJob(
-  plan: List[List[ProjectBuildDef]],
-  meta: BuildMeta
+    plan: List[List[ProjectBuildDef]],
+    meta: BuildMeta
 ): String = {
   class Printer() {
     private val buffer = mutable.StringBuilder()

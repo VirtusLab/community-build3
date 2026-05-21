@@ -1,11 +1,12 @@
 import org.jsoup._
 import scala.jdk.CollectionConverters._
 import scala.concurrent.*
+import java.nio.file.Files
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit.SECONDS
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import Scaladex.ScaladexUrl
+import Scaladex.{ProjectArtifact, ScaladexUrl}
 
 import scala.language.implicitConversions
 
@@ -54,26 +55,40 @@ enum CandidateProject:
   case BuildSelected(project: Project, mvs: Seq[ModuleInVersion])
 case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 
+/** JVM Scala 3 library artifacts we can resolve and test (not sbt plugins or cross-platform variants). */
+private def isTestableArtifact(artifactId: String): Boolean =
+  artifactId match
+    case s"${_}_native${_}"           => false
+    case s"${_}_sjs${_}"              => false
+    case s"${_}_sbt1" | s"${_}_sbt2" => false
+    case s"${_}_sbt${_}"              => false
+    case s"${_}_3"                    => true
+    case _                            => false
+
+private def isTestableModuleName(module: String): Boolean =
+  module match
+    case s"${_}_sbt1" | s"${_}_sbt2" => false
+    case _                            => isTestableArtifact(s"${module}_3")
+
 def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
 )(using scaladex: Scaladex): AsyncResponse[ProjectModules] = {
   for {
-    scala3JvmArtifacts <- scaladex
-      .artifacts(project)
-      .map:
-        _.filter:
-          _.artifactId match
-            case s"${_}_native${_}" => false
-            case s"${_}_sjs${_}"    => false
-            case s"${_}_3"          => true
-            case _                  => false
+    allArtifacts <- scaladex.artifacts(project)
+    scala3JvmArtifacts = allArtifacts.filter(a => isTestableArtifact(a.artifactId))
+    _ = if scala3JvmArtifacts.isEmpty then
+      val detail =
+        if allArtifacts.isEmpty then "no artifacts on Scaladex"
+        else s"0 testable JVM _3 artifacts among ${allArtifacts.size} on Scaladex"
+      CoordinatorLog.exclude(project, "no testable JVM _3 artifacts", detail)
     artifactsByVersion = scala3JvmArtifacts.groupBy(_.version)
     versionReleaseData <- Future
       .traverse(artifactsByVersion) { case (version, artifacts) =>
         scaladex
           .artifact(artifacts.head)
           .filter: artifact =>
-            releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
+            artifact.platform == "jvm" &&
+              releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
           .map: artifact =>
             (version, artifact.releaseDate)
       }
@@ -85,10 +100,70 @@ def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
       for version <- orderedVersions
       yield ModuleInVersion(
         version = version,
-        modules = artifactsByVersion(version).map(_.artifactId.stripSuffix("_3"))
+        modules =
+          artifactsByVersion(version)
+            .map(_.artifactId.stripSuffix("_3"))
+            .filter(isTestableModuleName)
+            .distinct
       )
-  } yield ProjectModules(project, versionModules)
+    nonEmptyVersions = versionModules.filter(_.modules.nonEmpty)
+    _ =
+      if nonEmptyVersions.isEmpty && artifactsByVersion.nonEmpty then
+        CoordinatorLog.exclude(
+          project,
+          "no testable JVM _3 artifacts",
+          s"no versions passed filters (releaseCutOffDate=${releaseCutOffDate.isDefined})"
+        )
+  } yield ProjectModules(project, nonEmptyVersions)
 }
+
+/** JVM Scala 3 versions published on Scaladex (one cheap [[Scaladex.artifacts]] call). */
+private def testableArtifactVersions(artifacts: Seq[ProjectArtifact]): Set[String] =
+  artifacts.filter(a => isTestableArtifact(a.artifactId)).map(_.version).toSet
+
+private def readCachedProjectModules(project: Project)(using
+    driver: CacheDriver[Project, ProjectModules]
+): Option[ProjectModules] =
+  val dest = driver.dest(project)
+  if Files.exists(dest) then
+    Some(driver.load(Files.readString(dest), project))
+  else None
+
+private def writeCachedProjectModules(pm: ProjectModules)(using
+    driver: CacheDriver[Project, ProjectModules]
+): Unit =
+  val dest = driver.dest(pm.project)
+  Files.createDirectories(dest.getParent)
+  Files.writeString(dest, driver.write(pm))
+
+/** Cached project modules with a cheap Scaladex version check before skipping the full load. */
+def loadProjectModulesWithVersionCheck(releaseCutOffDate: Option[LocalDate] = None)(
+    project: Project
+)(using scaladex: Scaladex, driver: CacheDriver[Project, ProjectModules]): AsyncResponse[ProjectModules] =
+  scaladex.artifacts(project).flatMap { artifacts =>
+    val freshVersions = testableArtifactVersions(artifacts)
+    readCachedProjectModules(project) match
+      case Some(cached) if cached.mvs.map(_.version).toSet == freshVersions =>
+        Future.successful(cached)
+      case Some(cached) =>
+        val cachedVersions = cached.mvs.map(_.version).toSet
+        val added = freshVersions -- cachedVersions
+        val removed = cachedVersions -- freshVersions
+        println(
+          s"Refreshing Scaladex project modules for ${project.coordinates} " +
+            s"(versions changed: +${added.mkString(", ")} -${removed.mkString(", ")})"
+        )
+        loadScaladexProject(releaseCutOffDate)(project).map { pm =>
+          writeCachedProjectModules(pm)
+          pm
+        }
+      case None =>
+        println(s"Refreshing Scaladex project modules for ${project.coordinates} (no cache)")
+        loadScaladexProject(releaseCutOffDate)(project).map { pm =>
+          writeCachedProjectModules(pm)
+          pm
+        }
+  }
 
 case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
 case class ModuleVersion(name: String, version: String, p: Project)
@@ -134,12 +209,18 @@ def loadMavenInfo(scalaBinaryVersion: String)(
 
   val tasks = modules.map { module =>
     def tryFetch(backoffSeconds: Int): AsyncResponse[Option[Target]] = {
-      inline def backoff(reason: => String) = {
+      inline def backoff(ex: Throwable, retryable: Boolean) = {
+        val detail = CoordinatorRuntime.describeFailure(ex)
+        val action =
+          if retryable then s"retry with backoff ${backoffSeconds}s"
+          else "giving up"
         Console.err.println(
-          s"Failed to load maven info for $organization/$repository, reason: $reason: retry with backoff ${backoffSeconds}s"
+          s"Failed to load maven info for $organization/$repository module=$module version=$version ($detail): $action"
         )
-        SECONDS.sleep(backoffSeconds)
-        tryFetch((backoffSeconds * 2).min(60))
+        if retryable then
+          SECONDS.sleep(backoffSeconds)
+          tryFetch((backoffSeconds * 2).min(60))
+        else Future.successful(None)
       }
       Future({
         val target = cached {
@@ -148,19 +229,18 @@ def loadMavenInfo(scalaBinaryVersion: String)(
         Some(target)
       })
         .recoverWith {
-          case _: UnknownHostException   => backoff("service not found")
-          case _: SocketTimeoutException => backoff("socket timeout exception")
+          case ex: UnknownHostException   => backoff(ex, retryable = true)
+          case ex: SocketTimeoutException => backoff(ex, retryable = true)
           case ex: HttpStatusException if ex.getStatusCode == 503 =>
-            backoff("service unavailable")
-          case ex: HttpStatusException if ex.getStatusCode == 500 =>
-            backoff(s"HTTP ${ex.getStatusCode} from Scaladex")
+            backoff(ex, retryable = true)
+          case ex: HttpStatusException if ex.getStatusCode >= 500 =>
+            backoff(ex, retryable = true)
           case ex: java.net.ConnectException if ex.getMessage().contains("Operation timed out") =>
-            backoff(ex.getMessage())
+            backoff(ex, retryable = true)
+          case ex: java.net.http.HttpTimeoutException =>
+            backoff(ex, retryable = true)
           case ex: Exception =>
-            Console.err.println(
-              s"Failed to load maven info for $organization/$repository: ${ex}"
-            )
-            Future.successful(None)
+            backoff(ex, retryable = false)
         }
     }
     tryFetch(1)
@@ -168,8 +248,23 @@ def loadMavenInfo(scalaBinaryVersion: String)(
 
   Future
     .sequence(tasks)
-    .map(_.flatten)
-    .map(LoadedProject(projectModules.project, version, _))
+    .map: results =>
+      val targets = results.flatten
+      val failedModules =
+        modules.zip(results).collect { case (module, None) => module }
+      if targets.nonEmpty && failedModules.nonEmpty then
+        CoordinatorLog.warn(
+          projectModules.project,
+          "partial Maven load",
+          s"@ $version loaded ${targets.size}/${modules.size} modules; failed: ${failedModules.mkString(", ")}"
+        )
+      else if targets.isEmpty then
+        CoordinatorLog.exclude(
+          projectModules.project,
+          "Maven metadata load failed",
+          s"@ $version for modules: ${modules.mkString(", ")}"
+        )
+      LoadedProject(projectModules.project, version, targets)
 
   /** @param scalaBinaryVersion
     *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention
@@ -188,11 +283,17 @@ def loadDepenenecyGraph(
   def loadProject(p: Project): AsyncResponse[CandidateProject] =
     if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
     else
-      cachedAsync { (p: Project) =>
-        loadScaladexProject(releaseCutOffDate)(p)
-          .map(projectModulesFilter(patterns))
-      }(p).map { case ProjectModules(project, mvs) =>
-        CandidateProject.BuildSelected(project, mvs)
+      loadProjectModulesWithVersionCheck(releaseCutOffDate)(p).map { pm =>
+        val filtered = projectModulesFilter(patterns)(pm)
+        if filtered.mvs.isEmpty then
+          if pm.mvs.isEmpty then ()
+          else
+            CoordinatorLog.exclude(
+              filtered.project,
+              "empty module list after filters",
+              s"${pm.mvs.size} version(s) before pattern/module filtering"
+            )
+        CandidateProject.BuildSelected(filtered.project, filtered.mvs)
       }
 
   val required = LazyList
@@ -225,8 +326,7 @@ def loadDepenenecyGraph(
                   Some(LoadedProject(project, "HEAD", Seq(Target.BuildAll)))
                 )
               case candidate @ CandidateProject.BuildSelected(project, mvs) =>
-                if mvs.isEmpty
-                then Future.successful(None)
+                if mvs.isEmpty then Future.successful(None)
                 else
                   loadMavenInfo(scalaBinaryVersion)(candidate)
                     .map { result =>
@@ -292,10 +392,12 @@ def projectModulesFilter(
             // Each entry is represented in form of `<organization>:<project/module>:<version>`
             // Filter out whole project for given version
             if !matchPatternAndLog(s"${p.organization}:${p.repository}:$version") =>
-          mvs.copy(modules = modules.filter { module =>
-            // Filter out modules for given version
-            !matchPatternAndLog(s"${p.organization}:$module:$version")
-          })
+          mvs.copy(modules =
+            modules.filter(isTestableModuleName).filter { module =>
+              // Filter out modules for given version
+              !matchPatternAndLog(s"${p.organization}:$module:$version")
+            }
+          )
       }
       .filter(_.modules.nonEmpty)
   )

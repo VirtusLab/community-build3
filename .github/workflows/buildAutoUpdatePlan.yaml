@@ -23,16 +23,14 @@ jobs:
         with:
           apps: scala-cli:1.12.5
 
-      - name: Get Date
-        id: get-date
-        run: echo "week-start=$(date -dmonday +%Y%m%d)" >> $GITHUB_OUTPUT
-
-      # - name: Cache coordinator data
-      #   uses: actions/cache@v4
-      #   with:
-      #     # coordinator stores cache in current working directory
-      #     path: data/
-      #     key: coordinator-data-cache-${{ steps.get-date.outputs.week-start}}
+      - name: Cache coordinator data
+        uses: actions/cache@v4
+        with:
+          # coordinator stores cache in current working directory (Scaladex + project build defs)
+          path: |
+            data/
+            coordinator/data/
+          key: coordinator-data-cache
 
       - name: Build plan
         # Limit each build plan to at most 1000 most project. 

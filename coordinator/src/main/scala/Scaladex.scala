@@ -9,6 +9,8 @@ import upickle.default.*
 object Scaladex:
   final val ScaladexUrl = uri"https://index.scala-lang.org"
 
+  case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
+
 class Scaladex:
   import Scaladex.*
 
@@ -25,13 +27,17 @@ class Scaladex:
           .send(backend)
       }
     }.map(_.body)
-      .recoverWith { 
+      .recoverWith {
         case err: SttpClientException =>
-          Console.err.println(s"Failed to fetch artifact metadata, ${err.cause}, retry with backoff ${backoffSeconds}s for $uri")
+          Console.err.println(
+            s"Failed to fetch artifact metadata (${CoordinatorRuntime.describeFailure(err)}), retry with backoff ${backoffSeconds}s for $uri"
+          )
           SECONDS.sleep(backoffSeconds)
           tryGet((backoffSeconds * 2).min(60))
-        case err: ujson.ParseException => 
-          Console.err.println(s"Failed to parse artifact metadata, ${err}, retry with backoff ${backoffSeconds}s for $uri")
+        case err: ujson.ParseException =>
+          Console.err.println(
+            s"Failed to parse artifact metadata (${CoordinatorRuntime.describeFailure(err)}), retry with backoff ${backoffSeconds}s for $uri"
+          )
           SECONDS.sleep(backoffSeconds)
           tryGet((backoffSeconds * 2).min(60))
       }
@@ -48,7 +54,6 @@ class Scaladex:
             Project(organization, repository)
   }
 
-  case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
   def artifacts(project: Project): AsyncResponse[Seq[ProjectArtifact]] =
     get[Seq[ProjectArtifact]](
       uri"$ScaladexUrl/api/projects/${project.organization}/${project.repository}/artifacts?stable-only=false"

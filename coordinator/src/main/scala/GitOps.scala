@@ -1,6 +1,6 @@
 import scala.annotation.tailrec
 
-object Git {
+object Git:
   enum Revision:
     case Branch(name: String)
     case Tag(version: String)
@@ -11,16 +11,32 @@ object Git {
       case Commit(sha)  => sha
   end Revision
 
+  def revisionFromCached(revision: String): Option[Revision] =
+    if revision.isEmpty then None
+    else if revision.length == 40 && revision.forall(isHexDigit) then Some(Revision.Commit(revision))
+    else Some(Revision.Tag(revision))
+
+  private def isHexDigit(c: Char): Boolean =
+    c.isDigit || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')
+
   def unshallowSinceDottyRelease(projectDir: os.Path): Unit =
     // unshallow commits done after release Scala 3.0.0
-    os.proc("git", "fetch", s"--shallow-since=2021-05-13", "--quiet")
-      .call(cwd = projectDir, check = false)
-      .exitCode
+    os.proc("git", "fetch", "--shallow-since=2021-05-13", "--quiet")
+      .call(
+        cwd = projectDir,
+        check = false,
+        mergeErrIntoOut = true,
+        timeout = CoordinatorRuntime.gitFetchTimeout.toMillis
+      )
 
   def fetchTags(projectDir: os.Path): Unit =
     os.proc("git", "fetch", "--tags", "--quiet")
-      .call(cwd = projectDir, check = false)
-      .exitCode
+      .call(
+        cwd = projectDir,
+        check = false,
+        mergeErrIntoOut = true,
+        timeout = CoordinatorRuntime.gitFetchTimeout.toMillis
+      )
 
   def checkout(
       repoUrl: String,
@@ -31,12 +47,12 @@ object Git {
   ): Option[os.Path] = {
     val branchOpt = revision.flatMap {
       case Revision.Branch(name) => Some(s"--branch=$name")
-      case Revision.Tag(tag) => Some(s"--branch=$tag")
+      case Revision.Tag(tag)     => Some(s"--branch=$tag")
       case _                     => None
     }
     val depthOpt = depth.map(s"--depth=" + _)
 
-    @tailrec def tryClone[T](
+    @tailrec def tryClone(
         retries: Int,
         backoffSeconds: Int = 1
     ): Option[os.Path] = {
@@ -54,7 +70,7 @@ object Git {
             depthOpt
           )
           .call(
-            stderr = os.Pipe,
+            mergeErrIntoOut = true,
             check = false,
             timeout = CoordinatorRuntime.gitCloneTimeout.toMillis
           )
@@ -65,7 +81,7 @@ object Git {
         Console.err.println(
           s"Failed to clone $repoUrl at revision ${revision}, backoff ${backoffSeconds}s"
         )
-        proc.err.lines().foreach(Console.err.println)
+        proc.out.lines().foreach(Console.err.println)
         os.remove.all(projectDir)
         Thread.sleep(backoffSeconds * 1000)
         tryClone(retries - 1, (backoffSeconds * 2).min(60))
@@ -73,7 +89,7 @@ object Git {
         Console.err.println(
           s"Failed to clone $repoUrl at revision ${revision}:"
         )
-        proc.err.lines().foreach(Console.err.println)
+        proc.out.lines().foreach(Console.err.println)
         os.remove.all(projectDir)
         None
     }
@@ -96,14 +112,12 @@ object Git {
           .call(
             cwd = projectDir,
             check = false,
-            timeout = CoordinatorRuntime.gitCheckoutTimeout.toMillis,
-            mergeErrIntoOut = true
+            mergeErrIntoOut = true,
+            timeout = CoordinatorRuntime.gitCheckoutTimeout.toMillis
           )
-        if (proc.exitCode != 0)
+        if proc.exitCode != 0 then
           System.err.println(
-            s"Failed to checkout revision $revision: " + proc.out
-              .lines()
-              .mkString
+            s"Failed to checkout revision $revision: " + proc.out.lines().mkString
           )
         proc.exitCode == 0
       }
@@ -115,4 +129,4 @@ object Git {
         None
     }
   }
-}
+end Git
