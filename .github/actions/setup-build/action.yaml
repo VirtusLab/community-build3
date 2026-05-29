@@ -44,7 +44,12 @@ runs:
           
           commitHash=$(git --no-pager rev-parse --short=7 HEAD | xargs)
           commitDate=$(git --no-pager show -s --format=%cd --date=format:"%Y%m%d" HEAD | xargs)
-          baseVersion=$(sbt --no-colors 'eval Build.baseVersion' | grep 'ans: String =' | awk '{ print $5 }' | xargs)
+          baseVersion=$(sbt --no-colors 'eval dotty.tools.sbtplugin.Versions.baseVersion' 2>/dev/null | grep 'ans: String =' | awk '{ print $5 }' | xargs)
+          if [[ -z "$baseVersion" ]]; then
+            echo "Not found Versions.baseVersion variable, using legacy variant Build.baseVersion"
+            baseVersion=$(sbt --no-colors 'eval Build.baseVersion' 2>/dev/null | grep 'ans: String =' | awk '{ print $5 }' | xargs)
+          fi
+          echo "Resolved base version: $baseVersion"
           # `SNAPSHOT` substring is required to treat compiler as experimental
           # All compilers build from branch are treated experimental
           scalaVersion=${baseVersion}-bin-${commitDate}-${commitHash}
