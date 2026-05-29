@@ -81,7 +81,6 @@ jobs:
         - name: "47degrees/github4s"
         - name: "47degrees/memeid"
         - name: "47degrees/munit-akka"
-        - name: "47degrees/sbt-energymonitor"
         - name: "7mind/izumi"
         - name: "7mind/sbtgen"
         - name: "afsalthaj/constraintless"
@@ -167,7 +166,6 @@ jobs:
         - name: "bishabosha/enum-extensions"
         - name: "bishabosha/ops-mirror"
         - name: "bishabosha/scala-object-notation"
-        - name: "bitlap/rolls"
         - name: "bkirwi/decline"
         - name: "blackdoor/jose"
         - name: "blemale/scaffeine"
@@ -287,7 +285,6 @@ jobs:
         - name: "dragonfly-ai/matrix"
         - name: "dragonfly-ai/narr"
         - name: "dragonfly-ai/slash"
-        - name: "dripower/postgresql-async"
         - name: "durban/choam"
         - name: "dvgica/healthful"
         - name: "dvgica/managerial"
@@ -304,6 +301,7 @@ jobs:
         - name: "eed3si9n/manifesto"
         - name: "eed3si9n/scalaxb"
         - name: "eed3si9n/sjson-new"
+        - name: "eed3si9n/treehugger"
         - name: "eed3si9n/verify"
         - name: "eikek/calev"
         - name: "eikek/emil"
@@ -332,6 +330,8 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
+        - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,8 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
@@ -593,6 +591,7 @@ jobs:
         - name: "lloydmeta/ltsv-logger"
         - name: "log4s/log4s"
         - name: "logging4s/logging4s"
+        - name: "lolgab/layers-dotty-plugin"
         - name: "lolgab/mill-mima"
         - name: "lombardo-chcg/websocket-scala"
         - name: "lomigmegard/akka-http-cors"
@@ -613,6 +612,7 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -754,6 +753,7 @@ jobs:
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"
         - name: "profunktor/redis4cats"
+        - name: "profunktor/valkey4cats"
         - name: "pureconfig/pureconfig"
         - name: "purplekingdomgames/tyrian"
         - name: "purplekingdomgames/ultraviolet"
@@ -1033,7 +1033,6 @@ jobs:
         - name: "typelevel/fs2-grpc"
         - name: "typelevel/fs2-kafka"
         - name: "typelevel/grackle"
-        - name: "typelevel/idna4s"
         - name: "typelevel/jawn"
         - name: "typelevel/jawn-fs2"
         - name: "typelevel/keypool"
@@ -1118,6 +1117,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
