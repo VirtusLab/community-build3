@@ -35,10 +35,6 @@ on:
         type: boolean
         description: "Should the workflow execute tests of the build projects (compile only by default)"
         default: false
-      push-to-gh-pages:
-        type: boolean
-        description: "Should the workflow push the generated raport to gh-pages branch"
-        default: false
 jobs:
   # Name of this job need to match inputs of build-project/job-info
   execute-build-plan:
@@ -54,52 +50,26 @@ jobs:
       custom-build-id: ${{ inputs.build-name }}
     secrets: inherit
 
-  create-raport:
+  emit-dashboard-links:
     needs: [execute-build-plan]
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
       - name: Git Checkout
         uses: actions/checkout@v6
-      - uses: coursier/cache-action@v8
-      - name: Install coursier
+
+      - name: Install scala-cli
         uses: coursier/setup-action@v3
         with:
           jvm: 25
           apps: scala-cli:1.12.5
 
-      - name: Generate raport
-        env:
-          ES_USER: ${{ secrets.OPENCB_ELASTIC_USER }}
-          ES_PASSWORD: ${{ secrets.OPENCB_ELASTIC_PSWD }}
+      - name: Emit dashboard comparison links
         run: |
           scalaVersion=${{ needs.execute-build-plan.outputs.used-scala-version }}
           lastRC="$(./scripts/lastVersionRC.sc)"
-          lastStable=$(./scripts/lastVersionStable.sc)
+          lastStable="$(./scripts/lastVersionStable.sc)"
 
-          FOR_HTML=1 scala-cli scripts/raport-regressions.scala -- $scalaVersion > raport-full.rendered.md
-          scala-cli scripts/raport-regressions.scala -- $scalaVersion | tee raport-full.md
-          scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastRC > raport-compare-$lastRC.md
-          scala-cli scripts/raport-regressions.scala -- $scalaVersion --compareWith=$lastStable > raport-compare-$lastStable.md
-
-      - name: Upload raports
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-raports
-          path: ${{ github.workspace }}/raport-*.md
-
-      - uses: tibdex/github-app-token@v1
-        if: ${{ inputs.push-to-gh-pages }}
-        id: generate-token
-        with:
-          app_id: 303718
-          private_key: ${{ secrets.OPENCB_CONFIG_UPDATE_TOKEN }}
-
-      - name: Push raport
-        if: ${{ inputs.push-to-gh-pages }}
-        uses: ./.github/actions/push-raport-to-gh-pages
-        with:
-          artifact-name: build-raports
-          file-to-pick: raport-full.rendered.md
-          build-title: ${{ needs.execute-build-plan.outputs.used-scala-version }}
-          token: ${{ steps.generate-token.outputs.token }}
+          ./scripts/emitDashboardLinks.sh "$scalaVersion" \
+            --vs "Compare vs last RC" "$lastRC" \
+            --vs "Compare vs last stable" "$lastStable"
