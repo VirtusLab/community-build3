@@ -38,15 +38,66 @@ object SemVersion:
   def unsafeApply(version: String): SemVersion =
     apply(version).getOrElse(throw IllegalArgumentException(s"Invalid version: $version"))
 
-  given Ordering[SemVersion] with
-    private object StableVersion:
-      def unapply(v: String): Option[String] =
-        if !v.contains('-') && v.split('.').length == 3 then Some(v) else None
+  /** Parsed Scala version components for ordering nightly/snapshot builds. */
+  private case class VersionComponents(
+      major: Int,
+      minor: Int,
+      patch: Int,
+      rc: Int,
+      date: Long,
+      tail: String
+  )
 
-    override def compare(x: String, y: String): Int = (x, y) match
-      case (StableVersion(stable), other) if other.startsWith(stable) => 1
-      case (other, StableVersion(stable)) if other.startsWith(stable) => -1
-      case _                                                          => Ordering.String.compare(x, y)
+  private val VersionPrefix = """^(\d+)\.(\d+)\.(\d+)(?:-(.*))?$""".r
+
+  private def isDate(value: String): Boolean =
+    value.length == 8 && value.forall(_.isDigit)
+
+  private def parseBinParts(afterBin: List[String]): (Long, String) =
+    afterBin match
+      case dateStr :: rest if isDate(dateStr) => (dateStr.toLong, rest.mkString("-"))
+      case _                                  => (0L, afterBin.mkString("-"))
+
+  private def parseComponents(version: String): VersionComponents =
+    version match
+      case VersionPrefix(maj, min, pat, null) =>
+        VersionComponents(maj.toInt, min.toInt, pat.toInt, Int.MaxValue, 0L, "")
+      case VersionPrefix(maj, min, pat, suffix) =>
+        val major = maj.toInt
+        val minor = min.toInt
+        val patch = pat.toInt
+        val parts = suffix.split('-').toList
+
+        def withRc(rc: Int, rest: List[String]): VersionComponents =
+          rest match
+            case Nil =>
+              VersionComponents(major, minor, patch, rc, 0L, "")
+            case "bin" :: afterBin =>
+              val (date, tail) = parseBinParts(afterBin)
+              VersionComponents(major, minor, patch, rc, date, tail)
+            case other =>
+              VersionComponents(major, minor, patch, rc, 0L, other.mkString("-"))
+
+        parts match
+          case s"RC$rcNum" :: rest if rcNum.forall(_.isDigit) =>
+            withRc(rcNum.toInt, rest)
+          case "bin" :: afterBin =>
+            val (date, tail) = parseBinParts(afterBin)
+            VersionComponents(major, minor, patch, 0, date, tail)
+          case _ =>
+            VersionComponents(major, minor, patch, 0, 0L, suffix)
+
+  private def orderingKey(components: VersionComponents): (Int, Int, Int, Int, Long, String) =
+    (components.major, components.minor, components.patch, components.rc, components.date, components.tail)
+
+  private def compareVersions(a: String, b: String): Int =
+    Ordering[(Int, Int, Int, Int, Long, String)].compare(
+      orderingKey(parseComponents(a)),
+      orderingKey(parseComponents(b))
+    )
+
+  given Ordering[SemVersion] with
+    override def compare(x: String, y: String): Int = compareVersions(x, y)
 
   given Codec[SemVersion] = Codec.from(
     Decoder.decodeString.map(identity),
@@ -55,19 +106,7 @@ object SemVersion:
 
   extension (v: SemVersion)
     def isNewerThan(other: SemVersion): Boolean =
-      val List(ref, ver) = List(other: String, v: String)
-        .map(_.split("[.-]").flatMap(_.toIntOption).toList)
-      if (other: String).startsWith(v) && ref.length > ver.length then false
-      else if (v: String).startsWith(other) && ver.length > ref.length then true
-      else
-        val maxLength = ref.length max ver.length
-        def loop(r: List[Int], ver: List[Int]): Boolean = (r, ver) match
-          case (rHead :: rTail, vHead :: vTail) =>
-            if vHead > rHead then true
-            else if vHead < rHead then false
-            else loop(rTail, vTail)
-          case _ => false
-        loop(ref.padTo(maxLength, 0), ver.padTo(maxLength, 0))
+      compareVersions(v: String, other: String) > 0
 
     def isNewerOrEqualTo(other: SemVersion): Boolean =
       v == other || v.isNewerThan(other)

@@ -50,6 +50,42 @@ class SemVersionTest extends FunSuite:
     assert(v340.isNewerThan(v331))
     assert(!v330.isNewerThan(v331))
 
+  test("compare minor versions numerically"):
+    val v310 = SemVersion.unsafeApply("3.10.0-RC1-bin-20260529-80ddc38")
+    val v320 = SemVersion.unsafeApply("3.2.0")
+    val v331 = SemVersion.unsafeApply("3.3.1")
+
+    given Ordering[SemVersion] = SemVersion.given_Ordering_SemVersion
+    assert(Ordering[SemVersion].compare(v310, v320) > 0)
+    assert(Ordering[SemVersion].compare(v310, v331) > 0)
+    assert(v310.isNewerThan(v320))
+
+  test("compare nightly builds by rc then date"):
+    val newer = SemVersion.unsafeApply("3.9.0-RC1-bin-20260522-7db439f-NIGHTLY")
+    val older = SemVersion.unsafeApply("3.9.0-RC1-bin-20260513-5ab0f25")
+    val bareRc = SemVersion.unsafeApply("3.9.0-RC1")
+
+    given Ordering[SemVersion] = SemVersion.given_Ordering_SemVersion
+    assert(Ordering[SemVersion].compare(newer, older) > 0)
+    assert(Ordering[SemVersion].compare(newer, bareRc) > 0)
+    assert(Ordering[SemVersion].compare(older, bareRc) > 0)
+
+  test("compare rc number before bin date"):
+    val rc3 = SemVersion.unsafeApply("3.8.4-RC3")
+    val rc2WithBin = SemVersion.unsafeApply("3.8.4-RC2-bin-20260520-cd2952e")
+
+    given Ordering[SemVersion] = SemVersion.given_Ordering_SemVersion
+    assert(Ordering[SemVersion].compare(rc3, rc2WithBin) > 0)
+
+  test("compare same rc by bin date"):
+    val newer = SemVersion.unsafeApply("3.8.4-RC2-bin-20260520-cd2952e")
+    val older = SemVersion.unsafeApply("3.8.4-RC2-bin-20260510-9ada879")
+    val bareRc = SemVersion.unsafeApply("3.8.4-RC2")
+
+    given Ordering[SemVersion] = SemVersion.given_Ordering_SemVersion
+    assert(Ordering[SemVersion].compare(newer, older) > 0)
+    assert(Ordering[SemVersion].compare(newer, bareRc) > 0)
+
   test("stable version is newer than RC"):
     val stable = SemVersion.unsafeApply("3.3.0")
     val rc = SemVersion.unsafeApply("3.3.0-RC1")
