@@ -135,7 +135,7 @@ object Templates:
   /** Home page with latest build results */
   def homePage(
       builds: List[BuildResult],
-      scalaVersions: List[String],
+      scalaVersions: Iterable[String],
       buildIds: List[String],
       params: HomeParams = HomeParams(),
       failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty,
@@ -161,7 +161,7 @@ object Templates:
 
   /** Home page shell - loads quickly, then fetches results via HTMX */
   def homePageDeferred(
-      scalaVersions: List[String],
+      scalaVersions: Iterable[String],
       params: HomeParams = HomeParams()
   ): String =
     layout(
@@ -191,7 +191,7 @@ object Templates:
   /** Partial: full home content for series changes (includes selector + results) */
   def homeContentPartial(
       builds: List[BuildResult],
-      scalaVersions: List[String],
+      scalaVersions: Iterable[String],
       buildIds: List[String],
       params: HomeParams,
       failureStreaks: Map[ProjectName, FailureStreakInfo] = Map.empty,
@@ -210,7 +210,7 @@ object Templates:
 
   /** Version selector for home page */
   private def homeVersionSelector(
-      scalaVersions: List[String],
+      scalaVersions: Iterable[String],
       buildIds: List[String],
       params: HomeParams
   ): Frag =
@@ -271,7 +271,7 @@ object Templates:
               if params.scalaVersion.isEmpty then attr("selected") := "selected" else frag(),
               "Latest"
             ),
-            filteredVersions.map: v =>
+            filteredVersions.toList.map: v =>
               option(
                 value := v,
                 if params.scalaVersion.contains(v) then attr("selected") := "selected" else frag(),
@@ -492,7 +492,7 @@ object Templates:
 
   /** Comparison page */
   def comparePage(
-      scalaVersions: List[String],
+      scalaVersions: Iterable[String],
       buildIds: List[String],
       result: Option[ComparisonResult],
       params: CompareParams = CompareParams(None, None, None, None),
@@ -530,7 +530,7 @@ object Templates:
 
   /** Partial: compare form for htmx updates (when series changes) */
   def compareFormPartial(
-      scalaVersions: List[String],
+      scalaVersions: Iterable[String],
       buildIds: List[String],
       params: CompareParams
   ): String =
@@ -539,7 +539,7 @@ object Templates:
     compareForm(filteredVersions, buildIds, params).render
 
   /** Comparison form */
-  private def compareForm(scalaVersions: List[String], buildIds: List[String], params: CompareParams): Frag =
+  private def compareForm(scalaVersions: Iterable[String], buildIds: List[String], params: CompareParams): Frag =
     form(
       id := "compare-form",
       cls := "bg-white rounded-lg shadow p-6 mb-8",
@@ -686,14 +686,14 @@ object Templates:
     }
   """
 
-  private def selectField(name: String, label: String, options: List[String], selected: Option[String]): Frag =
+  private def selectField(name: String, label: String, options: Iterable[String], selected: Option[String]): Frag =
     div(
       tag("label")(cls := "block text-sm text-gray-600 mb-1", label),
       tag("select")(
         attr("name") := name,
         cls := "w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
         option(value := "", if selected.isEmpty then attr("selected") := "selected" else frag(), "Select..."),
-        options.map: v =>
+        options.toList.map: v =>
           option(value := v, if selected.contains(v) then attr("selected") := "selected" else frag(), v)
       )
     )

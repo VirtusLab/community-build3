@@ -47,7 +47,7 @@ trait ElasticsearchClient:
   def listAllProjects(): IO[ProjectsList]
 
   /** List available scala versions */
-  def listScalaVersions(): IO[List[String]]
+  def listScalaVersions(): IO[List[SemVersion]]
 
   /** List available build IDs for a scala version */
   def listBuildIds(scalaVersion: Option[String]): IO[List[String]]
@@ -265,7 +265,7 @@ object ElasticsearchClient:
         val failing = sorted.count(_.status == BuildStatus.Failure)
         ProjectsList(sorted, sorted.length, passing, failing)
 
-    override def listScalaVersions(): IO[List[String]] =
+    override def listScalaVersions(): IO[List[SemVersion]] =
       val query = search(BuildSummariesIndex)
         .size(0)
         .aggs(
@@ -274,14 +274,13 @@ object ElasticsearchClient:
         )
 
       executeRaw(query).map: response =>
-        val versions = response.aggs
+        response.aggs
           .result[Terms]("versions")
           .buckets
           .map(_.key)
           .toList
-        // Sort using SemVersion ordering (reversed for descending order)
-        given Ordering[String] = (a, b) => SemVersion.given_Ordering_SemVersion.compare(b, a)
-        versions.sorted
+          .collect { case SemVersion(version) => version }
+          .sorted(using Ordering[SemVersion].reverse)
 
     override def listBuildIds(scalaVersion: Option[String]): IO[List[String]] =
       val baseQuery = search(BuildSummariesIndex).size(0)

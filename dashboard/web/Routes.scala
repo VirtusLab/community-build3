@@ -142,7 +142,11 @@ object Routes:
     val routes = List(
       // Comparison endpoints
       interpreter.toRoutes(Endpoints.compare.serverLogic(req => comparisonApi.compare(req))),
-      interpreter.toRoutes(Endpoints.listScalaVersions.serverLogic(_ => esClient.listScalaVersions().map(Right(_)))),
+      interpreter.toRoutes(
+        Endpoints.listScalaVersions.serverLogic(_ =>
+          esClient.listScalaVersions().map(versions => Right(versions.map(_.asString)))
+        )
+      ),
       interpreter.toRoutes(Endpoints.listBuildIds.serverLogic(sv => esClient.listBuildIds(sv).map(Right(_)))),
 
       // History endpoints
@@ -378,6 +382,7 @@ object Routes:
                 .when(series != ScalaSeries.All):
                   allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
                 .flatten
+                .map(_.asString)
             homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
             response <- Ok(
               Templates.homePageDeferred(allVersions, homeParams),
@@ -393,6 +398,7 @@ object Routes:
                 .when(series != ScalaSeries.All):
                   allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
                 .flatten
+                .map(_.asString)
             homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
             buildIds <- esClient.listBuildIds(effectiveScalaVersion)
             builds <- getCachedBuilds(effectiveScalaVersion, buildId)

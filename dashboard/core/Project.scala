@@ -35,6 +35,10 @@ object SemVersion:
     case s"$_.$_.$_-$_" => Some(version)
     case _              => None
 
+  def unapply(version: String): Option[SemVersion] = apply(version)
+
+  extension (v: SemVersion) def asString: String = v
+
   def unsafeApply(version: String): SemVersion =
     apply(version).getOrElse(throw IllegalArgumentException(s"Invalid version: $version"))
 
@@ -47,6 +51,10 @@ object SemVersion:
       date: Long,
       tail: String
   )
+
+  private given Ordering[VersionComponents] = Ordering.by:
+    case VersionComponents(major, minor, patch, rc, date, tail) =>
+      (major, minor, patch, rc, date, tail)
 
   private val VersionPrefix = """^(\d+)\.(\d+)\.(\d+)(?:-(.*))?$""".r
 
@@ -87,14 +95,8 @@ object SemVersion:
           case _ =>
             VersionComponents(major, minor, patch, 0, 0L, suffix)
 
-  private def orderingKey(components: VersionComponents): (Int, Int, Int, Int, Long, String) =
-    (components.major, components.minor, components.patch, components.rc, components.date, components.tail)
-
   private def compareVersions(a: String, b: String): Int =
-    Ordering[(Int, Int, Int, Int, Long, String)].compare(
-      orderingKey(parseComponents(a)),
-      orderingKey(parseComponents(b))
-    )
+    Ordering[VersionComponents].compare(parseComponents(a), parseComponents(b))
 
   given Ordering[SemVersion] with
     override def compare(x: String, y: String): Int = compareVersions(x, y)

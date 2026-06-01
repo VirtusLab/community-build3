@@ -96,3 +96,7 @@ class SemVersionTest extends FunSuite:
   test("isNewerOrEqualTo includes equal versions"):
     val v330 = SemVersion.unsafeApply("3.3.0")
     assert(v330.isNewerOrEqualTo(v330))
+
+  test("reject legacy snapshot-only strings for SemVersion.apply"):
+    assert(SemVersion("20250307-9cbbee6-SNAPSHOT").isEmpty)
+    assert(SemVersion("20260526-cf3cc7a-SNAPSHOT").isEmpty)
