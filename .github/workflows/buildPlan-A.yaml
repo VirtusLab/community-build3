@@ -272,6 +272,7 @@ jobs:
         - name: "dfianthdl/dfhdl"
         - name: "dieproht/matr"
         - name: "dieproht/molly"
+        - name: "digital-asset/canton"
         - name: "dimitarg/weaver-test-extra"
         - name: "disneystreaming/alloy"
         - name: "disneystreaming/smithy-translate"
@@ -331,7 +332,6 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
@@ -612,7 +613,6 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
-        - name: "medeia/medeia"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "medeia/medeia"
         - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
@@ -893,7 +894,6 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
-        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -951,12 +952,12 @@ jobs:
         - name: "spotify/featran"
         - name: "sqids/sqids-scala"
         - name: "stanch/zipper"
+        - name: "starlake-ai/quack-on-demand"
         - name: "stephennancekivell/scalatest-json"
         - name: "stg-tud/bismuth"
         - name: "stryker-mutator/stryker4s"
         - name: "stryker-mutator/weapon-regex"
         - name: "stuartapp/zcaffeine"
-        - name: "sullis/jms-testkit"
         - name: "suzaku-io/boopickle"
         - name: "svroonland/rezilience"
         - name: "svroonland/zio-kinesis"
@@ -1117,7 +1118,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
