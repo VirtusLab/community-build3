@@ -266,7 +266,6 @@ jobs:
         - name: "davenverse/single-fibered"
         - name: "davenverse/snickerdoodle"
         - name: "delimobil/fs2-hbase"
-        - name: "digital-asset/canton"
         - name: "dobrynya/zio-jms"
         - name: "dotty-cps-async/rl-logic"
         - name: "dotty-cps-async/shim--scala-async"
@@ -332,6 +331,7 @@ jobs:
         - name: "errors4s/errors4s-core-scalacheck"
         - name: "errors4s/errors4s-http"
         - name: "esamson/atbp"
+        - name: "esamson/better-xdg"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
         - name: "etorreborre/registry-scala"
@@ -613,6 +612,7 @@ jobs:
         - name: "lbialy/tailf"
         - name: "leviysoft/scala-kotlin-compat"
         - name: "leviysoft/tightbound"
+        - name: "lhns/cats-effect-utils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
@@ -894,6 +893,7 @@ jobs:
         - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
         - name: "sbt/sbinary"
+        - name: "sbt/sbt-giter8-resolver"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sbt/sbt-giter8-resolver"
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"
@@ -990,6 +989,7 @@ jobs:
         - name: "ssanj/delight"
         - name: "stk-code/scalaveusz"
         - name: "stringbean/text-utils"
+        - name: "sullis/jms-testkit"
         - name: "swagger-akka-http/swagger-enumeratum-module"
         - name: "swagger-akka-http/swagger-scala3-enum-module"
         - name: "swaldman/audiofluidity-rss"
