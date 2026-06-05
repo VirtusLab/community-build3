@@ -207,7 +207,6 @@ jobs:
         - name: "com-lihaoyi/geny"
         - name: "com-lihaoyi/mainargs"
         - name: "com-lihaoyi/mill"
-        - name: "com-lihaoyi/mill-moduledefs"
         - name: "com-lihaoyi/os-lib"
         - name: "com-lihaoyi/pprint"
         - name: "com-lihaoyi/requests-scala"
@@ -332,6 +331,7 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
         - name: "firstbirdtech/backbone"
@@ -392,7 +391,6 @@ jobs:
         - name: "gemini-hlsw/clue"
         - name: "gemini-hlsw/crystal"
         - name: "gemini-hlsw/lucuma-core"
-        - name: "gemini-hlsw/lucuma-odb"
         - name: "getkyo/kyo"
         - name: "getshaka-org/native-converter"
         - name: "ghik/anodi"
@@ -613,6 +611,8 @@ jobs:
         - name: "matsluni/aws-spi-akka-http"
         - name: "max-leuthaeuser/scroll"
         - name: "mdedetrich/pekko-streams-circe"
+        - name: "medeia/medeia"
+        - name: "metarank/cfor"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,8 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "medeia/medeia"
-        - name: "metarank/cfor"
         - name: "metarank/ltrlib"
         - name: "minosiants/pencil"
         - name: "mjakubowski84/parquet4s"
@@ -667,6 +665,7 @@ jobs:
         - name: "nafg/slick-migration-api"
         - name: "nafg/slick-migration-api-flyway"
         - name: "neandertech/cue4s"
+        - name: "neandertech/jsonrpclib"
         - name: "neandertech/langoustine"
         - name: "neandertech/smithy4s-deriving"
         - name: "nebula-contrib/nebula4scala"
@@ -894,6 +893,7 @@ jobs:
         - name: "shiftleftsecurity/overflowdb"
         - name: "sideeffffect/zio-testcontainers"
         - name: "sirthias/borer"
+        - name: "sirthias/macrolizer"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sirthias/macrolizer"
         - name: "sirthias/parboiled2"
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
@@ -1118,6 +1117,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"

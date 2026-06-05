@@ -1,5 +1,5 @@
 
-# projects total:     987
+# projects total:     989
 # min stars count:    -1
 # max projects count: 1000
 
@@ -213,6 +213,7 @@ jobs:
         - name: "colofabrix/h4sbl"
         - name: "colofabrix/tado4s"
         - name: "colofabrix/timeflux"
+        - name: "com-lihaoyi/mill-moduledefs"
         - name: "combinators/expression-problem"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
@@ -331,7 +332,6 @@ jobs:
         - name: "errors4s/errors4s-core-scalacheck"
         - name: "errors4s/errors4s-http"
         - name: "esamson/atbp"
-        - name: "esamson/better-xdg"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
         - name: "etorreborre/registry-scala"
@@ -392,6 +393,7 @@ jobs:
         - name: "gemini-hlsw/lucuma-graphql-routes"
         - name: "gemini-hlsw/lucuma-itc"
         - name: "gemini-hlsw/lucuma-jts"
+        - name: "gemini-hlsw/lucuma-odb"
         - name: "gemini-hlsw/lucuma-refined"
         - name: "gemini-hlsw/lucuma-schemas"
         - name: "gemini-hlsw/lucuma-sso"
@@ -611,8 +613,6 @@ jobs:
         - name: "lbialy/qdrant4s"
         - name: "lbialy/tailf"
         - name: "leviysoft/scala-kotlin-compat"
-        - name: "leviysoft/tightbound"
-        - name: "lhns/cats-effect-utils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "leviysoft/tightbound"
+        - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
@@ -892,8 +894,6 @@ jobs:
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
-        - name: "sbt/sbinary"
-        - name: "sbt/sbt-giter8-resolver"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sbt/sbinary"
+        - name: "sbt/sbt-giter8-resolver"
         - name: "scala-cli/directive-handler"
         - name: "scala-cli/java-class-name"
         - name: "scala-cli/libdaemon-jvm"

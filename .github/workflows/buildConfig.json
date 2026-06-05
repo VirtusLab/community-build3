@@ -42980,6 +42980,51 @@
       ]
     }
   },
+  "neandertech/jsonrpclib":{
+    "project":"neandertech/jsonrpclib",
+    "repoUrl":"https://github.com/neandertech/jsonrpclib.git",
+    "revision":"v0.1.2",
+    "version":"0.1.2",
+    "targets":"tech.neander%jsonrpclib-core tech.neander%jsonrpclib-fs2 tech.neander%jsonrpclib-smithy4s",
+    "publishedScalaVersion":"3.3.6",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3 = \"3.3.6\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
   "neandertech/langoustine":{
     "project":"neandertech/langoustine",
     "repoUrl":"https://github.com/neandertech/langoustine.git",
@@ -73239,6 +73284,50 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "zio-archive/zio-constraintless":{
+    "project":"zio-archive/zio-constraintless",
+    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
+    "revision":"v0.3.4",
+    "version":"0.3.4",
+    "targets":"",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.6.3\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }
