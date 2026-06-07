@@ -1,5 +1,5 @@
 
-# projects total:     990
+# projects total:     989
 # min stars count:    -1
 # max projects count: 1000
 
@@ -235,7 +235,6 @@ jobs:
         - name: "dacr/lorem-ipsum"
         - name: "dacr/lorem-ipsum-server-akkahttp"
         - name: "dacr/naturalsort"
-        - name: "dacr/primes"
         - name: "dacr/primes-server-akkahttp"
         - name: "dacr/split"
         - name: "dacr/spy"
@@ -332,6 +331,7 @@ jobs:
         - name: "errors4s/errors4s-core-cats"
         - name: "errors4s/errors4s-core-scalacheck"
         - name: "errors4s/errors4s-http"
+        - name: "esamson/atbp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "esamson/atbp"
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
@@ -613,6 +612,7 @@ jobs:
         - name: "lbialy/qdrant4s"
         - name: "lbialy/tailf"
         - name: "leviysoft/scala-kotlin-compat"
+        - name: "leviysoft/tightbound"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "leviysoft/tightbound"
         - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
@@ -894,6 +893,7 @@ jobs:
         - name: "sangria-graphql/sangria-msgpack"
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
+        - name: "saucam/shiva"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "saucam/shiva"
         - name: "sbt/sbinary"
         - name: "sbt/sbt-giter8-resolver"
         - name: "scala-cli/directive-handler"
