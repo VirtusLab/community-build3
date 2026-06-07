@@ -78,6 +78,26 @@ class Scala3CommunityBuildMillAdapter(
   }
 
   object Transform {
+
+    /** True if this tree already applies `.mapScalacOptions` (avoid double-wrapping / duplicate defs). */
+    def containsMapScalacOptionsCall(tree: Tree): Boolean =
+      tree.collect { case Term.Select(_, Term.Name("mapScalacOptions")) => () }.nonEmpty
+
+    /** True when scalacOptions only forwards to another module's scalacOptions (already mapped upstream). */
+    def isBareScalacOptionsReference(body: Term): Boolean = body match {
+      case Term.Select(_, Term.Name("scalacOptions")) => true
+      case _                                          => false
+    }
+
+    def scalaVersionRef: Term =
+      if (isMill1x)
+        Term.Apply(
+          Term.Select(Term.This(Name.Anonymous()), Term.Name("scalaVersion")),
+          Nil
+        )
+      else
+        Term.Name("scalaVersion")
+
     val RootMill = Term.Select(Term.Name("_root_"), Term.Name("mill"))
     val TaskType = Term.Select(RootMill, if (useLegacyTasks) Term.Name("T") else Term.Name("Task"))
     val TaskCommandType = {
@@ -108,8 +128,22 @@ class Scala3CommunityBuildMillAdapter(
         Name.Anonymous(),
         Nil
       )
+      def hasScalaModuleSubtype: Boolean =
+        anyTreeOfTypeName(has = ScalaModuleSubtypes)(traits)
+
+      def alreadyHasScalaWorkerPathRefFix(inits: List[Init]): Boolean =
+        inits.exists {
+          case Init(
+                Type.Select(Term.Name("MillCommunityBuild"), Type.Name("CommunityBuildScalaWorkerPathRefFix")),
+                _,
+                _
+              ) =>
+            true
+          case _ => false
+        }
+
       // format: off
-      traits.map {
+      val mapped = traits.map {
           case Init(name @ WithTypeName("CoursierModule"), _, _) =>
             coursierModuleInjected = true
             traitOf("CommunityBuildCoursierModule")
@@ -139,7 +173,8 @@ class Scala3CommunityBuildMillAdapter(
               )
             }
           case init => init
-        } ++ {
+        }
+      val withCoursier = mapped ++ {
           if (!coursierModuleInjected && anyTreeOfTypeName(
               has = coursierModuleSubtypes ++ testModuleSubtypes,
               butNot = List("CoursierModule", "PublishModule")
@@ -147,6 +182,15 @@ class Scala3CommunityBuildMillAdapter(
           ) Seq(traitOf("CommunityBuildCoursierModule"))
           else Nil
         }
+      withCoursier ++ {
+        if (
+          hasScalaModuleSubtype && !alreadyHasScalaWorkerPathRefFix(traits) && !alreadyHasScalaWorkerPathRefFix(
+            withCoursier
+          )
+        )
+          Seq(traitOf("CommunityBuildScalaWorkerPathRefFix"))
+        else Nil
+      }
     }
 
     def injectScalacOptionsMapping = Seq(
@@ -159,29 +203,24 @@ class Scala3CommunityBuildMillAdapter(
             ),
             Term.Name("mapScalacOptions")
           ),
-          List(
-            if(isMill1x)  Term.Apply(
-              Term.Select(Term.This(Name.Anonymous()), Term.Name("scalaVersion")),
-              List()
-            ) else Term.Name("scalaVersion")
-          )
+          List(scalaVersionRef)
         )
       )
     )
 
-    def injectRootModuleRunCommand = {                  
+    def injectRootModuleRunCommand = {
       // def runCommunityBuild(_evaluator: _root_.mill.eval.Evaluator, scalaVersion: _root_.scala.Predef.String, projectDir: _root_.scala.Predef.String, configJson: _root_.scala.Predef.String, targets: _root_.scala.Predef.String*) = _root_.mill.T.command {
       //   implicit val ctx = MillCommunityBuild.Ctx(this, scalaVersion, _evaluator, _root_.mill.T.log)
       //   MillCommunityBuild.runBuild(configJson, projectDir, targets)
       // }""".stripMargin
       val stringType = Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("scala")), Term.Name("Predef")), Type.Name("String"))
-      val evaluatorType = 
-        if (isMill1x) 
+      val evaluatorType =
+        if (isMill1x)
           Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("api")), Type.Name("Evaluator"))
-        else 
+        else
           Type.Select(Term.Select(Term.Select(Term.Name("_root_"), Term.Name("mill")), Term.Name("eval")), Type.Name("Evaluator"))
       Defn.Def(
-        Nil, Term.Name("runCommunityBuild"), Nil, 
+        Nil, Term.Name("runCommunityBuild"), Nil,
         paramss = List(
           List(
             Term.Param(Nil, Term.Name("evaluator"),    Some(evaluatorType), None),
@@ -199,8 +238,8 @@ class Scala3CommunityBuildMillAdapter(
               Term.Block(List(
                 Defn.Def(
                   List(Mod.Implicit()),
-                  Term.Name("ctx"), Nil, Nil, 
-                  Some(Type.Select(Term.Name("MillCommunityBuild"), Type.Name("Ctx"))), 
+                  Term.Name("ctx"), Nil, Nil,
+                  Some(Type.Select(Term.Name("MillCommunityBuild"), Type.Name("Ctx"))),
                   Term.Apply(
                     Term.Select(Term.Name("MillCommunityBuild"), Term.Name("Ctx")),
                     List(
@@ -225,7 +264,7 @@ class Scala3CommunityBuildMillAdapter(
     def isRootModule(defn: Tree): Boolean = config.isMainBuildFile.forall(_ == true) && {
       defn match {
         case defn: Defn.Object if isMill1x => defn.name.value == "package"
-        case _ =>
+        case _                             =>
           val template = defn match {
             case defn: Defn.Class  => defn.templ
             case defn: Defn.Trait  => defn.templ
@@ -256,7 +295,10 @@ class Scala3CommunityBuildMillAdapter(
         val updatedTemplate = template.copy(
           inits = mapTraits(traits),
           stats = stats.map(transformDefn).collect { case stat: Stat => stat } ++ {
-            if (hasScalacOptions || !canHaveScalacOptions || noInjects) Nil
+            if (
+              hasScalacOptions || !canHaveScalacOptions || noInjects ||
+              stats.exists(containsMapScalacOptionsCall)
+            ) Nil
             else injectScalacOptionsMapping
           } ++ {
             if (isRootModule(defn) && !noInjects) {
@@ -274,47 +316,53 @@ class Scala3CommunityBuildMillAdapter(
         }
 
       case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        def mapScalacOptions(receiver: Term) =
-          Term.Apply(
-            Term.Select(receiver, Term.Name("mapScalacOptions")),
-            List(Term.Name("scalaVersion"))
-          )
-
-        val updatedBody = body match {
-          case taskApply @ Term.Apply(receiver, Seq(arg @ Term.Block(stats)))
-              if receiver.syntax.contains("Task") =>
-            taskApply.copy(args =
-              Term.ArgClause(
-                Term.Block(
-                  stats.init ::: mapScalacOptions(stats.last.asInstanceOf[Term]) :: Nil
-                ) :: Nil
-              )
-            )
-
-          // Task(foo) => foo.mapScalacOptions(scalaVersion)
-          case Term.Apply(receiver, Seq(body: Term.Select)) if receiver.syntax.contains("Task") =>
-            System.err.println(s"mapScalacOptions args: $body: ${body.structure}")
-            mapScalacOptions(body)
-
-          // Ad-hoc fix for com-lihaoyi/cask defining Option().toSeq
-          case select: Term.Select if isMill1x && !Seq(".toSeq").exists(select.syntax.endsWith) =>
-            // If select is used then expected result type is Task[?]
-            // We need to evaluate it and map
+        if (containsMapScalacOptionsCall(body) || isBareScalacOptionsReference(body)) {
+          tree match {
+            case defn: Defn.Val => defn
+            case defn: Defn.Def => defn
+          }
+        } else {
+          def mapScalacOptions(receiver: Term) =
             Term.Apply(
-              TaskType,
-              Term.ArgClause(
-                Term.Block(
-                  mapScalacOptions(Term.Apply(select, Nil)) :: Nil
-                ) :: Nil
-              )
+              Term.Select(receiver, Term.Name("mapScalacOptions")),
+              List(scalaVersionRef)
             )
 
-          case _ =>
-            mapScalacOptions(body)
-        }
-        tree match {
-          case defn: Defn.Val => defn.copy(rhs = updatedBody)
-          case defn: Defn.Def => defn.copy(body = updatedBody)
+          val updatedBody = body match {
+            case taskApply @ Term.Apply(receiver, Seq(arg @ Term.Block(stats))) if receiver.syntax.contains("Task") =>
+              taskApply.copy(args =
+                Term.ArgClause(
+                  Term.Block(
+                    stats.init ::: mapScalacOptions(stats.last.asInstanceOf[Term]) :: Nil
+                  ) :: Nil
+                )
+              )
+
+            // Task(foo) => foo.mapScalacOptions(scalaVersion)
+            case Term.Apply(receiver, Seq(body: Term.Select)) if receiver.syntax.contains("Task") =>
+              System.err.println(s"mapScalacOptions args: $body: ${body.structure}")
+              mapScalacOptions(body)
+
+            // Ad-hoc fix for com-lihaoyi/cask defining Option().toSeq
+            case select: Term.Select if isMill1x && !Seq(".toSeq").exists(select.syntax.endsWith) =>
+              // If select is used then expected result type is Task[?]
+              // We need to evaluate it and map
+              Term.Apply(
+                TaskType,
+                Term.ArgClause(
+                  Term.Block(
+                    mapScalacOptions(Term.Apply(select, Nil)) :: Nil
+                  ) :: Nil
+                )
+              )
+
+            case _ =>
+              mapScalacOptions(body)
+          }
+          tree match {
+            case defn: Defn.Val => defn.copy(rhs = updatedBody)
+            case defn: Defn.Def => defn.copy(body = updatedBody)
+          }
         }
       case tree @ ValOrDefDef(Term.Name("scalaVersion"), tpe, body) =>
         def replacement = {

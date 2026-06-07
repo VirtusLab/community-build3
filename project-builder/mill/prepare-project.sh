@@ -179,6 +179,13 @@ else
   adaptedFiles+=(`find $millBuildDirectory -type f -name "*.sc"`)
   adaptedFiles+=(`find $millBuildDirectory -type f -name "*.scala"`)
 fi
+# Mill itself keeps extra modules under ./libs (outside mill-build/src); adapt those too, but skip
+# test fixtures which are not part of the meta-build graph.
+if [[ -d "./libs" ]]; then
+  while IFS= read -r -d '' f; do
+    adaptedFiles+=("$f")
+  done < <(find ./libs -type f \( -name "*.mill" -o -name "*.sc" \) ! -path "*/test/*" -print0)
+fi
 for buildFile in "${adaptedFiles[@]}"; do 
   isMainBuildFile=false
   if [[ "$buildFile" == "$millBuildFile" ]]; then

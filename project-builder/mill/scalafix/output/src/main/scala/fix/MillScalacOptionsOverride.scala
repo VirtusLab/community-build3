@@ -25,7 +25,7 @@ object MillScalacOptionsOverride {
       Seq(opt1)
     }.mapScalacOptions(scalaVersion)
   }
-  class moduleDef2 extends moduleDef { override val scalacOptions: T[Seq[String]] = MillScalacOptionsOverride.scalacOptions.mapScalacOptions(scalaVersion) }
+  class moduleDef2 extends moduleDef { override val scalacOptions: T[Seq[String]] = MillScalacOptionsOverride.scalacOptions }
   object moduleDef3 extends moduleDef {
     override def scalacOptions = T {
       super.scalacOptions ++ Nil

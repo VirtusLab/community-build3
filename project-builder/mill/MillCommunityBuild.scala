@@ -2,7 +2,7 @@
 package millbuild
 
 import mill.Module
-import mill.api.{Val, Task, ModuleRef, Result, Evaluator}
+import mill.api.{Evaluator, ModuleRef, PathRef, Result, Task, Val}
 import mill.api.daemon.Segment
 import mill.javalib.JvmWorkerModule
 import mill.javalib.testrunner.TestResult
@@ -47,6 +47,17 @@ object MillCommunityBuild {
       override def repositoriesTask = Task.Anon:
         mavenRepo.foldLeft(super.repositoriesTask())(_ :+ _)
   }
+
+  /** Forked Mill JVM workers re-check [[PathRef]] content signatures on RPC. Compiler plugins in
+    * ivy-local can trigger `PathRefValidationException` when deserializing `scalacPluginClasspath`.
+    *
+    * Do not try to fix this by overriding [[JvmWorkerModule.internalWorker]]: nesting
+    * `super.internalWorker()` under a new `Task.Worker` changes `Task.dest` and breaks Zinc
+    * subprocess file locking (writes must stay under the compiling module's dest).
+    */
+  trait CommunityBuildScalaWorkerPathRefFix extends ScalaModule:
+    override def scalacPluginClasspath =
+      super.scalacPluginClasspath().map(_.withRevalidate(PathRef.Revalidate.Never))
 
   // Extension to publish module allowing to upload artifacts to custom maven repo
   // Left for compliance with legacy versions
@@ -101,11 +112,10 @@ object MillCommunityBuild {
         case List(crossVersion, MatchesScalaBinaryVersion()) => (crossVersion, buildScalaVersion)
         case _ => crossEntry
       }
-      version <- Seq(mappedCross, crossEntry).distinct
     } yield {
-      if version != crossEntry then
+      if mappedCross != crossEntry then
         logOnce(s"Use cross-version $mappedCross instead of $crossEntry")
-      version.asInstanceOf[T]
+      mappedCross.asInstanceOf[T]
     }
     resultCrossVersions.distinct
   }
@@ -167,9 +177,9 @@ object MillCommunityBuild {
         case Result.Success(v) =>
           ctx.log.info(s"Successfully evaluated $task")
           EvalResult.Value(v, evalTime = tookMillis)
-        case Result.Failure(error) =>
-          ctx.log.error(s"Failed to evaluated $task: ${error}")
-          EvalResult.Failure(EvaluationFailure(error) :: Nil, evalTime = tookMillis)
+        case failure: Result.Failure =>
+          ctx.log.error(s"Failed to evaluate $task: ${failure}")
+          EvalResult.Failure(EvaluationFailure(failure.toString()) :: Nil, evalTime = tookMillis)
       }
     }
 
