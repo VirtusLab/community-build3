@@ -39,6 +39,11 @@ fi
 
 cd $repoDir
 
+sbtMajor=1
+if [[ -f project/build.properties ]]; then
+  sbtMajor=$(grep -E '^sbt\.version=' project/build.properties | cut -d= -f2 | cut -d. -f1)
+fi
+
 # GithHub actions workers have maximally 7GB of RAM
 memorySettings=("-J-Xmx7G" "-J-Xms4G" "-J-Xss8M")
 
@@ -86,18 +91,36 @@ function runSbt() {
   tq='"""'
   # csrSameVersions := Nil is set to allow testing Scala 3.8+ (new stdlib) without forcing upgrade to sbt 1.11.5
   # Timeout 110 minutes
-  timeout 6600 \
-    sbt ${sbtSettings[@]} \
-    "--batch" \
-    "setCrossScalaVersions $scalaVersion" \
-    "$setScalaVersionCmd -v" \
-    "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\"" \
-    "set every credentials := Nil" \
-    "excludeLibraryDependency ${excludedCompilerPlugins[*]}" \
-    "removeScalacOptionsStartingWith ${excludedCompilerPluginOptPrefixes[*]}" \
-    "$customCommands" \
-    "moduleMappings" \
-    "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString" 2>&1 | tee $logFile
+  sbtCommands=(
+    "setCrossScalaVersions $scalaVersion"
+    "$setScalaVersionCmd -v"
+    "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\""
+    "set every credentials := Nil"
+    "excludeLibraryDependency ${excludedCompilerPlugins[*]}"
+    "removeScalacOptionsStartingWith ${excludedCompilerPluginOptPrefixes[*]}"
+  )
+  if [[ -n "$customCommands" ]]; then
+    sbtCommands+=("$customCommands")
+  fi
+  sbtCommands+=(
+    "moduleMappings"
+    "runBuild ${scalaVersion} ${tq}${projectConfig}${tq} $targetsString"
+  )
+
+  if [[ "$sbtMajor" -ge 2 ]]; then
+    # sbt 2 batch client concatenates separate CLI args into one command line,
+    # so Command.args-based helpers would swallow the rest of the build script.
+    local joinedCommands
+    joinedCommands=$(IFS='; '; echo "${sbtCommands[*]}")
+    timeout 6600 \
+      sbt ${sbtSettings[@]} \
+      "$joinedCommands" 2>&1 | tee $logFile
+  else
+    timeout 6600 \
+      sbt ${sbtSettings[@]} \
+      "--batch" \
+      "${sbtCommands[@]}" 2>&1 | tee $logFile
+  fi
 
   exit_code=${PIPESTATUS[0]}
   if [ $exit_code -eq 124 ]; then

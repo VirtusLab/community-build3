@@ -12,64 +12,9 @@ import scala.collection.mutable
 import Scala3CommunityBuild.{Utils => _, _}
 import Scala3CommunityBuild.Utils.{LibraryDependency, logOnce}
 import TaskEvaluator.EvalResult
+import CommunityBuildConfigFormats._
 
-class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
-    extends TaskEvaluator[TaskKey] {
-
-  override def eval[T](task: TaskKey[T]): EvalResult[T] = {
-    val evalStart = System.currentTimeMillis()
-    val scopedTask = project / task
-
-    sbt.Project
-      .runTask(scopedTask, state)
-      .fold[EvalResult[T]] {
-        val reason = TaskEvaluator.UnkownTaskException(scopedTask.toString())
-        EvalResult.Failure(reason :: Nil, 0)
-      } { case (newState, result) =>
-        val tookMs = (System.currentTimeMillis() - evalStart).toInt
-        this.state = newState
-        result.toEither match {
-          case Right(value) => EvalResult.Value(value, tookMs)
-          case Left(incomplete) =>
-            val causes = getAllDirectCauses(incomplete)
-            EvalResult.Failure(causes, tookMs)
-        }
-      }
-  }
-
-  private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
-    val Limit = 10
-    @scala.annotation.tailrec
-    def loop(
-        incomplete: List[Incomplete],
-        acc: List[Throwable]
-    ): List[Throwable] = {
-      incomplete match {
-        case Nil                     => acc
-        case _ if acc.length > Limit => acc
-        case head :: tail =>
-          loop(
-            incomplete = tail ::: head.causes.toList,
-            acc = acc ::: head.directCause.toList
-          )
-      }
-    }
-    loop(incomplete :: Nil, Nil)
-  }
-}
-
-object WithExtractedScala3Suffix {
-  def unapply(s: String): Option[(String, String)] = {
-    val parts = s.split("_")
-    if (parts.length > 1 && parts.last.startsWith("3")) {
-      Some((parts.init.mkString("_"), parts.last))
-    } else {
-      None
-    }
-  }
-}
-
-object CommunityBuildPlugin extends AutoPlugin {
+trait CommunityBuildPluginShared extends AutoPlugin {
   override def trigger = allRequirements
 
   val runBuild = inputKey[Unit]("")
@@ -92,7 +37,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       Seq(scala3NightliesRepo) 
 
   override def projectSettings = Seq(
-    externalResolvers ++= extraOpenCBMavenRepos,
+    resolvers ++= extraOpenCBMavenRepos,
     // Fix for cyclic dependency when trying to use crossScalaVersion ~= ???
     crossScalaVersions := (thisProjectRef / crossScalaVersions).value,
     // Use explicitly required scala version, otherwise we might stumble onto the default projects Scala versions
@@ -319,7 +264,7 @@ object CommunityBuildPlugin extends AutoPlugin {
       val extracted = sbt.Project.extract(state)
       import extracted._
       val withArgs = mapping(args, extracted)
-      val r = sbt.Project.relation(extracted.structure, true)
+      val r = SbtAdapterSupport.projectRelation(extracted)
       val allDefs = r._1s.toSeq
       val projectScopes =
         allDefs.filter(_.key == task.key).map(_.scope).distinct
@@ -397,7 +342,7 @@ object CommunityBuildPlugin extends AutoPlugin {
         val parsed = Parser
           .parseFromString(configJson)
           .flatMap(
-            Converter.fromJson[ProjectBuildConfig](_)(ProjectBuildConfigFormat)
+            Converter.fromJson[ProjectBuildConfig](_)(CommunityBuildConfigFormats.ProjectBuildConfigFormat)
           )
         println(s"Parsed config: ${parsed}")
         parsed.getOrElse(ProjectBuildConfig())
@@ -756,6 +701,14 @@ object CommunityBuildPlugin extends AutoPlugin {
     }
   }
 
+  protected def collectTestResults(
+      evalResult: EvalResult[?],
+      definedTests: EvalResult[Seq[sbt.TestDefinition]],
+      loadedTestFrameworks: EvalResult[
+        Map[sbt.TestFramework, sbt.testing.Framework]
+      ]
+  ): TestsResult
+
   private def collectCompileResult(
       evalResult: EvalResult[CompileAnalysis],
       scalacOptions: Seq[String]
@@ -816,139 +769,4 @@ object CommunityBuildPlugin extends AutoPlugin {
         CompileResult.skipped()
     }
   }
-
-  def collectTestResults(
-      evalResult: EvalResult[sbt.Tests.Output],
-      definedTests: EvalResult[Seq[sbt.TestDefinition]],
-      loadedTestFrameworks: EvalResult[
-        Map[sbt.TestFramework, sbt.testing.Framework]
-      ]
-  ): TestsResult = {
-    val default = TestsResult(
-      evalResult.toStatus,
-      failureContext = evalResult.toBuildError,
-      tookMs = evalResult.evalTime
-    )
-
-    evalResult match {
-      case EvalResult.Value(value, _) =>
-        val status = value.overall match {
-          case TestResult.Passed => Status.Ok
-          case _                 => Status.Failed
-        }
-        def sum(results: Iterable[SuiteResult]) =
-          results.foldLeft(TestStats.empty) { case (state, result) =>
-            state.copy(
-              passed = state.passed + result.passedCount,
-              failed =
-                state.failed + result.failureCount + result.errorCount + result.canceledCount,
-              ignored = state.ignored + result.ignoredCount,
-              skipped = state.skipped + result.skippedCount
-            )
-          }
-        val byFrameworkStats: Map[String, TestStats] =
-          (definedTests, loadedTestFrameworks) match {
-            case (
-                  EvalResult.Value(definedTests, _),
-                  EvalResult.Value(loadedTestFrameworks, _)
-                ) =>
-              val frameworkByFingerprint = loadedTestFrameworks.values.flatMap { framework =>
-                val name = framework.name()
-                framework.fingerprints().map(_ -> name)
-              }.toMap
-              val testFrameworks = definedTests.map { test =>
-                val framework = frameworkByFingerprint
-                  .get(test.fingerprint)
-                  .orElse {
-                    // In case if overwrites toString but not equals (see munit)
-                    frameworkByFingerprint.collectFirst {
-                      case (fingerprint, name)
-                          if test.fingerprint
-                            .toString() == fingerprint.toString =>
-                        name
-                    }
-                  }
-                  .getOrElse("unknown")
-                test.name -> framework
-              }.toMap
-              value.events
-                .groupBy { case (testName, _) =>
-                  testFrameworks.get(testName).getOrElse("unknown")
-                }
-                .map { case (frameworkName, results) =>
-                  frameworkName -> sum(results.values)
-                }
-            case _ => Map.empty
-          }
-        val overallStats = sum(value.events.values)
-        default.copy(
-          status = status,
-          overall = overallStats,
-          byFramework = byFrameworkStats
-        )
-      case _ => default
-    }
-  }
-
-  // Serialization
-  implicit object TestingModeEnumJsonFormat extends JsonFormat[TestingMode] {
-    def write[J](x: TestingMode, builder: Builder[J]): Unit = ???
-    def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): TestingMode =
-      jsOpt.fold(deserializationError("Missing string")) { js =>
-        unbuilder.readString(js) match {
-          case "disabled"     => TestingMode.Disabled
-          case "compile-only" => TestingMode.CompileOnly
-          case "full"         => TestingMode.Full
-        }
-      }
-  }
-
-  implicit object ProjectOverridesFormat extends JsonFormat[ProjectOverrides] {
-    def write[J](obj: ProjectOverrides, builder: Builder[J]): Unit = ???
-    def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): ProjectOverrides =
-      jsOpt.fold(deserializationError("Empty object")) { js =>
-        implicit val _unbuilder: Unbuilder[J] = unbuilder
-        unbuilder.beginObject(js)
-        val testsMode = readOrDefault("tests", Option.empty[TestingMode])
-        unbuilder.endObject
-        ProjectOverrides(tests = testsMode)
-      }
-  }
-
-  implicit object ProjectsConfigFormat extends JsonFormat[ProjectsConfig] {
-    def write[J](obj: ProjectsConfig, builder: Builder[J]): Unit = ???
-    def read[J](jsOpt: Option[J], unbuilder: Unbuilder[J]): ProjectsConfig =
-      jsOpt.fold(deserializationError("Empty object")) { js =>
-        implicit val _unbuilder: Unbuilder[J] = unbuilder
-        unbuilder.beginObject(js)
-        val excluded = readOrDefault("exclude", Array.empty[String])
-        val overrides =
-          readOrDefault("overrides", Map.empty[String, ProjectOverrides])
-        unbuilder.endObject()
-        ProjectsConfig(excluded.toList, overrides)
-      }
-  }
-
-  implicit object ProjectBuildConfigFormat extends JsonFormat[ProjectBuildConfig] {
-    def write[J](v: ProjectBuildConfig, builder: Builder[J]): Unit = ???
-    def read[J](
-        optValue: Option[J],
-        unbuilder: Unbuilder[J]
-    ): ProjectBuildConfig =
-      optValue.fold(deserializationError("Empty object")) { v =>
-        implicit val _unbuilder: Unbuilder[J] = unbuilder
-        unbuilder.beginObject(v)
-        val projects = readOrDefault("projects", ProjectsConfig())
-        val testsMode = readOrDefault[TestingMode, J]("tests", TestingMode.Full)
-        unbuilder.endObject()
-        ProjectBuildConfig(projects, testsMode)
-      }
-  }
-  private def readOrDefault[T, J](field: String, default: T)(implicit
-      format: JsonReader[T],
-      unbuilder: Unbuilder[J]
-  ) =
-    unbuilder
-      .lookupField(field)
-      .fold(default)(v => format.read(Some(v), unbuilder))
 }
