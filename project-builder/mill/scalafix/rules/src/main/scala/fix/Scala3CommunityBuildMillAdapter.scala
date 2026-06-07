@@ -89,14 +89,17 @@ class Scala3CommunityBuildMillAdapter(
       case _                                          => false
     }
 
-    def scalaVersionRef: Term =
+    def scalaVersionTaskRef: Term =
       if (isMill1x)
-        Term.Apply(
-          Term.Select(Term.This(Name.Anonymous()), Term.Name("scalaVersion")),
-          Nil
-        )
+        Term.Select(Term.This(Name.Anonymous()), Term.Name("scalaVersion"))
       else
         Term.Name("scalaVersion")
+
+    def scalaVersionRef: Term =
+      if (isMill1x)
+        Term.Apply(scalaVersionTaskRef, Nil)
+      else
+        scalaVersionTaskRef
 
     val RootMill = Term.Select(Term.Name("_root_"), Term.Name("mill"))
     val TaskType = Term.Select(RootMill, if (useLegacyTasks) Term.Name("T") else Term.Name("Task"))
@@ -329,13 +332,10 @@ class Scala3CommunityBuildMillAdapter(
             )
 
           val updatedBody = body match {
-            case taskApply @ Term.Apply(receiver, Seq(arg @ Term.Block(stats))) if receiver.syntax.contains("Task") =>
-              taskApply.copy(args =
-                Term.ArgClause(
-                  Term.Block(
-                    stats.init ::: mapScalacOptions(stats.last.asInstanceOf[Term]) :: Nil
-                  ) :: Nil
-                )
+            case taskApply @ Term.Apply(receiver, Seq(_: Term.Block)) if receiver.syntax.contains("Task") =>
+              Term.Apply(
+                Term.Select(taskApply, Term.Name("mapScalacOptions")),
+                List(scalaVersionTaskRef)
               )
 
             // Task(foo) => foo.mapScalacOptions(scalaVersion)

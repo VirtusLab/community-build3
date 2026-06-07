@@ -29,8 +29,8 @@ object MillScalacOptionsNestedDelegation {
   trait CommonBase extends ScalaModule with MillCommunityBuild.CommunityBuildPublishModule with MillCommunityBuild.CommunityBuildScalaWorkerPathRefFix { common =>
     def scalaVersion = scala3
     def scalacOptions = Task {
-      Seq("-Wunused:privates,locals,explicits,implicits,params").mapScalacOptions(this.scalaVersion())
-    }
+      Seq("-Wunused:privates,locals,explicits,implicits,params")
+    }.mapScalacOptions(this.scalaVersion)
     trait CommonTest extends ScalaTests with MillCommunityBuild.CommunityBuildCoursierModule with MillCommunityBuild.CommunityBuildScalaWorkerPathRefFix { def scalacOptions = common.scalacOptions }
   }
 }

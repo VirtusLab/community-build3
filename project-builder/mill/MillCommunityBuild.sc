@@ -75,6 +75,9 @@ trait CommunityBuildCoursierModule extends CoursierModule with JavaModule {
   }
 }
 
+/** Marker for scalafix-injected Scala modules. Path-ref revalidation is handled on Mill 1.x only. */
+trait CommunityBuildScalaWorkerPathRefFix extends ScalaModule
+
 // Extension to publish module allowing to upload artifacts to custom maven repo
 // Left for compliance with legacy versions
 trait CommunityBuildPublishModule extends PublishModule with CommunityBuildCoursierModule
