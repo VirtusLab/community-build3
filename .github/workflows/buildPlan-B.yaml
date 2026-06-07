@@ -1,5 +1,5 @@
 
-# projects total:     989
+# projects total:     990
 # min stars count:    -1
 # max projects count: 1000
 
@@ -235,6 +235,7 @@ jobs:
         - name: "dacr/lorem-ipsum"
         - name: "dacr/lorem-ipsum-server-akkahttp"
         - name: "dacr/naturalsort"
+        - name: "dacr/primes"
         - name: "dacr/primes-server-akkahttp"
         - name: "dacr/split"
         - name: "dacr/spy"
@@ -331,7 +332,6 @@ jobs:
         - name: "errors4s/errors4s-core-cats"
         - name: "errors4s/errors4s-core-scalacheck"
         - name: "errors4s/errors4s-http"
-        - name: "esamson/atbp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "esamson/atbp"
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
@@ -474,7 +475,6 @@ jobs:
         - name: "i10416/munkres"
         - name: "ij-plugins/ijp-javacv"
         - name: "ij-plugins/ijp-scala-console"
-        - name: "imaxmelnyk/openai-scala"
         - name: "indoorvivants/decline-completion"
         - name: "indoorvivants/detective"
         - name: "indoorvivants/fxprof"
@@ -879,6 +879,7 @@ jobs:
         - name: "rustedbones/pekko-http-thrift"
         - name: "rustedbones/scout"
         - name: "sadly-dubious-org/widely-used-util"
+        - name: "sake92/deder-plugins"
         - name: "sake92/mill-local-vs-publish-repro"
         - name: "sake92/sbt-build-extract"
         - name: "sakulk/serval"
@@ -893,7 +894,6 @@ jobs:
         - name: "sangria-graphql/sangria-msgpack"
         - name: "sangria-graphql/sangria-spray-json"
         - name: "sangria-graphql/sangria-streaming-api"
-        - name: "saucam/shiva"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "saucam/shiva"
         - name: "sbt/sbinary"
         - name: "sbt/sbt-giter8-resolver"
         - name: "scala-cli/directive-handler"
@@ -985,7 +986,7 @@ jobs:
         - name: "sky-uk/kafka-topic-loader"
         - name: "snowplow/iglu-scala-client"
         - name: "snowplow/iglu-scala-core"
-        - name: "softinio/duck4s"
+        - name: "softwaremill/sttp-shared"
         - name: "spaceteams/scala-json-logging"
         - name: "spilne/spilne"
         - name: "ssanj/delight"
