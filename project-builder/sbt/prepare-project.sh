@@ -51,17 +51,21 @@ sbtMajor=${sbtSemVerParts[0]}
 sbtMinor=${sbtSemVerParts[1]}
 sbtPatch=${sbtSemVerParts[2]}
 
-minSbtSemVerParts=($(echo $(parseSemver "$MinSbtVersion")))
-minSbtMajor=${minSbtSemVerParts[0]}
-minSbtMinor=${minSbtSemVerParts[1]}
-minSbtPatch=${minSbtSemVerParts[2]}
+if [[ "$sbtMajor" -lt 2 ]]; then
+  minSbtSemVerParts=($(echo $(parseSemver "$MinSbtVersion")))
+  minSbtMajor=${minSbtSemVerParts[0]}
+  minSbtMinor=${minSbtSemVerParts[1]}
+  minSbtPatch=${minSbtSemVerParts[2]}
 
-if [[ "$sbtMajor" -lt "$minSbtMajor" ]] ||
-  ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -lt "$minSbtMinor" ]]) ||
-  ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -eq "$minSbtMinor" ]] && [[ "$sbtPatch" -lt "$minSbtPatch" ]]); then
-  echo "Sbt version $sbtVersion is not supported, minimal supported version is $MinSbtVersion"
-  echo "Enforcing usage of sbt in version ${MinSbtVersion}"
-  sed -i -E "s/(sbt.version\s*=\s*).*/\1${MinSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$MinSbtVersion" > "${buildPropsFile}"
+  if [[ "$sbtMajor" -lt "$minSbtMajor" ]] ||
+    ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -lt "$minSbtMinor" ]]) ||
+    ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -eq "$minSbtMinor" ]] && [[ "$sbtPatch" -lt "$minSbtPatch" ]]); then
+    echo "Sbt version $sbtVersion is not supported, minimal supported version is $MinSbtVersion"
+    echo "Enforcing usage of sbt in version ${MinSbtVersion}"
+    sed -i -E "s/(sbt.version\s*=\s*).*/\1${MinSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$MinSbtVersion" > "${buildPropsFile}"
+  fi
+else
+  echo "Using sbt 2.x project adapter for sbt version $sbtVersion"
 fi
 
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
@@ -77,8 +81,22 @@ else
 fi
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+sharedDir="$scriptDir/shared"
+if [[ "$sbtMajor" -ge 2 ]]; then
+  adapterDir="$scriptDir/sbt2"
+else
+  adapterDir="$scriptDir/sbt1"
+fi
+
 ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
-ln -fs $scriptDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
+ln -fs $sharedDir/CommunityBuildConfigFormats.scala $repoDir/project/CommunityBuildConfigFormats.scala
+ln -fs $sharedDir/CommunityBuildPluginShared.scala $repoDir/project/CommunityBuildPluginShared.scala
+ln -fs $adapterDir/SbtTaskEvaluator.scala $repoDir/project/SbtTaskEvaluator.scala
+ln -fs $adapterDir/SbtAdapterSupport.scala $repoDir/project/SbtAdapterSupport.scala
+ln -fs $adapterDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
+if [[ "$sbtMajor" -ge 2 ]]; then
+  ln -fs $adapterDir/CommunityBuildTestSupport.scala $repoDir/project/CommunityBuildTestSupport.scala
+fi
 
 # Register utility commands, for more info check command impl comments
 echo -e "\ncommands ++= CommunityBuildPlugin.commands" >>$repoDir/build.sbt
