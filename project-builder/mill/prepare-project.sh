@@ -26,6 +26,8 @@ readonly MILL_0_9=0.9.12
 readonly RESOLVE="resolve _"
 readonly MILL_BUILD_SCALA=build.mill.scala
 readonly MILL_BUILD=build.mill
+readonly MILL_BUILD_YAML=build.mill.yaml
+readonly TRIM_VALUE_SED="s/.*://; s/#.*//; s/['\"]//g; s/^[[:space:]]*//; s/[[:space:]]*$//"
 
 cd $repoDir
 
@@ -36,6 +38,7 @@ echo "-Xmx7G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
 
 millBuildFile=
+isMillYamlBuild=false
 for rootBuildFile in "$MILL_BUILD" "$MILL_BUILD_SCALA" "./build.sc"; do
   if [[ -f $rootBuildFile ]]; then
     millBuildFile=$rootBuildFile
@@ -47,6 +50,11 @@ for rootBuildFile in "$MILL_BUILD" "$MILL_BUILD_SCALA" "./build.sc"; do
     break 1
   fi
 done
+if [[ -z "$millBuildFile" && -f "$MILL_BUILD_YAML" ]]; then
+  millBuildFile="$MILL_BUILD_YAML"
+  isMillYamlBuild=true
+  echo "Found declarative mill build file $MILL_BUILD_YAML"
+fi
 if [[ -z "$millBuildFile" ]]; then
   echo "Not found a valid mill build root file"
   exit 1
@@ -59,6 +67,11 @@ if [ -f ".mill-version" ] ; then
 elif [ -f ".config/mill-version" ] ; then
   millVersion="$(tr '\r' '\n' < .config/mill-version | head -n 1 2> /dev/null)"
   echo "Found explicit mill version $millVersion in .config/mill-version"
+elif [[ "$isMillYamlBuild" == true ]]; then
+  millVersion="$(grep -E "mill-version:" "${millBuildFile}" | head -n 1 | sed -E "$TRIM_VALUE_SED")"
+  if [[ -n $millVersion ]]; then
+    echo "Found explicit mill version $millVersion in $MILL_BUILD_YAML"
+  fi
 elif [ -n "${millBuildFile}" ] ; then
   millVersion="$(cat ${millBuildFile} | grep '//[|]  *mill-version:  *' | sed 's;//|  *mill-version:  *;;')"
   if [[ -n $millVersion ]]; then
@@ -145,6 +158,13 @@ if [[ "$millBinaryVersionMajor" -gt "1" ]]; then
   exit 1
 fi
 
+if [[ "$isMillYamlBuild" == true ]]; then
+  if ! isVersionGreaterOrEqual "$millBinaryVersion" "1.1"; then
+    echo "Declarative $MILL_BUILD_YAML requires Mill 1.1 or later (found $millVersion)"
+    exit 1
+  fi
+fi
+
 prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
 if [[ -f "$prepareScript" ]]; then
   if [[ -x "$prepareScript" ]]; then 
@@ -159,7 +179,14 @@ fi
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs
-adaptedFiles=( $millBuildFile )
+adaptedFiles=()
+if [[ "$isMillYamlBuild" == true ]]; then
+  while IFS= read -r -d '' f; do
+    adaptedFiles+=("$f")
+  done < <(find . -path "./out" -prune -o -type f -name "*.mill.yaml" -print0)
+else
+  adaptedFiles=( $millBuildFile )
+fi
 millBuildDirectory=
 if [[ -d "./mill-build/src" ]]; then
   if isVersionGreaterOrEqual "$millBinaryVersion" 1.0 ; then
@@ -179,7 +206,28 @@ else
   adaptedFiles+=(`find $millBuildDirectory -type f -name "*.sc"`)
   adaptedFiles+=(`find $millBuildDirectory -type f -name "*.scala"`)
 fi
+# Mill itself keeps extra modules under ./libs (outside mill-build/src); adapt those too, but skip
+# test fixtures which are not part of the meta-build graph.
+if [[ -d "./libs" ]]; then
+  while IFS= read -r -d '' f; do
+    adaptedFiles+=("$f")
+  done < <(find ./libs -type f \( -name "*.mill" -o -name "*.sc" \) ! -path "*/test/*" -print0)
+fi
+if [[ "$isMillYamlBuild" == true ]]; then
+  for buildFile in "${adaptedFiles[@]}"; do
+    isRootYamlBuild=false
+    if [[ "$(realpath "$buildFile")" == "$(realpath "$millBuildFile")" ]]; then
+      isRootYamlBuild=true
+    fi
+    echo "Adapt declarative mill config $buildFile (root=${isRootYamlBuild})"
+    scala-cli "$scriptDir/adaptBuildMillYaml.scala" -- "$buildFile" "$scalaVersion" "$isRootYamlBuild"
+  done
+fi
+
 for buildFile in "${adaptedFiles[@]}"; do 
+  if [[ "$isMillYamlBuild" == true ]]; then
+    continue
+  fi
   isMainBuildFile=false
   if [[ "$buildFile" == "$millBuildFile" ]]; then
     isMainBuildFile=true
@@ -269,11 +317,14 @@ elif [[ millBinaryVersionMajor -eq 1 ]]; then
     rootMillBuild=$dir/mill-build/build.mill
     mkdir -p $millBuildDir
     cp $scriptDir/MillCommunityBuild.scala $millBuildDir
+    if [[ "$isMillYamlBuild" == true ]]; then
+      cp $scriptDir/MillCommunityBuildYamlModule.scala $millBuildDir
+    fi
     echo "package millbuild" | cat - $scriptDir/../shared/CommunityBuildCore.scala > ${millBuildDir}/CommunityBuildCore.scala 
     # Count .mill files, but ignore out directory - it might be left from previous build
     if [[ ! -f $rootMillBuild ]] ; then
       millFileCount=$(find "$dir" -path "$dir/out" -prune -o -type f -name "*.mill" -print | wc -l)
-      if [[ $millBinaryVersionMinor -eq 0 ]] || [[ $millFileCount -gt 1 ]]; then 
+      if [[ "$isMillYamlBuild" == true ]] || [[ $millBinaryVersionMinor -eq 0 ]] || [[ $millFileCount -gt 1 ]]; then 
         cat > $rootMillBuild <<'EOF'
 package build
 

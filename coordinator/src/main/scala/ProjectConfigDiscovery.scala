@@ -148,6 +148,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
     val files = projectDir / "build.sc" ::
       projectDir / "build.scala" ::
       projectDir / "build.mill" ::
+      projectDir / "build.mill.yaml" ::
       projectDir / "build.sbt" ::
       List(projectDir / "project")
         .filter(os.exists(_))

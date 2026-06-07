@@ -15,6 +15,7 @@ object MillCoursierModuleOverride {
   object MillCommunityBuild {
     trait CommunityBuildPublishModule
     trait CommunityBuildCoursierModule
+    trait CommunityBuildScalaWorkerPathRefFix
   }
 
   import mill._

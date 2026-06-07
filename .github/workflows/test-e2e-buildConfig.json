@@ -1,17 +1,19 @@
 {
-  "com-lihaoyi/mill":{
-    "project":"com-lihaoyi/mill",
-    "repoUrl":"https://github.com/com-lihaoyi/mill.git",
-    "revision":"1.0.4",
-    "version":"1.0.4",
-    "targets":"com.lihaoyi%mill-core-api com.lihaoyi%mill-core-api-daemon",
-    "publishedScalaVersion":"3.7.1",
+  "com-lihaoyi/castor":{
+    "project":"com-lihaoyi/castor",
+    "repoUrl":"https://github.com/com-lihaoyi/castor.git",
+    "revision":"0.3.2",
+    "version":"0.3.2",
+    "targets":"com.lihaoyi%castor",
+    "publishedScalaVersion":"3.3.3",
     "config":{
       "projects":{
         "exclude":[],
         "overrides":{}
       },
-      "java":{"version":"17"},
+      "java":{
+        "version":"17"
+      },
       "sbt":{
         "commands":[],
         "options":[]
@@ -23,9 +25,42 @@
       "migrationVersions":[],
       "sourcePatches":[
         {
-          "path":"mill-build/src/millbuild/Deps.scala",
-          "pattern":"val scalaVersion = \"3\\..*\\\"",
-          "replaceWith":"val scalaVersion = \"<SCALA_VERSION>\" "
+          "path":"build.mill",
+          "pattern":"val scala3 = \"3.3.3\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "com-lihaoyi/scalasql":{
+    "project":"com-lihaoyi/scalasql",
+    "repoUrl":"https://github.com/com-lihaoyi/scalasql.git",
+    "revision":"0.3.1",
+    "version":"0.3.1",
+    "targets":"com.lihaoyi%scalasql com.lihaoyi%scalasql-core com.lihaoyi%scalasql-operations com.lihaoyi%scalasql-query com.lihaoyi%scalasql-simple",
+    "publishedScalaVersion":"3.7.0",
+    "config":{
+      "projects":{
+        "exclude":[],
+        "overrides":{}
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[],
+        "options":[]
+      },
+      "mill":{
+        "options":[]
+      },
+      "tests":"full",
+      "migrationVersions":[],
+      "sourcePatches":[
+        {
+          "path":"build.mill",
+          "pattern":"val scala3 = \"3.6.2\"",
+          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }
@@ -157,6 +192,33 @@
       },
       "tests":"full",
       "migrationVersions":["3.4"],
+      "sourcePatches":[]
+    }
+  },
+  "swaldman/trivial-template":{
+    "project":"swaldman/trivial-template",
+    "repoUrl":"https://github.com/swaldman/trivial-template.git",
+    "revision":"",
+    "version":"0.0.1",
+    "targets":"com.mchange%trivial-template",
+    "publishedScalaVersion":"3.3.7",
+    "config":{
+      "projects":{
+        "exclude":[],
+        "overrides":{}
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[],
+        "options":[]
+      },
+      "mill":{
+        "options":[]
+      },
+      "tests":"full",
+      "migrationVersions":[],
       "sourcePatches":[]
     }
   }

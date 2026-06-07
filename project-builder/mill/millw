@@ -78,6 +78,9 @@ if [ -z "${MILL_VERSION}" ] ; then
     MILL_VERSION="$(tr '\r' '\n' < .mill-version | head -n 1 2> /dev/null)"
   elif [ -f ".config/mill-version" ] ; then
     MILL_VERSION="$(tr '\r' '\n' < .config/mill-version | head -n 1 2> /dev/null)"
+  elif [ -f "build.mill.yaml" ] ; then
+    TRIM_VALUE_SED="s/.*://; s/#.*//; s/['\"]//g; s/^[[:space:]]*//; s/[[:space:]]*$//"
+    MILL_VERSION="$(grep -E "mill-version:" "build.mill.yaml" | head -n 1 | sed -E "$TRIM_VALUE_SED")"
   elif [ -n "${MILL_BUILD_SCRIPT}" ] ; then
     MILL_VERSION="$(cat ${MILL_BUILD_SCRIPT} | grep '//[|]  *mill-version:  *' | sed 's;//|  *mill-version:  *;;')"
   fi

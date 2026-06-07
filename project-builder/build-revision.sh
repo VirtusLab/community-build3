@@ -211,7 +211,7 @@ function buildForScalaVersion(){
   trap 'opencb_mark_failure_if_still_started' ERR
   # Mill
   # We check either for mill boostrap script or one of valid root build files
-  if [ -f "${repoDir}/mill" ] || [ -f "${repoDir}/build.mill" ] || [ -f "${repoDir}/build.mill.scala" ] || [ -f "${repoDir}/build.sc" ]; then
+  if [ -f "${repoDir}/mill" ] || [ -f "${repoDir}/build.mill" ] || [ -f "${repoDir}/build.mill.scala" ] || [ -f "${repoDir}/build.mill.yaml" ] || [ -f "${repoDir}/build.sc" ]; then
     echo "Mill project found: ${isMillProject}"
     echo "mill" > $buildToolFile
     $scriptDir/mill/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
