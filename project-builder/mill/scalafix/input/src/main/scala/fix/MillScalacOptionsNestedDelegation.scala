@@ -11,6 +11,7 @@ object MillScalacOptionsNestedDelegation {
     trait CommunityBuildScalaWorkerPathRefFix
     implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]) {
       def mapScalacOptions(scalaVersion: String): Seq[String] = ???
+      def mapScalacOptions(scalaVersion: mill.Task[String]): Seq[String] = ???
     }
     implicit class MillCommunityBuildScalacOptionsTargetOps(asTarget: mill.Task[Seq[String]]) {
       def mapScalacOptions(scalaVersion: mill.Task[String]): mill.Task[Seq[String]] = ???
@@ -23,6 +24,9 @@ object MillScalacOptionsNestedDelegation {
     trait Task[T]
     object Task {
       def apply[T](t: => T): Task[T] = ???
+    }
+    extension [T](task: Task[T]) {
+      def apply(): Task[T] = task
     }
     trait PublishModule
     trait ScalaModule {

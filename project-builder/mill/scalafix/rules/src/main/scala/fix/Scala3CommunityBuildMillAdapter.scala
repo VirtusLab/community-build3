@@ -332,11 +332,22 @@ class Scala3CommunityBuildMillAdapter(
             )
 
           val updatedBody = body match {
-            case taskApply @ Term.Apply(receiver, Seq(_: Term.Block)) if receiver.syntax.contains("Task") =>
-              Term.Apply(
-                Term.Select(taskApply, Term.Name("mapScalacOptions")),
-                List(scalaVersionTaskRef)
-              )
+            case taskApply @ Term.Apply(receiver, Seq(block: Term.Block)) if receiver.syntax.contains("Task") =>
+              if (isMill1x) {
+                def mapLastExpr(stats: List[Stat]): List[Stat] = stats match {
+                  case init :+ (expr: Term) =>
+                    init :+ Term.Apply(
+                      Term.Select(expr, Term.Name("mapScalacOptions")),
+                      List(scalaVersionRef)
+                    )
+                  case other => other
+                }
+                Term.Apply(receiver, List(block.copy(stats = mapLastExpr(block.stats))))
+              } else
+                Term.Apply(
+                  Term.Select(taskApply, Term.Name("mapScalacOptions")),
+                  List(scalaVersionTaskRef)
+                )
 
             // Task(foo) => foo.mapScalacOptions(scalaVersion)
             case Term.Apply(receiver, Seq(body: Term.Select)) if receiver.syntax.contains("Task") =>
