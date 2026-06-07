@@ -1,7 +1,7 @@
 import sbt._
 import sbt.protocol.testing.TestResult
-import TaskEvaluator.EvalResult
 import Scala3CommunityBuild._
+import Scala3CommunityBuild.TaskEvaluator.EvalResult
 
 object CommunityBuildPlugin extends AutoPlugin with CommunityBuildPluginShared {
   override protected def collectTestResults(
