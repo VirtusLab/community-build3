@@ -11,7 +11,6 @@ import uPickleSerializers.OptionPickler.read
 import java.nio.file.Path
 import TaskEvaluator.EvalResult
 import os.CommandResult
-
 @main def buildScalaCliProject(
     repositoryDir: os.Path,
     scalaVersion: String,
@@ -55,8 +54,8 @@ import os.CommandResult
   val testsExecuteResults =
     evalWhen[Unit](config.tests == TestingMode.Full, compileResult)(
       cmd("test").copy(errHandler =
-        (proc, failure) =>
-          if (proc.err.toString().contains("No test framework found"))
+        (stderr, failure) =>
+          if (stderr.contains("No test framework found"))
             EvalResult.Skipped
           else failure
       )
@@ -130,7 +129,7 @@ import os.CommandResult
 
 case class CliCommand[T](
     command: Seq[String],
-    errHandler: (CommandResult, EvalResult.Failure) => EvalResult[T]
+    errHandler: (String, EvalResult.Failure) => EvalResult[T]
 ) {
   override def toString(): String = s"${command.mkString(" ")}"
 }
@@ -155,12 +154,14 @@ class CliTaskEvaluator(
   }
 
   def eval[T](task: CliCommand[T]): EvalResult[T] = {
+    println(s"Evaluating: ${task}")
     val extraLibraryDependencies = Utils.extraLibraryDependencies(scalaVersion).map {
       case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
         if (scalaCrossVersion) s"--dependency=$org::$artifact:$version"
         else s"--dependency=$org:$artifact:$version"
     }
     val evalStart = System.currentTimeMillis()
+    val stderrLines = collection.mutable.ArrayBuffer.empty[String]
     val proc = os
       .proc(
         "scala-cli",
@@ -182,9 +183,13 @@ class CliTaskEvaluator(
         cwd = repositoryDir,
         check = false,
         stdout = os.Inherit,
-        stderr = os.Pipe
+        stderr = os.ProcessOutput.Readlines { line =>
+          stderrLines.synchronized(stderrLines += line)
+          System.err.println(line)
+        }
       )
     val result = proc.exitCode
+    val stderrContent = stderrLines.synchronized(stderrLines.mkString("\n"))
     val tookMillis = (System.currentTimeMillis() - evalStart).toInt
     def nullT = null.asInstanceOf[T]
     result match {
@@ -193,12 +198,11 @@ class CliTaskEvaluator(
         EvalResult.Value(nullT, evalTime = tookMillis)
       case exitCode =>
         println(s"Failed to evaluated: $task, exitCode ${exitCode}")
-        proc.err.lines().foreach(System.err.println)
         val failure = EvalResult.Failure(
-          EvaluationFailure(proc.err.toString()) :: Nil,
+          EvaluationFailure(stderrContent) :: Nil,
           evalTime = tookMillis
         )
-        task.errHandler(proc, failure)
+        task.errHandler(stderrContent, failure)
     }
   }
 }
