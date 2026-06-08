@@ -4,6 +4,7 @@ import com.virtuslab.communitybuild.mvnrepo.dependency.model.Directory
 import com.virtuslab.communitybuild.mvnrepo.dependency.model.FileContext
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.DirectoryInfoResolver
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.JavaDependencyInfoResolver
+import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.PlainFileInfoResolver
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.ScalaDependencyInfoResolver
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.FileInfo
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.ScalaDependencyInfo
@@ -25,7 +26,7 @@ class DependencyService(private val storageService: StorageService, private val 
             ScalaDependencyInfoResolver(
                 JavaDependencyInfoResolver(
                     DirectoryInfoResolver(
-                        null
+                        PlainFileInfoResolver(null)
                     )
                 )
             )

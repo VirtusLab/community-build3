@@ -74,9 +74,13 @@ class FileSystemStorageService @Autowired constructor(val properties: StoragePro
     }
 
     override fun loadAllFromDir(dirName: String): List<Path> {
+        val dir = rootLocation.resolve(dirName)
+        if (!Files.exists(dir) || !Files.isDirectory(dir)) {
+            throw StorageFileNotFoundWithFileNameException(dirName, "Could not read directory: $dirName")
+        }
         return try {
-            Files.walk(rootLocation.resolve(dirName), 1)
-                .filter { path: Path -> path != rootLocation.resolve(dirName) }
+            Files.walk(dir, 1)
+                .filter { path: Path -> path != dir }
                 .collect(Collectors.toList())
         } catch (e: IOException) {
             throw StorageException("Failed to read stored files", e)
