@@ -7,8 +7,22 @@ on:
         type: string
         description: "Custom tag to publish container image version"
         required: true
+      core_images:
+        type: boolean
+        description: "Build and publish core images (builder-base, project-builder, quick)"
+        default: true
+      mvn_repo:
+        type: boolean
+        description: "Build and publish mvn-repo image"
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   publish-images:
+    if: inputs.core_images
     runs-on: ubuntu-22.04
     steps:
       - name: Git Checkout
@@ -26,3 +40,23 @@ jobs:
 
       - name: Push images to GitHub Container Registry
         run: scripts/publish-all.sh ${{ inputs.version }}
+
+  publish-mvn-repo-images:
+    if: inputs.mvn_repo
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v6
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build mvn-repo image
+        run: scripts/build-mvn-repo.sh ${{ inputs.version }}
+
+      - name: Push mvn-repo image to GitHub Container Registry
+        run: scripts/publish-mvn-repo.sh ${{ inputs.version }}

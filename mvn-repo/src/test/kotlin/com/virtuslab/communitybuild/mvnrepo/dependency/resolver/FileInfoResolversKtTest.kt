@@ -2,6 +2,7 @@ package com.virtuslab.communitybuild.mvnrepo.dependency.resolver
 
 import com.virtuslab.communitybuild.mvnrepo.dependency.DependencyService
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.JavaDependencyInfo
+import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.PlainFileInfo
 import com.virtuslab.communitybuild.mvnrepo.dependency.resolver.model.ScalaDependencyInfo
 import org.junit.jupiter.api.Test
 
@@ -211,5 +212,31 @@ internal class FileInfoResolversKtTest {
         assert(scalaDependencyInfo.version == "1.4.8")
         assert(scalaDependencyInfo.type == "")
         assert(scalaDependencyInfo.extension == "jar")
+    }
+
+    @Test
+    fun filenameToPlainFileInfo_mavenMetadataXml() {
+        val resolvers = getFileInfoResolverChain()
+        val fullFilename = "org/scala-lang/scala3-library_3/maven-metadata.xml"
+
+        val dependencyInfo = resolvers.resolve(fullFilename)
+
+        assert(dependencyInfo is PlainFileInfo)
+        val plainFileInfo = dependencyInfo as PlainFileInfo
+        assert(plainFileInfo.fullFilename == fullFilename)
+        assert(plainFileInfo.filename == "maven-metadata.xml")
+    }
+
+    @Test
+    fun filenameToPlainFileInfo_mavenMetadataSha1() {
+        val resolvers = getFileInfoResolverChain()
+        val fullFilename = "org/scala-lang/scala3-library_3/maven-metadata.xml.sha1"
+
+        val dependencyInfo = resolvers.resolve(fullFilename)
+
+        assert(dependencyInfo is PlainFileInfo)
+        val plainFileInfo = dependencyInfo as PlainFileInfo
+        assert(plainFileInfo.fullFilename == fullFilename)
+        assert(plainFileInfo.filename == "maven-metadata.xml.sha1")
     }
 }

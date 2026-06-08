@@ -14,7 +14,7 @@ scbk apply -f $scriptDir/../k8s/mvn-repo-data.yaml
 
 mvnRepoYaml=$scriptDir/../k8s/mvn-repo.yaml
 if [[ ! -z "${CB_VERSION}" ]]; then
-  cat ${mvnRepoYaml} | sed -E "s/(image: virtuslab\/scala-community-build-mvn-repo):.*/\1:${CB_VERSION}/" - | scbk apply -f -
+  cat ${mvnRepoYaml} | sed -E "s|(image: ghcr.io/virtuslab/scala-community-build-mvn-repo):.*|\1:${CB_VERSION}|" - | scbk apply -f -
 else
   scbk apply -f ${mvnRepoYaml}
 fi
