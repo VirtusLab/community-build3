@@ -1,5 +1,5 @@
 
-# projects total:     991
+# projects total:     990
 # min stars count:    -1
 # max projects count: 1000
 
@@ -742,7 +742,6 @@ jobs:
         - name: "natural-transformation/korolev"
         - name: "natural-transformation/levsha"
         - name: "natural-transformation/spoonbill"
-        - name: "nebula-contrib/nebula4scala"
         - name: "nebula-contrib/testcontainers-nebula"
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
@@ -894,6 +893,7 @@ jobs:
         - name: "sangria-graphql/sangria-marshalling-testkit"
         - name: "sangria-graphql/sangria-msgpack"
         - name: "sangria-graphql/sangria-spray-json"
+        - name: "sangria-graphql/sangria-streaming-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
         - name: "sbt/sbinary"
         - name: "sbt/sbt-giter8-resolver"
