@@ -33,7 +33,17 @@ if [[ -f "${scalafixConf}" || `grep 'scalafix' $pluginsFile` ]]; then
   echo -e '\naddSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.2")' >> $pluginsFile
 fi
 
-sbtVersion=$(cat "${buildPropsFile}" | grep sbt.version | awk -F= '{ print $2 }')
+sbtVersion=$(grep -E 'sbt\.version' "${buildPropsFile}" | head -n1 | awk -F= '{ print $2 }' | tr -d '[:space:]')
+
+function set_sbt_version() {
+  local file="$1"
+  local version="$2"
+  awk -v ver="$version" '
+    /^[[:space:]]*sbt\.version[[:space:]]*=/ { print "sbt.version=" ver; next }
+    { print }
+  ' "$file" > "${file}.tmp"
+  mv "${file}.tmp" "$file"
+}
 
 function parseSemver() {
   local prefixSufix=($(echo ${1/-/ }))
@@ -62,7 +72,7 @@ if [[ "$sbtMajor" -lt 2 ]]; then
     ([[ "$sbtMajor" -eq "$minSbtMajor" ]] && [[ "$sbtMinor" -eq "$minSbtMinor" ]] && [[ "$sbtPatch" -lt "$minSbtPatch" ]]); then
     echo "Sbt version $sbtVersion is not supported, minimal supported version is $MinSbtVersion"
     echo "Enforcing usage of sbt in version ${MinSbtVersion}"
-    sed -i -E "s/(sbt.version\s*=\s*).*/\1${MinSbtVersion}/" "${buildPropsFile}" || echo "sbt.version=$MinSbtVersion" > "${buildPropsFile}"
+    set_sbt_version "${buildPropsFile}" "${MinSbtVersion}"
   fi
 else
   echo "Using sbt 2.x project adapter for sbt version $sbtVersion"
@@ -88,15 +98,24 @@ else
   adapterDir="$scriptDir/sbt1"
 fi
 
-ln -fs $scriptDir/../shared/CommunityBuildCore.scala $repoDir/project/CommunityBuildCore.scala
-ln -fs $sharedDir/CommunityBuildConfigFormats.scala $repoDir/project/CommunityBuildConfigFormats.scala
-ln -fs $sharedDir/CommunityBuildPluginShared.scala $repoDir/project/CommunityBuildPluginShared.scala
-ln -fs $adapterDir/SbtTaskEvaluator.scala $repoDir/project/SbtTaskEvaluator.scala
-ln -fs $adapterDir/SbtAdapterSupport.scala $repoDir/project/SbtAdapterSupport.scala
-ln -fs $adapterDir/CommunityBuildPlugin.scala $repoDir/project/CommunityBuildPlugin.scala
+install_community_build_file() {
+  local source="$1"
+  local dest="$2"
+  cp -f "$source" "$dest"
+}
+
+install_community_build_file "$scriptDir/../shared/CommunityBuildCore.scala" "$repoDir/project/CommunityBuildCore.scala"
+install_community_build_file "$sharedDir/CommunityBuildConfigFormats.scala" "$repoDir/project/CommunityBuildConfigFormats.scala"
+install_community_build_file "$sharedDir/CommunityBuildPluginShared.scala" "$repoDir/project/CommunityBuildPluginShared.scala"
+install_community_build_file "$adapterDir/SbtTaskEvaluator.scala" "$repoDir/project/SbtTaskEvaluator.scala"
+install_community_build_file "$adapterDir/SbtAdapterSupport.scala" "$repoDir/project/SbtAdapterSupport.scala"
+install_community_build_file "$adapterDir/CommunityBuildPlugin.scala" "$repoDir/project/CommunityBuildPlugin.scala"
 if [[ "$sbtMajor" -ge 2 ]]; then
-  ln -fs $adapterDir/CommunityBuildTestSupport.scala $repoDir/project/CommunityBuildTestSupport.scala
+  install_community_build_file "$adapterDir/CommunityBuildTestSupport.scala" "$repoDir/project/CommunityBuildTestSupport.scala"
 fi
+
+# Drop stale meta-build outputs (host/container or arch switches break incremental compile).
+rm -rf "$repoDir/project/target"
 
 # Register utility commands, for more info check command impl comments
 echo -e "\ncommands ++= CommunityBuildPlugin.commands" >>$repoDir/build.sbt

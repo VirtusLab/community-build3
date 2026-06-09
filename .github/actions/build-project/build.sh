@@ -52,7 +52,6 @@ require_exe() {
 command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required but not found in PATH" >&2; exit 4; }
 command -v git >/dev/null 2>&1 || { echo "ERROR: git is required but not found in PATH" >&2; exit 5; }
 command -v timeout >/dev/null 2>&1 || { echo "ERROR: timeout is required but not found in PATH" >&2; exit 6; }
-command -v tee >/dev/null 2>&1 || { echo "ERROR: tee is required but not found in PATH" >&2; exit 7; }
 
 require_file "${CONFIG_FILE}"
 require_exe "${BUILD_SCRIPT}"
@@ -62,17 +61,19 @@ source "${OPENCB_ROOT}/project-builder/build-status.sh"
 config() {
   # Reads JSON under ."<project_name>" + <suffix>
   # Example: config ".repoUrl" -> jq -c -r '."myproj".repoUrl' buildConfig.json
-  local suffix="${1:?Missing config suffix, e.g. .repoUrl or ''}"
-  local jq_path
-  jq_path=".\"${PROJECT_NAME}\"${suffix}"
-  jq -c -r "${jq_path}" "${CONFIG_FILE}"
+  local suffix="${1:?Missing config suffix, e.g. .repoUrl}"
+  jq -c -r ".\"${PROJECT_NAME}\"${suffix}" "${CONFIG_FILE}"
+}
+
+project_config() {
+  jq -c ".\"${PROJECT_NAME}\".config // ${DEFAULT_CONFIG}" "${CONFIG_FILE}"
 }
 
 # Git config for migration patches
 git config --global user.email "scala3-community-build@virtuslab.com"
 git config --global user.name "Scala 3 Open Community Build"
 
-echo "Project config: $(config '')"
+echo "Project: ${PROJECT_NAME}"
 
 cd "${OPENCB_ROOT}"
 
@@ -81,7 +82,7 @@ opencb_init_build_status
 export OPENCB_EXECUTE_TESTS="${EXECUTE_TESTS}"
 export OPENCB_AKKA_REPO_TOKEN="${AKKA_REPO_TOKEN}"
 
-# Run build with a hard timeout; capture both output and real exit code through PIPESTATUS.
+# Run build with a hard timeout; stream to stdout and build-logs.txt.
 set +e
 timeout "${TIMEOUT_SECONDS}" \
   "${BUILD_SCRIPT}" \
@@ -91,7 +92,7 @@ timeout "${TIMEOUT_SECONDS}" \
   "${SCALA_VERSION}" \
   "$(config .targets)" \
   "${MAVEN_REPO_URL}" \
-  "$(config ".config // ${DEFAULT_CONFIG}")" \
+  "$(project_config)" \
   "${EXTRA_SCALAC_OPTIONS}" \
   "${DISABLED_SCALAC_OPTIONS}" \
   "${EXTRA_LIBRARY_DEPENDENCIES}" \

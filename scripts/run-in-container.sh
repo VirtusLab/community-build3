@@ -13,6 +13,12 @@ set -euo pipefail
 #   JDK_VERSION=                Override JDK from buildConfig (default: project config or 17)
 #   DOCKER_PLATFORM=            Force platform, e.g. linux/amd64 on Apple Silicon
 #   OPENCB_IMAGE=               Override container image
+#   OPENCB_CACHE_MOUNTS=0       Disable mounting dependency caches into the container
+#   OPENCB_CACHE_DIR=           Use repo-local cache dir instead of $HOME (avoids root-owned files in ~)
+#   OPENCB_IVY2_CACHE=            Override host ivy2 cache path (default: $HOME/.ivy2)
+#   OPENCB_SBT_CACHE=             Override host sbt cache path (default: $HOME/.sbt)
+#   OPENCB_COURSIER_CACHE=        Override host coursier cache path
+#   OPENCB_MILL_CACHE=            Override host mill cache path (default: $HOME/.cache/mill)
 #   EXTRA_SCALAC_OPTIONS=
 #   DISABLED_SCALAC_OPTIONS=
 #   EXTRA_LIBRARY_DEPENDENCIES=
@@ -55,6 +61,58 @@ DefaultJdk=17
 
 config() {
   jq -c -r ".\"$projectName\"$*" "$ConfigFile"
+}
+
+opencb_host_coursier_cache() {
+  if [[ -n "${OPENCB_COURSIER_CACHE:-}" ]]; then
+    echo "${OPENCB_COURSIER_CACHE}"
+  elif [[ -n "${OPENCB_CACHE_DIR:-}" ]]; then
+    echo "${OPENCB_CACHE_DIR}/coursier"
+  elif [[ "$(uname -s)" == Darwin && -d "${HOME}/Library/Caches/Coursier" ]]; then
+    echo "${HOME}/Library/Caches/Coursier"
+  elif [[ -d "${HOME}/.cache/coursier" ]]; then
+    echo "${HOME}/.cache/coursier"
+  else
+    echo "${HOME}/.cache/coursier"
+  fi
+}
+
+opencb_docker_cache_mounts() {
+  cache_mounts=()
+  if [[ "${OPENCB_CACHE_MOUNTS:-1}" == "0" ]]; then
+    return
+  fi
+
+  if [[ -n "${OPENCB_CACHE_DIR:-}" ]]; then
+    ivy2_host="${OPENCB_CACHE_DIR}/ivy2"
+    sbt_host="${OPENCB_CACHE_DIR}/sbt"
+    coursier_host="${OPENCB_CACHE_DIR}/coursier"
+    mill_host="${OPENCB_CACHE_DIR}/mill"
+    scalacli_host="${OPENCB_CACHE_DIR}/scalacli"
+  else
+    ivy2_host="${OPENCB_IVY2_CACHE:-${HOME}/.ivy2}"
+    sbt_host="${OPENCB_SBT_CACHE:-${HOME}/.sbt}"
+    coursier_host="$(opencb_host_coursier_cache)"
+    mill_host="${OPENCB_MILL_CACHE:-${HOME}/.cache/mill}"
+    scalacli_host="${HOME}/.cache/scalacli"
+  fi
+
+  declare -a cache_pairs=(
+    "$ivy2_host:/root/.ivy2"
+    "$sbt_host:/root/.sbt"
+    "$coursier_host:/root/.cache/coursier"
+    "$mill_host:/root/.cache/mill"
+    "$scalacli_host:/root/.cache/scalacli"
+  )
+
+  echo "cacheMounts:"
+  for pair in "${cache_pairs[@]}"; do
+    host_path="${pair%%:*}"
+    container_path="${pair#*:}"
+    mkdir -p "$host_path"
+    cache_mounts+=(-v "$host_path:$container_path")
+    echo "  $host_path -> $container_path"
+  done
 }
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -108,6 +166,9 @@ if [[ "${SKIP_BUILD_SETUP:-}" != "1" ]]; then
   scala-cli run "$scriptDir/../coordinator" -- 3 1 1 1 "$projectName" ./coordinator/configs/
 fi
 
+cache_mounts=()
+opencb_docker_cache_mounts
+
 dockerEnv=(
   -e "PROJECT_NAME=$projectName"
   -e "SCALA_VERSION=$scalaVersion"
@@ -125,6 +186,7 @@ dockerArgs=(
   run --rm
   "${dockerPlatform[@]}"
   -v "$repoRoot:/opencb"
+  "${cache_mounts[@]}"
   "${dockerEnv[@]}"
   "$image"
 )
@@ -135,7 +197,7 @@ if [[ "$shellMode" == true ]]; then
   docker "${dockerArgs[@]}" bash
   exit_code=$?
 else
-  docker "${dockerArgs[@]}" bash /opencb/.github/actions/build-project/build.sh 2>&1 | tee build-logs.txt
+  docker "${dockerArgs[@]}" bash /opencb/.github/actions/build-project/build.sh
   exit_code=$?
 fi
 set -e

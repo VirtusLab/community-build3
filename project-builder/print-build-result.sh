@@ -10,4 +10,9 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=build-status.sh
 source "$scriptDir/build-status.sh"
 
-opencb_print_build_result "$1"
+if ! opencb_print_build_result "$1"; then
+  if [[ -f build-logs.txt ]]; then
+    echo "See build-logs.txt for details." >&2
+  fi
+  exit 1
+fi
