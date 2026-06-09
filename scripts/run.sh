@@ -30,7 +30,7 @@ function config () {
 DefaultConfig="{}"
 
 
-[ "$SKIP_BUILD_SETUP" != "1" ] && scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
+[ "${SKIP_BUILD_SETUP:-}" != "1" ] && scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
 
 publishScalaVersion="$(config .publishedScalaVersion)"
 if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishScalaVersion" "$scalaVersion" ; then
@@ -46,6 +46,8 @@ if [[ -f $scriptDir/../.secrets/akka-repo-token ]]; then
 fi
 export OPENCB_GIT_DEPTH=1 
 export OPENCB_EXECUTE_TESTS=true 
+
+set +e
 $scriptDir/../project-builder/build-revision.sh \
   "$(config .project)" \
   "$(config .repoUrl)" \
@@ -57,13 +59,10 @@ $scriptDir/../project-builder/build-revision.sh \
   "$extraScalacOptions" \
   "$disabledScalacOptions" \
   "$extraLibraryDependencies" 2>&1 | tee build-logs.txt
+set -e
 
-if [[ "$SKIP_BUILD_SETUP" != "1" ]]; then 
+if [[ "${SKIP_BUILD_SETUP:-}" != "1" ]]; then 
   (cd $scriptDir/../ && git restore .github/workflows/buildConfig.json || false); 
 fi
 
-echo "------"
-status_file="${CB_STATUS_FILE:-$PWD/build-status.txt}"
-echo "$projectName status=$(cat "$status_file")"
-echo "-------"
-if [[ $(cat "$status_file") != "success" ]]; then exit 1; fi
+exec "$scriptDir/../project-builder/print-build-result.sh" "$projectName"

@@ -56,6 +56,8 @@ command -v tee >/dev/null 2>&1 || { echo "ERROR: tee is required but not found i
 
 require_file "${CONFIG_FILE}"
 require_exe "${BUILD_SCRIPT}"
+# shellcheck source=../../project-builder/build-status.sh
+source "${OPENCB_ROOT}/project-builder/build-status.sh"
 
 config() {
   # Reads JSON under ."<project_name>" + <suffix>
@@ -74,11 +76,7 @@ echo "Project config: $(config '')"
 
 cd "${OPENCB_ROOT}"
 
-# Ensure files exist locally first
-touch build-logs.txt build-summary.txt
-# Assume failure unless overwritten by a successful build
-echo 'failure' > build-status.txt
-echo 'unknown' > build-tool.txt
+opencb_init_build_status
 
 export OPENCB_EXECUTE_TESTS="${EXECUTE_TESTS}"
 export OPENCB_AKKA_REPO_TOKEN="${AKKA_REPO_TOKEN}"
@@ -103,7 +101,6 @@ set -e
 
 if [[ $exit_code -eq 124 ]]; then
   echo "Build timeout after $((TIMEOUT_SECONDS / 3600)) hours" >> build-logs.txt
-  echo "timeout" > build-status.txt
 fi
-
+opencb_record_process_exit "$exit_code"
 exit "$exit_code"

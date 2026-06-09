@@ -63,5 +63,8 @@ object CommunityBuildConfigFormats {
   ): T =
     unbuilder
       .lookupField(field)
-      .fold(default)(v => format.read(Some(v), unbuilder))
+      .fold(default) { v =>
+        import scala.util.Try
+        Try(format.read(Some(v), unbuilder)).getOrElse(default)
+      }
 }

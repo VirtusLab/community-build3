@@ -18,6 +18,8 @@ extraLibraryDeps="$8"
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "$scriptDir/../versions.sh"
+# shellcheck source=../build-status.sh
+source "$scriptDir/../build-status.sh"
 
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
@@ -41,7 +43,8 @@ cd $repoDir
 
 sbtMajor=1
 if [[ -f project/build.properties ]]; then
-  sbtMajor=$(grep -E '^sbt\.version=' project/build.properties | cut -d= -f2 | cut -d. -f1)
+  sbtMajor=$(grep -E 'sbt\.version' project/build.properties | awk -F= '{ print $2 }' | tr -d ' ' | cut -d. -f1)
+  sbtMajor=${sbtMajor:-1}
 fi
 
 # GithHub actions workers have maximally 7GB of RAM
@@ -62,7 +65,13 @@ fi
 customCommands=$(echo "$projectConfig" | jq -r "$customCommandsFilter | join(\"; \")" | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 targetsString="${targets[@]}"
 logFile=build.log
-statusFile="${CB_STATUS_FILE:-../build-status.txt}"
+case "${CB_STATUS_FILE:-}" in
+  /*) statusFile="$CB_STATUS_FILE" ;;
+  *)
+    statusFile="$(cd "$(dirname "$repoDir")/.." && pwd)/build-status.txt"
+    export CB_STATUS_FILE="$statusFile"
+    ;;
+esac
 
 # Compiler plugins, cannot be cross-published before starting the build
 # Allways exclude these from library dependencies
@@ -125,8 +134,8 @@ function runSbt() {
   exit_code=${PIPESTATUS[0]}
   if [ $exit_code -eq 124 ]; then
     echo "Build timeout" >> build-logs.txt
-    echo "timeout" > $statusFile
   fi
+  opencb_record_process_exit "$exit_code"
   return $exit_code
 }
 

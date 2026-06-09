@@ -29,6 +29,10 @@ executeTests=${_executeTests}
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 export OPENCB_SCRIPT_DIR=$scriptDir
 source $scriptDir/versions.sh
+# shellcheck source=build-status.sh
+source "$scriptDir/build-status.sh"
+opencb_init_build_status
+trap 'opencb_finalize_build_status' EXIT
 
 # Propagate CI env variable to build tools, ensure consistent behavior in local and CI builds
 export CI=true
@@ -37,9 +41,6 @@ repoDir=$PWD/repo/$project
 mkdir -p $repoDir
 $scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
-
-export CB_STATUS_FILE="${CB_STATUS_FILE:-$PWD/build-status.txt}"
-export CB_SUMMARY_FILE="${CB_SUMMARY_FILE:-$PWD/build-summary.txt}"
 
 if [[ ! -z $extraLibraryDeps ]]; then
   echo "Would try to append extra library dependencies (best-effort, sbt/scala-cli only): ${extraLibraryDeps}"
@@ -123,15 +124,21 @@ function detectSourceVersion() {
 }
 
 function setupProjectConfig() {
-  currentTests=$(echo "$_projectConfig" | jq '.tests // "compile-only"')
-  projectConfig=$(echo "$_projectConfig" | jq -c \
+  local baseConfig="$_projectConfig"
+  if [[ -z "$baseConfig" || "$baseConfig" == "null" ]]; then
+    baseConfig="{}"
+  fi
+
+  projectConfig=$(echo "$baseConfig" | jq -c \
     --argjson executeTests $executeTests \
-    --argjson currentTests $currentTests \
-    '.tests = if $executeTests then 
-        .tests 
-      else 
-        if $currentTests=="full" then "compile-only" else $currentTests end
-      end')
+    --arg defaultTests "full" \
+    --arg compileOnlyTests "compile-only" \
+    '.tests = (
+      (.tests // $defaultTests)
+      | if $executeTests then .
+        else if . == "full" then $compileOnlyTests else . end
+        end
+    )')
 }
 
 
@@ -196,19 +203,8 @@ function buildForScalaVersion(){
   echo "----"
   echo "Starting build for $scalaVersion"
   echo "Execute tests: ${executeTests}"
-  echo "started" > "$CB_STATUS_FILE"
-  # If prepare or an early step fails, nothing overwrites status (Mill/sbt write success/failure at end).
-  # Without this, build-status.txt would incorrectly stay on "started".
-  opencb_mark_failure_if_still_started() {
-    local current=""
-    if [[ -f "$CB_STATUS_FILE" ]]; then
-      current=$(tr -d '\r\n' <"$CB_STATUS_FILE" || true)
-    fi
-    if [[ "$current" == "started" ]]; then
-      echo "failure" > "$CB_STATUS_FILE"
-    fi
-  }
-  trap 'opencb_mark_failure_if_still_started' ERR
+  opencb_mark_build_started
+  trap 'opencb_mark_build_failure' ERR
   # Mill
   # We check either for mill boostrap script or one of valid root build files
   if [ -f "${repoDir}/mill" ] || [ -f "${repoDir}/build.mill" ] || [ -f "${repoDir}/build.mill.scala" ] || [ -f "${repoDir}/build.mill.yaml" ] || [ -f "${repoDir}/build.sc" ]; then
