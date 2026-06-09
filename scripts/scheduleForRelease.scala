@@ -29,7 +29,6 @@ import scala.sys.process.*
     | -f published-scala-version=${scalaVersion}
     | -f execute-tests=true
     | -f extra-scalac-options=${scalacOptions.mkString(",")}
-    | -f push-to-gh-pages=true
     |""".stripMargin
     
     println(s"Eval: $task")

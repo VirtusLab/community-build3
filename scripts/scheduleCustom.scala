@@ -45,7 +45,6 @@ def parseGitHubBranchUrl(url: String): (repository: String, branch: String) =
     | -f repository-url=${repository}
     | -f repository-branch=${branch}
     | -f extra-scalac-options=${scalacOptions.mkString(",")}
-    | -f push-to-gh-pages=${pushToGHPages}
     |""".stripMargin
     
     println(s"Eval: $task")
