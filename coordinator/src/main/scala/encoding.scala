@@ -1,6 +1,7 @@
 import org.json4s._
 import org.json4s.native.Serialization
 import java.time.OffsetDateTime
+import scala.reflect.ManifestFactory
 
 given Serialization = org.json4s.native.Serialization
 given Formats =
@@ -49,6 +50,18 @@ def toJson[T <: AnyRef](obj: T, pretty: Boolean = false): String =
   then Serialization.writePretty(obj)
   else Serialization.write(obj)
 def toJson[T <: AnyRef](obj: T): String = Serialization.write(obj)
+
+given Manifest[CachedProjectBuildDef] =
+  ManifestFactory.classType(classOf[CachedProjectBuildDef])
+
+given Manifest[Map[String, ProjectBuildDef]] =
+  ManifestFactory
+    .classType(
+      classOf[Map[?, ?]],
+      ManifestFactory.classType(classOf[String]),
+      ManifestFactory.classType(classOf[ProjectBuildDef])
+    )
+    .asInstanceOf[Manifest[Map[String, ProjectBuildDef]]]
 
 def fromJson[T: Manifest](json: String): T = Serialization.read(json)
 
