@@ -38,7 +38,11 @@ object CoordinatorCacheOptions:
       refreshProjects = refreshProjects
     )
 
-/** Parsed [[buildConfig.json]] once per coordinator run (avoids OOM from parallel full-file parses). */
+/** Parsed [[buildConfig.json]] once per coordinator run (avoids OOM from parallel full-file parses).
+  *
+  * Used only to seed repoUrl/revision when the disk cache is cold. Config is never taken from
+  * the seed file — it is always rediscovered so edits to projects-config.conf are picked up.
+  */
 final class BuildConfigSeedIndex(path: os.Path):
   private lazy val byCoordinates: Map[String, ProjectBuildDef] =
     if !os.exists(path) then Map.empty
@@ -52,25 +56,16 @@ final class BuildConfigSeedIndex(path: os.Path):
         identity
       )
 
-  def seed(
+  def seedRepoRevision(
       project: Project,
-      fingerprint: String,
       version: String,
       stats: ProjectBuildDefCacheStats
-  ): Option[CachedProjectBuildDef] =
+  ): Option[(String, String)] =
     byCoordinates.get(project.coordinates).flatMap { defn =>
       if defn.version != version then None
       else
         stats.seededFromBuildConfig.incrementAndGet()
-        Some(
-          CachedProjectBuildDef(
-            version = defn.version,
-            fingerprint = fingerprint,
-            repoUrl = defn.repoUrl,
-            revision = defn.revision,
-            config = defn.config
-          )
-        )
+        Some((defn.repoUrl, defn.revision))
     }
 
 final class ProjectBuildDefCacheStats:
@@ -169,12 +164,7 @@ object ProjectBuildDefCache:
 
     if !useCache then discoverFresh()
     else
-      val cached =
-        load(project.p).orElse(
-          buildConfigSeed.seed(project.p, fingerprint, project.v, stats)
-        )
-
-      cached match
+      load(project.p) match
         case Some(entry) if entry.version == project.v && entry.fingerprint == fingerprint =>
           stats.hits.incrementAndGet()
           println(s"Skipping config discovery for ${project.p.coordinates} (cache hit)")
@@ -190,7 +180,24 @@ object ProjectBuildDefCache:
           println(s"Refreshing ${project.p.coordinates} (coordinator config changed)")
           discoverFresh(reuseFromCache = Some(entry))
         case None =>
-          println(s"Refreshing ${project.p.coordinates} (no cache entry)")
-          discoverFresh()
+          buildConfigSeed.seedRepoRevision(project.p, project.v, stats) match
+            case Some((repoUrl, revision)) =>
+              println(
+                s"Refreshing ${project.p.coordinates} (buildConfig.json seed for repo/revision only)"
+              )
+              discoverFresh(
+                reuseFromCache = Some(
+                  CachedProjectBuildDef(
+                    version = project.v,
+                    fingerprint = fingerprint,
+                    repoUrl = repoUrl,
+                    revision = revision,
+                    config = None
+                  )
+                )
+              )
+            case None =>
+              println(s"Refreshing ${project.p.coordinates} (no cache entry)")
+              discoverFresh()
 
 end ProjectBuildDefCache
