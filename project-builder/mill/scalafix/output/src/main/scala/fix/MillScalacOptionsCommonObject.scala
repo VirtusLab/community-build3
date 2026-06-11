@@ -2,6 +2,8 @@ package fix
 
 object MillScalacOptionsCommonObject {
   object MillCommunityBuild {
+    trait CommunityBuildCoursierModule
+    trait CommunityBuildScalaWorkerPathRefFix
     implicit class MillCommunityBuildScalacOptionsOps(asSeq: Seq[String]) {
       def mapScalacOptions(scalaVersion: String): Seq[String] = ???
       def mapScalacOptions(scalaVersion: mill.Task[String]): Seq[String] = ???
