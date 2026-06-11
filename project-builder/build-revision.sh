@@ -191,6 +191,91 @@ function commitMigrationRewrite() {
   fi
 }
 
+function path_depth_from_root() {
+  local root="$1" path="$2"
+  local rel="${path#$root}"
+  rel="${rel#/}"
+  if [[ -z "$rel" ]]; then
+    echo 0
+    return
+  fi
+  local depth=0
+  local rest="$rel"
+  while [[ "$rest" == */* ]]; do
+    depth=$((depth + 1))
+    rest="${rest#*/}"
+  done
+  echo "$depth"
+}
+
+function is_mill_build_dir() {
+  local dir="$1"
+  [[ -f "$dir/mill" || -f "$dir/build.mill" || -f "$dir/build.mill.scala" || -f "$dir/build.mill.yaml" || -f "$dir/build.sc" ]]
+}
+
+function is_sbt_build_dir() {
+  local dir="$1"
+  ls "$dir"/*.sbt 1>/dev/null 2>&1
+}
+
+function consider_build_dir() {
+  local tool="$1" dir="$2" root="$3"
+  local depth
+  depth=$(path_depth_from_root "$root" "$dir")
+  if (( depth < bestBuildDepth )); then
+    bestBuildTool="$tool"
+    bestBuildDir="$dir"
+    bestBuildDepth=$depth
+  fi
+}
+
+function discover_build_layout() {
+  local root="$1"
+  bestBuildTool=""
+  bestBuildDir=""
+  bestBuildDepth=999999
+
+  if is_mill_build_dir "$root"; then
+    consider_build_dir mill "$root" "$root"
+  fi
+  if is_sbt_build_dir "$root"; then
+    consider_build_dir sbt "$root" "$root"
+  fi
+
+  while IFS= read -r buildFile; do
+    [[ -n "$buildFile" ]] || continue
+    consider_build_dir mill "$(dirname "$buildFile")" "$root"
+  done < <(
+    find "$root" -mindepth 2 \
+      \( -path "$root/.git/*" -o -path "*/target/*" \) -prune -o \
+      \( -name 'build.mill' -o -name 'build.mill.scala' -o -name 'build.mill.yaml' -o -name 'build.sc' \) \
+      -print 2>/dev/null
+  )
+
+  while IFS= read -r millScript; do
+    [[ -n "$millScript" ]] || continue
+    consider_build_dir mill "$(dirname "$millScript")" "$root"
+  done < <(
+    find "$root" -mindepth 2 -path "$root/.git/*" -prune -o -name 'mill' -type f -print 2>/dev/null
+  )
+
+  while IFS= read -r buildSbt; do
+    [[ -n "$buildSbt" ]] || continue
+    local dir
+    dir=$(dirname "$buildSbt")
+    # Require meta-build dir to avoid picking template or snippet build.sbt files.
+    [[ -d "$dir/project" ]] || continue
+    consider_build_dir sbt "$dir" "$root"
+  done < <(
+    find "$root" -mindepth 2 -path "$root/.git/*" -prune -o \
+      -name 'build.sbt' ! -path '*/project/*' -print 2>/dev/null
+  )
+
+  if [[ -n "$bestBuildTool" ]]; then
+    echo "$bestBuildTool|$bestBuildDir"
+  fi
+}
+
 function buildForScalaVersion(){
   scalaVersion=$1
   echo "----"
@@ -205,23 +290,35 @@ function buildForScalaVersion(){
   echo "Execute tests: ${executeTests}"
   opencb_mark_build_started
   trap 'opencb_mark_build_failure' ERR
+
+  buildDir="$repoDir"
+  buildLayout=$(discover_build_layout "$repoDir" || true)
+  if [[ -n "$buildLayout" ]]; then
+    buildTool=$(echo "$buildLayout" | cut -d'|' -f1)
+    buildDir=$(echo "$buildLayout" | cut -d'|' -f2)
+    if [[ "$buildDir" != "$repoDir" ]]; then
+      echo "Build files found in subdirectory: ${buildDir#$repoDir/}"
+    fi
+  else
+    buildTool=""
+  fi
+
   # Mill
-  # We check either for mill boostrap script or one of valid root build files
-  if [ -f "${repoDir}/mill" ] || [ -f "${repoDir}/build.mill" ] || [ -f "${repoDir}/build.mill.scala" ] || [ -f "${repoDir}/build.mill.yaml" ] || [ -f "${repoDir}/build.sc" ]; then
-    echo "Mill project found: ${isMillProject}"
+  if [[ "$buildTool" == "mill" ]]; then
+    echo "Mill project found at $buildDir"
     echo "mill" > $buildToolFile
-    $scriptDir/mill/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
+    $scriptDir/mill/prepare-project.sh "$project" "$buildDir" "$scalaVersion" "$projectConfig"
     createBuildPatch
-    $scriptDir/mill/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
+    $scriptDir/mill/build.sh "$buildDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions"
     revertBuildPatch || echo "Failed to fully revery build patch"
   ## Sbt
   ## Apparently built.sbt is a valid build file name. Accept any .sbt file
-  elif ls ${repoDir}/*.sbt 1> /dev/null 2>&1 ; then
-    echo "sbt project found: ${isSbtProject}"
+  elif [[ "$buildTool" == "sbt" ]]; then
+    echo "sbt project found at $buildDir"
     echo "sbt" > $buildToolFile
-    $scriptDir/sbt/prepare-project.sh "$project" "$repoDir" "$scalaVersion" "$projectConfig"
+    $scriptDir/sbt/prepare-project.sh "$project" "$buildDir" "$scalaVersion" "$projectConfig"
     createBuildPatch
-    $scriptDir/sbt/build.sh "$repoDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
+    $scriptDir/sbt/build.sh "$buildDir" "$scalaVersion" "$targets" "$mvnRepoUrl" "$projectConfig" "$extraScalacOptions" "$disabledScalacOptions" "$extraLibraryDeps"
     revertBuildPatch || echo "Failed to fully revery build patch"
   ## Scala-cli
   else

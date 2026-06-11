@@ -104,7 +104,7 @@ function runSbt() {
     "setCrossScalaVersions $scalaVersion"
     "$setScalaVersionCmd -v"
     "mapScalacOptions \"$appendScalacOptions\" \"$removeScalacOptions\""
-    "set every credentials := Nil"
+    "clearCredentials"
     "excludeLibraryDependency ${excludedCompilerPlugins[*]}"
     "removeScalacOptionsStartingWith ${excludedCompilerPluginOptPrefixes[*]}"
   )

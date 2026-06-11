@@ -86,8 +86,28 @@ class Scala3CommunityBuildMillAdapter(
     /** True when scalacOptions only forwards to another module's scalacOptions (already mapped upstream). */
     def isBareScalacOptionsReference(body: Term): Boolean = body match {
       case Term.Select(_, Term.Name("scalacOptions")) => true
-      case _                                          => false
+      case Term.Apply(receiver, arg :: Nil) if receiver.syntax.contains("Task") =>
+        arg match {
+          case Term.Select(Term.Name(qual), Term.Name("scalacOptions")) if qual.nonEmpty && qual.head.isUpper =>
+            true
+          case _ => false
+        }
+      case _ => false
     }
+
+    def isStringLiteral(term: Term): Boolean = term match {
+      case _: Lit.String => true
+      case _             => false
+    }
+
+    /** Prefer a plain String scalaVersion val in scope; fall back to module task ref. */
+    def findScalaVersionRef(enclosingStats: List[Stat]): Term =
+      enclosingStats.collectFirst {
+        case Defn.Val(_, Pat.Var(Term.Name("scalaVersion")) :: Nil, _, rhs) if isStringLiteral(rhs) =>
+          Term.Name("scalaVersion")
+        case Defn.Val(_, Pat.Var(Term.Name("scalaVersion")) :: Nil, _, Term.Select(qual, Term.Name("scalaVersion"))) =>
+          Term.Select(qual, Term.Name("scalaVersion"))
+      }.getOrElse(scalaVersionRef)
 
     def scalaVersionTaskRef: Term =
       if (isMill1x)
@@ -281,7 +301,7 @@ class Scala3CommunityBuildMillAdapter(
           }
       }
     }
-    def transformDefn(defn: Tree): Tree = defn match {
+    def transformDefn(defn: Tree, enclosingStats: List[Stat] = Nil): Tree = defn match {
       case defn @ (_: Defn.Class | _: Defn.Trait | _: Defn.Object) =>
         val template = defn match {
           case defn: Defn.Class  => defn.templ
@@ -297,7 +317,7 @@ class Scala3CommunityBuildMillAdapter(
         val canHaveScalacOptions = anyTreeOfTypeName(has = ScalaModuleSubtypes)(traits)
         val updatedTemplate = template.copy(
           inits = mapTraits(traits),
-          stats = stats.map(transformDefn).collect { case stat: Stat => stat } ++ {
+          stats = stats.map(stat => transformDefn(stat, stats)).collect { case stat: Stat => stat } ++ {
             if (
               hasScalacOptions || !canHaveScalacOptions || noInjects ||
               stats.exists(containsMapScalacOptionsCall)
@@ -325,10 +345,11 @@ class Scala3CommunityBuildMillAdapter(
             case defn: Defn.Def => defn
           }
         } else {
-          def mapScalacOptions(receiver: Term) =
+          val versionRef = findScalaVersionRef(enclosingStats)
+          def mapScalacOptions(receiver: Term, scalaVersion: Term = versionRef) =
             Term.Apply(
               Term.Select(receiver, Term.Name("mapScalacOptions")),
-              List(scalaVersionRef)
+              List(scalaVersion)
             )
 
           val updatedBody = body match {
@@ -351,8 +372,11 @@ class Scala3CommunityBuildMillAdapter(
 
             // Task(foo) => foo.mapScalacOptions(scalaVersion)
             case Term.Apply(receiver, Seq(body: Term.Select)) if receiver.syntax.contains("Task") =>
-              System.err.println(s"mapScalacOptions args: $body: ${body.structure}")
-              mapScalacOptions(body)
+              if (isBareScalacOptionsReference(body)) body
+              else {
+                System.err.println(s"mapScalacOptions args: $body: ${body.structure}")
+                mapScalacOptions(body)
+              }
 
             // Ad-hoc fix for com-lihaoyi/cask defining Option().toSeq
             case select: Term.Select if isMill1x && !Seq(".toSeq").exists(select.syntax.endsWith) =>
