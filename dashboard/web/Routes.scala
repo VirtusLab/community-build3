@@ -6,7 +6,7 @@ import org.http4s.*
 import org.http4s.dsl.io.*
 import org.http4s.headers.`Content-Type`
 import org.http4s.{headers, Uri, UrlForm}
-import org.typelevel.ci.CIStringSyntax
+import org.typelevel.ci.{CIString, CIStringSyntax}
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
 import scribe.cats.{io => log}
@@ -84,6 +84,9 @@ object Routes:
       showSnapshots = showSnapshots,
       showNightlies = showNightlies
     )
+
+  private def withComparePushUrl(response: Response[IO], params: Templates.CompareParams): Response[IO] =
+    response.putHeaders(Header.Raw(CIString("HX-Push-Url"), Templates.buildCompareUrl(params)))
 
   /** Parse history params from request, with defaults */
   private def parseHistoryParams(projectName: String, params: Map[String, String]): Templates.HistoryParams =
@@ -520,6 +523,7 @@ object Routes:
               resultOpt match
                 case Some(result) =>
                   Ok(Templates.comparisonResultsPartial(result, compareParams, notesMap, isLoggedIn), `Content-Type`(MediaType.text.html))
+                    .map(withComparePushUrl(_, compareParams))
                 case None => Ok("No comparison results", `Content-Type`(MediaType.text.html))
             else
               // Full page request
@@ -552,8 +556,7 @@ object Routes:
           targetBuildId = params.get("targetBuildId").filter(_.nonEmpty)
         )
 
-        val filter = params.get("filter").filter(_.nonEmpty).getOrElse("all")
-        val reason = params.get("reason").filter(_.nonEmpty)
+        val compareParams = parseCompareParams(params)
         val isLoggedIn = GitHubOAuth.extractUser(jwtSecret, req).isDefined
 
         // Helper to get the actual buildId from comparison result
@@ -572,7 +575,10 @@ object Routes:
             case None          => IO.pure(Map.empty[String, List[ProjectNote]])
           response <- result match
             case Right(r) =>
-              Ok(Templates.comparisonTablePartial(r, filter, reason, notesMap, isLoggedIn), `Content-Type`(MediaType.text.html))
+              Ok(
+                Templates.comparisonFilterResultsPartial(r, compareParams, notesMap, isLoggedIn),
+                `Content-Type`(MediaType.text.html)
+              ).map(withComparePushUrl(_, compareParams))
             case Left(err) => BadRequest(err)
         yield response
 
@@ -607,6 +613,7 @@ object Routes:
           response <- result match
             case Right(r) =>
               Ok(Templates.comparisonResultsPartial(r, compareParams, notesMap, isLoggedIn), `Content-Type`(MediaType.text.html))
+                .map(withComparePushUrl(_, compareParams))
             case Left(err) => BadRequest(err)
         yield response
 

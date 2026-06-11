@@ -741,13 +741,15 @@ object Templates:
       script(raw(swapCompareScript))
     )
 
-  /** Build a shareable URL for comparison */
-  private def buildCompareUrl(params: CompareParams): String =
+  /** Build a shareable URL for comparison (default filter/reason values omitted) */
+  def buildCompareUrl(params: CompareParams): String =
     val queryParams = List(
       params.baseScalaVersion.map(v => s"baseScalaVersion=${urlEncode(v)}"),
       params.baseBuildId.map(v => s"baseBuildId=${urlEncode(v)}"),
       params.targetScalaVersion.map(v => s"targetScalaVersion=${urlEncode(v)}"),
       params.targetBuildId.map(v => s"targetBuildId=${urlEncode(v)}"),
+      Option.when(params.filter != "all")(s"filter=${urlEncode(params.filter)}"),
+      params.reason.map(r => s"reason=${urlEncode(r)}"),
       Option.when(params.series != ScalaSeries.All)(s"series=${params.series}"),
       Option.when(!params.showSnapshots)("showSnapshots=false"),
       Option.when(!params.showNightlies)("showNightlies=false")
@@ -837,6 +839,49 @@ object Templates:
       showNightlies: Boolean = true
   )
 
+  /** Hidden inputs storing comparison parameters for htmx requests */
+  private def comparisonParamsHidden(params: CompareParams, oob: Boolean = false): Frag =
+    div(
+      id := "comparison-params",
+      if oob then attr("hx-swap-oob") := "true" else frag(),
+      input(tpe := "hidden", name := "baseScalaVersion", value := params.baseScalaVersion.getOrElse("")),
+      input(tpe := "hidden", name := "baseBuildId", value := params.baseBuildId.getOrElse("")),
+      input(tpe := "hidden", name := "targetScalaVersion", value := params.targetScalaVersion.getOrElse("")),
+      input(tpe := "hidden", name := "targetBuildId", value := params.targetBuildId.getOrElse("")),
+      input(tpe := "hidden", name := "filter", value := params.filter),
+      input(tpe := "hidden", name := "reason", value := params.reason.getOrElse(""))
+    )
+
+  /** Filter buttons and results table for compare page */
+  private def comparisonFilterResults(
+      result: ComparisonResult,
+      params: CompareParams,
+      notesMap: Map[String, List[ProjectNote]],
+      isLoggedIn: Boolean
+  ): Frag =
+    frag(
+      filterButtons(params),
+      div(
+        id := "results",
+        comparisonTable(result, params.filter, params.reason, notesMap, isLoggedIn)
+      )
+    )
+
+  /** Copy-link button for comparison results */
+  private def shareCompareButton(params: CompareParams, oob: Boolean = false): Frag =
+    val shareUrl = buildCompareUrl(params)
+    button(
+      id := "share-btn",
+      tpe := "button",
+      cls := "flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors",
+      if oob then attr("hx-swap-oob") := "true" else frag(),
+      attr("onclick") := s"copyShareLink('$shareUrl')",
+      raw(
+        """<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>"""
+      ),
+      span("Copy link")
+    )
+
   /** Comparison results content (without outer container) */
   def comparisonResultsContent(
       result: ComparisonResult,
@@ -844,35 +889,15 @@ object Templates:
       notesMap: Map[String, List[ProjectNote]] = Map.empty,
       isLoggedIn: Boolean = false
   ): Frag =
-    // Build shareable URL from params
-    val shareUrl = buildCompareUrl(params)
-
     frag(
       // Hidden inputs to store comparison parameters for htmx requests
-      div(
-        id := "comparison-params",
-        input(tpe := "hidden", name := "baseScalaVersion", value := params.baseScalaVersion.getOrElse("")),
-        input(tpe := "hidden", name := "baseBuildId", value := params.baseBuildId.getOrElse("")),
-        input(tpe := "hidden", name := "targetScalaVersion", value := params.targetScalaVersion.getOrElse("")),
-        input(tpe := "hidden", name := "targetBuildId", value := params.targetBuildId.getOrElse("")),
-        input(tpe := "hidden", name := "filter", value := params.filter),
-        input(tpe := "hidden", name := "reason", value := params.reason.getOrElse(""))
-      ),
+      comparisonParamsHidden(params),
 
       // Header with Copy link button
       div(
         cls := "flex justify-between items-center mb-4",
         h3(cls := "text-lg font-semibold text-gray-700", "Comparison Results"),
-        button(
-          id := "share-btn",
-          tpe := "button",
-          cls := "flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors",
-          attr("onclick") := s"copyShareLink('$shareUrl')",
-          raw(
-            """<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>"""
-          ),
-          span("Copy link")
-        )
+        shareCompareButton(params)
       ),
 
       // Summary
@@ -910,13 +935,10 @@ object Templates:
         )
       ),
 
-      // Filter buttons
-      filterButtons(params.filter, params.reason),
-
-      // Results table
+      // Filter buttons and results table
       div(
-        id := "results",
-        comparisonTable(result, params.filter, params.reason, notesMap, isLoggedIn)
+        id := "compare-filter-results",
+        comparisonFilterResults(result, params, notesMap, isLoggedIn)
       )
     )
 
@@ -998,6 +1020,19 @@ object Templates:
       isLoggedIn: Boolean = false
   ): String =
     comparisonTable(result, filter, reason, notesMap, isLoggedIn).render
+
+  /** Partial: filter buttons, results table, and OOB hidden-input sync for htmx */
+  def comparisonFilterResultsPartial(
+      result: ComparisonResult,
+      params: CompareParams,
+      notesMap: Map[String, List[ProjectNote]] = Map.empty,
+      isLoggedIn: Boolean = false
+  ): String =
+    frag(
+      comparisonParamsHidden(params, oob = true),
+      shareCompareButton(params, oob = true),
+      comparisonFilterResults(result, params, notesMap, isLoggedIn)
+    ).render
 
   /** Parameters for history filtering */
   final case class HistoryParams(
