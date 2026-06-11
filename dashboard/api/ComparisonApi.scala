@@ -105,12 +105,16 @@ class ComparisonApi(esClient: ElasticsearchClient):
       base: Option[BuildResult],
       target: BuildResult
   ): ProjectDiff =
+    val failureReasons =
+      if target.status == BuildStatus.Success then base.map(_.failureReasons).getOrElse(Nil)
+      else target.failureReasons
+
     ProjectDiff(
       projectName = project,
       version = target.version,
       baseStatus = base.map(_.status),
       targetStatus = target.status,
-      failureReasons = target.failureReasons,
+      failureReasons = failureReasons,
       buildURL = target.buildURL,
       buildId = target.buildId
     )
