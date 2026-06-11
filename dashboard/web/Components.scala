@@ -620,7 +620,10 @@ object Components:
     )
 
   /** Filter buttons for htmx - uses hx-include to pass form values */
-  def filterButtons(currentFilter: String, currentReason: Option[String]): Frag =
+  def filterButtons(params: Templates.CompareParams): Frag =
+    val currentFilter = params.filter
+    val currentReason = params.reason
+    val reasonParam = currentReason.getOrElse("")
     div(
       cls := "flex flex-wrap gap-2 mb-4 items-center",
       // Type filters
@@ -638,11 +641,11 @@ object Components:
                 if active then "bg-blue-600 text-white" else "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }",
             attr("hx-get") := path("/compare/filter"),
-            attr("hx-target") := "#results",
+            attr("hx-target") := "#compare-filter-results",
             attr("hx-swap") := "innerHTML",
             attr("hx-include") := "#comparison-params",
             attr("hx-indicator") := "#compare-loading",
-            attr("hx-vals") := s"""{"filter": "$value"}""",
+            attr("hx-vals") := s"""{"filter": "$value", "reason": "$reasonParam"}""",
             label
           )
       ),
@@ -678,11 +681,11 @@ object Components:
           button(
             cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
             attr("hx-get") := path("/compare/filter"),
-            attr("hx-target") := "#results",
+            attr("hx-target") := "#compare-filter-results",
             attr("hx-swap") := "innerHTML",
             attr("hx-include") := "#comparison-params",
             attr("hx-indicator") := "#compare-loading",
-            attr("hx-vals") := reasonOpt.map(r => s"""{"reason": "$r"}""").getOrElse("""{"reason": ""}"""),
+            attr("hx-vals") := s"""{"reason": "${reasonOpt.getOrElse("")}", "filter": "$currentFilter"}""",
             label
           )
       ),
