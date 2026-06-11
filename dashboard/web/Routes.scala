@@ -63,6 +63,28 @@ object Routes:
     if series.isEmpty then ScalaSeries.All
     else scala.util.Try(ScalaSeries.valueOf(series)).getOrElse(ScalaSeries.All)
 
+  /** Parse showSnapshots/showNightlies from request params (default: both true). */
+  private def parseShowFlags(params: Map[String, String]): (Boolean, Boolean) =
+    (
+      params.get("showSnapshots").forall(_ != "false"),
+      params.get("showNightlies").forall(_ != "false")
+    )
+
+  /** Parse compare page params from request, with defaults */
+  private def parseCompareParams(params: Map[String, String]): Templates.CompareParams =
+    val (showSnapshots, showNightlies) = parseShowFlags(params)
+    Templates.CompareParams(
+      baseScalaVersion = params.get("baseScalaVersion").filter(_.nonEmpty),
+      baseBuildId = params.get("baseBuildId").filter(_.nonEmpty),
+      targetScalaVersion = params.get("targetScalaVersion").filter(_.nonEmpty),
+      targetBuildId = params.get("targetBuildId").filter(_.nonEmpty),
+      filter = params.get("filter").filter(_.nonEmpty).getOrElse("all"),
+      reason = params.get("reason").filter(_.nonEmpty),
+      series = parseSeries(params.get("series").getOrElse("")),
+      showSnapshots = showSnapshots,
+      showNightlies = showNightlies
+    )
+
   /** Parse history params from request, with defaults */
   private def parseHistoryParams(projectName: String, params: Map[String, String]): Templates.HistoryParams =
     Templates.HistoryParams(
@@ -306,14 +328,18 @@ object Routes:
             .handleError(e => Left(e.getMessage))
 
     def getCachedBuilds(scalaVersion: Option[String], buildId: Option[String]): IO[List[BuildResult]] =
-      val cacheKey = (scalaVersion, buildId) match
-        case (Some(sv), _)  => BuildsCache.Key.ByScalaVersion(sv)
-        case (_, Some(bid)) => BuildsCache.Key.ByBuildId(bid)
-        case _              => BuildsCache.Key.Latest
-      val compute = cacheKey match
-        case BuildsCache.Key.ByScalaVersion(sv) => esClient.getBuildsByScalaVersion(sv)
-        case BuildsCache.Key.ByBuildId(bid)     => esClient.getBuildsByBuildId(bid)
-        case BuildsCache.Key.Latest             => esClient.getLatestBuilds()
+      val (cacheKey, compute) = (scalaVersion, buildId) match
+        case (_, Some(bid)) =>
+          (BuildsCache.Key.ByBuildId(bid), esClient.getBuildsByBuildId(bid))
+        case (Some(sv), None) =>
+          (
+            BuildsCache.Key.ByScalaVersion(sv),
+            esClient.listBuildIds(Some(sv)).flatMap:
+              case id :: _ => esClient.getBuildsByBuildId(id)
+              case Nil     => IO.pure(Nil)
+          )
+        case _ =>
+          (BuildsCache.Key.Latest, esClient.getLatestBuilds())
       buildsCache.getOrCompute(cacheKey, compute)
 
     def getCachedLogs(projectName: String, buildId: String): IO[Either[String, ParsedLogs]] =
@@ -368,6 +394,7 @@ object Routes:
           .flatMap(s => scala.util.Try(Templates.FailureSort.valueOf(s)).toOption)
           .getOrElse(Templates.FailureSort.Name)
         val sortAsc = params.get("sortAsc").forall(_ != "false") // Default true
+        val (showSnapshots, showNightlies) = parseShowFlags(params)
         val isHtmx = req.headers.get(ci"HX-Request").isDefined
         val htmxTarget = req.headers.get(ci"HX-Target").map(_.head.value)
 
@@ -383,9 +410,18 @@ object Routes:
                   allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
                 .flatten
                 .map(_.asString)
-            homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
+            homeParams = Templates.HomeParams(
+              effectiveScalaVersion,
+              buildId,
+              series,
+              reason,
+              sort,
+              sortAsc,
+              showSnapshots,
+              showNightlies
+            )
             response <- Ok(
-              Templates.homePageDeferred(allVersions, homeParams),
+              Templates.homePageDeferred(homeParams),
               `Content-Type`(MediaType.text.html)
             )
           yield response
@@ -399,7 +435,16 @@ object Routes:
                   allVersions.find(v => ScalaSeries.fromScalaVersion(v) == series)
                 .flatten
                 .map(_.asString)
-            homeParams = Templates.HomeParams(effectiveScalaVersion, buildId, series, reason, sort, sortAsc)
+            homeParams = Templates.HomeParams(
+              effectiveScalaVersion,
+              buildId,
+              series,
+              reason,
+              sort,
+              sortAsc,
+              showSnapshots,
+              showNightlies
+            )
             buildIds <- esClient.listBuildIds(effectiveScalaVersion)
             builds <- getCachedBuilds(effectiveScalaVersion, buildId)
             // Only compute failure streaks when sorting by Streak (expensive but cached)
@@ -443,12 +488,7 @@ object Routes:
           targetBuildId = params.get("targetBuildId").filter(_.nonEmpty)
         )
 
-        val compareParams = Templates.CompareParams(
-          baseScalaVersion = request.baseScalaVersion,
-          baseBuildId = request.baseBuildId,
-          targetScalaVersion = request.targetScalaVersion,
-          targetBuildId = request.targetBuildId
-        )
+        val compareParams = parseCompareParams(params)
 
         val isHtmx = req.headers.get(ci"HX-Request").isDefined
         val hasComparison = request.targetScalaVersion.isDefined || request.targetBuildId.isDefined
@@ -464,7 +504,8 @@ object Routes:
 
         for
           versions <- esClient.listScalaVersions()
-          buildIds <- esClient.listBuildIds(None)
+          baseBuildIds <- esClient.listBuildIds(request.baseScalaVersion)
+          targetBuildIds <- esClient.listBuildIds(request.targetScalaVersion)
           resultOpt <-
             if hasComparison
             then getCachedComparison(request).map(_.toOption)
@@ -483,27 +524,20 @@ object Routes:
             else
               // Full page request
               Ok(
-                Templates.comparePage(versions, buildIds, resultOpt, compareParams, notesMap, isLoggedIn),
+                Templates.comparePage(versions, baseBuildIds, targetBuildIds, resultOpt, compareParams, notesMap, isLoggedIn),
                 `Content-Type`(MediaType.text.html)
               )
         yield response
 
-      // Compare form partial (for htmx series filter) - returns form with filtered versions
+      // Compare form partial (for htmx series/version filter) - returns form with filtered versions
       case req @ GET -> Root / "compare" / "form" =>
-        val params = req.params
-        val series = parseSeries(params.get("series").getOrElse(""))
-        val compareParams = Templates.CompareParams(
-          baseScalaVersion = None,
-          baseBuildId = None,
-          targetScalaVersion = None,
-          targetBuildId = None,
-          series = series
-        )
+        val compareParams = parseCompareParams(req.params)
         for
           versions <- esClient.listScalaVersions()
-          buildIds <- esClient.listBuildIds(None)
+          baseBuildIds <- esClient.listBuildIds(compareParams.baseScalaVersion)
+          targetBuildIds <- esClient.listBuildIds(compareParams.targetScalaVersion)
           response <- Ok(
-            Templates.compareFormPartial(versions, buildIds, compareParams),
+            Templates.compareFormPartial(versions, baseBuildIds, targetBuildIds, compareParams),
             `Content-Type`(MediaType.text.html)
           )
         yield response
@@ -552,12 +586,7 @@ object Routes:
           targetBuildId = params.get("targetBuildId").filter(_.nonEmpty)
         )
 
-        val compareParams = Templates.CompareParams(
-          baseScalaVersion = request.baseScalaVersion,
-          baseBuildId = request.baseBuildId,
-          targetScalaVersion = request.targetScalaVersion,
-          targetBuildId = request.targetBuildId
-        )
+        val compareParams = parseCompareParams(params)
 
         val isLoggedIn = GitHubOAuth.extractUser(jwtSecret, req).isDefined
 

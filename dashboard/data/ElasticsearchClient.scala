@@ -112,6 +112,7 @@ object ElasticsearchClient:
           .size(MaxResults)
           .sourceInclude(standardFields)
           .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
+      .map(BuildResult.latestPerProjectAndBuild)
 
     override def getBuildsByBuildId(buildId: String): IO[List[BuildResult]] =
       executeSearch:
@@ -120,6 +121,7 @@ object ElasticsearchClient:
           .size(MaxResults)
           .sourceInclude(standardFields)
           .sortBy(fieldSort("projectName"), fieldSort("timestamp").desc())
+      .map(BuildResult.latestPerProjectAndBuild)
 
     override def getProjectHistory(projectName: ProjectName): IO[List[ProjectHistoryEntry]] =
       val query = search(BuildSummariesIndex)
@@ -209,6 +211,7 @@ object ElasticsearchClient:
         )
         .size(1)
         .sourceInclude(standardFields :+ "logs")
+        .sortBy(fieldSort("timestamp").desc())
 
       executeRaw(query).map: response =>
         response.hits.hits.headOption.flatMap(hit => parseBuildResult(hit.sourceAsMap))

@@ -43,13 +43,15 @@ class ComparisonApi(esClient: ElasticsearchClient):
       targetBuilds: List[BuildResult]
   ): ComparisonResult =
     // Group by project name, taking the most recent build per project
-    val baseByProject = baseBuilds
+    val baseByProject = BuildResult
+      .latestPerProjectAndBuild(baseBuilds)
       .groupBy(_.projectName)
       .view
       .mapValues(_.maxBy(_.timestamp))
       .toMap
 
-    val targetByProject = targetBuilds
+    val targetByProject = BuildResult
+      .latestPerProjectAndBuild(targetBuilds)
       .groupBy(_.projectName)
       .view
       .mapValues(_.maxBy(_.timestamp))

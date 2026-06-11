@@ -119,7 +119,9 @@ object Templates:
       series: ScalaSeries = ScalaSeries.All,
       reason: Option[String] = None,
       sort: FailureSort = FailureSort.Name,
-      sortAsc: Boolean = true
+      sortAsc: Boolean = true,
+      showSnapshots: Boolean = true,
+      showNightlies: Boolean = true
   ):
     def queryString: String =
       val params = List(
@@ -128,7 +130,9 @@ object Templates:
         Option.when(series != ScalaSeries.All)(s"series=${series.toString}"),
         reason.map(r => s"reason=$r"),
         Option.when(sort != FailureSort.Name)(s"sort=${sort.toString}"),
-        Option.when(!sortAsc)(s"sortAsc=false")
+        Option.when(!sortAsc)(s"sortAsc=false"),
+        Option.when(!showSnapshots)("showSnapshots=false"),
+        Option.when(!showNightlies)("showNightlies=false")
       ).flatten
       if params.isEmpty then "" else "?" + params.mkString("&")
 
@@ -160,30 +164,21 @@ object Templates:
     )
 
   /** Home page shell - loads quickly, then fetches results via HTMX */
-  def homePageDeferred(
-      scalaVersions: Iterable[String],
-      params: HomeParams = HomeParams()
-  ): String =
+  def homePageDeferred(params: HomeParams = HomeParams()): String =
     layout(
       "Build Results",
       div(
         id := "home-content",
-        // Version selector (with empty buildIds for now - will be populated on results load)
-        homeVersionSelector(scalaVersions, Nil, params),
-
-        // Results section - triggers load after page render
+        cls := "min-h-[400px]",
+        attr("hx-get") := path(s"/${params.queryString}"),
+        attr("hx-trigger") := "load",
+        attr("hx-swap") := "outerHTML",
+        attr("hx-indicator") := "#home-loading",
+        // Loading state
         div(
-          id := "home-results",
-          cls := "min-h-[400px]",
-          attr("hx-get") := path(s"/${params.queryString}"),
-          attr("hx-trigger") := "load",
-          attr("hx-swap") := "innerHTML",
-          // Loading state
-          div(
-            cls := "flex flex-col items-center justify-center py-16",
-            loadingSpinner,
-            p(cls := "mt-4 text-gray-500", "Loading build results...")
-          )
+          cls := "flex flex-col items-center justify-center py-16",
+          loadingSpinner,
+          p(cls := "mt-4 text-gray-500", "Loading build results...")
         )
       )
     )
@@ -208,30 +203,94 @@ object Templates:
       )
     ).render
 
+  /** Filter Scala versions by series and version type toggles. */
+  private def filterScalaVersions(
+      versions: Iterable[String],
+      series: ScalaSeries,
+      showSnapshots: Boolean,
+      showNightlies: Boolean,
+      keepSelected: Set[String]
+  ): List[String] =
+    versions.filter: v =>
+      keepSelected.contains(v) ||
+        (ScalaSeries.matches(series, v) &&
+          VersionType.shouldShow(v, !showSnapshots, !showNightlies))
+    .toList
+
+  /** Toggle buttons for showing snapshot/nightly Scala versions in dropdowns. */
+  private def versionTypeShowToggles(
+      showSnapshots: Boolean,
+      showNightlies: Boolean,
+      hxGet: String,
+      hxTarget: String,
+      hxInclude: String,
+      hxSwap: String = "outerHTML",
+      loadingIndicator: String = "#home-loading"
+  ): Frag =
+    div(
+      cls := "flex gap-2 ml-2 border-l pl-4 items-center",
+      span(cls := "text-sm text-gray-500 mr-2", "Show:"),
+      button(
+        tpe := "button",
+        cls := s"px-3 py-1 rounded text-xs font-medium transition-colors ${
+            if showSnapshots then "bg-gray-700 text-white"
+            else "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }",
+        attr("hx-get") := hxGet,
+        attr("hx-target") := hxTarget,
+        attr("hx-swap") := hxSwap,
+        attr("hx-indicator") := loadingIndicator,
+        attr("hx-include") := hxInclude,
+        attr("hx-vals") := s"""{"showSnapshots":"${!showSnapshots}"}""",
+        title := "Snapshot versions like 3.8.0-RC4-bin-20251230-fab225a",
+        "Snapshots"
+      ),
+      button(
+        tpe := "button",
+        cls := s"px-3 py-1 rounded text-xs font-medium transition-colors ${
+            if showNightlies then "bg-gray-700 text-white"
+            else "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }",
+        attr("hx-get") := hxGet,
+        attr("hx-target") := hxTarget,
+        attr("hx-swap") := hxSwap,
+        attr("hx-indicator") := loadingIndicator,
+        attr("hx-include") := hxInclude,
+        attr("hx-vals") := s"""{"showNightlies":"${!showNightlies}"}""",
+        title := "Nightly versions like 3.8.1-RC1-bin-20251228-e73ff2c-NIGHTLY",
+        "Nightlies"
+      )
+    )
+
   /** Version selector for home page */
   private def homeVersionSelector(
       scalaVersions: Iterable[String],
       buildIds: List[String],
       params: HomeParams
   ): Frag =
-    // Filter versions by selected series
-    val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
+    val keepSelected = params.scalaVersion.toSet
+    val filteredVersions = filterScalaVersions(
+      scalaVersions,
+      params.series,
+      params.showSnapshots,
+      params.showNightlies,
+      keepSelected
+    )
 
     div(
       id := "home-selector", // For full replacement on series change
       cls := "bg-white rounded-lg shadow p-4 mb-6 space-y-3",
 
-      // Row 1: Series selector (uses shared styling from Components)
+      // Row 1: Series selector and version type toggles
       div(
-        cls := "flex items-center gap-2",
+        cls := "flex flex-wrap items-center gap-2",
         span(cls := "text-sm text-gray-600", "Series:"),
         div(
           cls := "flex gap-1",
           ScalaSeries.allValues.map: series =>
             val active = params.series == series
             val colorClass = seriesButtonStyle(series, active)
-            // When changing series, clear scalaVersion and buildId to get fresh data
-            val newParams = HomeParams(series = series)
+            val newParams = params.copy(series = series, scalaVersion = None, buildId = None)
             button(
               cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
               attr("hx-get") := path(s"/${newParams.queryString}"),
@@ -240,6 +299,13 @@ object Templates:
               attr("hx-indicator") := "#home-loading",
               ScalaSeries.label(series)
             )
+        ),
+        versionTypeShowToggles(
+          params.showSnapshots,
+          params.showNightlies,
+          hxGet = path("/"),
+          hxTarget = "#home-content",
+          hxInclude = "#home-selector"
         ),
         // Loading indicator
         div(
@@ -252,6 +318,7 @@ object Templates:
 
       // Row 2: Version and Build selectors
       div(
+        id := "home-selector-inputs",
         cls := "flex flex-wrap gap-4 items-center",
 
         // Scala version selector (filtered by series)
@@ -261,10 +328,10 @@ object Templates:
           tag("select")(
             cls := "border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500",
             attr("hx-get") := path("/"),
-            attr("hx-target") := "#home-results",
-            attr("hx-swap") := "innerHTML",
+            attr("hx-target") := "#home-content",
+            attr("hx-swap") := "outerHTML",
             attr("hx-indicator") := "#home-loading",
-            attr("hx-include") := "#home-filters",
+            attr("hx-include") := "#home-selector-inputs",
             attr("name") := "scalaVersion",
             option(
               value := "",
@@ -287,10 +354,10 @@ object Templates:
           tag("select")(
             cls := "border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500",
             attr("hx-get") := path("/"),
-            attr("hx-target") := "#home-results",
-            attr("hx-swap") := "innerHTML",
+            attr("hx-target") := "#home-content",
+            attr("hx-swap") := "outerHTML",
             attr("hx-indicator") := "#home-loading",
-            attr("hx-include") := "#home-filters",
+            attr("hx-include") := "#home-selector-inputs",
             attr("name") := "buildId",
             option(value := "", if params.buildId.isEmpty then attr("selected") := "selected" else frag(), "Latest"),
             buildIds
@@ -313,7 +380,9 @@ object Templates:
             name := "series",
             value := (if params.series == ScalaSeries.All then "" else params.series.toString)
           ),
-          input(tpe := "hidden", name := "reason", value := params.reason.getOrElse(""))
+          input(tpe := "hidden", name := "reason", value := params.reason.getOrElse("")),
+          input(tpe := "hidden", name := "showSnapshots", value := params.showSnapshots.toString),
+          input(tpe := "hidden", name := "showNightlies", value := params.showNightlies.toString)
         )
       )
     )
@@ -493,14 +562,14 @@ object Templates:
   /** Comparison page */
   def comparePage(
       scalaVersions: Iterable[String],
-      buildIds: List[String],
+      baseBuildIds: List[String],
+      targetBuildIds: List[String],
       result: Option[ComparisonResult],
       params: CompareParams = CompareParams(None, None, None, None),
       notesMap: Map[String, List[ProjectNote]] = Map.empty,
       isLoggedIn: Boolean = false
   ): String =
-    // Filter versions by selected series
-    val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
+    val filteredVersions = filterCompareScalaVersions(scalaVersions, params)
 
     layout(
       "Compare Builds",
@@ -510,7 +579,7 @@ object Templates:
         // Comparison form (with series filtering)
         div(
           id := "compare-form-container",
-          compareForm(filteredVersions, buildIds, params)
+          compareForm(filteredVersions, baseBuildIds, targetBuildIds, params)
         ),
 
         // Results container (always present for htmx targeting)
@@ -528,18 +597,34 @@ object Templates:
       )
     )
 
-  /** Partial: compare form for htmx updates (when series changes) */
+  /** Partial: compare form for htmx updates (when series or version changes) */
   def compareFormPartial(
       scalaVersions: Iterable[String],
-      buildIds: List[String],
+      baseBuildIds: List[String],
+      targetBuildIds: List[String],
       params: CompareParams
   ): String =
-    // Filter versions by selected series
-    val filteredVersions = scalaVersions.filter(v => ScalaSeries.matches(params.series, v))
-    compareForm(filteredVersions, buildIds, params).render
+    val filteredVersions = filterCompareScalaVersions(scalaVersions, params)
+    compareForm(filteredVersions, baseBuildIds, targetBuildIds, params).render
+
+  /** Filter Scala versions for compare dropdowns by series and version type. */
+  private def filterCompareScalaVersions(scalaVersions: Iterable[String], params: CompareParams): List[String] =
+    val keepSelected = Set(params.baseScalaVersion, params.targetScalaVersion).flatten
+    filterScalaVersions(
+      scalaVersions,
+      params.series,
+      params.showSnapshots,
+      params.showNightlies,
+      keepSelected
+    )
 
   /** Comparison form */
-  private def compareForm(scalaVersions: Iterable[String], buildIds: List[String], params: CompareParams): Frag =
+  private def compareForm(
+      scalaVersions: Iterable[String],
+      baseBuildIds: List[String],
+      targetBuildIds: List[String],
+      params: CompareParams
+  ): Frag =
     form(
       id := "compare-form",
       cls := "bg-white rounded-lg shadow p-6 mb-8",
@@ -547,9 +632,12 @@ object Templates:
       attr("hx-target") := "#comparison-results",
       attr("hx-swap") := "innerHTML",
 
+      input(tpe := "hidden", name := "showSnapshots", value := params.showSnapshots.toString),
+      input(tpe := "hidden", name := "showNightlies", value := params.showNightlies.toString),
+
       // Series filter row (HTMX-based)
       div(
-        cls := "mb-4 pb-4 border-b border-gray-200 flex items-center gap-2",
+        cls := "mb-4 pb-4 border-b border-gray-200 flex flex-wrap items-center gap-2",
         span(cls := "text-sm text-gray-600", "Series:"),
         div(
           cls := "flex gap-1",
@@ -560,13 +648,25 @@ object Templates:
             button(
               tpe := "button",
               cls := s"px-3 py-1 rounded text-xs font-medium transition-colors $colorClass",
-              attr("hx-get") := path(s"/compare/form?series=$seriesParam"),
+              attr("hx-get") := path("/compare/form"),
               attr("hx-target") := "#compare-form-container",
               attr("hx-swap") := "innerHTML",
               attr("hx-indicator") := "#compare-loading",
+              attr("hx-include") := "#compare-form",
+              attr("hx-vals") := s"""{"series":"$seriesParam"}""",
               ScalaSeries.label(series)
             )
         ),
+        versionTypeShowToggles(
+          params.showSnapshots,
+          params.showNightlies,
+          hxGet = path("/compare/form"),
+          hxTarget = "#compare-form-container",
+          hxInclude = "#compare-form",
+          hxSwap = "innerHTML",
+          loadingIndicator = "#compare-loading"
+        ),
+
         // Loading indicator
         div(
           id := "compare-loading",
@@ -583,9 +683,9 @@ object Templates:
           p(cls := "text-xs text-gray-500 mb-3", "The version to compare against (previous)"),
           div(
             cls := "space-y-3",
-            selectField("baseScalaVersion", "Scala Version", scalaVersions, params.baseScalaVersion),
+            compareScalaVersionField("baseScalaVersion", "Scala Version", scalaVersions, params.baseScalaVersion),
             div(cls := "text-center text-gray-400", "or"),
-            selectField("baseBuildId", "Build ID", buildIds, params.baseBuildId)
+            selectField("baseBuildId", "Build ID", baseBuildIds, params.baseBuildId)
           )
         ),
         // Swap button
@@ -609,9 +709,9 @@ object Templates:
           p(cls := "text-xs text-gray-500 mb-3", "The version to compare with (current)"),
           div(
             cls := "space-y-3",
-            selectField("targetScalaVersion", "Scala Version", scalaVersions, params.targetScalaVersion),
+            compareScalaVersionField("targetScalaVersion", "Scala Version", scalaVersions, params.targetScalaVersion),
             div(cls := "text-center text-gray-400", "or"),
-            selectField("targetBuildId", "Build ID", buildIds, params.targetBuildId)
+            selectField("targetBuildId", "Build ID", targetBuildIds, params.targetBuildId)
           )
         )
       ),
@@ -647,7 +747,10 @@ object Templates:
       params.baseScalaVersion.map(v => s"baseScalaVersion=${urlEncode(v)}"),
       params.baseBuildId.map(v => s"baseBuildId=${urlEncode(v)}"),
       params.targetScalaVersion.map(v => s"targetScalaVersion=${urlEncode(v)}"),
-      params.targetBuildId.map(v => s"targetBuildId=${urlEncode(v)}")
+      params.targetBuildId.map(v => s"targetBuildId=${urlEncode(v)}"),
+      Option.when(params.series != ScalaSeries.All)(s"series=${params.series}"),
+      Option.when(!params.showSnapshots)("showSnapshots=false"),
+      Option.when(!params.showNightlies)("showNightlies=false")
     ).flatten
     if queryParams.isEmpty then path("/compare")
     else path(s"/compare?${queryParams.mkString("&")}")
@@ -698,6 +801,29 @@ object Templates:
       )
     )
 
+  private def compareScalaVersionField(
+      name: String,
+      label: String,
+      options: Iterable[String],
+      selected: Option[String]
+  ): Frag =
+    div(
+      tag("label")(cls := "block text-sm text-gray-600 mb-1", label),
+      tag("select")(
+        attr("name") := name,
+        cls := "w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+        attr("hx-get") := path("/compare/form"),
+        attr("hx-target") := "#compare-form-container",
+        attr("hx-swap") := "innerHTML",
+        attr("hx-indicator") := "#compare-loading",
+        attr("hx-include") := "#compare-form",
+        attr("hx-trigger") := "change",
+        option(value := "", if selected.isEmpty then attr("selected") := "selected" else frag(), "Select..."),
+        options.toList.map: v =>
+          option(value := v, if selected.contains(v) then attr("selected") := "selected" else frag(), v)
+      )
+    )
+
   /** Parameters for comparison filtering */
   final case class CompareParams(
       baseScalaVersion: Option[String],
@@ -706,7 +832,9 @@ object Templates:
       targetBuildId: Option[String],
       filter: String = "all",
       reason: Option[String] = None,
-      series: ScalaSeries = ScalaSeries.All
+      series: ScalaSeries = ScalaSeries.All,
+      showSnapshots: Boolean = true,
+      showNightlies: Boolean = true
   )
 
   /** Comparison results content (without outer container) */
