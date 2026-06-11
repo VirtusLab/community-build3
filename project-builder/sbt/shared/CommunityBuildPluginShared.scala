@@ -44,7 +44,11 @@ trait CommunityBuildPluginShared extends AutoPlugin {
     libraryDependencies ++= extraLibraryDependencies(
       buildScalaVersion = sys.props.get("communitybuild.scala").filter(_.nonEmpty),
       projectScalaVersion = (thisProjectRef / scalaVersion).value
-    )
+    ),
+    // Community build must not authenticate to remote repositories; clearCredentials reinforces this after ++.
+    credentials := Nil,
+    // Disable remote publish; runBuild only invokes publishLocal.
+    publish / skip := true
   )
 
   private def extraLibraryDependencies(
@@ -143,6 +147,12 @@ trait CommunityBuildPluginShared extends AutoPlugin {
             allowedCrossVersions
         }
       }
+    }
+
+  /** Clears publish credentials on every project without triggering sbt 2 settings reapply. */
+  val clearCredentials =
+    projectBasedKeyTransformCommand("clearCredentials", Keys.credentials) { (_, _) =>
+      (_: ProjectRef, _: Seq[Credentials]) => Nil
     }
 
   val mapScalacOptions =
@@ -250,6 +260,7 @@ trait CommunityBuildPluginShared extends AutoPlugin {
   val commands = Seq(
     disableFatalWarnings,
     setCrossScalaVersions,
+    clearCredentials,
     mapScalacOptions,
     excludeLibraryDependency,
     removeScalacOptionsStartingWith
