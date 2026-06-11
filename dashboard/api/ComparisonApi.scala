@@ -43,13 +43,15 @@ class ComparisonApi(esClient: ElasticsearchClient):
       targetBuilds: List[BuildResult]
   ): ComparisonResult =
     // Group by project name, taking the most recent build per project
-    val baseByProject = baseBuilds
+    val baseByProject = BuildResult
+      .latestPerProjectAndBuild(baseBuilds)
       .groupBy(_.projectName)
       .view
       .mapValues(_.maxBy(_.timestamp))
       .toMap
 
-    val targetByProject = targetBuilds
+    val targetByProject = BuildResult
+      .latestPerProjectAndBuild(targetBuilds)
       .groupBy(_.projectName)
       .view
       .mapValues(_.maxBy(_.timestamp))
@@ -103,12 +105,16 @@ class ComparisonApi(esClient: ElasticsearchClient):
       base: Option[BuildResult],
       target: BuildResult
   ): ProjectDiff =
+    val failureReasons =
+      if target.status == BuildStatus.Success then base.map(_.failureReasons).getOrElse(Nil)
+      else target.failureReasons
+
     ProjectDiff(
       projectName = project,
       version = target.version,
       baseStatus = base.map(_.status),
       targetStatus = target.status,
-      failureReasons = target.failureReasons,
+      failureReasons = failureReasons,
       buildURL = target.buildURL,
       buildId = target.buildId
     )

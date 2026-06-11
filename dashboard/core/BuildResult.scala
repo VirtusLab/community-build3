@@ -85,6 +85,14 @@ final case class BuildResult(
 ) derives Codec.AsObject
 
 object BuildResult:
+  /** Keep the newest document per (projectName, buildId). */
+  def latestPerProjectAndBuild(builds: List[BuildResult]): List[BuildResult] =
+    builds
+      .groupBy(b => (b.projectName, b.buildId))
+      .values
+      .map(_.maxBy(_.timestamp))
+      .toList
+
   extension (result: BuildResult)
     def hasCompilerFailure: Boolean =
       result.summary.exists(_.hasCompileFailure)
