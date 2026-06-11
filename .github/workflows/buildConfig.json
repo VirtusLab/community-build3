@@ -1059,7 +1059,6 @@
       },
       "sbt":{
         "commands":[
-          "set every targetSystemJdk := true",
           "set every apiURL := None",
           "mapScalacOptions \"\" -Wconf:cat=unused-nowarn:s,any:e",
           "set actorTests / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"BackoffSupervisorSpec.scala\" || \"MetricsBasedResizerSpec.scala\" || \"EventStreamSpec.scala\" || \"ForkJoinPoolStarvationSpec.scala\" || \"ConfigSpec.scala\" || \"LineNumberSpec.scala\" ",
@@ -1067,16 +1066,18 @@
           "set streamTests / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"RestartSpec.scala\" || \"TlsSpec.scala\" || \"InputStreamSinkSpec.scala\" || \"ActorRefBackpressureSourceSpec.scala\" || \"FlowDelaySpec.scala\" || \"TcpSpec.scala\" || \"TcpHelper.scala\" || \"DeprecatedTlsSpec.scala\"",
           "set remote / Test / executeTests := Tests.Output(TestResult.Passed, Map(), Iterable())",
           "set actorTypedTests / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"ActorContextPipeToSelfSpec.scala\" || \"ActorContextPipeToSelfTest.java\" || \"ActorContextSpec.scala\" || \"BubblingSampleTest.java\" || \"MailboxSelectorSpec.scala\" || \"LocalPubSubSpec.scala\" || \"MessageAdapterSpec.scala\"",
-          "set cluster / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"ClusterSpec.scala\" || \"ClusterHeartbeatReceiverSpec.scala\" || \"ClusterMessageSerializerSpec.scala\"",
+          "set cluster / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"ClusterSpec.scala\" || \"ClusterHeartbeatReceiverSpec.scala\" || \"ClusterMessageSerializerSpec.scala\" || \"DownAllIndirectlyConnected5NodeSpec.scala\"",
           "set clusterTools / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"ClusterSingletonLeaseSpec.scala\"",
-          "set clusterSharding / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"SupervisionSpec.scala\" || \"ConcurrentStartupShardingSpec.scala\" || \"StartEntitySpec.scala\"",
+          "set clusterSharding / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"SupervisionSpec.scala\" || \"ConcurrentStartupShardingSpec.scala\" || \"StartEntitySpec.scala\" || \"ShardRegionSpec.scala\" || \"ClusterShardingCoordinatorRoleSpec.scala\" || \"ClusterShardingRememberEntitiesSpec.scala\"",
           "set clusterTyped / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"ClusterReceptionistSpec.scala\"",
           "set coordination / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"LeaseDocSpec.scala\" || \"LeaseDocTest.java\"",
-          "set distributedData / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"WriteAggregatorSpec.scala\" || \"ReplicatedDataSerializerSpec.scala\"",
+          "set distributedData / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"WriteAggregatorSpec.scala\" || \"ReplicatedDataSerializerSpec.scala\" || \"DurableDataSpec.scala\" || \"DurablePruningSpec.scala\"",
+          "set jackson / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"JacksonSerializerSpec.scala\" || \"ScalaTestEventMigration.scala\" ",
+          "set remoteTests / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"AeronStreamLatencySpec.scala\" || \"AeronStreamMaxThroughputSpec.scala\" || \"AeronStreamConcistencySpec.scala\" || \"FanInThrougputSpec.scala\" ",
           "set persistence / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"PersistentActorBoundedStashingSpec.scala\" || \"AbstractPersistentFSMTest.java\" || \"PersistentActorSpec.scala\" || \"EventSourcedActorFailureSpec.scala\" || \"TimerPersistentActorSpec.scala\"",
           "set persistenceTyped / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"PersistentFsmToTypedMigrationCompileOnlyTest.java\"",
           "set persistenceTyped / Test / executeTests := Tests.Output(TestResult.Passed, Map(), Iterable())",
-          "set akkaPersistenceTck / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"LeveldbJournalNativeSpec.scala\" || \"LeveldbSnapshotStoreSpec.scala\""
+          "set persistenceTck / Test / unmanagedSources / excludeFilter := HiddenFileFilter || \"LeveldbJournalNativeSpec.scala\" || \"LeveldbSnapshotStoreSpec.scala\""
         ],
         "options":[
           
@@ -3028,7 +3029,7 @@
       },
       "sbt":{
         "commands":[
-          "set every targetSystemJdk := true"
+          
         ],
         "options":[
           
@@ -9322,7 +9323,7 @@
     "project":"cognitedata/cognite-sdk-scala",
     "repoUrl":"https://github.com/cognitedata/cognite-sdk-scala.git",
     "revision":"",
-    "version":"2.38.986",
+    "version":"2.38.1009",
     "targets":"com.cognite%cognite-sdk-scala",
     "publishedScalaVersion":"3.3.3",
     "config":{
@@ -9456,10 +9457,10 @@
   "colofabrix/h4sbl":{
     "project":"colofabrix/h4sbl",
     "repoUrl":"https://github.com/colofabrix/h4sbl.git",
-    "revision":"1.0.0",
-    "version":"1.0.0",
+    "revision":"1.0.1",
+    "version":"1.0.1",
     "targets":"com.colofabrix.scala%h4sbl",
-    "publishedScalaVersion":"3.7.4",
+    "publishedScalaVersion":"3.3.7",
     "config":{
       "projects":{
         "exclude":[
@@ -9492,7 +9493,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3Version = \"3.7.4\"",
+          "pattern":"val scala3Version = \"3.3.7\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ]
@@ -14922,8 +14923,8 @@
   "donderom/llm4s":{
     "project":"donderom/llm4s",
     "repoUrl":"https://github.com/donderom/llm4s.git",
-    "revision":"v0.15.0-b8049",
-    "version":"0.15.0-b8049",
+    "revision":"v0.16.0-b8608",
+    "version":"0.16.0-b8608",
     "targets":"com.donderom%llm4s",
     "publishedScalaVersion":"3.3.0",
     "config":{
@@ -21405,7 +21406,40 @@
     "revision":"v0.72.1",
     "version":"0.72.1",
     "targets":"edu.gemini%lucuma-itc edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc-service edu.gemini%lucuma-itc-testkit edu.gemini%lucuma-odb edu.gemini%lucuma-odb-binding edu.gemini%lucuma-odb-otel edu.gemini%lucuma-odb-schema edu.gemini%lucuma-sso-backend-client edu.gemini%lucuma-sso-frontend-client",
-    "publishedScalaVersion":"3.8.3"
+    "publishedScalaVersion":"3.8.3",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"25"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ]
+    }
   },
   "gemini-hlsw/lucuma-refined":{
     "project":"gemini-hlsw/lucuma-refined",
@@ -52489,8 +52523,8 @@
   "sake92/deder":{
     "project":"sake92/deder",
     "repoUrl":"https://github.com/sake92/deder.git",
-    "revision":"v0.16.2",
-    "version":"0.16.2",
+    "revision":"v0.17.0",
+    "version":"0.17.0",
     "targets":"ba.sake%deder-common ba.sake%deder-plugin-api",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -52530,8 +52564,8 @@
   "sake92/deder-plugins":{
     "project":"sake92/deder-plugins",
     "repoUrl":"https://github.com/sake92/deder-plugins.git",
-    "revision":"v0.1.1",
-    "version":"0.1.1",
+    "revision":"v0.2.0",
+    "version":"0.2.0",
     "targets":"ba.sake%deder-build-info ba.sake%deder-protobuf ba.sake%deder-web-dashboard",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -53935,7 +53969,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3 = \"3.8.3\"",
+          "pattern":"val scala3 = \"3.8.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ]
@@ -61106,8 +61140,8 @@
   "starlake-ai/quack-on-demand":{
     "project":"starlake-ai/quack-on-demand",
     "repoUrl":"https://github.com/starlake-ai/quack-on-demand.git",
-    "revision":"v0.3.0",
-    "version":"0.3.0",
+    "revision":"v0.3.1",
+    "version":"0.3.1",
     "targets":"ai.starlake%quack-on-demand",
     "publishedScalaVersion":"3.7.4",
     "config":{
@@ -69935,7 +69969,7 @@
           
         ]
       },
-      "tests":"disabled",
+      "tests":"full",
       "migrationVersions":[
         "3.3"
       ],
@@ -73365,50 +73399,6 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }
