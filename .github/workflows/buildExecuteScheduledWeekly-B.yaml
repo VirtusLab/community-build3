@@ -19,8 +19,8 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v6
 
-      - name: Install scala-cli
-        uses: coursier/setup-action@v3
+      - uses: coursier/cache-action@v8
+      - uses: coursier/setup-action@v3
         with:
           jvm: 25
           apps: scala-cli:1.12.5
@@ -57,8 +57,8 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v6
 
-      - name: Install scala-cli
-        uses: coursier/setup-action@v3
+      - uses: coursier/cache-action@v8
+      - uses: coursier/setup-action@v3
         with:
           jvm: 25
           apps: scala-cli:1.12.5

@@ -26,8 +26,8 @@ runs:
         ref: ${{ inputs.repository-branch }}
         path: "compiler"
 
-    - name: Install coursier
-      uses: coursier/setup-action@v3
+    - uses: coursier/cache-action@v8
+    - uses: coursier/setup-action@v3
       with:
         jvm: 17
         apps: cs
