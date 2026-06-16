@@ -277,18 +277,28 @@ object Scala3CommunityBuild {
     def toJson: String
   }
   object FailureContext {
+    // Used to match output colored using scala.io.AnsiColor
+    // ; is optional, it is not a part of AnsiColor, but is allowed in general to specify both foreground and background color
+    private val AnsiColorPattern = "\\u001B\\[[;\\d]*m"
+
+    private def jsonString(value: String): String = {
+      val escaped = value
+        .replaceAll(AnsiColorPattern, "")
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+      s""""$escaped""""
+    }
+
     case class WrongVersion(expected: String, actual: String) extends FailureContext {
       override def toJson: String =
-        s"""{"type": "wrongVersion", "expected": "$expected", "actual": "$actual"}"""
+        s"""{"type": "wrongVersion", "expected": ${jsonString(expected)}, "actual": ${jsonString(actual)}}"""
     }
     case class BuildError(reasons: List[String]) extends FailureContext {
       override def toJson: String = {
-        // Used to match output colored using scala.io.AnsiColor
-        // ; is optional, it is not a part of AnsiColor, but is allowed in general to specify both foreground and background color
-        val AnsiColorPattern = "\\u001B\\[[;\\d]*m"
-        val reasonsArray = reasons
-          .mkString("[", ", ", "]")
-          .replaceAll(AnsiColorPattern, "")
+        val reasonsArray = reasons.distinct.map(jsonString).mkString("[", ", ", "]")
         s"""{"type": "buildError", "reasons": $reasonsArray}"""
       }
     }
@@ -312,13 +322,7 @@ object Scala3CommunityBuild {
 
       def toBuildError: Option[FailureContext.BuildError] = this match {
         case EvalResult.Failure(reasons, _) =>
-          Some(
-            FailureContext.BuildError(
-              reasons
-                .map(v => "\"" + v.toString.replace("\n", " \\n") + "\"")
-                .distinct
-            )
-          )
+          Some(FailureContext.BuildError(reasons.map(_.toString).distinct))
         case _ => None
       }
     }
