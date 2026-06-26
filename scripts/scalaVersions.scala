@@ -7,19 +7,24 @@ import scala.util.chaining.*
 
 import SemVersion.given
 
+enum MavenMetadataXML(val url: String):
+  case Sonatype extends MavenMetadataXML("https://repo1.maven.org/maven2/org/scala-lang/scala3-compiler_3/maven-metadata.xml")
+  case Scala3Nightlies extends MavenMetadataXML("https://repo.scala-lang.org/artifactory/maven-nightlies/org/scala-lang/scala3-compiler_3/maven-metadata.xml")
+ 
 lazy val Stable: List[SemVersion] =
-  getVersions(raw"<version>(\d+\.\d+\.\d+(-RC\d+)?)</version>".r)
+  getVersions(raw"<version>(\d+\.\d+\.\d+?)</version>".r, MavenMetadataXML.Sonatype)
+
+lazy val RelaseCandidates: List[SemVersion] =
+  getVersions(raw"<version>(\d+\.\d+\.\d+(-RC\d+)?)</version>".r, MavenMetadataXML.Sonatype)
 
 lazy val Nightly: List[SemVersion] =
-  getVersions(raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r)
+  getVersions(raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r, MavenMetadataXML.Scala3Nightlies)
 
 lazy val Releases: List[SemVersion] =
-  (Stable ++ Nightly).sorted
+  (Stable ++ RelaseCandidates ++ Nightly).sorted
 
-def getVersions(versionPattern: scala.util.matching.Regex): List[SemVersion] = {
-  val xml = io.Source.fromURL(
-    "https://repo.scala-lang.org/artifactory/maven-nightlies/org/scala-lang/scala3-compiler_3/maven-metadata.xml"
-  )
+def getVersions(versionPattern: scala.util.matching.Regex, source: MavenMetadataXML): List[SemVersion] = {
+  val xml = io.Source.fromURL(source.url)
   versionPattern
     .findAllMatchIn(xml.mkString)
     .map(_.group(1))
