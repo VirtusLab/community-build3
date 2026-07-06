@@ -44,10 +44,10 @@ runs:
           
           commitHash=$(git --no-pager rev-parse --short=7 HEAD | xargs)
           commitDate=$(git --no-pager show -s --format=%cd --date=format:"%Y%m%d" HEAD | xargs)
-          baseVersion=$(sbt --no-colors 'eval dotty.tools.sbtplugin.Versions.baseVersion' 2>/dev/null | grep 'ans: String =' | awk '{ print $5 }' | xargs)
+          baseVersion=$(sbt --no-colors 'eval dotty.tools.sbtplugin.Versions.baseVersion' 2>/dev/null | grep 'ans: String =' | awk '{ print $5 }' | xargs || true)
           if [[ -z "$baseVersion" ]]; then
             echo "Not found Versions.baseVersion variable, using legacy variant Build.baseVersion"
-            baseVersion=$(sbt --no-colors 'eval Build.baseVersion' 2>/dev/null | grep 'ans: String =' | awk '{ print $5 }' | xargs)
+            baseVersion=$(sbt --no-colors 'eval Build.baseVersion' 2>/dev/null | grep 'ans: String =' | awk '{ print $5 }' | xargs || true)
           fi
           echo "Resolved base version: $baseVersion"
           # `SNAPSHOT` substring is required to treat compiler as experimental
