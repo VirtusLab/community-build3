@@ -1,6 +1,22 @@
+import java.nio.file.{DirectoryNotEmptyException, NoSuchFileException}
 import scala.annotation.tailrec
 
 object Git:
+  /** Best-effort recursive delete for temp git checkouts (IO can be flaky under parallel load). */
+  def bestEffortRemoveAll(path: os.Path): Unit =
+    @tailrec
+    def attempt(retries: Int, backoffMs: Int): Unit =
+      if !os.exists(path) then ()
+      else
+        try os.remove.all(path)
+        catch
+          case _: NoSuchFileException => ()
+          case _: DirectoryNotEmptyException | _: java.io.IOException if retries > 0 =>
+            Thread.sleep(backoffMs)
+            attempt(retries - 1, (backoffMs * 2).min(1000))
+          case ex: Throwable =>
+            System.err.println(s"Failed to remove temp dir $path: $ex")
+    attempt(retries = 5, backoffMs = 50)
   enum Revision:
     case Branch(name: String)
     case Tag(version: String)
@@ -82,7 +98,7 @@ object Git:
           s"Failed to clone $repoUrl at revision ${revision}, backoff ${backoffSeconds}s"
         )
         proc.out.lines().foreach(Console.err.println)
-        os.remove.all(projectDir)
+        bestEffortRemoveAll(projectDir)
         Thread.sleep(backoffSeconds * 1000)
         tryClone(retries - 1, (backoffSeconds * 2).min(60))
       else
@@ -90,7 +106,7 @@ object Git:
           s"Failed to clone $repoUrl at revision ${revision}:"
         )
         proc.out.lines().foreach(Console.err.println)
-        os.remove.all(projectDir)
+        bestEffortRemoveAll(projectDir)
         None
     }
 
@@ -125,7 +141,7 @@ object Git:
     tryClone(retries = 10).flatMap { projectDir =>
       if checkoutRevision(projectDir) then Some(projectDir)
       else
-        os.remove.all(projectDir)
+        bestEffortRemoveAll(projectDir)
         None
     }
   }

@@ -376,7 +376,7 @@ def makeDependenciesBasedBuildPlan(
         .out
         .lines()
         .headOption
-      _ = os.remove.all(repoDir) // best-effort, it's tmp dir anyway
+      _ = Git.bestEffortRemoveAll(repoDir)
     yield lastCommit.trim()
 
   def traverseLimited[A, B](items: List[A], parallelism: Int)(

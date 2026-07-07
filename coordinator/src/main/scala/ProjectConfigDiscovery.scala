@@ -130,7 +130,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
               s"Failed to resolve project config for ${project.p.coordinates}: ${ex}"
             )
             None
-        } finally os.remove.all(projectDir)
+        } finally Git.bestEffortRemoveAll(projectDir)
       }
   }
 
