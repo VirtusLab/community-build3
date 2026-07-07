@@ -1,5 +1,5 @@
 
-# projects total:     990
+# projects total:     994
 # min stars count:    -1
 # max projects count: 1000
 
@@ -193,6 +193,7 @@ jobs:
         - name: "catap/scala-sha"
         - name: "cheleb/sbt-fullstack-js"
         - name: "cheleb/zio-magnum"
+        - name: "cheleb/zio-opentelemetry-bootstrap"
         - name: "cheleb/zio-pravega"
         - name: "chili-piper/scala-quartz"
         - name: "christian-schlichtherle/circe-kafka"
@@ -236,6 +237,7 @@ jobs:
         - name: "dacr/lorem-ipsum"
         - name: "dacr/lorem-ipsum-server-akkahttp"
         - name: "dacr/naturalsort"
+        - name: "dacr/primes"
         - name: "dacr/primes-server-akkahttp"
         - name: "dacr/split"
         - name: "dacr/spy"
@@ -267,6 +269,7 @@ jobs:
         - name: "davenverse/publicsuffix"
         - name: "davenverse/single-fibered"
         - name: "davenverse/snickerdoodle"
+        - name: "ddolib-cetic-ucl/ddolib-scala"
         - name: "delimobil/fs2-hbase"
         - name: "dobrynya/zio-jms"
         - name: "dotty-cps-async/rl-logic"
@@ -277,7 +280,6 @@ jobs:
         - name: "dragonfly-ai/mesh"
         - name: "dragonfly-ai/spatial"
         - name: "dragonfly-ai/uriel"
-        - name: "dripower/postgresql-async"
         - name: "dvreeze/tqa"
         - name: "dvreeze/xpathparser"
         - name: "dwolla/dwolla-otel-natchez"
@@ -330,8 +332,6 @@ jobs:
         - name: "erikerlandson/sbt-tl-laika-demo"
         - name: "errors4s/errors4s-core-cats"
         - name: "errors4s/errors4s-core-scalacheck"
-        - name: "errors4s/errors4s-http"
-        - name: "esamson/atbp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "errors4s/errors4s-http"
+        - name: "esamson/atbp"
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
@@ -600,7 +602,6 @@ jobs:
         - name: "kubukoz/dualshock4s"
         - name: "kubuszok/lls"
         - name: "kubuszok/multiarch-scala"
-        - name: "kubuszok/refined-compat"
         - name: "kubuszok/scala-cli-md-spec"
         - name: "kubuszok/scala-newtype-compat"
         - name: "kubuszok/scala-sax-parser"
@@ -612,7 +613,6 @@ jobs:
         - name: "lbialy/jig"
         - name: "lbialy/qdrant4s"
         - name: "lbialy/tailf"
-        - name: "leviysoft/scala-kotlin-compat"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "leviysoft/scala-kotlin-compat"
         - name: "leviysoft/tightbound"
         - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
@@ -742,6 +743,7 @@ jobs:
         - name: "natural-transformation/korolev"
         - name: "natural-transformation/levsha"
         - name: "natural-transformation/spoonbill"
+        - name: "nebula-contrib/nebula4scala"
         - name: "nebula-contrib/testcontainers-nebula"
         - name: "nicolasfara/ecscala"
         - name: "nicolasfara/template-for-scala-multiplatform-projects"
@@ -892,8 +894,6 @@ jobs:
         - name: "sangria-graphql/sangria-marshalling-api"
         - name: "sangria-graphql/sangria-marshalling-testkit"
         - name: "sangria-graphql/sangria-msgpack"
-        - name: "sangria-graphql/sangria-spray-json"
-        - name: "sangria-graphql/sangria-streaming-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sangria-graphql/sangria-spray-json"
+        - name: "sangria-graphql/sangria-streaming-api"
         - name: "saucam/shiva"
         - name: "sbt/sbinary"
         - name: "sbt/sbt-giter8-resolver"
@@ -1043,6 +1045,7 @@ jobs:
         - name: "thatscalaguy/nats4cats"
         - name: "thatscalaguy/skunk-crypt"
         - name: "thatscalaguy/ulid4cats"
+        - name: "thatscalaguy/zustellix"
         - name: "thedrawingcoder-gamer/swing.io"
         - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
@@ -1061,6 +1064,7 @@ jobs:
         - name: "tmccarthy/tmm-scala-collections"
         - name: "tmccarthy/tmmutils"
         - name: "toniogela/cross"
+        - name: "toolsplus/atlassian-connect-play"
         - name: "toolsplus/atlassian-connect-play-slick"
         - name: "toolsplus/atlassian-jwt"
         - name: "torrentdam/bencode"
