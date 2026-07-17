@@ -165,10 +165,19 @@ object ProjectBuildDefCache:
     if !useCache then discoverFresh()
     else
       load(project.p) match
-        case Some(entry) if entry.version == project.v && entry.fingerprint == fingerprint =>
+        // A cache hit with config=None would permanently skip migrationVersions / tests /
+        // sourceVersion discovery (run.sh then passes {}). Treat as a miss and rediscover.
+        case Some(entry)
+            if entry.version == project.v && entry.fingerprint == fingerprint && entry.config.isDefined =>
           stats.hits.incrementAndGet()
           println(s"Skipping config discovery for ${project.p.coordinates} (cache hit)")
           (entry.repoUrl, entry.revision, entry.config)
+        case Some(entry) if entry.version == project.v && entry.fingerprint == fingerprint =>
+          stats.missesConfig.incrementAndGet()
+          println(
+            s"Refreshing ${project.p.coordinates} (cache hit had no config; rediscovering)"
+          )
+          discoverFresh(reuseFromCache = Some(entry))
         case Some(entry) if entry.version != project.v =>
           stats.missesVersion.incrementAndGet()
           println(

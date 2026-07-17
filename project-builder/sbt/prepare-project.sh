@@ -130,9 +130,11 @@ echo -e "\nThisBuild / evictionErrorLevel := sbt.util.Level.Warn" >>$repoDir/pro
 if [ -z "${OPENCB_AKKA_REPO_TOKEN:-}" ]; then
   echo "Warning: OPENCB_AKKA_REPO_TOKEN environment variable not set, skipping Akka secure repository configuration"
 else
+  # Must go in the root build (not project/*.sbt): project/ only configures the meta-build,
+  # so library deps would still hit the unauthenticated https://repo.akka.io/maven resolver.
   echo -e '
 ThisBuild / resolvers += "akka-secure-mvn" at "https://repo.akka.io/AKKA_REPO_TOKEN/secure/"
-' | sed "s/AKKA_REPO_TOKEN/$OPENCB_AKKA_REPO_TOKEN/" >> $repoDir/project/akka.sbt
+' | sed "s/AKKA_REPO_TOKEN/$OPENCB_AKKA_REPO_TOKEN/" >> $repoDir/build.sbt
 fi
 
 # Project dependencies
