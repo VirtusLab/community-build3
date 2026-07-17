@@ -18,7 +18,10 @@ lazy val RelaseCandidates: List[SemVersion] =
   getVersions(raw"<version>(\d+\.\d+\.\d+(-RC\d+)?)</version>".r, MavenMetadataXML.Sonatype)
 
 lazy val Nightly: List[SemVersion] =
-  getVersions(raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r, MavenMetadataXML.Scala3Nightlies)
+  Seq(
+    getVersions(raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r, MavenMetadataXML.Sonatype),
+    getVersions(raw"<version>(.+-bin-\d{8}-\w{7}-NIGHTLY)</version>".r, MavenMetadataXML.Scala3Nightlies)
+  ).flatten.sorted.toList
 
 lazy val Releases: List[SemVersion] =
   (Stable ++ RelaseCandidates ++ Nightly).sorted

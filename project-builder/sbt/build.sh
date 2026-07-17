@@ -87,6 +87,7 @@ excludedCompilerPluginOptPrefixes=(
 
 shouldRetry=false
 forceScalaVersion=false
+unshallowedForDynver=false
 appendScalacOptions="${extraScalacOptions},-Wconf:msg=can be rewritten automatically under:s"
 removeScalacOptions="${disabledScalacOption}"
 
@@ -119,19 +120,25 @@ function runSbt() {
   if [[ "$sbtMajor" -ge 2 ]]; then
     # sbt 2 batch client concatenates separate CLI args into one command line,
     # so Command.args-based helpers would swallow the rest of the build script.
-    local joinedCommands
-    joinedCommands=$(IFS='; '; echo "${sbtCommands[*]}")
+    # Joining with ';' also fails when runBuild's JSON config contains escaped
+    # quotes inside """...""" (parser error on \"). Use a command file instead:
+    # one command per line, loaded with `< file`.
+    local cmdFile
+    cmdFile="$(mktemp "${TMPDIR:-/tmp}/opencb-sbt-cmds.XXXXXX")"
+    printf '%s\n' "${sbtCommands[@]}" >"$cmdFile"
     timeout 6600 \
       sbt ${sbtSettings[@]} \
-      "$joinedCommands" 2>&1 | tee $logFile
+      "< $cmdFile" 2>&1 | tee $logFile
+    exit_code=${PIPESTATUS[0]}
+    rm -f "$cmdFile"
   else
     timeout 6600 \
       sbt ${sbtSettings[@]} \
       "--batch" \
       "${sbtCommands[@]}" 2>&1 | tee $logFile
+    exit_code=${PIPESTATUS[0]}
   fi
 
-  exit_code=${PIPESTATUS[0]}
   if [ $exit_code -eq 124 ]; then
     echo "Build timeout" >> build-logs.txt
   fi
@@ -167,6 +174,19 @@ if grep -qF -e 'sbt.librarymanagement.ResolveException' \
     return 0
   fi
 
+  # sbt-dynver needs git tags / history; shallow clones fail at project load
+  if [ "$unshallowedForDynver" = false ] &&
+    grep -qF 'No previous version found from dynver' -- "$logFile"; then
+    echo "dynver failed on shallow clone; fetching tags and unshallowing repo"
+    git fetch --tags --quiet 2>/dev/null || true
+    git fetch --unshallow --quiet 2>/dev/null || true
+    # Fallback when --unshallow is unavailable (matches checkout.sh / GitOps)
+    git fetch --shallow-since=2021-05-13 --quiet 2>/dev/null || true
+    unshallowedForDynver=true
+    shouldRetry=true
+    return 0
+  fi
+
   # Failed to switch version
   if [ "$forceScalaVersion" = false ]; then
     if grep -q 'Switch failed:' "$logFile" || grep -q "bad option: '-source:" "$logFile"; then
@@ -198,7 +218,7 @@ function retryBuild() {
     checkLogsForRetry
     if [[ "$shouldRetry" == "true" ]]; then
       retry=$((retry + 1))
-      echo "Retrying build, retry $retry/$maxRetries, force Scala version:$forceScalaVersion, enable migration:$enableMigrationMode"
+      echo "Retrying build, retry $retry/$maxRetries, force Scala version:$forceScalaVersion, unshallowed for dynver:$unshallowedForDynver"
       runSbt && exit 0
     else
       echo "Build failed, not retrying."

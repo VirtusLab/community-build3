@@ -89,6 +89,11 @@ object TestingMode:
 case class JavaConfig(version: Option[String] = None) derives ConfigReader
 case class SbtConfig(commands: List[String] = Nil, options: List[String] = Nil) derives ConfigReader
 case class MillConfig(options: List[String] = Nil) derives ConfigReader
+/** Git checkout tweaks for projects that need more than a depth=1 shallow clone. */
+case class GitConfig(
+    /** Fetch tags and unshallow history (dynver, JGit tag scans, git describe, etc.). */
+    unshallow: Boolean = false
+) derives ConfigReader
 case class ProjectOverrides(tests: Option[TestingMode] = None) derives ConfigReader
 case class ProjectsConfig(
     exclude: List[String] = Nil,
@@ -102,6 +107,7 @@ case class ProjectBuildConfig(
     java: JavaConfig = JavaConfig(),
     sbt: SbtConfig = SbtConfig(),
     mill: MillConfig = MillConfig(),
+    git: GitConfig = GitConfig(),
     tests: TestingMode = TestingMode.default,
     sourceVersion: Option[String] = None,
     migrationVersions: List[String] = Nil,   

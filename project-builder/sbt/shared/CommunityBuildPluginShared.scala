@@ -48,7 +48,10 @@ trait CommunityBuildPluginShared extends AutoPlugin {
     // Community build must not authenticate to remote repositories; clearCredentials reinforces this after ++.
     credentials := Nil,
     // Disable remote publish; runBuild only invokes publishLocal.
-    publish / skip := true
+    // publish/skip alone also skips publishLocal in sbt, which breaks projects that shell out to
+    // coursier (e.g. smithy4s genSmithy resolving smithy4s-protocol from ivy local).
+    publish / skip := true,
+    publishLocal / skip := false
   )
 
   private def extraLibraryDependencies(

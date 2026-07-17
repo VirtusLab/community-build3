@@ -42,6 +42,19 @@ mkdir -p $repoDir
 $scriptDir/checkout.sh "$repoUrl" "$rev" $repoDir
 buildToolFile="build-tool.txt"
 
+# Projects that need tags / full history at load time (dynver, JGit tag scans, git describe).
+# Config: git.unshallow = true in projects-config.conf
+if [[ "$(echo "${projectConfig}" | jq -r '.git.unshallow // false')" == "true" ]]; then
+  echo "git.unshallow=true: fetching tags and unshallowing $repoDir"
+  (
+    cd "$repoDir"
+    git fetch --tags --quiet 2>/dev/null || true
+    git fetch --unshallow --quiet 2>/dev/null || true
+    # Fallback when --unshallow is unavailable (matches checkout.sh / GitOps / dynver retry)
+    git fetch --shallow-since=2021-05-13 --quiet 2>/dev/null || true
+  )
+fi
+
 if [[ ! -z $extraLibraryDeps ]]; then
   echo "Would try to append extra library dependencies (best-effort, sbt/scala-cli only): ${extraLibraryDeps}"
 fi

@@ -1,0 +1,236 @@
+#!/usr/bin/env -S scala-cli shebang -S 3
+//> using toolkit default
+
+/** Joern depends on scala-repl-pp / scala-repl-pp-server with CrossVersion.full.
+  * Those artifacts are only published for selected Scala versions (e.g. 3.8.3), so
+  * for the community-build Scala version we publish them locally from upstream sources.
+  */
+val projectDir = sys.env
+  .get("OPENCB_PROJECT_DIR")
+  .map(os.Path(_))
+  .getOrElse(sys.error("no OPENCB_PROJECT_DIR env"))
+
+val scalaVersion = sys.env
+  .get("OPENCB_SCALA_VERSION")
+  .getOrElse(sys.error("no OPENCB_SCALA_VERSION env"))
+
+println(s"OPENCB_SCALA_VERSION: $scalaVersion")
+
+val replPpVersion = os
+  .read(projectDir / "project" / "Versions.scala")
+  .linesIterator
+  .collectFirst {
+    case s"$_ val scalaReplPP$_= \"$version\"$_" => version.trim
+  }
+  .getOrElse(sys.error("Failed to resolve Versions.scalaReplPP"))
+
+println(s"joern expects scala-repl-pp $replPpVersion")
+
+def artifactPublished(artifact: String): Boolean =
+  val ivy =
+    os.home / ".ivy2" / "local" / "com.michaelpollmeier" / s"${artifact}_$scalaVersion" / replPpVersion
+  if os.exists(ivy) then
+    println(s"Found $artifact in ivy2 local: $ivy")
+    true
+  else
+    val url =
+      s"https://repo1.maven.org/maven2/com/michaelpollmeier/${artifact}_$scalaVersion/$replPpVersion/${artifact}_$scalaVersion-$replPpVersion.pom"
+    val code = os
+      .proc("curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "-I", url)
+      .call(check = false)
+      .out
+      .text()
+      .trim
+    if code == "200" then println(s"Found $artifact on Maven Central")
+    code == "200"
+
+if artifactPublished("scala-repl-pp") && artifactPublished("scala-repl-pp-server") then
+  println(s"scala-repl-pp artifacts for $scalaVersion:$replPpVersion already available; skipping")
+  sys.exit(0)
+
+// v0.6.4+ carries scala-3.8.3 sources + java17Settings (scala3-repl); v0.6.3 does not.
+val sourceTag = "v0.6.4"
+val repositoryDir = os.temp.dir(prefix = "scala-repl-pp-")
+os.proc(
+  "git",
+  "clone",
+  "--depth=1",
+  "--branch",
+  sourceTag,
+  "https://github.com/mpollmeier/scala-repl-pp.git",
+  repositoryDir
+).call(check = true)
+
+val availableSourceVersions = os
+  .list(repositoryDir / "core" / "src" / "main")
+  .filter(os.isDir)
+  .map(_.last)
+  .collect { case s"scala-$v" => v }
+  .toList
+
+def parseScalaPrefix(v: String): Option[(Int, Int, Int)] =
+  val core = v.takeWhile(c => c.isDigit || c == '.')
+  core.split('.') match
+    case Array(maj, min, pat, _*) =>
+      for
+        major <- maj.toIntOption
+        minor <- min.toIntOption
+        patch <- pat.toIntOption
+      yield (major, minor, patch)
+    case Array(maj, min) =>
+      for
+        major <- maj.toIntOption
+        minor <- min.toIntOption
+      yield (major, minor, 0)
+    case _ => None
+
+given Ordering[(Int, Int, Int)] = Ordering.Tuple3[Int, Int, Int]
+
+val templateScalaVersion =
+  if availableSourceVersions.contains(scalaVersion) then scalaVersion
+  else
+    val requested = parseScalaPrefix(scalaVersion)
+    val sameMinor = availableSourceVersions.filter { candidate =>
+      (requested, parseScalaPrefix(candidate)) match
+        case (Some((maj, min, _)), Some((cMaj, cMin, _))) => maj == cMaj && min == cMin
+        case _                                            => false
+    }
+    val pool =
+      if sameMinor.nonEmpty then sameMinor
+      else availableSourceVersions
+    pool
+      .maxByOption(v => parseScalaPrefix(v).getOrElse((-1, -1, -1)))
+      .getOrElse(sys.error("No versioned sources under core/src/main/scala-*"))
+
+println(s"Using scala-repl-pp sources from scala-$templateScalaVersion for $scalaVersion")
+
+if templateScalaVersion != scalaVersion then
+  for module <- Seq("core", "server") do
+    val srcRoot = repositoryDir / module / "src" / "main"
+    val from = srcRoot / s"scala-$templateScalaVersion"
+    val to = srcRoot / s"scala-$scalaVersion"
+    if os.exists(from) && !os.exists(to) then
+      os.copy(from, to)
+      println(s"Copied $from -> $to")
+
+// Scala 3.8.4+ changed ReplCompiler.compile to Either[(List[Diagnostic], State), ...]
+// and displayErrors to take an explicit State (see scala/scala3 ReplDriver).
+val needsReplApi384Patch =
+  parseScalaPrefix(scalaVersion).exists { case (maj, min, pat) =>
+    maj > 3 || (maj == 3 && min > 8) || (maj == 3 && min == 8 && pat >= 4)
+  } && templateScalaVersion.startsWith("3.8.")
+
+if needsReplApi384Patch then
+  val driver =
+    repositoryDir / "core" / "src" / "main" / s"scala-$scalaVersion" / "replpp" / "DottyReplDriver.scala"
+  if !os.exists(driver) then
+    sys.error(s"Missing DottyReplDriver to patch: $driver")
+  var src = os.read(driver)
+  src = src.replace(
+    "displayErrors(errs)\n        state",
+    "displayErrors(errs, state)"
+  )
+  src = src.replace(
+    """compiler.typeOf(expr)(using newRun(state)).fold(
+            displayErrors,""",
+    """compiler.typeOf(expr)(using newRun(state)).fold(
+            errs => displayErrors(errs, state),"""
+  )
+  src = src.replace(
+    """compiler.docOf(expr)(using newRun(state)).fold(
+            displayErrors,""",
+    """compiler.docOf(expr)(using newRun(state)).fold(
+            errs => displayErrors(errs, state),"""
+  )
+  src = src.replace(
+    """private def displayErrors(errs: Seq[Diagnostic])(using state: State): State = {
+    errs.foreach(printDiagnostic)
+    state
+  }""",
+    """private def displayErrors(errs: Seq[Diagnostic], state: State): State = {
+    errs.foreach(printDiagnostic(_)(using state))
+    state
+  }"""
+  )
+  if src.contains("(using state: State): State = {\n    errs.foreach(printDiagnostic)") then
+    sys.error("Failed to patch displayErrors for Scala 3.8.4+ REPL API")
+  os.write.over(driver, src)
+  println(s"Patched $driver for Scala 3.8.4+ REPL API")
+
+val projectIdSuffix = scalaVersion.replaceAll("[^A-Za-z0-9]", "")
+val templateIdSuffix = templateScalaVersion.replaceAll("[^A-Za-z0-9]", "")
+
+val buildFile = repositoryDir / "build.sbt"
+var build = os.read(buildFile)
+
+// Retarget only the template Scala version slot (quoted literals + project ids).
+build = build.replace(s""""$templateScalaVersion"""", s""""$scalaVersion"""")
+build = build.replace(s"core_$templateIdSuffix", s"core_$projectIdSuffix")
+build = build.replace(s"server_$templateIdSuffix", s"server_$projectIdSuffix")
+
+if !build.contains(s"core_$projectIdSuffix") || !build.contains(s"server_$projectIdSuffix") then
+  sys.error(
+    s"Failed to retarget build.sbt to core_$projectIdSuffix / server_$projectIdSuffix (template=$templateScalaVersion)"
+  )
+
+// Drop early-release / sonatype publish wiring; we only need publishLocal with a fixed version.
+val pluginsFile = repositoryDir / "project" / "plugins.sbt"
+if os.exists(pluginsFile) then
+  val plugins = os
+    .read(pluginsFile)
+    .linesIterator
+    .filterNot(l => l.contains("sbt-ci-release-early") || l.contains("sonatype"))
+    .mkString("\n", "\n", "\n")
+  os.write.over(pluginsFile, plugins)
+
+build = build
+  .linesIterator
+  .filterNot { line =>
+    val t = line.trim
+    t.startsWith("ThisBuild/sonatype") ||
+    t.startsWith("ThisBuild / sonatype") ||
+    t.startsWith("ThisBuild/publishTo") ||
+    t.startsWith("ThisBuild / publishTo") ||
+    t.contains("sonatypePublishToBundle")
+  }
+  .mkString("\n")
+
+// Force the version joern asks for (git tag would otherwise be 0.6.4) and nightlies resolvers.
+build += s"""
+
+ThisBuild / version := "$replPpVersion"
+ThisBuild / resolvers ++= Seq(
+  "Scala Nightlies".at("https://repo.scala-lang.org/artifactory/maven-nightlies/"),
+  Resolver.mavenLocal
+)
+"""
+
+os.write.over(buildFile, build)
+
+val buildScala = repositoryDir / "project" / "Build.scala"
+if os.exists(buildScala) then
+  val patched = os
+    .read(buildScala)
+    .replace(
+      """val internalId = s"${internalName}_${scalaVersion}".replaceAll("\\.", "")""",
+      """val internalId = s"${internalName}_" + scalaVersion.replaceAll("[^A-Za-z0-9]", "")"""
+    )
+  os.write.over(buildScala, patched)
+
+val coreProject = s"core_$projectIdSuffix"
+val serverProject = s"server_$projectIdSuffix"
+
+println(s"Publishing locally: shadedLibs, $coreProject, $serverProject @ $replPpVersion")
+
+os.proc(
+  "sbt",
+  "--batch",
+  s"shadedLibs/publishLocal; $coreProject/publishLocal; $serverProject/publishLocal"
+).call(
+  cwd = repositoryDir,
+  check = true,
+  stdout = os.Inherit,
+  stderr = os.Inherit
+)
+
+println(s"Published scala-repl-pp modules for $scalaVersion as $replPpVersion")

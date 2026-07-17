@@ -8,8 +8,10 @@ case class Scala3CommunityBuildMillAdapterConfig(
     targetScalaVersion: Option[String] = None,
     millBinaryVersion: Option[String] = None,
     isMainBuildFile: Option[Boolean] = None
-)
-object Scala3CommunityBuildMillAdapterConfig {
+) extends Serializable
+// extends Serializable: workaround for scalafix 0.14.7 RuleInstrumentation crash on parentless objects
+// https://github.com/scalacenter/scalafix/issues/2462
+object Scala3CommunityBuildMillAdapterConfig extends Serializable {
   def default = Scala3CommunityBuildMillAdapterConfig()
   implicit val surface: metaconfig.generic.Surface[fix.Scala3CommunityBuildMillAdapterConfig] =
     metaconfig.generic.deriveSurface[Scala3CommunityBuildMillAdapterConfig]
@@ -45,7 +47,7 @@ class Scala3CommunityBuildMillAdapter(
       .map(new Scala3CommunityBuildMillAdapter(_))
   }
 
-  object isScala3Identifier {
+  object isScala3Identifier extends Serializable {
     def apply(value: String): Boolean = scala3Identifiers.exists(value.equalsIgnoreCase)
 
     val scala3Identifiers = Seq(
@@ -77,7 +79,7 @@ class Scala3CommunityBuildMillAdapter(
     case _                 => false
   }
 
-  object Transform {
+  object Transform extends Serializable {
 
     /** True if this tree already applies `.mapScalacOptions` (avoid double-wrapping / duplicate defs). */
     def containsMapScalacOptionsCall(tree: Tree): Boolean =
@@ -546,7 +548,7 @@ class Scala3CommunityBuildMillAdapter(
     // "ZioTest",
   )
   // format: on
-  object Replacment {
+  object Replacment extends Serializable {
     def ScalaVersion(default: => String, asTarget: Boolean = true) =
       config.targetScalaVersion
         .map(quoted(_))
@@ -658,7 +660,7 @@ class Scala3CommunityBuildMillAdapter(
     }.mkString("\n")
   }
 
-  object ValOrDefDef {
+  object ValOrDefDef extends Serializable {
     def unapply(tree: Tree): Option[(Term.Name, Option[Type], Term)] = tree match {
       // Make sure def has no parameter lists
       case Defn.Def(_, name, _, Nil, tpe, body)               => Some((name, tpe, body))
@@ -682,7 +684,7 @@ class Scala3CommunityBuildMillAdapter(
     exists && !existsBlocker
   }
 
-  object WithTypeName {
+  object WithTypeName extends Serializable {
     def unapply(tree: Tree): Option[String] = tree match {
       case name: Type.Name         => Some(name.toString)
       case Type.Select(qual, name) => Some(name.toString)

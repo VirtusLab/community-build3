@@ -105,31 +105,35 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         None
       } { projectDir =>
         try {
-          internalProjectConfigs(project.showName)
+          // Decode overrides outside discovery catch so config errors hard-fail.
+          val baseConfig = internalProjectConfigs(project.showName)
             .orElse(Some(ProjectBuildConfig.empty))
-            .map: c =>
-              if c.java.version.nonEmpty then c
-              else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
-            .map: c =>
-              c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
-            .map: c =>
-              if c.sourceVersion.isDefined then c
-              else c.copy(sourceVersion = projectSourceVersions.get(project.p))
-            .map: c =>
-              if c.migrationVersions.nonEmpty then c
-              else c.copy(migrationVersions = projectMigrationVersions.getOrElse(project.p, Nil))
-            .map: c =>
-              if c.tests != TestingMode.default then c
-              else projectTestsConfig.get(project.p).foldLeft(c) { (c, value) =>
-                c.copy(tests = value)
-              }
-            .filter(_ != ProjectBuildConfig.empty)
-        } catch {
-          case ex: Throwable =>
-            Console.err.println(
-              s"Failed to resolve project config for ${project.p.coordinates}: ${ex}"
-            )
-            None
+          try {
+            baseConfig
+              .map: c =>
+                if c.java.version.nonEmpty then c
+                else c.copy(java = c.java.copy(version = discoverJavaVersion(projectDir)))
+              .map: c =>
+                c.copy(sourcePatches = c.sourcePatches ::: discoverSourcePatches(projectDir))
+              .map: c =>
+                if c.sourceVersion.isDefined then c
+                else c.copy(sourceVersion = projectSourceVersions.get(project.p))
+              .map: c =>
+                if c.migrationVersions.nonEmpty then c
+                else c.copy(migrationVersions = projectMigrationVersions.getOrElse(project.p, Nil))
+              .map: c =>
+                if c.tests != TestingMode.default then c
+                else projectTestsConfig.get(project.p).foldLeft(c) { (c, value) =>
+                  c.copy(tests = value)
+                }
+              .filter(_ != ProjectBuildConfig.empty)
+          } catch {
+            case ex: Throwable =>
+              Console.err.println(
+                s"Failed to resolve project config for ${project.p.coordinates}: ${ex}"
+              )
+              None
+          }
         } finally Git.bestEffortRemoveAll(projectDir)
       }
   }
@@ -158,18 +162,27 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
     files.filter(f => os.exists(f) && os.isFile(f))
   }
 
-  private lazy val referenceConfig =
-    ConfigSource
-      .resources("buildPlan.reference.conf")
-      .cursor()
-      .flatMap(_.asConfigValue)
-      .toOption
+  private lazy val referenceConfigValue = {
+    val source = ConfigSource.resources("buildPlan.reference.conf")
+    source.load[ProjectBuildConfig] match {
+      case Left(failure) =>
+        sys.error(
+          s"Invalid buildPlan.reference.conf (must define defaults for ProjectBuildConfig): ${failure.prettyPrint(0)}"
+        )
+      case Right(_) =>
+        source.cursor().flatMap(_.asConfigValue) match {
+          case Left(failure) =>
+            sys.error(s"Failed to read buildPlan.reference.conf: ${failure.prettyPrint(0)}")
+          case Right(value) => value
+        }
+    }
+  }
 
   // Resolve project config from coordinator/configs/projects-config.conf
   private def internalProjectConfigs(projectName: String) = {
     val configEntryName = projectName.toLowerCase
     val fallbackConfig =
-      referenceConfig.foldLeft(ConfigFactory.empty)(_.withValue(configEntryName, _))
+      ConfigFactory.empty().withValue(configEntryName, referenceConfigValue)
     val config = ConfigSource
       .file(internalProjectConfigsPath)
       .withFallback(ConfigSource.fromConfig(fallbackConfig))
