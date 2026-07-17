@@ -158,7 +158,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
         }
       }
   }
-  try Await.result(task, 60.minute)
+  try Await.result(task, 90.minute)
   catch {
     case ex: Throwable =>
       ex.printStackTrace()
