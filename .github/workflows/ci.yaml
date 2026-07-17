@@ -42,7 +42,9 @@ jobs:
       - uses: coursier/setup-action@v3
         with:
           jvm: 17
-          apps: scala:3.7.1 scala-cli:1.12.5 sbt:1.11.3 mill scalafix
+          # Pin scalafix: 0.14.7 breaks loading file: rules with parentless companion objects
+          # https://github.com/scalacenter/scalafix/issues/2462
+          apps: scala:3.7.1 scala-cli:1.12.5 sbt:1.11.3 mill scalafix:0.14.6
       - name: Configure
         run: |
           mv .github/workflows/test-e2e-buildConfig.json .github/workflows/buildConfig.json
