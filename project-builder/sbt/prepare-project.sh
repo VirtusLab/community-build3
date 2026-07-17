@@ -27,11 +27,6 @@ if [ ! -f "${buildPropsFile}" ]; then
 fi
 
 pluginsFile="${repoDir}/project/plugins.sbt"
-scalafixConf="${repoDir}/.scalafix.conf"
-if [[ -f "${scalafixConf}" || `grep 'scalafix' $pluginsFile` ]]; then 
-  # Force minimal scalafix version (to handle Scala 3 nightly version parsing)
-  echo -e '\naddSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.2")' >> $pluginsFile
-fi
 
 sbtVersion=$(grep -E 'sbt\.version' "${buildPropsFile}" | head -n1 | awk -F= '{ print $2 }' | tr -d '[:space:]')
 
@@ -73,6 +68,12 @@ if [[ "$sbtMajor" -lt 2 ]]; then
     echo "Sbt version $sbtVersion is not supported, minimal supported version is $MinSbtVersion"
     echo "Enforcing usage of sbt in version ${MinSbtVersion}"
     set_sbt_version "${buildPropsFile}" "${MinSbtVersion}"
+  fi
+
+  scalafixConf="${repoDir}/.scalafix.conf"
+  if [[ -f "${scalafixConf}" || `grep 'scalafix' $pluginsFile` ]]; then
+    # Force minimal scalafix version (to handle Scala 3 nightly version parsing)
+    echo -e '\naddSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.2")' >> $pluginsFile
   fi
 else
   echo "Using sbt 2.x project adapter for sbt version $sbtVersion"

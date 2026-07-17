@@ -119,19 +119,25 @@ function runSbt() {
   if [[ "$sbtMajor" -ge 2 ]]; then
     # sbt 2 batch client concatenates separate CLI args into one command line,
     # so Command.args-based helpers would swallow the rest of the build script.
-    local joinedCommands
-    joinedCommands=$(IFS='; '; echo "${sbtCommands[*]}")
+    # Joining with ';' also fails when runBuild's JSON config contains escaped
+    # quotes inside """...""" (parser error on \"). Use a command file instead:
+    # one command per line, loaded with `< file`.
+    local cmdFile
+    cmdFile="$(mktemp "${TMPDIR:-/tmp}/opencb-sbt-cmds.XXXXXX")"
+    printf '%s\n' "${sbtCommands[@]}" >"$cmdFile"
     timeout 6600 \
       sbt ${sbtSettings[@]} \
-      "$joinedCommands" 2>&1 | tee $logFile
+      "< $cmdFile" 2>&1 | tee $logFile
+    exit_code=${PIPESTATUS[0]}
+    rm -f "$cmdFile"
   else
     timeout 6600 \
       sbt ${sbtSettings[@]} \
       "--batch" \
       "${sbtCommands[@]}" 2>&1 | tee $logFile
+    exit_code=${PIPESTATUS[0]}
   fi
 
-  exit_code=${PIPESTATUS[0]}
   if [ $exit_code -eq 124 ]; then
     echo "Build timeout" >> build-logs.txt
   fi
