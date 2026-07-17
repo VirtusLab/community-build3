@@ -11,12 +11,9 @@ import scala.util.chaining.*
 @main def listNightlyVersions(args: String*) = {
   var minScalaVersion = Option.empty[String]
   var maxScalaVersion = Option.empty[String]
-  var nightly = false
-  var refreshConfig = false
   args.foreach{
     case s"--min=$version" => minScalaVersion = Some(version)
     case s"--max=$version" => maxScalaVersion = Some(version) 
-    case s"--nightly" => nightly = true
   }
   versionsRange(min = minScalaVersion, max = maxScalaVersion)(versions = Nightly)
   .foreach(println)
@@ -24,7 +21,7 @@ import scala.util.chaining.*
 
 private def versionsRange(min: Option[String] = None, max: Option[String] = None)(versions: List[SemVersion]) = {
   val filters = Seq[List[SemVersion] => List[SemVersion]](
-    _.sorted,
+    _.sorted(using summon[Ordering[SemVersion]]),
     versions => 
       min.map: minVersion =>
         versions.dropWhile(version => !version.startsWith(minVersion))
