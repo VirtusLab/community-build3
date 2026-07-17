@@ -330,8 +330,8 @@ jobs:
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
+        - name: "firstbirdtech/backbone"
         - name: "flink-extended/flink-scala-api"
-        - name: "flxj/platdb"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "flxj/platdb"
         - name: "fmonniot/scala3mock"
         - name: "foldables-io/skunk-tables"
         - name: "folone/poi.scala"
@@ -568,6 +569,7 @@ jobs:
         - name: "leanovate/play-mockws"
         - name: "lego/woof"
         - name: "leviysoft/oolong"
+        - name: "lewisjkl/header"
         - name: "lhns/fs2-compress"
         - name: "lichess-org/lila"
         - name: "lichess-org/lila-fishnet"
@@ -611,8 +613,6 @@ jobs:
         - name: "mockito/mockito-scala"
         - name: "molarmanful/sclin"
         - name: "mongocamp/mongodb-driver"
-        - name: "mongodb/mongo-java-driver"
-        - name: "monix/implicitbox"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mongodb/mongo-java-driver"
+        - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
         - name: "monix/monix-bio"
@@ -810,7 +812,6 @@ jobs:
         - name: "scala-interop/slinc"
         - name: "scala-js/scala-js"
         - name: "scala-js/scala-js-stubs"
-        - name: "scala-native/scala-native"
         - name: "scala-native/scala-native-cli"
         - name: "scala-php/scala-php"
         - name: "scala-steward-org/scala-steward"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
-        - name: "slack-scala-client/slack-scala-client"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
         - name: "smootoo/tablediff"
         - name: "snowplow/snowplow-scala-analytics-sdk"
@@ -1116,7 +1117,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
