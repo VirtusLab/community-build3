@@ -2166,7 +2166,7 @@
       ],
       "sourcePatches":[
         {
-          "path":"build.mill.scala",
+          "path":"build.mill",
           "pattern":"version3: String = \"3\\..*\"",
           "replaceWith":"version3: String = \"<SCALA_VERSION>\""
         }
@@ -21503,54 +21503,6 @@
     "targets":"com.fommil%shapely",
     "publishedScalaVersion":"3.2.1"
   },
-  "foundweekends/giter8":{
-    "project":"foundweekends/giter8",
-    "repoUrl":"https://github.com/foundweekends/giter8.git",
-    "revision":"v0.18.0",
-    "version":"0.18.0",
-    "targets":"org.foundweekends.giter8%giter8 org.foundweekends.giter8%giter8-bootstrap org.foundweekends.giter8%giter8-cli-git org.foundweekends.giter8%giter8-launcher org.foundweekends.giter8%giter8-lib",
-    "publishedScalaVersion":"3.7.3",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"project/Dependencies.scala",
-          "pattern":"val scala3                                 = \"3.7.3\"",
-          "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
-        }
-      ]
-    }
-  },
   "foundweekends/knockoff":{
     "project":"foundweekends/knockoff",
     "repoUrl":"https://github.com/foundweekends/knockoff.git",
@@ -23564,7 +23516,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -26077,13 +26029,18 @@
         },
         {
           "path":"build.sbt",
-          "pattern":"sys.error(\"Java 11 is required for this project",
-          "replaceWith":"println(\"Java 11 is required for this project"
+          "pattern":"sys.error\\(s?\"Java 11 is required for this project",
+          "replaceWith":"println(s\"Java 11 is required for this project"
         },
         {
           "path":"src/QuereaseMetadata.scala",
           "pattern":"protected lazy val resourceLoader: String => InputStream = getClass.getResourceAsStream _",
           "replaceWith":"protected lazy val resourceLoader: String => InputStream = getClass.getResourceAsStream(_)"
+        },
+        {
+          "path":"src/compiling/ViewCompiler.scala",
+          "pattern":"this: QuereaseExpressions with QuereaseResolvers with QueryStringBuilder\n    with QuereaseResolvers with FilterTransformer with ValueTransformer =>",
+          "replaceWith":"this: (QuereaseExpressions & QuereaseResolvers & QueryStringBuilder\n    & QuereaseResolvers & FilterTransformer & ValueTransformer) =>"
         },
         {
           "path":"src/QuereaseExpressions.scala",
@@ -77085,8 +77042,8 @@
       "sourcePatches":[
         {
           "path":"project/deps/package.mill",
-          "pattern":"def scala3Lts        = s\"\\$scala3LtsPrefix.7\"",
-          "replaceWith":"def scala3Lts        = \"<SCALA_VERSION>\""
+          "pattern":"def\\s+scala3Lts\\s*=\\s*s?\"(?:\\$scala3LtsPrefix\\.|3\\.)[^\"]+\"",
+          "replaceWith":"def scala3Lts = \"<SCALA_VERSION>\""
         }
       ]
     }
@@ -79811,6 +79768,53 @@
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String   = versions(\"3\")",
           "replaceWith":"val Scala3: String = \"<SCALA_VERSION>\""
+        }
+      ]
+    }
+  },
+  "zio-archive/zio-constraintless":{
+    "project":"zio-archive/zio-constraintless",
+    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
+    "revision":"v0.3.4",
+    "version":"0.3.4",
+    "targets":"",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.6.3\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ]
     }

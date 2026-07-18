@@ -363,7 +363,6 @@ jobs:
         - name: "foldables-io/skunk-tables"
         - name: "folone/poi.scala"
         - name: "fomkin/levsha"
-        - name: "foundweekends/giter8"
         - name: "foundweekends/knockoff"
         - name: "foundweekends/pamflet"
         - name: "fs2-blobstore/fs2-blobstore"
@@ -613,6 +612,7 @@ jobs:
         - name: "mockito/mockito-scala"
         - name: "molarmanful/sclin"
         - name: "mongocamp/mongodb-driver"
+        - name: "mongodb/mongo-java-driver"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "mongodb/mongo-java-driver"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
@@ -894,6 +893,7 @@ jobs:
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
+        - name: "slack-scala-client/slack-scala-client"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
         - name: "smootoo/tablediff"
         - name: "snowplow/snowplow-scala-analytics-sdk"
@@ -1117,6 +1116,7 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
