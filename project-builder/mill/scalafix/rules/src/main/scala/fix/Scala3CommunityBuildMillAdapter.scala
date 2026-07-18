@@ -97,6 +97,28 @@ class Scala3CommunityBuildMillAdapter(
       case _ => false
     }
 
+    /**
+     * Dependency version pins named `scalacOptions` (e.g. indigoengine's
+     * `val scalacOptions: String = millbuild.DepVersions.scalacOptionsVersion`)
+     * must not be rewritten with `.mapScalacOptions`.
+     */
+    def isScalacOptionsVersionPin(tpe: Option[Type], body: Term): Boolean = {
+      def isPlainStringType(t: Type): Boolean = t match {
+        case Type.Name("String") => true
+        case Type.Select(_, Type.Name("String")) => true
+        case _ => false
+      }
+      def bodyLooksLikeVersion: Boolean = body match {
+        case _: Lit.String => true
+        case Term.Select(_, Term.Name(name)) if name.endsWith("Version") || name == "scalacOptionsVersion" =>
+          true
+        case Term.Name(name) if name.endsWith("Version") || name == "scalacOptionsVersion" =>
+          true
+        case _ => false
+      }
+      tpe.exists(isPlainStringType) || bodyLooksLikeVersion
+    }
+
     def isStringLiteral(term: Term): Boolean = term match {
       case _: Lit.String => true
       case _             => false
@@ -340,8 +362,12 @@ class Scala3CommunityBuildMillAdapter(
           case defn: Defn.Object => defn.copy(templ = updatedTemplate)
         }
 
-      case tree @ ValOrDefDef(Term.Name("scalacOptions"), _, body) =>
-        if (containsMapScalacOptionsCall(body) || isBareScalacOptionsReference(body)) {
+      case tree @ ValOrDefDef(Term.Name("scalacOptions"), tpe, body) =>
+        if (
+          containsMapScalacOptionsCall(body) ||
+          isBareScalacOptionsReference(body) ||
+          isScalacOptionsVersionPin(tpe, body)
+        ) {
           tree match {
             case defn: Defn.Val => defn
             case defn: Defn.Def => defn

@@ -212,7 +212,8 @@ function path_depth_from_root() {
     echo 0
     return
   fi
-  local depth=0
+  # Count path segments: "sbt-indigo" -> 1, "a/b" -> 2
+  local depth=1
   local rest="$rel"
   while [[ "$rest" == */* ]]; do
     depth=$((depth + 1))
@@ -223,7 +224,8 @@ function path_depth_from_root() {
 
 function is_mill_build_dir() {
   local dir="$1"
-  [[ -f "$dir/mill" || -f "$dir/build.mill" || -f "$dir/build.mill.scala" || -f "$dir/build.mill.yaml" || -f "$dir/build.sc" ]]
+  # A mill launcher alone is not enough (repos may ship one beside an sbt build).
+  [[ -f "$dir/build.mill" || -f "$dir/build.mill.scala" || -f "$dir/build.mill.yaml" || -f "$dir/build.sc" ]]
 }
 
 function is_sbt_build_dir() {
@@ -239,6 +241,10 @@ function consider_build_dir() {
     bestBuildTool="$tool"
     bestBuildDir="$dir"
     bestBuildDepth=$depth
+  elif (( depth == bestBuildDepth )) && [[ "$tool" == "sbt" && "$bestBuildTool" == "mill" ]]; then
+    # Prefer sbt when both tools are present at the same depth.
+    bestBuildTool="$tool"
+    bestBuildDir="$dir"
   fi
 }
 
