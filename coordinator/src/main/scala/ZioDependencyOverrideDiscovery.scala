@@ -4,15 +4,15 @@ import scala.collection.mutable
 import org.jsoup.Jsoup
 
 /** Discover ZIO core modules that need a force-upgrade for Scala 3.10 Tracer fixes.
-  * Skips ZIO 1.x and ZIO 2.0.0 milestones / RCs entirely. Only emits overrides when
-  * current version &lt; [[ForceVersion]].
+  * Skips ZIO 1.x and 2.0.0-RCx projects entirely. Only emits overrides when current
+  * version &lt; [[ForceVersion]].
   */
 object ZioDependencyOverrideDiscovery:
   val ForceVersion = "2.1.26"
   private val ForceSemVersion = SemVersion(2, 1, 26)
 
   /** Bump when discovery skip/force rules change so [[ProjectBuildDefCache]] invalidates. */
-  val DiscoveryRulesVersion = "skip-1.x+skip-2.0.0-M/RC+force-2.1.26-7+transitive-zio-pom-graph"
+  val DiscoveryRulesVersion = "1.0"
 
   /** Core JVM modules from https://index.scala-lang.org/zio/zio/artifacts/zio
     * that share the `dev.zio` version line (excludes interop / examples / tests).
@@ -48,7 +48,7 @@ object ZioDependencyOverrideDiscovery:
     "zio-test-refined",
   )
 
-  private val Zio200PreRelease = raw"(?i)2\.0\.0-(?:M|RC)\d+.*".r
+  private val Zio200Rc = raw"(?i)2\.0\.0-RC\d+.*".r
   private val QuotedVersion = raw""""(2\.\d+\.\d+[^"]*)"""".r
   private val ZioVersionAssign =
     raw"""(?i)zio(?:Version|Ver|_version)\s*=\s*"([^"]+)"""".r
@@ -79,9 +79,9 @@ object ZioDependencyOverrideDiscovery:
                     .mkString(", ")})"
               )
               Nil
-            else if coreDeps.exists(dep => isZio200PreRelease(dep.version)) then
+            else if coreDeps.exists(dep => isZio200Rc(dep.version)) then
               println(
-                s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: uses ZIO 2.0.0 milestone / RC (${coreDeps
+                s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: uses ZIO 2.0.0-RC (${coreDeps
                     .map(dep => s"${dep.logicalName}:${dep.version}")
                     .mkString(", ")})"
               )
@@ -114,7 +114,7 @@ object ZioDependencyOverrideDiscovery:
         else Nil
       val versions = (assigned ++ quoted).distinct
       if versions.exists(isZio1) then Some("uses ZIO 1.x")
-      else if versions.exists(isZio200PreRelease) then Some("uses ZIO 2.0.0 milestone / RC")
+      else if versions.exists(isZio200Rc) then Some("uses ZIO 2.0.0-RC")
       else None
 
   private def buildSourceFiles(projectDir: os.Path): List[os.Path] =
@@ -139,12 +139,12 @@ object ZioDependencyOverrideDiscovery:
     val v = version.trim
     SemVersion.unapply(v).exists(_.major == 1) || v.startsWith("1.")
 
-  /** ZIO 2.0.0 pre-releases (e.g. `2.0.0-M5`, `2.0.0-RC5`) — do not force-upgrade to 2.1.x. */
-  private def isZio200PreRelease(version: String): Boolean =
-    version.trim.matches(Zio200PreRelease.regex)
+  /** ZIO 2.0.0 release candidates (e.g. `2.0.0-RC5`) — do not force-upgrade to 2.1.x. */
+  private def isZio200Rc(version: String): Boolean =
+    version.trim.matches(Zio200Rc.regex)
 
   private def needsForceUpgrade(version: String): Boolean =
-    if isZio1(version) || isZio200PreRelease(version) then false
+    if isZio1(version) || isZio200Rc(version) then false
     else
       SemVersion.unapply(version) match
         case Some(v) => v < ForceSemVersion
@@ -174,15 +174,15 @@ object ZioDependencyOverrideDiscovery:
             val id = a.obj.get("artifactId").map(_.str).getOrElse("")
             id.endsWith("_3") || a.obj.get("language").exists(_.str == "3")
         case matched => matched
-    val artOpt = matching
+    val candidateArtifacts = matching
       .sortBy: a =>
         val id = a.obj.get("artifactId").map(_.str).getOrElse("")
         if id.endsWith("_3") then 0 else 1
-      .headOption
-
-    artOpt match
-      case None => Nil
-      case Some(art) =>
+    // Inspect all published Scala 3 artifacts for the project version. Some projects,
+    // like guinep, use ZIO only from a secondary module (e.g. `guinep-web` via zio-http),
+    // and looking at a single artifact misses the transitive `dev.zio` graph entirely.
+    candidateArtifacts
+      .flatMap: art =>
         val groupId = art("groupId").str
         val artifactId = art("artifactId").str
         val tryVersions =
@@ -193,6 +193,7 @@ object ZioDependencyOverrideDiscovery:
             catch case _: Exception => None
           .headOption
           .getOrElse(Nil)
+      .distinctBy(dep => dep.artifactId -> dep.version)
 
   private def loadPublishedDevZioDeps(artifactId: String, version: String): List[ZioDep] =
     try loadPomDevZioDeps("dev.zio", artifactId, version)
