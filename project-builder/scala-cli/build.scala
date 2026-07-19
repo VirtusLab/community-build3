@@ -38,6 +38,7 @@ import os.CommandResult
     scalaVersion = scalaVersion,
     repositoryDir = repositoryDir,
     mavenRepoURL = Option(mavenRepoURL).filterNot(_.isEmpty),
+    dependencyOverrides = config.dependencyOverrides,
     extraScalacOptions = Scala3CommunityBuild.Utils.splitScalacOptionArgs(extraScalacOptions).map {
       case s"REQUIRE:$opt" => opt
       case opt             => opt
@@ -138,6 +139,7 @@ class CliTaskEvaluator(
     scalaVersion: String,
     repositoryDir: os.Path,
     mavenRepoURL: Option[String],
+    dependencyOverrides: Seq[DependencyOverride],
     extraScalacOptions: List[String]
 ) extends TaskEvaluator[CliCommand] {
   import TaskEvaluator.*
@@ -156,9 +158,16 @@ class CliTaskEvaluator(
   def eval[T](task: CliCommand[T]): EvalResult[T] = {
     println(s"Evaluating: ${task}")
     val extraLibraryDependencies = Utils.extraLibraryDependencies(scalaVersion).map {
-      case Utils.LibraryDependency(org, artifact, version, scalaCrossVersion) =>
-        if (scalaCrossVersion) s"--dependency=$org::$artifact:$version"
-        else s"--dependency=$org:$artifact:$version"
+      case Utils.LibraryDependency(org, artifact, version, scalaColons) =>
+        val cross =
+          if (scalaColons == 3) ":::"
+          else if (scalaColons == 2) "::"
+          else ":"
+        s"--dependency=$org$cross$artifact:$version"
+    }
+    val dependencyOverrideArgs = dependencyOverrides.distinct.flatMap { dep =>
+      Utils.logOnce(s"Would apply dependencyOverride via scala-cli --dep: ${dep.coord}")
+      Seq("--dep", dep.coord)
     }
     val evalStart = System.currentTimeMillis()
     val stderrLines = collection.mutable.ArrayBuffer.empty[String]
@@ -176,6 +185,7 @@ class CliTaskEvaluator(
         "--scalac-option=-J-Xms4G",
         mavenRepoURL.map(s"--repository=" + _).toList,
         extraLibraryDependencies,
+        dependencyOverrideArgs,
         extraScalacOptions.map("--scala-option=" + _),
         "--platform=jvm"
       )
@@ -242,6 +252,8 @@ object uPickleSerializers {
 
   given Reader[ProjectOverrides] = macroR
   given Reader[ProjectsConfig] = macroR
+  given Reader[DependencyOverride] =
+    implicitly[Reader[String]].map(DependencyOverride(_))
   given Reader[ProjectBuildConfig] = macroR
   given Reader[ScalaVersionRange] = macroR
   given Reader[SourcePatch] = macroR

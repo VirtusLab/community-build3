@@ -52,8 +52,15 @@ object CommunityBuildConfigFormats {
         unbuilder.beginObject(v)
         val projects = readOrDefault("projects", ProjectsConfig())
         val testsMode = readOrDefault[TestingMode, J]("tests", TestingMode.Full)
+        val dependencyOverrides = readOrDefault("dependencyOverrides", Array.empty[String])
+          .toSeq
+          .map(DependencyOverride(_))
         unbuilder.endObject()
-        ProjectBuildConfig(projects, testsMode)
+        ProjectBuildConfig(
+          projects = projects,
+          tests = testsMode,
+          dependencyOverrides = dependencyOverrides
+        )
       }
   }
 

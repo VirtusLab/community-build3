@@ -113,6 +113,11 @@ object ProjectBuildDefCache:
     discovery.requireConfigBytes(project).foreach { case (label, bytes) =>
       update(label, bytes)
     }
+    update(
+      "zio-discovery",
+      ZioDependencyOverrideDiscovery.DiscoveryRulesVersion
+        .getBytes(java.nio.charset.StandardCharsets.UTF_8)
+    )
     update("replacement", replacementLine(project, confFiles).getBytes(java.nio.charset.StandardCharsets.UTF_8))
     digest.digest().map("%02x".format(_)).mkString
 

@@ -14,7 +14,8 @@ object Scala3CommunityBuild {
   case class ProjectBuildConfig(
       projects: ProjectsConfig = ProjectsConfig(),
       tests: TestingMode = TestingMode.Full,
-      sourcePatches: Seq[SourcePatch] = Nil
+      sourcePatches: Seq[SourcePatch] = Nil,
+      dependencyOverrides: Seq[DependencyOverride] = Nil
   )
 
   case class ProjectOverrides(tests: Option[TestingMode] = None)
@@ -28,6 +29,90 @@ object Scala3CommunityBuild {
     case object Disabled extends TestingMode
     case object CompileOnly extends TestingMode
     case object Full extends TestingMode
+  }
+
+  /** scala-cli / Mill style coordinate, e.g. `dev.zio::zio:2.1.26`, `dev.zio:zio-test_2.13:2.1.26`.
+    *
+    * Format (same as Mill / scala-cli):
+    *   org + scalaSuffix + name + platformSuffix + version
+    *   scalaSuffix:    ":" | "::" | ":::"   (none | binary | full)
+    *   platformSuffix: ":" | "::"           (none | platform)
+    */
+  // Mill wraps imported .sc sources in a generated class, and nested value classes are illegal.
+  case class DependencyOverride(coord: String) {
+    private def parts: DependencyOverride.Parts =
+      DependencyOverride
+        .parse(coord)
+        .getOrElse(DependencyOverride.Parts("", "", "", 1))
+
+    def organization: String = parts.organization
+    def artifact: String = parts.artifact
+    def version: String = parts.version
+
+    /** `true` for `::` (binary) or `:::` (full) scala version suffixes. */
+    def crossScalaVersion: Boolean = parts.scalaColons >= 2
+
+    /** `true` only for `:::` (full Scala version suffix). */
+    def crossFullScalaVersion: Boolean = parts.scalaColons == 3
+
+    /** Stable key for merge: org + logical artifact (binary suffix stripped). */
+    def moduleKey: String = {
+      val logicalArtifact =
+        DependencyOverride.stripScalaBinarySuffix(parts.artifact)
+      parts.organization + "::" + logicalArtifact
+    }
+  }
+
+  object DependencyOverride {
+    private val ScalaBinarySuffix = raw"_(?:3|(?:2\.\d+))$$".r
+
+    final case class Parts(
+        organization: String,
+        artifact: String,
+        version: String,
+        scalaColons: Int // 1 = none, 2 = binary, 3 = full
+    )
+
+    def stripScalaBinarySuffix(artifact: String): String =
+      ScalaBinarySuffix.replaceFirstIn(artifact, "")
+
+    def parse(coord: String): Option[Parts] = {
+      val s = coord.trim
+      if (s.isEmpty) None
+      else {
+        val orgEnd = s.indexOf(':')
+        if (orgEnd <= 0) None
+        else {
+          val organization = s.substring(0, orgEnd)
+          var i = orgEnd
+          var scalaColons = 0
+          while (i < s.length && s.charAt(i) == ':') {
+            scalaColons += 1
+            i += 1
+          }
+          if (scalaColons < 1 || scalaColons > 3 || i >= s.length) None
+          else {
+            val nameStart = i
+            val platformStart = s.indexOf(':', nameStart)
+            if (platformStart < 0) None
+            else {
+              val artifact = s.substring(nameStart, platformStart)
+              i = platformStart
+              var platformColons = 0
+              while (i < s.length && s.charAt(i) == ':') {
+                platformColons += 1
+                i += 1
+              }
+              val version = s.substring(i)
+              if (
+                artifact.isEmpty || version.isEmpty || platformColons < 1 || platformColons > 2
+              ) None
+              else Some(Parts(organization, artifact, version, scalaColons))
+            }
+          }
+        }
+      }
+    }
   }
 
   case class SourcePatch(
@@ -681,37 +766,52 @@ object Scala3CommunityBuild {
         organization: String,
         artifact: String,
         version: String,
-        crossScalaVersion: Boolean
+        scalaColons: Int // 1 = none, 2 = binary, 3 = full
     ) {
+      def crossScalaVersion: Boolean = scalaColons >= 2
+      def crossFullScalaVersion: Boolean = scalaColons == 3
+
       override def toString(): String = {
-        val crossVersion = if (crossScalaVersion) "%%" else "%"
+        val crossVersion =
+          if (crossFullScalaVersion) "%%%"
+          else if (crossScalaVersion) "%%"
+          else "%"
         s"$organization $crossVersion $artifact % $version"
       }
     }
 
     private def escapeScalaVersion(scalaVersion: String)(str: String): String =
       str.replace("<SCALA_VERSION>", scalaVersion)
-    final val ExtraLibraryDependenciesProp = "communitybuild.project.dependencies.add"
-    def extraLibraryDependencies(scalaVersion: String): Seq[LibraryDependency] = sys.props
-      .getOrElse(ExtraLibraryDependenciesProp, "")
-      .split(';')
-      .map(escapeScalaVersion(scalaVersion)(_))
-      .filter(_.nonEmpty)
-      .map(dep => dep.trim().split(':'))
-      .flatMap {
-        // org::artifact:version
-        case Array(org, "", artifact, version) =>
-          Some(LibraryDependency(org, artifact, version, crossScalaVersion = true))
-        // org:artifact:version
-        case Array(org, artifact, version) =>
-          Some(LibraryDependency(org, artifact, version, crossScalaVersion = false))
-        // other
-        case segments =>
-          logOnce(s"Invalid dependency format, segments=${segments.toList}")
-          None
+
+    def parseLibraryDependency(coord: String): Option[LibraryDependency] =
+      DependencyOverride.parse(coord).map { p =>
+        LibraryDependency(
+          p.organization,
+          p.artifact,
+          p.version,
+          scalaColons = p.scalaColons
+        )
       }
-      .toList
-      .map { dep =>
+
+    def parseLibraryDependencies(
+        coords: Seq[String],
+        scalaVersion: String
+    ): Seq[LibraryDependency] =
+      coords
+        .map(escapeScalaVersion(scalaVersion)(_))
+        .filter(_.nonEmpty)
+        .flatMap(parseLibraryDependency)
+
+    final val ExtraLibraryDependenciesProp = "communitybuild.project.dependencies.add"
+    def extraLibraryDependencies(scalaVersion: String): Seq[LibraryDependency] =
+      parseLibraryDependencies(
+        sys.props
+          .getOrElse(ExtraLibraryDependenciesProp, "")
+          .split(';')
+          .filter(_.nonEmpty)
+          .toSeq,
+        scalaVersion
+      ).map { dep =>
         logOnce(s"Would include extra dependency: $dep")
         dep
       }

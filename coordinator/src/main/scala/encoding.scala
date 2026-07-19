@@ -7,7 +7,8 @@ given Serialization = org.json4s.native.Serialization
 given Formats =
   Serialization.formats(NoTypeHints) +
     TestingModeEnumSerializer() + ProjectBuildDefSerializer +
-    UTCOffsetDateTimeSerializer() + ProjectSerializer()
+    UTCOffsetDateTimeSerializer() + ProjectSerializer() +
+    DependencyOverrideSerializer()
 
 object ProjectBuildDefSerializer
     extends FieldSerializer[ProjectBuildDef]({
@@ -41,6 +42,18 @@ class TestingModeEnumSerializer
         case TestingMode.Disabled    => JString(DisabledName)
         case TestingMode.CompileOnly => JString(CompileOnlyName)
         case TestingMode.Full        => JString(FullName)
+      }
+      (deserialize, serialize)
+    })
+
+/** Wire format is a plain scala-cli coordinate string. */
+class DependencyOverrideSerializer
+    extends CustomSerializer[DependencyOverride](_ => {
+      def deserialize: PartialFunction[JValue, DependencyOverride] = {
+        case JString(coord) => DependencyOverride(coord)
+      }
+      def serialize: PartialFunction[Any, JValue] = {
+        case DependencyOverride(coord) => JString(coord)
       }
       (deserialize, serialize)
     })

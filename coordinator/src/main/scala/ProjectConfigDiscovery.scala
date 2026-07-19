@@ -126,6 +126,13 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
                 else projectTestsConfig.get(project.p).foldLeft(c) { (c, value) =>
                   c.copy(tests = value)
                 }
+              .map: c =>
+                c.copy(dependencyOverrides =
+                  mergeDependencyOverrides(
+                    c.dependencyOverrides,
+                    ZioDependencyOverrideDiscovery.discover(project, projectDir)
+                  )
+                )
               .filter(_ != ProjectBuildConfig.empty)
           } catch {
             case ex: Throwable =>
@@ -345,4 +352,12 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
         Nil
     }
   }
+
+  /** Manual overrides win on the same org+artifact key; discovery fills the rest. */
+  private def mergeDependencyOverrides(
+      manual: List[DependencyOverride],
+      discovered: List[DependencyOverride]
+  ): List[DependencyOverride] =
+    val manualKeys = manual.map(_.moduleKey).toSet
+    manual ++ discovered.filterNot(d => manualKeys.contains(d.moduleKey))
 }

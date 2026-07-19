@@ -102,6 +102,88 @@ case class ProjectsConfig(
 // Describes a simple textual replecement performed on path (relative Unix-style path to the file
 case class SourcePatch(path: String, pattern: String, replaceWith: String, selectVersion: Option[ScalaVersionRange] = None) derives ConfigReader
 case class ScalaVersionRange(min: Option[String] = None, max: Option[String] = None) derives ConfigReader
+
+/** scala-cli / Mill style coordinate, e.g. `dev.zio::zio:2.1.26`, `dev.zio:zio-test_2.13:2.1.26`.
+  *
+  * Format (same as Mill / scala-cli):
+  * {{{
+  *   org + scalaSuffix + name + platformSuffix + version
+  *   scalaSuffix:    ":" | "::" | ":::"   (none | binary | full)
+  *   platformSuffix: ":" | "::"           (none | platform)
+  * }}}
+  */
+case class DependencyOverride(coord: String) extends AnyVal:
+  private def parts: DependencyOverride.Parts =
+    DependencyOverride.parse(coord).getOrElse(DependencyOverride.Parts("", "", "", scalaColons = 1))
+
+  def organization: String = parts.organization
+  def artifact: String = parts.artifact
+  def version: String = parts.version
+
+  /** `true` for `::` (binary) or `:::` (full) scala version suffixes. */
+  def crossScalaVersion: Boolean = parts.scalaColons >= 2
+
+  /** `true` only for `:::` (full Scala version suffix). */
+  def crossFullScalaVersion: Boolean = parts.scalaColons == 3
+
+  /** Stable key for merge: org + logical artifact (binary suffix stripped). */
+  def moduleKey: String =
+    val logicalArtifact =
+      DependencyOverride.stripScalaBinarySuffix(parts.artifact)
+    s"${parts.organization}::$logicalArtifact"
+
+object DependencyOverride:
+  private val ScalaBinarySuffix = raw"_(?:3|(?:2\.\d+))$$".r
+
+  final case class Parts(
+      organization: String,
+      artifact: String,
+      version: String,
+      scalaColons: Int // 1 = none, 2 = binary, 3 = full
+  )
+
+  given ConfigReader[DependencyOverride] =
+    ConfigReader[String].map(DependencyOverride(_))
+
+  def scala(organization: String, artifact: String, version: String): DependencyOverride =
+    DependencyOverride(s"$organization::$artifact:$version")
+
+  def java(organization: String, artifact: String, version: String): DependencyOverride =
+    DependencyOverride(s"$organization:$artifact:$version")
+
+  def stripScalaBinarySuffix(artifact: String): String =
+    ScalaBinarySuffix.replaceFirstIn(artifact, "")
+
+  /** Parse a scala-cli / Mill dependency coordinate. */
+  def parse(coord: String): Option[Parts] =
+    val s = coord.trim
+    if s.isEmpty then None
+    else
+      val orgEnd = s.indexOf(':')
+      if orgEnd <= 0 then None
+      else
+        val organization = s.substring(0, orgEnd)
+        var i = orgEnd
+        var scalaColons = 0
+        while i < s.length && s.charAt(i) == ':' do
+          scalaColons += 1
+          i += 1
+        if scalaColons < 1 || scalaColons > 3 || i >= s.length then None
+        else
+          val nameStart = i
+          val platformStart = s.indexOf(':', nameStart)
+          if platformStart < 0 then None
+          else
+            val artifact = s.substring(nameStart, platformStart)
+            i = platformStart
+            var platformColons = 0
+            while i < s.length && s.charAt(i) == ':' do
+              platformColons += 1
+              i += 1
+            val version = s.substring(i)
+            if artifact.isEmpty || version.isEmpty || platformColons < 1 || platformColons > 2 then None
+            else Some(Parts(organization, artifact, version, scalaColons))
+
 case class ProjectBuildConfig(
     projects: ProjectsConfig = ProjectsConfig(),
     java: JavaConfig = JavaConfig(),
@@ -110,8 +192,9 @@ case class ProjectBuildConfig(
     git: GitConfig = GitConfig(),
     tests: TestingMode = TestingMode.default,
     sourceVersion: Option[String] = None,
-    migrationVersions: List[String] = Nil,   
-    sourcePatches: List[SourcePatch] = Nil
+    migrationVersions: List[String] = Nil,
+    sourcePatches: List[SourcePatch] = Nil,
+    dependencyOverrides: List[DependencyOverride] = Nil
 ) derives ConfigReader
 
 object ProjectBuildConfig {

@@ -69,10 +69,13 @@ trait CommunityBuildPluginShared extends AutoPlugin {
                 org,
                 artifact,
                 version,
-                scalaCrossVersion
+                scalaColons
               ) =>
-            if (scalaCrossVersion) org %% artifact % version
-            else org % artifact % version
+            scalaColons match {
+              case 3 => org % artifact % version cross CrossVersion.full
+              case 2 => org %% artifact % version
+              case _ => org % artifact % version
+            }
         }
 
   private def stripScala3Suffix(s: String) = s match {
@@ -362,7 +365,33 @@ trait CommunityBuildPluginShared extends AutoPlugin {
         parsed.getOrElse(ProjectBuildConfig())
       }
 
-      val cState = state.value
+      var cState = state.value
+      val forcedDependencyOverrides =
+        Scala3CommunityBuild.Utils
+          .parseLibraryDependencies(
+            config.dependencyOverrides.map(_.coord),
+            scalaVersionArg
+          )
+          .map {
+            case LibraryDependency(org, artifact, version, scalaColons) =>
+              scalaColons match {
+                case 3 => org % artifact % version cross CrossVersion.full
+                case 2 => org %% artifact % version
+                case _ => org % artifact % version
+              }
+          }
+      if (forcedDependencyOverrides.nonEmpty) {
+        println(
+          s"Applying dependencyOverrides: ${forcedDependencyOverrides.mkString(", ")}"
+        )
+        val extracted0 = sbt.Project.extract(cState)
+        val refs = extracted0.structure.allProjectRefs
+        cState = cState.appendWithSession(
+          ((ThisBuild / dependencyOverrides) ++= forcedDependencyOverrides) +:
+            refs.map(ref => (ref / dependencyOverrides) ++= forcedDependencyOverrides)
+        )
+      }
+
       val extracted = sbt.Project.extract(cState)
       val s = extracted.structure
       val refsByName = s.allProjectRefs.map(r => r.project -> r).toMap
