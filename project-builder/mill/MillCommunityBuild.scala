@@ -482,6 +482,8 @@ object MillCommunityBuild {
       }
       readwriter[String].bimap[TestingMode](toJson, fromJson)
     }
+    given Reader[DependencyOverride] =
+      implicitly[Reader[String]].map(DependencyOverride(_))
     given Reader[ProjectOverrides] = macroR
     given Reader[ProjectsConfig] = macroR
     given Reader[ProjectBuildConfig] = macroR

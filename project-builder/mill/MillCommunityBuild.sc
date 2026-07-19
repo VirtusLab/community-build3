@@ -522,6 +522,8 @@ object serialization {
     readwriter[String].bimap[TestingMode](toJson, fromJson)
   }
 
+  implicit lazy val DependencyOverrideR: Reader[DependencyOverride] =
+    implicitly[Reader[String]].map(DependencyOverride(_))
   implicit lazy val ProjectOverridesR: Reader[ProjectOverrides] = macroR
   implicit lazy val ProjectsConfigR: Reader[ProjectsConfig] = macroR
   implicit lazy val ProjectBuildConfigR: Reader[ProjectBuildConfig] = macroR
