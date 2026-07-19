@@ -161,6 +161,7 @@ jobs:
         - name: "beangle/web"
         - name: "beangle/webmvc"
         - name: "benoitlouy/indent"
+        - name: "benoitlouy/tele"
         - name: "besselstudio/coingecko"
         - name: "bilal-fazlani/akka-http-jwt-auth"
         - name: "bilal-fazlani/circe-json-schema"
@@ -331,7 +332,6 @@ jobs:
         - name: "errors4s/errors4s-core-cats"
         - name: "errors4s/errors4s-core-scalacheck"
         - name: "errors4s/errors4s-http"
-        - name: "esamson/atbp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "esamson/atbp"
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
@@ -612,7 +613,6 @@ jobs:
         - name: "laserdisc-io/scanamo-circe"
         - name: "laserdisc-io/slack4s"
         - name: "laserdisc-io/zio-oci-objectstorage"
-        - name: "lbialy/filter-native-image-metadata"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "lbialy/filter-native-image-metadata"
         - name: "lbialy/jig"
         - name: "lbialy/qdrant4s"
         - name: "lbialy/tailf"
@@ -838,7 +839,6 @@ jobs:
         - name: "potencia/formats"
         - name: "ppurang/abctemplates"
         - name: "ppurang/asynch"
-        - name: "profunktor/valkey4cats"
         - name: "pschichtel/obd4s"
         - name: "psilicon/avro2s"
         - name: "pureharm/pureharm-config-ciris"

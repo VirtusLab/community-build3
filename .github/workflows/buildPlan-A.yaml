@@ -744,6 +744,7 @@ jobs:
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"
         - name: "profunktor/redis4cats"
+        - name: "profunktor/valkey4cats"
         - name: "pureconfig/pureconfig"
         - name: "purplekingdomgames/indigoengine"
         - name: "purplekingdomgames/tyrian"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/scala-ssh"
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
-        - name: "slack-scala-client/slack-scala-client"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
         - name: "smootoo/tablediff"
         - name: "snowplow/snowplow-scala-analytics-sdk"
@@ -1116,7 +1117,6 @@ jobs:
         - name: "zio-archive/interop-monix"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
