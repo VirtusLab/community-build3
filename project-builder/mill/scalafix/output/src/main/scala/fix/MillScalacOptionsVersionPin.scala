@@ -32,6 +32,6 @@ object MillScalacOptionsVersionPin {
   }
   trait Shared extends ScalaModule with MillCommunityBuild.CommunityBuildCoursierModule with MillCommunityBuild.CommunityBuildScalaWorkerPathRefFix {
     override def scalaVersion = mill.Task("3.8.4")
-    override def scalacOptions = Task(Seq("-Werror")).mapScalacOptions(this.scalaVersion())
+    override def scalacOptions = Task(Seq("-Werror").mapScalacOptions(this.scalaVersion()))
   }
 }
