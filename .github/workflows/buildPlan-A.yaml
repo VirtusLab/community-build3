@@ -532,6 +532,7 @@ jobs:
         - name: "kevin-lee/maven2sbt"
         - name: "kevin-lee/refined4s"
         - name: "killaitis/peloton"
+        - name: "kinoplan/utils"
         - name: "kirill5k/mongo4cats"
         - name: "kitlangton/animus"
         - name: "kitlangton/neotype"
@@ -612,7 +613,6 @@ jobs:
         - name: "mockito/mockito-scala"
         - name: "molarmanful/sclin"
         - name: "mongocamp/mongodb-driver"
-        - name: "mongodb/mongo-java-driver"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mongodb/mongo-java-driver"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
@@ -744,7 +745,6 @@ jobs:
         - name: "profunktor/http4s-jwt-auth"
         - name: "profunktor/neutron"
         - name: "profunktor/redis4cats"
-        - name: "profunktor/valkey4cats"
         - name: "pureconfig/pureconfig"
         - name: "purplekingdomgames/indigoengine"
         - name: "purplekingdomgames/tyrian"
