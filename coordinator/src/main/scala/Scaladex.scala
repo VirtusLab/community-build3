@@ -11,6 +11,17 @@ object Scaladex:
 
   case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
 
+  /** Non-2xx Scaladex response; body is often plain text (e.g. Cloudflare 503). */
+  final class HttpFailure(val statusCode: Int, val bodyPreview: String, val uri: Uri)
+      extends RuntimeException(s"HTTP $statusCode for $uri: $bodyPreview")
+
+  /** upickle wraps `ujson.ParseException` in `TraceVisitor$TraceException`. */
+  def isJsonParseFailure(err: Throwable): Boolean =
+    err match
+      case _: ujson.ParseException => true
+      case _ =>
+        Option(err.getCause).exists(isJsonParseFailure)
+
 class Scaladex:
   import Scaladex.*
 
@@ -19,28 +30,31 @@ class Scaladex:
   private inline def get[T: Reader](
       uri: Uri
   ): AsyncResponse[T] = {
+    def retryAfter(err: Throwable, backoffSeconds: Int, kind: String): AsyncResponse[T] =
+      Console.err.println(
+        s"Failed to $kind artifact metadata (${CoordinatorRuntime.describeFailure(err)}), retry with backoff ${backoffSeconds}s for $uri"
+      )
+      SECONDS.sleep(backoffSeconds)
+      tryGet((backoffSeconds * 2).min(60))
+
     def tryGet(backoffSeconds: Int): AsyncResponse[T] = Future {
       CoordinatorRuntime.withPermit(CoordinatorRuntime.scaladexApi) {
-        quickRequest
+        val response = quickRequest
           .get(uri)
-          .mapResponse(read[T](_))
+          .response(asStringAlways)
           .send(backend)
+        if !response.isSuccess then
+          throw HttpFailure(response.code.code, response.body.take(200), uri)
+        read[T](response.body)
       }
-    }.map(_.body)
-      .recoverWith {
-        case err: SttpClientException =>
-          Console.err.println(
-            s"Failed to fetch artifact metadata (${CoordinatorRuntime.describeFailure(err)}), retry with backoff ${backoffSeconds}s for $uri"
-          )
-          SECONDS.sleep(backoffSeconds)
-          tryGet((backoffSeconds * 2).min(60))
-        case err: ujson.ParseException =>
-          Console.err.println(
-            s"Failed to parse artifact metadata (${CoordinatorRuntime.describeFailure(err)}), retry with backoff ${backoffSeconds}s for $uri"
-          )
-          SECONDS.sleep(backoffSeconds)
-          tryGet((backoffSeconds * 2).min(60))
-      }
+    }.recoverWith {
+      case err: SttpClientException =>
+        retryAfter(err, backoffSeconds, "fetch")
+      case err: HttpFailure =>
+        retryAfter(err, backoffSeconds, "fetch")
+      case err: Exception if isJsonParseFailure(err) =>
+        retryAfter(err, backoffSeconds, "parse")
+    }
 
     tryGet(1)
   }
