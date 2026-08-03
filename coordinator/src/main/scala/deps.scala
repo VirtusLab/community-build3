@@ -86,13 +86,13 @@ def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
       .traverse(artifactsByVersion) { case (version, artifacts) =>
         scaladex
           .artifact(artifacts.head)
-          .filter: artifact =>
-            artifact.platform == "jvm" &&
-              releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
           .map: artifact =>
-            (version, artifact.releaseDate)
+            Option.when(
+              artifact.platform == "jvm" &&
+                releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
+            )((version, artifact.releaseDate))
       }
-      .map(_.toMap)
+      .map(_.flatten.toMap)
     orderedVersions = versionReleaseData.toSeq
       .sortBy(-_._2.toEpochSecond()) // releaseDate-epoch-mill descending
       .map(_._1)
