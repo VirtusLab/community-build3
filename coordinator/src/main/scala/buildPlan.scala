@@ -44,7 +44,7 @@ object CoordinatorRuntime:
   val gitClone: Permit = permit(gitCloneParallelism)
   val gitLsRemote: Permit = permit(ioBoundParallelism(min = 4, max = 16))
   val mavenInfo: Permit = permit(ioBoundParallelism(min = 4, max = 4))
-  val scaladexApi: Permit = permit(ioBoundParallelism(min = 2, max = 2))
+  val scaladexApi: Permit = permit(ioBoundParallelism(min = 1, max = 1))
 
   def withPermit[T](permit: Permit)(op: => T): T =
     blocking(permit.acquire())
@@ -158,7 +158,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
         }
       }
   }
-  try Await.result(task, 180.minute)
+  try Await.result(task, Duration.Inf)
   catch {
     case ex: Throwable =>
       ex.printStackTrace()
