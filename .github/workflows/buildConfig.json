@@ -91334,17 +91334,26 @@
         {
           "path":"build.sbt",
           "pattern":"libraryDependencies ++= unroll,\n    addCompilerPlugin(\"com.lihaoyi\" %% \"unroll-plugin\" % \"0.1.12\"),",
-          "replaceWith":"// libraryDependencies ++= unroll, // use scala.annotation.unroll + -experimental\n    // addCompilerPlugin(\"com.lihaoyi\" %% \"unroll-plugin\" % \"0.1.12\"),"
+          "replaceWith":"// libraryDependencies ++= unroll, // use scala.annotation.unroll + -experimental\n    // addCompilerPlugin(\"com.lihaoyi\" %% \"unroll-plugin\" % \"0.1.12\"),",
+          "selectVersion":{
+            "min":"3.5.0"
+          }
         },
         {
           "path":"zio-http/jvm/src/main/scala/zio/http/netty/client/NettyClientDriver.scala",
           "pattern":"@unroll",
-          "replaceWith":"/*@unroll*/"
+          "replaceWith":"/*@unroll*/",
+          "selectVersion":{
+            "min":"3.5.0"
+          }
         },
         {
-          "path":"zio-http/shared/src/main/scala/zio/http/ClientDriver.scala",
-          "pattern":"@unroll",
-          "replaceWith":"/*@unroll*/"
+          "path": "zio-http/shared/src/main/scala/zio/http/ClientDriver.scala",
+          "pattern": "@unroll",
+          "replaceWith": "/*@unroll*/",
+          "selectVersion": {
+            "min": "3.5.0"
+          }
         },
         {
           "path":"zio-http/shared/src/main/scala/zio/http/endpoint/openapi/OpenAPIGen.scala",
