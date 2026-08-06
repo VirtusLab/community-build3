@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# upickle ships a stub sbt build (readme/scalatex only) alongside the real Mill build.
+# Community-build prefers sbt when both tools are present at the same depth, so remove
+# the sbt layout before build-tool discovery.
+set -euo pipefail
+
+ProjectDir="${OPENCB_PROJECT_DIR:?OPENCB_PROJECT_DIR is not defined}"
+cd "$ProjectDir"
+
+echo "Disabling stub sbt build so Mill is used for com-lihaoyi/upickle"
+rm -f build.sbt
+rm -rf project

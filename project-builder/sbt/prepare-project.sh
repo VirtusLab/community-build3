@@ -79,17 +79,6 @@ else
   echo "Using sbt 2.x project adapter for sbt version $sbtVersion"
 fi
 
-prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
-if [[ -f "$prepareScript" ]]; then
-  if [[ -x "$prepareScript" ]]; then 
-    echo "Execute project prepare script: ${prepareScript}"
-    cat $prepareScript
-    "$prepareScript"
-  else echo "Project prepare script is not executable: $prepareScript"
-  fi
-else 
-  echo "No prepare script found for project $projectName"
-fi
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 sharedDir="$scriptDir/shared"

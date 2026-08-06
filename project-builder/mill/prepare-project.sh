@@ -32,7 +32,7 @@ readonly TRIM_VALUE_SED="s/.*://; s/#.*//; s/['\"]//g; s/^[[:space:]]*//; s/[[:s
 cd $repoDir
 
 javaVersion=$( echo "${projectConfig}" | jq -r '.java.version // "17"')
-echo "system" > .mill-jvm-version
+echo "${javaVersion}" > .mill-jvm-version
 echo "" >> .mill-jvm-opts
 echo "-Xmx7G" >> .mill-jvm-opts
 echo "-Xms4G" >> .mill-jvm-opts
@@ -165,17 +165,6 @@ if [[ "$isMillYamlBuild" == true ]]; then
   fi
 fi
 
-prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${projectName}"
-if [[ -f "$prepareScript" ]]; then
-  if [[ -x "$prepareScript" ]]; then 
-    echo "Execute project prepare script: ${prepareScript}"
-    cat $prepareScript
-    $prepareScript
-  else echo "Project prepare script is not executable: $prepareScript"
-  fi
-else 
-  echo "No prepare script found for project $projectName"
-fi
 
 # Rename build.sc to build.scala - Scalafix does ignore .sc files
 # Use scala 3 dialect to allow for top level defs

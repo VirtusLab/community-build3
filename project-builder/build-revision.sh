@@ -295,6 +295,27 @@ function discover_build_layout() {
   fi
 }
 
+function runProjectPrepareScript() {
+  local projectDir="$1"
+  local prepareScript="${OPENCB_SCRIPT_DIR:?OPENCB_SCRIPT_DIR not defined}/prepare-scripts/${project}"
+  if [[ -f "$prepareScript" ]]; then
+    if [[ -x "$prepareScript" ]]; then
+      echo "Execute project prepare script: ${prepareScript}"
+      cat "$prepareScript"
+      (
+        export OPENCB_PROJECT_DIR="$projectDir"
+        export OPENCB_SCALA_VERSION="$scalaVersion"
+        cd "$projectDir"
+        "$prepareScript"
+      )
+    else
+      echo "Project prepare script is not executable: $prepareScript"
+    fi
+  else
+    echo "No prepare script found for project $project"
+  fi
+}
+
 function buildForScalaVersion(){
   scalaVersion=$1
   echo "----"
@@ -303,6 +324,8 @@ function buildForScalaVersion(){
   setupScalacOptions
   setupProjectConfig
   applySourcePatches
+  # Run before build-tool discovery so scripts can disable a stub sbt/mill layout.
+  runProjectPrepareScript "$repoDir"
   
   echo "----"
   echo "Starting build for $scalaVersion"
