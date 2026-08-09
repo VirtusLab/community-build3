@@ -93,6 +93,8 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
     readNormalized(confFiles.customProjects).map(Project.load)
   given ExecutionContext = ExecutionContext.fromExecutor(executor)
 
+  CoordinatorProgress.start(15.seconds)
+  CoordinatorProgress.setPhase("dependency-graph")
   val task = for {
     dependencyGraph <- loadDepenenecyGraph(
       scalaBinaryVersion,
@@ -101,17 +103,21 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       requiredProjects = requiredProjects,
       customProjects = customProjects,
       filterPatterns = loadFilters,
-      releaseCutOffDate = releaseCutOffDate
+      releaseCutOffDate = releaseCutOffDate,
+      offlineScaladex = cacheOptions.offlineScaladex,
+      buildConfigSeedPath = cacheOptions.seedBuildConfigPath
     )
     _ = println(
       s"Loaded dependency graph: ${dependencyGraph.projects.size} projects"
     )
+    _ = CoordinatorProgress.setPhase("build-plan")
     fullBuildPlan <- makeDependenciesBasedBuildPlan(
       dependencyGraph,
       releaseCutOffDate,
       cacheOptions
     )
     _ = println("Generated build plan")
+    _ = CoordinatorProgress.setPhase("writing-outputs")
   } yield {
     // Build config
     if !ForReproducer then {
@@ -164,6 +170,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       ex.printStackTrace()
       sys.error(s"Uncought exception: $ex")
   } finally {
+    CoordinatorProgress.stop()
     executor.shutdownNow()
     executor.awaitTermination(10, SECONDS)
   }
@@ -311,10 +318,14 @@ def makeDependenciesBasedBuildPlan(
     cacheOptions: CoordinatorCacheOptions = CoordinatorCacheOptions()
 )(using confFiles: ConfigFiles): AsyncResponse[Array[ProjectBuildDef]] =
   val (_, fullInfo, projectsDeps) = buildPlanCommons(depGraph)
-  val configDiscovery =
-    ProjectConfigDiscovery(confFiles.projectsConfig.toIO, confFiles.requiredConfigs)
   val cacheStats = ProjectBuildDefCacheStats()
   val buildConfigSeed = BuildConfigSeedIndex(cacheOptions.seedBuildConfigPath)
+  val configDiscovery =
+    ProjectConfigDiscovery(
+      confFiles.projectsConfig.toIO,
+      confFiles.requiredConfigs,
+      buildConfigSeed
+    )
 
   val replacementPattern = raw"(\S+)/(\S+) (\S+)/(\S+) ?(\S+)?".r
   val replacements =

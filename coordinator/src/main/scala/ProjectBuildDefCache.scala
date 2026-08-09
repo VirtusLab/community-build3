@@ -22,6 +22,8 @@ case class CachedProjectBuildDef(
 case class CoordinatorCacheOptions(
     enabled: Boolean = true,
     refreshProjects: Set[Project] = Set.empty,
+    /** Skip Scaladex HTTP; reuse `data/projectModules` (or buildConfig.json targets). */
+    offlineScaladex: Boolean = false,
     seedBuildConfigPath: os.Path = workflowsDir / "buildConfig.json"
 )
 
@@ -35,13 +37,15 @@ object CoordinatorCacheOptions:
         .getOrElse(Set.empty)
     CoordinatorCacheOptions(
       enabled = !varargs.contains("--no-project-cache"),
-      refreshProjects = refreshProjects
+      refreshProjects = refreshProjects,
+      offlineScaladex = varargs.contains("--offline-scaladex")
     )
 
 /** Parsed [[buildConfig.json]] once per coordinator run (avoids OOM from parallel full-file parses).
   *
-  * Used only to seed repoUrl/revision when the disk cache is cold. Config is never taken from
-  * the seed file — it is always rediscovered so edits to projects-config.conf are picked up.
+  * Seeds repoUrl/revision when the disk cache is cold and project modules for `--offline-scaladex`.
+  * Config is never taken from the seed file — it is always rediscovered so edits to
+  * projects-config.conf are picked up.
   */
 final class BuildConfigSeedIndex(path: os.Path):
   private lazy val byCoordinates: Map[String, ProjectBuildDef] =
@@ -66,6 +70,28 @@ final class BuildConfigSeedIndex(path: os.Path):
       else
         stats.seededFromBuildConfig.incrementAndGet()
         Some((defn.repoUrl, defn.revision))
+    }
+
+  /** Parsed `org%artifact` tokens from buildConfig `targets`. */
+  def targets(project: Project): Seq[(String, String)] =
+    byCoordinates.get(project.coordinates).toSeq.flatMap: defn =>
+      defn.targets
+        .split("\\s+")
+        .iterator
+        .flatMap: token =>
+          token.split('%') match
+            case Array(group, artifact) if group.nonEmpty && artifact.nonEmpty =>
+              Some((group, artifact))
+            case _ => None
+        .toSeq
+
+  /** Best-effort modules list for `--offline-scaladex` when `data/projectModules` is missing. */
+  def projectModules(project: Project): Option[ProjectModules] =
+    byCoordinates.get(project.coordinates).flatMap { defn =>
+      val modules = targets(project).map(_._2).distinct
+      Option.when(modules.nonEmpty)(
+        ProjectModules(project, Seq(ModuleInVersion(defn.version, modules)))
+      )
     }
 
 final class ProjectBuildDefCacheStats:
@@ -156,7 +182,9 @@ object ProjectBuildDefCache:
           .flatMap(e => Git.revisionFromCached(e.revision))
           .orElse(resolveRevision(repoUrl))
       println(s"Discovering config for ${project.p.coordinates} (git checkout)...")
+      CoordinatorProgress.setDetail(s"discover ${project.p.coordinates}")
       val config = configDiscovery(project, repoUrl, revision)
+      CoordinatorProgress.configDiscovered()
       val entry = CachedProjectBuildDef(
         version = project.v,
         fingerprint = fingerprint,
@@ -175,6 +203,8 @@ object ProjectBuildDefCache:
         case Some(entry)
             if entry.version == project.v && entry.fingerprint == fingerprint && entry.config.isDefined =>
           stats.hits.incrementAndGet()
+          CoordinatorProgress.configCacheHit()
+          CoordinatorProgress.setDetail(s"cache-hit ${project.p.coordinates}")
           println(s"Skipping config discovery for ${project.p.coordinates} (cache hit)")
           (entry.repoUrl, entry.revision, entry.config)
         case Some(entry) if entry.version == project.v && entry.fingerprint == fingerprint =>

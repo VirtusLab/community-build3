@@ -5,7 +5,11 @@ import java.io.FileNotFoundException
 import scala.jdk.CollectionConverters.*
 import scala.util.chaining.*
 
-class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredConfigsPath: os.Path) {
+class ProjectConfigDiscovery(
+    internalProjectConfigsPath: java.io.File,
+    requiredConfigsPath: os.Path,
+    buildConfigSeed: BuildConfigSeedIndex = BuildConfigSeedIndex(workflowsDir / "buildConfig.json")
+) {
   type Filename = String
   def loadRequiredProjectsLists(dirPath: os.Path): Seq[(Project, Filename)] = 
     for 
@@ -14,6 +18,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
       project <- os.read.lines(file)
         .map(_.trim)
         .filter(_.nonEmpty)
+        .filterNot(_.startsWith("#"))
         .map(Project.load)
     yield project -> fileName
 
@@ -130,7 +135,7 @@ class ProjectConfigDiscovery(internalProjectConfigsPath: java.io.File, requiredC
                 c.copy(dependencyOverrides =
                   mergeDependencyOverrides(
                     c.dependencyOverrides,
-                    ZioDependencyOverrideDiscovery.discover(project, projectDir)
+                    ZioDependencyOverrideDiscovery.discover(project, projectDir, buildConfigSeed)
                   )
                 )
               .filter(_ != ProjectBuildConfig.empty)

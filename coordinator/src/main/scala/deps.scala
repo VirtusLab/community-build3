@@ -1,5 +1,5 @@
 import org.jsoup._
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.concurrent.*
 import java.nio.file.Files
 import java.time.LocalDate
@@ -165,36 +165,40 @@ def loadProjectModulesWithVersionCheck(releaseCutOffDate: Option[LocalDate] = No
         }
   }
 
+/** Reuse on-disk Scaladex module cache (or buildConfig.json targets); never call Scaladex. */
+def loadProjectModulesOffline(
+    project: Project,
+    buildConfigSeed: BuildConfigSeedIndex
+)(using driver: CacheDriver[Project, ProjectModules]): AsyncResponse[ProjectModules] =
+  Future {
+    readCachedProjectModules(project) match
+      case Some(cached) =>
+        println(
+          s"Using cached Scaladex project modules for ${project.coordinates} (--offline-scaladex)"
+        )
+        cached
+      case None =>
+        buildConfigSeed.projectModules(project) match
+          case Some(seeded) =>
+            println(
+              s"Seeding project modules for ${project.coordinates} from buildConfig.json (--offline-scaladex)"
+            )
+            writeCachedProjectModules(seeded)
+            seeded
+          case None =>
+            throw RuntimeException(
+              s"No Scaladex modules cache for ${project.coordinates} with --offline-scaladex. " +
+                s"Expected data/projectModules/${project.organization}_${project.repository}.csv " +
+                "or a targets entry in .github/workflows/buildConfig.json"
+            )
+  }
+
 case class VersionedModules(modules: ModuleInVersion, semVersion: SemVersion)
 case class ModuleVersion(name: String, version: String, p: Project)
 
-val GradleDep = "compile group: '(.+)', name: '(.+)', version: '(.+)'".r
+private val MaxMavenInfoAttempts = 5
 
-def asTarget(scalaBinaryVersion: String)(mv: ModuleVersion): Target =
-  import mv._
-  CoordinatorRuntime.withPermit(CoordinatorRuntime.mavenInfo) {
-    val url =
-      s"$ScaladexUrl/${p.organization}/${p.repository}/${name}/${version}?target=_$scalaBinaryVersion"
-    val d = Jsoup.connect(url).get()
-    val gradle = d.select("#copy-gradle").text()
-    val GradleDep(o, n, v) = gradle: @unchecked
-    val orgParsed = o.split('.').mkString("/")
-    val mCentralUrl =
-      s"https://repo1.maven.org/maven2/$orgParsed/$n/$v/$n-$v.pom"
-    val md = Jsoup.connect(mCentralUrl).get
-
-    val deps =
-      for
-        dep <- md.select("dependency").asScala
-        groupId <- dep.select("groupId").asScala
-        artifactId <- dep.select("artifactId").asScala
-        version <- dep.select("version").asScala
-      yield Dep(TargetId(groupId.text, artifactId.text), version.text)
-
-    Target(TargetId(o, n), deps.toSeq)
-  }
-
-def loadMavenInfo(scalaBinaryVersion: String)(
+def loadMavenInfo(scalaBinaryVersion: String, buildConfigSeed: BuildConfigSeedIndex)(
     projectModules: CandidateProject.BuildSelected
 ): AsyncResponse[LoadedProject] =
   import projectModules.project.{repository, organization}
@@ -208,23 +212,25 @@ def loadMavenInfo(scalaBinaryVersion: String)(
     .getOrElse(projectModules.mvs.head)
 
   val tasks = modules.map { module =>
-    def tryFetch(backoffSeconds: Int): AsyncResponse[Option[Target]] = {
+    def tryFetch(backoffSeconds: Int, attempt: Int): AsyncResponse[Option[Target]] = {
       inline def backoff(ex: Throwable, retryable: Boolean) = {
+        val canRetry = retryable && attempt < MaxMavenInfoAttempts
         val detail = CoordinatorRuntime.describeFailure(ex)
         val action =
-          if retryable then s"retry with backoff ${backoffSeconds}s"
+          if canRetry then s"retry with backoff ${backoffSeconds}s (attempt $attempt/$MaxMavenInfoAttempts)"
+          else if retryable then s"giving up after $attempt attempts"
           else "giving up"
         Console.err.println(
           s"Failed to load maven info for $organization/$repository module=$module version=$version ($detail): $action"
         )
-        if retryable then
+        if canRetry then
           SECONDS.sleep(backoffSeconds)
-          tryFetch((backoffSeconds * 2).min(60))
+          tryFetch((backoffSeconds * 2).min(60), attempt + 1)
         else Future.successful(None)
       }
       Future({
         val target = cached {
-          asTarget(scalaBinaryVersion)(_)
+          Maven.asTarget(scalaBinaryVersion, buildConfigSeed)(_)
         }(ModuleVersion(module, version, projectModules.project))
         Some(target)
       })
@@ -243,7 +249,7 @@ def loadMavenInfo(scalaBinaryVersion: String)(
             backoff(ex, retryable = false)
         }
     }
-    tryFetch(1)
+    tryFetch(1, attempt = 1)
   }
 
   Future
@@ -276,14 +282,22 @@ def loadDepenenecyGraph(
     requiredProjects: Seq[Project] = Nil,
     customProjects: Seq[Project] = Nil,
     filterPatterns: Seq[String] = Nil,
-    releaseCutOffDate: Option[LocalDate] = None
+    releaseCutOffDate: Option[LocalDate] = None,
+    offlineScaladex: Boolean = false,
+    buildConfigSeedPath: os.Path = workflowsDir / "buildConfig.json"
 ): AsyncResponse[DependencyGraph] =
   given Scaladex = Scaladex()
   val patterns = filterPatterns.map(_.r)
+  val buildConfigSeed = BuildConfigSeedIndex(buildConfigSeedPath)
+  if offlineScaladex then
+    println("Scaladex offline mode: reusing data/projectModules (or buildConfig.json targets)")
   def loadProject(p: Project): AsyncResponse[CandidateProject] =
     if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
     else
-      loadProjectModulesWithVersionCheck(releaseCutOffDate)(p).map { pm =>
+      val modules =
+        if offlineScaladex then loadProjectModulesOffline(p, buildConfigSeed)
+        else loadProjectModulesWithVersionCheck(releaseCutOffDate)(p)
+      modules.map { pm =>
         val filtered = projectModulesFilter(patterns)(pm)
         if filtered.mvs.isEmpty then
           if pm.mvs.isEmpty then ()
@@ -328,8 +342,10 @@ def loadDepenenecyGraph(
               case candidate @ CandidateProject.BuildSelected(project, mvs) =>
                 if mvs.isEmpty then Future.successful(None)
                 else
-                  loadMavenInfo(scalaBinaryVersion)(candidate)
+                  loadMavenInfo(scalaBinaryVersion, buildConfigSeed)(candidate)
                     .map { result =>
+                      CoordinatorProgress.mavenInfoLoaded()
+                      CoordinatorProgress.setDetail(s"maven #$name")
                       println(s"Loaded Maven info #${idx + 1} for $name")
                       Option(result)
                     }
