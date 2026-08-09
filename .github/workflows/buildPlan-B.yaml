@@ -115,7 +115,6 @@ jobs:
         - name: "andimiller/munit-cats-effect-styles"
         - name: "andreamarcolin/oidc4s"
         - name: "andyglow/scala-range"
-        - name: "andyglow/typesafe-config-scala"
         - name: "antognini/type-safe-equality"
         - name: "aoiroaoino/nanolens"
         - name: "appliedtopology/tda4j"
@@ -332,6 +331,7 @@ jobs:
         - name: "evolution-gaming/random"
         - name: "fdietze/formidable"
         - name: "fehu/opentracing-scala"
+        - name: "fenixedu/fenixedu-scala-sdk"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fenixedu/fenixedu-scala-sdk"
         - name: "fgrutsch/emergence"
         - name: "fgrutsch/pekko-persistence-mapdb"
         - name: "fiatjaf/nlog"
@@ -613,6 +612,7 @@ jobs:
         - name: "leviysoft/scala-kotlin-compat"
         - name: "leviysoft/tightbound"
         - name: "lewisjkl/header"
+        - name: "lhns/cats-effect-utils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
@@ -894,6 +893,7 @@ jobs:
         - name: "sangria-graphql/sangria-argonaut"
         - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-json4s-jackson"
+        - name: "sangria-graphql/sangria-json4s-native"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sangria-graphql/sangria-json4s-native"
         - name: "sangria-graphql/sangria-marshalling-api"
         - name: "sangria-graphql/sangria-marshalling-testkit"
         - name: "sangria-graphql/sangria-msgpack"
@@ -984,6 +983,7 @@ jobs:
         - name: "sideeffffect/liquibase-doobie"
         - name: "sideeffffect/scala-quartz"
         - name: "simkoc/scala-argparse"
+        - name: "simkoc/scala-conf-parser"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
@@ -998,7 +998,6 @@ jobs:
         - name: "stringbean/text-utils"
         - name: "sullis/jms-testkit"
         - name: "swagger-akka-http/swagger-enumeratum-module"
-        - name: "swagger-akka-http/swagger-scala-module"
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/bskyarchive"
         - name: "swaldman/cryptoutil"
@@ -1024,6 +1023,7 @@ jobs:
         - name: "taig/flog"
         - name: "taig/geojson"
         - name: "taig/hmap"
+        - name: "taig/mapping"
         - name: "taig/object-fit"
         - name: "taig/scala-linguist"
         - name: "taig/scala-pygments"

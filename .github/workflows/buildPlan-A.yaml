@@ -113,6 +113,7 @@ jobs:
         - name: "andimiller/decline-completion"
         - name: "andresilva/scala-pool"
         - name: "andyglow/scala-xml-diff"
+        - name: "andyglow/typesafe-config-scala"
         - name: "andyglow/websocket-scala-client"
         - name: "ant8e/uuid4cats-effect"
         - name: "apache/daffodil"
@@ -331,7 +332,6 @@ jobs:
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
@@ -612,7 +613,6 @@ jobs:
         - name: "monix/monix"
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
-        - name: "mpollmeier/scala-repl-pp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mpollmeier/scala-repl-pp"
         - name: "mrumkovskis/tresql"
         - name: "msgpack4z/msgpack4z-core"
         - name: "mvv/sager"
@@ -879,7 +880,6 @@ jobs:
         - name: "scoverage/scalac-scoverage-plugin"
         - name: "sellmerfud/optparse"
         - name: "seratch/awscala"
-        - name: "shastick/zio-prefetcher"
         - name: "sherpal/url-dsl"
         - name: "shiftleftsecurity/codepropertygraph"
         - name: "shiftleftsecurity/js2cpg"
@@ -956,6 +956,7 @@ jobs:
         - name: "svroonland/rezilience"
         - name: "svroonland/zio-kinesis"
         - name: "swagger-akka-http/swagger-pekko-http"
+        - name: "swagger-akka-http/swagger-scala-module"
         - name: "systemfw/dynosaur"
         - name: "systemfw/upperbound"
         - name: "t2v/holidays"
@@ -981,7 +982,6 @@ jobs:
         - name: "timwspence/cats-stm"
         - name: "tinkoff/phobos"
         - name: "tminglei/slick-pg"
-        - name: "tofu-tf/derevo"
         - name: "tofu-tf/glass"
         - name: "tofu-tf/tofu"
         - name: "tomasmikula/libretto"

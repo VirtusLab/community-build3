@@ -60,6 +60,7 @@ rchillyard:matchers:.*
 maif:wasm4s:.*
 edadma:char-reader:.*
 jurajburian:mailer:.*
+tofu-tf:derevo:.*
 
 ## Failed to add custom commands
 ossuminc:riddl:.*
@@ -357,3 +358,7 @@ scala-native:scala-native:.*
 
 ## Self-bootstrapping required 
 foundweekends:giter8:.*
+
+## Pinned to ZIO 2.0.0-RC6, which fails Tracer macros on Scala 3.10;
+## upgrading to 2.1.x is API-breaking (ZEnv removed, unsafeRun changed)
+shastick:zio-prefetcher:.*
