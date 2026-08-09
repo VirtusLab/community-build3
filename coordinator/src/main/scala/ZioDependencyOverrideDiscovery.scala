@@ -5,14 +5,15 @@ import org.jsoup.Jsoup
 
 /** Discover ZIO core modules that need a force-upgrade for Scala 3.10 Tracer fixes.
   * Skips ZIO 1.x and 2.0.0-RCx projects entirely. Only emits overrides when current
-  * version &lt; [[ForceVersion]].
+  * version &lt; [[ForceVersion]]. Upgrading a 2.0.0-RCx project is API-breaking (`ZEnv`
+  * removal, `unsafeRun` changes), so those are filtered out of the build instead.
   */
 object ZioDependencyOverrideDiscovery:
   val ForceVersion = "2.1.26"
   private val ForceSemVersion = SemVersion(2, 1, 26)
 
   /** Bump when discovery skip/force rules change so [[ProjectBuildDefCache]] invalidates. */
-  val DiscoveryRulesVersion = "1.0"
+  val DiscoveryRulesVersion = "1.1"
 
   /** Core JVM modules from https://index.scala-lang.org/zio/zio/artifacts/zio
     * that share the `dev.zio` version line (excludes interop / examples / tests).
@@ -52,6 +53,12 @@ object ZioDependencyOverrideDiscovery:
   private val QuotedVersion = raw""""(2\.\d+\.\d+[^"]*)"""".r
   private val ZioVersionAssign =
     raw"""(?i)zio(?:Version|Ver|_version)\s*=\s*"([^"]+)"""".r
+  /** sbt: `"dev.zio" %% "zio-http" % "3.0.0-RC4"` (also `%` / `%%%`). */
+  private val DevZioSbtDep =
+    raw""""dev\.zio"\s*%{1,3}\s*"([^"]+)"\s*%\s*"([^"]+)"""".r
+  /** Mill/ivy/scala-cli: `ivy"dev.zio::zio-http:3.0.0-RC4"`, `//> using dep "dev.zio::zio:2.1.14"`. */
+  private val DevZioIvyDep =
+    raw"""dev\.zio:{1,2}([A-Za-z0-9_.-]+):([^`"\s]+)""".r
   private val Placeholder = """\$\{([^}]+)\}""".r
 
   private case class ZioDep(logicalName: String, artifactId: String, version: String)
@@ -60,39 +67,44 @@ object ZioDependencyOverrideDiscovery:
 
   def discover(project: ProjectVersion, projectDir: os.Path): List[DependencyOverride] =
     try
-      sourceSkipReason(projectDir) match
+      val sourceVersions = extractSourceZioVersions(projectDir)
+      val sourceDeclaredDeps = extractSourceDevZioLibraryDeps(projectDir)
+      // Only core modules share the ZIO version line. Independent `dev.zio` libs
+      // (zio-prelude 1.x, zio-schema 1.x, zio-http 3.x) must not trigger ZIO 1.x / 2.0.0-RC skips.
+      val sourceCoreVersions =
+        sourceVersions ++ sourceDeclaredDeps.collect {
+          case d if CoreArtifacts.contains(d.logicalName) => d.version
+        }
+      sourceSkipReason(sourceCoreVersions) match
         case Some(reason) =>
           println(
             s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: $reason (from sources)"
           )
           Nil
         case None =>
-          val directZioDeps = loadDirectZioMavenDeps(project)
-          if directZioDeps.isEmpty then Nil
+          val coreDeps = loadCoreDeps(project, sourceVersions, sourceDeclaredDeps)
+          if coreDeps.isEmpty then Nil
+          else if coreDeps.exists(dep => isZio1(dep.version)) then
+            println(
+              s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: uses ZIO 1.x (${coreDeps
+                  .map(dep => s"${dep.logicalName}:${dep.version}")
+                  .mkString(", ")})"
+            )
+            Nil
+          else if coreDeps.exists(dep => isZio200Rc(dep.version)) then
+            println(
+              s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: uses ZIO 2.0.0-RC (${coreDeps
+                  .map(dep => s"${dep.logicalName}:${dep.version}")
+                  .mkString(", ")})"
+            )
+            Nil
+          else if !coreDeps.exists(dep => needsForceUpgrade(dep.version)) then Nil
           else
-            val coreDeps = reachableCoreDeps(directZioDeps)
-            if coreDeps.isEmpty then Nil
-            else if coreDeps.exists(dep => isZio1(dep.version)) then
-              println(
-                s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: uses ZIO 1.x (${coreDeps
-                    .map(dep => s"${dep.logicalName}:${dep.version}")
-                    .mkString(", ")})"
-              )
-              Nil
-            else if coreDeps.exists(dep => isZio200Rc(dep.version)) then
-              println(
-                s"Skipping ZIO dependencyOverrides for ${project.p.coordinates}: uses ZIO 2.0.0-RC (${coreDeps
-                    .map(dep => s"${dep.logicalName}:${dep.version}")
-                    .mkString(", ")})"
-              )
-              Nil
-            else if !coreDeps.exists(dep => needsForceUpgrade(dep.version)) then Nil
-            else
-              // Force the full core set once any reachable core dep needs it, even when
-              // the project only declares a downstream/non-core `dev.zio` module directly.
-              CoreArtifacts.toList
-                .map(artifact => DependencyOverride.scala("dev.zio", artifact, ForceVersion))
-                .distinctBy(_.moduleKey)
+            // Force the full core set once any reachable core dep needs it, even when
+            // the project only declares a downstream/non-core `dev.zio` module directly.
+            CoreArtifacts.toList
+              .map(artifact => DependencyOverride.scala("dev.zio", artifact, ForceVersion))
+              .distinctBy(_.moduleKey)
     catch
       case ex: Exception =>
         Console.err.println(
@@ -100,22 +112,85 @@ object ZioDependencyOverrideDiscovery:
         )
         Nil
 
-  /** Prefer build sources over Maven: community-build compiles the git checkout. */
-  private def sourceSkipReason(projectDir: os.Path): Option[String] =
-    val text = buildSourceFiles(projectDir)
-      .flatMap(path => util.Try(os.read(path)).toOption)
-      .mkString("\n")
-    if !text.contains("dev.zio") && !ZioVersionAssign.findFirstIn(text).isDefined then None
+  /** Scaladex+Maven first; fall back to source-declared `dev.zio` deps (and their POMs).
+    * Source fallback matters when Scaladex is down/offline and the project only depends on
+    * non-core modules like `zio-http` (e.g. guinep) — core ZIO versions live in those POMs.
+    */
+  private def loadCoreDeps(
+      project: ProjectVersion,
+      sourceVersions: List[String],
+      sourceDeclaredDeps: List[ZioDep]
+  ): List[ZioDep] =
+    val fromMaven =
+      try
+        val directZioDeps = loadDirectZioMavenDeps(project)
+        if directZioDeps.isEmpty then Nil else reachableCoreDeps(directZioDeps)
+      catch
+        case ex: Exception =>
+          Console.err.println(
+            s"Maven/Scaladex ZIO discovery failed for ${project.p.coordinates}, trying sources: $ex"
+          )
+          Nil
+    if fromMaven.nonEmpty then fromMaven
+    else if sourceDeclaredDeps.nonEmpty then
+      println(
+        s"Using source-declared dev.zio deps for ${project.p.coordinates}: ${sourceDeclaredDeps
+            .map(d => s"${d.logicalName}:${d.version}")
+            .mkString(", ")}"
+      )
+      reachableCoreDeps(sourceDeclaredDeps)
+    else
+      val upgradeable = sourceVersions.filter(needsForceUpgrade)
+      if upgradeable.isEmpty then Nil
+      else
+        println(
+          s"Using source-declared ZIO versions for ${project.p.coordinates}: ${upgradeable.mkString(", ")}"
+        )
+        upgradeable.map(v => ZioDep("zio", "zio_3", v))
+
+  /** Prefer build sources over Maven for skip decisions: community-build compiles the git checkout. */
+  private def extractSourceZioVersions(projectDir: os.Path): List[String] =
+    val text = buildSourceText(projectDir)
+    if !text.contains("dev.zio") && !ZioVersionAssign.findFirstIn(text).isDefined then Nil
     else
       val assigned = ZioVersionAssign.findAllMatchIn(text).map(_.group(1)).toList
       val quoted =
         if text.contains("dev.zio") then
           QuotedVersion.findAllMatchIn(text).map(_.group(1)).toList
         else Nil
-      val versions = (assigned ++ quoted).distinct
-      if versions.exists(isZio1) then Some("uses ZIO 1.x")
-      else if versions.exists(isZio200Rc) then Some("uses ZIO 2.0.0-RC")
-      else None
+      (assigned ++ quoted).distinct
+
+  /** Direct `dev.zio` libraryDependencies from build sources (sbt / Mill ivy / scala-cli). */
+  private def extractSourceDevZioLibraryDeps(projectDir: os.Path): List[ZioDep] =
+    val text = buildSourceText(projectDir)
+    if !text.contains("dev.zio") then Nil
+    else
+      val fromSbt =
+        DevZioSbtDep
+          .findAllMatchIn(text)
+          .map: m =>
+            val logical = DependencyOverride.stripScalaBinarySuffix(m.group(1))
+            ZioDep(logical, s"${logical}_3", m.group(2))
+          .toList
+      val fromIvy =
+        DevZioIvyDep
+          .findAllMatchIn(text)
+          .map: m =>
+            val logical = DependencyOverride.stripScalaBinarySuffix(m.group(1))
+            ZioDep(logical, s"${logical}_3", m.group(2))
+          .toList
+      (fromSbt ++ fromIvy).distinctBy(d => d.logicalName -> d.version)
+
+  private def buildSourceText(projectDir: os.Path): String =
+    buildSourceFiles(projectDir)
+      .flatMap(path => util.Try(os.read(path)).toOption)
+      .mkString("\n")
+
+  private def sourceSkipReason(versions: List[String]): Option[String] =
+    if versions.isEmpty then None
+    else if versions.exists(isZio1) then Some("uses ZIO 1.x")
+    else if versions.exists(isZio200Rc) then Some("uses ZIO 2.0.0-RC")
+    else None
 
   private def buildSourceFiles(projectDir: os.Path): List[os.Path] =
     val rootFiles = List(
@@ -123,17 +198,39 @@ object ZioDependencyOverrideDiscovery:
       projectDir / "build.sc",
       projectDir / "build.scala",
       projectDir / "build.mill",
+      projectDir / "build.mill.scala",
       projectDir / "Dependencies.scala",
       projectDir / "project" / "Dependencies.scala",
       projectDir / "project" / "deps.scala",
       projectDir / "project" / "Deps.scala"
     )
-    val projectDirFiles =
-      val dir = projectDir / "project"
+    def scalaFilesUnder(dir: os.Path): List[os.Path] =
       if os.exists(dir) && os.isDir(dir) then
-        os.list(dir).filter(p => os.isFile(p) && (p.ext == "scala" || p.ext == "sbt")).toList
+        os.walk(dir, maxDepth = 3)
+          .filter(p =>
+            os.isFile(p) && (p.ext == "scala" || p.ext == "sbt" || p.ext == "sc" || p.last
+              .endsWith(".mill"))
+          )
+          .toList
       else Nil
-    (rootFiles ++ projectDirFiles).filter(os.isFile).distinct
+    val projectDirFiles = scalaFilesUnder(projectDir / "project")
+    val millBuildFiles = scalaFilesUnder(projectDir / "mill-build")
+    (rootFiles ++ projectDirFiles ++ millBuildFiles ++ scalaCliDirectiveFiles(projectDir))
+      .filter(os.isFile)
+      .distinct
+
+  /** scala-cli projects declare dependencies in `//> using dep` directives instead of a build
+    * file. They conventionally live in `project.scala`, but any source file may carry them.
+    */
+  private def scalaCliDirectiveFiles(projectDir: os.Path): List[os.Path] =
+    util
+      .Try(
+        os.walk(projectDir, maxDepth = 2, skip = p => os.isDir(p) && p.last.startsWith("."))
+          .filter(p => os.isFile(p) && (p.ext == "scala" || p.ext == "sc" || p.ext == "java"))
+          .filter(p => util.Try(os.read(p)).toOption.exists(_.contains("//> using")))
+          .toList
+      )
+      .getOrElse(Nil)
 
   private def isZio1(version: String): Boolean =
     val v = version.trim
@@ -165,7 +262,7 @@ object ZioDependencyOverrideDiscovery:
   private def loadDirectZioMavenDeps(project: ProjectVersion): List[ZioDep] =
     val artifactsUrl =
       s"https://index.scala-lang.org/api/v1/projects/${project.p.organization}/${project.p.repository}/artifacts?stable-only=false"
-    val artifactsJson = httpGet(artifactsUrl)
+    val artifactsJson = httpGet(artifactsUrl).get
     val artifacts = ujson.read(artifactsJson).arr.toList
     val matching =
       artifacts.filter(a => a.obj.get("version").exists(_.str == project.v)) match
@@ -199,20 +296,29 @@ object ZioDependencyOverrideDiscovery:
     try loadPomDevZioDeps("dev.zio", artifactId, version)
     catch
       case ex: Exception =>
-        Console.err.println(
-          s"Failed to inspect transitive dev.zio deps for $artifactId:$version: $ex"
-        )
-        Nil
+        // Non-core modules (zio-http, zio-json, ...) may lack a `_3` build for every version;
+        // try the binary-suffix-free coordinates used by some early releases.
+        if artifactId.endsWith("_3") then
+          val unsuffixed = artifactId.stripSuffix("_3")
+          try loadPomDevZioDeps("dev.zio", unsuffixed, version)
+          catch
+            case ex2: Exception =>
+              Console.err.println(
+                s"Failed to inspect transitive dev.zio deps for $artifactId:$version: $ex2"
+              )
+              Nil
+        else
+          Console.err.println(
+            s"Failed to inspect transitive dev.zio deps for $artifactId:$version: $ex"
+          )
+          Nil
 
   private def loadPomDevZioDeps(groupId: String, artifactId: String, version: String): List[ZioDep] =
     DevZioPomDepsCache.getOrElseUpdate(
       (groupId, artifactId, version),
-      readDevZioDepsFromPom(
-        httpGet(
-          s"https://repo1.maven.org/maven2/${groupId.replace('.', '/')}/$artifactId/$version/$artifactId-$version.pom"
-        ),
-        ownerVersion = version
-      )
+      httpGet(
+        s"https://repo1.maven.org/maven2/${groupId.replace('.', '/')}/$artifactId/$version/$artifactId-$version.pom"
+      ).map(readDevZioDepsFromPom(_, ownerVersion = version)).get
     )
 
   private def readDevZioDepsFromPom(pom: String, ownerVersion: String): List[ZioDep] =
@@ -288,21 +394,16 @@ object ZioDependencyOverrideDiscovery:
       val resolved = loop(trimmed, remaining = 6)
       Option.when(resolved.nonEmpty && Placeholder.findFirstIn(resolved).isEmpty)(resolved)
 
-  private def httpGet(url: String): String =
-    import java.net.URI
-    import java.net.http.{HttpClient, HttpRequest, HttpResponse}
-    import java.time.Duration
-    val client = HttpClient
-      .newBuilder()
-      .connectTimeout(Duration.ofSeconds(30))
-      .build()
-    val request = HttpRequest
-      .newBuilder(URI.create(url))
-      .timeout(Duration.ofSeconds(60))
-      .header("User-Agent", "scala3-community-build")
-      .GET()
-      .build()
-    val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-    if response.statusCode() != 200 then
-      throw RuntimeException(s"HTTP ${response.statusCode()} for $url")
-    response.body()
+  private def httpGet(url: String): util.Try[String] =
+    import sttp.client4.quick.*
+    import scala.concurrent.duration.DurationInt
+    util
+      .Try:
+        quickRequest
+          .get(uri"$url")
+          .header("User-Agent", "scala3-community-build")
+          .readTimeout(60.seconds)
+          .send()
+      .flatMap: response =>
+        if response.isSuccess then util.Success(response.body)
+        else util.Failure(RuntimeException(s"HTTP ${response.code} for $url"))
