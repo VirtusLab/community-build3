@@ -30,7 +30,15 @@ function config () {
 DefaultConfig="{}"
 
 
-[ "${SKIP_BUILD_SETUP:-}" != "1" ] && scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/
+if [ "${SKIP_BUILD_SETUP:-}" != "1" ]; then
+  # OFFLINE_SCALADEX=1 skips Scaladex HTTP and reuses data/projectModules (or buildConfig.json).
+  # Config discovery from projects-config.conf / require/* still runs when fingerprints change.
+  CoordinatorArgs=()
+  if [ "${OFFLINE_SCALADEX:-}" = "1" ]; then
+    CoordinatorArgs+=(--offline-scaladex)
+  fi
+  scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/ "${CoordinatorArgs[@]}"
+fi
 
 publishScalaVersion="$(config .publishedScalaVersion)"
 if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishScalaVersion" "$scalaVersion" ; then
@@ -45,7 +53,7 @@ if [[ -f $scriptDir/../.secrets/akka-repo-token ]]; then
     export AKKA_IO_REPOSITORY_KEY=${OPENCB_AKKA_REPO_TOKEN}
 fi
 export OPENCB_GIT_DEPTH=1 
-export OPENCB_EXECUTE_TESTS=true 
+export OPENCB_EXECUTE_TESTS="${OPENCB_EXECUTE_TESTS:-true}"
 
 set +e
 $scriptDir/../project-builder/build-revision.sh \
