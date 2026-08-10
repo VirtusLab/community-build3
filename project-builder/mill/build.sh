@@ -35,6 +35,7 @@ millSettings=(
   -D "coursier.repositories=central|ivy2local|$mavenRepoUrl|https://repo.scala-lang.org/artifactory/maven-nightlies"
   -D "communitybuild.maven.url=$mavenRepoUrl"
   -D "communitybuild.scala=$scalaVersion"
+  -D "communitybuild.migrating=${OPENCB_MIGRATING:-false}"
   -D "communitybuild.appendScalacOptions=$extraScalacOptions"
   -D "communitybuild.removeScalacOptions=-deprecation,-feature,-Xfatal-warnings,-Werror,$disabledScalacOption"
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")

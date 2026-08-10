@@ -55,6 +55,7 @@ sbtSettings=(
   --verbose
   "-Dcommunitybuild.scala=$scalaVersion"
   "-Dcommunitybuild.project.dependencies.add=$extraLibraryDeps"
+  "-Dcommunitybuild.migrating=${OPENCB_MIGRATING:-false}"
   ${memorySettings[@]}
   $(echo $projectConfig | jq -r '.sbt.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )

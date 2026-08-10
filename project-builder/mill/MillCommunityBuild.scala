@@ -250,7 +250,14 @@ object MillCommunityBuild {
             }
           }
       }
-      val testingMode = overrides.flatMap(_.tests).getOrElse(config.tests)
+      val isMigrating = isMigratingBuild
+      if isMigrating then
+        ctx.log.info(
+          "Migration rewrite build detected: skipping test execution and publish"
+        )
+      val testingMode = testingModeForBuild(
+        overrides.flatMap(_.tests).getOrElse(config.tests)
+      )
 
       val testModule = module.moduleInternal.modules.toList
         .collect { case module: (TestModule & JavaModule) => module } match {
@@ -278,18 +285,21 @@ object MillCommunityBuild {
         test(_.testCached).fold[EvalResult[Seq[TestResult]]](EvalResult.skipped):
           evalWhen(testingMode == TestingMode.Full, testsCompileResult)(_).map(_.results)
 
-      val publishResult = module match {
-        case module: CommunityBuildPublishModule =>
-          PublishResult(
-            evalAsDependencyOf(compileResult, docResult)(
-              module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
-            )
-          )
+      val publishResult =
+        if isMigrating then PublishResult.skipped
+        else
+          module match {
+            case module: CommunityBuildPublishModule =>
+              PublishResult(
+                evalAsDependencyOf(compileResult, docResult)(
+                  module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
+                )
+              )
 
-        case _ =>
-          ctx.log.error(s"Module $module is not a publish module, skipping publishing")
-          PublishResult.skipped
-      }
+            case _ =>
+              ctx.log.error(s"Module $module is not a publish module, skipping publishing")
+              PublishResult.skipped
+          }
 
       ModuleBuildResults(
         artifactName = name,

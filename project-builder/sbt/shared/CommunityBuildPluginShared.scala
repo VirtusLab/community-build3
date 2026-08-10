@@ -10,7 +10,12 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 import Scala3CommunityBuild.{Utils => _, _}
-import Scala3CommunityBuild.Utils.{LibraryDependency, logOnce}
+import Scala3CommunityBuild.Utils.{
+  LibraryDependency,
+  isMigratingBuild,
+  logOnce,
+  testingModeForBuild
+}
 import TaskEvaluator.EvalResult
 import CommunityBuildConfigFormats._
 
@@ -598,15 +603,21 @@ trait CommunityBuildPluginShared extends AutoPlugin {
                 }
               }
           }
-          val testingMode =
-            overrideSettings.flatMap(_.tests).getOrElse(config.tests)
-
           import evaluator._
           val scalacOptions = eval(Compile / Keys.scalacOptions) match {
             case EvalResult.Value(settings, _) => settings
             case _                             => Nil
           }
           println(s"Compile scalacOptions: ${scalacOptions.mkString(", ")}")
+          val isMigrating = isMigratingBuild
+          if (isMigrating) {
+            println(
+              "Migration rewrite build detected: skipping test execution and publish"
+            )
+          }
+          val testingMode = testingModeForBuild(
+            overrideSettings.flatMap(_.tests).getOrElse(config.tests)
+          )
           def mayRetry[T](task: TaskKey[T])(
               evaluate: TaskKey[T] => EvalResult[T]
           ): EvalResult[T] = evaluate(task) match {
@@ -642,13 +653,17 @@ trait CommunityBuildPluginShared extends AutoPlugin {
               Test / executeTests
             )
 
-          val shouldPublish = eval(Compile / publish / skip) match {
-            case EvalResult.Value(skip, _) => skip
-            case _                         => false
-          }
-          val publishResult = PublishResult(
-            evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
-          )
+          val shouldPublish =
+            !isMigrating && (eval(Compile / publish / skip) match {
+              case EvalResult.Value(skip, _) => skip
+              case _                         => false
+            })
+          val publishResult =
+            if (isMigrating) PublishResult.skipped
+            else
+              PublishResult(
+                evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
+              )
 
           val built = ModuleBuildResults(
             artifactName = projectName,

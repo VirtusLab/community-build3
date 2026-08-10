@@ -46,14 +46,19 @@ import os.CommandResult
   )
   import evaluator.{eval, evalAsDependencyOf, evalWhen}
 
+  val isMigrating = Utils.isMigratingBuild
+  if (isMigrating)
+    println("Migration rewrite build detected: skipping test execution and publish")
+  val testingMode = Utils.testingModeForBuild(config.tests)
+
   val compileResult = eval[Unit](cmd("compile"))
   val docResult = evalAsDependencyOf(compileResult)("doc", "--force")
   val testsCompileResult =
-    evalWhen[Unit](config.tests != TestingMode.Disabled, compileResult)(
+    evalWhen[Unit](testingMode != TestingMode.Disabled, compileResult)(
       cmd("compile", "--test")
     )
   val testsExecuteResults =
-    evalWhen[Unit](config.tests == TestingMode.Full, compileResult)(
+    evalWhen[Unit](testingMode == TestingMode.Full, compileResult)(
       cmd("test").copy(errHandler =
         (stderr, failure) =>
           if (stderr.contains("No test framework found"))

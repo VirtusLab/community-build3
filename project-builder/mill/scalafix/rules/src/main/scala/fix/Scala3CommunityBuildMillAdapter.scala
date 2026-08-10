@@ -178,16 +178,24 @@ class Scala3CommunityBuildMillAdapter(
       def hasScalaModuleSubtype: Boolean =
         anyTreeOfTypeName(has = ScalaModuleSubtypes)(traits)
 
-      def alreadyHasScalaWorkerPathRefFix(inits: List[Init]): Boolean =
+      def alreadyHasMillCommunityBuildTrait(inits: List[Init], name: String): Boolean =
         inits.exists {
           case Init(
-                Type.Select(Term.Name("MillCommunityBuild"), Type.Name("CommunityBuildScalaWorkerPathRefFix")),
+                Type.Select(Term.Name("MillCommunityBuild"), Type.Name(`name`)),
                 _,
                 _
               ) =>
             true
-          case _ => false
+          case Init(WithTypeName(`name`), _, _) => true
+          case _                                => false
         }
+
+      def alreadyHasScalaWorkerPathRefFix(inits: List[Init]): Boolean =
+        alreadyHasMillCommunityBuildTrait(inits, "CommunityBuildScalaWorkerPathRefFix")
+
+      def alreadyHasCoursierInject(inits: List[Init]): Boolean =
+        alreadyHasMillCommunityBuildTrait(inits, "CommunityBuildCoursierModule") ||
+          alreadyHasMillCommunityBuildTrait(inits, "CommunityBuildPublishModule")
 
       // format: off
       val mapped = traits.map {
@@ -197,34 +205,62 @@ class Scala3CommunityBuildMillAdapter(
           case Init(name @ WithTypeName("PublishModule"), _, _) =>
             coursierModuleInjected = true
             traitOf("CommunityBuildPublishModule")
+          case init @ Init(WithTypeName("CommunityBuildCoursierModule" | "CommunityBuildPublishModule"), _, _) =>
+            coursierModuleInjected = true
+            init
           case init @ Init(tpe @ Type.Apply(name @ WithTypeName("Cross"), List(tpeParam)), _, Seq(args)) =>
             def unconfigured = Term.Apply(
               Term.Select(Term.Name("sys"), Term.Name("exit")),
               List(Lit.String("targetScalaVersion not specified in scalafix config"))
             )
-            if (useLegacyMillCross)
-              init.copy(
-                tpe = tpe.copy(tpe = Type.Name("MillCommunityBuildCross")),
-                argss = List(args, List(config.targetScalaVersion.map(Lit.String(_)).getOrElse(unconfigured)))
-              )
-            else {
-              init.copy(
-                argss = List(
-                  List(
+            val targetVersionLit =
+              config.targetScalaVersion.map(Lit.String(_)).getOrElse(unconfigured)
+            // Idempotent across migration→final builds: keep a single mapCrossVersions wrap,
+            // but refresh the target Scala version argument.
+            args match {
+              case List(
                     Term.Apply(
-                      Term.Select(Term.Name("MillCommunityBuild"), Term.Name("mapCrossVersions")),
-                      config.targetScalaVersion.map(Lit.String(_)).getOrElse(unconfigured) :: args
+                      sel @ Term.Select(Term.Name("MillCommunityBuild"), Term.Name("mapCrossVersions")),
+                      _ :: rest
+                    )
+                  ) =>
+                init.copy(argss = List(List(Term.Apply(sel, targetVersionLit :: rest))))
+              case List(
+                    Term.Apply(
+                      sel @ Term.Select(
+                        Term.Select(_, Term.Name("MillCommunityBuild")),
+                        Term.Name("mapCrossVersions")
+                      ),
+                      _ :: rest
+                    )
+                  ) =>
+                init.copy(argss = List(List(Term.Apply(sel, targetVersionLit :: rest))))
+              case _ if useLegacyMillCross =>
+                init.copy(
+                  tpe = tpe.copy(tpe = Type.Name("MillCommunityBuildCross")),
+                  argss = List(args, List(targetVersionLit))
+                )
+              case _ =>
+                init.copy(
+                  argss = List(
+                    List(
+                      Term.Apply(
+                        Term.Select(Term.Name("MillCommunityBuild"), Term.Name("mapCrossVersions")),
+                        targetVersionLit :: args
+                      )
                     )
                   )
                 )
-              )
             }
           case init => init
         }
       val withCoursier = mapped ++ {
-          if (!coursierModuleInjected && anyTreeOfTypeName(
+          if (
+            !coursierModuleInjected &&
+            !alreadyHasCoursierInject(traits) &&
+            anyTreeOfTypeName(
               has = coursierModuleSubtypes ++ testModuleSubtypes,
-              butNot = List("CoursierModule", "PublishModule")
+              butNot = List("CoursierModule", "PublishModule", "CommunityBuildCoursierModule", "CommunityBuildPublishModule")
             )(traits)
           ) Seq(traitOf("CommunityBuildCoursierModule"))
           else Nil
@@ -348,7 +384,13 @@ class Scala3CommunityBuildMillAdapter(
             ) Nil
             else injectScalacOptionsMapping
           } ++ {
-            if (isRootModule(defn) && !noInjects) {
+            if (
+              isRootModule(defn) && !noInjects &&
+              !stats.exists {
+                case Defn.Def(_, Term.Name("runCommunityBuild"), _, _, _, _) => true
+                case _                                                       => false
+              }
+            ) {
               injectsRunCommandInRootModule = true
               Some(injectRootModuleRunCommand)
             } else None
@@ -486,8 +528,11 @@ class Scala3CommunityBuildMillAdapter(
   var injectsRunCommandInRootModule = false
   override def fix(implicit doc: SyntacticDocument): Patch = {
     injectsRunCommandInRootModule = false
+    val alreadyHasOpenCbInjects =
+      doc.tree.syntax.contains("End of OpenCB code injects") ||
+        doc.tree.syntax.contains("def runCommunityBuild")
     lazy val headerInject = {
-      if (noInjects) Patch.empty
+      if (noInjects || alreadyHasOpenCbInjects) Patch.empty
       else {
         val insertAfter = doc.tree.collect {
           case tree: Import if Seq("$file", "$ivy").exists(tree.syntax.contains) => tree

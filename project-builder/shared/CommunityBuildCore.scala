@@ -455,6 +455,18 @@ object Scala3CommunityBuild {
   }
 
   object Utils {
+    /** Set by build-revision.sh via OPENCB_MIGRATING / -Dcommunitybuild.migrating. */
+    def isMigratingBuild: Boolean =
+      sys.props
+        .get("communitybuild.migrating")
+        .orElse(sys.env.get("OPENCB_MIGRATING"))
+        .exists(v => v.equalsIgnoreCase("true") || v == "1")
+
+    /** Migration builds only need compile (+ rewrite); never run tests. */
+    def testingModeForBuild(configured: TestingMode): TestingMode =
+      if (isMigratingBuild && configured == TestingMode.Full) TestingMode.CompileOnly
+      else configured
+
     case class SemVersion(major: Int, minor: Int, patch: Int, preRelease: Option[String]) {
       def render = s"$major.$minor.$patch${preRelease.fold("")("-" + _)}"
     }

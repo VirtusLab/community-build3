@@ -142,14 +142,18 @@ function setupProjectConfig() {
     baseConfig="{}"
   fi
 
+  # Migration rewrite builds only need compile (+ -rewrite); force compile-only tests.
+  # Builders also skip test execution and publish via OPENCB_MIGRATING / communitybuild.migrating.
   projectConfig=$(echo "$baseConfig" | jq -c \
     --argjson executeTests $executeTests \
+    --argjson isMigrating $isMigrating \
     --arg defaultTests "full" \
     --arg compileOnlyTests "compile-only" \
     '.tests = (
       (.tests // $defaultTests)
-      | if $executeTests then .
-        else if . == "full" then $compileOnlyTests else . end
+      | if ($isMigrating or ($executeTests | not)) then
+          if . == "full" then $compileOnlyTests else . end
+        else .
         end
     )')
 }
@@ -320,6 +324,7 @@ function buildForScalaVersion(){
   scalaVersion=$1
   echo "----"
   echo "Preparing build for $scalaVersion"
+  export OPENCB_MIGRATING=$isMigrating
   detectSourceVersion
   setupScalacOptions
   setupProjectConfig
@@ -330,6 +335,7 @@ function buildForScalaVersion(){
   echo "----"
   echo "Starting build for $scalaVersion"
   echo "Execute tests: ${executeTests}"
+  echo "Migrating: ${OPENCB_MIGRATING}"
   opencb_mark_build_started
   trap 'opencb_mark_build_failure' ERR
 
