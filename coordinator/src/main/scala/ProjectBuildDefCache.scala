@@ -162,6 +162,7 @@ object ProjectBuildDefCache:
       project: ProjectVersion,
       fingerprint: String,
       repoUrlForProject: Project => String,
+      configuredRevision: Option[Git.Revision],
       resolveRevision: String => Option[Git.Revision],
       configDiscovery: (ProjectVersion, String, Option[Git.Revision]) => Option[ProjectBuildConfig],
       options: CoordinatorCacheOptions,
@@ -176,10 +177,14 @@ object ProjectBuildDefCache:
     def discoverFresh(
         reuseFromCache: Option[CachedProjectBuildDef] = None
     ): (String, String, Option[ProjectBuildConfig]) =
-      val repoUrl = reuseFromCache.fold(repoUrlForProject(project.p))(_.repoUrl)
-      val revision =
+      val repoUrl = repoUrlForProject(project.p)
+      val reusableRevision =
         reuseFromCache
+          .filter(_.repoUrl == repoUrl)
           .flatMap(e => Git.revisionFromCached(e.revision))
+      val revision =
+        configuredRevision
+          .orElse(reusableRevision)
           .orElse(resolveRevision(repoUrl))
       println(s"Discovering config for ${project.p.coordinates} (git checkout)...")
       CoordinatorProgress.setDetail(s"discover ${project.p.coordinates}")
@@ -219,10 +224,10 @@ object ProjectBuildDefCache:
             s"Refreshing ${project.p.coordinates} (version ${entry.version} -> ${project.v})"
           )
           discoverFresh()
-        case Some(entry) =>
+        case Some(_) =>
           stats.missesConfig.incrementAndGet()
           println(s"Refreshing ${project.p.coordinates} (coordinator config changed)")
-          discoverFresh(reuseFromCache = Some(entry))
+          discoverFresh()
         case None =>
           buildConfigSeed.seedRepoRevision(project.p, project.v, stats) match
             case Some((repoUrl, revision)) =>

@@ -435,6 +435,7 @@ def makeDependenciesBasedBuildPlan(
           project = project,
           fingerprint = fingerprint,
           repoUrlForProject = projectRepoUrl,
+          configuredRevision = getRevision(project.p),
           resolveRevision = resolveRevisionForUrl,
           configDiscovery = configDiscovery.apply,
           options = cacheOptions,
