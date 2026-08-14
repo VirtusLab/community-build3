@@ -10,3 +10,17 @@ cd "$ProjectDir"
 echo "Disabling stub sbt build so Mill is used for com-lihaoyi/upickle"
 rm -f build.sbt
 rm -rf project
+
+# named-tuples sources live under src-3.7 (Scala 3.7+). Mill only picks up that directory
+# when the Cross Scala version is 3.7.x; after CB remaps the Cross key to a 3.10 nightly,
+# sources become empty and jsonschema tests fail with "namedTuples is not a member".
+# Rename to src-3 so Mill's 3.x source path includes them for any Scala 3 CB version.
+namedTuplesDir="upickle/implicits/named-tuples"
+if [[ -d "$namedTuplesDir/src-3.7" && ! -d "$namedTuplesDir/src-3" ]]; then
+  echo "Renaming $namedTuplesDir/src-3.7 -> src-3 for Mill 3.x source discovery"
+  mv "$namedTuplesDir/src-3.7" "$namedTuplesDir/src-3"
+fi
+if [[ -d "$namedTuplesDir/test/src-3.7" && ! -d "$namedTuplesDir/test/src-3" ]]; then
+  echo "Renaming $namedTuplesDir/test/src-3.7 -> test/src-3 for Mill 3.x source discovery"
+  mv "$namedTuplesDir/test/src-3.7" "$namedTuplesDir/test/src-3"
+fi

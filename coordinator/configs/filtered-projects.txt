@@ -61,6 +61,8 @@ maif:wasm4s:.*
 edadma:char-reader:.*
 jurajburian:mailer:.*
 tofu-tf:derevo:.*
+jobial-io:scase:.*
+spilne:spilne:.*
 
 ## Failed to add custom commands
 ossuminc:riddl:.*
@@ -321,6 +323,8 @@ tinkoff:muffin:.*
 markehammons:slinc:.*
 ## fomkin/korolev -> natural-transformation/korolev
 fomkin:korolev.*
+## sbt/librarymanagement -> merged into sbt/sbt
+sbt:librarymanagement:.*
 
 # Needs compiler plugin
 ## sh.almond:scala-kernel-api
@@ -359,6 +363,13 @@ scala-native:scala-native:.*
 ## Self-bootstrapping required 
 foundweekends:giter8:.*
 
-## Pinned to ZIO 2.0.0-RC6, which fails Tracer macros on Scala 3.10;
+## Pinned to ZIO 2.0.0-RC*, which fails Tracer macros on Scala 3.10;
 ## upgrading to 2.1.x is API-breaking (ZEnv removed, unsafeRun changed)
 shastick:zio-prefetcher:.*
+aaronp:franz:.*
+nafg:scala-grist:.*
+vladkopanev:zio-saga:.*
+## Stable version but requires more build changes then just upgrade
+polynote:uzhttp:.*
+swaldman:latest:.*
+unit-finance:zio-raft:.*

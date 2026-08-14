@@ -12,7 +12,7 @@ object ZioDependencyOverrideDiscovery:
   private val ForceSemVersion = SemVersion(2, 1, 26)
 
   /** Bump when discovery skip/force rules change so [[ProjectBuildDefCache]] invalidates. */
-  val DiscoveryRulesVersion = "1.3"
+  val DiscoveryRulesVersion = "1.4"
 
   /** Core JVM modules from https://index.scala-lang.org/zio/zio/artifacts/zio
     * that share the `dev.zio` version line (excludes interop / examples / tests).
@@ -49,18 +49,24 @@ object ZioDependencyOverrideDiscovery:
   )
 
   private val Zio200Rc = raw"(?i)2\.0\.0-RC\d+.*".r
-  private val QuotedVersion = raw""""(2\.\d+\.\d+[^"]*)"""".r
   private val ZioVersionAssign =
     raw"""(?i)zio(?:Version|Ver|_version)\s*=\s*"([^"]+)"""".r
+  /** Any `val NAME = "..."` assignment, used to resolve version vars referenced by `dev.zio` deps. */
+  private val ValStringAssign =
+    raw"""(?m)\b([A-Za-z_]\w*)\s*=\s*"([^"]+)"""".r
   /** sbt: `"dev.zio" %% "zio-http" % "3.0.0-RC4"` (also `%` / `%%%`). */
   private val DevZioSbtDep =
     raw""""dev\.zio"\s*%{1,3}\s*"([^"]+)"\s*%\s*"([^"]+)"""".r
+  /** sbt with a variable version: `"dev.zio" %% "zio-test" % ZioVersion`, resolved via [[ValStringAssign]]. */
+  private val DevZioSbtDepVar =
+    raw""""dev\.zio"\s*%{1,3}\s*"([^"]+)"\s*%\s*([A-Za-z_]\w*)""".r
   /** Mill/ivy/scala-cli: `ivy"dev.zio::zio-http:3.0.0-RC4"`, `//> using dep "dev.zio::zio:2.1.14"`. */
   private val DevZioIvyDep =
     raw"""dev\.zio:{1,2}([A-Za-z0-9_.-]+):([^`"\s]+)""".r
   private val Placeholder = """\$\{([^}]+)\}""".r
 
   private case class ZioDep(logicalName: String, artifactId: String, version: String)
+  private case class MavenCoord(groupId: String, artifactId: String, version: String)
 
   private enum UpgradeDecision:
     case Skip(reason: String)
@@ -68,7 +74,16 @@ object ZioDependencyOverrideDiscovery:
     case ForceUpgrade
 
   private val DevZioPomDepsCache = TrieMap.empty[(String, String, String), List[ZioDep]]
+  private val PomDirectDepsCache = TrieMap.empty[(String, String, String), List[MavenCoord]]
   private val PomHttpTimeoutMs = 15_000
+
+  /** Groups that never carry a meaningful `dev.zio` core dep for our purposes. */
+  private val IgnoredCarrierGroups: Set[String] = Set(
+    "org.scala-lang",
+    "org.scala-lang.modules",
+    "org.scala-js",
+    "org.scala-native",
+  )
 
   def discover(
       project: ProjectVersion,
@@ -137,7 +152,9 @@ object ZioDependencyOverrideDiscovery:
     else Some(UpgradeDecision.NoOverride)
 
   /** Shallow POM inspection only — never BFS the full ZIO graph.
-    * Non-core deps (e.g. zio-http) are fetched once; their direct `dev.zio` core deps decide.
+    * Non-core `dev.zio` deps (e.g. zio-http) are fetched once; their direct core deps decide.
+    * If the project POM has no direct `dev.zio` at all (e.g. ZIO only via
+    * `com.thesamet.scalapb.zio-grpc:zio-grpc-core`), peek one hop into those carriers.
     */
   private def coreVersionsFromPomFrontier(
       project: ProjectVersion,
@@ -161,46 +178,91 @@ object ZioDependencyOverrideDiscovery:
               s"Maven ZIO discovery failed for ${project.p.coordinates}: $ex"
             )
             Nil
-    if startDeps.isEmpty then sourceVersions.filter(needsForceUpgrade)
+    val fromStartDeps =
+      if startDeps.isEmpty then Nil
+      else
+        startDeps
+          .flatMap: dep =>
+            if CoreArtifacts.contains(dep.logicalName) then List(dep.version)
+            else
+              loadPublishedDevZioDeps(dep.artifactId, dep.version).collect:
+                case d if CoreArtifacts.contains(d.logicalName) => d.version
+          .distinct
+    if fromStartDeps.nonEmpty then fromStartDeps
     else
-      startDeps
+      val fromCarriers =
+        try loadCoreVersionsViaNonZioCarriers(project, buildConfigSeed)
+        catch
+          case ex: Exception =>
+            Console.err.println(
+              s"Maven ZIO carrier discovery failed for ${project.p.coordinates}: $ex"
+            )
+            Nil
+      if fromCarriers.nonEmpty then fromCarriers
+      else sourceVersions.filter(needsForceUpgrade)
+
+  /** One-hop peek: project POM → non-`dev.zio` direct deps → their `dev.zio` core versions.
+    * Covers libraries that depend on ZIO only through ecosystem carriers (zio-grpc, etc.).
+    */
+  private def loadCoreVersionsViaNonZioCarriers(
+      project: ProjectVersion,
+      buildConfigSeed: BuildConfigSeedIndex
+  ): List[String] =
+    val carriers = loadDirectProjectMavenDeps(project, buildConfigSeed)
+      .filterNot: dep =>
+        dep.groupId == "dev.zio" || IgnoredCarrierGroups.contains(dep.groupId)
+    if carriers.isEmpty then Nil
+    else
+      println(
+        s"Inspecting non-dev.zio ZIO carriers for ${project.p.coordinates}: ${carriers
+            .map(d => s"${d.groupId}:${d.artifactId}:${d.version}")
+            .mkString(", ")}"
+      )
+      carriers
         .flatMap: dep =>
-          if CoreArtifacts.contains(dep.logicalName) then List(dep.version)
-          else
-            loadPublishedDevZioDeps(dep.artifactId, dep.version).collect:
+          try
+            loadPomDevZioDeps(dep.groupId, dep.artifactId, dep.version).collect:
               case d if CoreArtifacts.contains(d.logicalName) => d.version
+          catch case _: Exception => Nil
         .distinct
 
-  /** Prefer build sources over Maven for skip decisions: community-build compiles the git checkout. */
+  /** Prefer build sources over Maven for skip decisions: community-build compiles the git checkout.
+    *
+    * Only versions explicitly assigned to a ZIO-named variable (`zioVersion = "…"`) count here.
+    * A blanket scan of every quoted `2.x` literal is unsound: unrelated `dev.zio`-adjacent deps
+    * (e.g. `ZHTTPVersion = "2.0.0-RC11"` for `io.d11 %% zhttp`) would masquerade as a ZIO core
+    * version and trigger a spurious `2.0.0-RC` skip. Actual `dev.zio` core versions — literal or
+    * variable-referenced — are picked up by [[extractSourceDevZioLibraryDeps]] instead.
+    */
   private def extractSourceZioVersions(text: String): List[String] =
-    if !text.contains("dev.zio") && !ZioVersionAssign.findFirstIn(text).isDefined then Nil
-    else
-      val assigned = ZioVersionAssign.findAllMatchIn(text).map(_.group(1)).toList
-      val quoted =
-        if text.contains("dev.zio") then
-          QuotedVersion.findAllMatchIn(text).map(_.group(1)).toList
-        else Nil
-      (assigned ++ quoted).distinct
+    ZioVersionAssign.findAllMatchIn(text).map(_.group(1)).toList.distinct
 
   /** Direct `dev.zio` libraryDependencies from build sources (sbt / Mill ivy / scala-cli). */
   private def extractSourceDevZioLibraryDeps(text: String): List[ZioDep] =
     if !text.contains("dev.zio") then Nil
     else
+      def zioDep(artifact: String, version: String): ZioDep =
+        val logical = DependencyOverride.stripScalaBinarySuffix(artifact)
+        ZioDep(logical, s"${logical}_3", version)
+
       val fromSbt =
         DevZioSbtDep
           .findAllMatchIn(text)
-          .map: m =>
-            val logical = DependencyOverride.stripScalaBinarySuffix(m.group(1))
-            ZioDep(logical, s"${logical}_3", m.group(2))
+          .map(m => zioDep(m.group(1), m.group(2)))
+          .toList
+      // Deps whose version is a `val` (e.g. `"dev.zio" %% "zio-test" % ZioVersion`); resolve the var.
+      val valVersions = ValStringAssign.findAllMatchIn(text).map(m => m.group(1) -> m.group(2)).toMap
+      val fromSbtVar =
+        DevZioSbtDepVar
+          .findAllMatchIn(text)
+          .flatMap(m => valVersions.get(m.group(2)).map(version => zioDep(m.group(1), version)))
           .toList
       val fromIvy =
         DevZioIvyDep
           .findAllMatchIn(text)
-          .map: m =>
-            val logical = DependencyOverride.stripScalaBinarySuffix(m.group(1))
-            ZioDep(logical, s"${logical}_3", m.group(2))
+          .map(m => zioDep(m.group(1), m.group(2)))
           .toList
-      (fromSbt ++ fromIvy).distinctBy(d => d.logicalName -> d.version)
+      (fromSbt ++ fromSbtVar ++ fromIvy).distinctBy(d => d.logicalName -> d.version)
 
   private def buildSourceText(projectDir: os.Path): String =
     buildSourceFiles(projectDir)
@@ -267,21 +329,39 @@ object ZioDependencyOverrideDiscovery:
       project: ProjectVersion,
       buildConfigSeed: BuildConfigSeedIndex
   ): List[ZioDep] =
-    val candidates = buildConfigSeed
+    projectPomCandidates(project, buildConfigSeed)
+      .flatMap: (groupId, artifactId) =>
+        try loadPomDevZioDeps(groupId, artifactId, project.v)
+        catch case _: Exception => Nil
+      .distinctBy(dep => dep.artifactId -> dep.version)
+      .toList
+
+  /** All direct Maven deps declared by the project's published Scala 3 artifacts. */
+  private def loadDirectProjectMavenDeps(
+      project: ProjectVersion,
+      buildConfigSeed: BuildConfigSeedIndex
+  ): List[MavenCoord] =
+    projectPomCandidates(project, buildConfigSeed)
+      .flatMap: (groupId, artifactId) =>
+        try loadPomDirectDeps(groupId, artifactId, project.v)
+        catch case _: Exception => Nil
+      .distinctBy(dep => (dep.groupId, dep.artifactId, dep.version))
+      .toList
+
+  private def projectPomCandidates(
+      project: ProjectVersion,
+      buildConfigSeed: BuildConfigSeedIndex
+  ): List[(String, String)] =
+    // Inspect all known Scala 3 artifacts for the project version. Some projects,
+    // like guinep, use ZIO only from a secondary module (e.g. `guinep-web` via zio-http),
+    // and looking at a single artifact misses the transitive `dev.zio` graph entirely.
+    buildConfigSeed
       .targets(project.p)
       .map: (groupId, artifact) =>
         val module =
           if artifact.endsWith("_3") then artifact.stripSuffix("_3") else artifact
         (groupId, Maven.scalaArtifactId(module, "3"))
       .distinct
-    // Inspect all known Scala 3 artifacts for the project version. Some projects,
-    // like guinep, use ZIO only from a secondary module (e.g. `guinep-web` via zio-http),
-    // and looking at a single artifact misses the transitive `dev.zio` graph entirely.
-    candidates
-      .flatMap: (groupId, artifactId) =>
-        try loadPomDevZioDeps(groupId, artifactId, project.v)
-        catch case _: Exception => Nil
-      .distinctBy(dep => dep.artifactId -> dep.version)
       .toList
 
   private def loadPublishedDevZioDeps(artifactId: String, version: String): List[ZioDep] =
@@ -313,7 +393,15 @@ object ZioDependencyOverrideDiscovery:
         .get
     )
 
-  private def readDevZioDepsFromPom(pom: String, ownerVersion: String): List[ZioDep] =
+  private def loadPomDirectDeps(groupId: String, artifactId: String, version: String): List[MavenCoord] =
+    PomDirectDepsCache.getOrElseUpdate(
+      (groupId, artifactId, version),
+      httpGet(Maven.pomUrl(groupId, artifactId, version))
+        .map(readDirectDepsFromPom(_, ownerVersion = version))
+        .get
+    )
+
+  private def readDirectDepsFromPom(pom: String, ownerVersion: String): List[MavenCoord] =
     val doc = Jsoup.parse(pom, "", org.jsoup.parser.Parser.xmlParser())
     val properties = pomProperties(doc, ownerVersion)
     val managedVersions = pomManagedVersions(doc, properties, ownerVersion)
@@ -330,9 +418,16 @@ object ZioDependencyOverrideDiscovery:
             .orElse(managedVersions.get(group -> artifactId))
             .orElse(Option.when(group == "dev.zio" && rawVersion.isEmpty)(ownerVersion))
             .getOrElse("")
-        if group == "dev.zio" && artifactId.nonEmpty && version.nonEmpty then
-          Some(ZioDep(DependencyOverride.stripScalaBinarySuffix(artifactId), artifactId, version))
+        if group.nonEmpty && artifactId.nonEmpty && version.nonEmpty then
+          Some(MavenCoord(group, artifactId, version))
         else None
+      .distinctBy(dep => (dep.groupId, dep.artifactId, dep.version))
+
+  private def readDevZioDepsFromPom(pom: String, ownerVersion: String): List[ZioDep] =
+    readDirectDepsFromPom(pom, ownerVersion)
+      .collect:
+        case MavenCoord("dev.zio", artifactId, version) =>
+          ZioDep(DependencyOverride.stripScalaBinarySuffix(artifactId), artifactId, version)
       .distinctBy(dep => dep.artifactId -> dep.version)
 
   private def pomProperties(
