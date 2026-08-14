@@ -127,7 +127,6 @@ jobs:
         - name: "armanbilge/oxidized"
         - name: "armanbilge/sadalsuud"
         - name: "armanbilge/scala-native-config-brew"
-        - name: "armanbilge/scalacheck-effect"
         - name: "armanbilge/stratus"
         - name: "armanbilge/van-cats"
         - name: "arturaz/cats-effect-resource-shared-memoized"
@@ -160,6 +159,7 @@ jobs:
         - name: "besselstudio/coingecko"
         - name: "bilal-fazlani/akka-http-jwt-auth"
         - name: "bilal-fazlani/csv-codec"
+        - name: "bilal-fazlani/csv-schema"
         - name: "bilal-fazlani/jslt-parser"
         - name: "bilal-fazlani/rainbowcli"
         - name: "bilal-fazlani/scala-aql"
@@ -200,7 +200,6 @@ jobs:
         - name: "colofabrix/timeflux"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "combinators/expression-problem"
-        - name: "constructive-programming/eo"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -237,6 +236,7 @@ jobs:
         - name: "davenverse/condemned"
         - name: "davenverse/crossplatformioapp"
         - name: "davenverse/env"
+        - name: "davenverse/epimetheus-circuit"
         - name: "davenverse/epimetheus-community"
         - name: "davenverse/epimetheus-http4s"
         - name: "davenverse/epimetheus-log4cats"
@@ -290,6 +290,7 @@ jobs:
         - name: "edadma/emoji"
         - name: "edadma/fetch"
         - name: "edadma/gramma"
+        - name: "edadma/hocon"
         - name: "edadma/importer"
         - name: "edadma/indentation"
         - name: "edadma/logger"
@@ -309,6 +310,7 @@ jobs:
         - name: "edadma/squiggly"
         - name: "edadma/stow"
         - name: "edadma/tabula"
+        - name: "edadma/texish"
         - name: "edadma/toml"
         - name: "edadma/wasm"
         - name: "edadma/yaml"
@@ -330,8 +332,6 @@ jobs:
         - name: "estrondo/farango"
         - name: "estrondo/sweet-mockito"
         - name: "eugene-sy/play-quartz"
-        - name: "evolution-gaming/random"
-        - name: "fdietze/formidable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "evolution-gaming/random"
+        - name: "fdietze/formidable"
         - name: "fehu/opentracing-scala"
         - name: "fenixedu/fenixedu-scala-sdk"
         - name: "fgrutsch/emergence"
@@ -458,6 +460,7 @@ jobs:
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
         - name: "http4s/http4s-servlet"
+        - name: "http4s/http4s-session"
         - name: "http4s/http4s-tomcat"
         - name: "http4s/http4s-twirl"
         - name: "hughsimpson/scalameter"
@@ -493,7 +496,6 @@ jobs:
         - name: "ist-dsi/scala-openstack-common-clients"
         - name: "itv/quartz4s"
         - name: "ivoah/squall"
-        - name: "ivoah/vial"
         - name: "j-mie6/golden-scala"
         - name: "j-mie6/parsley-debug-views"
         - name: "j5ik2o/base64scala"
@@ -531,7 +533,6 @@ jobs:
         - name: "joohnnie/retry"
         - name: "jozic/scalax-collection"
         - name: "jphmrst/scala-automata"
-        - name: "jphmrst/scala-latex"
         - name: "jqscala/jq-fs2"
         - name: "jqscala/jqscala"
         - name: "juliano/pokeapi-scala"
@@ -553,6 +554,7 @@ jobs:
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
         - name: "jypma/lazagna"
+        - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kaizen-solutions/zio-telemetry-extras"
@@ -611,8 +613,6 @@ jobs:
         - name: "lbialy/tailf"
         - name: "leviysoft/scala-kotlin-compat"
         - name: "leviysoft/tightbound"
-        - name: "lewisjkl/header"
-        - name: "lhns/cats-effect-utils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "lewisjkl/header"
+        - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
@@ -665,13 +667,10 @@ jobs:
         - name: "logicovercode/core-commons"
         - name: "lorandszakacs/enclosure"
         - name: "losizm/bolster"
-        - name: "losizm/ergo"
         - name: "losizm/grapple"
         - name: "losizm/little-cli"
         - name: "losizm/little-config"
         - name: "losizm/little-io"
-        - name: "losizm/little-json"
-        - name: "losizm/little-security"
         - name: "losizm/little-sql"
         - name: "losizm/little-time"
         - name: "losizm/scamper"
@@ -826,6 +825,7 @@ jobs:
         - name: "polyvariant/smithy4s-bsp"
         - name: "polyvariant/treesitter4s"
         - name: "polyvariant/webauthn4s"
+        - name: "pomadchin/dynosaur-derivation"
         - name: "pomadchin/tagless-mid"
         - name: "ponkotuy/flyway-play"
         - name: "potencia/formats"
@@ -864,7 +864,6 @@ jobs:
         - name: "reactivemongo/reactivemongo-play-json"
         - name: "rolang/gar-handler"
         - name: "rolang/google-rest-api-codegen"
-        - name: "rossabaker/no"
         - name: "roundrop/scala3-bcrypt"
         - name: "rsemlal/clickhouse4cats"
         - name: "rssh/scala-appcontext"
@@ -894,6 +893,7 @@ jobs:
         - name: "sangria-graphql/sangria-argonaut"
         - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-json4s-jackson"
+        - name: "sangria-graphql/sangria-json4s-native"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,7 +920,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "sangria-graphql/sangria-json4s-native"
         - name: "sangria-graphql/sangria-marshalling-api"
         - name: "sangria-graphql/sangria-marshalling-testkit"
         - name: "sangria-graphql/sangria-msgpack"
@@ -1000,6 +999,7 @@ jobs:
         - name: "stringbean/text-utils"
         - name: "sullis/jms-testkit"
         - name: "swagger-akka-http/swagger-enumeratum-module"
+        - name: "swagger-akka-http/swagger-scala3-enum-module"
         - name: "swaldman/audiofluidity-rss"
         - name: "swaldman/bskyarchive"
         - name: "swaldman/cryptoutil"
@@ -1048,7 +1048,6 @@ jobs:
         - name: "thatscalaguy/ulid4cats"
         - name: "thatscalaguy/zustellix"
         - name: "thedrawingcoder-gamer/swing.io"
-        - name: "theiterators/baklava"
         - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
         - name: "timbertson/auditspec"
@@ -1155,6 +1154,7 @@ jobs:
         - name: "zio-archive/zio-morphir"
         - name: "zio/zio-bson"
         - name: "zio/zio-streams-compress"
+        - name: "zygfryd/scala-zygf-jackshaft"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
