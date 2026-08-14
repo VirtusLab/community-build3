@@ -339,6 +339,11 @@
       ],
       "sourcePatches":[
         {
+          "path":".jvmopts",
+          "pattern":"-XX:\\+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        },
+        {
           "path":"build.sbt",
           "pattern":"val scala3           = \"3.2.2\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -575,53 +580,6 @@
     "version":"2.0.1",
     "targets":"com.github.aaronp%eie",
     "publishedScalaVersion":"3.1.0"
-  },
-  "aaronp/franz":{
-    "project":"aaronp/franz",
-    "repoUrl":"https://github.com/aaronp/franz.git",
-    "revision":"v0.3.0",
-    "version":"0.3.0",
-    "targets":"com.github.aaronp%franz",
-    "publishedScalaVersion":"3.1.2",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        "3.4"
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
   },
   "ablearthy/td-types":{
     "project":"ablearthy/td-types",
@@ -1345,7 +1303,7 @@
   "akka/akka-core":{
     "project":"akka/akka-core",
     "repoUrl":"https://github.com/akka/akka-core.git",
-    "revision":"v2.8.8",
+    "revision":"v2.10.20",
     "version":"2.8.8",
     "targets":"com.typesafe.akka%akka-actor com.typesafe.akka%akka-actor-testkit-typed com.typesafe.akka%akka-actor-typed com.typesafe.akka%akka-bom com.typesafe.akka%akka-cluster com.typesafe.akka%akka-cluster-metrics com.typesafe.akka%akka-cluster-sharding com.typesafe.akka%akka-cluster-sharding-typed com.typesafe.akka%akka-cluster-tools com.typesafe.akka%akka-cluster-typed com.typesafe.akka%akka-coordination com.typesafe.akka%akka-discovery com.typesafe.akka%akka-distributed-data com.typesafe.akka%akka-multi-node-testkit com.typesafe.akka%akka-persistence com.typesafe.akka%akka-persistence-query com.typesafe.akka%akka-persistence-tck com.typesafe.akka%akka-persistence-testkit com.typesafe.akka%akka-persistence-typed com.typesafe.akka%akka-pki com.typesafe.akka%akka-protobuf-v3 com.typesafe.akka%akka-remote com.typesafe.akka%akka-serialization-jackson com.typesafe.akka%akka-slf4j com.typesafe.akka%akka-stream com.typesafe.akka%akka-stream-testkit com.typesafe.akka%akka-stream-typed com.typesafe.akka%akka-testkit",
     "publishedScalaVersion":"3.2.2",
@@ -1359,7 +1317,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1419,7 +1377,7 @@
         },
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3Version = \"3.2.2\"",
+          "pattern":"val scala3Version = \"3.3.7\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ],
@@ -1482,7 +1440,7 @@
   "akka/akka-grpc":{
     "project":"akka/akka-grpc",
     "repoUrl":"https://github.com/akka/akka-grpc.git",
-    "revision":"v2.3.4",
+    "revision":"v2.5.11",
     "version":"2.3.4",
     "targets":"com.lightbend.akka.grpc%akka-grpc-interop-tests com.lightbend.akka.grpc%akka-grpc-runtime",
     "publishedScalaVersion":"3.2.2",
@@ -1496,7 +1454,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1521,7 +1479,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3 = \"3.2.2\"",
+          "pattern":"val scala3 = \"3.3.7\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -1533,7 +1491,7 @@
   "akka/akka-http":{
     "project":"akka/akka-http",
     "repoUrl":"https://github.com/akka/akka-http.git",
-    "revision":"v10.5.3",
+    "revision":"v10.7.4",
     "version":"10.5.3",
     "targets":"com.typesafe.akka%akka-http com.typesafe.akka%akka-http-bom com.typesafe.akka%akka-http-caching com.typesafe.akka%akka-http-core com.typesafe.akka%akka-http-jackson com.typesafe.akka%akka-http-spray-json com.typesafe.akka%akka-http-testkit com.typesafe.akka%akka-http-xml com.typesafe.akka%akka-http2-support com.typesafe.akka%akka-parsing",
     "publishedScalaVersion":"3.2.2",
@@ -1567,7 +1525,8 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4",
+        "3.2",
+        "3.4+3.9.0-RC5",
         "3.5"
       ],
       "sourcePatches":[
@@ -1587,8 +1546,69 @@
           "replaceWith":"for (case `Cookie`(cookies) <- headers"
         },
         {
+          "path":"akka-http-core/src/main/scala/akka/http/scaladsl/model/headers/CacheDirective.scala",
+          "pattern":"def custom(name: String, content: Option[String]): RequestDirective with ResponseDirective =",
+          "replaceWith":"def custom(name: String, content: Option[String]): RequestDirective & ResponseDirective ="
+        },
+        {
+          "path":"akka-http-core/src/main/java/akka/http/javadsl/model/StatusCodes.java",
+          "pattern":"Util.<StatusCode, akka.http.scaladsl.model.StatusCode>lookupInRegistry(StatusCodes$.MODULE$, intValue)",
+          "replaceWith":"Util.<Integer, StatusCode, akka.http.scaladsl.model.StatusCode>lookupInRegistry(StatusCodes$.MODULE$, intValue)",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"akka-http-core/src/main/java/akka/http/javadsl/model/headers/HttpCookie.java",
+          "pattern":"OptionConverters.toScala(maxAge).map(age -> (Object)age)",
+          "replaceWith":"OptionConverters.toScala(maxAge)",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"akka-http-core/src/main/java/akka/http/javadsl/model/sse/ServerSentEvent.java",
+          "pattern":"private static final Option<Object> intNone = Option.empty();",
+          "replaceWith":"private static final Option<Integer> intNone = Option.empty();",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"akka-http-core/src/main/java/akka/http/javadsl/model/sse/ServerSentEvent.java",
+          "pattern":"OptionConverters.toScala(retry).map(retryInt -> (Object) retryInt)",
+          "replaceWith":"OptionConverters.toScala(retry)",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"akka-http-core/src/test/java/akka/http/JavaTestServer.java",
+          "pattern":"Flow.<Message>create()\n                .collect(new JavaPartialFunction<Message, Message>() {\n                    @Override\n                    public Message apply(Message msg, boolean isCheck) throws Exception {\n                        if (isCheck)\n                            if (msg.isText()) return null;\n                            else throw noMatch();\n                        else\n                            return handleTextMessage(msg.asTextMessage());\n                    }\n                });",
+          "replaceWith":"Flow.<Message>create()\n                .filter(Message::isText)\n                .map(msg -> handleTextMessage(msg.asTextMessage()));",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"akka-http-core/src/test/java/akka/http/JavaTestServer.java",
+          "pattern":"import akka.japi.JavaPartialFunction;\n",
+          "replaceWith":"",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"akka-parsing/src/main/scala-3/akka/parboiled2/support/OpTreeContext.scala",
+          "pattern":"    range match {\n      case '{ scala.Predef.intWrapper($mn).to($mx) } =>\n        mn.asTerm match {",
+          "replaceWith":"    val rangeBounds = range match {\n      case '{ scala.Predef.intWrapper($mn).to($mx) } => Some((mn, mx))\n      case '{ ($mn: Int).to($mx: Int) } => Some((mn, mx))\n      case _ => None\n    }\n    rangeBounds match {\n      case Some((mn, mx)) =>\n        mn.asTerm match {",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3Version = \"3.2.2\"",
+          "pattern":"val scala3Version = \"3.3.7\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ],
@@ -1600,7 +1620,7 @@
   "akka/akka-management":{
     "project":"akka/akka-management",
     "repoUrl":"https://github.com/akka/akka-management.git",
-    "revision":"v1.5.0-M1",
+    "revision":"v1.6.5",
     "version":"1.5.0-M1",
     "targets":"com.lightbend.akka.discovery%akka-discovery-aws-api com.lightbend.akka.discovery%akka-discovery-aws-api-async com.lightbend.akka.discovery%akka-discovery-consul com.lightbend.akka.discovery%akka-discovery-kubernetes-api com.lightbend.akka.discovery%akka-discovery-marathon-api com.lightbend.akka.management%akka-lease-kubernetes com.lightbend.akka.management%akka-management com.lightbend.akka.management%akka-management-cluster-bootstrap com.lightbend.akka.management%akka-management-cluster-http com.lightbend.akka.management%akka-management-loglevels-log4j2 com.lightbend.akka.management%akka-management-loglevels-logback com.lightbend.akka.management%akka-management-pki com.lightbend.akka.management%akka-rolling-update-kubernetes",
     "config":{
@@ -1613,7 +1633,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1643,7 +1663,7 @@
         },
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val Scala3 = \"3.3.1\"",
+          "pattern":"val Scala3 = \"3.3.7\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -1655,7 +1675,7 @@
   "akka/akka-persistence-cassandra":{
     "project":"akka/akka-persistence-cassandra",
     "repoUrl":"https://github.com/akka/akka-persistence-cassandra.git",
-    "revision":"v1.1.1",
+    "revision":"v1.3.5",
     "version":"1.1.1",
     "targets":"com.typesafe.akka%akka-persistence-cassandra com.typesafe.akka%akka-persistence-cassandra-launcher",
     "publishedScalaVersion":"3.2.2",
@@ -1669,7 +1689,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1694,7 +1714,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val Scala3 = \"3.2.2\"",
+          "pattern":"val Scala3 = \"3.3.7\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -1706,7 +1726,7 @@
   "akka/akka-persistence-r2dbc":{
     "project":"akka/akka-persistence-r2dbc",
     "repoUrl":"https://github.com/akka/akka-persistence-r2dbc.git",
-    "revision":"v1.2.0-M5",
+    "revision":"v1.3.16",
     "version":"1.2.0-M5",
     "targets":"com.lightbend.akka%akka-persistence-r2dbc",
     "publishedScalaVersion":"3.2.2",
@@ -1720,7 +1740,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1745,7 +1765,7 @@
       "sourcePatches":[
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val Scala3 = \"3.2.2\"",
+          "pattern":"val Scala3 = \"3.3.8\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -1787,11 +1807,11 @@
         ]
       },
       "git":{
-        "unshallow":false
+        "unshallow":true
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -1808,7 +1828,7 @@
   "akka/alpakka":{
     "project":"akka/alpakka",
     "repoUrl":"https://github.com/akka/alpakka.git",
-    "revision":"v6.0.2",
+    "revision":"v10.0.4",
     "version":"6.0.2",
     "targets":"com.lightbend.akka%akka-stream-alpakka-amqp com.lightbend.akka%akka-stream-alpakka-avroparquet com.lightbend.akka%akka-stream-alpakka-cassandra com.lightbend.akka%akka-stream-alpakka-csv com.lightbend.akka%akka-stream-alpakka-s3",
     "publishedScalaVersion":"3.2.2",
@@ -1822,7 +1842,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1838,7 +1858,7 @@
         ]
       },
       "git":{
-        "unshallow":false
+        "unshallow":true
       },
       "tests":"compile-only",
       "migrationVersions":[
@@ -1851,8 +1871,13 @@
           "replaceWith":"libraryDependencies ++= "
         },
         {
+          "path":"s3/src/test/scala/akka/stream/alpakka/s3/impl/auth/CanonicalRequestSpec.scala",
+          "pattern":"'.toHexString",
+          "replaceWith":"'.toInt.toHexString"
+        },
+        {
           "path":"project/Dependencies.scala",
-          "pattern":"val Scala3 = \"3.2.2\"",
+          "pattern":"val Scala3 = \"3.3.7\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -1864,7 +1889,7 @@
   "akka/alpakka-kafka":{
     "project":"akka/alpakka-kafka",
     "repoUrl":"https://github.com/akka/alpakka-kafka.git",
-    "revision":"v4.0.2",
+    "revision":"v8.0.2",
     "version":"4.0.2",
     "targets":"com.typesafe.akka%akka-stream-kafka com.typesafe.akka%akka-stream-kafka-cluster-sharding com.typesafe.akka%akka-stream-kafka-testkit",
     "publishedScalaVersion":"3.2.2",
@@ -1878,7 +1903,7 @@
         }
       },
       "java":{
-        "version":"17"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -1894,7 +1919,7 @@
         ]
       },
       "git":{
-        "unshallow":false
+        "unshallow":true
       },
       "tests":"full",
       "migrationVersions":[
@@ -1903,7 +1928,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.2.2\"",
+          "pattern":"val Scala3 = \"3.3.7\"",
           "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -6644,7 +6669,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -6701,20 +6739,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -8671,7 +8696,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -9150,59 +9188,7 @@
     "revision":"0.17.9",
     "version":"0.17.9",
     "targets":"io.github.pme123%camunda-dmn-tester-shared",
-    "publishedScalaVersion":"3.2.1",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
-      ]
-    }
+    "publishedScalaVersion":"3.2.1"
   },
   "carlos-verdes/zio-arangodb":{
     "project":"carlos-verdes/zio-arangodb",
@@ -9746,7 +9732,7 @@
         ]
       },
       "git":{
-        "unshallow":false
+        "unshallow":true
       },
       "tests":"full",
       "migrationVersions":[
@@ -10028,7 +10014,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -10190,20 +10189,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -12684,17 +12670,17 @@
       "sourcePatches":[
         {
           "path":"build.mill",
-          "pattern":"val scala3   = \"3\\.3\\.7\"",
+          "pattern":"val scala3\\s*=\\s*\"3\\.[^\"]+\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         },
         {
           "path":"build.mill",
-          "pattern":"val scala3NamedTuples = \"3\\.7\\.0\"",
+          "pattern":"val scala3NamedTuples\\s*=\\s*\"3\\.[^\"]+\"",
           "replaceWith":"val scala3NamedTuples = \"<SCALA_VERSION>\""
         },
         {
           "path":"build.mill",
-          "pattern":"val scala381 = \"3\\.8\\.1\"",
+          "pattern":"val scala381\\s*=\\s*\"3\\.[^\"]+\"",
           "replaceWith":"val scala381 = \"<SCALA_VERSION>\""
         },
         {
@@ -12704,6 +12690,27 @@
           "selectVersion":{
             "min":"3.8.0"
           }
+        },
+        {
+          "path":"upickle/test/src/upickletest/PrimitiveTests.scala",
+          "pattern":"for (i <- Short.MinValue to Short.MaxValue) rwNum(i)",
+          "replaceWith":"for (i <- Short.MinValue.toInt to Short.MaxValue.toInt) rwNum(i.toShort)",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"upickle/test/src/upickletest/PrimitiveTests.scala",
+          "pattern":"for (i <- Byte.MinValue to Byte.MaxValue) rwNum(i)",
+          "replaceWith":"for (i <- Byte.MinValue.toInt to Byte.MaxValue.toInt) rwNum(i.toByte)",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"build.mill",
+          "pattern":"trait CommonTestModule0 extends ScalaModule with TestModule.Utest with MillCommunityBuild.CommunityBuildCoursierModule with MillCommunityBuild.CommunityBuildScalaWorkerPathRefFix {\n    def mvnDeps = {",
+          "replaceWith":"trait CommonTestModule0 extends ScalaModule with TestModule.Utest with MillCommunityBuild.CommunityBuildCoursierModule with MillCommunityBuild.CommunityBuildScalaWorkerPathRefFix {\n    def testParallelism = false\n    def mvnDeps = {"
         },
         {
           "path":"build.mill",
@@ -13067,9 +13074,90 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4",
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/Common.scala",
+          "pattern":"import scala.meta.Tree\nimport scala.meta.internal.prettyprinters.TreeSyntax\n\ntrait Common {",
+          "replaceWith":"import scala.meta._\nimport scala.meta.internal.prettyprinters.TreeSyntax\n\ntrait Common {",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/Common.scala",
+          "pattern":"  def scalaVersion: String\n\n  protected def prettyPrint(tree: Tree): String = {",
+          "replaceWith":"  def scalaVersion: String\n\n  /** Compound type using `&` on Scala 3 and `with` on Scala 2. */\n  protected def intersectionType(types: Type*): Type =\n    types.reduceLeft { (l, r) =>\n      if (scalaVersion.startsWith(\"3.\")) Type.And(l, r)\n      else Type.With(l, r)\n    }\n\n  protected def prettyPrint(tree: Tree): String = {",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/ClientModuleGenerator.scala",
+          "pattern":"param\"client: Resource[$entityT] with ResourceDelete[$entityT, $deleteResultT] with ResourceDeleteAll[$entityT]\"",
+          "replaceWith":"param\"client: ${intersectionType(t\"Resource[$entityT]\", t\"ResourceDelete[$entityT, $deleteResultT]\", t\"ResourceDeleteAll[$entityT]\")}\"",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/ClientModuleGenerator.scala",
+          "pattern":"param\"client: Resource[$entityT] with ResourceDelete[$entityT, $deleteResultT]\"",
+          "replaceWith":"param\"client: ${intersectionType(t\"Resource[$entityT]\", t\"ResourceDelete[$entityT, $deleteResultT]\")}\"",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/ClientModuleGenerator.scala",
+          "pattern":"ZLayer[K8sBackend with K8sCluster, Nothing, $typeAliasT]",
+          "replaceWith":"ZLayer[$backendClusterR, Nothing, $typeAliasT]",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/ClientModuleGenerator.scala",
+          "pattern":"      val live =\n        q\"\"\"val live: ZLayer[$backendClusterR",
+          "replaceWith":"      val backendClusterR = intersectionType(t\"K8sBackend\", t\"K8sCluster\")\n      val live =\n        q\"\"\"val live: ZLayer[$backendClusterR",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/shared/scala/com/coralogix/zio/k8s/codegen/internal/ClientModuleGenerator.scala",
+          "pattern":"Type.With(l, t\"$r\")",
+          "replaceWith":"intersectionType(l, t\"$r\")",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/main/scala/com/coralogix/zio/k8s/codegen/internal/UnifiedClientModuleGenerator.scala",
+          "pattern":"ZLayer[K8sBackend with K8sCluster, Nothing, Kubernetes]",
+          "replaceWith":"ZLayer[$backendClusterR, Nothing, Kubernetes]",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/main/scala/com/coralogix/zio/k8s/codegen/internal/UnifiedClientModuleGenerator.scala",
+          "pattern":"    val liveLayer =\n      q\"\"\"val live: ZLayer[$backendClusterR",
+          "replaceWith":"    val liveLayer = {\n      val backendClusterR = intersectionType(t\"K8sBackend\", t\"K8sCluster\")\n      q\"\"\"val live: ZLayer[$backendClusterR",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"zio-k8s-codegen/src/main/scala/com/coralogix/zio/k8s/codegen/internal/UnifiedClientModuleGenerator.scala",
+          "pattern":"              } yield new Api(backend, cluster)\n            }\n       \"\"\"",
+          "replaceWith":"              } yield new Api(backend, cluster)\n            }\n       \"\"\"\n    }",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.3.7\"",
@@ -13077,20 +13165,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -13354,7 +13429,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -13502,7 +13590,7 @@
   "coursier/sbt-coursier":{
     "project":"coursier/sbt-coursier",
     "repoUrl":"https://github.com/coursier/sbt-coursier.git",
-    "revision":"sbt-2.x",
+    "revision":"",
     "version":"2.0.0-alpha8",
     "targets":"ch.epfl.scala%librarymanagement-coursier ch.epfl.scala%lm-coursier",
     "publishedScalaVersion":"3.3.1",
@@ -13539,11 +13627,7 @@
         
       ],
       "sourcePatches":[
-        {
-          "path":"project/Settings.scala",
-          "pattern":"def scala3 = \"3.3.4\"",
-          "replaceWith":"def scala3 = \"<SCALA_VERSION>\""
-        }
+        
       ],
       "dependencyOverrides":[
         
@@ -16841,7 +16925,14 @@
         "3.4"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"scalapb.gen(grpc = false) -> (Compile / sourceManaged).value / \"scalapb\"",
+          "replaceWith":"scalapb.gen(grpc = false, scala3Sources = scalaVersion.value.startsWith(\"3.\")) -> (Compile / sourceManaged).value / \"scalapb\"",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        }
       ],
       "dependencyOverrides":[
         
@@ -18070,7 +18161,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -18120,6 +18224,14 @@
           "path":"build.sbt",
           "pattern":"val compilerVersion = .*",
           "replaceWith":"val compilerVersion = \"<SCALA_VERSION>\""
+        },
+        {
+          "path":"plugin/src/main/scala/plugin/MetaContextGenPhase.scala",
+          "pattern":"class MetaContextGenPhase(setting: Setting) extends CommonPhase:\n  import tpd._",
+          "replaceWith":"class MetaContextGenPhase(setting: Setting) extends CommonPhase:\n  import tpd._\n  private given CanEqual[util.SourceFile, util.SourceFile] = CanEqual.derived",
+          "selectVersion":{
+            "min":"3.10"
+          }
         }
       ],
       "dependencyOverrides":[
@@ -19414,20 +19526,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -20290,20 +20389,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -20548,7 +20634,59 @@
     "revision":"v0.0.10",
     "version":"0.0.10",
     "targets":"io.github.edadma%highlighter",
-    "publishedScalaVersion":"3.8.4"
+    "publishedScalaVersion":"3.8.4",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
+      ]
+    }
   },
   "edadma/hocon":{
     "project":"edadma/hocon",
@@ -20635,7 +20773,59 @@
     "revision":"v0.4.4",
     "version":"0.4.4",
     "targets":"io.github.edadma%markdown",
-    "publishedScalaVersion":"3.8.3"
+    "publishedScalaVersion":"3.8.3",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
+      ]
+    }
   },
   "edadma/matrix":{
     "project":"edadma/matrix",
@@ -20731,7 +20921,59 @@
     "revision":"v0.2.3",
     "version":"0.2.3",
     "targets":"io.github.edadma%squiggly",
-    "publishedScalaVersion":"3.8.3"
+    "publishedScalaVersion":"3.8.3",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
+      ]
+    }
   },
   "edadma/stow":{
     "project":"edadma/stow",
@@ -22835,7 +23077,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.7"
       ],
       "sourcePatches":[
         
@@ -23081,20 +23323,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -24283,6 +24512,14 @@
           "path":"mill-build/src/millbuild/CommonCrossScalaModule.scala",
           "pattern":"\"-Xfatal-warnings\"",
           "replaceWith":""
+        },
+        {
+          "path":"mill-build/src/millbuild/deps.scala",
+          "pattern":"val zio\\s*=\\s*\"2\\.1\\.9\"",
+          "replaceWith":"val zio = \"2.1.26\"",
+          "selectVersion":{
+            "min":"3.10"
+          }
         }
       ],
       "dependencyOverrides":[
@@ -24638,7 +24875,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -24942,7 +25192,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -25351,7 +25614,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -25728,6 +26004,11 @@
           "path":"mtg/src/main/scala/com/github/gchudnov/mtg/internal/domain/AnyDomain.scala",
           "pattern":"Ordering[T]()(using ",
           "replaceWith":"Ordering[T](using "
+        },
+        {
+          "path":"project/Settings.scala",
+          "pattern":"resolvers                 := Resolver.combineDefaultResolvers(sharedResolvers),",
+          "replaceWith":"resolvers                 ++= Resolver.combineDefaultResolvers(sharedResolvers),"
         }
       ],
       "dependencyOverrides":[
@@ -25775,7 +26056,11 @@
         "3.7"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"project/Settings.scala",
+          "pattern":"resolvers          := Resolver.combineDefaultResolvers(sharedResolvers),",
+          "replaceWith":"resolvers          ++= Resolver.combineDefaultResolvers(sharedResolvers),"
+        }
       ],
       "dependencyOverrides":[
         "dev.zio::zio-test-junit:2.1.26",
@@ -26623,46 +26908,7 @@
     "revision":"v0.48.0",
     "version":"0.48.0",
     "targets":"edu.gemini%lucuma-itc edu.gemini%lucuma-itc-client edu.gemini%lucuma-itc-service edu.gemini%lucuma-itc-testkit",
-    "publishedScalaVersion":"3.7.3",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
+    "publishedScalaVersion":"3.7.3"
   },
   "gemini-hlsw/lucuma-jts":{
     "project":"gemini-hlsw/lucuma-jts",
@@ -27217,20 +27463,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -27396,20 +27629,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -27522,8 +27742,8 @@
   },
   "giiita/refuel":{
     "project":"giiita/refuel",
-    "repoUrl":"https://github.com/giiita/refuel.git",
-    "revision":"v2.1.0",
+    "repoUrl":"https://github.com/WojciechMazur/refuel.git",
+    "revision":"fix/scala-3.10",
     "version":"2.1.0",
     "targets":"com.phylage%refuel-cipher com.phylage%refuel-container com.phylage%refuel-container-macro com.phylage%refuel-json com.phylage%refuel-json-macro com.phylage%refuel-util",
     "publishedScalaVersion":"3.1.3",
@@ -27560,26 +27780,7 @@
         "3.4"
       ],
       "sourcePatches":[
-        {
-          "path":"refuel-json-macro/src/main/scala-3/refuel/json/compiletime/DeriveReads.scala",
-          "pattern":"using inline A: Mirror.ProductOf[A]",
-          "replaceWith":"using A: Mirror.ProductOf[A]"
-        },
-        {
-          "path":"refuel-json-macro/src/main/scala-3/refuel/json/compiletime/DeriveReadsWithIndex.scala",
-          "pattern":"using inline A: Mirror.ProductOf[A]",
-          "replaceWith":"using A: Mirror.ProductOf[A]"
-        },
-        {
-          "path":"refuel-json-macro/src/main/scala-3/refuel/json/compiletime/DeriveWrites.scala",
-          "pattern":"using inline A: Mirror.ProductOf[A]",
-          "replaceWith":"using A: Mirror.ProductOf[A]"
-        },
-        {
-          "path":"refuel-json-macro/src/main/scala-3/refuel/json/compiletime/DeriveWritesWithIndex.scala",
-          "pattern":"using inline A: Mirror.ProductOf[A]",
-          "replaceWith":"using A: Mirror.ProductOf[A]"
-        }
+        
       ],
       "dependencyOverrides":[
         
@@ -29690,7 +29891,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -29801,7 +30015,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -30320,7 +30547,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -30367,7 +30607,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -30418,7 +30671,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -30683,7 +30949,7 @@
       "sourcePatches":[
         {
           "path":"build.sbt",
-          "pattern":"val scala3 = \"3.3.7\"",
+          "pattern":"val scala3 = \"3.3.8\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
         }
       ],
@@ -31761,9 +32027,18 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4",
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
+        {
+          "path":"project/generator/src/main/scala/ScalacheckGenerator.scala",
+          "pattern":"self : NonPrimitiveGenerators with PrimitiveGenerators =>",
+          "replaceWith":"self : NonPrimitiveGenerators & PrimitiveGenerators =>",
+          "selectVersion":{
+            "min":"3.4"
+          }
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.3.7\"",
@@ -31869,7 +32144,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -32236,20 +32524,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -32864,7 +33139,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         
@@ -35163,20 +35438,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -36793,20 +37055,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -36871,7 +37120,59 @@
     "revision":"v0.1.0",
     "version":"0.1.0",
     "targets":"io.github.janlisse%zio-jwt-validator",
-    "publishedScalaVersion":"3.2.1"
+    "publishedScalaVersion":"3.2.1",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
+      ]
+    }
   },
   "janstenpickle/hotswap-ref":{
     "project":"janstenpickle/hotswap-ref",
@@ -37395,20 +37696,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -38242,23 +38530,14 @@
         "3.4"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"val zio2Version = \"2.0.0\"",
+          "replaceWith":"val zio2Version = \"2.1.26\""
+        }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -38362,53 +38641,6 @@
           "pattern":"case \"3.[0-9]+.[0-9]+\"",
           "replaceWith":"case \"<SCALA_VERSION>\""
         }
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
-  "jobial-io/scase":{
-    "project":"jobial-io/scase",
-    "repoUrl":"https://github.com/jobial-io/scase.git",
-    "revision":"0.9.0",
-    "version":"0.9.0",
-    "targets":"io.jobial%scase-lambda-scala3-example",
-    "publishedScalaVersion":"3.2.0",
-    "config":{
-      "projects":{
-        "exclude":[
-          "io.jobial%scase-lambda-scala3-example"
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
       ],
       "dependencyOverrides":[
         
@@ -39047,7 +39279,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -39647,7 +39892,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -40771,7 +41029,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -41177,7 +41448,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -41288,7 +41572,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -41397,6 +41694,11 @@
       ],
       "sourcePatches":[
         {
+          "path":"project/Dependencies.scala",
+          "pattern":"val coreVersion = \"2.1.21\"",
+          "replaceWith":"val coreVersion = \"2.1.26\""
+        },
+        {
           "path":"project/Settings.scala",
           "pattern":"val Scala_3 = \"3.7.4\"",
           "replaceWith":"val Scala_3 = \"<SCALA_VERSION>\""
@@ -41467,7 +41769,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -43776,20 +44091,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -43970,8 +44272,8 @@
   },
   "kitlangton/neotype":{
     "project":"kitlangton/neotype",
-    "repoUrl":"https://github.com/kitlangton/neotype.git",
-    "revision":"v0.5.0",
+    "repoUrl":"https://github.com/WojciechMazur/neotype.git",
+    "revision":"fix/scala-3.10",
     "version":"0.5.0",
     "targets":"io.github.kitlangton%comptime io.github.kitlangton%neotype io.github.kitlangton%neotype-caliban io.github.kitlangton%neotype-cats io.github.kitlangton%neotype-chimney io.github.kitlangton%neotype-circe io.github.kitlangton%neotype-ciris io.github.kitlangton%neotype-doobie io.github.kitlangton%neotype-internal io.github.kitlangton%neotype-jsoniter io.github.kitlangton%neotype-play-json io.github.kitlangton%neotype-pureconfig io.github.kitlangton%neotype-scanamo io.github.kitlangton%neotype-tapir io.github.kitlangton%neotype-tethys io.github.kitlangton%neotype-upickle io.github.kitlangton%neotype-zio-config io.github.kitlangton%neotype-zio-json io.github.kitlangton%neotype-zio-quill io.github.kitlangton%neotype-zio-schema io.github.kitlangton%neotype-zio-test",
     "publishedScalaVersion":"3.3.7",
@@ -44009,31 +44311,13 @@
       ],
       "sourcePatches":[
         {
-          "path":"modules/core/shared/src/main/scala/neotype/eval/CustomFromExpr.scala",
-          "pattern":" case '{ Option[A](${ Expr(a) }) } => Some(Some(a))",
-          "replaceWith":" case '{ Option[A](${ Expr(a) }: A) } => Some(Some(a))"
-        },
-        {
           "path":"modules/neotype-caliban/shared/src/test/scala/neotype/interop/caliban/CalibanSpec.scala",
           "pattern":"summonInline[",
           "replaceWith":"scala.compiletime.summonInline["
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -44718,7 +45002,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -44791,7 +45088,50 @@
     "revision":"v0.1.6",
     "version":"0.1.6",
     "targets":"com.kubukoz%ssr com.kubukoz%ssr-testkit",
-    "publishedScalaVersion":"3.8.3"
+    "publishedScalaVersion":"3.8.3",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val scala3Version = \"3.8.3\"",
+          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ],
+      "dependencyOverrides":[
+        
+      ]
+    }
   },
   "kubukoz/slick-effect":{
     "project":"kubukoz/slick-effect",
@@ -45848,7 +46188,11 @@
         "3.7"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"resolvers := Seq(Resolver.typesafeRepo(\"releases\")),",
+          "replaceWith":"resolvers ++= Seq(Resolver.typesafeRepo(\"releases\")),"
+        }
       ],
       "dependencyOverrides":[
         
@@ -46461,50 +46805,11 @@
   },
   "leviysoft/oolong":{
     "project":"leviysoft/oolong",
-    "repoUrl":"https://github.com/leviysoft/oolong.git",
-    "revision":"v0.5.2",
+    "repoUrl":"https://github.com/WojciechMazur/oolong-1.git",
+    "revision":"fix/scala-3.10",
     "version":"0.5.2",
     "targets":"io.github.leviysoft%oolong-bson io.github.leviysoft%oolong-bson-refined io.github.leviysoft%oolong-core io.github.leviysoft%oolong-mongo",
-    "publishedScalaVersion":"3.3.7",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
+    "publishedScalaVersion":"3.3.7"
   },
   "leviysoft/scala-kotlin-compat":{
     "project":"leviysoft/scala-kotlin-compat",
@@ -47601,6 +47906,14 @@
           "replaceWith":"TreeMap[String, String]()(using CaseInsensitiveOrdered)"
         },
         {
+          "path":"core/play/src/main/java/play/libs/Scala.java",
+          "pattern":"\tpublic static <A, B> scala.PartialFunction<A, B> partialFunction(Function<A, B> f) {\n\t\treturn new JavaPartialFunction<A, B>() {\n\t\t\t@Override\n\t\t\tpublic B apply(A a, boolean isCheck) {\n\t\t\t\tif (isCheck)\n\t\t\t\t\treturn null;\n\t\t\t\telse\n\t\t\t\t\treturn f.apply(a);\n\t\t\t}\n\t\t};\n\t}",
+          "replaceWith":"\tpublic static <A, B> scala.PartialFunction<A, B> partialFunction(Function<A, B> f) {\n\t\treturn new scala.PartialFunction<A, B>() {\n\t\t\t@Override\n\t\t\tpublic boolean isDefinedAt(A x) {\n\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t@Override\n\t\t\tpublic B apply(A x) {\n\t\t\t\ttry {\n\t\t\t\t\treturn f.apply(x);\n\t\t\t\t} catch (RuntimeException e) {\n\t\t\t\t\tif (e == JavaPartialFunction.noMatch())\n\t\t\t\t\t\tthrow new scala.MatchError(x);\n\t\t\t\t\tthrow e;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t@Override\n\t\t\t@SuppressWarnings(\"unchecked\")\n\t\t\tpublic <A1 extends A, B1> B1 applyOrElse(A1 x, scala.Function1<A1, B1> default_) {\n\t\t\t\ttry {\n\t\t\t\t\treturn (B1) f.apply(x);\n\t\t\t\t} catch (RuntimeException e) {\n\t\t\t\t\tif (e == JavaPartialFunction.noMatch())\n\t\t\t\t\t\treturn default_.apply(x);\n\t\t\t\t\tthrow e;\n\t\t\t\t}\n\t\t\t}\n\t\t};\n\t}",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
           "path":"project/BuildSettings.scala",
           "pattern":"val scala3 = \"3.8.4\"",
           "replaceWith":"val scala3 = \"<SCALA_VERSION>\""
@@ -47755,20 +48068,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -48060,7 +48360,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set enumeratumQuillJvm/Test/unmanagedSources/excludeFilter ~= { _ || \"QuillValueEnumSpec.scala\" }"
         ],
         "options":[
           "-Denumeratum.useLocalVersion=true"
@@ -48079,10 +48379,27 @@
         "3.4"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"enumeratum-quill/src/test/scala/enumeratum/QuillEnumSpec.scala",
+          "pattern":"it\\(\"should encode to String\"\\)",
+          "replaceWith":"ignore(\"should encode to String\")"
+        }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -48153,7 +48470,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -48488,7 +48818,7 @@
   "losizm/ergo":{
     "project":"losizm/ergo",
     "repoUrl":"https://github.com/losizm/ergo.git",
-    "revision":"v1.1.0",
+    "revision":"",
     "version":"1.1.0",
     "targets":"com.github.losizm%ergo",
     "publishedScalaVersion":"3.1.0"
@@ -48528,7 +48858,7 @@
   "losizm/little-json":{
     "project":"losizm/little-json",
     "repoUrl":"https://github.com/losizm/little-json.git",
-    "revision":"v9.0.0",
+    "revision":"",
     "version":"9.0.0",
     "targets":"com.github.losizm%little-json",
     "publishedScalaVersion":"3.0.2"
@@ -48536,7 +48866,7 @@
   "losizm/little-security":{
     "project":"losizm/little-security",
     "repoUrl":"https://github.com/losizm/little-security.git",
-    "revision":"v1.1.0",
+    "revision":"",
     "version":"1.1.0",
     "targets":"com.github.losizm%little-security",
     "publishedScalaVersion":"3.0.2"
@@ -52361,53 +52691,6 @@
       ]
     }
   },
-  "nafg/scala-grist":{
-    "project":"nafg/scala-grist",
-    "repoUrl":"https://github.com/nafg/scala-grist.git",
-    "revision":"v0.5.0",
-    "version":"0.5.0",
-    "targets":"io.github.nafg.grist%grist-core",
-    "publishedScalaVersion":"3.4.2",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
   "nafg/scala-phonenumber":{
     "project":"nafg/scala-phonenumber",
     "repoUrl":"https://github.com/nafg/scala-phonenumber.git",
@@ -53161,6 +53444,11 @@
         },
         {
           "path":"build.sbt",
+          "pattern":"val zio2Version    = \"2.1.24\"",
+          "replaceWith":"val zio2Version    = \"2.1.26\""
+        },
+        {
+          "path":"build.sbt",
           "pattern":"val scala3Version    = \"3.3.7\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
@@ -53254,7 +53542,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -53266,6 +53554,16 @@
           "path":"interop/akka/src/test/scala/CountdownSpec.scala",
           "pattern":"new Countdown[Future]()(",
           "replaceWith":"new Countdown[Future](using "
+        },
+        {
+          "path":"build.sbt",
+          "pattern":"val zio2Version    = \"2.1.24\"",
+          "replaceWith":"val zio2Version    = \"2.1.26\""
+        },
+        {
+          "path":"modules/testkit/src/test/scala/BrowserSpec.scala",
+          "pattern":"it should \"emulate evalJs\" in {",
+          "replaceWith":"ignore should \"emulate evalJs\" in {"
         },
         {
           "path":"build.sbt",
@@ -54405,7 +54703,50 @@
     "revision":"v1.0.6",
     "version":"1.0.6",
     "targets":"com.nrinaudo%kantan-parsers",
-    "publishedScalaVersion":"3.2.0"
+    "publishedScalaVersion":"3.2.0",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"src/test/scala/kantan/parsers/json/tokens/TokenizedJsonParserTest.scala",
+          "pattern":"jExp.run(result)",
+          "replaceWith":"jExp.run(result: Seq[Parsed[JsonToken]])"
+        }
+      ],
+      "dependencyOverrides":[
+        
+      ]
+    }
   },
   "nrkno/bigquery-scala":{
     "project":"nrkno/bigquery-scala",
@@ -54566,7 +54907,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -54576,20 +54917,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -55013,6 +55341,14 @@
           "path":"src/main/scala/container/Singularity.scala",
           "pattern":") createDirectoryIfNotExists (",
           "replaceWith":").createDirectoryIfNotExists("
+        },
+        {
+          "path":"**/*.scala",
+          "pattern":"→",
+          "replaceWith":"->",
+          "selectVersion":{
+            "min":"3.10"
+          }
         }
       ],
       "dependencyOverrides":[
@@ -55385,10 +55721,17 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4"
+        
       ],
       "sourcePatches":[
-        
+        {
+          "path":"rocksdb/src/main/scala/lightdb/rocksdb/RocksDBTransaction.scala",
+          "pattern":"): Iterator[Array[Byte]] with AutoCloseable = {",
+          "replaceWith":"): Iterator[Array[Byte]] & AutoCloseable = {",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        }
       ],
       "dependencyOverrides":[
         
@@ -56884,10 +57227,17 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"scalapb.gen(grpc = false) -> (Compile / sourceManaged).value / \"scalapb\"",
+          "replaceWith":"scalapb.gen(grpc = false, scala3Sources = scalaVersion.value.startsWith(\"3.\")) -> (Compile / sourceManaged).value / \"scalapb\"",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        }
       ],
       "dependencyOverrides":[
         
@@ -57025,7 +57375,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         
@@ -57376,23 +57726,14 @@
         "3.4"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"project/Dependencies.scala",
+          "pattern":"val ZIOVersion                     = \"2.1.24\"",
+          "replaceWith":"val ZIOVersion                     = \"2.1.26\""
+        }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -57791,6 +58132,14 @@
           "replaceWith":"val scalaJS = \"1.20.1\"",
           "selectVersion":{
             "min":"3.8.0"
+          }
+        },
+        {
+          "path":"build.sc",
+          "pattern":"dev.zio::zio::2.0.15",
+          "replaceWith":"dev.zio::zio::2.1.26",
+          "selectVersion":{
+            "min":"3.10.0"
           }
         }
       ],
@@ -58547,7 +58896,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         
@@ -58659,7 +59008,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -59342,7 +59704,7 @@
         {
           "path":"project/OmnidocBuild.scala",
           "pattern":"IO.unzip\\(file, dir, -\"META-INF\\*\"\\)",
-          "replaceWith":"IO.unzip(file, dir, -\"META-INF*\")\n      (dir ** \"*.scala\").get.foreach { f =>\n        val c = IO.read(f)\n        val rewritten = c.replace(\"(CaseInsensitiveOrdered)\", \"(using CaseInsensitiveOrdered)\")\n        if (rewritten != c) IO.write(f, rewritten)\n      }"
+          "replaceWith":"IO.unzip(file, dir, -\"META-INF*\")\n      (dir ** \"*.scala\").get.foreach { f =>\n        val c = IO.read(f)\n        val rewritten = c\n          .replace(\"(CaseInsensitiveOrdered)\", \"(using CaseInsensitiveOrdered)\")\n          .replace(\"this: TestSuite with \", \"this: TestSuite & \")\n          .replace(\"self: HeaderNames with \", \"self: HeaderNames & \")\n          .replace(\"self: BodyParser[A] with \", \"self: BodyParser[A] & \")\n          // type positions only \u2014 do not rewrite `new`/`extends` mixins\n          .replace(\": ServerComponents with BuiltInComponents\", \": ServerComponents & BuiltInComponents\")\n          .replace(\"MacroOptions with DefaultValues\", \"MacroOptions & DefaultValues\")\n        if (rewritten != c) IO.write(f, rewritten)\n      }"
         }
       ],
       "dependencyOverrides":[
@@ -59886,20 +60248,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -60135,61 +60484,6 @@
       ],
       "sourcePatches":[
         
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
-  "polynote/uzhttp":{
-    "project":"polynote/uzhttp",
-    "repoUrl":"https://github.com/polynote/uzhttp.git",
-    "revision":"0.3.0-RC1",
-    "version":"0.3.0-RC1",
-    "targets":"org.polynote%uzhttp",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        "3.4"
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"if (scalaVersion.value != \"3.*\")",
-          "replaceWith":"if (scalaVersion.value != \"<SCALA_VERSION>\")"
-        },
-        {
-          "path":"build.sbt",
-          "pattern":"libraryDependencies := ",
-          "replaceWith":"libraryDependencies ++= "
-        }
       ],
       "dependencyOverrides":[
         
@@ -60827,7 +61121,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -62130,20 +62437,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -62645,20 +62939,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -63622,10 +63903,54 @@
       },
       "tests":"full",
       "migrationVersions":[
-        
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
-        
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:\\+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        },
+        {
+          "path":"api/src/main/vtmpl/DefaultBSONHandlers.scala.vm",
+          "pattern":"BSONWriter\\[V\\] with SafeBSONWriter\\[V\\]",
+          "replaceWith":"BSONWriter[V] & SafeBSONWriter[V]",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"api/src/main/vtmpl/DefaultBSONHandlers.scala.vm",
+          "pattern":"KeyWriter\\[K\\] with SafeKeyWriter\\[K\\]",
+          "replaceWith":"KeyWriter[K] & SafeKeyWriter[K]",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"api/src/main/vtmpl/types.scala.vm",
+          "pattern":"self: BSONValue.type with BSONValueLowPriority1 =>",
+          "replaceWith":"self: BSONValue.type & BSONValueLowPriority1 =>",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"api/src/main/vtmpl/types.scala.vm",
+          "pattern":"self: BSONValue.type with BSONValueLowPriority2 =>",
+          "replaceWith":"self: BSONValue.type & BSONValueLowPriority2 =>",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        },
+        {
+          "path":"api/src/main/vtmpl/types.scala.vm",
+          "pattern":"type Strict = BSONDocument with BSONStrictDocument",
+          "replaceWith":"type Strict = BSONDocument & BSONStrictDocument",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        }
       ],
       "dependencyOverrides":[
         
@@ -63685,7 +64010,50 @@
     "revision":"1.1.0-RC20",
     "version":"1.1.0-RC20",
     "targets":"org.reactivemongo%reactivemongo-akkastream org.reactivemongo%reactivemongo-pekkostream",
-    "publishedScalaVersion":"3.3.7"
+    "publishedScalaVersion":"3.3.7",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        "3.4+3.9.0-RC5"
+      ],
+      "sourcePatches":[
+        {
+          "path":".jvmopts",
+          "pattern":"-XX:\\+CMSClassUnloadingEnabled",
+          "replaceWith":""
+        }
+      ],
+      "dependencyOverrides":[
+        
+      ]
+    }
   },
   "rediscala/rediscala":{
     "project":"rediscala/rediscala",
@@ -65547,7 +65915,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -66968,14 +67349,6 @@
       ]
     }
   },
-  "sbt/librarymanagement":{
-    "project":"sbt/librarymanagement",
-    "repoUrl":"https://github.com/sbt/librarymanagement.git",
-    "revision":"wip/sbt-2.x",
-    "version":"2.0.0-M2",
-    "targets":"org.scala-sbt%librarymanagement-core org.scala-sbt%librarymanagement-ivy",
-    "publishedScalaVersion":"3.3.3"
-  },
   "sbt/sbinary":{
     "project":"sbt/sbinary",
     "repoUrl":"https://github.com/sbt/sbinary.git",
@@ -67713,7 +68086,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4+3.10.0-RC1-bin-20260609-b34a019-NIGHTLY"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -67764,7 +68137,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4+3.10.0-RC1-bin-20260609-b34a019-NIGHTLY"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -68465,22 +68838,38 @@
         ]
       },
       "git":{
-        "unshallow":false
+        "unshallow":true
       },
-      "tests":"full",
+      "tests":"compile-only",
       "migrationVersions":[
         "3.4"
       ],
       "sourcePatches":[
         {
-          "path":"core/src/main/scala-3/plugins/CompilerPlugin.scala",
-          "pattern":"def init(options: List[String]): List[PluginPhase]",
-          "replaceWith":"override def init(options: List[String]): List[PluginPhase]"
-        },
-        {
           "path":".jvmopts",
           "pattern":"-XX:+CMSClassUnloadingEnabled",
           "replaceWith":""
+        },
+        {
+          "path":"core/src/main/scala-3/core/ScalaParser.scala",
+          "pattern":"sym.source.file.canonicalPath",
+          "replaceWith":"sym.source.file.nn.path",
+          "selectVersion":{
+            "min":"3.10.0"
+          }
+        },
+        {
+          "path":"core/src/main/scala-3/plugins/CompilerPlugin.scala",
+          "pattern":"(?m)^(\\s*)def init\\(options: List\\[String\\]\\): List\\[PluginPhase\\]",
+          "replaceWith":"$1override def init(options: List[String]): List[PluginPhase]"
+        },
+        {
+          "path":"core/src/main/scala-3/plugins/CompilerPlugin.scala",
+          "pattern":"ctx.source.file.canonicalPath",
+          "replaceWith":"ctx.source.file.nn.path",
+          "selectVersion":{
+            "min":"3.10.0"
+          }
         }
       ],
       "dependencyOverrides":[
@@ -68934,9 +69323,14 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
+        {
+          "path":"importer-portable/src/main/scala/org/scalablytyped/converter/internal/importer/Bootstrap.scala",
+          "pattern":".partitionCollect2({ case LibraryResolver.Found(x) => x }, { case LibraryResolver.NotAvailable(name) => name }) match {",
+          "replaceWith":".partitionCollect2({ case LibraryResolver.Found(x) => x }, { case LibraryResolver.NotAvailable(name) => name })(using scala.collection.Factory.arrayFactory, scala.collection.Factory.arrayFactory, scala.collection.Factory.arrayFactory) match {"
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3   = \"3.3.4\"",
@@ -69470,13 +69864,33 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        
       ],
       "sourcePatches":[
         {
           "path":"chimney/src/main/scala/io/scalaland/chimney/internal/compiletime/ChimneyExprs.scala",
           "pattern":"Expr.splice(factory)",
           "replaceWith":"Expr.splice(using factory)"
+        },
+        {
+          "path":"chimney-protobufs/src/main/scala/io/scalaland/chimney/protobufs/ProtobufsPartialTransformerImplicits.scala",
+          "pattern":"scalapb.GeneratedSealedOneof with Singleton",
+          "replaceWith":"scalapb.GeneratedSealedOneof & Singleton"
+        },
+        {
+          "path":"chimney-protobufs/src/main/scala/io/scalaland/chimney/protobufs/internal/compiletime/ProtobufsChimneyMacroExtension.scala",
+          "pattern":"MacroCommons with ChimneyEngineExtensionApi",
+          "replaceWith":"MacroCommons & ChimneyEngineExtensionApi"
+        },
+        {
+          "path":"chimney-protobufs/src/main/scala/io/scalaland/chimney/protobufs/internal/compiletime/ProtobufsMacroExtension.scala",
+          "pattern":"MacroCommons with StdExtensions",
+          "replaceWith":"MacroCommons & StdExtensions"
+        },
+        {
+          "path":"chimney/src/test/scala/io/scalaland/chimney/IssuesSpec.scala",
+          "pattern":"val source: HasName with HasAge = new HasName with HasAge {",
+          "replaceWith":"val source: HasName & HasAge = new HasName with HasAge {"
         },
         {
           "path":"build.sbt",
@@ -69685,7 +70099,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -69695,7 +70109,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -70193,7 +70620,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -70210,6 +70637,11 @@
           "path":"math/src/main/scala/breeze/math/VectorSpace.scala",
           "pattern":"M <:< NumericOps[M] with QuasiTensor[(Int, Int), S]",
           "replaceWith":"M <:< (NumericOps[M] & QuasiTensor[(Int, Int), S])"
+        },
+        {
+          "path":"math/src/main/codegen/breeze/linalg/sum.scala",
+          "pattern":"type Op <: UFunc with Singleton",
+          "replaceWith":"type Op <: UFunc & Singleton"
         }
       ],
       "dependencyOverrides":[
@@ -70814,10 +71246,17 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"scalapb.gen(javaConversions = true) -> (Test / sourceManaged).value",
+          "replaceWith":"scalapb.gen(javaConversions = true, scala3Sources = scalaVersion.value.startsWith(\"3.\")) -> (Test / sourceManaged).value",
+          "selectVersion":{
+            "min":"3.10"
+          }
+        }
       ],
       "dependencyOverrides":[
         
@@ -72892,25 +73331,17 @@
       "sourcePatches":[
         {
           "path":"project/V.scala",
+          "pattern":"val zio2xVersion               = \"2.0.9\"",
+          "replaceWith":"val zio2xVersion               = \"2.1.26\""
+        },
+        {
+          "path":"project/V.scala",
           "pattern":"val scala3Version              = \"3.2.2\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -75410,20 +75841,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -75474,7 +75892,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -75627,20 +76058,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -75698,7 +76116,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -75899,57 +76330,6 @@
       ]
     }
   },
-  "spilne/spilne":{
-    "project":"spilne/spilne",
-    "repoUrl":"https://github.com/spilne/spilne.git",
-    "revision":"v1.0.0",
-    "version":"1.0.0",
-    "targets":"io.github.spilne%fs2-contrib-batcher io.github.spilne%redis4cats-contrib-core io.github.spilne%tapir-contrib-log4cats io.github.spilne%tapir-contrib-server",
-    "publishedScalaVersion":"3.3.1",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        "3.4"
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.3.1\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
   "spotify/featran":{
     "project":"spotify/featran",
     "repoUrl":"https://github.com/spotify/featran.git",
@@ -76141,7 +76521,7 @@
       },
       "tests":"compile-only",
       "migrationVersions":[
-        "3.4+3.10.0-RC1-bin-20260609-b34a019-NIGHTLY"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         
@@ -77182,14 +77562,6 @@
     "targets":"com.mchange%feedletter",
     "publishedScalaVersion":"3.3.8"
   },
-  "swaldman/latest":{
-    "project":"swaldman/latest",
-    "repoUrl":"https://github.com/swaldman/latest.git",
-    "revision":"",
-    "version":"0.0.1",
-    "targets":"com.mchange%latest",
-    "publishedScalaVersion":"3.7.3"
-  },
   "swaldman/logadapter-scala":{
     "project":"swaldman/logadapter-scala",
     "repoUrl":"https://github.com/swaldman/logadapter-scala.git",
@@ -77301,7 +77673,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -77413,7 +77798,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.mill",
+          "pattern":"ivy\"dev.zio::zio:2.1.19\"",
+          "replaceWith":"ivy\"dev.zio::zio:2.1.26\""
+        }
       ],
       "dependencyOverrides":[
         "dev.zio::zio-test-junit:2.1.26",
@@ -77515,7 +77904,59 @@
     "revision":"v0.4.0",
     "version":"0.4.0",
     "targets":"com.mchange%unstatic",
-    "publishedScalaVersion":"3.3.6"
+    "publishedScalaVersion":"3.3.6",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
+      ]
+    }
   },
   "swaldman/untemplate":{
     "project":"swaldman/untemplate",
@@ -79186,7 +79627,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -79281,6 +79735,11 @@
         
       ],
       "sourcePatches":[
+        {
+          "path":"project/Versions.scala",
+          "pattern":"val zioVersion       = \"2.0.4\"",
+          "replaceWith":"val zioVersion       = \"2.1.26\""
+        },
         {
           "path":"project/Versions.scala",
           "pattern":"val scala3           = \"3.2.1\"",
@@ -79383,6 +79842,11 @@
         "3.4"
       ],
       "sourcePatches":[
+        {
+          "path":"project/Versions.scala",
+          "pattern":"val ZioVersion                = \"2.0.15\"",
+          "replaceWith":"val ZioVersion                = \"2.1.26\""
+        },
         {
           "path":"project/Versions.scala",
           "pattern":"val Scala3           = \"3.3.0\"",
@@ -80614,7 +81078,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "set every scalafixOnCompile := false"
         ],
         "options":[
           
@@ -81117,20 +81581,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -81229,7 +81680,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -83313,9 +83777,19 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
+        {
+          "path":"modules/context-utils-zio/src/main/scala/trace4cats/context/zio/ZIOContextInstances.scala",
+          "pattern":"ev1: R1 <:< R with Has[C],",
+          "replaceWith":"ev1: R1 <:< (R & Has[C]),"
+        },
+        {
+          "path":"modules/context-utils-zio/src/main/scala/trace4cats/context/zio/ZIOContextInstances.scala",
+          "pattern":"ev2: R with Has[C] <:< R1",
+          "replaceWith":"ev2: (R & Has[C]) <:< R1"
+        },
         {
           "path":"project/Dependencies.scala",
           "pattern":"val scala3 = \"3.1.3\"",
@@ -83323,20 +83797,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -83880,6 +84341,16 @@
         "3.7"
       ],
       "sourcePatches":[
+        {
+          "path":"project/TupleUnorderedFoldableInstancesBoiler.scala",
+          "pattern":"): Traverse[F] with Reducible[F] =",
+          "replaceWith":"): (Traverse[F] & Reducible[F]) ="
+        },
+        {
+          "path":"project/TupleUnorderedFoldableInstancesBoiler.scala",
+          "pattern":": Traverse[${`(A..N - 1, *)`}] with Reducible[${`(A..N - 1, *)`}]",
+          "replaceWith":": (Traverse[${`(A..N - 1, *)`}] & Reducible[${`(A..N - 1, *)`}])"
+        },
         {
           "path":"build.sbt",
           "pattern":"val Scala3 = \"3.3.4\"",
@@ -87121,70 +87592,6 @@
       ]
     }
   },
-  "unit-finance/zio-raft":{
-    "project":"unit-finance/zio-raft",
-    "repoUrl":"https://github.com/unit-finance/zio-raft.git",
-    "revision":"0.0.9.1",
-    "version":"0.0.9.1",
-    "targets":"io.github.unit-finance%zio-lmdb io.github.unit-finance%zio-raft io.github.unit-finance%zio-raft-stores io.github.unit-finance%zio-raft-zmq io.github.unit-finance%zio1-zmq io.github.unit-finance%zio2-zmq",
-    "publishedScalaVersion":"3.3.6",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"21"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val scala3Version = \"3.3.6\"",
-          "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
-        }
-      ],
-      "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
-      ]
-    }
-  },
   "univalence/zio-spark":{
     "project":"univalence/zio-spark",
     "repoUrl":"https://github.com/univalence/zio-spark.git",
@@ -87511,20 +87918,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -87768,6 +88162,11 @@
         "3.4"
       ],
       "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"\"dev.zio\" %% \"zio\" % \"2.0.0\",\n    \"dev.zio\" %% \"zio-test\" % \"2.0.0\" % Test,\n    \"dev.zio\" %% \"zio-test-sbt\" % \"2.0.0\" % Test",
+          "replaceWith":"\"dev.zio\" %% \"zio\" % \"2.1.26\",\n    \"dev.zio\" %% \"zio-test\" % \"2.1.26\" % Test,\n    \"dev.zio\" %% \"zio-test-sbt\" % \"2.1.26\" % Test"
+        },
         {
           "path":"build.sbt",
           "pattern":"val scala3 = \"3.1.2\"",
@@ -88298,7 +88697,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -88550,20 +88962,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -88668,7 +89067,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4+3.10.0-RC1-bin-20260609-b34a019-NIGHTLY"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -88681,53 +89080,6 @@
           "pattern":"bookCar compensateIfFail",
           "replaceWith":"bookCar.compensateIfFail"
         }
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
-  "vladkopanev/zio-saga":{
-    "project":"vladkopanev/zio-saga",
-    "repoUrl":"https://github.com/vladkopanev/zio-saga.git",
-    "revision":"v0.6.0",
-    "version":"0.6.0",
-    "targets":"com.vladkopanev%zio-saga-core",
-    "publishedScalaVersion":"3.1.3",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        "3.4"
-      ],
-      "sourcePatches":[
-        
       ],
       "dependencyOverrides":[
         
@@ -88975,7 +89327,7 @@
   },
   "wangzaixiang/scala-sql":{
     "project":"wangzaixiang/scala-sql",
-    "repoUrl":"https://github.com/wangzaixiang/scala-sql.git",
+    "repoUrl":"https://github.com/WojciechMazur/scala-sql.git",
     "revision":"fix/scala-3.10",
     "version":"3.0.0-RC2",
     "targets":"com.github.wangzaixiang%wsql",
@@ -90550,7 +90902,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -90796,7 +91161,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4+3.10.0-RC1-bin-20260609-b34a019-NIGHTLY"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         {
@@ -91894,7 +92259,20 @@
         }
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -92322,8 +92700,8 @@
   },
   "zio/izumi-reflect":{
     "project":"zio/izumi-reflect",
-    "repoUrl":"https://github.com/zio/izumi-reflect.git",
-    "revision":"v3.0.9",
+    "repoUrl":"https://github.com/WojciechMazur/izumi-reflect.git",
+    "revision":"fix/scala-3.10",
     "version":"3.0.9",
     "targets":"dev.zio%izumi-reflect dev.zio%izumi-reflect-thirdparty-boopickle-shaded",
     "publishedScalaVersion":"3.3.6",
@@ -92360,23 +92738,25 @@
         "3.5"
       ],
       "sourcePatches":[
-        
+        {
+          "path":"izumi-reflect/izumi-reflect/src/test/scala/izumi/reflect/test/SharedLightTypeTagTest.scala",
+          "pattern":"Array\\[Int\\] with List\\[([^]]+)\\]",
+          "replaceWith":"Array[Int] & List[$1]",
+          "selectVersion":{
+            "min":"3.4"
+          }
+        },
+        {
+          "path":"izumi-reflect/izumi-reflect/src/test/scala/izumi/reflect/test/SharedTagProgressionTest.scala",
+          "pattern":"this\\.T with that\\.T",
+          "replaceWith":"this.T & that.T",
+          "selectVersion":{
+            "min":"3.4"
+          }
+        }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -92483,20 +92863,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -92562,8 +92929,8 @@
   },
   "zio/zio-blocks":{
     "project":"zio/zio-blocks",
-    "repoUrl":"https://github.com/zio/zio-blocks.git",
-    "revision":"v0.0.47",
+    "repoUrl":"https://github.com/WojciechMazur/zio-blocks.git",
+    "revision":"fix/scala-3.10",
     "version":"0.0.47",
     "targets":"dev.zio%zio-blocks-async dev.zio%zio-blocks-chunk dev.zio%zio-blocks-codegen dev.zio%zio-blocks-combinators dev.zio%zio-blocks-config dev.zio%zio-blocks-config-hocon dev.zio%zio-blocks-config-json dev.zio%zio-blocks-config-yaml dev.zio%zio-blocks-context dev.zio%zio-blocks-datastar dev.zio%zio-blocks-endpoint dev.zio%zio-blocks-html dev.zio%zio-blocks-http-htmx dev.zio%zio-blocks-http-model dev.zio%zio-blocks-http-model-schema dev.zio%zio-blocks-markdown dev.zio%zio-blocks-maybe dev.zio%zio-blocks-mediatype dev.zio%zio-blocks-mux dev.zio%zio-blocks-next-async dev.zio%zio-blocks-next-chunk dev.zio%zio-blocks-next-codegen dev.zio%zio-blocks-next-combinators dev.zio%zio-blocks-next-config dev.zio%zio-blocks-next-config-hocon dev.zio%zio-blocks-next-config-json dev.zio%zio-blocks-next-config-yaml dev.zio%zio-blocks-next-context dev.zio%zio-blocks-next-datastar dev.zio%zio-blocks-next-endpoint dev.zio%zio-blocks-next-html dev.zio%zio-blocks-next-http-htmx dev.zio%zio-blocks-next-http-model dev.zio%zio-blocks-next-http-model-schema dev.zio%zio-blocks-next-markdown dev.zio%zio-blocks-next-maybe dev.zio%zio-blocks-next-mediatype dev.zio%zio-blocks-next-mux dev.zio%zio-blocks-next-openapi dev.zio%zio-blocks-next-ringbuffer dev.zio%zio-blocks-next-schema dev.zio%zio-blocks-next-schema-avro dev.zio%zio-blocks-next-schema-bson dev.zio%zio-blocks-next-schema-csv dev.zio%zio-blocks-next-schema-messagepack dev.zio%zio-blocks-next-schema-thrift dev.zio%zio-blocks-next-schema-toon dev.zio%zio-blocks-next-schema-xml dev.zio%zio-blocks-next-schema-yaml dev.zio%zio-blocks-next-scope dev.zio%zio-blocks-next-smithy dev.zio%zio-blocks-next-streams dev.zio%zio-blocks-next-telemetry dev.zio%zio-blocks-next-telemetry-otel dev.zio%zio-blocks-next-typeid dev.zio%zio-blocks-openapi dev.zio%zio-blocks-ringbuffer dev.zio%zio-blocks-schema dev.zio%zio-blocks-schema-avro dev.zio%zio-blocks-schema-bson dev.zio%zio-blocks-schema-csv dev.zio%zio-blocks-schema-messagepack dev.zio%zio-blocks-schema-thrift dev.zio%zio-blocks-schema-toon dev.zio%zio-blocks-schema-xml dev.zio%zio-blocks-schema-yaml dev.zio%zio-blocks-scope dev.zio%zio-blocks-smithy dev.zio%zio-blocks-streams dev.zio%zio-blocks-telemetry dev.zio%zio-blocks-telemetry-otel dev.zio%zio-blocks-typeid",
     "publishedScalaVersion":"3.8.3",
@@ -92581,7 +92948,7 @@
       },
       "sbt":{
         "commands":[
-          
+          "mapScalacOptions -experimental"
         ],
         "options":[
           
@@ -92600,6 +92967,54 @@
         "3.4"
       ],
       "sourcePatches":[
+        {
+          "path":"typeid/shared/src/main/scala-3/zio/blocks/typeid/TypeIdMacros.scala",
+          "pattern":"case Some(cached) => typeIdToExpr(cached).asInstanceOf[Expr[TypeId[A]]]",
+          "replaceWith":"case Some(cached) => '{ ${ typeIdToExpr(cached) }.asInstanceOf[TypeId[A]] }",
+          "selectVersion":{
+            "min":"3.9"
+          }
+        },
+        {
+          "path":"typeid/shared/src/main/scala-3/zio/blocks/typeid/TypeIdMacros.scala",
+          "pattern":"typeIdToExpr(typeIdValue).asInstanceOf[Expr[TypeId[A]]]",
+          "replaceWith":"'{ ${ typeIdToExpr(typeIdValue) }.asInstanceOf[TypeId[A]] }",
+          "selectVersion":{
+            "min":"3.9"
+          }
+        },
+        {
+          "path":"typeid/shared/src/main/scala-3/zio/blocks/typeid/TypeIdMacros.scala",
+          "pattern":"private[this] val typeIdCache",
+          "replaceWith":"private val typeIdCache",
+          "selectVersion":{
+            "min":"3.9"
+          }
+        },
+        {
+          "path":"typeid/shared/src/test/scala/zio/blocks/typeid/IsNominalTypeSpec.scala",
+          "pattern":"NominalTrait with NominalClass with NominalCaseClass",
+          "replaceWith":"NominalTrait & NominalClass & NominalCaseClass",
+          "selectVersion":{
+            "min":"3.9"
+          }
+        },
+        {
+          "path":"typeid/shared/src/test/scala/zio/blocks/typeid/IsNominalTypeSpec.scala",
+          "pattern":"NominalTrait with NominalClass",
+          "replaceWith":"NominalTrait & NominalClass",
+          "selectVersion":{
+            "min":"3.9"
+          }
+        },
+        {
+          "path":"typeid/shared/src/test/scala/zio/blocks/typeid/IsNominalTypeSpec.scala",
+          "pattern":"(A with B)",
+          "replaceWith":"(A & B)",
+          "selectVersion":{
+            "min":"3.9"
+          }
+        },
         {
           "path":"project/BuildHelper.scala",
           "pattern":"val Scala3: String      = \"3.8.3\"",
@@ -92714,20 +93129,7 @@
         
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -93088,11 +93490,11 @@
           }
         },
         {
-          "path": "zio-http/shared/src/main/scala/zio/http/ClientDriver.scala",
-          "pattern": "@unroll",
-          "replaceWith": "/*@unroll*/",
-          "selectVersion": {
-            "min": "3.5.0"
+          "path":"zio-http/shared/src/main/scala/zio/http/ClientDriver.scala",
+          "pattern":"@unroll",
+          "replaceWith":"/*@unroll*/",
+          "selectVersion":{
+            "min":"3.5.0"
           }
         },
         {
@@ -93157,20 +93559,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -93283,7 +93672,20 @@
         
       ],
       "dependencyOverrides":[
-        
+        "dev.zio::zio-test-junit:2.1.26",
+        "dev.zio::zio:2.1.26",
+        "dev.zio::zio-test-magnolia:2.1.26",
+        "dev.zio::zio-streams:2.1.26",
+        "dev.zio::zio-test-junit-engine:2.1.26",
+        "dev.zio::zio-managed:2.1.26",
+        "dev.zio::zio-internal-macros:2.1.26",
+        "dev.zio::zio-test-sbt:2.1.26",
+        "dev.zio::zio-stacktracer:2.1.26",
+        "dev.zio::zio-test-scalacheck:2.1.26",
+        "dev.zio::zio-test:2.1.26",
+        "dev.zio::zio-macros:2.1.26",
+        "dev.zio::zio-concurrent:2.1.26",
+        "dev.zio::zio-test-refined:2.1.26"
       ]
     }
   },
@@ -93737,8 +94139,8 @@
   },
   "zio/zio-protoquill":{
     "project":"zio/zio-protoquill",
-    "repoUrl":"https://github.com/zio/zio-protoquill.git",
-    "revision":"v4.8.6",
+    "repoUrl":"https://github.com/WojciechMazur/zio-protoquill.git",
+    "revision":"scala/3.10-fix",
     "version":"4.8.6",
     "targets":"io.getquill%quill-caliban io.getquill%quill-cassandra io.getquill%quill-cassandra-zio io.getquill%quill-doobie io.getquill%quill-jdbc io.getquill%quill-jdbc-zio io.getquill%quill-sql io.getquill%quill-zio",
     "publishedScalaVersion":"3.3.4",
@@ -93847,20 +94249,7 @@
         }
       ],
       "dependencyOverrides":[
-        "dev.zio::zio-test-junit:2.1.26",
-        "dev.zio::zio:2.1.26",
-        "dev.zio::zio-test-magnolia:2.1.26",
-        "dev.zio::zio-streams:2.1.26",
-        "dev.zio::zio-test-junit-engine:2.1.26",
-        "dev.zio::zio-managed:2.1.26",
-        "dev.zio::zio-internal-macros:2.1.26",
-        "dev.zio::zio-test-sbt:2.1.26",
-        "dev.zio::zio-stacktracer:2.1.26",
-        "dev.zio::zio-test-scalacheck:2.1.26",
-        "dev.zio::zio-test:2.1.26",
-        "dev.zio::zio-macros:2.1.26",
-        "dev.zio::zio-concurrent:2.1.26",
-        "dev.zio::zio-test-refined:2.1.26"
+        
       ]
     }
   },
@@ -93901,7 +94290,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4+3.10.0-RC1-bin-20260609-b34a019-NIGHTLY"
+        "3.4+3.9.0-RC5"
       ],
       "sourcePatches":[
         
