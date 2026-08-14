@@ -220,6 +220,7 @@ jobs:
         - name: "comcast/ip4s"
         - name: "commercetools/fs2-queues"
         - name: "commercetools/sphere-scala-libs"
+        - name: "constructive-programming/eo"
         - name: "coralogix/zio-k8s"
         - name: "cornerman/chameleon"
         - name: "cornerman/sloth"
@@ -331,7 +332,6 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
-        - name: "filosganga/jsonpath"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
@@ -516,6 +517,7 @@ jobs:
         - name: "karimagnusson/kuzminki-zio-2"
         - name: "kasiamarek/tyre-scala"
         - name: "katrix/perspective"
+        - name: "katrix/typenbt"
         - name: "kcrypt/scala-biginteger"
         - name: "kcrypt/scala-blake3"
         - name: "kcrypt/scala-sha"
@@ -611,8 +613,6 @@ jobs:
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
-        - name: "monix/monix-bio"
-        - name: "monix/monix-connect"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "monix/monix-bio"
+        - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
         - name: "mrumkovskis/tresql"
         - name: "msgpack4z/msgpack4z-core"
@@ -727,7 +729,6 @@ jobs:
         - name: "plokhotnyuk/rtree2d"
         - name: "pme123/camundala"
         - name: "polentino/redacted"
-        - name: "polynote/uzhttp"
         - name: "polystat/odin"
         - name: "polyvariant/colorize-scala"
         - name: "polyvariant/smithy4s-caliban"
@@ -791,7 +792,6 @@ jobs:
         - name: "sbt-jib/sbt-jib"
         - name: "sbt/contraband"
         - name: "sbt/io"
-        - name: "sbt/librarymanagement"
         - name: "sbt/sbt"
         - name: "sbt/sbt-dynver"
         - name: "sbt/sbt-jni"
@@ -971,6 +971,7 @@ jobs:
         - name: "testcontainers/testcontainers-scala"
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
+        - name: "theiterators/baklava"
         - name: "theiterators/http4s-stir"
         - name: "theiterators/kebs"
         - name: "theiterators/sealed-monad"
@@ -1084,7 +1085,6 @@ jobs:
         - name: "vitaliihonta/scala-ql"
         - name: "vitaliihonta/zio-temporal"
         - name: "vladkopanev/cats-saga"
-        - name: "vladkopanev/zio-saga"
         - name: "vlovgr/ciris"
         - name: "vmunier/scalajs-scripts"
         - name: "wangzaixiang/scala-sql"
