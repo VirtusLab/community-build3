@@ -162,8 +162,14 @@ if [[ "$publishScalaVersion" != "null" ]] && isBinVersionGreaterThan "$publishSc
   echo "Warning: project published with Scala $publishScalaVersion - cannot guarantee it would work with older Scala version $scalaVersion"
 fi
 
-if [[ "${SKIP_BUILD_SETUP:-}" != "1" ]]; then
-  scala-cli run "$scriptDir/../coordinator" -- 3 1 1 1 "$projectName" ./coordinator/configs/
+if [ "${SKIP_BUILD_SETUP:-}" != "1" ]; then
+  # OFFLINE_SCALADEX=1 skips Scaladex HTTP and reuses data/projectModules (or buildConfig.json).
+  # Config discovery from projects-config.conf / require/* still runs when fingerprints change.
+  CoordinatorArgs=()
+  if [ "${OFFLINE_SCALADEX:-}" = "1" ]; then
+    CoordinatorArgs+=(--offline-scaladex)
+  fi
+  scala-cli run ${scriptDir}/../coordinator -- 3 1 1 1 "$projectName" ./coordinator/configs/ "${CoordinatorArgs[@]}"
 fi
 
 cache_mounts=()

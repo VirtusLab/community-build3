@@ -93,7 +93,10 @@ trait CommunityBuildPluginShared extends AutoPlugin {
       (_: Scope, currentSettings: Seq[String]) => currentSettings.filterNot(flags.contains)
     }
 
-  private val projectCrossScalaVersions = mutable.Map.empty[String, Seq[String]]
+  // Written from setCrossScalaVersions transforms evaluated in parallel by sbt's
+  // EvaluateSettings pool — must be concurrent (mutable.HashMap livelocks under races).
+  private val projectCrossScalaVersions =
+    scala.collection.concurrent.TrieMap.empty[String, Seq[String]]
 
   /** Helper command used to update crossScalaVersion It's needed for sbt 1.7.x, which does force
     * exact match in `++ <scalaVersion>` command for defined crossScalaVersions,
@@ -109,13 +112,14 @@ trait CommunityBuildPluginShared extends AutoPlugin {
 
       (ref: ProjectRef, currentCrossVersions: Seq[String]) => {
         val currentScalaVersion = extracted.get(ref / Keys.scalaVersion)
-        if (!projectCrossScalaVersions.contains(ref.project)) {
-          projectCrossScalaVersions(ref.project) = currentCrossVersions
+        projectCrossScalaVersions.putIfAbsent(
+          ref.project,
+          currentCrossVersions
             .diff(Seq(scalaVersion)) ++ // exclude current version
             sys.env
               .get("OVERRIDEN_SCALA_VERSION")
               .filterNot(_.isEmpty) // overriden before start of built tool
-        }
+        )
 
         def updateVersion(fromVersion: String) = {
           logOnce(
@@ -536,9 +540,38 @@ trait CommunityBuildPluginShared extends AutoPlugin {
         mappedProjects.flatten.toSet
       }
 
+      // dependsOn edges plus libraryDependencies that resolve to another module in this build
+      // Without the latter, topological order and flatten only see dependsOn and can build a
+      // consumer before its published producer (ResolveException -> retry).
+      def mappingKey(dep: ModuleID, sv: String, sbv: String): String = {
+        val name = CrossVersion(dep.crossVersion, sv, sbv)
+          .fold(dep.name)(_(dep.name))
+        s"${dep.organization}%${stripScala3Suffix(name)}"
+      }
+      def resolveInBuildDep(dep: ModuleID, sv: String, sbv: String): Option[ProjectRef] = {
+        val key = mappingKey(dep, sv, sbv)
+        moduleIds.get(key).orElse(originalModuleIds.get(key))
+      }
+
+      var coordinateEdgeCount = 0
       val projectDeps = s.allProjectPairs.map { case (rp, ref) =>
-        ref -> rp.dependencies.map(_.project)
+        val dependsOnDeps = rp.dependencies.map(_.project)
+        val sv = (ref / scalaVersion).get(s.data).getOrElse(scalaVersionArg)
+        val sbv =
+          (ref / scalaBinaryVersion).get(s.data).getOrElse(scalaBinaryVersionUsed)
+        val libraryDeps = (ref / libraryDependencies).get(s.data).toSeq.flatten
+          .flatMap(dep => resolveInBuildDep(dep, sv, sbv))
+          .filterNot(_ == ref)
+          .distinct
+        val added = libraryDeps.filterNot(dependsOnDeps.contains)
+        coordinateEdgeCount += added.size
+        ref -> (dependsOnDeps ++ libraryDeps).distinct
       }.toMap
+      if (coordinateEdgeCount > 0) {
+        println(
+          s"OpenCB::Added $coordinateEdgeCount build-order edge(s) from in-build libraryDependencies"
+        )
+      }
 
       @annotation.tailrec
       def flatten(
@@ -612,7 +645,7 @@ trait CommunityBuildPluginShared extends AutoPlugin {
           val isMigrating = isMigratingBuild
           if (isMigrating) {
             println(
-              "Migration rewrite build detected: skipping test execution and publish"
+              "Migration rewrite build detected: skipping test execution, tolerating doc and publish failures"
             )
           }
           val testingMode = testingModeForBuild(
@@ -653,17 +686,13 @@ trait CommunityBuildPluginShared extends AutoPlugin {
               Test / executeTests
             )
 
-          val shouldPublish =
-            !isMigrating && (eval(Compile / publish / skip) match {
-              case EvalResult.Value(skip, _) => skip
-              case _                         => false
-            })
-          val publishResult =
-            if (isMigrating) PublishResult.skipped
-            else
-              PublishResult(
-                evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
-              )
+          val shouldPublish = eval(Compile / publish / skip) match {
+            case EvalResult.Value(skip, _) => skip
+            case _                         => false
+          }
+          val publishResult = PublishResult(
+            evalWhen(shouldPublish, compileResult)(Compile / publishLocal)
+          )
 
           val built = ModuleBuildResults(
             artifactName = projectName,

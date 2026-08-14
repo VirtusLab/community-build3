@@ -152,9 +152,13 @@ object Scala3CommunityBuild {
       publish: PublishResult,
       metadata: ModuleMetadata
   ) {
-    def hasFailedStep: Boolean = this.productIterator.exists {
-      case result: StepResult => result.status == Status.Failed
-      case _                  => false
+    def hasFailedStep: Boolean = {
+      // Migration builds publish locally only so that intra-build dependencies expressed as
+      // maven coordinates can resolve; neither publishing nor docs are part of their outcome.
+      val requiredSteps: Seq[StepResult] =
+        if (Utils.isMigratingBuild) Seq(compile, testsCompile, testsExecute)
+        else Seq(compile, doc, testsCompile, testsExecute, publish)
+      requiredSteps.exists(_.status == Status.Failed)
     }
     lazy val toJson = {
       s"""{
@@ -546,8 +550,10 @@ object Scala3CommunityBuild {
     )
 
     object logOnce extends Function[String, Unit] {
-      val logged = collection.mutable.Set.empty[String]
-      override def apply(v: String): Unit = if (logged.add(v)) println(s"OpenCB::$v")
+      // Called from parallel sbt settings evaluation; mutable.Set races can livelock.
+      private val logged = scala.collection.concurrent.TrieMap.empty[String, Unit]
+      override def apply(v: String): Unit =
+        if (logged.putIfAbsent(v, ()).isEmpty) println(s"OpenCB::$v")
     }
     // Invalid scalac options but not checked before 3.5.0-RC
     val invalidLanguageOptions = 0.until(5).map(v => s"3.$v") ++ Seq(

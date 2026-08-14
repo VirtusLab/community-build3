@@ -48,7 +48,9 @@ import os.CommandResult
 
   val isMigrating = Utils.isMigratingBuild
   if (isMigrating)
-    println("Migration rewrite build detected: skipping test execution and publish")
+    println(
+      "Migration rewrite build detected: skipping test execution, tolerating doc failures"
+    )
   val testingMode = Utils.testingModeForBuild(config.tests)
 
   val compileResult = eval[Unit](cmd("compile"))

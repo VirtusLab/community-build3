@@ -253,7 +253,7 @@ object MillCommunityBuild {
       val isMigrating = isMigratingBuild
       if isMigrating then
         ctx.log.info(
-          "Migration rewrite build detected: skipping test execution and publish"
+          "Migration rewrite build detected: skipping test execution, tolerating doc and publish failures"
         )
       val testingMode = testingModeForBuild(
         overrides.flatMap(_.tests).getOrElse(config.tests)
@@ -281,25 +281,25 @@ object MillCommunityBuild {
           mayRetry(_):
             evalWhen(testingMode != TestingMode.Disabled, compileResult)
 
+      // Prefer testForked (Task.Command) over testCached: evaluating multiple testCached
+      // tasks via Evaluator in one CB run can leave Mill's TaskCtx.dest stuck on an earlier
+      // module ("Writing to …/claim not allowed during execution of `<other>.testCached`").
       val testsExecuteResults =
-        test(_.testCached).fold[EvalResult[Seq[TestResult]]](EvalResult.skipped):
+        test(_.testForked()).fold[EvalResult[Seq[TestResult]]](EvalResult.skipped):
           evalWhen(testingMode == TestingMode.Full, testsCompileResult)(_).map(_.results)
 
-      val publishResult =
-        if isMigrating then PublishResult.skipped
-        else
-          module match {
-            case module: CommunityBuildPublishModule =>
-              PublishResult(
-                evalAsDependencyOf(compileResult, docResult)(
-                  module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
-                )
-              )
+      val publishResult = module match {
+        case module: CommunityBuildPublishModule =>
+          PublishResult(
+            evalAsDependencyOf(compileResult, docResult)(
+              module.publishLocal( /*localIvyRepo=*/ null /* use default */ )
+            )
+          )
 
-            case _ =>
-              ctx.log.error(s"Module $module is not a publish module, skipping publishing")
-              PublishResult.skipped
-          }
+        case _ =>
+          ctx.log.error(s"Module $module is not a publish module, skipping publishing")
+          PublishResult.skipped
+      }
 
       ModuleBuildResults(
         artifactName = name,

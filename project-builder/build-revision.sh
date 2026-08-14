@@ -143,7 +143,8 @@ function setupProjectConfig() {
   fi
 
   # Migration rewrite builds only need compile (+ -rewrite); force compile-only tests.
-  # Builders also skip test execution and publish via OPENCB_MIGRATING / communitybuild.migrating.
+  # Builders also skip test execution and ignore doc/publish failures via
+  # OPENCB_MIGRATING / communitybuild.migrating.
   projectConfig=$(echo "$baseConfig" | jq -c \
     --argjson executeTests $executeTests \
     --argjson isMigrating $isMigrating \
