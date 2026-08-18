@@ -9,8 +9,10 @@ import java.nio.file.{Files, Paths}
   // Read the log file
   val content = Source.fromFile(inputFile).mkString
 
-  // Remove ANSI color codes
-  val contentWithoutColors = content.replaceAll("\u001B\\[[0-9;]*[mGK]", "")
+  // Remove ANSI escape sequences: CSI (colors, cursor moves, erase), OSC and 2-char escapes
+  val AnsiEscapePattern =
+    "\\u001B(?:\\[[0-?]*[ -/]*[@-~]|\\][^\\u0007\\u001B]*(?:\\u0007|\\u001B\\\\)?|[@-Z\\\\-_])"
+  val contentWithoutColors = content.replaceAll(AnsiEscapePattern, "")
 
   // Redact secrets using foldLeft
   val redactedContent = secrets

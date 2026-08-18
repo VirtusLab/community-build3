@@ -366,13 +366,14 @@ object Scala3CommunityBuild {
     def toJson: String
   }
   object FailureContext {
-    // Used to match output colored using scala.io.AnsiColor
-    // ; is optional, it is not a part of AnsiColor, but is allowed in general to specify both foreground and background color
-    private val AnsiColorPattern = "\\u001B\\[[;\\d]*m"
+    // Matches any ANSI escape sequence: CSI (colors, cursor moves, erase commands),
+    // OSC (terminated by BEL or ST) and two-character escapes
+    private val AnsiEscapePattern =
+      "\\u001B(?:\\[[0-?]*[ -/]*[@-~]|\\][^\\u0007\\u001B]*(?:\\u0007|\\u001B\\\\)?|[@-Z\\\\-_])"
 
     private def jsonString(value: String): String = {
       val escaped = value
-        .replaceAll(AnsiColorPattern, "")
+        .replaceAll(AnsiEscapePattern, "")
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
         .replace("\n", "\\n")
