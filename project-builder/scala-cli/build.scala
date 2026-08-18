@@ -181,7 +181,7 @@ class CliTaskEvaluator(
     val proc = os
       .proc(
         "scala-cli",
-        "--cli-version=1.9.0",
+        "--cli-version=1.15.0",
         "--power",
         task.command,
         repositoryDir,
