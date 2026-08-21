@@ -78,33 +78,29 @@ scala-cli run "${OPENCB_ROOT}/project-builder/redact-logs.scala" --server=false 
   "${CONTAINER_REGISTRY_TOKEN_SECRET}" \
   "${AKKA_REPOSITORY_TOKEN_SECRET}"
 
-index_exit=0
-for attempt in 1 2 3; do
-  set +e
-  "${OPENCB_ROOT}/project-builder/feed-elastic.sh" \
-    "${DATA_ENDPOINT}" \
-    "${PROJECT_NAME}" \
-    "$(cat "${OPENCB_ROOT}/build-status.txt")" \
-    "$(date --iso-8601=seconds)" \
-    "${OPENCB_ROOT}/build-summary.txt" \
-    "${OPENCB_ROOT}/build-logs-redacted.txt" \
-    "$(config .version)" \
-    "${SCALA_VERSION}" \
-    "${BUILD_ID}" \
-    "${BUILD_URL}" \
-    "$(cat "${OPENCB_ROOT}/build-tool.txt")"
-  index_exit=$?
-  set -e
+# feed-elastic.sh retries on its own, shrinking the logs on every attempt.
+# It reports indexing with reduced logs with a dedicated exit code.
+PARTIAL_INDEXING_EXIT_CODE=2
 
-  if [[ $index_exit -eq 0 ]]; then
-    break
-  elif [[ $attempt -lt 3 ]]; then
-    echo "Indexing failed, would retry"
-    sleep $((attempt * 5))
-  fi
-done
+set +e
+"${OPENCB_ROOT}/project-builder/feed-elastic.sh" \
+  "${DATA_ENDPOINT}" \
+  "${PROJECT_NAME}" \
+  "$(cat "${OPENCB_ROOT}/build-status.txt")" \
+  "$(date --iso-8601=seconds)" \
+  "${OPENCB_ROOT}/build-summary.txt" \
+  "${OPENCB_ROOT}/build-logs-redacted.txt" \
+  "$(config .version)" \
+  "${SCALA_VERSION}" \
+  "${BUILD_ID}" \
+  "${BUILD_URL}" \
+  "$(cat "${OPENCB_ROOT}/build-tool.txt")"
+index_exit=$?
+set -e
 
-if [[ $index_exit -ne 0 ]]; then
-  # Emit a GitHub Actions workflow command warning
+# Emit GitHub Actions workflow command warnings
+if [[ $index_exit -eq $PARTIAL_INDEXING_EXIT_CODE ]]; then
+  echo "::warning title=Partial indexing::Results of ${PROJECT_NAME} were indexed with reduced logs"
+elif [[ $index_exit -ne 0 ]]; then
   echo "::warning title=Indexing failure::Indexing results of ${PROJECT_NAME} failed"
 fi
