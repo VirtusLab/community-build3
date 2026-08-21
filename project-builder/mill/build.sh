@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -o pipefail
 
 if [ $# -ne 7 ]; then
   echo "Wrong number of script arguments, expected $0 <repo_dir> <scala-version> <targets> <maven_repo> <sbt_version?> <project_config?> <extra-scalacOption?> <disabled-scalacOptions?>, got $#: $@"
@@ -25,6 +26,8 @@ echo Project projectConfig: $projectConfig
 echo '##################################'
 
 scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# shellcheck source=../retry-utils.sh
+source "$scriptDir/../retry-utils.sh"
 
 cd $repoDir
 
@@ -41,9 +44,11 @@ millSettings=(
   $(echo $projectConfig | jq -r '.mill?.options? // [] | join(" ")' | sed "s/<SCALA_VERSION>/${scalaVersion}/g")
 )
 
-function tryBuild() {
+logFile="build.log"
+resolveLogFile="mill-resolve.log"
+
+function runBuild() {
   mill=$1
-  echo "Try build using $mill"
   rm -rf $repoDir/out
   # mill 0.11- does not support arg=value inputs
   $mill "${millSettings[@]}" runCommunityBuild \
@@ -53,12 +58,18 @@ function tryBuild() {
     "${targets[@]}"
 }
 
+function tryBuild() {
+  mill=$1
+  echo "Try build using $mill"
+  opencb_run_retrying_rate_limits "$logFile" runBuild "$mill"
+}
+
 for launcher in ./millw ./mill ${scriptDir}/millw; do
   if [[ ! -f $launcher ]]; then
     continue
   fi
   chmod +x $launcher
-  if $launcher resolve _ > /dev/null ; then
+  if opencb_run_retrying_rate_limits "$resolveLogFile" $launcher resolve _ > /dev/null ; then
     tryBuild $launcher
     exit 0
   else

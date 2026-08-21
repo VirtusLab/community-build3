@@ -20,6 +20,8 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "$scriptDir/../versions.sh"
 # shellcheck source=../build-status.sh
 source "$scriptDir/../build-status.sh"
+# shellcheck source=../retry-utils.sh
+source "$scriptDir/../retry-utils.sh"
 
 if [[ -z "$projectConfig" ]]; then
   projectConfig="{}"
@@ -148,10 +150,26 @@ function runSbt() {
 }
 
 buildTimeouts=0
+rateLimitRetries=0
+retryIsFree=false
 
 function checkLogsForRetry() {
   # Retry only when given modes were not tried yet
   shouldRetry=false
+
+  # Remote repository rate limiting (HTTP 429) is transient and unrelated to the tested
+  # compiler, retrying it must not consume the regular retries budget.
+  if opencb_log_has_rate_limit "$logFile"; then
+    if ((rateLimitRetries < OPENCB_RATE_LIMIT_MAX_RETRIES)); then
+      rateLimitRetries=$((rateLimitRetries + 1))
+      opencb_wait_for_rate_limit "$rateLimitRetries"
+      shouldRetry=true
+      retryIsFree=true
+      return 0
+    fi
+    echo "Remote repository rate limiting persists after $rateLimitRetries retries"
+  fi
+
   if grep -q "timeout" "$statusFile"; then
     buildTimeouts=$((buildTimeouts + 1))
     if [ "$buildTimeouts" -le 1 ]; then
@@ -216,10 +234,15 @@ maxRetries=2 # 1 retry for each: missing mappings (force scala version)
 
 function retryBuild() {
   while [[ $retry -lt $maxRetries ]]; do
+    retryIsFree=false
     checkLogsForRetry
     if [[ "$shouldRetry" == "true" ]]; then
-      retry=$((retry + 1))
-      echo "Retrying build, retry $retry/$maxRetries, force Scala version:$forceScalaVersion, unshallowed for dynver:$unshallowedForDynver"
+      if [[ "$retryIsFree" == "true" ]]; then
+        echo "Retrying rate limited build, retry $rateLimitRetries/$OPENCB_RATE_LIMIT_MAX_RETRIES"
+      else
+        retry=$((retry + 1))
+        echo "Retrying build, retry $retry/$maxRetries, force Scala version:$forceScalaVersion, unshallowed for dynver:$unshallowedForDynver"
+      fi
       runSbt && exit 0
     else
       echo "Build failed, not retrying."

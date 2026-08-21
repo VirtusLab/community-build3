@@ -31,6 +31,8 @@ export OPENCB_SCRIPT_DIR=$scriptDir
 source $scriptDir/versions.sh
 # shellcheck source=build-status.sh
 source "$scriptDir/build-status.sh"
+# shellcheck source=retry-utils.sh
+source "$scriptDir/retry-utils.sh"
 opencb_init_build_status
 trap 'opencb_finalize_build_status' EXIT
 
@@ -379,7 +381,8 @@ function buildForScalaVersion(){
     scala-cli bloop exit
     scala-cli clean $scriptDir/scala-cli/
     scala-cli clean $repoDir/
-    scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
+    opencb_run_retrying_rate_limits "$PWD/build.log" \
+      scala-cli $scriptDir/scala-cli/build.scala -- "$repoDir" "$scalaVersion" "$projectConfig" "$mvnRepoUrl" "$extraLibraryDeps" "$extraScalacOptions"
   fi
   trap - ERR
 
