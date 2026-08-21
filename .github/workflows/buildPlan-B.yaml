@@ -200,7 +200,6 @@ jobs:
         - name: "colofabrix/timeflux"
         - name: "com-lihaoyi/mill-moduledefs"
         - name: "combinators/expression-problem"
-        - name: "constructive-programming/eo"
         - name: "cornerman/http4s-jsoniter"
         - name: "cornerman/keratin-authn-scala"
         - name: "cornerman/mycelium"
@@ -290,6 +289,7 @@ jobs:
         - name: "edadma/emoji"
         - name: "edadma/fetch"
         - name: "edadma/gramma"
+        - name: "edadma/hocon"
         - name: "edadma/importer"
         - name: "edadma/indentation"
         - name: "edadma/logger"
@@ -309,6 +309,7 @@ jobs:
         - name: "edadma/squiggly"
         - name: "edadma/stow"
         - name: "edadma/tabula"
+        - name: "edadma/texish"
         - name: "edadma/toml"
         - name: "edadma/wasm"
         - name: "edadma/yaml"
@@ -331,7 +332,6 @@ jobs:
         - name: "estrondo/sweet-mockito"
         - name: "eugene-sy/play-quartz"
         - name: "evolution-gaming/random"
-        - name: "fdietze/formidable"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "fdietze/formidable"
         - name: "fehu/opentracing-scala"
         - name: "fenixedu/fenixedu-scala-sdk"
         - name: "fgrutsch/emergence"
@@ -458,6 +459,7 @@ jobs:
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
         - name: "http4s/http4s-servlet"
+        - name: "http4s/http4s-session"
         - name: "http4s/http4s-tomcat"
         - name: "http4s/http4s-twirl"
         - name: "hughsimpson/scalameter"
@@ -553,6 +555,7 @@ jobs:
         - name: "jwojnowski/humanoid"
         - name: "jwojnowski/scuid"
         - name: "jypma/lazagna"
+        - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil-kyo"
         - name: "kaizen-solutions/zio-newrelic-events"
         - name: "kaizen-solutions/zio-telemetry-extras"
@@ -610,9 +613,6 @@ jobs:
         - name: "lbialy/qdrant4s"
         - name: "lbialy/tailf"
         - name: "leviysoft/scala-kotlin-compat"
-        - name: "leviysoft/tightbound"
-        - name: "lewisjkl/header"
-        - name: "lhns/cats-effect-utils"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,9 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "leviysoft/tightbound"
+        - name: "lewisjkl/header"
+        - name: "lhns/cats-effect-utils"
         - name: "lhns/doobie-flyway"
         - name: "lhns/fs2-functork"
         - name: "lhns/fs2-utils"
@@ -665,13 +668,10 @@ jobs:
         - name: "logicovercode/core-commons"
         - name: "lorandszakacs/enclosure"
         - name: "losizm/bolster"
-        - name: "losizm/ergo"
         - name: "losizm/grapple"
         - name: "losizm/little-cli"
         - name: "losizm/little-config"
         - name: "losizm/little-io"
-        - name: "losizm/little-json"
-        - name: "losizm/little-security"
         - name: "losizm/little-sql"
         - name: "losizm/little-time"
         - name: "losizm/scamper"
@@ -1048,7 +1048,6 @@ jobs:
         - name: "thatscalaguy/ulid4cats"
         - name: "thatscalaguy/zustellix"
         - name: "thedrawingcoder-gamer/swing.io"
-        - name: "theiterators/baklava"
         - name: "thepiwo/petname-scala"
         - name: "throup/couldbe"
         - name: "timbertson/auditspec"
@@ -1155,6 +1154,7 @@ jobs:
         - name: "zio-archive/zio-morphir"
         - name: "zio/zio-bson"
         - name: "zio/zio-streams-compress"
+        - name: "zygfryd/scala-zygf-jackshaft"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
