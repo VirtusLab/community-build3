@@ -220,6 +220,7 @@ jobs:
         - name: "comcast/ip4s"
         - name: "commercetools/fs2-queues"
         - name: "commercetools/sphere-scala-libs"
+        - name: "constructive-programming/eo"
         - name: "coralogix/zio-k8s"
         - name: "cornerman/chameleon"
         - name: "cornerman/sloth"
@@ -331,7 +332,6 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
-        - name: "filosganga/jsonpath"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finos/morphir-jvm"
@@ -508,7 +509,6 @@ jobs:
         - name: "jwt-scala/jwt-scala"
         - name: "kacperfkorban/guinep"
         - name: "kailuowang/mau"
-        - name: "kaizen-solutions/trace4cats-zio-extras"
         - name: "kaizen-solutions/virgil"
         - name: "kalin-rudnicki/oxygen"
         - name: "kamon-io/kamon"
@@ -972,6 +972,7 @@ jobs:
         - name: "testcontainers/testcontainers-scala"
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
+        - name: "theiterators/baklava"
         - name: "theiterators/http4s-stir"
         - name: "theiterators/kebs"
         - name: "theiterators/sealed-monad"
@@ -1115,7 +1116,6 @@ jobs:
         - name: "zero-deps/proto"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
