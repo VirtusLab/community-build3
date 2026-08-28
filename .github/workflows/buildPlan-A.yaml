@@ -102,6 +102,7 @@ jobs:
         - name: "alejandrohdezma/http4s-munit"
         - name: "alexarchambault/case-app"
         - name: "alexarchambault/mill-native-image"
+        - name: "algebrazebra/slick-duckdb"
         - name: "algolia/algoliasearch-client-scala"
         - name: "aliics/mouse"
         - name: "almond-sh/almond"
@@ -113,7 +114,6 @@ jobs:
         - name: "andimiller/decline-completion"
         - name: "andresilva/scala-pool"
         - name: "andyglow/scala-xml-diff"
-        - name: "andyglow/typesafe-config-scala"
         - name: "andyglow/websocket-scala-client"
         - name: "ant8e/uuid4cats-effect"
         - name: "apache/daffodil"
@@ -217,6 +217,7 @@ jobs:
         - name: "com-lihaoyi/unroll"
         - name: "com-lihaoyi/upickle"
         - name: "com-lihaoyi/utest"
+        - name: "com-vitthalmirji/toon4s"
         - name: "comcast/ip4s"
         - name: "commercetools/fs2-queues"
         - name: "commercetools/sphere-scala-libs"
@@ -331,7 +332,6 @@ jobs:
         - name: "fasterxml/jackson-module-scala"
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
-        - name: "filosganga/batcher"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,9 +358,11 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "filosganga/batcher"
         - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
+        - name: "finochiom/s2d"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
         - name: "fmonniot/scala3mock"
@@ -517,7 +519,6 @@ jobs:
         - name: "karimagnusson/kuzminki-zio-2"
         - name: "kasiamarek/tyre-scala"
         - name: "katrix/perspective"
-        - name: "katrix/typenbt"
         - name: "kcrypt/scala-biginteger"
         - name: "kcrypt/scala-blake3"
         - name: "kcrypt/scala-sha"
@@ -612,7 +613,6 @@ jobs:
         - name: "mongodb/mongo-java-driver"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
-        - name: "monix/monix"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "monix/monix"
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
@@ -656,6 +657,7 @@ jobs:
         - name: "neandertech/smithy4s-deriving"
         - name: "neotypes/neotypes"
         - name: "netflix/atlas"
+        - name: "neverblink-oss/linkml-scala"
         - name: "nivox/fs2-backpressure-sensor"
         - name: "nixiesearch/nixiesearch"
         - name: "nmoncho/helenus3"
@@ -892,8 +894,6 @@ jobs:
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
-        - name: "slick/slick"
-        - name: "smootoo/tablediff"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "slick/slick"
+        - name: "smootoo/tablediff"
         - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "snowplow/snowplow-scala-tracker"
         - name: "softwaremill/akka-http-session"
@@ -941,6 +943,7 @@ jobs:
         - name: "softwaremill/tapir-loom"
         - name: "soundcloud/twinagle"
         - name: "sovt/spata"
+        - name: "spamegg1/tarski"
         - name: "spotify/featran"
         - name: "spray/spray"
         - name: "sqids/sqids-scala"
@@ -956,7 +959,6 @@ jobs:
         - name: "svroonland/rezilience"
         - name: "svroonland/zio-kinesis"
         - name: "swagger-akka-http/swagger-pekko-http"
-        - name: "swagger-akka-http/swagger-scala-module"
         - name: "systemfw/dynosaur"
         - name: "systemfw/upperbound"
         - name: "t2v/holidays"
@@ -971,7 +973,6 @@ jobs:
         - name: "testcontainers/testcontainers-scala"
         - name: "tethys-json/tethys"
         - name: "tharwaninitin/etlflow"
-        - name: "theiterators/baklava"
         - name: "theiterators/http4s-stir"
         - name: "theiterators/kebs"
         - name: "theiterators/sealed-monad"
@@ -1115,7 +1116,6 @@ jobs:
         - name: "zero-deps/proto"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
