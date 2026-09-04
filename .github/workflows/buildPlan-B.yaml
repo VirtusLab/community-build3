@@ -82,7 +82,6 @@ jobs:
         - name: "47degrees/sbt-energymonitor"
         - name: "aaronp/args4c"
         - name: "aaronp/eie"
-        - name: "ablearthy/td-types"
         - name: "absaoss/absa-shaded-jackson-module-scala"
         - name: "acsgh/scala-common"
         - name: "active-group/scalajasper"
@@ -258,6 +257,7 @@ jobs:
         - name: "davidledwards/scalop"
         - name: "ddolib-cetic-ucl/ddolib-scala"
         - name: "delimobil/fs2-hbase"
+        - name: "devsisters/zio-agones"
         - name: "dobrynya/zio-jms"
         - name: "dotty-cps-async/rl-logic"
         - name: "dotty-cps-async/shim--scala-async"
@@ -328,10 +328,10 @@ jobs:
         - name: "esamson/atbp"
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
-        - name: "estrondo/sweet-mockito"
         - name: "eugene-sy/play-quartz"
         - name: "evolution-gaming/random"
         - name: "fdietze/formidable"
+        - name: "fehu/opentracing-scala"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "fehu/opentracing-scala"
         - name: "fenixedu/fenixedu-scala-sdk"
         - name: "fgrutsch/emergence"
         - name: "fgrutsch/pekko-persistence-mapdb"
@@ -430,6 +429,10 @@ jobs:
         - name: "gzoller/testkit"
         - name: "h8io/borscht"
         - name: "h8io/sbt-scoverage-summary"
+        - name: "halotukozak-com/commons"
+        - name: "halotukozak-com/made"
+        - name: "halotukozak-com/mcodec"
+        - name: "halotukozak-com/regex"
         - name: "hamnis/dataclass-scalafix"
         - name: "hamnis/google-discovery-scala"
         - name: "hamnis/googleapis-discovery-http4s"
@@ -455,6 +458,7 @@ jobs:
         - name: "http4s/http4s-async-http-client"
         - name: "http4s/http4s-crypto"
         - name: "http4s/http4s-fabric"
+        - name: "http4s/http4s-fs2-data"
         - name: "http4s/http4s-jetty"
         - name: "http4s/http4s-play-json"
         - name: "http4s/http4s-scala-xml"
@@ -609,10 +613,6 @@ jobs:
         - name: "laserdisc-io/slack4s"
         - name: "laserdisc-io/zio-oci-objectstorage"
         - name: "lbialy/filter-native-image-metadata"
-        - name: "lbialy/jig"
-        - name: "lbialy/qdrant4s"
-        - name: "lbialy/tailf"
-        - name: "leviysoft/scala-kotlin-compat"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "lbialy/jig"
+        - name: "lbialy/qdrant4s"
+        - name: "lbialy/tailf"
+        - name: "leviysoft/scala-kotlin-compat"
         - name: "leviysoft/tightbound"
         - name: "lewisjkl/header"
         - name: "lhns/cats-effect-utils"
@@ -686,7 +690,6 @@ jobs:
         - name: "makiftutuncu/as"
         - name: "makiftutuncu/effect"
         - name: "malliina/sbt-utils"
-        - name: "malliina/util-base"
         - name: "malyszaryczlowiek/kessenger-lib"
         - name: "marchliu/jaskell-dotty"
         - name: "marcinzh/beam"
@@ -843,7 +846,6 @@ jobs:
         - name: "pureharm/pureharm-effects-cats"
         - name: "pureharm/pureharm-json-circe"
         - name: "pureharm/pureharm-testkit"
-        - name: "quadstingray/quartz-manager"
         - name: "quafadas/dairect-democracy"
         - name: "quafadas/inspirerad"
         - name: "quafadas/narr"
@@ -892,8 +894,6 @@ jobs:
         - name: "sakulk/serval"
         - name: "salesforce/kineticpulse"
         - name: "salesforce/telepathy"
-        - name: "sangria-graphql/sangria-argonaut"
-        - name: "sangria-graphql/sangria-ion"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,8 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "sangria-graphql/sangria-argonaut"
+        - name: "sangria-graphql/sangria-ion"
         - name: "sangria-graphql/sangria-json4s-jackson"
         - name: "sangria-graphql/sangria-json4s-native"
         - name: "sangria-graphql/sangria-marshalling-api"
@@ -960,7 +962,6 @@ jobs:
         - name: "sciss/log"
         - name: "sciss/lucrepi"
         - name: "sciss/model"
-        - name: "sciss/scalacollider-dot"
         - name: "sciss/scalacollider-if"
         - name: "sciss/transform4s"
         - name: "scodec/scodec-cats"
@@ -985,7 +986,6 @@ jobs:
         - name: "sideeffffect/liquibase-doobie"
         - name: "sideeffffect/scala-quartz"
         - name: "simkoc/scala-argparse"
-        - name: "simkoc/scala-conf-parser"
         - name: "simy4/coregex"
         - name: "sky-uk/fs2-kafka-topic-loader"
         - name: "sky-uk/kafka-topic-loader"
