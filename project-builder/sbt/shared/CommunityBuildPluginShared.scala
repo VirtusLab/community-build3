@@ -352,6 +352,7 @@ trait CommunityBuildPluginShared extends AutoPlugin {
   }
 
   override def globalSettings = Seq(
+    sbt.Keys.commands ++= commands,
     resolvers ++= extraOpenCBMavenRepos,
     moduleMappings := { // Store settings in file to capture its original scala versions
       val moduleIds = mkMappings.value

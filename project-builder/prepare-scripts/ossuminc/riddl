@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# riddl 2.1.x builds with sbt 2 and needs com.ossuminc:sbt-ossuminc 3.x, which is published
+# only to GitHub Packages. That registry demands authentication even for public packages and
+# the community build has no GitHub credentials, so plugin resolution fails with 401. Build
+# the plugin from source instead and publish it to the local ivy repository, which sbt's
+# meta-build already searches.
+set -euo pipefail
+
+ProjectDir="${OPENCB_PROJECT_DIR:?OPENCB_PROJECT_DIR is not defined}"
+cd "$ProjectDir"
+
+pluginsFile="project/plugins.sbt"
+if [[ ! -f "$pluginsFile" ]]; then
+  echo "No $pluginsFile found, nothing to prepare"
+  exit 0
+fi
+
+pluginVersion=$(
+  sed -nE 's/.*addSbtPlugin\("com\.ossuminc"[[:space:]]*%[[:space:]]*"sbt-ossuminc"[[:space:]]*%[[:space:]]*"([^"]+)".*/\1/p' \
+    "$pluginsFile" | head -n1
+)
+
+if [[ -z "$pluginVersion" ]]; then
+  echo "No sbt-ossuminc dependency in $pluginsFile, nothing to prepare"
+  exit 0
+fi
+
+# Only the 0.x line reached Maven Central (latest there is 0.22.2); 1.x and up are
+# GitHub Packages only.
+pluginMajor="${pluginVersion%%.*}"
+if [[ "$pluginMajor" =~ ^[0-9]+$ ]] && ((pluginMajor < 1)); then
+  echo "sbt-ossuminc $pluginVersion resolves from Maven Central, nothing to prepare"
+  exit 0
+fi
+
+if compgen -G "$HOME/.ivy2/local/com.ossuminc/sbt-ossuminc_*/$pluginVersion/ivys/ivy.xml" >/dev/null; then
+  echo "sbt-ossuminc $pluginVersion is already published to the local ivy repository"
+  exit 0
+fi
+
+workDir=$(mktemp -d)
+trap 'rm -rf "$workDir"' EXIT
+
+echo "Publishing com.ossuminc:sbt-ossuminc:$pluginVersion to the local ivy repository"
+git clone --quiet --depth 1 --branch "$pluginVersion" \
+  https://github.com/ossuminc/sbt-ossuminc "$workDir"
+
+# sbt-dynver derives the version from the checked out tag, so leave the checkout untouched.
+(cd "$workDir" && sbt publishLocal </dev/null)

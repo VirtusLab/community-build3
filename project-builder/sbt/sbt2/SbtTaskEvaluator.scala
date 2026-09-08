@@ -18,8 +18,39 @@ class SbtTaskEvaluator(val project: ProjectRef, private var state: State)
       EvalResult.Value(value, tookMs)
     } catch {
       case ex: Throwable =>
-        EvalResult.Failure(ex :: Nil, (System.currentTimeMillis() - evalStart).toInt)
+        EvalResult.Failure(failureReasons(ex), (System.currentTimeMillis() - evalStart).toInt)
     }
+  }
+
+  // runTask throws the whole Incomplete tree, whose toString nests every node of the task
+  // graph and buries the actual exception thousands of characters deep. Report the causes.
+  private def failureReasons(ex: Throwable): List[Throwable] = ex match {
+    case incomplete: Incomplete =>
+      getAllDirectCauses(incomplete) match {
+        case Nil    => ex :: Nil
+        case causes => causes
+      }
+    case _ => ex :: Nil
+  }
+
+  private def getAllDirectCauses(incomplete: Incomplete): List[Throwable] = {
+    val Limit = 10
+    @scala.annotation.tailrec
+    def loop(
+        incomplete: List[Incomplete],
+        acc: List[Throwable]
+    ): List[Throwable] = {
+      incomplete match {
+        case Nil                     => acc
+        case _ if acc.length > Limit => acc
+        case head :: tail =>
+          loop(
+            incomplete = tail ::: head.causes.toList,
+            acc = acc ::: head.directCause.toList
+          )
+      }
+    }
+    loop(incomplete :: Nil, Nil)
   }
 }
 

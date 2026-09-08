@@ -107,8 +107,6 @@ fi
 # Drop stale meta-build outputs (host/container or arch switches break incremental compile).
 rm -rf "$repoDir/project/target"
 
-# Register utility commands, for more info check command impl comments
-echo -e "\ncommands ++= CommunityBuildPlugin.commands" >>$repoDir/build.sbt
 # Add custom repositories 
 echo -e '\nGlobal / resolvers += "The Scala Nightly Repository".at("https://repo.scala-lang.org/artifactory/maven-nightlies/")' >>$repoDir/build.sbt
 # Ensure eviction errors are not failing the build
