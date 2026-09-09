@@ -72,54 +72,149 @@ private def isTestableModuleName(module: String): Boolean =
 
 def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
-)(using scaladex: Scaladex): AsyncResponse[ProjectModules] = {
-  for {
-    allArtifacts <- scaladex.artifacts(project)
-    scala3JvmArtifacts = allArtifacts.filter(a => isTestableArtifact(a.artifactId))
-    _ = if scala3JvmArtifacts.isEmpty then
-      val detail =
-        if allArtifacts.isEmpty then "no artifacts on Scaladex"
-        else s"0 testable JVM _3 artifacts among ${allArtifacts.size} on Scaladex"
-      CoordinatorLog.exclude(project, "no testable JVM _3 artifacts", detail)
-    artifactsByVersion = scala3JvmArtifacts.groupBy(_.version)
-    versionReleaseData <- Future
-      .traverse(artifactsByVersion) { case (version, artifacts) =>
-        scaladex
-          .artifact(artifacts.head)
-          .map: artifact =>
-            Option.when(
-              artifact.platform == "jvm" &&
-                releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
-            )((version, artifact.releaseDate))
-      }
-      .map(_.flatten.toMap)
-    orderedVersions = versionReleaseData.toSeq
-      .sortBy(-_._2.toEpochSecond()) // releaseDate-epoch-mill descending
-      .map(_._1)
-    versionModules =
-      for version <- orderedVersions
-      yield ModuleInVersion(
-        version = version,
-        modules =
-          artifactsByVersion(version)
-            .map(_.artifactId.stripSuffix("_3"))
-            .filter(isTestableModuleName)
-            .distinct
-      )
-    nonEmptyVersions = versionModules.filter(_.modules.nonEmpty)
-    _ =
-      if nonEmptyVersions.isEmpty && artifactsByVersion.nonEmpty then
-        CoordinatorLog.exclude(
-          project,
-          "no testable JVM _3 artifacts",
-          s"no versions passed filters (releaseCutOffDate=${releaseCutOffDate.isDefined})"
-        )
-  } yield ProjectModules(project, nonEmptyVersions)
-}
+)(using scaladex: Scaladex): AsyncResponse[ProjectModules] =
+  scaladex.artifacts(project).map: allArtifacts =>
+    buildProjectModules(project, allArtifacts, releaseCutOffDate)
 
-/** JVM Scala 3 versions published on Scaladex (one cheap [[Scaladex.artifacts]] call). */
-private def testableArtifactVersions(artifacts: Seq[ProjectArtifact]): Set[String] =
-  artifacts.filter(a => isTestableArtifact(a.artifactId)).map(_.version).toSet
+/** Build [[ProjectModules]] from Scaladex GAVs + Maven Central versions + git tags. */
+private def buildProjectModules(
+    project: Project,
+    allArtifacts: Seq[ProjectArtifact],
+    releaseCutOffDate: Option[LocalDate]
+): ProjectModules =
+  val scala3JvmArtifacts = allArtifacts.filter(a => isTestableArtifact(a.artifactId))
+  if scala3JvmArtifacts.isEmpty then
+    val detail =
+      if allArtifacts.isEmpty then "no artifacts on Scaladex"
+      else s"0 testable JVM _3 artifacts among ${allArtifacts.size} on Scaladex"
+    CoordinatorLog.exclude(project, "no testable JVM _3 artifacts", detail)
+    ProjectModules(project, Nil)
+  else
+    buildProjectModulesFromArtifacts(project, scala3JvmArtifacts, releaseCutOffDate)
+
+/** Build [[ProjectModules]] once Scaladex has yielded at least one testable JVM artifact. */
+private def buildProjectModulesFromArtifacts(
+    project: Project,
+    scala3JvmArtifacts: Seq[ProjectArtifact],
+    releaseCutOffDate: Option[LocalDate]
+): ProjectModules =
+  val knownModules =
+    scala3JvmArtifacts
+      .map(_.artifactId.stripSuffix("_3"))
+      .filter(isTestableModuleName)
+      .distinct
+  val gavs =
+    scala3JvmArtifacts
+      .map(a => (a.groupId, a.artifactId))
+      .distinct
+
+  // version -> modules known to publish that version on Central
+  val mavenModulesByVersion =
+    scala.collection.mutable.Map.empty[String, scala.collection.mutable.Set[String]]
+  val mavenDates = scala.collection.mutable.Map.empty[String, LocalDate]
+  var anyMavenSuccess = false
+
+  for (groupId, artifactId) <- gavs do
+    val module = artifactId.stripSuffix("_3")
+    if isTestableModuleName(module) then
+      Maven.listVersionsWithDates(groupId, artifactId, fetchDates = releaseCutOffDate.isDefined) match
+        case Maven.VersionsLookup.Resolved(versions) =>
+          if versions.nonEmpty then anyMavenSuccess = true
+          for mv <- versions do
+            mavenModulesByVersion
+              .getOrElseUpdate(mv.version, scala.collection.mutable.Set.empty)
+              .add(module)
+            mv.releaseDate.foreach: date =>
+              mavenDates.updateWith(mv.version):
+                case Some(existing) => Some(if date.isAfter(existing) then date else existing)
+                case None           => Some(date)
+        case Maven.VersionsLookup.NotFound =>
+          () // artifact not on Central — expected for private/custom publishes
+        case Maven.VersionsLookup.Failure(ex) =>
+          Console.err.println(
+            s"Failed to list Maven versions for $groupId:$artifactId " +
+              s"(${CoordinatorRuntime.describeFailure(ex)})"
+          )
+
+  val scaladexModulesByVersion: Map[String, Seq[String]] =
+    scala3JvmArtifacts
+      .groupBy(_.version)
+      .view
+      .mapValues: arts =>
+        arts.map(_.artifactId.stripSuffix("_3")).filter(isTestableModuleName).distinct
+      .toMap
+
+  // Prefer Central version lists; fall back to Scaladex when nothing is on Central.
+  val publishedModulesByVersion: Map[String, Seq[String]] =
+    if anyMavenSuccess then
+      mavenModulesByVersion.view.mapValues(_.toSeq).toMap
+    else
+      Console.err.println(
+        s"No Maven Central versions for ${project.coordinates}; falling back to Scaladex versions"
+      )
+      scaladexModulesByVersion
+
+  val repoUrl = s"https://github.com/${project.organization}/${project.repository}.git"
+  val gitTagVersions = listVersionLikeTags(repoUrl)
+
+  val allVersions =
+    (publishedModulesByVersion.keySet ++ gitTagVersions).toSeq
+
+  def passesCutoff(version: String): Boolean =
+    releaseCutOffDate match
+      case None => true
+      case Some(cutoff) =>
+        mavenDates.get(version) match
+          case Some(date) => cutoff.isAfter(date)
+          case None       => true // tag-only / undated: keep (riddl-style private publishes)
+
+  val orderedVersions =
+    allVersions
+      .filter(passesCutoff)
+      .sorted(using versionOrdering.reverse)
+
+  val versionModules =
+    for version <- orderedVersions
+    yield
+      val modules =
+        publishedModulesByVersion
+          .getOrElse(version, knownModules)
+          .filter(isTestableModuleName)
+          .distinct
+      ModuleInVersion(version, modules)
+
+  val nonEmptyVersions = versionModules.filter(_.modules.nonEmpty)
+  if nonEmptyVersions.isEmpty && allVersions.nonEmpty then
+    CoordinatorLog.exclude(
+      project,
+      "no testable JVM _3 artifacts",
+      s"no versions passed filters (releaseCutOffDate=${releaseCutOffDate.isDefined})"
+    )
+  ProjectModules(project, nonEmptyVersions)
+
+/** Maven ∪ git-tag versions for cache freshness (Scaladex only supplies GAVs). */
+private def freshProjectVersions(
+    project: Project,
+    artifacts: Seq[ProjectArtifact]
+): Set[String] =
+  val scala3Jvm = artifacts.filter(a => isTestableArtifact(a.artifactId))
+  val gavs = scala3Jvm.map(a => (a.groupId, a.artifactId)).distinct
+  val mavenVersions = gavs.flatMap { case (g, a) =>
+    Maven.listVersions(g, a) match
+      case Maven.VersionsLookup.Resolved(versions) => versions.map(_.version)
+      case Maven.VersionsLookup.NotFound           => Nil
+      case Maven.VersionsLookup.Failure(ex) =>
+        Console.err.println(
+          s"Failed to list Maven versions for $g:$a while checking cache " +
+            s"(${CoordinatorRuntime.describeFailure(ex)})"
+        )
+        Nil
+  }.toSet
+  val repoUrl = s"https://github.com/${project.organization}/${project.repository}.git"
+  val tagVersions = listVersionLikeTags(repoUrl).toSet
+  val scaladexVersions = scala3Jvm.map(_.version).toSet
+  if mavenVersions.nonEmpty then mavenVersions ++ tagVersions
+  else scaladexVersions ++ tagVersions
 
 private def readCachedProjectModules(project: Project)(using
     driver: CacheDriver[Project, ProjectModules]
@@ -136,12 +231,12 @@ private def writeCachedProjectModules(pm: ProjectModules)(using
   Files.createDirectories(dest.getParent)
   Files.writeString(dest, driver.write(pm))
 
-/** Cached project modules with a cheap Scaladex version check before skipping the full load. */
+/** Cached project modules; refresh when Maven∪git versions diverge from the cache. */
 def loadProjectModulesWithVersionCheck(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
 )(using scaladex: Scaladex, driver: CacheDriver[Project, ProjectModules]): AsyncResponse[ProjectModules] =
   scaladex.artifacts(project).flatMap { artifacts =>
-    val freshVersions = testableArtifactVersions(artifacts)
+    val freshVersions = freshProjectVersions(project, artifacts)
     readCachedProjectModules(project) match
       case Some(cached) if cached.mvs.map(_.version).toSet == freshVersions =>
         Future.successful(cached)
@@ -150,16 +245,18 @@ def loadProjectModulesWithVersionCheck(releaseCutOffDate: Option[LocalDate] = No
         val added = freshVersions -- cachedVersions
         val removed = cachedVersions -- freshVersions
         println(
-          s"Refreshing Scaladex project modules for ${project.coordinates} " +
+          s"Refreshing project modules for ${project.coordinates} " +
             s"(versions changed: +${added.mkString(", ")} -${removed.mkString(", ")})"
         )
-        loadScaladexProject(releaseCutOffDate)(project).map { pm =>
+        Future {
+          val pm = buildProjectModules(project, artifacts, releaseCutOffDate)
           writeCachedProjectModules(pm)
           pm
         }
       case None =>
-        println(s"Refreshing Scaladex project modules for ${project.coordinates} (no cache)")
-        loadScaladexProject(releaseCutOffDate)(project).map { pm =>
+        println(s"Refreshing project modules for ${project.coordinates} (no cache)")
+        Future {
+          val pm = buildProjectModules(project, artifacts, releaseCutOffDate)
           writeCachedProjectModules(pm)
           pm
         }
@@ -202,39 +299,45 @@ def loadMavenInfo(scalaBinaryVersion: String, buildConfigSeed: BuildConfigSeedIn
     projectModules: CandidateProject.BuildSelected
 ): AsyncResponse[LoadedProject] =
   import projectModules.project.{repository, organization}
+  val project = projectModules.project
   val repoName = s"https://github.com/$organization/$repository.git"
   require(
     projectModules.mvs.nonEmpty,
-    s"Empty modules list in ${projectModules.project}"
+    s"Empty modules list in $project"
   )
-  val ModuleInVersion(version, modules) = projectModules.mvs
+  // Checkout: newest version that has a matching git tag (mvs already newest-first).
+  val checkout = projectModules.mvs
     .find(v => findTag(repoName, v.version).isDefined)
     .getOrElse(projectModules.mvs.head)
+  val checkoutVersion = checkout.version
 
-  val tasks = modules.map { module =>
-    def tryFetch(backoffSeconds: Int, attempt: Int): AsyncResponse[Option[Target]] = {
-      inline def backoff(ex: Throwable, retryable: Boolean) = {
-        val canRetry = retryable && attempt < MaxMavenInfoAttempts
-        val detail = CoordinatorRuntime.describeFailure(ex)
-        val action =
-          if canRetry then s"retry with backoff ${backoffSeconds}s (attempt $attempt/$MaxMavenInfoAttempts)"
-          else if retryable then s"giving up after $attempt attempts"
-          else "giving up"
-        Console.err.println(
-          s"Failed to load maven info for $organization/$repository module=$module version=$version ($detail): $action"
-        )
-        if canRetry then
-          SECONDS.sleep(backoffSeconds)
-          tryFetch((backoffSeconds * 2).min(60), attempt + 1)
-        else Future.successful(None)
-      }
-      Future({
-        val target = cached {
-          Maven.asTarget(scalaBinaryVersion, buildConfigSeed)(_)
-        }(ModuleVersion(module, version, projectModules.project))
-        Some(target)
-      })
-        .recoverWith {
+  def tryFetchTargets(
+      version: String,
+      modules: Seq[String]
+  ): AsyncResponse[Seq[Target]] =
+    val tasks = modules.map { module =>
+      def tryFetch(backoffSeconds: Int, attempt: Int): AsyncResponse[Option[Target]] =
+        inline def backoff(ex: Throwable, retryable: Boolean) =
+          val canRetry = retryable && attempt < MaxMavenInfoAttempts
+          val detail = CoordinatorRuntime.describeFailure(ex)
+          val action =
+            if canRetry then
+              s"retry with backoff ${backoffSeconds}s (attempt $attempt/$MaxMavenInfoAttempts)"
+            else if retryable then s"giving up after $attempt attempts"
+            else "giving up"
+          Console.err.println(
+            s"Failed to load maven info for $organization/$repository module=$module version=$version ($detail): $action"
+          )
+          if canRetry then
+            SECONDS.sleep(backoffSeconds)
+            tryFetch((backoffSeconds * 2).min(60), attempt + 1)
+          else Future.successful(None)
+        Future({
+          val target = cached {
+            Maven.asTarget(scalaBinaryVersion, buildConfigSeed)(_)
+          }(ModuleVersion(module, version, project))
+          Some(target)
+        }).recoverWith {
           case ex: UnknownHostException   => backoff(ex, retryable = true)
           case ex: SocketTimeoutException => backoff(ex, retryable = true)
           case ex: HttpStatusException if ex.getStatusCode == 503 =>
@@ -245,32 +348,96 @@ def loadMavenInfo(scalaBinaryVersion: String, buildConfigSeed: BuildConfigSeedIn
             backoff(ex, retryable = true)
           case ex: java.net.http.HttpTimeoutException =>
             backoff(ex, retryable = true)
+          case ex: HttpStatusException if ex.getStatusCode == 404 =>
+            Future.successful(None)
           case ex: Exception =>
             backoff(ex, retryable = false)
         }
+      tryFetch(1, attempt = 1)
     }
-    tryFetch(1, attempt = 1)
-  }
+    Future.sequence(tasks).map(_.flatten)
 
-  Future
-    .sequence(tasks)
-    .map: results =>
-      val targets = results.flatten
-      val failedModules =
-        modules.zip(results).collect { case (module, None) => module }
-      if targets.nonEmpty && failedModules.nonEmpty then
-        CoordinatorLog.warn(
-          projectModules.project,
-          "partial Maven load",
-          s"@ $version loaded ${targets.size}/${modules.size} modules; failed: ${failedModules.mkString(", ")}"
-        )
-      else if targets.isEmpty then
-        CoordinatorLog.exclude(
-          projectModules.project,
-          "Maven metadata load failed",
-          s"@ $version for modules: ${modules.mkString(", ")}"
-        )
-      LoadedProject(projectModules.project, version, targets)
+  def stubTargets(modules: Seq[String]): Seq[Target] =
+    modules.flatMap: module =>
+      Maven.asStubTarget(scalaBinaryVersion, buildConfigSeed)(
+        ModuleVersion(module, checkoutVersion, project)
+      ) match
+        case scala.util.Success(target) => Some(target)
+        case scala.util.Failure(ex) =>
+          Console.err.println(
+            s"Failed to resolve stub target for $organization/$repository module=$module " +
+              s"(${CoordinatorRuntime.describeFailure(ex)})"
+          )
+          None
+
+  def tryVersions(remaining: Seq[ModuleInVersion]): AsyncResponse[LoadedProject] =
+    remaining match
+      case Nil =>
+        val stubs = stubTargets(checkout.modules)
+        if stubs.isEmpty then
+          CoordinatorLog.exclude(
+            project,
+            "Maven metadata load failed",
+            s"@ $checkoutVersion for modules: ${checkout.modules.mkString(", ")}"
+          )
+        else
+          CoordinatorLog.warn(
+            project,
+            "POM unavailable; using stub targets",
+            s"checkout=$checkoutVersion modules=${checkout.modules.mkString(", ")}"
+          )
+        Future.successful(LoadedProject(project, checkoutVersion, stubs))
+      case mv +: rest =>
+        tryFetchTargets(mv.version, mv.modules).flatMap { targets =>
+          if targets.nonEmpty then
+            if mv.version != checkoutVersion then
+              CoordinatorLog.warn(
+                project,
+                "graph POM lags checkout",
+                s"checkout=$checkoutVersion graphPom=${mv.version} " +
+                  s"loaded ${targets.size}/${mv.modules.size} modules"
+              )
+            else if targets.size < mv.modules.size then
+              val failed =
+                mv.modules.filterNot(m =>
+                  targets.exists(_.id.name == Maven.scalaArtifactId(m, scalaBinaryVersion))
+                )
+              CoordinatorLog.warn(
+                project,
+                "partial Maven load",
+                s"@ ${mv.version} loaded ${targets.size}/${mv.modules.size} modules; failed: ${failed.mkString(", ")}"
+              )
+            Future.successful(LoadedProject(project, checkoutVersion, targets))
+          else tryVersions(rest)
+        }
+
+  def versionPublishedOnMaven(version: String, modules: Seq[String]): Boolean =
+    modules.exists: module =>
+      Maven.resolveCoords(project, module, scalaBinaryVersion, buildConfigSeed) match
+        case scala.util.Failure(ex) =>
+          Console.err.println(
+            s"Failed to resolve coords for $organization/$repository module=$module " +
+              s"(${CoordinatorRuntime.describeFailure(ex)})"
+          )
+          false
+        case scala.util.Success((groupId, artifactId)) =>
+          Maven.listVersions(groupId, artifactId) match
+            case Maven.VersionsLookup.Resolved(versions) =>
+              versions.exists(_.version == version)
+            case Maven.VersionsLookup.NotFound => false
+            case Maven.VersionsLookup.Failure(ex) =>
+              Console.err.println(
+                s"Failed to list Maven versions for $groupId:$artifactId " +
+                  s"(${CoordinatorRuntime.describeFailure(ex)})"
+              )
+              false
+
+  // Prefer POM at checkout version; then older Central versions; finally stubs.
+  val pomCandidates =
+    checkout +: projectModules.mvs.filter: mv =>
+      mv.version != checkoutVersion && versionPublishedOnMaven(mv.version, mv.modules)
+
+  tryVersions(pomCandidates)
 
   /** @param scalaBinaryVersion
     *   Scala binary version name (major.minor) or `3` for scala 3 - following scaladex's convention

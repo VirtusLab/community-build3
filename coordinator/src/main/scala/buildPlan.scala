@@ -197,7 +197,13 @@ def splitBuildPlan(
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
-def findTag(repoUrl: String, version: String): Option[String] = {
+private val remoteTagsCache = scala.collection.concurrent.TrieMap.empty[String, Seq[String]]
+
+/** Raw tag names from `git ls-remote --tags` (no `refs/tags/` prefix; `^{}` peeled tags removed). */
+def listRemoteTags(repoUrl: String): Seq[String] =
+  remoteTagsCache.getOrElseUpdate(repoUrl, fetchRemoteTags(repoUrl))
+
+private def fetchRemoteTags(repoUrl: String): Seq[String] =
   val timeout = CoordinatorRuntime.gitLsRemoteTimeoutSeconds.seconds
 
   def retryWithBackoff(
@@ -205,8 +211,7 @@ def findTag(repoUrl: String, version: String): Option[String] = {
       backoffSeconds: Int,
       message: String
   ): Option[CommandResult] =
-    if retries <= 0
-    then
+    if retries <= 0 then
       Console.err.println(message)
       None
     else
@@ -252,14 +257,54 @@ def findTag(repoUrl: String, version: String): Option[String] = {
 
   retryConnect(10)
     .filter(_.exitCode == 0)
-    .flatMap { lsRemote =>
-      val lines = lsRemote.out.lines().filter(_.contains(version)).toList
-      val (exactMatch, partialMatch) = lines
-        .partition(_.endsWith(version))
-      (exactMatch ::: partialMatch) // sorted candidates
-        .collectFirst { case TagRef(tag) => tag }.headOption
+    .map { lsRemote =>
+      lsRemote.out
+        .lines()
+        .collect { case TagRef(tag) if !tag.endsWith("^{}") => tag }
+        .toSeq
+        .distinct
     }
-}
+    .getOrElse(Nil)
+
+/** Strip optional `v` prefix; reject SNAPSHOT / NIGHTLY / `-bin-` nightlies. */
+def versionLikeTag(tag: String): Option[String] =
+  val version = tag.stripPrefix("v")
+  if version.contains("SNAPSHOT") || version.contains("NIGHTLY") || version.contains("-bin-") then
+    None
+  else SemVersion.unapply(version).map(_ => version)
+
+/** Stable releases sort above RCs/milestones with the same major.minor.patch. */
+val versionOrdering: Ordering[String] =
+  Ordering.fromLessThan { (a, b) =>
+    (SemVersion.unapply(a), SemVersion.unapply(b)) match
+      case (Some(sa), Some(sb)) =>
+        if sa.major != sb.major then sa.major < sb.major
+        else if sa.minor != sb.minor then sa.minor < sb.minor
+        else if sa.patch != sb.patch then sa.patch < sb.patch
+        else (sa.milestone, sb.milestone) match
+          case (None, Some(_)) => false // stable > prerelease
+          case (Some(_), None) => true
+          case (ma, mb) =>
+            def milestoneRank(m: Option[String]): Int =
+              m.fold(Int.MaxValue)(_.filter(_.isDigit).toIntOption.getOrElse(0))
+            milestoneRank(ma) < milestoneRank(mb)
+      case (Some(_), None) => false
+      case (None, Some(_)) => true
+      case _               => a < b
+  }
+
+/** Version-like release tags for a GitHub repo (newest-first by [[versionOrdering]]). */
+def listVersionLikeTags(repoUrl: String): Seq[String] =
+  listRemoteTags(repoUrl)
+    .flatMap(versionLikeTag)
+    .distinct
+    .sorted(using versionOrdering.reverse)
+
+def findTag(repoUrl: String, version: String): Option[String] =
+  val tags = listRemoteTags(repoUrl)
+  val matching = tags.filter(_.contains(version)).toList
+  val (exactMatch, partialMatch) = matching.partition(_.endsWith(version))
+  (exactMatch ::: partialMatch).headOption
 
 object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
