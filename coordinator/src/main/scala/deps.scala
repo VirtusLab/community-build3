@@ -145,20 +145,36 @@ private def buildProjectModulesFromArtifacts(
       .toMap
 
   // Prefer Central version lists; fall back to Scaladex when nothing is on Central.
+  // Drop sparse Maven-only versions (e.g. one outlier module on a different version line)
+  // unless they also exist as a git tag — otherwise unioning all GAVs picks unrelated lines
+  // (izumi csharp 1.5.x / 1.3.0 vs distage 1.3.0-M3).
+  val gitTagVersions = listVersionLikeTags(
+    s"https://github.com/${project.organization}/${project.repository}.git"
+  )
+  val taggedVersionSet = gitTagVersions.toSet
+
   val publishedModulesByVersion: Map[String, Seq[String]] =
     if anyMavenSuccess then
-      mavenModulesByVersion.view.mapValues(_.toSeq).toMap
+      val retained =
+        retainedMavenVersions(
+          knownModules,
+          mavenModulesByVersion.view.mapValues(_.toSet).toMap,
+          taggedVersionSet
+        )
+      mavenModulesByVersion.iterator
+        .collect {
+          case (version, mods) if retained.contains(version) =>
+            version -> mods.toSeq
+        }
+        .toMap
     else
       Console.err.println(
         s"No Maven Central versions for ${project.coordinates}; falling back to Scaladex versions"
       )
       scaladexModulesByVersion
 
-  val repoUrl = s"https://github.com/${project.organization}/${project.repository}.git"
-  val gitTagVersions = listVersionLikeTags(repoUrl)
-
   val allVersions =
-    (publishedModulesByVersion.keySet ++ gitTagVersions).toSeq
+    (publishedModulesByVersion.keySet ++ taggedVersionSet).toSeq
 
   def passesCutoff(version: String): Boolean =
     releaseCutOffDate match
@@ -168,10 +184,13 @@ private def buildProjectModulesFromArtifacts(
           case Some(date) => cutoff.isAfter(date)
           case None       => true // tag-only / undated: keep (riddl-style private publishes)
 
+  // Tagged versions first (newest-first), then remaining Maven/Scaladex versions.
+  // Checkout walks this list with exact findTag — tags must win over Maven-only outliers.
   val orderedVersions =
-    allVersions
-      .filter(passesCutoff)
-      .sorted(using versionOrdering.reverse)
+    val tagged = allVersions.filter(taggedVersionSet.contains).sorted(using versionOrdering.reverse)
+    val untagged =
+      allVersions.filterNot(taggedVersionSet.contains).sorted(using versionOrdering.reverse)
+    (tagged ++ untagged).filter(passesCutoff)
 
   val versionModules =
     for version <- orderedVersions
@@ -198,23 +217,52 @@ private def freshProjectVersions(
     artifacts: Seq[ProjectArtifact]
 ): Set[String] =
   val scala3Jvm = artifacts.filter(a => isTestableArtifact(a.artifactId))
+  val knownModules =
+    scala3Jvm
+      .map(_.artifactId.stripSuffix("_3"))
+      .filter(isTestableModuleName)
+      .distinct
   val gavs = scala3Jvm.map(a => (a.groupId, a.artifactId)).distinct
-  val mavenVersions = gavs.flatMap { case (g, a) =>
-    Maven.listVersions(g, a) match
-      case Maven.VersionsLookup.Resolved(versions) => versions.map(_.version)
-      case Maven.VersionsLookup.NotFound           => Nil
-      case Maven.VersionsLookup.Failure(ex) =>
-        Console.err.println(
-          s"Failed to list Maven versions for $g:$a while checking cache " +
-            s"(${CoordinatorRuntime.describeFailure(ex)})"
-        )
-        Nil
-  }.toSet
+  val mavenModulesByVersion =
+    scala.collection.mutable.Map.empty[String, scala.collection.mutable.Set[String]]
+  var anyMavenSuccess = false
+  for (g, a) <- gavs do
+    val module = a.stripSuffix("_3")
+    if isTestableModuleName(module) then
+      Maven.listVersions(g, a) match
+        case Maven.VersionsLookup.Resolved(versions) =>
+          if versions.nonEmpty then anyMavenSuccess = true
+          for mv <- versions do
+            mavenModulesByVersion
+              .getOrElseUpdate(mv.version, scala.collection.mutable.Set.empty)
+              .add(module)
+        case Maven.VersionsLookup.NotFound => ()
+        case Maven.VersionsLookup.Failure(ex) =>
+          Console.err.println(
+            s"Failed to list Maven versions for $g:$a while checking cache " +
+              s"(${CoordinatorRuntime.describeFailure(ex)})"
+          )
   val repoUrl = s"https://github.com/${project.organization}/${project.repository}.git"
   val tagVersions = listVersionLikeTags(repoUrl).toSet
-  val scaladexVersions = scala3Jvm.map(_.version).toSet
-  if mavenVersions.nonEmpty then mavenVersions ++ tagVersions
-  else scaladexVersions ++ tagVersions
+  if anyMavenSuccess then
+    retainedMavenVersions(knownModules, mavenModulesByVersion.view.mapValues(_.toSet).toMap, tagVersions) ++ tagVersions
+  else
+    scala3Jvm.map(_.version).toSet ++ tagVersions
+
+/** Keep Maven versions published by enough modules, or that also exist as git tags. */
+private def retainedMavenVersions(
+    knownModules: Seq[String],
+    mavenModulesByVersion: Map[String, Set[String]],
+    taggedVersions: Set[String]
+): Set[String] =
+  val minModules =
+    if knownModules.size <= 1 then 1
+    else math.max(2, (knownModules.size + 1) / 2)
+  mavenModulesByVersion.iterator.collect {
+    case (version, mods)
+        if taggedVersions.contains(version) || mods.size >= minModules =>
+      version
+  }.toSet
 
 private def readCachedProjectModules(project: Project)(using
     driver: CacheDriver[Project, ProjectModules]

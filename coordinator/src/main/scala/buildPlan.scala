@@ -300,11 +300,10 @@ def listVersionLikeTags(repoUrl: String): Seq[String] =
     .distinct
     .sorted(using versionOrdering.reverse)
 
+/** Exact tag match for a version: `1.2.3` or `v1.2.3` only (no substring / suffix matches). */
 def findTag(repoUrl: String, version: String): Option[String] =
   val tags = listRemoteTags(repoUrl)
-  val matching = tags.filter(_.contains(version)).toList
-  val (exactMatch, partialMatch) = matching.partition(_.endsWith(version))
-  (exactMatch ::: partialMatch).headOption
+  tags.find(t => t == version || t == s"v$version")
 
 object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
