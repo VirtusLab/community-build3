@@ -113,7 +113,6 @@ jobs:
         - name: "analogweb/analogweb-scala"
         - name: "andimiller/decline-completion"
         - name: "andresilva/scala-pool"
-        - name: "andyglow/scala-xml-diff"
         - name: "andyglow/websocket-scala-client"
         - name: "ant8e/uuid4cats-effect"
         - name: "apache/daffodil"
@@ -173,7 +172,6 @@ jobs:
         - name: "business4s/forms4s"
         - name: "business4s/workflows4s"
         - name: "camunda-community-hub/camunda-dmn-tester"
-        - name: "carlos-verdes/zio-arangodb"
         - name: "carlosedp/riscvassembler"
         - name: "carueda/tscfg"
         - name: "cb372/cats-retry"
@@ -257,7 +255,6 @@ jobs:
         - name: "davenverse/epimetheus"
         - name: "davenverse/fuuid"
         - name: "davenverse/github"
-        - name: "davenverse/googleapis-http4s"
         - name: "davenverse/keysemaphore"
         - name: "davenverse/mapref"
         - name: "davenverse/mules"
@@ -269,7 +266,6 @@ jobs:
         - name: "delimobil/cabbit"
         - name: "devlaam/leucine"
         - name: "devsisters/shardcake"
-        - name: "devsisters/zio-agones"
         - name: "dfianthdl/dfhdl"
         - name: "dieproht/matr"
         - name: "dieproht/molly"
@@ -320,6 +316,7 @@ jobs:
         - name: "epfl-lara/lisa"
         - name: "erikerlandson/coulomb"
         - name: "erikvanoosten/metrics-scala"
+        - name: "es-meta/esmeta"
         - name: "etorreborre/specs2"
         - name: "etspaceman/kinesis4cats"
         - name: "etspaceman/scalacheck-faker"
@@ -332,6 +329,9 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
+        - name: "filosganga/jsonpath"
+        - name: "findify/flink-adt"
+        - name: "findify/flink-scala-api"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,9 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/jsonpath"
-        - name: "findify/flink-adt"
-        - name: "findify/flink-scala-api"
         - name: "finochiom/s2d"
         - name: "finos/morphir-jvm"
         - name: "flink-extended/flink-scala-api"
@@ -495,6 +492,7 @@ jobs:
         - name: "jetbrains/sbt-structure"
         - name: "jilen/play-circe"
         - name: "joan38/kubernetes-client"
+        - name: "joan38/mill-scalafix"
         - name: "jodersky/scala-argparse"
         - name: "jodersky/simplesql"
         - name: "joernio/flatgraph"
@@ -607,12 +605,14 @@ jobs:
         - name: "mkroli/dns4s"
         - name: "mkurz/deadbolt-2-scala"
         - name: "mockito/mockito-scala"
-        - name: "molarmanful/sclin"
         - name: "mongocamp/mongodb-driver"
         - name: "mongodb/mongo-java-driver"
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
+        - name: "monix/monix-bio"
+        - name: "monix/monix-connect"
+        - name: "mpollmeier/scala-repl-pp"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,9 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "monix/monix-bio"
-        - name: "monix/monix-connect"
-        - name: "mpollmeier/scala-repl-pp"
         - name: "mrumkovskis/tresql"
         - name: "msgpack4z/msgpack4z-core"
         - name: "mvv/sager"
@@ -670,6 +667,7 @@ jobs:
         - name: "nulab/play2-oauth2-provider"
         - name: "nulab/scala-oauth2-provider"
         - name: "ocadotechnology/pass4s"
+        - name: "oleg-py/shironeko"
         - name: "olivierblanvillain/regsafe"
         - name: "ollls/zio-quartz-h2"
         - name: "ollls/zio-tls-http"
@@ -694,6 +692,7 @@ jobs:
         - name: "outr/spice"
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "ovotech/natchez-extras"
+        - name: "oyvindberg/jatatui"
         - name: "pac4j/http4s-pac4j"
         - name: "paoloboni/binance-scala-client"
         - name: "pathikrit/better-files"
@@ -894,6 +893,7 @@ jobs:
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
         - name: "slick/slick"
+        - name: "smootoo/tablediff"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,9 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "smootoo/tablediff"
         - name: "snowplow/snowplow-scala-analytics-sdk"
-        - name: "snowplow/snowplow-scala-tracker"
         - name: "softwaremill/akka-http-session"
         - name: "softwaremill/diffx"
         - name: "softwaremill/elasticmq"
@@ -1002,6 +1000,7 @@ jobs:
         - name: "travisbrown/iteratee"
         - name: "tschuchortdev/hkd4s"
         - name: "twitter/util"
+        - name: "typelevel/algebra"
         - name: "typelevel/bobcats"
         - name: "typelevel/case-insensitive"
         - name: "typelevel/catapult"
@@ -1116,6 +1115,7 @@ jobs:
         - name: "zero-deps/proto"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
