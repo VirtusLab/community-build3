@@ -197,13 +197,7 @@ def splitBuildPlan(
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
-private val remoteTagsCache = scala.collection.concurrent.TrieMap.empty[String, Seq[String]]
-
-/** Raw tag names from `git ls-remote --tags` (no `refs/tags/` prefix; `^{}` peeled tags removed). */
-def listRemoteTags(repoUrl: String): Seq[String] =
-  remoteTagsCache.getOrElseUpdate(repoUrl, fetchRemoteTags(repoUrl))
-
-private def fetchRemoteTags(repoUrl: String): Seq[String] =
+def findTag(repoUrl: String, version: String): Option[String] = {
   val timeout = CoordinatorRuntime.gitLsRemoteTimeoutSeconds.seconds
 
   def retryWithBackoff(
@@ -211,7 +205,8 @@ private def fetchRemoteTags(repoUrl: String): Seq[String] =
       backoffSeconds: Int,
       message: String
   ): Option[CommandResult] =
-    if retries <= 0 then
+    if retries <= 0
+    then
       Console.err.println(message)
       None
     else
@@ -257,89 +252,14 @@ private def fetchRemoteTags(repoUrl: String): Seq[String] =
 
   retryConnect(10)
     .filter(_.exitCode == 0)
-    .map { lsRemote =>
-      lsRemote.out
-        .lines()
-        .collect { case TagRef(tag) if !tag.endsWith("^{}") => tag }
-        .toSeq
-        .distinct
+    .flatMap { lsRemote =>
+      val lines = lsRemote.out.lines().filter(_.contains(version)).toList
+      val (exactMatch, partialMatch) = lines
+        .partition(_.endsWith(version))
+      (exactMatch ::: partialMatch) // sorted candidates
+        .collectFirst { case TagRef(tag) => tag }.headOption
     }
-    .getOrElse(Nil)
-
-/** Strip optional `v` prefix; reject SNAPSHOT / NIGHTLY / `-bin-` nightlies. */
-def versionLikeTag(tag: String): Option[String] =
-  val version = tag.stripPrefix("v")
-  if version.contains("SNAPSHOT") || version.contains("NIGHTLY") || version.contains("-bin-") then
-    None
-  else SemVersion.unapply(version).map(_ => version)
-
-/** Stable releases sort above RCs/milestones with the same major.minor.patch.
-  *
-  * Pre-release tokens are compared left-to-right. A shorter token list wins when it is a
-  * prefix of the other (`1.0.0-M1` > `1.0.0-M1-RC1`), matching typical release tagging.
-  */
-val versionOrdering: Ordering[String] =
-  Ordering.fromLessThan { (a, b) =>
-    (SemVersion.unapply(a), SemVersion.unapply(b)) match
-      case (Some(sa), Some(sb)) =>
-        if sa.major != sb.major then sa.major < sb.major
-        else if sa.minor != sb.minor then sa.minor < sb.minor
-        else if sa.patch != sb.patch then sa.patch < sb.patch
-        else comparePreRelease(sa.milestone, sb.milestone) < 0
-      case (Some(_), None) => false
-      case (None, Some(_)) => true
-      case _               => a < b
-  }
-
-/** @return negative if `left` < `right`, positive if `left` > `right`, 0 if equal. */
-private def comparePreRelease(left: Option[String], right: Option[String]): Int =
-  (left, right) match
-    case (None, None)       => 0
-    case (None, Some(_))    => 1 // stable > prerelease
-    case (Some(_), None)    => -1
-    case (Some(l), Some(r)) =>
-      val lt = preReleaseTokens(l)
-      val rt = preReleaseTokens(r)
-      val common = lt.zip(rt)
-      common
-        .collectFirst {
-          case (a, b) if a != b => Ordering[(Int, Int, String)].compare(a, b)
-        }
-        .getOrElse:
-          // Equal prefix: fewer tokens = more final (M1 > M1-RC1).
-          rt.length.compareTo(lt.length)
-
-/** kind rank: alpha < beta < milestone < rc < other; then numeric; then raw text. */
-private def preReleaseTokens(milestone: String): List[(Int, Int, String)] =
-  milestone
-    .split('-')
-    .toList
-    .filter(_.nonEmpty)
-    .map: tok =>
-      tok match
-        case s"alpha$n" if n.forall(_.isDigit) => (0, n.toIntOption.getOrElse(0), "")
-        case s"a$n" if n.forall(_.isDigit)     => (0, n.toIntOption.getOrElse(0), "")
-        case s"beta$n" if n.forall(_.isDigit)  => (1, n.toIntOption.getOrElse(0), "")
-        case s"b$n" if n.forall(_.isDigit)     => (1, n.toIntOption.getOrElse(0), "")
-        case s"M$n" if n.forall(_.isDigit)     => (2, n.toIntOption.getOrElse(0), "")
-        case s"m$n" if n.forall(_.isDigit)     => (2, n.toIntOption.getOrElse(0), "")
-        case s"RC$n" if n.forall(_.isDigit)    => (3, n.toIntOption.getOrElse(0), "")
-        case s"rc$n" if n.forall(_.isDigit)    => (3, n.toIntOption.getOrElse(0), "")
-        case other =>
-          val num = other.filter(_.isDigit).toIntOption.getOrElse(0)
-          (4, num, other.toLowerCase)
-
-/** Version-like release tags for a GitHub repo (newest-first by [[versionOrdering]]). */
-def listVersionLikeTags(repoUrl: String): Seq[String] =
-  listRemoteTags(repoUrl)
-    .flatMap(versionLikeTag)
-    .distinct
-    .sorted(using versionOrdering.reverse)
-
-/** Exact tag match for a version: `1.2.3` or `v1.2.3` only (no substring / suffix matches). */
-def findTag(repoUrl: String, version: String): Option[String] =
-  val tags = listRemoteTags(repoUrl)
-  tags.find(t => t == version || t == s"v$version")
+}
 
 object WithExtractedScala3Suffix {
   def unapply(s: String): Option[(String, String)] = {
