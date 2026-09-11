@@ -269,7 +269,6 @@ jobs:
         - name: "delimobil/cabbit"
         - name: "devlaam/leucine"
         - name: "devsisters/shardcake"
-        - name: "devsisters/zio-agones"
         - name: "dfianthdl/dfhdl"
         - name: "dieproht/matr"
         - name: "dieproht/molly"
@@ -332,6 +331,7 @@ jobs:
         - name: "fdimuccio/play2-sockjs"
         - name: "fiatjaf/scoin"
         - name: "filosganga/batcher"
+        - name: "filosganga/jsonpath"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,7 +358,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "filosganga/jsonpath"
         - name: "findify/flink-adt"
         - name: "findify/flink-scala-api"
         - name: "finochiom/s2d"
@@ -613,6 +612,7 @@ jobs:
         - name: "monix/implicitbox"
         - name: "monix/minitest"
         - name: "monix/monix"
+        - name: "monix/monix-bio"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,7 +639,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: "monix/monix-bio"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
         - name: "mrumkovskis/tresql"
@@ -694,6 +693,7 @@ jobs:
         - name: "outr/spice"
         - name: "ovotech/ciris-aws-secretsmanager"
         - name: "ovotech/natchez-extras"
+        - name: "oyvindberg/jatatui"
         - name: "pac4j/http4s-pac4j"
         - name: "paoloboni/binance-scala-client"
         - name: "pathikrit/better-files"
@@ -1019,7 +1019,6 @@ jobs:
         - name: "typelevel/discipline"
         - name: "typelevel/discipline-munit"
         - name: "typelevel/discipline-scalatest"
-        - name: "typelevel/discipline-specs2"
         - name: "typelevel/doobie"
         - name: "typelevel/fabric"
         - name: "typelevel/feral"
@@ -1116,6 +1115,7 @@ jobs:
         - name: "zero-deps/proto"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
+        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
