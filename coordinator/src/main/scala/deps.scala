@@ -184,13 +184,10 @@ private def buildProjectModulesFromArtifacts(
           case Some(date) => cutoff.isAfter(date)
           case None       => true // tag-only / undated: keep (riddl-style private publishes)
 
-  // Tagged versions first (newest-first), then remaining Maven/Scaladex versions.
-  // Checkout walks this list with exact findTag — tags must win over Maven-only outliers.
+  // Newest-first by SemVer across Maven∪tags. Do not prefer tags over newer Maven-only
+  // publishes (acsgh 1.3.0 has no tag but must beat tagged 1.2.16).
   val orderedVersions =
-    val tagged = allVersions.filter(taggedVersionSet.contains).sorted(using versionOrdering.reverse)
-    val untagged =
-      allVersions.filterNot(taggedVersionSet.contains).sorted(using versionOrdering.reverse)
-    (tagged ++ untagged).filter(passesCutoff)
+    allVersions.filter(passesCutoff).sorted(using versionOrdering.reverse)
 
   val versionModules =
     for version <- orderedVersions
@@ -348,15 +345,14 @@ def loadMavenInfo(scalaBinaryVersion: String, buildConfigSeed: BuildConfigSeedIn
 ): AsyncResponse[LoadedProject] =
   import projectModules.project.{repository, organization}
   val project = projectModules.project
-  val repoName = s"https://github.com/$organization/$repository.git"
   require(
     projectModules.mvs.nonEmpty,
     s"Empty modules list in $project"
   )
-  // Checkout: newest version that has a matching git tag (mvs already newest-first).
-  val checkout = projectModules.mvs
-    .find(v => findTag(repoName, v.version).isDefined)
-    .getOrElse(projectModules.mvs.head)
+  // Published/graph version: newest Maven∪tag candidate (mvs already newest-first).
+  // Git revision is resolved later via exact findTag; missing tags keep empty revision
+  // rather than falling back to an older tagged release.
+  val checkout = projectModules.mvs.head
   val checkoutVersion = checkout.version
 
   def tryFetchTargets(

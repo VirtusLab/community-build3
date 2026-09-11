@@ -273,7 +273,11 @@ def versionLikeTag(tag: String): Option[String] =
     None
   else SemVersion.unapply(version).map(_ => version)
 
-/** Stable releases sort above RCs/milestones with the same major.minor.patch. */
+/** Stable releases sort above RCs/milestones with the same major.minor.patch.
+  *
+  * Pre-release tokens are compared left-to-right. A shorter token list wins when it is a
+  * prefix of the other (`1.0.0-M1` > `1.0.0-M1-RC1`), matching typical release tagging.
+  */
 val versionOrdering: Ordering[String] =
   Ordering.fromLessThan { (a, b) =>
     (SemVersion.unapply(a), SemVersion.unapply(b)) match
@@ -281,17 +285,49 @@ val versionOrdering: Ordering[String] =
         if sa.major != sb.major then sa.major < sb.major
         else if sa.minor != sb.minor then sa.minor < sb.minor
         else if sa.patch != sb.patch then sa.patch < sb.patch
-        else (sa.milestone, sb.milestone) match
-          case (None, Some(_)) => false // stable > prerelease
-          case (Some(_), None) => true
-          case (ma, mb) =>
-            def milestoneRank(m: Option[String]): Int =
-              m.fold(Int.MaxValue)(_.filter(_.isDigit).toIntOption.getOrElse(0))
-            milestoneRank(ma) < milestoneRank(mb)
+        else comparePreRelease(sa.milestone, sb.milestone) < 0
       case (Some(_), None) => false
       case (None, Some(_)) => true
       case _               => a < b
   }
+
+/** @return negative if `left` < `right`, positive if `left` > `right`, 0 if equal. */
+private def comparePreRelease(left: Option[String], right: Option[String]): Int =
+  (left, right) match
+    case (None, None)       => 0
+    case (None, Some(_))    => 1 // stable > prerelease
+    case (Some(_), None)    => -1
+    case (Some(l), Some(r)) =>
+      val lt = preReleaseTokens(l)
+      val rt = preReleaseTokens(r)
+      val common = lt.zip(rt)
+      common
+        .collectFirst {
+          case (a, b) if a != b => Ordering[(Int, Int, String)].compare(a, b)
+        }
+        .getOrElse:
+          // Equal prefix: fewer tokens = more final (M1 > M1-RC1).
+          rt.length.compareTo(lt.length)
+
+/** kind rank: alpha < beta < milestone < rc < other; then numeric; then raw text. */
+private def preReleaseTokens(milestone: String): List[(Int, Int, String)] =
+  milestone
+    .split('-')
+    .toList
+    .filter(_.nonEmpty)
+    .map: tok =>
+      tok match
+        case s"alpha$n" if n.forall(_.isDigit) => (0, n.toIntOption.getOrElse(0), "")
+        case s"a$n" if n.forall(_.isDigit)     => (0, n.toIntOption.getOrElse(0), "")
+        case s"beta$n" if n.forall(_.isDigit)  => (1, n.toIntOption.getOrElse(0), "")
+        case s"b$n" if n.forall(_.isDigit)     => (1, n.toIntOption.getOrElse(0), "")
+        case s"M$n" if n.forall(_.isDigit)     => (2, n.toIntOption.getOrElse(0), "")
+        case s"m$n" if n.forall(_.isDigit)     => (2, n.toIntOption.getOrElse(0), "")
+        case s"RC$n" if n.forall(_.isDigit)    => (3, n.toIntOption.getOrElse(0), "")
+        case s"rc$n" if n.forall(_.isDigit)    => (3, n.toIntOption.getOrElse(0), "")
+        case other =>
+          val num = other.filter(_.isDigit).toIntOption.getOrElse(0)
+          (4, num, other.toLowerCase)
 
 /** Version-like release tags for a GitHub repo (newest-first by [[versionOrdering]]). */
 def listVersionLikeTags(repoUrl: String): Seq[String] =
