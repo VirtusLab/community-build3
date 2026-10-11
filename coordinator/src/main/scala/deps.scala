@@ -1,52 +1,14 @@
-import org.jsoup._
-import scala.jdk.CollectionConverters.*
 import scala.concurrent.*
 import java.nio.file.Files
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit.SECONDS
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import Scaladex.{ProjectArtifact, ScaladexUrl}
+import org.jsoup.HttpStatusException
+import Scaladex.ProjectArtifact
 
-import scala.language.implicitConversions
-
-// TODO scala3 should be more robust
-def loadProjects(scalaBinaryVersion: String): Seq[StarredProject] =
-  val commonSearchParams = Map(
-    "language" -> scalaBinaryVersion,
-    "platform" -> "jvm",
-    "sort" -> "stars",
-    "q" -> "*"
-  ).map(_ + "=" + _).mkString("&")
-  def load(page: Int): Seq[StarredProject] = try {
-    val d = Jsoup
-      .connect(
-        s"$ScaladexUrl/search?${commonSearchParams}&page=$page"
-      )
-      .get()
-    d.select(".list-result .row").asScala.flatMap { e =>
-      e.select("h4").get(0).text().takeWhile(!_.isWhitespace) match {
-        case s"${organization}/${repository}" =>
-          for ghStars <- e
-              .select(".stats [title=Stars]")
-              .asScala
-              .headOption
-              .flatMap(_.text.toIntOption)
-              .orElse(Some(-1))
-          yield StarredProject(organization, repository)(ghStars)
-        case _ => None
-      }
-    }.toSeq
-  } catch{case err: SocketTimeoutException => 
-    println(s"retry load projects, page=$page, err=$err")
-    load(page)
-  }
-  LazyList
-    .from(1) // page 0 and page 1 have the same content
-    .map(load)
-    .takeWhile(_.nonEmpty)
-    .flatten
-    .sortBy(-_.stars)
+def loadProjects(scalaBinaryVersion: String)(using scaladex: Scaladex): Seq[StarredProject] =
+  scaladex.starredProjects(scalaBinaryVersion)
 
 case class ModuleInVersion(version: String, modules: Seq[String])
 enum CandidateProject:
@@ -58,17 +20,17 @@ case class ProjectModules(project: Project, mvs: Seq[ModuleInVersion])
 /** JVM Scala 3 library artifacts we can resolve and test (not sbt plugins or cross-platform variants). */
 private def isTestableArtifact(artifactId: String): Boolean =
   artifactId match
-    case s"${_}_native${_}"           => false
-    case s"${_}_sjs${_}"              => false
+    case s"${_}_native${_}"          => false
+    case s"${_}_sjs${_}"             => false
     case s"${_}_sbt1" | s"${_}_sbt2" => false
-    case s"${_}_sbt${_}"              => false
-    case s"${_}_3"                    => true
-    case _                            => false
+    case s"${_}_sbt${_}"             => false
+    case s"${_}_3"                   => true
+    case _                           => false
 
 private def isTestableModuleName(module: String): Boolean =
   module match
     case s"${_}_sbt1" | s"${_}_sbt2" => false
-    case _                            => isTestableArtifact(s"${module}_3")
+    case _                           => isTestableArtifact(s"${module}_3")
 
 def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
@@ -100,11 +62,10 @@ def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
       for version <- orderedVersions
       yield ModuleInVersion(
         version = version,
-        modules =
-          artifactsByVersion(version)
-            .map(_.artifactId.stripSuffix("_3"))
-            .filter(isTestableModuleName)
-            .distinct
+        modules = artifactsByVersion(version)
+          .map(_.artifactId.stripSuffix("_3"))
+          .filter(isTestableModuleName)
+          .distinct
       )
     nonEmptyVersions = versionModules.filter(_.modules.nonEmpty)
     _ =
@@ -125,8 +86,7 @@ private def readCachedProjectModules(project: Project)(using
     driver: CacheDriver[Project, ProjectModules]
 ): Option[ProjectModules] =
   val dest = driver.dest(project)
-  if Files.exists(dest) then
-    Some(driver.load(Files.readString(dest), project))
+  if Files.exists(dest) then Some(driver.load(Files.readString(dest), project))
   else None
 
 private def writeCachedProjectModules(pm: ProjectModules)(using
@@ -235,8 +195,8 @@ def loadMavenInfo(scalaBinaryVersion: String, buildConfigSeed: BuildConfigSeedIn
         Some(target)
       })
         .recoverWith {
-          case ex: UnknownHostException   => backoff(ex, retryable = true)
-          case ex: SocketTimeoutException => backoff(ex, retryable = true)
+          case ex: UnknownHostException                           => backoff(ex, retryable = true)
+          case ex: SocketTimeoutException                         => backoff(ex, retryable = true)
           case ex: HttpStatusException if ex.getStatusCode == 503 =>
             backoff(ex, retryable = true)
           case ex: HttpStatusException if ex.getStatusCode >= 500 =>
@@ -289,8 +249,7 @@ def loadDepenenecyGraph(
   given Scaladex = Scaladex()
   val patterns = filterPatterns.map(_.r)
   val buildConfigSeed = BuildConfigSeedIndex(buildConfigSeedPath)
-  if offlineScaladex then
-    println("Scaladex offline mode: reusing data/projectModules (or buildConfig.json targets)")
+  if offlineScaladex then println("Scaladex offline mode: reusing data/projectModules (or buildConfig.json targets)")
   def loadProject(p: Project): AsyncResponse[CandidateProject] =
     if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
     else
@@ -385,8 +344,7 @@ def loadDepenenecyGraph(
           .map(available ++ _.flatten.take(remainingSlots))
       }
     }
-  }
-    .map(DependencyGraph(scalaBinaryVersion, _))
+  }.map(DependencyGraph(scalaBinaryVersion, _))
 
 def projectModulesFilter(
     filterPatterns: Seq[util.matching.Regex]
@@ -408,12 +366,10 @@ def projectModulesFilter(
             // Each entry is represented in form of `<organization>:<project/module>:<version>`
             // Filter out whole project for given version
             if !matchPatternAndLog(s"${p.organization}:${p.repository}:$version") =>
-          mvs.copy(modules =
-            modules.filter(isTestableModuleName).filter { module =>
-              // Filter out modules for given version
-              !matchPatternAndLog(s"${p.organization}:$module:$version")
-            }
-          )
+          mvs.copy(modules = modules.filter(isTestableModuleName).filter { module =>
+            // Filter out modules for given version
+            !matchPatternAndLog(s"${p.organization}:$module:$version")
+          })
       }
       .filter(_.modules.nonEmpty)
   )
