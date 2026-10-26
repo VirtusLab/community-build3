@@ -9,6 +9,7 @@ object CoordinatorProgress:
   private val mavenLoaded = AtomicInteger(0)
   private val configsDiscovered = AtomicInteger(0)
   private val configsCacheHits = AtomicInteger(0)
+  private val scaladexSkips = AtomicInteger(0)
   @volatile private var ticker: Thread | Null = null
 
   def start(interval: FiniteDuration = 15.seconds): Unit =
@@ -19,6 +20,7 @@ object CoordinatorProgress:
     mavenLoaded.set(0)
     configsDiscovered.set(0)
     configsCacheHits.set(0)
+    scaladexSkips.set(0)
     val t = new Thread(
       () =>
         try
@@ -61,10 +63,15 @@ object CoordinatorProgress:
   def configCacheHit(): Unit =
     configsCacheHits.incrementAndGet()
 
+  def scaladexSkipped(): Unit =
+    scaladexSkips.incrementAndGet()
+
+  def scaladexSkippedCount: Int = scaladexSkips.get()
+
   private def report(): Unit =
     val elapsedSec = ((System.currentTimeMillis() - startedAtMs.get()).max(0L) / 1000L)
     val current = detail.get()
     val suffix = if current.nonEmpty then s" | $current" else ""
     Console.err.println(
-      s"[progress] ${elapsedSec}s | ${phase.get()} | maven=${mavenLoaded.get()} configs=${configsDiscovered.get()} cacheHits=${configsCacheHits.get()}$suffix"
+      s"[progress] ${elapsedSec}s | ${phase.get()} | maven=${mavenLoaded.get()} configs=${configsDiscovered.get()} cacheHits=${configsCacheHits.get()} scaladexSkips=${scaladexSkips.get()}$suffix"
     )

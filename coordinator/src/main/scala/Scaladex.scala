@@ -1,4 +1,5 @@
-import java.util.concurrent.TimeUnit.{MILLISECONDS, SECONDS}
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import scala.concurrent.*
 import scala.concurrent.duration.*
 import java.time.LocalDate
@@ -11,9 +12,16 @@ object Scaladex:
 
   case class ProjectArtifact(groupId: String, artifactId: String, version: String) derives Reader
 
-  /** Non-2xx Scaladex response; body is often plain text (e.g. Cloudflare 503). */
-  final class HttpFailure(val statusCode: Int, val bodyPreview: String, val uri: Uri)
-      extends RuntimeException(s"HTTP $statusCode for $uri: $bodyPreview")
+  /** Non-2xx Scaladex response. Body is omitted: Cloudflare 429 pages are large HTML challenges. */
+  final class HttpFailure(val statusCode: Int, val uri: Uri)
+      extends RuntimeException(s"HTTP $statusCode for $uri")
+
+  /** One URL exhausted its attempts. Callers may skip that project and keep a cached copy. */
+  final class GaveUp(val uri: Uri, val attempts: Int, cause: Throwable)
+      extends RuntimeException(s"Giving up on Scaladex after $attempts attempts for $uri (${cause.getMessage})", cause)
+
+  /** Shared backoff still saw errors. Fail the run instead of retrying until the job is cancelled. */
+  final class Unavailable(message: String) extends RuntimeException(message)
 
   /** upickle wraps `ujson.ParseException` in `TraceVisitor$TraceException`. */
   def isJsonParseFailure(err: Throwable): Boolean =
@@ -44,42 +52,93 @@ class Scaladex:
     */
   private val SearchPageDelayMs = 500
 
-  private def fetchRaw(uri: Uri): Response[String] =
+  /** Floor between successful calls. A cold run lists ~2k projects; faster than this trips Cloudflare 429s. */
+  private val MinGapMs = 350
+  private val MaxGapMs = 15_000
+  private val MaxAttempts = 4
+  private val CircuitAfter = 8
+  private val MaxCircuitOpens = 4
+  private val CircuitPauseMs = 30_000
+
+  private val nextRequestAtMs = AtomicLong(0L)
+  private val gapMs = AtomicInteger(MinGapMs)
+  private val consecutiveFailures = AtomicInteger(0)
+  private val circuitOpens = AtomicInteger(0)
+
+  private enum Fetch:
+    case Ok(body: String)
+    case Http(status: Int)
+    case Transport(err: SttpClientException)
+
+  /** One Scaladex call at a time, including the backoff. Independent retries were re-entering as soon as the previous
+    * 429 returned, so a few thousand project lookups hammered Cloudflare for the whole 6h job timeout.
+    */
+  private def fetchRaw(uri: Uri): Fetch =
     CoordinatorRuntime.withPermit(CoordinatorRuntime.scaladexApi) {
-      quickRequest
-        .get(uri)
-        .header("User-Agent", UserAgent)
-        .response(asStringAlways)
-        .send(backend)
-    }
-
-  private def readBody[T: Reader](uri: Uri, response: Response[String]): T =
-    if !response.isSuccess then throw HttpFailure(response.code.code, response.body.take(200), uri)
-    read[T](response.body)
-
-  private def waitSeconds(err: Throwable, backoffSeconds: Int): Int =
-    err match
-      case failure: HttpFailure if failure.statusCode == 429 => backoffSeconds.max(5)
-      case _                                                 => backoffSeconds
-
-  private def getSync[T: Reader](uri: Uri): T =
-    def loop(backoffSeconds: Int): T =
-      try readBody(uri, fetchRaw(uri))
+      val waitMs = nextRequestAtMs.get() - System.currentTimeMillis()
+      if waitMs > 0 then MILLISECONDS.sleep(waitMs)
+      try
+        val response =
+          quickRequest
+            .get(uri)
+            .header("User-Agent", UserAgent)
+            .response(asStringAlways)
+            .send(backend)
+        if response.isSuccess then
+          recordSuccess()
+          Fetch.Ok(response.body)
+        else
+          recordFailure()
+          Fetch.Http(response.code.code)
       catch
         case err: SttpClientException =>
-          pause(err, backoffSeconds, "fetch")
-        case err: HttpFailure =>
-          pause(err, backoffSeconds, "fetch")
-        case err: Exception if isJsonParseFailure(err) =>
-          pause(err, backoffSeconds, "parse")
+          recordFailure()
+          Fetch.Transport(err)
+    }
 
-    def pause(err: Throwable, backoffSeconds: Int, kind: String): T =
-      val delaySeconds = waitSeconds(err, backoffSeconds)
+  private def recordSuccess(): Unit =
+    consecutiveFailures.set(0)
+    val decayed = math.max(MinGapMs, gapMs.get() - 25)
+    gapMs.set(decayed)
+    nextRequestAtMs.set(System.currentTimeMillis() + decayed)
+
+  private def recordFailure(): Unit =
+    val failures = consecutiveFailures.incrementAndGet()
+    val grown = math.min(MaxGapMs, math.max(gapMs.get() * 2, 1000))
+    gapMs.set(grown)
+    if failures >= CircuitAfter then
+      consecutiveFailures.set(0)
+      val opens = circuitOpens.incrementAndGet()
+      if opens > MaxCircuitOpens then
+        throw Unavailable(
+          s"Scaladex still failing after $MaxCircuitOpens pauses of ${CircuitPauseMs}ms"
+        )
       Console.err.println(
-        s"Failed to $kind Scaladex response (${CoordinatorRuntime.describeFailure(err)}), retry with backoff ${delaySeconds}s for $uri"
+        s"[scaladex] $CircuitAfter consecutive errors, pausing ${CircuitPauseMs}ms (cycle $opens/$MaxCircuitOpens)"
       )
-      SECONDS.sleep(delaySeconds)
-      loop((delaySeconds * 2).min(60))
+      nextRequestAtMs.set(System.currentTimeMillis() + CircuitPauseMs)
+    else nextRequestAtMs.set(System.currentTimeMillis() + grown)
+
+  private def getSync[T: Reader](uri: Uri): T =
+    def loop(attempt: Int): T =
+      fetchRaw(uri) match
+        case Fetch.Ok(body) =>
+          try read[T](body)
+          catch
+            case err: Exception if isJsonParseFailure(err) =>
+              recordFailure()
+              retry(attempt, err, s"JSON parse failed for $uri")
+        case Fetch.Http(status) =>
+          retry(attempt, HttpFailure(status, uri), s"HTTP $status for $uri")
+        case Fetch.Transport(err) =>
+          retry(attempt, err, s"${CoordinatorRuntime.describeFailure(err)} for $uri")
+
+    def retry(attempt: Int, err: Throwable, detail: String): T =
+      if attempt >= MaxAttempts then throw GaveUp(uri, attempt, err)
+      Console.err.println(
+        s"Scaladex $detail (attempt $attempt/$MaxAttempts, next gap ${gapMs.get()}ms)"
+      )
+      loop(attempt + 1)
 
     loop(1)
 

@@ -107,6 +107,7 @@ val ForReproducer = sys.props.contains("opencb.coordinator.reproducer-mode")
       offlineScaladex = cacheOptions.offlineScaladex,
       buildConfigSeedPath = cacheOptions.seedBuildConfigPath
     )
+    _ = ensureScaladexCoverage(dependencyGraph)
     _ = println(
       s"Loaded dependency graph: ${dependencyGraph.projects.size} projects"
     )

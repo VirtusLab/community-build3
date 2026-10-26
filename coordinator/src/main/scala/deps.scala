@@ -32,51 +32,73 @@ private def isTestableModuleName(module: String): Boolean =
     case s"${_}_sbt1" | s"${_}_sbt2" => false
     case _                           => isTestableArtifact(s"${module}_3")
 
-def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
-    project: Project
-)(using scaladex: Scaladex): AsyncResponse[ProjectModules] = {
-  for {
-    allArtifacts <- scaladex.artifacts(project)
-    scala3JvmArtifacts = allArtifacts.filter(a => isTestableArtifact(a.artifactId))
-    _ = if scala3JvmArtifacts.isEmpty then
-      val detail =
-        if allArtifacts.isEmpty then "no artifacts on Scaladex"
-        else s"0 testable JVM _3 artifacts among ${allArtifacts.size} on Scaladex"
-      CoordinatorLog.exclude(project, "no testable JVM _3 artifacts", detail)
-    artifactsByVersion = scala3JvmArtifacts.groupBy(_.version)
-    versionReleaseData <- Future
-      .traverse(artifactsByVersion) { case (version, artifacts) =>
-        scaladex
-          .artifact(artifacts.head)
-          .map: artifact =>
-            Option.when(
-              artifact.platform == "jvm" &&
-                releaseCutOffDate.forall(_.isAfter(artifact.releaseLocalData))
-            )((version, artifact.releaseDate))
-      }
-      .map(_.flatten.toMap)
-    orderedVersions = versionReleaseData.toSeq
-      .sortBy(-_._2.toEpochSecond()) // releaseDate-epoch-mill descending
-      .map(_._1)
-    versionModules =
-      for version <- orderedVersions
-      yield ModuleInVersion(
+/** Higher semver first. A release outranks a milestone with the same numbers. */
+private def versionSortKey(version: String): (Int, Int, Int, Int) =
+  val sem = SemVersion.unapply(version).getOrElse(SemVersion(0, 0, 0))
+  val stable = if sem.milestone.isEmpty then 1 else 0
+  (sem.major, sem.minor, sem.patch, stable)
+
+private def modulesForVersions(
+    artifactsByVersion: Map[String, Seq[ProjectArtifact]],
+    versions: Seq[String]
+): Seq[ModuleInVersion] =
+  versions
+    .map { version =>
+      ModuleInVersion(
         version = version,
         modules = artifactsByVersion(version)
           .map(_.artifactId.stripSuffix("_3"))
           .filter(isTestableModuleName)
           .distinct
       )
-    nonEmptyVersions = versionModules.filter(_.modules.nonEmpty)
-    _ =
+    }
+    .filter(_.modules.nonEmpty)
+
+def loadScaladexProject(releaseCutOffDate: Option[LocalDate] = None)(
+    project: Project
+)(using scaladex: Scaladex): AsyncResponse[ProjectModules] =
+  scaladex.artifacts(project).flatMap(projectModulesFromArtifacts(releaseCutOffDate, project, _))
+
+private def projectModulesFromArtifacts(
+    releaseCutOffDate: Option[LocalDate],
+    project: Project,
+    allArtifacts: Seq[ProjectArtifact]
+)(using scaladex: Scaladex): AsyncResponse[ProjectModules] =
+  val scala3JvmArtifacts = allArtifacts.filter(a => isTestableArtifact(a.artifactId))
+    if scala3JvmArtifacts.isEmpty then
+      val detail =
+        if allArtifacts.isEmpty then "no artifacts on Scaladex"
+        else s"0 testable JVM _3 artifacts among ${allArtifacts.size} on Scaladex"
+      CoordinatorLog.exclude(project, "no testable JVM _3 artifacts", detail)
+    val artifactsByVersion = scala3JvmArtifacts.groupBy(_.version)
+    val orderedVersions =
+      releaseCutOffDate match
+        case None =>
+          // One artifacts-list call per project. Per-version detail calls are what turned a
+          // Cloudflare 429 into a 6h retry loop (~2k projects × every published version).
+          Future.successful(artifactsByVersion.keys.toSeq.sortBy(versionSortKey).reverse)
+        case Some(cutOff) =>
+          artifactsByVersion.keys.toList
+            .foldLeft(Future.successful(List.empty[(String, java.time.OffsetDateTime)])) { (accF, version) =>
+              accF.flatMap { acc =>
+                scaladex.artifact(artifactsByVersion(version).head).map { artifact =>
+                  if artifact.platform == "jvm" && cutOff.isAfter(artifact.releaseLocalData) then
+                    (version, artifact.releaseDate) :: acc
+                  else acc
+                }
+              }
+            }
+            .map(_.sortBy(-_._2.toEpochSecond).map(_._1))
+    orderedVersions.map { versions =>
+      val nonEmptyVersions = modulesForVersions(artifactsByVersion, versions)
       if nonEmptyVersions.isEmpty && artifactsByVersion.nonEmpty then
         CoordinatorLog.exclude(
           project,
           "no testable JVM _3 artifacts",
           s"no versions passed filters (releaseCutOffDate=${releaseCutOffDate.isDefined})"
         )
-  } yield ProjectModules(project, nonEmptyVersions)
-}
+      ProjectModules(project, nonEmptyVersions)
+    }
 
 /** JVM Scala 3 versions published on Scaladex (one cheap [[Scaladex.artifacts]] call). */
 private def testableArtifactVersions(artifacts: Seq[ProjectArtifact]): Set[String] =
@@ -96,34 +118,70 @@ private def writeCachedProjectModules(pm: ProjectModules)(using
   Files.createDirectories(dest.getParent)
   Files.writeString(dest, driver.write(pm))
 
+private def refreshProjectModules(
+    releaseCutOffDate: Option[LocalDate],
+    project: Project,
+    artifacts: Seq[ProjectArtifact],
+    reason: String
+)(using
+    scaladex: Scaladex,
+    driver: CacheDriver[Project, ProjectModules]
+): AsyncResponse[ProjectModules] =
+  println(s"Refreshing Scaladex project modules for ${project.coordinates} ($reason)")
+  projectModulesFromArtifacts(releaseCutOffDate, project, artifacts).map { pm =>
+    writeCachedProjectModules(pm)
+    pm
+  }
+
+/** Stale disk cache when Scaladex gives up on this project. An outage ([[Scaladex.Unavailable]]) is not recovered. */
+private def modulesAfterScaladexGaveUp(project: Project, err: Scaladex.GaveUp)(using
+    driver: CacheDriver[Project, ProjectModules]
+): ProjectModules =
+  CoordinatorProgress.scaladexSkipped()
+  readCachedProjectModules(project) match
+    case Some(cached) =>
+      CoordinatorLog.warn(project, "using stale Scaladex cache", err.getMessage)
+      cached
+    case None =>
+      CoordinatorLog.exclude(project, "Scaladex lookup failed", err.getMessage)
+      ProjectModules(project, Nil)
+
 /** Cached project modules with a cheap Scaladex version check before skipping the full load. */
 def loadProjectModulesWithVersionCheck(releaseCutOffDate: Option[LocalDate] = None)(
     project: Project
 )(using scaladex: Scaladex, driver: CacheDriver[Project, ProjectModules]): AsyncResponse[ProjectModules] =
-  scaladex.artifacts(project).flatMap { artifacts =>
-    val freshVersions = testableArtifactVersions(artifacts)
-    readCachedProjectModules(project) match
-      case Some(cached) if cached.mvs.map(_.version).toSet == freshVersions =>
-        Future.successful(cached)
-      case Some(cached) =>
-        val cachedVersions = cached.mvs.map(_.version).toSet
-        val added = freshVersions -- cachedVersions
-        val removed = cachedVersions -- freshVersions
-        println(
-          s"Refreshing Scaladex project modules for ${project.coordinates} " +
-            s"(versions changed: +${added.mkString(", ")} -${removed.mkString(", ")})"
-        )
-        loadScaladexProject(releaseCutOffDate)(project).map { pm =>
-          writeCachedProjectModules(pm)
-          pm
-        }
-      case None =>
-        println(s"Refreshing Scaladex project modules for ${project.coordinates} (no cache)")
-        loadScaladexProject(releaseCutOffDate)(project).map { pm =>
-          writeCachedProjectModules(pm)
-          pm
-        }
-  }
+  scaladex
+    .artifacts(project)
+    .flatMap { artifacts =>
+      val freshVersions = testableArtifactVersions(artifacts)
+      readCachedProjectModules(project) match
+        case Some(cached) if cached.mvs.map(_.version).toSet == freshVersions =>
+          Future.successful(cached)
+        case Some(cached) =>
+          val cachedVersions = cached.mvs.map(_.version).toSet
+          val added = freshVersions -- cachedVersions
+          val removed = cachedVersions -- freshVersions
+          refreshProjectModules(
+            releaseCutOffDate,
+            project,
+            artifacts,
+            s"versions changed: +${added.mkString(", ")} -${removed.mkString(", ")}"
+          )
+        case None =>
+          refreshProjectModules(releaseCutOffDate, project, artifacts, "no cache")
+    }
+    .recover { case err: Scaladex.GaveUp =>
+      modulesAfterScaladexGaveUp(project, err)
+    }
+
+/** Fail the run when too many projects were skipped, so a partial plan is not published. */
+def ensureScaladexCoverage(graph: DependencyGraph): Unit =
+  val skipped = CoordinatorProgress.scaladexSkippedCount
+  val seen = graph.projects.size + skipped
+  if seen >= 20 && skipped * 20 > seen then
+    sys.error(
+      s"Scaladex lookups failed for $skipped of $seen projects; refusing to write a partial build plan"
+    )
 
 /** Reuse on-disk Scaladex module cache (or buildConfig.json targets); never call Scaladex. */
 def loadProjectModulesOffline(
@@ -250,24 +308,26 @@ def loadDepenenecyGraph(
   val patterns = filterPatterns.map(_.r)
   val buildConfigSeed = BuildConfigSeedIndex(buildConfigSeedPath)
   if offlineScaladex then println("Scaladex offline mode: reusing data/projectModules (or buildConfig.json targets)")
-  def loadProject(p: Project): AsyncResponse[CandidateProject] =
-    if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
-    else
-      val modules =
-        if offlineScaladex then loadProjectModulesOffline(p, buildConfigSeed)
-        else loadProjectModulesWithVersionCheck(releaseCutOffDate)(p)
-      modules.map { pm =>
-        val filtered = projectModulesFilter(patterns)(pm)
-        if filtered.mvs.isEmpty then
-          if pm.mvs.isEmpty then ()
-          else
-            CoordinatorLog.exclude(
-              filtered.project,
-              "empty module list after filters",
-              s"${pm.mvs.size} version(s) before pattern/module filtering"
-            )
-        CandidateProject.BuildSelected(filtered.project, filtered.mvs)
-      }
+  def loadProject(p: Project): () => AsyncResponse[CandidateProject] =
+    () =>
+      CoordinatorProgress.setDetail(s"scaladex ${p.coordinates}")
+      if customProjects.contains(p) then Future.successful(CandidateProject.BuildAll(p))
+      else
+        val modules =
+          if offlineScaladex then loadProjectModulesOffline(p, buildConfigSeed)
+          else loadProjectModulesWithVersionCheck(releaseCutOffDate)(p)
+        modules.map { pm =>
+          val filtered = projectModulesFilter(patterns)(pm)
+          if filtered.mvs.isEmpty then
+            if pm.mvs.isEmpty then ()
+            else
+              CoordinatorLog.exclude(
+                filtered.project,
+                "empty module list after filters",
+                s"${pm.mvs.size} version(s) before pattern/module filtering"
+              )
+          CandidateProject.BuildSelected(filtered.project, filtered.mvs)
+        }
 
   val required = LazyList
     .from(requiredProjects)
@@ -284,40 +344,46 @@ def loadDepenenecyGraph(
   def optional(from: Int, limit: Option[Int]) =
     limit.foldLeft(optionalStream.drop(from))(_.take(_))
 
+  val projectLoadBatchSize = 4
   def load(
-      candidates: LazyList[Future[CandidateProject]]
-  ): Future[Seq[Option[LoadedProject]]] = {
-    Future
-      .traverse(candidates.zipWithIndex) { (getProject, idx) =>
-        for
-          project <- getProject
-          name = s"${project.project.organization}/${project.project.repository}"
-          mvnInfo <-
+      candidates: LazyList[() => AsyncResponse[CandidateProject]]
+  ): Future[Seq[Option[LoadedProject]]] =
+    def runBatch(
+        rest: LazyList[() => AsyncResponse[CandidateProject]],
+        acc: Vector[Option[LoadedProject]],
+        idx: Int
+    ): Future[Seq[Option[LoadedProject]]] =
+      if rest.isEmpty then Future.successful(acc.toSeq)
+      else
+        val (batch, tail) = rest.splitAt(projectLoadBatchSize)
+        val started = batch.toList.zipWithIndex.map { (start, offset) =>
+          val projectIndex = idx + offset
+          start().flatMap { project =>
+            val name = s"${project.project.organization}/${project.project.repository}"
             project match
-              case CandidateProject.BuildAll(project) =>
-                Future.successful(
-                  Some(LoadedProject(project, "HEAD", Seq(Target.BuildAll)))
-                )
-              case candidate @ CandidateProject.BuildSelected(project, mvs) =>
-                if mvs.isEmpty then Future.successful(None)
-                else
-                  loadMavenInfo(scalaBinaryVersion, buildConfigSeed)(candidate)
-                    .map { result =>
-                      CoordinatorProgress.mavenInfoLoaded()
-                      CoordinatorProgress.setDetail(s"maven #$name")
-                      println(s"Loaded Maven info #${idx + 1} for $name")
-                      Option(result)
-                    }
-                    .recover {
-                      case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
-                        System.err.println(
-                          s"Missing Maven info: ${ex.getUrl()}"
-                        )
-                        None
-                    }
-        yield mvnInfo
-      }
-  }
+              case CandidateProject.BuildAll(buildAll) =>
+                Future.successful(Some(LoadedProject(buildAll, "HEAD", Seq(Target.BuildAll))))
+              case CandidateProject.BuildSelected(_, mvs) if mvs.isEmpty =>
+                Future.successful(None)
+              case candidate: CandidateProject.BuildSelected =>
+                CoordinatorProgress.setDetail(s"maven $name")
+                loadMavenInfo(scalaBinaryVersion, buildConfigSeed)(candidate)
+                  .map { result =>
+                    CoordinatorProgress.mavenInfoLoaded()
+                    println(s"Loaded Maven info #${projectIndex + 1} for $name")
+                    Some(result)
+                  }
+                  .recover {
+                    case ex: org.jsoup.HttpStatusException if ex.getStatusCode() == 404 =>
+                      System.err.println(s"Missing Maven info: ${ex.getUrl()}")
+                      None
+                  }
+          }
+        }
+        Future.sequence(started).flatMap { rows =>
+          runBatch(tail, acc ++ rows, idx + rows.size)
+        }
+    runBatch(candidates, Vector.empty, 0)
 
   load(
     required #::: optional(

@@ -15,6 +15,9 @@ on:
 jobs:
   build-plan:
     runs-on: ubuntu-22.04
+    # Stay under the hosted-runner ceiling so a slow plan fails the step instead of cancelling the job.
+    # Cancellation skips every later step, including cache save, so the next week starts cold.
+    timeout-minutes: 360
     if: github.repository == 'VirtusLab/community-build3' && contains(github.ref, 'master')
     steps:
       - uses: actions/checkout@v6
@@ -23,20 +26,36 @@ jobs:
         with:
           apps: scala-cli:1.12.5
 
-      - name: Cache coordinator data
-        uses: actions/cache@v4
+      - name: Restore coordinator data
+        uses: actions/cache/restore@v4
         with:
-          # coordinator stores cache in current working directory (Scaladex + project build defs)
+          # coordinator stores cache in the working directory (Scaladex modules, Maven targets, build defs)
           path: |
             data/
             coordinator/data/
-          key: coordinator-data-cache
+          # A new key every run. actions/cache will not overwrite an existing key, and the old
+          # fixed key was never saved: the 6h job cancellation skipped the post-cache step.
+          key: coordinator-data-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            coordinator-data-
 
       - name: Build plan
-        # Limit each build plan to at most 1000 most project. 
+        # Leave time for the cache save below. GitHub kills the whole job at 6h and then saves nothing.
+        timeout-minutes: 330
+        # Limit each build plan to at most 1000 most project.
         # GitHub actions has problems when rendering workflow of more then 1k jobs
         # Projects are grouped based on GitHub stars
         run: scala-cli run coordinator/ -- 3 -1 -1 1000 "" coordinator/configs
+
+      - name: Save coordinator data
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            data/
+            coordinator/data/
+          key: coordinator-data-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
