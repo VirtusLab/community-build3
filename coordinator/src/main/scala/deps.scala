@@ -32,11 +32,22 @@ private def isTestableModuleName(module: String): Boolean =
     case s"${_}_sbt1" | s"${_}_sbt2" => false
     case _                           => isTestableArtifact(s"${module}_3")
 
-/** Higher semver first. A release outranks a milestone with the same numbers. */
-private def versionSortKey(version: String): (Int, Int, Int, Int) =
+/** Higher semver first. A release outranks a prerelease; `M4` outranks `M1`. */
+private def versionSortKey(version: String): (Int, Int, Int, Int, Int) =
   val sem = SemVersion.unapply(version).getOrElse(SemVersion(0, 0, 0))
-  val stable = if sem.milestone.isEmpty then 1 else 0
-  (sem.major, sem.minor, sem.patch, stable)
+  val (preKind, preNum) = sem.milestone match
+    case None => (5, 0)
+    case Some(milestone) =>
+      val lower = milestone.toLowerCase
+      val kind =
+        if lower.startsWith("rc") || lower.startsWith("cr") then 4
+        else if lower.startsWith("milestone") || lower.startsWith("m") then 3
+        else if lower.startsWith("beta") then 2
+        else if lower.startsWith("alpha") || lower.startsWith("preview") then 1
+        else 0
+      val preNum = """\d+""".r.findAllIn(milestone).toList.lastOption.flatMap(_.toIntOption).getOrElse(0)
+      (kind, preNum)
+  (sem.major, sem.minor, sem.patch, preKind, preNum)
 
 private def modulesForVersions(
     artifactsByVersion: Map[String, Seq[ProjectArtifact]],
@@ -225,9 +236,10 @@ def loadMavenInfo(scalaBinaryVersion: String, buildConfigSeed: BuildConfigSeedIn
     projectModules.mvs.nonEmpty,
     s"Empty modules list in ${projectModules.project}"
   )
-  val ModuleInVersion(version, modules) = projectModules.mvs
+  val byRelease = projectModules.mvs.sortBy(mv => versionSortKey(mv.version)).reverse
+  val ModuleInVersion(version, modules) = byRelease
     .find(v => findTag(repoName, v.version).isDefined)
-    .getOrElse(projectModules.mvs.head)
+    .getOrElse(byRelease.head)
 
   val tasks = modules.map { module =>
     def tryFetch(backoffSeconds: Int, attempt: Int): AsyncResponse[Option[Target]] = {

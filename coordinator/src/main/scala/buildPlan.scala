@@ -198,6 +198,46 @@ def splitBuildPlan(
 
 val TagRef = """.+refs\/tags\/(.+)""".r
 
+/** A tag names this release, not a longer version that merely contains it.
+  *
+  * `v1.3.0-M1` must not satisfy version `1.3.0`: that checkout does not contain the `1.3.0` modules.
+  * `v1.3.0`, `v.1.3.0`, and `SPECS2-5.9.1` still match. A trailing prerelease (`-M1`, `-RC2`) does not.
+  */
+def tagDenotesVersion(tag: String, version: String): Boolean =
+  val name = tag.stripSuffix("^{}")
+  def atBoundary(i: Int): Boolean =
+    val beforeOk = i == 0 || (name(i - 1) match
+      case 'v' | 'V' => i == 1 || !name(i - 2).isLetterOrDigit
+      case c         => !c.isLetterOrDigit
+    )
+    val after = name.drop(i + version.length)
+    val afterOk = after.isEmpty || (!after.head.isLetterOrDigit && !isPrereleaseContinuation(after))
+    beforeOk && afterOk
+
+  def occurrences(from: Int): LazyList[Int] =
+    name.indexOf(version, from) match
+      case i if i >= 0 => i #:: occurrences(i + 1)
+      case _           => LazyList.empty
+
+  version.nonEmpty && !name.toLowerCase.contains("mistake") && occurrences(0).exists(atBoundary)
+
+private val PrereleaseMarkers =
+  Seq("m", "rc", "cr", "alpha", "beta", "snapshot", "preview", "pre", "milestone")
+
+private def isPrereleaseContinuation(after: String): Boolean =
+  val rest = after.dropWhile(c => c == '-' || c == '.' || c == '_')
+  val head = rest.takeWhile(_.isLetter).toLowerCase
+  PrereleaseMarkers.contains(head)
+
+private def tagRank(tag: String, version: String): (exact: Int, length: Int, tag: String) =
+  val body = tag match
+    case s"v.$rest" => rest
+    case s"v$rest" if rest.nonEmpty && rest.head.isDigit => rest
+    case s"V$rest" if rest.nonEmpty && rest.head.isDigit => rest
+    case other      => other
+  val exact = if body == version || tag == version then 0 else 1
+  (exact = exact, length = tag.length, tag = tag)
+
 def findTag(repoUrl: String, version: String): Option[String] = {
   val timeout = CoordinatorRuntime.gitLsRemoteTimeoutSeconds.seconds
 
@@ -254,11 +294,13 @@ def findTag(repoUrl: String, version: String): Option[String] = {
   retryConnect(10)
     .filter(_.exitCode == 0)
     .flatMap { lsRemote =>
-      val lines = lsRemote.out.lines().filter(_.contains(version)).toList
-      val (exactMatch, partialMatch) = lines
-        .partition(_.endsWith(version))
-      (exactMatch ::: partialMatch) // sorted candidates
-        .collectFirst { case TagRef(tag) => tag }.headOption
+      val tags = lsRemote.out
+        .lines()
+        .filter(_.contains(version))
+        .collect { case TagRef(tag) => tag.stripSuffix("^{}") }
+        .distinct
+        .filter(tagDenotesVersion(_, version))
+      tags.minByOption(tagRank(_, version))
     }
 }
 
