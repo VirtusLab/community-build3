@@ -12307,7 +12307,7 @@
         }
       },
       "java":{
-        "version":"17"
+        
       },
       "sbt":{
         "commands":[
@@ -48989,7 +48989,7 @@
         }
       },
       "java":{
-        "version":"21"
+        "version":"25"
       },
       "sbt":{
         "commands":[
@@ -51639,6 +51639,56 @@
           "path":"build.sbt",
           "pattern":"val scala3Version = \"3.7.4\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
+        }
+      ],
+      "dependencyOverrides":[
+        
+      ]
+    }
+  },
+  "mchv/play-brotli-filter":{
+    "project":"mchv/play-brotli-filter",
+    "repoUrl":"https://github.com/mchv/play-brotli-filter.git",
+    "revision":"v0.24.1",
+    "version":"0.24.1",
+    "targets":"",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"21"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        {
+          "path":"build.sbt",
+          "pattern":"val Scala3 = \"3.3.4\"",
+          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
         }
       ],
       "dependencyOverrides":[
@@ -61498,7 +61548,8 @@
     "repoUrl":"https://github.com/playframework/play-mailer.git",
     "revision":"11.0.0-M1",
     "version":"11.0.0-M1",
-    "targets":"",
+    "targets":"org.playframework%play-mailer org.playframework%play-mailer-guice",
+    "publishedScalaVersion":"3.3.4",
     "config":{
       "projects":{
         "exclude":[
@@ -65061,7 +65112,7 @@
   "rchillyard/flog":{
     "project":"rchillyard/flog",
     "repoUrl":"https://github.com/rchillyard/flog.git",
-    "revision":"",
+    "revision":"V1.0.15",
     "version":"1.0.15",
     "targets":"com.phasmidsoftware%flog",
     "publishedScalaVersion":"3.3.6",
@@ -94105,57 +94156,6 @@
         "dev.zio::zio-macros:2.1.26",
         "dev.zio::zio-concurrent:2.1.26",
         "dev.zio::zio-test-refined:2.1.26"
-      ]
-    }
-  },
-  "zio-archive/zio-constraintless":{
-    "project":"zio-archive/zio-constraintless",
-    "repoUrl":"https://github.com/zio-archive/zio-constraintless.git",
-    "revision":"v0.3.4",
-    "version":"0.3.4",
-    "targets":"dev.zio%zio-constraintless dev.zio%zio-constraintless-docs",
-    "publishedScalaVersion":"3.6.3",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        {
-          "path":"build.sbt",
-          "pattern":"val Scala3 = \"3.6.3\"",
-          "replaceWith":"val Scala3 = \"<SCALA_VERSION>\""
-        }
-      ],
-      "dependencyOverrides":[
-        
       ]
     }
   },
