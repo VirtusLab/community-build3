@@ -485,6 +485,7 @@ jobs:
         - name: "jczuchnowski/zio-pulsar"
         - name: "jd557/interim"
         - name: "jd557/minart"
+        - name: "jd557/qrgen"
         - name: "jelly-rdf/jelly-jvm"
         - name: "jetbrains/sbt-structure"
         - name: "jilen/play-circe"
@@ -612,7 +613,6 @@ jobs:
         - name: "monix/monix-bio"
         - name: "monix/monix-connect"
         - name: "mpollmeier/scala-repl-pp"
-        - name: "mrumkovskis/tresql"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "mrumkovskis/tresql"
         - name: "msgpack4z/msgpack4z-core"
         - name: "mvv/sager"
         - name: "nafg/css-dsl"
@@ -893,7 +894,6 @@ jobs:
         - name: "sirthias/spliff"
         - name: "sksamuel/avro4s"
         - name: "slack-scala-client/slack-scala-client"
-        - name: "slick/slick"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -920,6 +920,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "slick/slick"
         - name: "smootoo/tablediff"
         - name: "snowplow/snowplow-scala-analytics-sdk"
         - name: "softwaremill/akka-http-session"
@@ -1115,7 +1116,6 @@ jobs:
         - name: "zero-deps/proto"
         - name: "zio-archive/interop-reactive-streams"
         - name: "zio-archive/zio-connect"
-        - name: "zio-archive/zio-constraintless"
         - name: "zio-archive/zio-jdbc"
         - name: "zio-archive/zio-metrics-legacy"
         - name: "zio-archive/zio-mock"
