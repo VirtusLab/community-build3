@@ -82,7 +82,6 @@ jobs:
         - name: "47degrees/sbt-energymonitor"
         - name: "aaronp/args4c"
         - name: "aaronp/eie"
-        - name: "ab-keynub/keynub-sdk"
         - name: "absaoss/absa-shaded-jackson-module-scala"
         - name: "acsgh/scala-common"
         - name: "active-group/scalajasper"
@@ -146,6 +145,7 @@ jobs:
         - name: "banno/cosmos4s"
         - name: "bartholomews/scala-iso"
         - name: "bcarter97/id-generator"
+        - name: "beangle/boot"
         - name: "beangle/cache"
         - name: "beangle/cdi"
         - name: "beangle/commons"
@@ -173,7 +173,6 @@ jobs:
         - name: "bp3r/jsonrpc2"
         - name: "bpholt/java-time-literals"
         - name: "broij/zarrow"
-        - name: "business4s/chatops4s"
         - name: "cake-lier/tuples-space-client"
         - name: "carlos-verdes/zio-arangodb"
         - name: "carlosedp/scalautils"
@@ -258,6 +257,8 @@ jobs:
         - name: "ddolib-cetic-ucl/ddolib-scala"
         - name: "delimobil/fs2-hbase"
         - name: "devsisters/zio-agones"
+        - name: "dieproht/molly"
+        - name: "dmytromitin/auxify-scala3"
         - name: "dmytromitin/quasiquotes-scala3"
         - name: "dmytromitin/scala-semantic-harness"
         - name: "dobrynya/zio-jms"
@@ -331,7 +332,6 @@ jobs:
         - name: "esamson/better-xdg"
         - name: "estrondo/farango"
         - name: "eugene-sy/play-quartz"
-        - name: "evolution-gaming/random"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -358,6 +358,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "evolution-gaming/random"
         - name: "fdietze/formidable"
         - name: "fehu/opentracing-scala"
         - name: "fgrutsch/emergence"
@@ -408,11 +409,9 @@ jobs:
         - name: "greyplane/jsonpath4s"
         - name: "greyplane/spray-json-optics"
         - name: "guardian/anghammarad"
-        - name: "guardian/cross-platform-navigation"
         - name: "guardian/etag-caching"
         - name: "guardian/facia-scala-client"
         - name: "guardian/identity-test-users"
-        - name: "guardian/mobile-apps-api-models"
         - name: "guardian/pa-football-client"
         - name: "guardian/play-passkeyauth"
         - name: "guardian/redirect-resolver"
@@ -451,6 +450,7 @@ jobs:
         - name: "hnaderi/scala-readpass"
         - name: "hnaderi/yaml4s"
         - name: "hoangmaihuy/scalapb-jsoniter"
+        - name: "hsci-r/octavo-indexer"
         - name: "hseeberger/slf4s"
         - name: "hshn/diffact"
         - name: "hshn/yoshi"
@@ -522,6 +522,7 @@ jobs:
         - name: "janlisse/zio-jwt-validator"
         - name: "janstenpickle/hotswap-ref"
         - name: "jatcwang/iohandle"
+        - name: "jd557/qrgen"
         - name: "jd557/rokrok"
         - name: "jd557/spaeti"
         - name: "jkobejs/cron"
@@ -612,7 +613,6 @@ jobs:
         - name: "kubuszok/scala-newtype-compat"
         - name: "kubuszok/scala-sax-parser"
         - name: "kzmake/uuid7s"
-        - name: "laserdisc-io/scanamo-circe"
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -639,6 +639,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: "laserdisc-io/scanamo-circe"
         - name: "laserdisc-io/slack4s"
         - name: "laserdisc-io/zio-oci-objectstorage"
         - name: "lbialy/filter-native-image-metadata"
@@ -676,7 +677,6 @@ jobs:
         - name: "logicovercode/core-commons"
         - name: "lorandszakacs/enclosure"
         - name: "losizm/bolster"
-        - name: "losizm/grapple"
         - name: "losizm/little-cli"
         - name: "losizm/little-config"
         - name: "losizm/little-io"

@@ -581,13 +581,6 @@
     "targets":"com.github.aaronp%eie",
     "publishedScalaVersion":"3.1.0"
   },
-  "ab-keynub/keynub-sdk":{
-    "project":"ab-keynub/keynub-sdk",
-    "repoUrl":"https://github.com/ab-keynub/keynub-sdk.git",
-    "revision":"v1.1.1",
-    "version":"1.1.1",
-    "targets":""
-  },
   "absaoss/absa-shaded-jackson-module-scala":{
     "project":"absaoss/absa-shaded-jackson-module-scala",
     "repoUrl":"https://github.com/absaoss/absa-shaded-jackson-module-scala.git",
@@ -18610,12 +18603,12 @@
       ],
       "sourcePatches":[
         {
-          "path":"buildSetup.sc",
-          "pattern":"case ZincWorkerUtil.DottyVersion(\"0\",",
-          "replaceWith":"case ZincWorkerUtil.Scala3Version("
+          "path":"buildSetup.mill",
+          "pattern":"val parts = scalaVersion.split('.').map(_.toInt)",
+          "replaceWith":"val parts = scalaVersion.split('.').map(_.takeWhile(_.isDigit).toInt)"
         },
         {
-          "path":"buildSetup.sc",
+          "path":"buildSetup.mill",
           "pattern":"-java-output-version:11",
           "replaceWith":"-java-output-version:21"
         }
@@ -29072,7 +29065,7 @@
         }
       },
       "java":{
-        
+        "version":"21"
       },
       "sbt":{
         "commands":[
@@ -29442,53 +29435,6 @@
     "targets":"com.gu%anghammarad-client com.gu%anghammarad-common",
     "publishedScalaVersion":"3.3.8"
   },
-  "guardian/cross-platform-navigation":{
-    "project":"guardian/cross-platform-navigation",
-    "repoUrl":"https://github.com/guardian/cross-platform-navigation.git",
-    "revision":"v1.3.2",
-    "version":"1.3.2",
-    "targets":"com.gu%cross-platform-navigation",
-    "publishedScalaVersion":"3.3.3",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
   "guardian/etag-caching":{
     "project":"guardian/etag-caching",
     "repoUrl":"https://github.com/guardian/etag-caching.git",
@@ -29653,53 +29599,6 @@
     "version":"14.0.1",
     "targets":"com.gu%janus-config-tools",
     "publishedScalaVersion":"3.3.8"
-  },
-  "guardian/mobile-apps-api-models":{
-    "project":"guardian/mobile-apps-api-models",
-    "repoUrl":"https://github.com/guardian/mobile-apps-api-models.git",
-    "revision":"v1.0.80",
-    "version":"1.0.80",
-    "targets":"com.gu%mobile-apps-api-models-v0",
-    "publishedScalaVersion":"3.3.6",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
   },
   "guardian/pa-football-client":{
     "project":"guardian/pa-football-client",
@@ -30296,7 +30195,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.4"
+        
       ],
       "sourcePatches":[
         
@@ -45555,52 +45454,6 @@
       ]
     }
   },
-  "kmizu/numscala":{
-    "project":"kmizu/numscala",
-    "repoUrl":"https://github.com/kmizu/numscala.git",
-    "revision":"v0.5.0",
-    "version":"0.5.0",
-    "targets":"",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"25"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
-  },
   "kolemannix/spack":{
     "project":"kolemannix/spack",
     "repoUrl":"https://github.com/kolemannix/spack.git",
@@ -49805,7 +49658,7 @@
       "sourcePatches":[
         {
           "path":"build.mill",
-          "pattern":"val scalaVersions = Seq\\(\"3\\.8\\.3\"\\)",
+          "pattern":"val scalaVersions = Seq\\([^)]*\\)",
           "replaceWith":"val scalaVersions = Seq(\"<SCALA_VERSION>\")"
         }
       ],
@@ -54995,7 +54848,7 @@
         }
       },
       "java":{
-        
+        "version":"21"
       },
       "sbt":{
         "commands":[
@@ -55487,9 +55340,9 @@
       ]
     }
   },
-  "neverblink-oss/linkml-scala":{
-    "project":"neverblink-oss/linkml-scala",
-    "repoUrl":"https://github.com/neverblink-oss/linkml-scala.git",
+  "neverblink-oss/ohi":{
+    "project":"neverblink-oss/ohi",
+    "repoUrl":"https://github.com/neverblink-oss/ohi.git",
     "revision":"v0.14.0",
     "version":"0.14.0",
     "targets":"",
@@ -65068,46 +64921,7 @@
     "revision":"",
     "version":"2.0.0",
     "targets":"com.phasmidsoftware%args",
-    "publishedScalaVersion":"3.3.8",
-    "config":{
-      "projects":{
-        "exclude":[
-          
-        ],
-        "overrides":{
-          
-        }
-      },
-      "java":{
-        "version":"17"
-      },
-      "sbt":{
-        "commands":[
-          
-        ],
-        "options":[
-          
-        ]
-      },
-      "mill":{
-        "options":[
-          
-        ]
-      },
-      "git":{
-        "unshallow":false
-      },
-      "tests":"full",
-      "migrationVersions":[
-        
-      ],
-      "sourcePatches":[
-        
-      ],
-      "dependencyOverrides":[
-        
-      ]
-    }
+    "publishedScalaVersion":"3.3.8"
   },
   "rchillyard/flog":{
     "project":"rchillyard/flog",
@@ -67386,10 +67200,8 @@
         "unshallow":false
       },
       "tests":"full",
-      "sourceVersion":"3.5",
       "migrationVersions":[
-        "3.6+3.6.3",
-        "3.7"
+        
       ],
       "sourcePatches":[
         {
@@ -70221,6 +70033,52 @@
       ]
     }
   },
+  "scala-ml/numscala":{
+    "project":"scala-ml/numscala",
+    "repoUrl":"https://github.com/scala-ml/numscala.git",
+    "revision":"v0.5.0",
+    "version":"0.5.0",
+    "targets":"",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"25"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        
+      ]
+    }
+  },
   "scala-native/scala-native-cli":{
     "project":"scala-native/scala-native-cli",
     "repoUrl":"https://github.com/scala-native/scala-native-cli.git",
@@ -72796,7 +72654,11 @@
         
       ],
       "sourcePatches":[
-        
+        {
+          "path":"build.sbt",
+          "pattern":"ThisBuild / dependencyOverrides ++= Seq(",
+          "replaceWith":"val docToolDependencyOverrides = Seq("
+        }
       ],
       "dependencyOverrides":[
         
@@ -77506,7 +77368,7 @@
       },
       "tests":"full",
       "migrationVersions":[
-        "3.7"
+        
       ],
       "sourcePatches":[
         
@@ -79741,8 +79603,8 @@
       "sourcePatches":[
         {
           "path":"build.mill",
-          "pattern":"ivy\"dev.zio::zio:2.1.19\"",
-          "replaceWith":"ivy\"dev.zio::zio:2.1.26\""
+          "pattern":"mvn\"dev.zio::zio:2.1.19\"",
+          "replaceWith":"mvn\"dev.zio::zio:2.1.26\""
         }
       ],
       "dependencyOverrides":[
