@@ -87,6 +87,22 @@ trait CommunityBuildPluginShared extends AutoPlugin {
     case WithExtractedScala3Suffix(prefix, _) => prefix; case _ => s
   }
 
+  // Published artifact name, e.g. foo_3 or foo_sjs1_3. Under sbt 2 the platform is not part of
+  // crossVersion, so add it back, otherwise JVM, JS and Native modules would share one name.
+  private def crossVersionedName(
+      module: ModuleID,
+      platform: Option[String],
+      sv: String,
+      sbv: String
+  ): String = {
+    val name = (module.crossVersion, platform) match {
+      case (_: sbt.librarymanagement.Disabled, _) => module.name
+      case (_, Some(platform))                    => s"${module.name}_$platform"
+      case _                                      => module.name
+    }
+    CrossVersion(module.crossVersion, sv, sbv).fold(name)(_(name))
+  }
+
   val disableFatalWarnings =
     keyTransformCommand("disableFatalWarnings", Keys.scalacOptions) { (_, _) =>
       val flags = Seq("-Xfatal-warnings", "-Werror")
@@ -344,8 +360,8 @@ trait CommunityBuildPluginShared extends AutoPlugin {
       val current: ModuleID = (r / projectID).get(s.data).get
       val sv = (r / scalaVersion).get(s.data).get
       val sbv = (r / scalaBinaryVersion).get(s.data).get
-      val name = CrossVersion(current.crossVersion, sv, sbv)
-        .fold(current.name)(_(current.name))
+      val platform = SbtAdapterSupport.platformToAdd(r, current, s)
+      val name = crossVersionedName(current, platform, sv, sbv)
       val mappingKey = s"${current.organization}%${stripScala3Suffix(name)}"
       mappingKey -> r
     }
@@ -544,13 +560,17 @@ trait CommunityBuildPluginShared extends AutoPlugin {
       // dependsOn edges plus libraryDependencies that resolve to another module in this build
       // Without the latter, topological order and flatten only see dependsOn and can build a
       // consumer before its published producer (ResolveException -> retry).
-      def mappingKey(dep: ModuleID, sv: String, sbv: String): String = {
-        val name = CrossVersion(dep.crossVersion, sv, sbv)
-          .fold(dep.name)(_(dep.name))
+      def mappingKey(dep: ModuleID, platform: Option[String], sv: String, sbv: String): String = {
+        val name = crossVersionedName(dep, platform, sv, sbv)
         s"${dep.organization}%${stripScala3Suffix(name)}"
       }
-      def resolveInBuildDep(dep: ModuleID, sv: String, sbv: String): Option[ProjectRef] = {
-        val key = mappingKey(dep, sv, sbv)
+      def resolveInBuildDep(
+          ref: ProjectRef,
+          dep: ModuleID,
+          sv: String,
+          sbv: String
+      ): Option[ProjectRef] = {
+        val key = mappingKey(dep, SbtAdapterSupport.platformToAdd(ref, dep, s), sv, sbv)
         moduleIds.get(key).orElse(originalModuleIds.get(key))
       }
 
@@ -561,7 +581,7 @@ trait CommunityBuildPluginShared extends AutoPlugin {
         val sbv =
           (ref / scalaBinaryVersion).get(s.data).getOrElse(scalaBinaryVersionUsed)
         val libraryDeps = (ref / libraryDependencies).get(s.data).toSeq.flatten
-          .flatMap(dep => resolveInBuildDep(dep, sv, sbv))
+          .flatMap(dep => resolveInBuildDep(ref, dep, sv, sbv))
           .filterNot(_ == ref)
           .distinct
         val added = libraryDeps.filterNot(dependsOnDeps.contains)
