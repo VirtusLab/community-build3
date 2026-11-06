@@ -3725,10 +3725,10 @@
   "apache/pekko":{
     "project":"apache/pekko",
     "repoUrl":"https://github.com/apache/pekko.git",
-    "revision":"v2.0.0-M4",
-    "version":"2.0.0-M4",
+    "revision":"v2.0.0",
+    "version":"2.0.0",
     "targets":"org.apache.pekko%pekko-actor org.apache.pekko%pekko-actor-testkit-typed org.apache.pekko%pekko-actor-typed org.apache.pekko%pekko-bom org.apache.pekko%pekko-cluster org.apache.pekko%pekko-cluster-metrics org.apache.pekko%pekko-cluster-sharding org.apache.pekko%pekko-cluster-sharding-typed org.apache.pekko%pekko-cluster-tools org.apache.pekko%pekko-cluster-typed org.apache.pekko%pekko-coordination org.apache.pekko%pekko-discovery org.apache.pekko%pekko-distributed-data org.apache.pekko%pekko-multi-node-testkit org.apache.pekko%pekko-osgi org.apache.pekko%pekko-persistence org.apache.pekko%pekko-persistence-query org.apache.pekko%pekko-persistence-tck org.apache.pekko%pekko-persistence-testkit org.apache.pekko%pekko-persistence-typed org.apache.pekko%pekko-pki org.apache.pekko%pekko-protobuf-v3 org.apache.pekko%pekko-remote org.apache.pekko%pekko-serialization-jackson org.apache.pekko%pekko-serialization-jackson3 org.apache.pekko%pekko-slf4j org.apache.pekko%pekko-stream org.apache.pekko%pekko-stream-testkit org.apache.pekko%pekko-stream-typed org.apache.pekko%pekko-testkit",
-    "publishedScalaVersion":"3.3.8",
+    "publishedScalaVersion":"3.3.9",
     "config":{
       "projects":{
         "exclude":[
@@ -3784,7 +3784,7 @@
         },
         {
           "path":"project/Dependencies.scala",
-          "pattern":"val scala3Version = \"3.3.8\"",
+          "pattern":"val scala3Version = \"3.3.9\"",
           "replaceWith":"val scala3Version = \"<SCALA_VERSION>\""
         }
       ],
@@ -29599,6 +29599,53 @@
     "version":"14.0.1",
     "targets":"com.gu%janus-config-tools",
     "publishedScalaVersion":"3.3.8"
+  },
+  "guardian/mobile-apps-api-models":{
+    "project":"guardian/mobile-apps-api-models",
+    "repoUrl":"https://github.com/guardian/mobile-apps-api-models.git",
+    "revision":"v1.0.80",
+    "version":"1.0.80",
+    "targets":"com.gu%mobile-apps-api-models-v0",
+    "publishedScalaVersion":"3.3.6",
+    "config":{
+      "projects":{
+        "exclude":[
+          
+        ],
+        "overrides":{
+          
+        }
+      },
+      "java":{
+        "version":"17"
+      },
+      "sbt":{
+        "commands":[
+          
+        ],
+        "options":[
+          
+        ]
+      },
+      "mill":{
+        "options":[
+          
+        ]
+      },
+      "git":{
+        "unshallow":false
+      },
+      "tests":"full",
+      "migrationVersions":[
+        
+      ],
+      "sourcePatches":[
+        
+      ],
+      "dependencyOverrides":[
+        
+      ]
+    }
   },
   "guardian/pa-football-client":{
     "project":"guardian/pa-football-client",
